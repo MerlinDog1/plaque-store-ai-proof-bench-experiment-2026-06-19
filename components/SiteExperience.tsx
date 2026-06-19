@@ -47,7 +47,8 @@ function SiteHero({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
       <div className="commerce-premium-hero__shade" aria-hidden="true" />
       <div className="commerce-premium-hero__copy">
         <p className="commerce-eyebrow">Instant professional plaque proofing</p>
-        <h1><span className="brand-wordmark brand-wordmark--hero"><span>Insta</span><span>Plaque</span></span> custom plaques, proofed before you order.</h1>
+        <div className="brand-wordmark brand-wordmark--hero-title" aria-label="InstaPlaque"><span>Insta</span><span>Plaque</span></div>
+        <h1>Custom plaques, proofed before you order.</h1>
         <p>
           Choose a plaque, enter the wording and see a finished proof in minutes with intelligent typography,
           realistic materials and live pricing.

@@ -20,11 +20,11 @@ const navItems: Array<{ view: SiteView; label: string }> = [
 
 export const Header: React.FC<Props> = ({ onNavigate, currentView, priceLabel }) => {
   return (
-    <header className="proofbench-titlebar print:hidden">
+    <header className={`proofbench-titlebar print:hidden ${currentView === 'home' ? 'is-home' : ''}`}>
       <div className="mx-auto flex h-full max-w-[1540px] items-center justify-between gap-4 px-4 md:px-8">
         <div className="flex min-w-0 items-center gap-4">
           <button className="proofbench-mark-wrap flex min-w-0 cursor-pointer items-center gap-3 text-left" onClick={() => onNavigate('home')} type="button">
-            <div className="proofbench-mark">
+            <div className="proofbench-mark" aria-hidden="true">
               IP
             </div>
             <div className="min-w-0">
@@ -49,7 +49,7 @@ export const Header: React.FC<Props> = ({ onNavigate, currentView, priceLabel })
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button" className="commerce-header-cta hidden sm:inline-flex" onClick={() => onNavigate('plaque')}>
+          <button type="button" className="commerce-header-cta inline-flex" onClick={() => onNavigate('plaque')}>
             Design now
           </button>
           <div className="proofbench-price-chip" aria-label={`Current price ${priceLabel} including UK delivery`}>

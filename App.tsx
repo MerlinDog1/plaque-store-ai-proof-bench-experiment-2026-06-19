@@ -761,11 +761,12 @@ const App: React.FC = () => {
 
             <section className={`proofbench-stage relative row-start-1 min-h-0 min-w-0 overflow-hidden md:col-start-3 md:row-start-1 ${isProofExpanded ? 'is-expanded' : ''}`}>
               <div className="proofbench-mobile-top no-print md:hidden">
-                <div className="proofbench-rail-logo">IP</div>
-                <div className="min-w-0 text-center">
-                  <p className="text-[11px] font-black text-[#f6ead2]">Proof Bench</p>
-                  <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[#a9b7ad]">{steps[activeStep]}</p>
-                </div>
+                <button type="button" className="proofbench-mobile-brand" onClick={() => handleNavigate('home')}>
+                  <span className="brand-wordmark brand-wordmark--mobile-tool">
+                    <span>Insta</span><span>Plaque</span>
+                  </span>
+                  <small>{steps[activeStep]}</small>
+                </button>
                 <div className="proofbench-mobile-price" aria-label={`Current price ${formattedPrice} including UK delivery`}>
                   <span>Inc UK delivery</span>
                   <strong>{formattedPrice}</strong>
