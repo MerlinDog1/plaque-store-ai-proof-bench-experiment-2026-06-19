@@ -57,17 +57,17 @@ const retryWrapper = async <T>(
 const ARCHETYPE_DESCRIPTIONS: Record<Exclude<DesignStyle, DesignStyle.Auto>, string> = {
   [DesignStyle.Monumental]: `MONUMENTAL: One MASSIVE title dominating 70%+ of vertical space. Minimal supporting text below in much smaller size. Heavy font weight (700-900). ALL CAPS title with generous letter-spacing (0.2-0.4em). Think: carved into stone on a Roman building. The title IS the design.`,
 
-  [DesignStyle.ClassicalFormal]: `CLASSICAL FORMAL: Balanced typographic hierarchy with elegant serif fonts. Title in refined serif, body in complementary serif or light sans. Use small-caps for subtitles. Subtle ornamental separators (thin double-rules or em-dash flourishes like "— est. 1847 —"). Symmetrical, centered composition. Think: an invitation to a state dinner.`,
+  [DesignStyle.ClassicalFormal]: `CLASSICAL FORMAL: Balanced typographic hierarchy with elegant serif fonts. Title in refined serif, body in complementary serif or light sans. Use small-caps for subtitles. Use whitespace and scale for separation; if separation is essential, prefer one plain thin horizontal rule in the final product, never star, rosette, sparkle, fleuron, diamond, bullet, or decorative glyph separators. Symmetrical, centered composition. Think: an invitation to a state dinner.`,
 
   [DesignStyle.ModernMinimal]: `MODERN MINIMAL: Clean sans-serif throughout. Generous whitespace — text occupies only 50-60% of safe area. Light font weights (300-400) with one bold accent. NO decorative lines or ornaments. Hierarchy through size contrast alone. Lowercase or Title Case preferred. Think: a premium Apple product label.`,
 
-  [DesignStyle.HeritagePlaque]: `HERITAGE PLAQUE: Period-appropriate styling evoking Victorian/Edwardian era. Mix serif title with old-style body text. Use decorative corner brackets or small ornamental frames. Small caps are welcome. Dates formatted elegantly ("Anno Domini MMXXIV" or "Established in the Year 1847"). Typographic ornaments: ❧ ✦ ◆. Think: a blue plaque on a London townhouse.`,
+  [DesignStyle.HeritagePlaque]: `HERITAGE PLAQUE: Period-appropriate styling evoking Victorian/Edwardian era. Mix serif title with old-style body text. Small caps are welcome. Dates formatted elegantly ("Anno Domini MMXXIV" or "Established in the Year 1847"). Keep the plaque plain and typographic: no star, rosette, sparkle, fleuron, diamond, bullet, corner-bracket, or decorative glyph separators. If separation is essential, use only a simple plain horizontal rule in the final product. Think: a blue plaque on a London townhouse.`,
 
   [DesignStyle.MemorialSolemn]: `MEMORIAL SOLEMN: Dignified and restrained. Serif title, light-weight body. Generous vertical spacing between groups (2-3x line height). Script accent font for a single personal touch (e.g. a name or "Forever in our hearts" in calligraphy). Use a single thin horizontal rule sparingly. Italic for quotes or epitaphs. Think: a gravestone inscription done with typographic grace.`,
 
   [DesignStyle.ContemporaryBold]: `CONTEMPORARY BOLD: Dynamic visual tension. Condensed heavy title contrasted with wide light body text. Mix UPPERCASE condensed (Bebas Neue, Oswald) with lowercase expanded sans. Asymmetric visual weight — title can be much bolder and larger than expected. Consider using a contrasting size ratio of 3:1 or more. Think: a gallery exhibition poster.`,
 
-  [DesignStyle.ArtisanCraft]: `ARTISAN CRAFT: Warm, handcrafted feel. Serif or display title paired with a script accent for ONE element (a name, a date, or a short phrase — NOT the whole plaque). Body in clean serif or sans. Small decorative flourishes welcome. Think: a hand-lettered sign for an artisan bakery.`,
+  [DesignStyle.ArtisanCraft]: `ARTISAN CRAFT: Warm, handcrafted feel. Serif or display title paired with a script accent for ONE element (a name, a date, or a short phrase — NOT the whole plaque). Body in clean serif or sans. Keep decoration typographic and restrained: no star, rosette, sparkle, fleuron, diamond, bullet, or decorative glyph separators. If separation is essential, use only a simple plain horizontal rule in the final product. Think: a hand-lettered sign for an artisan bakery.`,
 
   [DesignStyle.Institutional]: `INSTITUTIONAL: Official, authoritative tone. ALL CAPS throughout with varied sizes. Sans-serif fonts only (Montserrat, Oswald, Raleway). Structured grid-like layout. Even spacing. No scripts, no decorative elements. Information hierarchy: Organization → Person/Event → Date → Details. Think: a government building dedication.`,
 };
@@ -89,7 +89,6 @@ const EXAMPLE_LAYOUTS = `
 <text y="45" text-anchor="middle" font-family="Raleway" font-weight="300" font-size="13" letter-spacing="0.12em" fill="currentColor">GREENFIELD ACADEMY</text>
 
 ## EXAMPLE D — Heritage (300×200 canvas):
-<text y="-50" text-anchor="middle" font-family="Cinzel" font-weight="400" font-size="14" letter-spacing="0.3em" fill="currentColor">❧</text>
 <text y="-20" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="36" letter-spacing="0.12em" fill="currentColor">HARTLEY HOUSE</text>
 <text y="10" text-anchor="middle" font-family="EB Garamond" font-weight="400" font-size="16" letter-spacing="0.08em" fill="currentColor">Built in the Year 1756</text>
 <text y="35" text-anchor="middle" font-family="EB Garamond" font-weight="400" font-size="15" fill="currentColor">Grade II Listed Building</text>
@@ -725,51 +724,7 @@ function isDecorativeSymbolText(text: string) {
   return chars.length > 0 && chars.every((char) => DECORATIVE_SYMBOLS.has(char));
 }
 
-function symbolLetterSpacingPx(value: string | null, fontSize: number) {
-  if (!value) return 0;
-  const trimmed = value.trim();
-  if (!trimmed) return 0;
-  const parsed = Number.parseFloat(trimmed);
-  if (!Number.isFinite(parsed)) return 0;
-  return trimmed.endsWith("em") ? parsed * fontSize : parsed;
-}
-
-function symbolPathD(char: string, cx: number, cy: number, radius: number) {
-  const r = Math.max(1.2, radius);
-  if ("•·○●◦".includes(char)) {
-    const k = r * 0.55228475;
-    return [
-      `M ${cx.toFixed(2)} ${(cy - r).toFixed(2)}`,
-      `C ${(cx + k).toFixed(2)} ${(cy - r).toFixed(2)} ${(cx + r).toFixed(2)} ${(cy - k).toFixed(2)} ${(cx + r).toFixed(2)} ${cy.toFixed(2)}`,
-      `C ${(cx + r).toFixed(2)} ${(cy + k).toFixed(2)} ${(cx + k).toFixed(2)} ${(cy + r).toFixed(2)} ${cx.toFixed(2)} ${(cy + r).toFixed(2)}`,
-      `C ${(cx - k).toFixed(2)} ${(cy + r).toFixed(2)} ${(cx - r).toFixed(2)} ${(cy + k).toFixed(2)} ${(cx - r).toFixed(2)} ${cy.toFixed(2)}`,
-      `C ${(cx - r).toFixed(2)} ${(cy - k).toFixed(2)} ${(cx - k).toFixed(2)} ${(cy - r).toFixed(2)} ${cx.toFixed(2)} ${(cy - r).toFixed(2)}`,
-      "Z",
-    ].join(" ");
-  }
-  if ("✦✧✶✷✹✺✻✼✽✾✿❖❧☙".includes(char)) {
-    return [
-      `M ${cx.toFixed(2)} ${(cy - r * 1.28).toFixed(2)}`,
-      `L ${(cx + r * 0.34).toFixed(2)} ${(cy - r * 0.34).toFixed(2)}`,
-      `L ${(cx + r * 1.28).toFixed(2)} ${cy.toFixed(2)}`,
-      `L ${(cx + r * 0.34).toFixed(2)} ${(cy + r * 0.34).toFixed(2)}`,
-      `L ${cx.toFixed(2)} ${(cy + r * 1.28).toFixed(2)}`,
-      `L ${(cx - r * 0.34).toFixed(2)} ${(cy + r * 0.34).toFixed(2)}`,
-      `L ${(cx - r * 1.28).toFixed(2)} ${cy.toFixed(2)}`,
-      `L ${(cx - r * 0.34).toFixed(2)} ${(cy - r * 0.34).toFixed(2)}`,
-      "Z",
-    ].join(" ");
-  }
-  return [
-    `M ${cx.toFixed(2)} ${(cy - r).toFixed(2)}`,
-    `L ${(cx + r).toFixed(2)} ${cy.toFixed(2)}`,
-    `L ${cx.toFixed(2)} ${(cy + r).toFixed(2)}`,
-    `L ${(cx - r).toFixed(2)} ${cy.toFixed(2)}`,
-    "Z",
-  ].join(" ");
-}
-
-function convertStandaloneSymbolTextToPaths(svgContent: string): string {
+function removeStandaloneDecorativeSymbolText(svgContent: string): string {
   if (!svgContent || typeof DOMParser === "undefined") return svgContent;
   try {
     const doc = new DOMParser().parseFromString(`<svg xmlns="http://www.w3.org/2000/svg">${svgContent}</svg>`, "image/svg+xml");
@@ -778,40 +733,14 @@ function convertStandaloneSymbolTextToPaths(svgContent: string): string {
     Array.from(doc.querySelectorAll("text")).forEach((text) => {
       const content = text.textContent || "";
       if (!isDecorativeSymbolText(content)) return;
-
-      const symbols = Array.from(content).filter((char) => DECORATIVE_SYMBOLS.has(char));
-      if (!symbols.length) return;
-
-      const fontSize = Math.max(5, Number.parseFloat(text.getAttribute("font-size") || "10") || 10);
-      const spacing = symbolLetterSpacingPx(text.getAttribute("letter-spacing"), fontSize);
-      const step = Math.max(fontSize * 0.72, fontSize * 0.88 + spacing);
-      const anchor = text.getAttribute("text-anchor") || "middle";
-      const x = Number.parseFloat(text.getAttribute("x") || "0") || 0;
-      const baseline = Number.parseFloat(text.getAttribute("y") || "0") || 0;
-      const centerY = baseline - fontSize * 0.32;
-      const totalWidth = step * Math.max(0, symbols.length - 1);
-      const startX = anchor === "start" ? x : anchor === "end" ? x - totalWidth : x - totalWidth / 2;
-      const radius = fontSize * 0.28;
-      const group = doc.createElementNS("http://www.w3.org/2000/svg", "g");
-      group.setAttribute("fill", "currentColor");
-      group.setAttribute("stroke", "none");
-      group.setAttribute("data-generated-symbols", "true");
-
-      symbols.forEach((symbol, index) => {
-        const path = doc.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", symbolPathD(symbol, startX + index * step, centerY, radius));
-        path.setAttribute("fill", "currentColor");
-        group.appendChild(path);
-      });
-
-      text.parentNode?.replaceChild(group, text);
+      text.parentNode?.removeChild(text);
     });
 
     return Array.from(doc.documentElement.children)
       .map((node) => new XMLSerializer().serializeToString(node).replace(/\sxmlns="http:\/\/www\.w3\.org\/2000\/svg"/g, ""))
       .join("\n");
   } catch (error) {
-    console.warn("Decorative symbol conversion failed.", error);
+    console.warn("Decorative symbol removal failed.", error);
     return svgContent;
   }
 }
@@ -918,6 +847,7 @@ TEXT HANDLING:
 - If you correct a spelling mistake, list it briefly in reasoning as "Spelling corrected: old -> new".
 - Preserve user line breaks as layout intent: each input line should become a visual line or block lower down on the plaque. Blank input lines mean deliberate extra vertical spacing.
 - Do not invent ornaments or extra words.
+- Never use star glyphs, sparkle glyphs, rosettes, fleurons, bullets, dots, diamonds, decorative Unicode symbols, or repeated ornamental marks. If a visual separator is truly needed, rely on whitespace here; the product renderer may add at most one simple plain horizontal rule.
 
 STRICT SVG RULES:
 - Use 1-12 <text> elements and optional direct-child <tspan> elements only. No other SVG elements.
@@ -980,7 +910,7 @@ ${inscription}
   const parsed = JSON.parse(response.text);
   const extractedSvg = extractTypographyFromAuthoredSvg(String(parsed.svgContent || ""), box);
   const guidedSvg = splitShortLeadInNameLines(
-    convertStandaloneSymbolTextToPaths(applyComposerGuidancePostProcess(extractedSvg, guidanceRules))
+    removeStandaloneDecorativeSymbolText(applyComposerGuidancePostProcess(extractedSvg, guidanceRules))
   );
   return {
     reasoning: normalizeSpace([
@@ -1759,6 +1689,7 @@ Product details:
 - Finish: ${portraitFinishInstruction}.
 - Engraving/text colour: ${textColourDesc}. Match this colour in the generated realistic render unless reverse etch is enabled.
 - The lettering and border must remain clearly visible and legible in the final render. Do not fade the text into the metal, wash it out, blur it, emboss it as barely visible relief, or convert black filled etch into pale scratches.
+- Never add star glyphs, sparkle glyphs, rosettes, fleurons, bullets, dots, diamonds, decorative Unicode symbols, or repeated ornamental marks between title and body text. If the plaque needs a separator, use only one simple plain thin horizontal line, not three stars or ornamental icons.
 - If decorative caps are selected, render them as plain flat circular metal caps, only 2-3mm thick. They should look like thin flat discs sitting on the plaque surface: flat top face, straight vertical side wall, crisp circular edge. No bevel or chamfer. Never render domed button caps, hemispheres, rounded knobs, convex rivets, screw heads, mushroom-shaped hardware, or chunky raised standoffs.
 - If the shape is Heart, render a classic upright memorial heart: full rounded lobes, clear central top notch, balanced shoulders, and a defined lower point. Do not make it a wide flattened love-heart.
 - If the material is orbital brass with matt lacquer, render a very fine orbital sanding haze: tiny dense overlapping micro-scratch arcs, not visible large swirls or circular rings. The finish should read close to fine brushed grain under matt lacquer, muted lacquered brass, low glare, no mirror reflection. The engraving must be a crisp precision surface etch with hairline-sharp boundaries and clear separation between closely spaced hatch marks. Keep the etch visually shallow and flat, without bevelled walls, rounded grooves, raised rims, heavy recess shadows, bleeding, blur, or loss of fine detail. Use the selected ${textColourDesc} as a precise filled surface etch, not a raised print or blurry ink wash.

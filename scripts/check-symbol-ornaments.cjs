@@ -61,7 +61,7 @@ function assert(condition, message) {
   });
 
   await page.waitForFunction(
-    () => document.querySelectorAll("#ai-text-layer [data-generated-symbols='true'] path").length === 2,
+    () => Boolean(document.querySelector("#ai-text-layer")?.textContent?.includes("HARRISON & LOWE ENGINEERING LTD")),
     null,
     { timeout: 30000 },
   );
@@ -79,12 +79,12 @@ function assert(condition, message) {
   });
 
   assert(result.symbolTextCount === 0, `Expected no standalone decorative text glyphs, got ${result.symbolTextCount}`);
-  assert(result.symbolPathCount === 2, `Expected 2 generated symbol paths, got ${result.symbolPathCount}`);
+  assert(result.symbolPathCount === 0, `Expected decorative symbol glyphs to be removed, got ${result.symbolPathCount} generated symbol paths`);
   assert(result.wordingStillPresent, "Expected normal wording text to remain untouched");
 
   await page.screenshot({ path: "output/playwright/symbol-ornaments.png", fullPage: true });
   await browser.close();
-  console.log(`Converted ${result.symbolPathCount} standalone symbol glyphs to SVG paths; normal wording remained live text.`);
+  console.log("Removed standalone decorative symbol glyphs; normal wording remained live text.");
 })().catch(async (error) => {
   console.error(error);
   process.exit(1);
