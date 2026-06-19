@@ -186,5 +186,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Plaque Store AI listening on http://127.0.0.1:${port}; Gemini key configured: ${Boolean(apiKey)}`);
+  console.log(`InstaPlaque listening on http://127.0.0.1:${port}; Gemini key configured: ${Boolean(apiKey)}`);
 });

@@ -598,7 +598,7 @@ const App: React.FC = () => {
       <div className="flex min-h-screen items-center justify-center bg-[#f7f1e7]">
         <div className="flex flex-col items-center gap-4">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#b98235] border-t-transparent"></div>
-          <p className="text-sm font-bold text-[#6a746d]">Initializing Plaques AI...</p>
+          <p className="text-sm font-bold text-[#6a746d]">Initializing InstaPlaque...</p>
         </div>
       </div>
     );
@@ -611,10 +611,10 @@ const App: React.FC = () => {
 
         <div className="glass-panel relative z-10 w-full max-w-md rounded-lg p-8 text-center shadow-2xl">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-gradient-to-br from-[#f2d688] to-[#8d542a] text-3xl font-black text-[#1b231f] shadow-lg shadow-[#b98235]/20">
-            P
+            IP
           </div>
 
-          <h1 className="mb-2 text-3xl font-black tracking-tight text-[#1b231f]">plaques<span className="text-[#9a6a16]">.ai</span></h1>
+          <h1 className="brand-wordmark brand-wordmark--access mb-2 justify-center"><span>Insta</span><span>Plaque</span></h1>
           <p className="mb-8 text-sm leading-relaxed text-[#6a746d]">
             Welcome to the Pro Designer. To access high-fidelity realistic previews and AI layout generation, please connect your Google Cloud Project.
           </p>
@@ -761,7 +761,7 @@ const App: React.FC = () => {
 
             <section className={`proofbench-stage relative row-start-1 min-h-0 min-w-0 overflow-hidden md:col-start-3 md:row-start-1 ${isProofExpanded ? 'is-expanded' : ''}`}>
               <div className="proofbench-mobile-top no-print md:hidden">
-                <div className="proofbench-rail-logo">P</div>
+                <div className="proofbench-rail-logo">IP</div>
                 <div className="min-w-0 text-center">
                   <p className="text-[11px] font-black text-[#f6ead2]">Proof Bench</p>
                   <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[#a9b7ad]">{steps[activeStep]}</p>

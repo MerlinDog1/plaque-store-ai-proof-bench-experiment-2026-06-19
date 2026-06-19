@@ -25,11 +25,11 @@ export const Header: React.FC<Props> = ({ onNavigate, currentView, priceLabel })
         <div className="flex min-w-0 items-center gap-4">
           <button className="proofbench-mark-wrap flex min-w-0 cursor-pointer items-center gap-3 text-left" onClick={() => onNavigate('home')} type="button">
             <div className="proofbench-mark">
-              P
+              IP
             </div>
             <div className="min-w-0">
-              <span className="block text-[11px] font-black uppercase tracking-[0.28em] text-[#f5d27b]">
-                Plaque Store AI
+              <span className="brand-wordmark brand-wordmark--header">
+                <span>Insta</span><span>Plaque</span>
               </span>
               <span className="hidden text-[10px] font-black uppercase tracking-[0.18em] text-[#9baaa2] sm:block">Proof in minutes. Plaque in days.</span>
             </div>

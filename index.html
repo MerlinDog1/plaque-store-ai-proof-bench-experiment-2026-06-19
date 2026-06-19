@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plaque Store AI - Instant Proof Ecommerce Prototype</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2312352d'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Arial,sans-serif' font-size='34' font-weight='800' fill='white'%3EP%3C/text%3E%3C/svg%3E" />
+  <title>InstaPlaque - Custom Plaques Proofed Instantly</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2312352d'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='Arial,sans-serif' font-size='22' font-weight='900' fill='%23f5d27b'%3EIP%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -25,6 +25,50 @@
       --app-ink-deep: #13221d;
       --app-steel: #dbe2df;
       --app-sage: #dfece4;
+    }
+
+    .brand-wordmark {
+      display: inline-flex;
+      align-items: baseline;
+      min-width: 0;
+      letter-spacing: 0;
+      white-space: nowrap;
+      font-family: "Montserrat", sans-serif;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .brand-wordmark span:first-child {
+      color: #f5d27b;
+    }
+
+    .brand-wordmark span:last-child {
+      color: #f7f1e3;
+    }
+
+    .brand-wordmark--header {
+      display: flex;
+      font-size: 15px;
+    }
+
+    .brand-wordmark--hero {
+      margin-right: 0.12em;
+      font-size: inherit;
+    }
+
+    .brand-wordmark--hero span:first-child,
+    .brand-wordmark--access span:first-child {
+      color: #b98235;
+    }
+
+    .brand-wordmark--hero span:last-child,
+    .brand-wordmark--access span:last-child {
+      color: #1b231f;
+    }
+
+    .brand-wordmark--access {
+      display: flex;
+      font-size: 30px;
     }
 
     html,
