@@ -992,12 +992,23 @@
     flex: 0 0 64px;
   }
 
+  .proofbench-titlebar.is-home .proofbench-titlebar__inner {
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
   .proofbench-titlebar.is-home .proofbench-mark {
     display: none;
   }
 
   .proofbench-titlebar.is-home .proofbench-mark-wrap {
+    flex: 0 1 auto;
     gap: 0;
+  }
+
+  .proofbench-titlebar.is-home .proofbench-header-actions {
+    margin-left: auto;
   }
 
   .proofbench-titlebar.is-home .brand-wordmark--header {

@@ -21,7 +21,7 @@ const navItems: Array<{ view: SiteView; label: string }> = [
 export const Header: React.FC<Props> = ({ onNavigate, currentView, priceLabel }) => {
   return (
     <header className={`proofbench-titlebar print:hidden ${currentView === 'home' ? 'is-home' : ''}`}>
-      <div className="mx-auto flex h-full max-w-[1540px] items-center justify-between gap-4 px-4 md:px-8">
+      <div className="proofbench-titlebar__inner mx-auto flex h-full max-w-[1540px] items-center justify-between gap-4 px-4 md:px-8">
         <div className="flex min-w-0 items-center gap-4">
           <button className="proofbench-mark-wrap flex min-w-0 cursor-pointer items-center gap-3 text-left" onClick={() => onNavigate('home')} type="button">
             <div className="proofbench-mark" aria-hidden="true">
@@ -48,7 +48,7 @@ export const Header: React.FC<Props> = ({ onNavigate, currentView, priceLabel })
           </nav>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="proofbench-header-actions flex items-center gap-2">
           <button type="button" className="commerce-header-cta inline-flex" onClick={() => onNavigate('plaque')}>
             Design now
           </button>

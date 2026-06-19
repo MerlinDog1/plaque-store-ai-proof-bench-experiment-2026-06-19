@@ -648,6 +648,31 @@ const App: React.FC = () => {
     currency: 'GBP',
     maximumFractionDigits: 0,
   });
+  const materialTrailLabels: Record<Material, string> = {
+    [Material.BrushedBrass]: 'Brushed brass',
+    [Material.OrbitalBrassMattLacquer]: 'Orbital brass',
+    [Material.PolishedBrass]: 'Polished brass',
+    [Material.AgedBrass]: 'Aged brass',
+    [Material.BrushedSteel]: 'Brushed steel',
+    [Material.PolishedSteel]: 'Polished steel',
+  };
+  const fixingTrailLabels: Record<Fixing, string> = {
+    [Fixing.None]: 'No fixings',
+    [Fixing.VHB]: 'VHB tape',
+    [Fixing.Screws]: 'Screws',
+    [Fixing.Caps]: 'Decoration caps',
+  };
+  const textTrailLabels: Record<TextColor, string> = {
+    [TextColor.Black]: 'Black text',
+    [TextColor.Grey]: 'Grey text',
+    [TextColor.White]: 'White text',
+    [TextColor.Cream]: 'Cream text',
+  };
+  const proofSpecTrail = [
+    materialTrailLabels[state.material],
+    fixingTrailLabels[state.fixing],
+    textTrailLabels[state.textColor],
+  ].join(' / ');
 
   return (
     <div className={`studio-app-shell proofbench-app flex flex-col bg-transparent text-[#eef4ee] ${currentView !== 'plaque' && currentView !== 'vector' ? 'commerce-mode' : ''}`}>
@@ -765,7 +790,7 @@ const App: React.FC = () => {
                   <span className="brand-wordmark brand-wordmark--mobile-tool">
                     <span>Insta</span><span>Plaque</span>
                   </span>
-                  <small>{steps[activeStep]}</small>
+                  <small title={proofSpecTrail}>{proofSpecTrail}</small>
                 </button>
                 <div className="proofbench-mobile-price" aria-label={`Current price ${formattedPrice} including UK delivery`}>
                   <span>Inc UK delivery</span>
