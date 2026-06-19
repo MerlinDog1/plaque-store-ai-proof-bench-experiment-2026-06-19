@@ -728,7 +728,7 @@
 }
 
 .commerce-premium-hero__image {
-  background-image: url('/site-images/plaque-hero-equine.jpg');
+  background-image: url('/site-images/plaque-hero-memorial-wall-desktop.jpg');
   background-position: center;
   background-size: cover;
   transform: scale(1.01);
@@ -1003,37 +1003,53 @@
   }
 
   .commerce-hero--premium {
-    min-height: 720px;
+    min-height: 0;
+    padding: 0;
+    background: #f6f1e8;
   }
 
   .commerce-premium-hero__image {
-    background-position: 74% center;
+    position: relative;
+    inset: auto;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    background-image: url('/site-images/plaque-hero-memorial-wall-mobile.jpg');
+    background-position: center top;
+    transform: none;
   }
 
   .commerce-premium-hero__shade {
-    background:
-      linear-gradient(180deg, rgba(13, 11, 9, 0.08), rgba(13, 11, 9, 0.28) 32%, rgba(13, 11, 9, 0.86)),
-      linear-gradient(90deg, rgba(13, 11, 9, 0.42), rgba(13, 11, 9, 0.12) 55%, rgba(13, 11, 9, 0.36));
+    display: none;
   }
 
   .commerce-premium-hero__copy {
     display: flex;
-    min-height: 540px;
+    min-height: 0;
     flex-direction: column;
-    justify-content: end;
-    padding: 128px 24px 26px;
+    justify-content: start;
+    padding: 24px 20px 32px;
+    color: #211d18;
+  }
+
+  .commerce-premium-hero__copy .commerce-eyebrow {
+    color: #9a6a22;
+    text-shadow: none;
   }
 
   .commerce-premium-hero__copy h1 {
     max-width: 340px;
+    color: #211d18;
     font-size: clamp(40px, 10vw, 48px);
     line-height: 1;
+    text-shadow: none;
   }
 
   .commerce-premium-hero__copy p:not(.commerce-eyebrow) {
     max-width: 330px;
+    color: #5b5248;
     font-size: 15px;
     line-height: 1.38;
+    text-shadow: none;
   }
 
   .commerce-premium-hero__copy .commerce-actions {
@@ -1046,6 +1062,13 @@
     min-height: 44px;
     padding-inline: 0.95rem;
     font-size: 13px;
+  }
+
+  .commerce-premium-hero__copy .commerce-secondary {
+    border-color: rgba(33, 29, 24, 0.22);
+    background: rgba(255, 250, 240, 0.72);
+    color: #211d18;
+    box-shadow: none;
   }
 
   .commerce-premium-proof {

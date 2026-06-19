@@ -59,20 +59,6 @@ function SiteHero({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
           <a className="commerce-secondary commerce-secondary--glass" href="#products">View plaque types</a>
         </div>
       </div>
-      <div className="commerce-premium-proof">
-        <div className="commerce-premium-proof__bar">
-          <span>Proof generated</span>
-          <strong>02:14</strong>
-        </div>
-        <div className="commerce-premium-proof__plaque">
-          <span>RUNNING VALIANT</span>
-          <small>2008 - 2024</small>
-        </div>
-        <div className="commerce-premium-proof__meta">
-          <span>Brass on dark wood</span>
-          <strong>£169 inc delivery</strong>
-        </div>
-      </div>
     </section>
   );
 }
