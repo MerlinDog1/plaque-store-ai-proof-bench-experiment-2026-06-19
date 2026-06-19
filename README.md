@@ -40,6 +40,18 @@ It keeps the instant AI proof as the core selling point and adds product pages,
 proof-launch presets, mock checkout, mock order capture, and a mock admin view.
 See `docs/OVERNIGHT_ECOMMERCE_CHECKPOINT.md` for the current shape.
 
+## Supabase Foundation
+
+The first production backend pass has been scaffolded with Supabase Postgres and
+Storage as the business source of truth. See `docs/SUPABASE_SETUP.md` and
+`supabase/migrations/20260619182000_initial_business_schema.sql`.
+
+Current server endpoints:
+
+- `GET /api/supabase/health`
+- `POST /api/proof-sessions`
+- `GET /api/proof-sessions/:publicToken`
+
 ## Security
 
 - No API keys, credentials, customer records, local agent files, generated

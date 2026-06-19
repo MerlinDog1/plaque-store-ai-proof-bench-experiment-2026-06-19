@@ -3,6 +3,11 @@ import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { GoogleGenAI } from "@google/genai";
+import {
+  createProofSession,
+  getProofSessionByToken,
+  getSupabaseConfig,
+} from "./server/supabase.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, "dist");
@@ -100,6 +105,44 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/gemini/health") {
     sendJson(res, 200, { ok: true, hasKey: Boolean(apiKey) });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/supabase/health") {
+    const config = getSupabaseConfig();
+    sendJson(res, 200, { ok: true, ...config });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/proof-sessions") {
+    try {
+      const payload = JSON.parse(await readBody(req));
+      const proofSession = await createProofSession(payload);
+      sendJson(res, 201, { ok: true, proofSession });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not create proof session.";
+      sendJson(res, message.includes("not configured") ? 501 : 500, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname.startsWith("/api/proof-sessions/")) {
+    try {
+      const publicToken = decodeURIComponent(url.pathname.replace("/api/proof-sessions/", ""));
+      if (!publicToken) {
+        sendJson(res, 400, { error: "Missing proof session token." });
+        return;
+      }
+      const proofSession = await getProofSessionByToken(publicToken);
+      if (!proofSession) {
+        sendJson(res, 404, { error: "Proof session not found." });
+        return;
+      }
+      sendJson(res, 200, { ok: true, proofSession });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not load proof session.";
+      sendJson(res, message.includes("not configured") ? 501 : 500, { error: message });
+    }
     return;
   }
 
