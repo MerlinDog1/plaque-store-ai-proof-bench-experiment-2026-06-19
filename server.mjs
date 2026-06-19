@@ -3,11 +3,6 @@ import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { GoogleGenAI } from "@google/genai";
-import {
-  createProofSession,
-  getProofSessionByToken,
-  getSupabaseConfig,
-} from "./server/supabase.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, "dist");
@@ -29,6 +24,12 @@ const loadEnvFile = (filePath) => {
 
 loadEnvFile(path.join(__dirname, ".env.local"));
 loadEnvFile(path.join(__dirname, ".env"));
+
+const {
+  createProofSession,
+  getProofSessionByToken,
+  getSupabaseConfig,
+} = await import("./server/supabase.mjs");
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY || "";
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;

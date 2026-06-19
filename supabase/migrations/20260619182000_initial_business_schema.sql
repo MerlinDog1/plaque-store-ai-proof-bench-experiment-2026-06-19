@@ -23,7 +23,7 @@ create table if not exists public.customers (
 
 create table if not exists public.proof_sessions (
   id uuid primary key default gen_random_uuid(),
-  public_token text not null unique default encode(gen_random_bytes(32), 'hex'),
+  public_token text not null unique default encode(extensions.gen_random_bytes(32), 'hex'),
   customer_id uuid references public.customers(id) on delete set null,
   email citext,
   status text not null default 'draft' check (
@@ -61,7 +61,7 @@ create table if not exists public.proof_artifacts (
 
 create table if not exists public.carts (
   id uuid primary key default gen_random_uuid(),
-  public_token text not null unique default encode(gen_random_bytes(32), 'hex'),
+  public_token text not null unique default encode(extensions.gen_random_bytes(32), 'hex'),
   customer_id uuid references public.customers(id) on delete set null,
   email citext,
   status text not null default 'active' check (
