@@ -15,6 +15,7 @@
     "check:gemini": "node scripts/check-gemini-authored.cjs",
     "check:pricing": "node scripts/check-pricing.cjs",
     "check:symbols": "node scripts/check-symbol-ornaments.cjs",
+    "experiment:layout-harness": "node scripts/layout-experiment-harness.cjs",
     "test:export-fidelity": "node scripts/validate-export-fidelity.mjs",
     "preview": "node server.mjs",
     "serve": "node server.mjs"
