@@ -69,8 +69,8 @@ function getPricingBand(state: PlaqueState) {
   return PRICING_BANDS.find((band) => area <= band.maxArea) ?? PRICING_BANDS[PRICING_BANDS.length - 1];
 }
 
-function roundUpToNine(value: number) {
-  return Math.ceil((value + 1) / 10) * 10 - 1;
+function roundToNearestHalfPound(value: number) {
+  return Math.round(value * 2) / 2;
 }
 
 function getTradeEtchedCost(state: PlaqueState, material: PricingMaterial) {
@@ -100,7 +100,13 @@ export function estimatePlaquePrice(state: PlaqueState) {
   const supplierCostWithVat = getTradeEtchedCost(state, material) * getShapeUplift(state.shape) * (1 + SUPPLIER_VAT_RATE);
   const costBasis = supplierCostWithVat + PACKAGE_AND_POSTAGE;
   const baseRetail = costBasis / (1 - TARGET_GROSS_MARGIN);
-  const plaqueRetail = roundUpToNine(fitsProductionBed(state) ? baseRetail : baseRetail * OVERSIZED_BED_UPLIFT);
+  const normalizedWidth = Math.max(state.width, state.height);
+  const normalizedHeight = Math.min(state.width, state.height);
+  const benchMinimumRetail = normalizedWidth === 150 && normalizedHeight === 50 ? 69 : 0;
+  const plaqueRetail = Math.max(
+    benchMinimumRetail,
+    roundToNearestHalfPound(fitsProductionBed(state) ? baseRetail : baseRetail * OVERSIZED_BED_UPLIFT)
+  );
   const woodAddOn = state.wood && state.shape !== Shape.Heart ? band.woodAddOn : 0;
 
   return plaqueRetail + woodAddOn;

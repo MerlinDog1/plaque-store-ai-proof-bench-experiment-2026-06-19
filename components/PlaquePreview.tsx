@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { BorderStyle, PlaqueState, Shape, Fixing, Material, TEXT_COLOR_VALUES, MemorialImageMethod, DesignStyle, MemorialImageShape } from '../types';
 import { getInscriptionLayout } from '../services/inscriptionLayout';
+import { isBenchPlaqueFormat } from '../services/plaqueRules';
 
 interface Props {
   state: PlaqueState;
@@ -168,6 +169,8 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const totalW = state.width + woodExtra;
   const totalH = state.height + woodExtra;
   const offset = woodExtra / 2;
+  const woodFill = state.woodTone === 'dark' ? "url(#woodDarkTexture)" : "url(#woodLightTexture)";
+  const woodChamfer = Math.max(4, Math.min(8, offset * 0.55));
 
   // Helpers for geometry
   const cornerR = state.shape === Shape.Rect ? state.cornerRadius : 0;
@@ -209,15 +212,26 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const borderOuterInset = 3;
   const borderInnerInset = 5;
   const borderStrokeScale = state.width < 100 || state.height < 100 ? 0.5 : 1;
-  const fixingBorderClearance = state.fixing === Fixing.Screws ? 0.75 : 2;
+  const fixingBorderClearance = state.fixing === Fixing.Screws ? 2.25 : 2;
   const screwRadius = 2.5;
   const capRadius = state.capSize / 2;
   const fixingRadius = state.fixing === Fixing.Caps ? capRadius : screwRadius;
-  const borderFixingInset = borderOuterInset;
+  const scallopedCapCenterInset = state.capSize === 15 ? 12 : 10;
+  const standardCapBorderClearance = 2;
+  const capBorderInset = state.borderStyle === BorderStyle.Double ? borderInnerInset : borderOuterInset;
+  const screwBorderInset = state.borderStyle === BorderStyle.Double ? borderInnerInset : borderOuterInset;
+  const borderedCapInset = isScallopedBorder
+    ? scallopedCapCenterInset
+    : capBorderInset + capRadius + standardCapBorderClearance;
+  const borderedFixingInset = state.fixing === Fixing.Caps
+    ? borderedCapInset
+    : screwBorderInset + fixingRadius + fixingBorderClearance;
   const holeInset = state.border
-    ? borderFixingInset + fixingRadius + fixingBorderClearance
+    ? borderedFixingInset
     : state.fixing === Fixing.Screws ? 7 : 10 + (state.capSize === 15 ? 2 : 0);
   const sideMountedFixings = state.shape !== Shape.Rect || state.height < 80;
+  const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
+  const requestedHoleCount = isBenchPlaque && state.fixing === Fixing.Screws ? state.fixingHoleCount ?? 2 : 2;
 
   let holes: { x: number, y: number }[] = [];
   const cx = offset + state.width / 2;
@@ -225,7 +239,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
 
   // Calculate fixing positions
   if (hasVisibleFixings && !isHeartPlaque) {
-    if (!sideMountedFixings) {
+    if (!sideMountedFixings || requestedHoleCount === 4) {
       const x1 = offset + holeInset;
       const x2 = offset + state.width - holeInset;
       const y1 = offset + holeInset;
@@ -791,15 +805,40 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             {state.shape === Shape.Rect ? (
               <>
                 <rect
-                  x={0} y={0} width={totalW} height={totalH} rx={0} ry={0}
-                  fill={state.woodTone === 'dark' ? "url(#woodDarkTexture)" : "url(#woodLightTexture)"}
+                  x={0} y={0} width={totalW} height={totalH} rx={3} ry={3}
+                  fill={woodFill}
+                />
+                <path
+                  d={`M 0 0 H ${totalW} L ${totalW - woodChamfer} ${woodChamfer} H ${woodChamfer} L ${woodChamfer} ${totalH - woodChamfer} L 0 ${totalH} Z`}
+                  fill="#fff6d8"
+                  opacity="0.13"
+                />
+                <path
+                  d={`M ${totalW} 0 V ${totalH} L ${totalW - woodChamfer} ${totalH - woodChamfer} V ${woodChamfer} Z`}
+                  fill="#1b0f06"
+                  opacity="0.22"
+                />
+                <path
+                  d={`M 0 ${totalH} H ${totalW} L ${totalW - woodChamfer} ${totalH - woodChamfer} H ${woodChamfer} Z`}
+                  fill="#1b0f06"
+                  opacity="0.18"
+                />
+                <rect
+                  x={woodChamfer}
+                  y={woodChamfer}
+                  width={Math.max(1, totalW - woodChamfer * 2)}
+                  height={Math.max(1, totalH - woodChamfer * 2)}
+                  rx={2}
+                  fill="none"
+                  stroke="rgba(255,248,226,0.22)"
+                  strokeWidth={0.6}
                 />
               </>
             ) : state.shape === Shape.Heart ? (
               <>
                 <path
                   d={heartPathD(0, 0, totalW, totalH)}
-                  fill={state.woodTone === 'dark' ? "url(#woodDarkTexture)" : "url(#woodLightTexture)"}
+                  fill={woodFill}
                 />
               </>
             ) : (
@@ -807,7 +846,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
                 <ellipse
                   cx={totalW / 2} cy={totalH / 2}
                   rx={totalW / 2} ry={totalH / 2}
-                  fill={state.woodTone === 'dark' ? "url(#woodDarkTexture)" : "url(#woodLightTexture)"}
+                  fill={woodFill}
                 />
               </>
             )}

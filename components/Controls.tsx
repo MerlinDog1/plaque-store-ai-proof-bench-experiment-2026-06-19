@@ -28,11 +28,11 @@ const MEMORIAL_PROMPT =
 
 const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
-  [Material.OrbitalBrassMattLacquer]: 'Orbital brass + matt lacquer',
+  [Material.OrbitalBrassMattLacquer]: 'Orbital brass',
   [Material.PolishedBrass]: 'Polished brass',
   [Material.AgedBrass]: 'Aged brass',
-  [Material.BrushedSteel]: 'Brushed steel',
-  [Material.PolishedSteel]: 'Polished steel',
+  [Material.BrushedSteel]: 'Brushed stainless',
+  [Material.PolishedSteel]: 'Polished stainless',
 };
 
 const MATERIAL_NOTES: Record<Material, string> = {
@@ -53,6 +53,15 @@ const MATERIAL_SWATCH: Record<Material, string> = {
   [Material.PolishedSteel]: 'linear-gradient(135deg,#4a535b 0%,#d7dde1 15%,#ffffff 26%,#8c969e 38%,#f2f6f8 55%,#727d86 72%,#39434b 100%)',
 };
 
+const MATERIAL_ORDER: Material[] = [
+  Material.BrushedSteel,
+  Material.PolishedSteel,
+  Material.PolishedBrass,
+  Material.BrushedBrass,
+  Material.OrbitalBrassMattLacquer,
+  Material.AgedBrass,
+];
+
 const BORDER_STYLE_OPTIONS: { value: BorderStyle; label: string; note: string }[] = [
   { value: BorderStyle.Single, label: 'Single', note: 'One clean engraved keyline' },
   { value: BorderStyle.Double, label: 'Double', note: 'Two balanced inset lines' },
@@ -60,16 +69,47 @@ const BORDER_STYLE_OPTIONS: { value: BorderStyle; label: string; note: string }[
   { value: BorderStyle.DoubleScalloped, label: 'Double scalloped', note: 'Two cut-out lines around fixings' },
 ];
 
-const SIZE_PRESETS = [
+type SizePreset = {
+  label: string;
+  note: string;
+  shape: Shape;
+  width: number;
+  height: number;
+  badge?: string;
+};
+
+const SIZE_PRESETS: SizePreset[] = [
   { label: 'A5 landscape', note: '210 x 148mm · Most popular', shape: Shape.Rect, width: 210, height: 148 },
   { label: 'A5 portrait', note: '148 x 210mm · Door or wall', shape: Shape.Rect, width: 148, height: 210 },
   { label: 'A4 landscape', note: '297 x 210mm · Longer tributes', shape: Shape.Rect, width: 297, height: 210 },
   { label: 'A4 portrait', note: '210 x 297mm · Door or wall', shape: Shape.Rect, width: 210, height: 297 },
-  { label: 'Bench plaque', note: '150 x 50mm · Bench or seat', shape: Shape.Rect, width: 150, height: 50 },
   { label: 'Wall plaque', note: '200 x 150mm · General purpose', shape: Shape.Rect, width: 200, height: 150 },
 ];
 
+const BENCH_SIZE_PRESETS: SizePreset[] = [
+  { label: '150 x 50 mm', note: 'Current compact bench default', shape: Shape.Rect, width: 150, height: 50, badge: 'Default' },
+  { label: '225 x 75 mm', note: 'Wider commemorative bench plaque', shape: Shape.Rect, width: 225, height: 75, badge: 'Most popular' },
+  { label: '225 x 65 mm', note: 'Wide low-profile bench plaque', shape: Shape.Rect, width: 225, height: 65 },
+  { label: '150 x 75 mm', note: 'Compact deeper bench plaque', shape: Shape.Rect, width: 150, height: 75 },
+  { label: '150 x 65 mm', note: 'Compact balanced bench plaque', shape: Shape.Rect, width: 150, height: 65 },
+  { label: '200 x 50 mm', note: 'Long narrow bench strip', shape: Shape.Rect, width: 200, height: 50 },
+  { label: '125 x 50 mm', note: 'Small bench or seat strip', shape: Shape.Rect, width: 125, height: 50 },
+  { label: '175 x 25 mm', note: 'Slim dedication strip', shape: Shape.Rect, width: 175, height: 25 },
+];
+
 const MAX_CUSTOM_DIMENSION_MM = 600;
+const CUSTOM_FAST_TURNAROUND_WIDTH_MM = 600;
+const CUSTOM_FAST_TURNAROUND_HEIGHT_MM = 400;
+const getDefaultCapSize = (width: number, height: number, shape: Shape) => {
+  if (shape === Shape.Heart) return 10;
+  return Math.max(width, height) >= 297 && Math.min(width, height) >= 210 ? 15 : 10;
+};
+
+const fitsCustomFastTurnaround = (width: number, height: number) => {
+  const longest = Math.max(width, height);
+  const shortest = Math.min(width, height);
+  return longest <= CUSTOM_FAST_TURNAROUND_WIDTH_MM && shortest <= CUSTOM_FAST_TURNAROUND_HEIGHT_MM;
+};
 
 const STEP_COPY = [
   {
@@ -128,6 +168,8 @@ interface Props {
   isGeneratingMemorialImage: boolean;
   memorialStatus: string | null;
   activeStep: number;
+  onSizeSelected: () => void;
+  showMaterialPrices: boolean;
   price: number;
   readinessItems: { label: string; ready: boolean; step: number }[];
   isProductionReady: boolean;
@@ -296,6 +338,8 @@ export const Controls: React.FC<Props> = ({
   isGeneratingMemorialImage,
   memorialStatus,
   activeStep,
+  onSizeSelected,
+  showMaterialPrices,
   price,
   readinessItems,
   isProductionReady,
@@ -314,10 +358,15 @@ export const Controls: React.FC<Props> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const styleInputRef = useRef<HTMLInputElement>(null);
+  const sizePresetStackRef = useRef<HTMLDivElement>(null);
   const [fineTuneUnlocked, setFineTuneUnlocked] = useState(false);
   const [sizeMode, setSizeMode] = useState<'standard' | 'custom'>('standard');
+  const [benchSizesExpanded, setBenchSizesExpanded] = useState(true);
+  const [customWidthInput, setCustomWidthInput] = useState(String(state.width));
+  const [customHeightInput, setCustomHeightInput] = useState(String(state.height));
   const [fixingsBorderMode, setFixingsBorderMode] = useState<'fixings' | 'border'>('fixings');
   const [manualTextOpen, setManualTextOpen] = useState(false);
+  const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
   const isIterating = !!state.generatedSvgContent;
   const portraitPreviewUrl = state.memorialImageMethod === MemorialImageMethod.UvPrinted
     ? state.memorialImageSourceUrl || state.memorialImagePreviewUrl
@@ -365,12 +414,28 @@ export const Controls: React.FC<Props> = ({
   const clampDimension = (value: number) => Math.min(MAX_CUSTOM_DIMENSION_MM, Math.max(40, Number.isFinite(value) ? value : 40));
   const isHeartPlaque = state.shape === Shape.Heart;
   const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
+  const activeBenchSize = BENCH_SIZE_PRESETS.find((preset) => (
+    state.shape === preset.shape && state.width === preset.width && state.height === preset.height
+  ));
   const visibleBorderStyleOptions = useMemo(() => (
     isBenchPlaque
       ? BORDER_STYLE_OPTIONS.filter((option) => option.value !== BorderStyle.Scalloped && option.value !== BorderStyle.DoubleScalloped)
       : BORDER_STYLE_OPTIONS
   ), [isBenchPlaque]);
   const shapeLabel = state.shape === Shape.Circle ? 'Circle' : state.shape === Shape.Oval ? 'Oval' : 'Rectangle';
+  const customFastTurnaround = fitsCustomFastTurnaround(state.width, state.height) && !state.wood;
+  const customLongTurnaround = !customFastTurnaround;
+  const customTurnaroundLabel = customFastTurnaround
+    ? 'Custom size: 5 working days'
+    : 'Custom size: 10 working days';
+
+  useEffect(() => {
+    setCustomWidthInput(String(state.width));
+  }, [state.width]);
+
+  useEffect(() => {
+    setCustomHeightInput(String(state.height));
+  }, [state.height]);
 
   useEffect(() => {
     if (
@@ -381,14 +446,53 @@ export const Controls: React.FC<Props> = ({
     }
   }, [isBenchPlaque, onChange, state.borderStyle]);
 
+  useEffect(() => {
+    if (activeStep === 1 && sizeMode === 'standard' && activeBenchSize) {
+      setBenchSizesExpanded(true);
+    }
+  }, [activeBenchSize, activeStep, sizeMode]);
+
+  useEffect(() => {
+    if (activeStep !== 1 || sizeMode !== 'standard') return;
+    const selected = sizePresetStackRef.current?.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
+    if (!selected) return;
+    window.setTimeout(() => {
+      selected.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
+    }, 80);
+  }, [activeStep, sizeMode, state.height, state.shape, state.width]);
+
+  useEffect(() => {
+    if (activeStep !== 1 || sizeMode !== 'custom') {
+      setTurnaroundToast(null);
+      return;
+    }
+    if (activeStep !== 1 || sizeMode !== 'custom' || !customLongTurnaround) return;
+    const message = '10 working days due to the custom size.';
+    setTurnaroundToast(message);
+    const timer = window.setTimeout(() => setTurnaroundToast(null), 4200);
+    return () => window.clearTimeout(timer);
+  }, [activeStep, customLongTurnaround, sizeMode]);
+
   const update = (key: keyof PlaqueState, value: any) => {
+    if (activeStep === 1 && (key === 'width' || key === 'height' || key === 'shape')) {
+      onSizeSelected();
+    }
     if (key === 'width' || key === 'height') value = clampDimension(value);
     if (key === 'width' && state.shape === Shape.Circle) {
-      onChange({ width: value, height: value });
+      onChange({
+        width: value,
+        height: value,
+        ...(state.fixing === Fixing.Caps ? { capSize: getDefaultCapSize(value, value, state.shape) } : {}),
+      });
       return;
     }
     if (key === 'shape' && value === Shape.Circle) {
-      onChange({ shape: value, height: state.width, cornerRadius: 0 });
+      onChange({
+        shape: value,
+        height: state.width,
+        cornerRadius: 0,
+        ...(state.fixing === Fixing.Caps ? { capSize: getDefaultCapSize(state.width, state.width, value) } : {}),
+      });
       return;
     }
     if (key === 'shape' && value === Shape.Heart) {
@@ -402,20 +506,66 @@ export const Controls: React.FC<Props> = ({
       });
       return;
     }
+    if (key === 'fixing' && value === Fixing.Caps) {
+      onChange({
+        fixing: value,
+        ...(isBenchPlaque ? { fixingHoleCount: 2 } : {}),
+        capSize: getDefaultCapSize(state.width, state.height, state.shape),
+      });
+      return;
+    }
+    if (key === 'fixing' && value !== Fixing.Screws) {
+      onChange({
+        fixing: value,
+        ...((isBenchPlaque || value === Fixing.VHB) ? { fixingHoleCount: 2 } : {}),
+      });
+      return;
+    }
+    const nextWidth = key === 'width' ? value : state.width;
+    const nextHeight = key === 'height' ? value : state.height;
+    const nextShape = key === 'shape' ? value : state.shape;
     onChange({
       [key]: value,
       ...(key === 'shape' ? { cornerRadius: 0 } : {}),
+      ...(state.fixing === Fixing.Caps && (key === 'width' || key === 'height' || key === 'shape')
+        ? { capSize: getDefaultCapSize(nextWidth, nextHeight, nextShape) }
+        : {}),
     });
   };
 
-  const applySizePreset = (preset: (typeof SIZE_PRESETS)[number]) => {
+  const handleDimensionDraft = (key: 'width' | 'height', value: string) => {
+    if (/^\d{0,4}$/.test(value)) {
+      if (key === 'width') setCustomWidthInput(value);
+      if (key === 'height') setCustomHeightInput(value);
+    }
+  };
+
+  const commitDimensionDraft = (key: 'width' | 'height') => {
+    const draft = key === 'width' ? customWidthInput : customHeightInput;
+    const committed = clampDimension(Number(draft));
+    if (key === 'width') setCustomWidthInput(String(committed));
+    if (key === 'height') setCustomHeightInput(String(committed));
+    update(key, committed);
+  };
+
+  const commitDimensionOnEnter = (event: React.KeyboardEvent<HTMLInputElement>, key: 'width' | 'height') => {
+    if (event.key === 'Enter') {
+      event.currentTarget.blur();
+      commitDimensionDraft(key);
+    }
+  };
+
+  const applySizePreset = (preset: SizePreset) => {
     const presetIsBenchPlaque = isBenchPlaqueFormat(preset.width, preset.height, preset.shape);
+    onSizeSelected();
+    setTurnaroundToast(null);
     onChange({
       shape: preset.shape,
       width: preset.width,
       height: preset.height,
       cornerRadius: 0,
-      ...(presetIsBenchPlaque ? { border: false, wood: false } : {}),
+      ...(state.fixing === Fixing.Caps ? { capSize: getDefaultCapSize(preset.width, preset.height, preset.shape) } : {}),
+      ...(presetIsBenchPlaque ? { border: false, wood: false, ...(state.fixing === Fixing.Caps ? { fixingHoleCount: 2 } : {}) } : {}),
       ...(preset.shape === Shape.Heart
         ? {
             wood: false,
@@ -426,17 +576,26 @@ export const Controls: React.FC<Props> = ({
     });
   };
 
-  const formatPrice = (value: number) => value.toLocaleString('en-GB', {
-    style: 'currency',
-    currency: 'GBP',
-    maximumFractionDigits: 0,
-  });
-  const priceForPreset = (preset: (typeof SIZE_PRESETS)[number]) => estimatePlaqueBasePrice({
+  const formatPrice = (value: number) => {
+    const hasPence = Math.round(value * 100) % 100 !== 0;
+    return value.toLocaleString('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+      minimumFractionDigits: hasPence ? 2 : 0,
+      maximumFractionDigits: hasPence ? 2 : 0,
+    });
+  };
+  const priceForPreset = (preset: SizePreset) => estimatePlaqueBasePrice({
     ...state,
     shape: preset.shape,
     width: preset.width,
     height: preset.height,
     cornerRadius: 0,
+    wood: false,
+  });
+  const priceForMaterial = (material: Material) => estimatePlaqueBasePrice({
+    ...state,
+    material,
     wood: false,
   });
   const woodAddOnPrice = estimateWoodAddOn(state);
@@ -495,8 +654,53 @@ export const Controls: React.FC<Props> = ({
     onGenerate(copy);
   };
 
+  const renderSizePresetButton = (preset: SizePreset, extraClassName = '') => {
+    const active = state.shape === preset.shape && state.width === preset.width && state.height === preset.height;
+    return (
+      <button
+        key={`${preset.label}-${preset.width}-${preset.height}`}
+        onClick={() => applySizePreset(preset)}
+        aria-pressed={active}
+        className={`${choiceClass(active)} size-preset-option grid grid-cols-[64px_1fr_auto] items-center gap-3 ${extraClassName}`}
+      >
+        <span className="size-mini-stage flex h-12 w-16 items-center justify-center rounded-lg">
+          <span
+            className="size-mini-plate block border border-current/40 bg-current/10"
+            style={{
+              width: `${Math.max(24, Math.min(52, preset.width / 6))}px`,
+              height: `${Math.max(10, Math.min(34, preset.height / 6))}px`,
+            }}
+          />
+        </span>
+        <span className="min-w-0">
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="truncate">{preset.label}</span>
+            {preset.badge && (
+              <span className={`size-badge-chip ${preset.badge === 'Most popular' ? 'size-badge-chip--popular' : ''}`}>
+                {preset.badge}
+              </span>
+            )}
+          </span>
+          <span className="mt-1 block text-[11px] font-bold opacity-70">{preset.note}</span>
+        </span>
+        <span className="flex flex-col items-end gap-1">
+          <span className="size-dims rounded-full px-2 py-1 text-[10px] font-black">{preset.width} x {preset.height}</span>
+          <span className="size-price-chip rounded-full px-2 py-1 text-[10px] font-black">
+            from {formatPrice(priceForPreset(preset))}
+          </span>
+        </span>
+      </button>
+    );
+  };
+
   return (
     <div className="controls-instrument rounded-lg p-4 text-[#1b231f] md:p-5">
+      {turnaroundToast && (
+        <div className="turnaround-toast" role="status" aria-live="polite">
+          <strong>Custom turnaround</strong>
+          <span>{turnaroundToast}</span>
+        </div>
+      )}
       <StepIntro step={activeStep} />
 
       {activeStep === 1 && (
@@ -505,7 +709,10 @@ export const Controls: React.FC<Props> = ({
             <div className="grid grid-cols-2 gap-2 rounded-lg bg-[#efe4d1] p-1">
               <button
                 type="button"
-                onClick={() => setSizeMode('standard')}
+                onClick={() => {
+                  setSizeMode('standard');
+                  setTurnaroundToast(null);
+                }}
                 aria-pressed={sizeMode === 'standard'}
                 className={`min-h-[44px] rounded-lg px-3 text-sm font-black transition ${
                   sizeMode === 'standard' ? 'bg-[#f2d688] text-[#1b231f] shadow-sm' : 'text-[#2f3832] hover:bg-[#efe4d1]'
@@ -515,7 +722,10 @@ export const Controls: React.FC<Props> = ({
               </button>
               <button
                 type="button"
-                onClick={() => setSizeMode('custom')}
+                onClick={() => {
+                  setSizeMode('custom');
+                  onSizeSelected();
+                }}
                 aria-pressed={sizeMode === 'custom'}
                 className={`min-h-[44px] rounded-lg px-3 text-sm font-black transition ${
                   sizeMode === 'custom' ? 'bg-[#f2d688] text-[#1b231f] shadow-sm' : 'text-[#2f3832] hover:bg-[#efe4d1]'
@@ -525,59 +735,65 @@ export const Controls: React.FC<Props> = ({
               </button>
             </div>
 
-            <div className="flex items-start justify-between gap-3">
-              <div className="mt-4">
-                <div className="text-sm font-black">{sizeMode === 'standard' ? 'Standard size presets' : 'Custom size controls'}</div>
-                <div className="text-xs leading-5 text-[#6a746d]">
-                  {sizeMode === 'standard'
-                    ? 'Choose the common production size. Prices update from your selected material.'
-                    : `Set an exact ${shapeLabel.toLowerCase()} size for this plaque.`}
-                </div>
-              </div>
+            <div className="mt-3 rounded-lg border border-[#d7b66a]/25 bg-[#1b231f] px-3 py-2 text-xs font-black text-[#f2d688]">
+              {sizeMode === 'standard'
+                ? 'Standard sizes: 5 working days'
+                : customTurnaroundLabel}
             </div>
 
+            {sizeMode === 'standard' && (
+              <div className="flex items-start justify-between gap-3">
+                <div className="mt-4">
+                  <div className="text-sm font-black">Standard size presets</div>
+                  <div className="text-xs leading-5 text-[#6a746d]">
+                    Choose a common production size. Prices update from your selected material.
+                  </div>
+                </div>
+              </div>
+            )}
+
             {sizeMode === 'standard' ? (
-              <div className="size-preset-stack mt-3 grid gap-2">
-                {SIZE_PRESETS.map((preset) => {
-                  const active = state.shape === preset.shape && state.width === preset.width && state.height === preset.height;
-                  return (
-                    <button
-                      key={preset.label}
-                      onClick={() => applySizePreset(preset)}
-                      aria-pressed={active}
-                      className={`${choiceClass(active)} size-preset-option grid grid-cols-[64px_1fr_auto] items-center gap-3`}
-                    >
-                      <span className="size-mini-stage flex h-12 w-16 items-center justify-center rounded-lg">
-                        <span
-                          className="size-mini-plate block border border-current/40 bg-current/10"
-                          style={{
-                            width: `${Math.max(24, Math.min(52, preset.width / 6))}px`,
-                            height: `${Math.max(10, Math.min(34, preset.height / 6))}px`,
-                          }}
-                        />
+              <div className="size-preset-stack mt-3 grid gap-2" ref={sizePresetStackRef}>
+                {SIZE_PRESETS.map((preset) => renderSizePresetButton(preset))}
+
+                <div className={`bench-size-group ${activeBenchSize ? 'is-active' : ''}`}>
+                  <button
+                    type="button"
+                    className="bench-size-header studio-press"
+                    onClick={() => setBenchSizesExpanded((open) => !open)}
+                    aria-expanded={benchSizesExpanded}
+                  >
+                    <span className="min-w-0">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span>Bench plaques</span>
+                        <span className="bench-class-chip">Bench format</span>
                       </span>
-                      <span className="min-w-0">
-                        <span className="block truncate">{preset.label}</span>
-                        <span className="mt-1 block text-[11px] font-bold opacity-70">{preset.note}</span>
+                      <span className="mt-1 block text-[11px] font-bold opacity-70">
+                        {activeBenchSize
+                          ? `${activeBenchSize.label} selected · all options in this group are bench plaques`
+                          : 'Long, low bench and seat plaque sizes'}
                       </span>
-                      <span className="flex flex-col items-end gap-1">
-                        <span className="size-dims rounded-full px-2 py-1 text-[10px] font-black">{preset.width} x {preset.height}</span>
-                        <span className="rounded-full bg-[#1b231f] px-2 py-1 text-[10px] font-black text-[#f2d688]">
-                          from {formatPrice(priceForPreset(preset))}
-                        </span>
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span className="size-price-chip rounded-full px-2 py-1 text-[10px] font-black">
+                        from {formatPrice(priceForPreset(BENCH_SIZE_PRESETS[0]))}
                       </span>
-                    </button>
-                  );
-                })}
+                      <span className="bench-size-chevron" aria-hidden="true">{benchSizesExpanded ? '-' : '+'}</span>
+                    </span>
+                  </button>
+
+                  {benchSizesExpanded && (
+                    <div className="bench-size-options">
+                      {BENCH_SIZE_PRESETS.map((preset) => renderSizePresetButton(preset, 'bench-size-option'))}
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="mt-4 space-y-4 border-t border-[rgba(84, 72, 52, 0.14)] pt-4">
                 <div>
                   <div className="text-sm font-black">Custom size and shape</div>
                   <div className="mt-1 text-xs leading-5 text-[#6a746d]">{shapeLabel} · {state.width} x {state.height}mm</div>
-                  <div className="mt-2 inline-flex rounded-full bg-[#1b231f] px-3 py-1 text-xs font-black text-[#f2d688]">
-                    Estimate {formatPrice(estimatePlaqueBasePrice(state))}
-                  </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
@@ -610,7 +826,10 @@ export const Controls: React.FC<Props> = ({
                       max={MAX_CUSTOM_DIMENSION_MM}
                       step="1"
                       value={state.width}
-                      onChange={(e) => update('width', Number(e.target.value))}
+                      onChange={(e) => {
+                        setCustomWidthInput(e.target.value);
+                        update('width', Number(e.target.value));
+                      }}
                       className="w-full accent-[#b98235]"
                     />
                     <input
@@ -618,8 +837,11 @@ export const Controls: React.FC<Props> = ({
                       min="40"
                       max={MAX_CUSTOM_DIMENSION_MM}
                       step="1"
-                      value={state.width}
-                      onChange={(e) => update('width', Number(e.target.value))}
+                      value={customWidthInput}
+                      inputMode="numeric"
+                      onChange={(e) => handleDimensionDraft('width', e.target.value)}
+                      onBlur={() => commitDimensionDraft('width')}
+                      onKeyDown={(e) => commitDimensionOnEnter(e, 'width')}
                       className={`${fieldClass} mt-2`}
                     />
                   </label>
@@ -636,7 +858,10 @@ export const Controls: React.FC<Props> = ({
                         max={MAX_CUSTOM_DIMENSION_MM}
                         step="1"
                         value={state.height}
-                        onChange={(e) => update('height', Number(e.target.value))}
+                        onChange={(e) => {
+                          setCustomHeightInput(e.target.value);
+                          update('height', Number(e.target.value));
+                        }}
                         className="w-full accent-[#b98235]"
                       />
                       <input
@@ -644,8 +869,11 @@ export const Controls: React.FC<Props> = ({
                         min="40"
                         max={MAX_CUSTOM_DIMENSION_MM}
                         step="1"
-                        value={state.height}
-                        onChange={(e) => update('height', Number(e.target.value))}
+                        value={customHeightInput}
+                        inputMode="numeric"
+                        onChange={(e) => handleDimensionDraft('height', e.target.value)}
+                        onBlur={() => commitDimensionDraft('height')}
+                        onKeyDown={(e) => commitDimensionOnEnter(e, 'height')}
                         className={`${fieldClass} mt-2`}
                       />
                     </label>
@@ -661,40 +889,49 @@ export const Controls: React.FC<Props> = ({
       {activeStep === 0 && (
         <section className="space-y-4">
           <div className="grid gap-2">
-            {Object.values(Material).map((material) => (
-              <button
-                key={material}
-                onClick={() => update('material', material)}
-                aria-pressed={state.material === material}
-                className={`flex min-h-[64px] items-center gap-3 rounded-lg border p-3 text-left transition active:scale-[0.99] ${
-                  state.material === material ? 'border-[#c6932e] bg-[#f2d688] text-[#1b231f]' : 'border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] text-[#1b231f]'
-                }`}
-              >
-                <span className="h-10 w-10 shrink-0 rounded-lg border border-black/10" style={{ background: MATERIAL_SWATCH[material] }} />
-                <span>
-                  <span className="block text-sm font-black">{MATERIAL_LABELS[material]}</span>
-                  <span className="block text-xs leading-4 opacity-70">{MATERIAL_NOTES[material]}</span>
-                </span>
-              </button>
+            {MATERIAL_ORDER.map((material) => (
+              <React.Fragment key={material}>
+                <button
+                  onClick={() => update('material', material)}
+                  aria-pressed={state.material === material}
+                  className={`material-option flex min-h-[64px] items-center gap-3 rounded-lg border p-3 text-left transition active:scale-[0.99] ${
+                    state.material === material ? 'border-[#c6932e] bg-[#f2d688] text-[#1b231f]' : 'border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] text-[#1b231f]'
+                  }`}
+                >
+                  <span className="h-10 w-10 shrink-0 rounded-lg border border-black/10" style={{ background: MATERIAL_SWATCH[material] }} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-black">{MATERIAL_LABELS[material]}</span>
+                    <span className="block text-xs leading-4 opacity-70">{MATERIAL_NOTES[material]}</span>
+                  </span>
+                  {showMaterialPrices && (
+                    <span className="material-price-chip shrink-0 rounded-full px-2 py-1 text-xs font-black">
+                      {formatPrice(priceForMaterial(material))}
+                    </span>
+                  )}
+                </button>
+                {material === Material.AgedBrass && state.material === Material.AgedBrass && (
+                  <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
+                    <div className="mb-2 text-sm font-black">Aged brass finish</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        ['Light aged', 0.18],
+                        ['Middle aged', 0.48],
+                        ['Heavy aged', 0.82],
+                      ].map(([label, value]) => (
+                        <button
+                          key={label}
+                          onClick={() => update('ageIntensity', value)}
+                          className={pillClass(Math.abs(state.ageIntensity - Number(value)) < 0.08)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
-
-          {state.material === Material.AgedBrass && (
-            <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
-              <div className="flex justify-between text-sm font-black">
-                <span>Patina depth</span>
-                <span>{Math.round(state.ageIntensity * 100)}%</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={state.ageIntensity * 100}
-                onChange={(e) => update('ageIntensity', Number(e.target.value) / 100)}
-                className="mt-3 w-full accent-[#b98235]"
-              />
-            </div>
-          )}
         </section>
       )}
 
@@ -771,57 +1008,81 @@ export const Controls: React.FC<Props> = ({
                   [Fixing.Screws, 'Countersunk screws', 'Flush screws colour-matched to the selected plaque material'],
                   [Fixing.VHB, 'Hidden adhesive', 'Clean face with no visible holes or mounting hardware'],
                 ].map(([fixing, label, note]) => (
-                  <button
-                    key={fixing}
-                    onClick={() => !isHeartPlaque && update('fixing', fixing)}
-                    disabled={isHeartPlaque && fixing !== Fixing.VHB}
-                    className={`min-h-[64px] rounded-lg border p-4 text-left transition active:scale-[0.99] ${
-                      state.fixing === fixing ? 'border-[#c6932e] bg-[#f2d688] text-[#1b231f]' : 'border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] text-[#1b231f]'
-                    } disabled:cursor-not-allowed disabled:opacity-40`}
-                  >
-                    <span className="block text-sm font-black">{label}</span>
-                    <span className="mt-1 block text-xs leading-4 opacity-70">{note}</span>
-                  </button>
+                  <React.Fragment key={fixing}>
+                    <button
+                      onClick={() => !isHeartPlaque && update('fixing', fixing)}
+                      disabled={isHeartPlaque && fixing !== Fixing.VHB}
+                      className={`min-h-[64px] rounded-lg border p-4 text-left transition active:scale-[0.99] ${
+                        state.fixing === fixing ? 'border-[#c6932e] bg-[#f2d688] text-[#1b231f]' : 'border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] text-[#1b231f]'
+                      } disabled:cursor-not-allowed disabled:opacity-40`}
+                    >
+                      <span className="block text-sm font-black">{label}</span>
+                      <span className="mt-1 block text-xs leading-4 opacity-70">{note}</span>
+                    </button>
+                    {fixing === Fixing.Caps && state.fixing === Fixing.Caps && (
+                      <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
+                        <div className="mb-2 text-sm font-black">Cap diameter</div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {[10, 15].map((size) => (
+                            <button key={size} onClick={() => update('capSize', size)} className={pillClass(state.capSize === size)}>
+                              {size}mm caps
+                            </button>
+                          ))}
+                        </div>
+                        {isBenchPlaque && (
+                          <div className="mt-3 rounded-lg border border-[rgba(84,72,52,0.14)] bg-[#fffaf0] px-3 py-2 text-xs font-bold leading-5 text-[#6a746d]">
+                            Decorative caps on bench plaques use two visible caps.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {fixing === Fixing.Screws && state.fixing === Fixing.Screws && isBenchPlaque && (
+                      <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
+                        <div className="mb-2 text-sm font-black">Countersunk screw holes</div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {[2, 4].map((count) => (
+                            <button
+                              key={count}
+                              onClick={() => update('fixingHoleCount', count)}
+                              className={pillClass(state.fixingHoleCount === count)}
+                            >
+                              {count} holes
+                            </button>
+                          ))}
+                        </div>
+                        <div className="mt-2 text-xs font-bold leading-5 text-[#6a746d]">
+                          Choose two end holes or four corner holes for bench plaque screw fixing.
+                        </div>
+                      </div>
+                    )}
+                  </React.Fragment>
                 ))}
-
-                {state.fixing === Fixing.Caps && (
-                  <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
-                    <div className="mb-2 text-sm font-black">Cap diameter</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[10, 15].map((size) => (
-                        <button key={size} onClick={() => update('capSize', size)} className={pillClass(state.capSize === size)}>
-                          {size}mm caps
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             ) : (
               <div className="mt-3 space-y-3">
-                <button
-                  onClick={() => update('border', !state.border)}
-                  className={`${pillClass(state.border)} w-full`}
-                >
-                  Border {state.border ? 'on' : 'off'}
-                </button>
-
-                {state.border && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {visibleBorderStyleOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => update('borderStyle', option.value)}
-                        aria-pressed={state.borderStyle === option.value}
-                        className={choiceClass(state.borderStyle === option.value)}
-                      >
-                        <span className="block">{option.label}</span>
-                        <span className="mt-1 block text-[11px] font-bold opacity-70">{option.note}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => update('border', false)}
+                    aria-pressed={!state.border}
+                    className={choiceClass(!state.border)}
+                  >
+                    <span className="block">Border off</span>
+                    <span className="mt-1 block text-[11px] font-bold opacity-70">Clean plaque face</span>
+                  </button>
+                  {visibleBorderStyleOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => onChange({ border: true, borderStyle: option.value })}
+                      aria-pressed={state.border && state.borderStyle === option.value}
+                      className={choiceClass(state.border && state.borderStyle === option.value)}
+                    >
+                      <span className="block">{option.label}</span>
+                      <span className="mt-1 block text-[11px] font-bold opacity-70">{option.note}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -1241,23 +1502,25 @@ export const Controls: React.FC<Props> = ({
               <div>
                 <div className="text-sm font-black">Wood backing</div>
                 <div className="text-xs text-[#6a746d]">
-                  {isHeartPlaque ? 'Not available on heart plaques.' : `Adds ${formatPrice(woodAddOnPrice)} for a 15mm timber backing board.`}
+                  {isHeartPlaque
+                    ? 'Not available on heart plaques.'
+                    : isBenchPlaque
+                      ? 'Not available on bench plaques.'
+                      : `Adds ${formatPrice(woodAddOnPrice)} for a 15mm timber backing board.`}
                 </div>
               </div>
               <button
-                onClick={() => !isHeartPlaque && update('wood', !state.wood)}
-                disabled={isHeartPlaque}
+                onClick={() => !isHeartPlaque && !isBenchPlaque && update('wood', !state.wood)}
+                disabled={isHeartPlaque || isBenchPlaque}
                 className={`${pillClass(state.wood)} disabled:cursor-not-allowed disabled:opacity-50`}
               >
-                {isHeartPlaque ? 'Not available' : state.wood ? `Added ${formatPrice(woodAddOnPrice)}` : `Add ${formatPrice(woodAddOnPrice)}`}
+                {isHeartPlaque || isBenchPlaque ? 'Not available' : state.wood ? `Added ${formatPrice(woodAddOnPrice)}` : `Add ${formatPrice(woodAddOnPrice)}`}
               </button>
             </div>
-            {state.wood && !isHeartPlaque && (
+            {state.wood && !isHeartPlaque && !isBenchPlaque && (
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <button onClick={() => update('woodTone', 'light')} className={pillClass(state.woodTone === 'light')}>Light oak</button>
-                <button onClick={() => update('woodTone', 'dark')} className={pillClass(state.woodTone === 'dark')}>Dark mahogany</button>
-                <button onClick={() => update('woodEdge', 'square')} className={pillClass(state.woodEdge === 'square')}>Square edge</button>
-                <button onClick={() => update('woodEdge', 'bevel')} className={pillClass(state.woodEdge === 'bevel')}>Bevel edge</button>
+                <button onClick={() => update('woodTone', 'light')} className={pillClass(state.woodTone === 'light')}>Light</button>
+                <button onClick={() => update('woodTone', 'dark')} className={pillClass(state.woodTone === 'dark')}>Dark</button>
               </div>
             )}
           </div>

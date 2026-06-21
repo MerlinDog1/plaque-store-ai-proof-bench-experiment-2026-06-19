@@ -10,6 +10,7 @@ import { downloadCorelSvg, downloadPdf, svgToPngBase64 } from './services/export
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
 import { MockOrder, ProductFamily, SiteView, getProductBySlug, makeMockOrder, productFamilies } from './services/commerce';
+import { isBenchPlaqueFormat } from './services/plaqueRules';
 
 const VectorSketch = lazy(async () => {
   const module = await import('./components/VectorSketch');
@@ -22,6 +23,7 @@ const ThreePlaquePreview = lazy(async () => {
 });
 
 const SUPPORTED_MEMORIAL_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/avif'];
+const DELIVERY_HELP = 'UK mainland only. Highlands, islands and non-UK delivery may incur extra charges.';
 
 const PROOF_BENCH_INITIAL_STATE: PlaqueState = {
   ...INITIAL_STATE,
@@ -33,11 +35,46 @@ const PROOF_BENCH_INITIAL_STATE: PlaqueState = {
   border: false,
   borderStyle: BorderStyle.Single,
   fixing: Fixing.None,
+  fixingHoleCount: 4,
   capSize: 10,
   cornerRadius: 0,
   generatedSvgContent: null,
   aiReasoning: null,
   typographyEngine: TypographyEngine.GeminiAuthored,
+};
+
+const routeViews: Partial<Record<string, SiteView>> = {
+  '/': 'home',
+  '/materials': 'materials',
+  '/how-it-works': 'how',
+  '/faq': 'faq',
+  '/quote': 'quote',
+  '/contact': 'contact',
+  '/terms': 'terms',
+  '/privacy': 'privacy',
+  '/cookies': 'cookies',
+  '/returns': 'returns',
+  '/returns-and-cancellations': 'returns',
+  '/design': 'plaque',
+};
+
+const viewRoutes: Partial<Record<SiteView, string>> = {
+  home: '/',
+  materials: '/materials',
+  how: '/how-it-works',
+  faq: '/faq',
+  quote: '/quote',
+  contact: '/contact',
+  terms: '/terms',
+  privacy: '/privacy',
+  cookies: '/cookies',
+  returns: '/returns-and-cancellations',
+  plaque: '/design',
+};
+
+const getInitialView = (): SiteView => {
+  if (typeof window === 'undefined') return 'home';
+  return routeViews[window.location.pathname] ?? 'home';
 };
 
 const readFileAsDataUrl = (file: File): Promise<string> => new Promise((resolve, reject) => {
@@ -73,10 +110,11 @@ async function prepareMemorialImageUpload(file: File): Promise<string> {
 const App: React.FC = () => {
   const [hasAccess, setHasAccess] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
-  const [currentView, setCurrentView] = useState<SiteView>('home');
+  const [currentView, setCurrentView] = useState<SiteView>(getInitialView);
   const [selectedProductSlug, setSelectedProductSlug] = useState(productFamilies[0].slug);
   const [mockOrders, setMockOrders] = useState<MockOrder[]>([]);
   const [activeStep, setActiveStep] = useState(0);
+  const [hasSelectedSize, setHasSelectedSize] = useState(false);
 
   const [state, setState] = useState<PlaqueState>(PROOF_BENCH_INITIAL_STATE);
   const [inscriptionPrompt, setInscriptionPrompt] = useState('');
@@ -133,6 +171,14 @@ const App: React.FC = () => {
     } catch {
       setMockOrders([]);
     }
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentView(routeViews[window.location.pathname] ?? 'home');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const handleConnectApiKey = async () => {
@@ -204,12 +250,24 @@ const App: React.FC = () => {
     setBasketAdded(false);
     setState(prev => {
       const next = { ...prev, ...changes };
+      if (changes.wood === true) {
+        next.woodEdge = 'bevel';
+      }
       if (next.shape === Shape.Rect) {
         next.cornerRadius = 0;
+      }
+      const nextIsBenchPlaque = isBenchPlaqueFormat(next.width, next.height, next.shape);
+      const previousWasBenchPlaque = isBenchPlaqueFormat(prev.width, prev.height, prev.shape);
+      if (nextIsBenchPlaque) {
+        next.wood = false;
+        if (next.fixing === Fixing.Caps || next.fixing !== Fixing.Screws || !previousWasBenchPlaque || changes.fixing === Fixing.Screws) {
+          next.fixingHoleCount = 2;
+        }
       }
       if (next.shape === Shape.Heart) {
         next.wood = false;
         next.fixing = Fixing.VHB;
+        next.fixingHoleCount = 2;
         if (changes.shape === Shape.Heart) {
           next.width = 180;
           next.height = 160;
@@ -546,23 +604,57 @@ const App: React.FC = () => {
       setSelectedProductSlug(productSlug);
     }
     setCurrentView(view);
+    const route = viewRoutes[view];
+    if (route && window.location.pathname !== route) {
+      window.history.pushState({}, '', route);
+    }
+  };
+
+  const handleStartDesign = () => {
+    setState(PROOF_BENCH_INITIAL_STATE);
+    setInscriptionPrompt('');
+    setInscriptionGuidance('');
+    setGeneratedLayoutSignature(null);
+    setGeneratedImage(null);
+    setRealisticReferenceImage(null);
+    setMemorialSourceImage(null);
+    setMemorialStatus(null);
+    setProofSaved(false);
+    setBasketAdded(false);
+    setHasSelectedSize(false);
+    setActiveStep(0);
+    setCurrentView('plaque');
+    if (window.location.pathname !== '/design') {
+      window.history.pushState({}, '', '/design');
+    }
   };
 
   const handleLaunchProduct = (product: ProductFamily) => {
     setSelectedProductSlug(product.slug);
-    setState(prev => ({
-      ...prev,
-      ...product.preset,
-      generatedSvgContent: null,
-      aiReasoning: null,
-      conceptImageUrl: null,
-    }));
+    setHasSelectedSize(true);
+    setState(prev => {
+      const next = {
+        ...prev,
+        ...product.preset,
+        generatedSvgContent: null,
+        aiReasoning: null,
+        conceptImageUrl: null,
+      };
+      if (isBenchPlaqueFormat(next.width, next.height, next.shape)) {
+        next.wood = false;
+        next.fixingHoleCount = 2;
+      }
+      return next;
+    });
     setInscriptionPrompt(product.proofPrompt);
     setGeneratedLayoutSignature(null);
     setProofSaved(false);
     setBasketAdded(false);
     setCurrentView('plaque');
-    setActiveStep(5);
+    setActiveStep(0);
+    if (window.location.pathname !== '/design') {
+      window.history.pushState({}, '', '/design');
+    }
   };
 
   const handleCreateMockOrder = (customerName: string, customerEmail: string) => {
@@ -585,6 +677,7 @@ const App: React.FC = () => {
   const progress = ((activeStep + 1) / steps.length) * 100;
   const canGoBack = activeStep > 0;
   const canGoNext = activeStep < steps.length - 1;
+  const showMaterialPrices = hasSelectedSize && selectedProduct.slug !== 'custom-plaques';
 
   const goBack = () => setActiveStep(step => Math.max(0, step - 1));
   const goNext = () => setActiveStep(step => Math.min(steps.length - 1, step + 1));
@@ -643,18 +736,24 @@ const App: React.FC = () => {
   }
 
   const stepIcons = ['▦', '◉', '●', '⌁', '▥', 'T', '✓'];
-  const formattedPrice = price.toLocaleString('en-GB', {
-    style: 'currency',
-    currency: 'GBP',
-    maximumFractionDigits: 0,
-  });
+  const formattedPrice = (() => {
+    const hasPence = Math.round(price * 100) % 100 !== 0;
+    return price.toLocaleString('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+      minimumFractionDigits: hasPence ? 2 : 0,
+      maximumFractionDigits: hasPence ? 2 : 0,
+    });
+  })();
+  const showProofPrice = currentView === 'plaque' && hasSelectedSize;
+  const showHeaderPrice = currentView === 'plaque' ? hasSelectedSize : currentView === 'product' || currentView === 'checkout';
   const materialTrailLabels: Record<Material, string> = {
     [Material.BrushedBrass]: 'Brushed brass',
     [Material.OrbitalBrassMattLacquer]: 'Orbital brass',
     [Material.PolishedBrass]: 'Polished brass',
     [Material.AgedBrass]: 'Aged brass',
-    [Material.BrushedSteel]: 'Brushed steel',
-    [Material.PolishedSteel]: 'Polished steel',
+    [Material.BrushedSteel]: 'Brushed stainless',
+    [Material.PolishedSteel]: 'Polished stainless',
   };
   const fixingTrailLabels: Record<Fixing, string> = {
     [Fixing.None]: 'No fixings',
@@ -678,8 +777,10 @@ const App: React.FC = () => {
     <div className={`studio-app-shell proofbench-app flex flex-col bg-transparent text-[#eef4ee] ${currentView !== 'plaque' && currentView !== 'vector' ? 'commerce-mode' : ''}`}>
       <Header
         onNavigate={handleNavigate}
+        onStartDesign={handleStartDesign}
         currentView={currentView}
         priceLabel={formattedPrice}
+        showPrice={showHeaderPrice}
       />
 
       <main className={`min-h-0 w-full flex-1 ${currentView === 'plaque' || currentView === 'vector' ? 'overflow-hidden' : 'overflow-auto'}`}>
@@ -694,6 +795,7 @@ const App: React.FC = () => {
             isProductionReady={isProductionReady}
             orders={mockOrders}
             onNavigate={handleNavigate}
+            onStartDesign={handleStartDesign}
             onLaunchProduct={handleLaunchProduct}
             onCreateMockOrder={handleCreateMockOrder}
           />
@@ -765,6 +867,8 @@ const App: React.FC = () => {
                   isGeneratingMemorialImage={isGeneratingMemorial}
                   memorialStatus={memorialStatus}
                   activeStep={activeStep}
+                  onSizeSelected={() => setHasSelectedSize(true)}
+                  showMaterialPrices={showMaterialPrices}
                   price={price}
                   readinessItems={readinessItems}
                   isProductionReady={isProductionReady}
@@ -792,10 +896,23 @@ const App: React.FC = () => {
                   </span>
                   <small title={proofSpecTrail}>{proofSpecTrail}</small>
                 </button>
-                <div className="proofbench-mobile-price" aria-label={`Current price ${formattedPrice} including UK delivery`}>
-                  <span>Inc UK delivery</span>
-                  <strong>{formattedPrice}</strong>
-                </div>
+                {showProofPrice && (
+                  <div className="proofbench-mobile-price" aria-label={`Current price ${formattedPrice} including UK delivery`}>
+                    <span className="proofbench-delivery-label">
+                      Inc UK delivery
+                      <button type="button" className="proofbench-info-dot" aria-label={DELIVERY_HELP} title={DELIVERY_HELP}>
+                        i
+                      </button>
+                    </span>
+                    <strong>
+                      <svg className="proofbench-price-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6.4 8.5h11.2l-.8 10.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6.4 8.5Z" />
+                        <path d="M9 8.5V7a3 3 0 0 1 6 0v1.5" />
+                      </svg>
+                      {formattedPrice}
+                    </strong>
+                  </div>
+                )}
               </div>
 
               <div className="proofbench-dimension-top hidden md:block">{state.width} mm</div>

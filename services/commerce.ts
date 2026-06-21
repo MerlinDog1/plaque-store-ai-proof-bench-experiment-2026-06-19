@@ -9,7 +9,22 @@ import {
 } from '../types';
 import { estimatePlaquePrice } from './pricing';
 
-export type SiteView = 'home' | 'product' | 'materials' | 'how' | 'faq' | 'quote' | 'checkout' | 'admin' | 'plaque' | 'vector';
+export type SiteView =
+  | 'home'
+  | 'product'
+  | 'materials'
+  | 'how'
+  | 'faq'
+  | 'quote'
+  | 'checkout'
+  | 'admin'
+  | 'contact'
+  | 'terms'
+  | 'privacy'
+  | 'cookies'
+  | 'returns'
+  | 'plaque'
+  | 'vector';
 
 export interface ProductFamily {
   slug: string;
@@ -51,15 +66,15 @@ export interface MockOrder {
 
 export const productFamilies: ProductFamily[] = [
   {
-    slug: 'memorial-bench-plaques',
-    title: 'Memorial bench plaques',
-    shortTitle: 'Bench plaques',
-    eyebrow: 'Most ordered',
-    startingFrom: 'from £79',
+    slug: 'bench-plaques',
+    title: 'Bench plaques',
+    shortTitle: 'Bench',
+    eyebrow: '150 x 50 mm',
+    startingFrom: 'from £69',
     materialCue: 'stainless',
-    image: '/site-images/plaque-hero-equine.jpg',
-    description: 'Weather-ready engraved plaques for benches, seats and outdoor dedications, with instant AI typography that keeps the wording calm, balanced and legible.',
-    bestFor: ['Parks and public benches', 'Memorial gardens', 'Short tributes', 'Outdoor stainless or brass'],
+    image: '/site-images/home-carousel-bench-steel.webp',
+    description: 'The compact format for benches, seats and short outdoor dedications where the wording needs to stay crisp.',
+    bestFor: ['Benches and seats', 'Short memorial wording', 'Outdoor brass or stainless', 'Standard screw fixing'],
     proofPrompt: 'In loving memory of\nMargaret Ellis\n1942 - 2026\nForever in our hearts',
     preset: {
       width: 150,
@@ -76,26 +91,63 @@ export const productFamilies: ProductFamily[] = [
     },
     faqs: [
       {
-        question: 'Can I approve the bench plaque online?',
-        answer: 'Yes. Generate the proof, adjust the wording and layout, then approve the exact design before ordering.',
+        question: 'Is the small size enough for a memorial?',
+        answer: 'Yes, for short wording. If the inscription has several lines, start with the medium plaque instead.',
       },
       {
-        question: 'Are scalloped borders available on bench plaques?',
-        answer: 'No. Bench plaques use cleaner border options that suit the shallow format and leave room for readable text.',
+        question: 'Can this be used outside?',
+        answer: 'Yes. Choose stainless steel or brass with standard screw fixings for outdoor use.',
       },
     ],
   },
   {
-    slug: 'memorial-wall-plaques',
-    title: 'Memorial wall plaques',
-    shortTitle: 'Wall plaques',
-    eyebrow: 'Classic tribute',
+    slug: 'a5-plaques',
+    title: 'A5 plaques',
+    shortTitle: 'A5',
+    eyebrow: '210 x 148 mm',
     startingFrom: 'from £129',
     materialCue: 'brass',
-    image: '/site-images/plaque-hero-memorial.jpg',
-    description: 'Formal wall-mounted plaques for homes, gardens, churches and commemorative spaces, designed instantly with a professional hierarchy.',
-    bestFor: ['Longer inscriptions', 'Garden walls', 'Church and hall dedications', 'Wood-backed presentation'],
+    image: '/site-images/home-carousel-garden-brass.webp',
+    description: 'A useful all-round size for wall plaques, garden dedications and memorial wording with room for balance.',
+    bestFor: ['Most memorial plaques', 'Wall and garden use', 'Names, dates and a short message', 'Optional wood backing'],
     proofPrompt: 'In loving memory of\nArthur James Williams\nA devoted husband, father and grandfather\n1938 - 2026',
+    preset: {
+      width: 210,
+      height: 148,
+      material: Material.BrushedBrass,
+      shape: Shape.Rect,
+      fixing: Fixing.Caps,
+      border: true,
+      borderStyle: BorderStyle.Double,
+      wood: true,
+      woodTone: 'dark',
+      woodEdge: 'bevel',
+      designStyle: DesignStyle.ClassicalFormal,
+      textColor: TextColor.Black,
+      cornerRadius: 0,
+    },
+    faqs: [
+      {
+        question: 'Is this the best starting size?',
+        answer: 'Usually, yes. It gives the proofing system enough room for a clear title, dates and a short message.',
+      },
+      {
+        question: 'Can I add a wooden backing?',
+        answer: 'Yes. Wood backing is priced live and shown in the proof before you order.',
+      },
+    ],
+  },
+  {
+    slug: 'a4-plaques',
+    title: 'A4 plaques',
+    shortTitle: 'A4',
+    eyebrow: '297 x 210 mm',
+    startingFrom: 'from £149',
+    materialCue: 'brass',
+    image: '/site-images/home-carousel-reading-room.webp',
+    description: 'A larger format for longer inscriptions, presentation pieces and places where the wording needs more presence.',
+    bestFor: ['Longer tribute wording', 'Presentation plaques', 'Opening plaques', 'Prominent wall displays'],
+    proofPrompt: 'Opened by\nThe Rt Hon. Eleanor Hart MP\non 18 June 2026\nRiverside Community Centre',
     preset: {
       width: 297,
       height: 210,
@@ -113,95 +165,25 @@ export const productFamilies: ProductFamily[] = [
     },
     faqs: [
       {
-        question: 'Can I use a longer inscription?',
-        answer: 'Yes. The intelligent typography engine will balance line breaks, hierarchy and spacing before you approve the proof.',
+        question: 'When should I choose large?',
+        answer: 'Choose large for longer wording, formal openings, donor recognition or anything that needs to be read from further away.',
       },
       {
-        question: 'Can I add a wooden backing?',
-        answer: 'Yes. Wood backing is priced live and shown in the proof before you order.',
+        question: 'Will the price still show before ordering?',
+        answer: 'Yes. Standard large plaques can be priced before checkout, with extras shown before payment.',
       },
     ],
   },
   {
-    slug: 'tree-and-stake-plaques',
-    title: 'Tree and stake plaques',
-    shortTitle: 'Tree plaques',
-    eyebrow: 'Garden ready',
-    startingFrom: 'from £99',
-    materialCue: 'aged',
-    image: '/site-images/plaque-hero-cat.png',
-    description: 'Outdoor dedication plaques for trees, planting schemes and memorial gardens, with fast proofing and simple fixing choices.',
-    bestFor: ['Tree dedications', 'Garden markers', 'Short commemorations', 'Outdoor brass or stainless'],
-    proofPrompt: 'Planted in memory of\nGrace Thompson\nA life full of kindness',
-    preset: {
-      width: 210,
-      height: 148,
-      material: Material.AgedBrass,
-      shape: Shape.Rect,
-      fixing: Fixing.Screws,
-      border: true,
-      borderStyle: BorderStyle.Single,
-      wood: false,
-      designStyle: DesignStyle.HeritagePlaque,
-      textColor: TextColor.Black,
-      cornerRadius: 0,
-    },
-    faqs: [
-      {
-        question: 'Do tree plaques need a quote?',
-        answer: 'Most standard tree plaques can be priced instantly. Bespoke stakes or unusual mounting can be sent as a quote request.',
-      },
-      {
-        question: 'Can I keep the wording simple?',
-        answer: 'Yes. The proof engine is especially useful for short inscriptions because it makes simple wording look deliberate.',
-      },
-    ],
-  },
-  {
-    slug: 'business-plaques',
-    title: 'Business and professional plaques',
-    shortTitle: 'Business plaques',
-    eyebrow: 'Professional finish',
-    startingFrom: 'from £149',
-    materialCue: 'brass',
-    image: '/site-images/proofbench-materials.png',
-    description: 'Reception, office, opening and accreditation plaques with instant formal layouts, live pricing and production-ready proof approval.',
-    bestFor: ['Reception plaques', 'Opening plaques', 'Donor recognition', 'Official presentations'],
-    proofPrompt: 'Opened by\nThe Rt Hon. Eleanor Hart MP\non 18 June 2026\nRiverside Community Centre',
-    preset: {
-      width: 300,
-      height: 200,
-      material: Material.PolishedBrass,
-      shape: Shape.Rect,
-      fixing: Fixing.Caps,
-      border: true,
-      borderStyle: BorderStyle.Single,
-      wood: false,
-      designStyle: DesignStyle.Institutional,
-      textColor: TextColor.Black,
-      cornerRadius: 0,
-    },
-    faqs: [
-      {
-        question: 'Can we add a logo?',
-        answer: 'Logo upload can be handled as an artwork-check or quote path. Text-only business plaques can usually be approved instantly.',
-      },
-      {
-        question: 'Can the proof be used internally before ordering?',
-        answer: 'Yes. The instant proof is designed so teams can check wording and hierarchy before checkout.',
-      },
-    ],
-  },
-  {
-    slug: 'bespoke-plaques',
-    title: 'Bespoke engraved plaques',
-    shortTitle: 'Bespoke plaques',
-    eyebrow: 'Custom route',
-    startingFrom: 'quoted when needed',
+    slug: 'custom-plaques',
+    title: 'Custom plaques',
+    shortTitle: 'Custom',
+    eyebrow: 'Up to 600 mm long',
+    startingFrom: 'quote checked before order',
     materialCue: 'wood',
-    image: '/site-images/plaque-hero-memorial.jpg',
-    description: 'Start with a live proof, then route anything unusual through quote review: custom dimensions, complex artwork, batch orders or special mounting.',
-    bestFor: ['Unusual sizes', 'Artwork and logos', 'Batch orders', 'Special fixing requirements'],
+    image: '/site-images/home-carousel-brass-wall.webp',
+    description: 'For non-standard dimensions, logos, artwork, batch orders or anything that needs a quick manual check.',
+    bestFor: ['Up to 600 mm long', 'Logos and artwork', 'Batch orders', 'Special fixing requirements'],
     proofPrompt: 'The Old Mill\nRestored 2026\nIn honour of everyone who brought this place back to life',
     preset: {
       width: 400,

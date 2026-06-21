@@ -187,6 +187,7 @@ export interface PlaqueState {
   shape: Shape;
   material: Material;
   fixing: Fixing;
+  fixingHoleCount: 2 | 4;
   capSize: number;
   cornerRadius: number;
   border: boolean;
@@ -237,6 +238,7 @@ export const INITIAL_STATE: PlaqueState = {
   shape: Shape.Rect,
   material: Material.BrushedBrass,
   fixing: Fixing.None,
+  fixingHoleCount: 4,
   capSize: 10,
   cornerRadius: 0,
   border: false,

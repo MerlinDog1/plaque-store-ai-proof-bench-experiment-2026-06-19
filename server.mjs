@@ -7,6 +7,7 @@ import { GoogleGenAI } from "@google/genai";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, "dist");
 const port = Number(process.env.PORT || 4179);
+const host = process.env.HOST || "127.0.0.1";
 const maxBodyBytes = 24 * 1024 * 1024;
 
 const loadEnvFile = (filePath) => {
@@ -185,6 +186,6 @@ const server = http.createServer(async (req, res) => {
   sendJson(res, 405, { error: "Method not allowed." });
 });
 
-server.listen(port, "127.0.0.1", () => {
-  console.log(`InstaPlaque listening on http://127.0.0.1:${port}; Gemini key configured: ${Boolean(apiKey)}`);
+server.listen(port, host, () => {
+  console.log(`InstaPlaque listening on http://${host}:${port}; Gemini key configured: ${Boolean(apiKey)}`);
 });

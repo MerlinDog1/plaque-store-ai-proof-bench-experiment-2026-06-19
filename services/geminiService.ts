@@ -1,5 +1,6 @@
 import { Type } from "@google/genai";
 import { AVAILABLE_FONTS, PlaqueState, Shape, Material, Fixing, MemorialImageMethod, DesignStyle, STYLE_FONT_PALETTES, FontPalette, TypographyEngine, TextColor } from "../types";
+import { isBenchPlaqueFormat } from "./plaqueRules";
 import { composeEditorialTypography } from "./editorialComposer";
 import { getGeminiClient } from "./geminiClient";
 
@@ -1635,9 +1636,11 @@ export const generateRealisticView = async (
     hardwareDesc = "No visible fixings, no screw holes, no caps. Clean heart-shaped metal plaque face only.";
     backingDesc = "None. No wood backing board for this heart plaque.";
   } else if (state.fixing === Fixing.Screws || state.fixing === Fixing.Caps) {
-    const isRect = state.shape === Shape.Rect;
-    const count = isRect ? "4x" : "2x";
-    const pos = isRect
+    const isFourHole = state.shape === Shape.Rect
+      && (!isBenchPlaqueFormat(state.width, state.height, state.shape)
+        || (state.fixing === Fixing.Screws && state.fixingHoleCount === 4));
+    const count = isFourHole ? "4x" : "2x";
+    const pos = isFourHole
       ? "in the four corners"
       : "at the horizontal center lines (left and right edges)";
 
