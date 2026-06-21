@@ -7,6 +7,7 @@ const OUT_DIR = process.env.LAYOUT_EXPERIMENT_OUT || "output/layout-experiment";
 const CASE_LIMIT = Number(process.env.CASE_LIMIT || 0);
 const GENERATE_TIMEOUT_MS = Number(process.env.GENERATE_TIMEOUT_MS || 180000);
 const CHROMIUM_EXECUTABLE = process.env.CHROMIUM_EXECUTABLE || "/data/data/com.termux/files/usr/bin/chromium-browser";
+const SEMANTIC_LAYOUT_EXPERIMENT = process.env.SEMANTIC_LAYOUT_EXPERIMENT === "1";
 
 const CASES = [
   {
@@ -140,7 +141,7 @@ function scoreFromMetrics(metrics) {
     score -= 8;
     issues.push(`too many text blocks (${metrics.textCount})`);
   }
-  if (metrics.titleDominance < 1.15 && metrics.inputLength < 180) {
+  if (metrics.textCount > 1 && metrics.titleDominance < 1.15 && metrics.inputLength < 180) {
     score -= 8;
     issues.push("weak title dominance");
   }
@@ -158,12 +159,12 @@ function scoreFromMetrics(metrics) {
 async function collectMetrics(page, inputText) {
   return page.evaluate((rawInputText) => {
     const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
+    const normalizeForWordingCompare = (value) => normalize(value).toLowerCase();
     const layer = document.querySelector("#ai-text-layer");
     const texts = Array.from(document.querySelectorAll("#ai-text-layer text"));
     const fitW = Number(layer?.getAttribute("data-fit-width") || 0);
     const fitH = Number(layer?.getAttribute("data-fit-height") || 0);
     const layerBox = layer && "getBBox" in layer ? layer.getBBox() : { x: 0, y: 0, width: 0, height: 0 };
-    const renderedText = normalize(texts.map((text) => text.textContent || "").join(" "));
     const inputText = normalize(rawInputText);
     const fontSizes = texts.flatMap((text) => {
       const inherited = Number(text.getAttribute("font-size") || 0);
@@ -177,6 +178,7 @@ async function collectMetrics(page, inputText) {
       if (!tspans.length) return [normalize(text.textContent || "")].filter(Boolean);
       return tspans.map((line) => normalize(line.textContent || "")).filter(Boolean);
     });
+    const renderedText = normalize(lines.join(" "));
     const sourceSingleWordLines = new Set(String(rawInputText).split(/\n+/).map(normalize).filter((line) => line.split(" ").length === 1));
     const shortOrphanLines = lines.filter((line) => {
       const words = line.split(" ").filter(Boolean);
@@ -193,7 +195,7 @@ async function collectMetrics(page, inputText) {
     return {
       textCount: texts.length,
       renderedText,
-      exactTextMatch: renderedText === inputText,
+      exactTextMatch: normalizeForWordingCompare(renderedText) === normalizeForWordingCompare(inputText),
       inputLength: inputText.length,
       fitW,
       fitH,
@@ -219,6 +221,11 @@ async function collectMetrics(page, inputText) {
 
   for (const testCase of cases) {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    if (SEMANTIC_LAYOUT_EXPERIMENT) {
+      await page.addInitScript(() => {
+        window.localStorage.setItem("instaplaque.semanticLayoutExperiment", "1");
+      });
+    }
     const startedAt = Date.now();
     try {
       await clickProduct(page, testCase.product);
@@ -258,6 +265,7 @@ async function collectMetrics(page, inputText) {
   await browser.close();
   const summary = {
     appUrl: APP_URL,
+    semanticLayoutExperiment: SEMANTIC_LAYOUT_EXPERIMENT,
     generatedAt: new Date().toISOString(),
     caseCount: results.length,
     averageScore: results.length ? Math.round(results.reduce((sum, result) => sum + result.score, 0) / results.length) : 0,

@@ -144,6 +144,13 @@ const escapeXml = (value: string) =>
 
 const normalizeSpace = (value: string) => value.replace(/\s+/g, " ").trim();
 
+function semanticLayoutExperimentEnabled(): boolean {
+  const envEnabled = import.meta.env.VITE_AI_SEMANTIC_LAYOUT_EXPERIMENT === "1";
+  if (envEnabled) return true;
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem("instaplaque.semanticLayoutExperiment") === "1";
+}
+
 interface ComposerGuidanceRules {
   raw: string;
   promptBlock: string;
@@ -810,6 +817,58 @@ function fallbackRenderedTextOnlySvg(inscription: string, box: InscriptionBox): 
   return renderStructuredLayoutToSvg(fallbackStructuredLayout(inscription), box.width, box.height, Shape.Rect, DesignStyle.ClassicalFormal);
 }
 
+function renderBenchStripLayoutToSvg(layout: StructuredTextLayout, width: number, height: number, shape: Shape, style: DesignStyle): string {
+  const resolvedStyle = style === DesignStyle.Auto ? DesignStyle.MemorialSolemn : style;
+  const palette = pickFontPalette(resolvedStyle) || { title: "Cinzel", body: "Lato", accent: "Playfair Display" };
+  const minSide = Math.min(width, height);
+  const margin = clamp(minSide * (shape === Shape.Rect ? 0.025 : 0.055), 2, 6);
+  const safeW = Math.max(40, width - margin * 2);
+  const safeH = Math.max(14, height - margin * 2);
+  const dateBlocks = layout.blocks.filter((block) => block.role === "date" || /\b\d{4}\b/.test(block.text));
+  const primaryBlocks = layout.blocks.filter((block) => !dateBlocks.includes(block));
+  const primaryText = normalizeSpace(primaryBlocks.map((block) => block.text).join(" "));
+  const dateText = normalizeSpace(dateBlocks.map((block) => block.text).join(" "));
+  const combinedText = normalizeSpace([primaryText || normalizeSpace(layout.blocks.map((block) => block.text).join(" ")), dateText].filter(Boolean).join(" "));
+  const singleLineSize = clamp(safeH * 0.42, 6.2, 7.6);
+  if (estimateTextWidth(combinedText, singleLineSize, 0.02) <= safeW) {
+    return `<text y="${(singleLineSize * 0.34).toFixed(2)}" text-anchor="middle" font-family="${escapeXml(palette.title)}" font-weight="700" font-size="${singleLineSize.toFixed(2)}" letter-spacing="0.02em" fill="currentColor"><tspan x="0">${escapeXml(combinedText)}</tspan></text>`;
+  }
+  const lines = [
+    {
+      text: primaryText || normalizeSpace(layout.blocks.map((block) => block.text).join(" ")),
+      role: "title" as const,
+      size: clamp(safeH * 0.38, 6.8, 8.4),
+      weight: 700,
+      family: palette.title,
+      letterSpacing: "0.03em",
+    },
+    dateText ? {
+      text: dateText,
+      role: "date" as const,
+      size: clamp(safeH * 0.25, 5.2, 6.0),
+      weight: 400,
+      family: palette.body,
+      letterSpacing: "0.06em",
+    } : null,
+  ].filter(Boolean) as Array<{ text: string; role: StructuredTextRole; size: number; weight: number; family: string; letterSpacing: string }>;
+
+  const lineGap = lines.length > 1 ? clamp(safeH * 0.12, 1.4, 2.2) : 0;
+  const naturalHeight = lines.reduce((sum, line) => sum + line.size, 0) + lineGap * Math.max(0, lines.length - 1);
+  const naturalWidth = lines.reduce((widest, line) => {
+    const spacing = Number.parseFloat(line.letterSpacing) || 0;
+    return Math.max(widest, estimateTextWidth(line.text, line.size, spacing));
+  }, 0);
+  const fitScale = Math.min(1, safeH / Math.max(1, naturalHeight), safeW / Math.max(1, naturalWidth));
+  let cursor = -(naturalHeight * fitScale) / 2;
+
+  return lines.map((line) => {
+    const fontSize = line.size * fitScale;
+    const baseline = cursor + fontSize * 0.82;
+    cursor += fontSize + lineGap * fitScale;
+    return `<text y="${baseline.toFixed(2)}" text-anchor="middle" font-family="${escapeXml(line.family)}" font-weight="${line.weight}" font-size="${fontSize.toFixed(2)}" letter-spacing="${line.letterSpacing}" fill="currentColor"><tspan x="0">${escapeXml(line.text)}</tspan></text>`;
+  }).join("\n");
+}
+
 async function generateAuthoredTypographySvg(
   inscription: string,
   plaqueWidth: number,
@@ -927,8 +986,17 @@ function renderStructuredLayoutToSvg(layout: StructuredTextLayout, width: number
   const palette = pickFontPalette(resolvedStyle) || { title: "Cinzel", body: "Lato", accent: "Playfair Display" };
   const minSide = Math.min(width, height);
   const margin = clamp(minSide * (shape === Shape.Rect ? 0.025 : 0.055), 2, 10);
+  const rawSafeW = Math.max(40, width - margin * 2);
+  const rawSafeH = Math.max(10, height - margin * 2);
   const safeW = Math.max(40, width - margin * 2);
   const safeH = Math.max(34, height - margin * 2);
+  const benchCompact = rawSafeW / Math.max(1, rawSafeH) > 2.7 && rawSafeH <= 62;
+  const benchStrip = rawSafeW / Math.max(1, rawSafeH) > 5.5 && rawSafeH <= 24;
+
+  if (benchStrip) {
+    return renderBenchStripLayoutToSvg(layout, width, height, shape, style);
+  }
+
   const totalCharacters = layout.blocks.reduce((sum, block) => sum + normalizeSpace(block.text).length, 0);
   const longForm = totalCharacters > 180 || layout.blocks.length > 6;
 
@@ -940,20 +1008,26 @@ function renderStructuredLayoutToSvg(layout: StructuredTextLayout, width: number
         ? toTitleCase(block.text)
         : block.text;
     const maxChars = role === "title"
-      ? longForm
-        ? clamp(Math.round(safeW / 8), 18, 34)
-        : clamp(Math.round(safeW / Math.max(8, minSide * 0.12)), 10, 24)
-      : clamp(Math.round(safeW / Math.max(3.4, minSide * (longForm ? 0.020 : 0.045))), longForm ? 40 : 22, longForm ? 82 : 48);
+      ? benchCompact
+        ? clamp(Math.round(safeW / 5.5), 20, 38)
+        : longForm
+          ? clamp(Math.round(safeW / 8), 18, 34)
+          : clamp(Math.round(safeW / Math.max(8, minSide * 0.12)), 10, 24)
+      : benchCompact
+        ? clamp(Math.round(safeW / 5.2), 24, 58)
+        : clamp(Math.round(safeW / Math.max(3.4, minSide * (longForm ? 0.020 : 0.045))), longForm ? 40 : 22, longForm ? 82 : 48);
     const lines = rawText.split(/\n+/).flatMap(line => wrapLine(line, maxChars));
     const roleSize = role === "title"
-      ? minSide * (style === DesignStyle.Monumental ? (longForm ? 0.17 : 0.32) : (longForm ? 0.115 : 0.23))
+      ? benchCompact
+        ? minSide * 0.18
+        : minSide * (style === DesignStyle.Monumental ? (longForm ? 0.17 : 0.32) : (longForm ? 0.115 : 0.23))
       : role === "subtitle"
-        ? minSide * (longForm ? 0.075 : 0.095)
+        ? minSide * (benchCompact ? 0.14 : longForm ? 0.075 : 0.095)
         : role === "accent"
-          ? minSide * (longForm ? 0.095 : 0.13)
-          : minSide * (longForm ? 0.068 : 0.078);
-    const size = clamp(roleSize, longForm ? 8 : 7.5, minSide * 0.34);
-    const lineHeight = role === "title" ? 1.08 : longForm ? 1.08 : 1.22;
+          ? minSide * (benchCompact ? 0.15 : longForm ? 0.095 : 0.13)
+          : minSide * (benchCompact ? 0.13 : longForm ? 0.068 : 0.078);
+    const size = clamp(roleSize, benchCompact ? 5.4 : longForm ? 8 : 7.5, minSide * (benchCompact ? 0.22 : 0.34));
+    const lineHeight = role === "title" ? (benchCompact ? 1.02 : 1.08) : longForm ? 1.08 : benchCompact ? 1.06 : 1.22;
     const blockHeight = size * (1 + (lines.length - 1) * lineHeight);
     return {
       ...block,
@@ -965,26 +1039,33 @@ function renderStructuredLayoutToSvg(layout: StructuredTextLayout, width: number
       fontWeight: block.emphasis === "light" ? 300 : block.emphasis === "strong" || role === "title" ? 700 : 400,
       fontStyle: "normal",
       letterSpacing: role === "title" || block.transform === "uppercase"
-        ? (style === DesignStyle.Monumental ? (longForm ? "0.10em" : "0.16em") : (longForm ? "0.04em" : "0.08em"))
+        ? benchCompact
+          ? "0.03em"
+          : (style === DesignStyle.Monumental ? (longForm ? "0.10em" : "0.16em") : (longForm ? "0.04em" : "0.08em"))
         : role === "subtitle" || role === "date"
-          ? (longForm ? "0.06em" : "0.12em")
+          ? benchCompact ? "0.04em" : (longForm ? "0.06em" : "0.12em")
           : longForm ? "0" : "0.02em",
     };
   });
 
-  const gapBase = clamp(safeH * (longForm ? 0.020 : 0.065), longForm ? 1.5 : 5, longForm ? 5 : 16);
+  const gapBase = benchCompact
+    ? clamp(safeH * 0.025, 1.1, 2.4)
+    : clamp(safeH * (longForm ? 0.020 : 0.065), longForm ? 1.5 : 5, longForm ? 5 : 16);
   const naturalHeight = prepared.reduce((sum, block) => sum + block.blockHeight, 0)
     + Math.max(0, prepared.length - 1) * gapBase;
   const estimatedMaxWidth = prepared.reduce((widest, block) => {
     const lineWidth = block.lines.reduce((lineWidest, line) => {
       const spacing = Number.parseFloat(block.letterSpacing) || 0;
-      return Math.max(lineWidest, estimateTextWidth(line, block.size, spacing));
+      const measurementGuard = benchCompact ? 1.05 : 1.18;
+      return Math.max(lineWidest, estimateTextWidth(line, block.size, spacing) * measurementGuard);
     }, 0);
     return Math.max(widest, lineWidth);
   }, 0);
   const verticalScale = naturalHeight > safeH ? safeH / naturalHeight : 1;
-  const horizontalScale = estimatedMaxWidth > safeW ? safeW / estimatedMaxWidth : 1;
-  const fitScale = Math.min(verticalScale, horizontalScale);
+  const widthGuard = benchCompact ? safeW : safeW * 0.94;
+  const horizontalScale = estimatedMaxWidth > widthGuard ? widthGuard / estimatedMaxWidth : 1;
+  const finalSafetyScale = benchCompact ? 1 : 0.86;
+  const fitScale = Math.min(verticalScale, horizontalScale, finalSafetyScale);
   let cursor = -(naturalHeight * fitScale) / 2;
 
   return prepared.map((block) => {
@@ -1474,6 +1555,54 @@ export const generatePlaqueDesign = async (
     height: Math.max(10, height - (shape === Shape.Rect ? 44 : shape === Shape.Heart ? Math.max(56, Math.min(width, height) * 0.30) : 80)),
   };
 
+  // ── EXPERIMENT: Gemini plans the hierarchy; local code owns production geometry. ──
+  if (semanticLayoutExperimentEnabled()) {
+    try {
+      onPhaseChange?.('transcribe');
+      console.log("Generating semantic inscription plan with gemini-3.5-flash...");
+      const semanticPlan = preserveExactStructuredWording(
+        await generateStructuredTextLayout(
+          promptText,
+          width,
+          height,
+          shape,
+          resolvedStyle,
+          inscriptionContext
+        ),
+        promptText
+      );
+      const svgContent = splitShortLeadInNameLines(renderStructuredLayoutToSvg(
+        semanticPlan,
+        textBox.width,
+        textBox.height,
+        shape,
+        resolvedStyle
+      ));
+      onPhaseChange?.(null);
+      return {
+        svgContent,
+        reasoning: `Semantic layout plan rendered locally: ${semanticPlan.reasoning}`,
+        conceptImageUrl: null,
+      };
+    } catch (error) {
+      console.warn("Semantic layout plan failed; using local structured fallback.", error);
+      const fallbackPlan = inferLocalStructuredLayout(promptText);
+      const svgContent = splitShortLeadInNameLines(renderStructuredLayoutToSvg(
+        fallbackPlan,
+        textBox.width,
+        textBox.height,
+        shape,
+        resolvedStyle
+      ));
+      onPhaseChange?.(null);
+      return {
+        svgContent,
+        reasoning: `Semantic layout plan fallback rendered locally: ${fallbackPlan.reasoning}`,
+        conceptImageUrl: null,
+      };
+    }
+  }
+
   if (typographyEngine === TypographyEngine.ComposerLab && !inscriptionContext?.layoutGuidance) {
     try {
       onPhaseChange?.('transcribe');
@@ -1489,7 +1618,7 @@ export const generatePlaqueDesign = async (
     }
   }
 
-  // ── NEW DESIGN MODE: Gemini owns the composition; local code only proves it is safe and exact. ──
+  // ── CURRENT FALLBACK: Gemini owns the composition; local code only proves it is safe and exact. ──
   try {
     onPhaseChange?.('transcribe');
     console.log("Generating model-authored inscription SVG with gemini-3.5-flash...");
