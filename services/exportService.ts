@@ -690,6 +690,18 @@ const addWrappedText = (doc: any, text: string, x: number, y: number, maxWidth: 
   return y + Math.max(lines.length, 1) * lineHeight;
 };
 
+const formatSavedUntil = () => {
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 30);
+  return expiresAt.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, options: PdfExportOptions = {}) => {
   try {
     await ensurePdfLibraries();
@@ -708,61 +720,60 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
 
     const pageW = 297;
     const pageH = 210;
-    const margin = 12;
-    const contentW = pageW - margin * 2;
+    const savedUntil = formatSavedUntil();
     const proofImageBase64 = options.proofImageBase64 || await svgToProofPngBase64(sourceSvg);
     const proofImageData = proofImageBase64.startsWith("data:")
       ? proofImageBase64
       : `data:image/png;base64,${proofImageBase64}`;
     const imageProps = doc.getImageProperties(proofImageData);
-    const imageBoxW = 196;
-    const imageBoxH = 128;
+    const imageBoxW = 197;
+    const imageBoxH = 132;
     const imageScale = Math.min(imageBoxW / imageProps.width, imageBoxH / imageProps.height);
     const imageW = imageProps.width * imageScale;
     const imageH = imageProps.height * imageScale;
     const proofX = 14;
-    const proofY = 40;
+    const proofY = 43;
     const imageX = proofX + (imageBoxW - imageW) / 2;
     const imageY = proofY + (imageBoxH - imageH) / 2;
 
     doc.setFillColor(243, 239, 229);
     doc.rect(0, 0, pageW, pageH, "F");
     doc.setFillColor(8, 31, 26);
-    doc.rect(0, 0, pageW, 13, "F");
-    doc.setDrawColor(193, 150, 64);
-    doc.setLineWidth(0.45);
-    doc.line(14, 29, pageW - 14, 29);
+    doc.rect(0, 0, pageW, 30, "F");
 
-    doc.setTextColor(19, 38, 33);
+    doc.setTextColor(246, 240, 222);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("InstaPlaque", 14, 24);
-    doc.setTextColor(96, 88, 76);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.text("Private customer proof", pageW - 14, 20, { align: "right" });
-    doc.setFontSize(7);
-    doc.text(new Date().toLocaleDateString("en-GB"), pageW - 14, 25, { align: "right" });
+    doc.setFontSize(15);
+    doc.text("Insta", 14, 19);
+    doc.setTextColor(244, 202, 103);
+    doc.text("Plaque", 26.5, 19);
 
-    doc.setFillColor(220, 213, 198);
-    doc.roundedRect(proofX + 3, proofY + 4, imageBoxW, imageBoxH, 3, 3, "F");
-    doc.setFillColor(250, 247, 240);
-    doc.roundedRect(proofX, proofY, imageBoxW, imageBoxH, 3, 3, "F");
-    doc.setDrawColor(193, 150, 64);
-    doc.setLineWidth(0.5);
-    doc.roundedRect(proofX, proofY, imageBoxW, imageBoxH, 3, 3, "S");
+    doc.setFillColor(237, 190, 82);
+    doc.roundedRect(pageW - 82, 8, 68, 14, 7, 7, "F");
+    doc.setTextColor(23, 32, 29);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.8);
+    doc.text(`Design saved until ${savedUntil}`, pageW - 48, 17, { align: "center", maxWidth: 58 });
+
+    doc.setTextColor(118, 107, 90);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.6);
+    doc.text("Private customer proof", 14, 37);
+
+    doc.setFillColor(224, 217, 201);
+    doc.roundedRect(proofX + 2, proofY + 3, imageBoxW, imageBoxH, 2, 2, "F");
     doc.addImage(proofImageData, "PNG", imageX, imageY, imageW, imageH);
 
     const panelX = 222;
-    const panelY = 40;
+    const panelY = 43;
     const panelW = pageW - panelX - 14;
-    const panelH = 128;
+    const panelH = 151;
     doc.setFillColor(8, 31, 26);
-    doc.roundedRect(panelX, panelY, panelW, panelH, 3, 3, "F");
+    doc.roundedRect(panelX, panelY, panelW, panelH, 4, 4, "F");
     doc.setDrawColor(193, 150, 64);
-    doc.roundedRect(panelX, panelY, panelW, panelH, 3, 3, "S");
+    doc.roundedRect(panelX, panelY, panelW, panelH, 4, 4, "S");
 
-    const specY = 54;
+    const specY = 56;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(245, 230, 186);
@@ -779,65 +790,61 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       ["Estimate", `${formatPrice(options.price)} inc. UK mainland delivery`],
     ];
     specs.forEach(([label, value], index) => {
-      const y = specY + 15 + index * 10;
+      const y = specY + 14 + index * 9;
       doc.setFont("helvetica", "bold");
       doc.setFontSize(6.6);
       doc.setTextColor(177, 161, 128);
       doc.text(String(label).toUpperCase(), panelX + 7, y);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(index === specs.length - 1 ? 8.7 : 8);
+      doc.setFontSize(index === specs.length - 1 ? 8.2 : 7.6);
       doc.setTextColor(index === specs.length - 1 ? 245 : 237, index === specs.length - 1 ? 218 : 238, index === specs.length - 1 ? 151 : 232);
       doc.text(value, panelX + 7, y + 4.2, { maxWidth: panelW - 14 });
     });
 
-    doc.setTextColor(19, 38, 33);
+    doc.setDrawColor(193, 150, 64);
+    doc.line(panelX + 7, 133, panelX + panelW - 7, 133);
+
+    doc.setTextColor(245, 230, 186);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("Please check before production", 14, 180);
+    doc.setFontSize(8.6);
+    doc.text("Before production", panelX + 7, 144);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.8);
-    doc.setTextColor(76, 70, 60);
+    doc.setFontSize(6.8);
+    doc.setTextColor(237, 238, 232);
     addWrappedText(
       doc,
-      "Check names, dates, material, size, fixings and layout. The finished plaque will be made from the approved proof.",
-      14,
-      186,
-      156,
-      4
+      "Check names, dates, material, size, fixings and layout. The plaque will be made from the approved proof.",
+      panelX + 7,
+      151,
+      panelW - 14,
+      3.5
     );
 
-    const footerX = 184;
-    const footerY = 176;
-    const footerW = pageW - footerX - 14;
-    doc.setFillColor(255, 253, 247);
-    doc.roundedRect(footerX, footerY, footerW, 18, 3, 3, "F");
-    doc.setDrawColor(193, 150, 64);
-    doc.roundedRect(footerX, footerY, footerW, 18, 3, 3, "S");
-    doc.setTextColor(19, 38, 33);
+    doc.setTextColor(245, 230, 186);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9.5);
-    doc.text("Continue online", footerX + 7, footerY + 7);
+    doc.setFontSize(8.6);
+    doc.text("Continue online", panelX + 7, 172);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.2);
-    doc.setTextColor(76, 70, 60);
+    doc.setFontSize(6.7);
+    doc.setTextColor(237, 238, 232);
     addWrappedText(
       doc,
       "Reopen this proof to edit or checkout.",
-      footerX + 7,
-      footerY + 12.5,
-      38,
-      3.6
+      panelX + 7,
+      178,
+      26,
+      3.4
     );
 
     if (options.continueUrl) {
       const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 220, errorCorrectionLevel: "M" });
-      doc.addImage(qrDataUrl, "PNG", pageW - 33, footerY + 3, 12, 12);
-      doc.setFillColor(8, 31, 26);
-      doc.roundedRect(pageW - 70, footerY + 5, 32, 8, 2, 2, "F");
-      doc.setTextColor(242, 214, 136);
+      doc.addImage(qrDataUrl, "PNG", pageW - 32, 171, 14, 14);
+      doc.setFillColor(237, 190, 82);
+      doc.roundedRect(panelX + 7, 184, 30, 7, 3.5, 3.5, "F");
+      doc.setTextColor(23, 32, 29);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(7);
-      doc.textWithLink("Open proof", pageW - 62, footerY + 10.5, { url: options.continueUrl });
+      doc.setFontSize(6.6);
+      doc.textWithLink("Open proof", panelX + 22, 188.8, { url: options.continueUrl, align: "center" });
     }
 
     doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);
