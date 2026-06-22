@@ -14,6 +14,7 @@ import {
   MemorialImageShape,
   PlaqueState,
   Shape,
+  STYLE_FONT_PALETTES,
   TextColor,
   AVAILABLE_FONTS,
   BorderStyle,
@@ -25,6 +26,8 @@ import { estimatePlaqueBasePrice, estimateWoodAddOn } from '../services/pricing'
 
 const MEMORIAL_PROMPT =
   "In loving memory of Bertie. Loyal companion, garden explorer, and forever in our hearts. 2014-2026.";
+
+const BENCH_SAFE_MARGIN_PERCENT = 7;
 
 const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
@@ -195,6 +198,22 @@ const REALISTIC_ASPECT_RATIOS = [
   ['3:4', 'Portrait'],
   ['9:16', 'Story'],
 ];
+
+const INSTANT_STYLE_OPTIONS = [
+  DesignStyle.ClassicalFormal,
+  DesignStyle.ModernMinimal,
+  DesignStyle.MemorialSolemn,
+  DesignStyle.ContemporaryBold,
+  DesignStyle.HeritagePlaque,
+];
+
+const instantStyleLetterSpacing: Partial<Record<DesignStyle, { title: string; body: string; date: string }>> = {
+  [DesignStyle.ClassicalFormal]: { title: "0.04em", body: "0", date: "0.06em" },
+  [DesignStyle.ModernMinimal]: { title: "0.08em", body: "0", date: "0.08em" },
+  [DesignStyle.MemorialSolemn]: { title: "0.03em", body: "0", date: "0.05em" },
+  [DesignStyle.ContemporaryBold]: { title: "0.06em", body: "0", date: "0.06em" },
+  [DesignStyle.HeritagePlaque]: { title: "0.05em", body: "0", date: "0.08em" },
+};
 
 interface GeneratedTextControl {
   index: number;
@@ -565,7 +584,7 @@ export const Controls: React.FC<Props> = ({
       height: preset.height,
       cornerRadius: 0,
       ...(state.fixing === Fixing.Caps ? { capSize: getDefaultCapSize(preset.width, preset.height, preset.shape) } : {}),
-      ...(presetIsBenchPlaque ? { border: false, wood: false, ...(state.fixing === Fixing.Caps ? { fixingHoleCount: 2 } : {}) } : {}),
+      ...(presetIsBenchPlaque ? { border: false, wood: false, safeMargin: BENCH_SAFE_MARGIN_PERCENT, ...(state.fixing === Fixing.Caps ? { fixingHoleCount: 2 } : {}) } : {}),
       ...(preset.shape === Shape.Heart
         ? {
             wood: false,
@@ -574,6 +593,57 @@ export const Controls: React.FC<Props> = ({
           }
         : {}),
     });
+  };
+
+  const applyGeneratedTextStyle = (style: Exclude<DesignStyle, DesignStyle.Auto>) => {
+    if (!state.generatedSvgContent || typeof DOMParser === 'undefined') {
+      onChange({ designStyle: style });
+      return;
+    }
+
+    try {
+      const doc = new DOMParser().parseFromString(
+        `<svg xmlns="http://www.w3.org/2000/svg">${state.generatedSvgContent}</svg>`,
+        'image/svg+xml'
+      );
+      if (doc.querySelector('parsererror')) return;
+      const texts = Array.from(doc.querySelectorAll('text'));
+      if (!texts.length) return;
+
+      const palette = STYLE_FONT_PALETTES[style]?.[0] || STYLE_FONT_PALETTES[DesignStyle.ClassicalFormal][0];
+      const spacing = instantStyleLetterSpacing[style] || instantStyleLetterSpacing[DesignStyle.ClassicalFormal]!;
+      const sizes = texts.map((text) => Number(text.getAttribute('font-size') || text.querySelector('tspan')?.getAttribute('font-size') || 0));
+      const maxSize = Math.max(...sizes.filter(Number.isFinite), 0);
+
+      texts.forEach((text, index) => {
+        const content = (text.textContent || '').trim();
+        const size = Number(text.getAttribute('font-size') || text.querySelector('tspan')?.getAttribute('font-size') || 0);
+        const isDate = /\b\d{3,4}\b/.test(content);
+        const isTitle = size >= maxSize * 0.92 || (!index && !isDate);
+        const fontFamily = isTitle ? palette.title : palette.body;
+        const weight = isTitle
+          ? style === DesignStyle.ModernMinimal ? "600" : "700"
+          : isDate ? "500" : "400";
+        const letterSpacing = isTitle ? spacing.title : isDate ? spacing.date : spacing.body;
+
+        text.setAttribute('font-family', fontFamily);
+        text.setAttribute('font-weight', weight);
+        text.setAttribute('letter-spacing', letterSpacing);
+        text.querySelectorAll('tspan').forEach((tspan) => {
+          tspan.setAttribute('font-family', fontFamily);
+          tspan.setAttribute('font-weight', weight);
+          tspan.setAttribute('letter-spacing', letterSpacing);
+        });
+      });
+
+      const nextSvg = Array.from(doc.documentElement.children)
+        .map(node => new XMLSerializer().serializeToString(node).replace(/\sxmlns="http:\/\/www\.w3\.org\/2000\/svg"/g, ''))
+        .join('\n');
+      onGeneratedSvgContentChange(nextSvg);
+      onChange({ designStyle: style });
+    } catch (error) {
+      console.warn('Instant style change failed.', error);
+    }
   };
 
   const formatPrice = (value: number) => {
@@ -1561,17 +1631,6 @@ export const Controls: React.FC<Props> = ({
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-2" aria-label="Choose a typography style">
-            {Object.values(DesignStyle).map((style) => {
-              const meta = DESIGN_STYLE_META[style];
-              return (
-                <button key={style} onClick={() => onChange({ designStyle: style })} className={pillClass(state.designStyle === style)} title={meta.desc}>
-                  {meta.label}
-                </button>
-              );
-            })}
-          </div>
-
           <div className="grid gap-3">
             <div>
               <label htmlFor="inscription-wording-input" className="block text-xs font-black uppercase tracking-wide text-[#6a746d]">
@@ -1586,6 +1645,22 @@ export const Controls: React.FC<Props> = ({
               />
             </div>
           </div>
+
+          {!isIterating && (
+            <details className="rounded-lg border border-[#edf3ef]/14 bg-[#edf3ef]/6 p-3">
+              <summary className="cursor-pointer text-sm font-black text-[#edf3ef]">Advanced style options</summary>
+              <div className="mt-3 grid grid-cols-3 gap-2" aria-label="Choose a typography style">
+                {Object.values(DesignStyle).map((style) => {
+                  const meta = DESIGN_STYLE_META[style];
+                  return (
+                    <button key={style} onClick={() => onChange({ designStyle: style })} className={pillClass(state.designStyle === style)} title={meta.desc}>
+                      {meta.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </details>
+          )}
 
           {!isIterating && (
           <div className="grid gap-2">
@@ -1617,6 +1692,29 @@ export const Controls: React.FC<Props> = ({
 
           {isIterating && (
             <div className="space-y-3">
+              <div className="rounded-lg border border-[#edf3ef]/14 bg-[#edf3ef]/6 p-3">
+                <div className="mb-2 text-xs font-black uppercase tracking-wide text-[#f2d688]">Change style instantly</div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5" aria-label="Restyle the current layout">
+                  {INSTANT_STYLE_OPTIONS.map((style) => {
+                    const meta = DESIGN_STYLE_META[style];
+                    return (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => applyGeneratedTextStyle(style)}
+                        className={`min-h-[42px] rounded-lg border px-3 text-sm font-black transition ${
+                          state.designStyle === style
+                            ? 'border-[#f2d688]/70 bg-[#f2d688] text-[#13201c]'
+                            : 'border-[#edf3ef]/18 bg-[#edf3ef]/8 text-[#edf3ef] hover:border-[#f2d688]/55'
+                        }`}
+                        title={`Keep the layout and try ${meta.label} styling`}
+                      >
+                        {meta.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
