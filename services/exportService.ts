@@ -727,53 +727,53 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       : `data:image/png;base64,${proofImageBase64}`;
     const imageProps = doc.getImageProperties(proofImageData);
     const imageBoxW = 197;
-    const imageBoxH = 132;
+    const imageBoxH = 136;
     const imageScale = Math.min(imageBoxW / imageProps.width, imageBoxH / imageProps.height);
     const imageW = imageProps.width * imageScale;
     const imageH = imageProps.height * imageScale;
     const proofX = 14;
-    const proofY = 43;
+    const proofY = 36;
     const imageX = proofX + (imageBoxW - imageW) / 2;
     const imageY = proofY + (imageBoxH - imageH) / 2;
 
     doc.setFillColor(243, 239, 229);
     doc.rect(0, 0, pageW, pageH, "F");
     doc.setFillColor(8, 31, 26);
-    doc.rect(0, 0, pageW, 30, "F");
+    doc.rect(0, 0, pageW, 24, "F");
 
     doc.setTextColor(246, 240, 222);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(15);
-    doc.text("Insta", 14, 19);
+    doc.setFontSize(13.5);
+    doc.text("Insta", 14, 16);
     doc.setTextColor(244, 202, 103);
-    doc.text("Plaque", 26.5, 19);
+    doc.text("Plaque", 25.4, 16);
 
     doc.setFillColor(237, 190, 82);
-    doc.roundedRect(pageW - 82, 8, 68, 14, 7, 7, "F");
+    doc.roundedRect(pageW - 78, 6, 64, 12, 6, 6, "F");
     doc.setTextColor(23, 32, 29);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.8);
-    doc.text(`Design saved until ${savedUntil}`, pageW - 48, 17, { align: "center", maxWidth: 58 });
+    doc.setFontSize(7.2);
+    doc.text(`Design saved until ${savedUntil}`, pageW - 46, 13.8, { align: "center", maxWidth: 55 });
 
     doc.setTextColor(118, 107, 90);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.6);
-    doc.text("Private customer proof", 14, 37);
+    doc.text("Private customer proof", 14, 31);
 
     doc.setFillColor(224, 217, 201);
     doc.roundedRect(proofX + 2, proofY + 3, imageBoxW, imageBoxH, 2, 2, "F");
     doc.addImage(proofImageData, "PNG", imageX, imageY, imageW, imageH);
 
     const panelX = 222;
-    const panelY = 43;
+    const panelY = 36;
     const panelW = pageW - panelX - 14;
-    const panelH = 151;
+    const panelH = 158;
     doc.setFillColor(8, 31, 26);
     doc.roundedRect(panelX, panelY, panelW, panelH, 4, 4, "F");
     doc.setDrawColor(193, 150, 64);
     doc.roundedRect(panelX, panelY, panelW, panelH, 4, 4, "S");
 
-    const specY = 56;
+    const specY = 49;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(245, 230, 186);
