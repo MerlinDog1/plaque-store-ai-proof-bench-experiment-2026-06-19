@@ -252,13 +252,23 @@ function wrapLine(line: string, maxChars: number) {
   });
 
   if (current) lines.push(current);
+  if (lines.length === 2 && normalizeSpace(line).length <= maxChars * 1.5) {
+    return [normalizeSpace(line)];
+  }
   if (lines.length > 1) {
     const lastWords = lines[lines.length - 1].split(" ");
     const previousWords = lines[lines.length - 2].split(" ");
-    if (lastWords.length === 1 && previousWords.length > 2) {
+    if (lastWords.length === 1 && lastWords[0].length <= 5 && previousWords.length > 1) {
       lastWords.unshift(previousWords.pop()!);
       lines[lines.length - 2] = previousWords.join(" ");
       lines[lines.length - 1] = lastWords.join(" ");
+    }
+    const firstWords = lines[0].split(" ");
+    const secondWords = lines[1]?.split(" ") || [];
+    if (firstWords.length === 1 && firstWords[0].length <= 4 && secondWords.length > 1) {
+      firstWords.push(secondWords.shift()!);
+      lines[0] = firstWords.join(" ");
+      lines[1] = secondWords.join(" ");
     }
   }
   return lines.length ? lines : [line.trim()];
@@ -856,13 +866,13 @@ function renderBenchStripLayoutToSvg(layout: StructuredTextLayout, width: number
   const naturalHeight = lines.reduce((sum, line) => sum + line.size, 0) + lineGap * Math.max(0, lines.length - 1);
   const naturalWidth = lines.reduce((widest, line) => {
     const spacing = Number.parseFloat(line.letterSpacing) || 0;
-    return Math.max(widest, estimateTextWidth(line.text, line.size, spacing));
+    return Math.max(widest, estimateTextWidth(line.text, line.size, spacing) * 1.14);
   }, 0);
-  const fitScale = Math.min(1, safeH / Math.max(1, naturalHeight), safeW / Math.max(1, naturalWidth));
+  const fitScale = Math.min(1, safeH / Math.max(1, naturalHeight), (safeW * 0.94) / Math.max(1, naturalWidth));
   let cursor = -(naturalHeight * fitScale) / 2;
 
   return lines.map((line) => {
-    const fontSize = line.size * fitScale;
+    const fontSize = Math.max(5.2, line.size * fitScale);
     const baseline = cursor + fontSize * 0.82;
     cursor += fontSize + lineGap * fitScale;
     return `<text y="${baseline.toFixed(2)}" text-anchor="middle" font-family="${escapeXml(line.family)}" font-weight="${line.weight}" font-size="${fontSize.toFixed(2)}" letter-spacing="${line.letterSpacing}" fill="currentColor"><tspan x="0">${escapeXml(line.text)}</tspan></text>`;
@@ -1062,14 +1072,14 @@ function renderStructuredLayoutToSvg(layout: StructuredTextLayout, width: number
     return Math.max(widest, lineWidth);
   }, 0);
   const verticalScale = naturalHeight > safeH ? safeH / naturalHeight : 1;
-  const widthGuard = benchCompact ? safeW : safeW * 0.94;
+  const widthGuard = benchCompact ? safeW * 0.92 : safeW * 0.94;
   const horizontalScale = estimatedMaxWidth > widthGuard ? widthGuard / estimatedMaxWidth : 1;
   const finalSafetyScale = benchCompact ? 1 : 0.86;
   const fitScale = Math.min(verticalScale, horizontalScale, finalSafetyScale);
   let cursor = -(naturalHeight * fitScale) / 2;
 
   return prepared.map((block) => {
-    const fontSize = block.size * fitScale;
+    const fontSize = Math.max(5.2, block.size * fitScale);
     const firstBaseline = cursor + fontSize * 0.82;
     cursor += block.blockHeight * fitScale + gapBase * fitScale;
     const tspans = block.lines.map((line, lineIndex) =>
