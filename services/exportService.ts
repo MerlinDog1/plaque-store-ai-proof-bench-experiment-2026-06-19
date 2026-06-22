@@ -296,7 +296,7 @@ const translatePathToSourceBBox = (pathEl: SVGPathElement, sourceRun: SVGTextCon
 const outlineTextLayer = async (
   cloneSvg: SVGSVGElement,
   sourceSvg: SVGSVGElement,
-  options: { pathFill?: string } = {},
+  options: { pathFill?: string; preserveSourceFill?: boolean } = {},
 ) => {
   await ensureOpenType();
   const cloneTextGroup = cloneSvg.querySelector("#ai-text-layer");
@@ -437,7 +437,8 @@ const outlineTextLayer = async (
       try {
         const pathEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
         pathEl.setAttribute("d", pathData);
-        pathEl.setAttribute("fill", options.pathFill || "#000000");
+        const sourceFill = style.fill && style.fill !== "none" ? style.fill : "#000000";
+        pathEl.setAttribute("fill", options.pathFill || (options.preserveSourceFill ? sourceFill : "#000000"));
         pathEl.setAttribute("stroke", "none");
 
         // Preserve transform from the text element itself (e.g. if individual text was rotated)
@@ -472,7 +473,7 @@ const outlineTextLayer = async (
 export const outlinePreviewTextLayer = async (
   cloneSvg: SVGSVGElement,
   sourceSvg: SVGSVGElement,
-  options: { pathFill?: string } = {},
+  options: { pathFill?: string; preserveSourceFill?: boolean } = {},
 ) => {
   await outlineTextLayer(cloneSvg, sourceSvg, options);
 };
@@ -913,7 +914,7 @@ export const svgToProofPngBase64 = async (sourceSvg: SVGSVGElement): Promise<str
   document.body.appendChild(wrapper);
 
   try {
-    await outlineTextLayer(clone, sourceSvg);
+    await outlineTextLayer(clone, sourceSvg, { preserveSourceFill: true });
     await inlineSvgImageHrefs(clone);
     const xml = new XMLSerializer().serializeToString(clone);
     const svg64 = btoa(unescape(encodeURIComponent(xml)));
