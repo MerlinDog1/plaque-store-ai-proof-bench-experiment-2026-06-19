@@ -708,53 +708,55 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
 
     const pageW = 297;
     const pageH = 210;
-    const margin = 14;
+    const margin = 12;
     const contentW = pageW - margin * 2;
-    const proofImageBase64 = options.proofImageBase64 || await svgToPngBase64(sourceSvg, state);
+    const proofImageBase64 = options.proofImageBase64 || await svgToProofPngBase64(sourceSvg);
     const proofImageData = proofImageBase64.startsWith("data:")
       ? proofImageBase64
       : `data:image/png;base64,${proofImageBase64}`;
     const imageProps = doc.getImageProperties(proofImageData);
-    const imageBoxW = 178;
-    const imageBoxH = 112;
+    const imageBoxW = 188;
+    const imageBoxH = 124;
     const imageScale = Math.min(imageBoxW / imageProps.width, imageBoxH / imageProps.height);
     const imageW = imageProps.width * imageScale;
     const imageH = imageProps.height * imageScale;
     const imageX = margin + (imageBoxW - imageW) / 2;
-    const imageY = 43 + (imageBoxH - imageH) / 2;
+    const imageY = 42 + (imageBoxH - imageH) / 2;
 
-    doc.setFillColor(245, 239, 228);
+    doc.setFillColor(7, 26, 22);
     doc.rect(0, 0, pageW, pageH, "F");
-    doc.setFillColor(8, 28, 24);
-    doc.rect(0, 0, pageW, 30, "F");
-    doc.setFillColor(15, 47, 40);
-    doc.rect(0, 30, pageW, 4, "F");
+    doc.setDrawColor(174, 129, 52);
+    doc.setLineWidth(0.35);
+    doc.rect(7, 7, pageW - 14, pageH - 14, "S");
+    doc.setFillColor(12, 38, 33);
+    doc.roundedRect(margin, 12, contentW, 22, 3, 3, "F");
     doc.setTextColor(242, 214, 136);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("InstaPlaque", margin, 18);
+    doc.setFontSize(18);
+    doc.text("InstaPlaque", margin + 8, 26);
     doc.setTextColor(237, 243, 239);
     doc.setFontSize(8);
-    doc.text("CUSTOM PLAQUE PROOF", pageW - margin, 13, { align: "right" });
-    doc.text(new Date().toLocaleDateString("en-GB"), pageW - margin, 19, { align: "right" });
+    doc.text("CUSTOM PLAQUE PROOF", pageW - margin - 8, 22, { align: "right" });
+    doc.text(new Date().toLocaleDateString("en-GB"), pageW - margin - 8, 28, { align: "right" });
 
-    doc.setTextColor(27, 35, 31);
-    doc.setFontSize(18);
-    doc.text("Your plaque proof", margin, 40);
+    doc.setTextColor(246, 241, 231);
+    doc.setFontSize(16);
+    doc.text("Your plaque proof", margin + 2, 39);
 
-    doc.setFillColor(255, 252, 245);
-    doc.roundedRect(margin, 43, imageBoxW, imageBoxH, 3, 3, "F");
-    doc.setDrawColor(214, 198, 166);
-    doc.roundedRect(margin, 43, imageBoxW, imageBoxH, 3, 3, "S");
+    doc.setFillColor(246, 241, 231);
+    doc.roundedRect(margin, 42, imageBoxW, imageBoxH, 3, 3, "F");
+    doc.setDrawColor(206, 164, 80);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(margin, 42, imageBoxW, imageBoxH, 3, 3, "S");
     doc.addImage(proofImageData, "PNG", imageX, imageY, imageW, imageH);
 
-    const panelX = 204;
-    const panelY = 43;
+    const panelX = 209;
+    const panelY = 42;
     const panelW = pageW - panelX - margin;
-    const panelH = 112;
-    doc.setFillColor(255, 250, 240);
+    const panelH = 124;
+    doc.setFillColor(250, 246, 236);
     doc.roundedRect(panelX, panelY, panelW, panelH, 3, 3, "F");
-    doc.setDrawColor(214, 198, 166);
+    doc.setDrawColor(206, 164, 80);
     doc.roundedRect(panelX, panelY, panelW, panelH, 3, 3, "S");
 
     const specY = 54;
@@ -772,7 +774,7 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       ["Fixing", state.fixing === Fixing.None ? "No fixings" : labelFromSlug(state.fixing)],
       ["Border", state.border ? labelFromSlug(state.borderStyle) : "No border"],
       ["Wood backing", state.wood ? `${labelFromSlug(state.woodTone)} wood, ${state.woodEdge} edge` : "No backing"],
-      ["Price", `${formatPrice(options.price)} inc. UK mainland delivery`],
+      ["Estimate", `${formatPrice(options.price)} inc. UK mainland delivery`],
     ];
     specs.forEach(([label, value], index) => {
       const y = specY + 8 + index * 6;
@@ -782,53 +784,57 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       doc.text(value, panelX + 35, y, { maxWidth: panelW - 43 });
     });
 
-    const wordingY = specY + 57;
+    doc.setDrawColor(218, 206, 183);
+    doc.line(panelX + 8, 107, panelX + panelW - 8, 107);
     doc.setTextColor(27, 35, 31);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.text("Wording", panelX + 8, wordingY);
+    doc.setFontSize(10);
+    doc.text("Before production", panelX + 8, 119);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(72, 76, 70);
-    addWrappedText(doc, options.wording || "Wording shown in proof image.", panelX + 8, wordingY + 8, panelW - 16, 4.5);
+    addWrappedText(
+      doc,
+      "Please check names, dates, material, size, fixings and layout. The plaque will be made from the approved proof.",
+      panelX + 8,
+      128,
+      panelW - 16,
+      4.2
+    );
 
-    const footerY = 166;
-    doc.setFillColor(255, 250, 240);
-    doc.roundedRect(margin, footerY, contentW, 30, 3, 3, "F");
-    doc.setDrawColor(214, 198, 166);
-    doc.roundedRect(margin, footerY, contentW, 30, 3, 3, "S");
+    const footerY = 174;
+    doc.setFillColor(250, 246, 236);
+    doc.roundedRect(margin, footerY, contentW, 22, 3, 3, "F");
+    doc.setDrawColor(206, 164, 80);
+    doc.roundedRect(margin, footerY, contentW, 22, 3, 3, "S");
 
     doc.setTextColor(27, 35, 31);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("Continue or approve this proof", margin + 8, footerY + 9);
+    doc.text("Continue or checkout", margin + 8, footerY + 9);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(72, 76, 70);
     addWrappedText(
       doc,
-      "Use the private link below to reopen this proof, make changes, or continue to checkout. Please check every name, date, word, material, size and fixing before approving production.",
+      "Use the button link or QR code to reopen this proof, make changes, or continue to checkout.",
       margin + 8,
       footerY + 17,
-      190,
+      168,
       4.5
     );
 
     if (options.continueUrl) {
       const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 220, errorCorrectionLevel: "M" });
-      doc.addImage(qrDataUrl, "PNG", pageW - margin - 31, footerY + 4, 24, 24);
-      doc.setTextColor(24, 83, 141);
+      doc.addImage(qrDataUrl, "PNG", pageW - margin - 27, footerY + 3, 17, 17);
+      doc.setFillColor(13, 45, 38);
+      doc.roundedRect(pageW - margin - 78, footerY + 6, 42, 10, 3, 3, "F");
+      doc.setTextColor(242, 214, 136);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      doc.textWithLink("Continue your proof online", margin + 8, footerY + 27, { url: options.continueUrl });
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(6.5);
-      doc.text(options.continueUrl, margin + 70, footerY + 27, { maxWidth: 150 });
+      doc.setFontSize(7.5);
+      doc.textWithLink("Open proof", pageW - margin - 68, footerY + 12.5, { url: options.continueUrl });
     }
 
-    doc.setTextColor(104, 98, 87);
-    doc.setFontSize(7.5);
-    doc.text("This customer PDF is for proof review. Production uses the separate vector artwork/export.", margin, pageH - 7);
     doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);
   } catch (e) {
     console.error("PDF Export failed", e);
@@ -847,6 +853,52 @@ const realisticReferenceMaterialFill: Record<Material, string> = {
 
 const realisticReferenceWoodFill = (state?: PlaqueState) =>
   state?.woodTone === "light" ? "#b99058" : "#5b3524";
+
+export const svgToProofPngBase64 = async (sourceSvg: SVGSVGElement): Promise<string> => {
+  const clone = sourceSvg.cloneNode(true) as SVGSVGElement;
+  const vb = sourceSvg.viewBox.baseVal;
+  const targetW = 1800;
+  const scale = targetW / Math.max(1, vb.width);
+  const w = Math.round(vb.width * scale);
+  const h = Math.round(vb.height * scale);
+  clone.setAttribute("width", `${w}px`);
+  clone.setAttribute("height", `${h}px`);
+
+  const wrapper = document.createElement("div");
+  wrapper.style.position = "absolute";
+  wrapper.style.top = "-9999px";
+  wrapper.style.left = "-9999px";
+  wrapper.style.opacity = "0";
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  try {
+    await outlineTextLayer(clone, sourceSvg);
+    const xml = new XMLSerializer().serializeToString(clone);
+    const svg64 = btoa(unescape(encodeURIComponent(xml)));
+    const image64 = `data:image/svg+xml;base64,${svg64}`;
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject("Canvas error");
+        ctx.fillStyle = "#f5f2ea";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png").split(",")[1]);
+      };
+      img.onerror = reject;
+      img.src = image64;
+    });
+  } finally {
+    document.body.removeChild(wrapper);
+  }
+};
 
 export const svgToPngBase64 = async (sourceSvg: SVGSVGElement, state?: PlaqueState): Promise<string> => {
   const clone = sourceSvg.cloneNode(true) as SVGSVGElement;

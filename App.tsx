@@ -6,7 +6,7 @@ import { RealisticPreviewModal } from './components/RealisticPreviewModal';
 import { SiteExperience } from './components/SiteExperience';
 import { BorderStyle, DesignStyle, EtchmasterImageMode, EtchmasterShapeMask, Fixing, INITIAL_STATE, Material, MemorialImageMethod, MemorialImagePlacement, MemorialImageShape, PlaqueState, Shape, TextColor, TypographyEngine } from './types';
 import { generatePlaqueDesign, generateRealisticView, GenerationPhase } from './services/geminiService';
-import { downloadCorelSvg, downloadPdf, svgToPngBase64 } from './services/exportService';
+import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
 import { MockOrder, ProductFamily, SiteView, getProductBySlug, makeMockOrder, productFamilies } from './services/commerce';
@@ -647,7 +647,7 @@ const App: React.FC = () => {
     } catch (error) {
       console.warn('PDF resume link was not added.', error);
     }
-    const proofImageBase64 = generatedImage || await svgToPngBase64(svgRef.current, state);
+    const proofImageBase64 = generatedImage || await svgToProofPngBase64(svgRef.current);
     await downloadPdf(svgRef.current, state, {
       continueUrl,
       proofImageBase64,
