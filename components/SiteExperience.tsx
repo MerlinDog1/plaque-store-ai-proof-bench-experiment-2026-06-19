@@ -210,6 +210,10 @@ function HomeMaterialPanels() {
       <div className="commerce-section__head">
         <p className="commerce-eyebrow">Materials</p>
         <h2>Tactile finishes, chosen for real engraved plaques.</h2>
+        <p>
+          Each plaque is engraved with care on quality metal or wood-backed finishes, then checked
+          before it is packed for delivery.
+        </p>
       </div>
       <div className="commerce-material-grid commerce-material-grid--home">
         {materialStories.map((material) => (
