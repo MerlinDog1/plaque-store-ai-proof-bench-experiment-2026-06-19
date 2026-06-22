@@ -23,7 +23,7 @@ Semantic mode:
 - Cases: 38
 - Average score: 99
 - Remaining issues:
-  - `bench-175-slim-long-risk`: 70, overflows by 6.2 units. This is a useful failure: the copy is too long for a 175 x 25 mm strip without going unreadably small.
+  - `bench-175-slim-long-risk`: 70, overflows by 6.2 units. This was a useful failure: the copy was too long for a 175 x 25 mm strip without going unreadably small. That 25 mm high preset was later removed; 50 mm is now the minimum plaque width and height.
   - `bench-200-strip-service`: 92, weak title dominance.
   - `a4-list-like-donors`: 92, weak title dominance.
   - `bench-150-too-much-copy`: 92, weak title dominance.

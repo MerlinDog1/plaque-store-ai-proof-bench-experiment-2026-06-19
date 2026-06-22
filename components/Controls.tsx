@@ -94,9 +94,9 @@ const BENCH_SIZE_PRESETS: SizePreset[] = [
   { label: '150 x 65 mm', note: 'Compact balanced bench plaque', shape: Shape.Rect, width: 150, height: 65 },
   { label: '200 x 50 mm', note: 'Long narrow bench strip', shape: Shape.Rect, width: 200, height: 50 },
   { label: '125 x 50 mm', note: 'Small bench or seat strip', shape: Shape.Rect, width: 125, height: 50 },
-  { label: '175 x 25 mm', note: 'Slim dedication strip', shape: Shape.Rect, width: 175, height: 25 },
 ];
 
+const MIN_CUSTOM_DIMENSION_MM = 50;
 const MAX_CUSTOM_DIMENSION_MM = 600;
 const CUSTOM_FAST_TURNAROUND_WIDTH_MM = 600;
 const CUSTOM_FAST_TURNAROUND_HEIGHT_MM = 400;
@@ -411,7 +411,7 @@ export const Controls: React.FC<Props> = ({
     }
   }, [state.generatedSvgContent]);
 
-  const clampDimension = (value: number) => Math.min(MAX_CUSTOM_DIMENSION_MM, Math.max(40, Number.isFinite(value) ? value : 40));
+  const clampDimension = (value: number) => Math.min(MAX_CUSTOM_DIMENSION_MM, Math.max(MIN_CUSTOM_DIMENSION_MM, Number.isFinite(value) ? value : MIN_CUSTOM_DIMENSION_MM));
   const isHeartPlaque = state.shape === Shape.Heart;
   const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
   const activeBenchSize = BENCH_SIZE_PRESETS.find((preset) => (
@@ -822,7 +822,7 @@ export const Controls: React.FC<Props> = ({
                     </div>
                     <input
                       type="range"
-                      min="40"
+                      min={MIN_CUSTOM_DIMENSION_MM}
                       max={MAX_CUSTOM_DIMENSION_MM}
                       step="1"
                       value={state.width}
@@ -834,7 +834,7 @@ export const Controls: React.FC<Props> = ({
                     />
                     <input
                       type="number"
-                      min="40"
+                      min={MIN_CUSTOM_DIMENSION_MM}
                       max={MAX_CUSTOM_DIMENSION_MM}
                       step="1"
                       value={customWidthInput}
@@ -854,7 +854,7 @@ export const Controls: React.FC<Props> = ({
                       </div>
                       <input
                         type="range"
-                        min="40"
+                        min={MIN_CUSTOM_DIMENSION_MM}
                         max={MAX_CUSTOM_DIMENSION_MM}
                         step="1"
                         value={state.height}
@@ -866,7 +866,7 @@ export const Controls: React.FC<Props> = ({
                       />
                       <input
                         type="number"
-                        min="40"
+                        min={MIN_CUSTOM_DIMENSION_MM}
                         max={MAX_CUSTOM_DIMENSION_MM}
                         step="1"
                         value={customHeightInput}
