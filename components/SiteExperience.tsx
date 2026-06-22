@@ -224,38 +224,6 @@ function HomeMaterialPanels() {
   );
 }
 
-function HomeQualityBand({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
-  return (
-    <section className="commerce-section commerce-process-band">
-      <div className="commerce-process-copy">
-        <p className="commerce-eyebrow">How they are made</p>
-        <h2>Proofed online, then checked before engraving.</h2>
-        <p>
-          The proof gives customers speed, but production still needs care. Each order is checked
-          against the chosen size, material and fixing before it is engraved, packed and dispatched.
-        </p>
-        <button type="button" className="commerce-primary" onClick={onStartDesign}>
-          Start a free proof
-        </button>
-      </div>
-      <div className="commerce-process-grid">
-        {[
-          ['Proof created', 'The layout is generated around the selected plaque size and wording.'],
-          ['Order checked', 'A human check catches obvious sizing, spelling or production issues.'],
-          ['Engraved finish', 'The approved artwork is prepared for the chosen material and fixing.'],
-          ['Packed with care', 'The finished plaque is protected for delivery after production.'],
-        ].map(([step, detail], index) => (
-          <div className="commerce-process-step" key={step}>
-            <span>{index + 1}</span>
-            <strong>{step}</strong>
-            <p>{detail}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function HomeFaq() {
   const faqs = [
     ['Is the proof really free?', 'Yes. Customers can create and review the proof before placing an order.'],
@@ -363,7 +331,6 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
       </section>
       <ProductGrid onLaunchProduct={props.onLaunchProduct} />
       <HomeMaterialPanels />
-      <HomeQualityBand onStartDesign={props.onStartDesign} />
       <HomeFaq />
     </div>
   );
