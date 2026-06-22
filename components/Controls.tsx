@@ -1647,22 +1647,6 @@ export const Controls: React.FC<Props> = ({
           </div>
 
           {!isIterating && (
-            <details className="rounded-lg border border-[#edf3ef]/14 bg-[#edf3ef]/6 p-3">
-              <summary className="cursor-pointer text-sm font-black text-[#edf3ef]">Advanced style options</summary>
-              <div className="mt-3 grid grid-cols-3 gap-2" aria-label="Choose a typography style">
-                {Object.values(DesignStyle).map((style) => {
-                  const meta = DESIGN_STYLE_META[style];
-                  return (
-                    <button key={style} onClick={() => onChange({ designStyle: style })} className={pillClass(state.designStyle === style)} title={meta.desc}>
-                      {meta.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </details>
-          )}
-
-          {!isIterating && (
           <div className="grid gap-2">
             <button
               onClick={() => {
