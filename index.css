@@ -281,7 +281,7 @@
   display: flex;
 }
 
-.proofbench-titlebar.is-home .proofbench-titlebar__inner {
+.proofbench-titlebar .proofbench-titlebar__inner {
   width: 100%;
   max-width: none;
   padding-left: clamp(16px, 2.8vw, 34px);
