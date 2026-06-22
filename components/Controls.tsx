@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  DESIGN_STYLE_META,
   DesignStyle,
   EtchmasterImageMode,
   EtchmasterImageModel,
@@ -199,12 +198,12 @@ const REALISTIC_ASPECT_RATIOS = [
   ['9:16', 'Story'],
 ];
 
-const INSTANT_STYLE_OPTIONS = [
-  DesignStyle.ClassicalFormal,
-  DesignStyle.ModernMinimal,
-  DesignStyle.MemorialSolemn,
-  DesignStyle.ContemporaryBold,
-  DesignStyle.HeritagePlaque,
+const INSTANT_STYLE_OPTIONS: { variant: number; label: string; style: Exclude<DesignStyle, DesignStyle.Auto> | null; title: string }[] = [
+  { variant: 1, label: '1', style: null, title: 'Original generated style' },
+  { variant: 2, label: '2', style: DesignStyle.ClassicalFormal, title: 'Try a classical style' },
+  { variant: 3, label: '3', style: DesignStyle.ModernMinimal, title: 'Try a modern style' },
+  { variant: 4, label: '4', style: DesignStyle.MemorialSolemn, title: 'Try a softer memorial style' },
+  { variant: 5, label: '5', style: DesignStyle.ContemporaryBold, title: 'Try a bolder style' },
 ];
 
 const instantStyleLetterSpacing: Partial<Record<DesignStyle, { title: string; body: string; date: string }>> = {
@@ -378,6 +377,7 @@ export const Controls: React.FC<Props> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const styleInputRef = useRef<HTMLInputElement>(null);
   const sizePresetStackRef = useRef<HTMLDivElement>(null);
+  const instantStyleApplyingRef = useRef(false);
   const [fineTuneUnlocked, setFineTuneUnlocked] = useState(false);
   const [sizeMode, setSizeMode] = useState<'standard' | 'custom'>('standard');
   const [benchSizesExpanded, setBenchSizesExpanded] = useState(true);
@@ -386,6 +386,8 @@ export const Controls: React.FC<Props> = ({
   const [fixingsBorderMode, setFixingsBorderMode] = useState<'fixings' | 'border'>('fixings');
   const [manualTextOpen, setManualTextOpen] = useState(false);
   const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
+  const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
+  const [instantStyleVariant, setInstantStyleVariant] = useState(1);
   const isIterating = !!state.generatedSvgContent;
   const portraitPreviewUrl = state.memorialImageMethod === MemorialImageMethod.UvPrinted
     ? state.memorialImageSourceUrl || state.memorialImagePreviewUrl
@@ -428,6 +430,21 @@ export const Controls: React.FC<Props> = ({
     } catch {
       return [];
     }
+  }, [state.generatedSvgContent]);
+
+  useEffect(() => {
+    if (!state.generatedSvgContent) {
+      setBaseGeneratedSvgContent(null);
+      setInstantStyleVariant(1);
+      instantStyleApplyingRef.current = false;
+      return;
+    }
+    if (instantStyleApplyingRef.current) {
+      instantStyleApplyingRef.current = false;
+      return;
+    }
+    setBaseGeneratedSvgContent(state.generatedSvgContent);
+    setInstantStyleVariant(1);
   }, [state.generatedSvgContent]);
 
   const clampDimension = (value: number) => Math.min(MAX_CUSTOM_DIMENSION_MM, Math.max(MIN_CUSTOM_DIMENSION_MM, Number.isFinite(value) ? value : MIN_CUSTOM_DIMENSION_MM));
@@ -595,7 +612,17 @@ export const Controls: React.FC<Props> = ({
     });
   };
 
-  const applyGeneratedTextStyle = (style: Exclude<DesignStyle, DesignStyle.Auto>) => {
+  const applyGeneratedTextStyle = (style: Exclude<DesignStyle, DesignStyle.Auto> | null, variant: number) => {
+    if (style === null) {
+      if (baseGeneratedSvgContent) {
+        instantStyleApplyingRef.current = true;
+        onGeneratedSvgContentChange(baseGeneratedSvgContent);
+      }
+      setInstantStyleVariant(1);
+      onChange({ designStyle: DesignStyle.Auto });
+      return;
+    }
+
     if (!state.generatedSvgContent || typeof DOMParser === 'undefined') {
       onChange({ designStyle: style });
       return;
@@ -639,7 +666,9 @@ export const Controls: React.FC<Props> = ({
       const nextSvg = Array.from(doc.documentElement.children)
         .map(node => new XMLSerializer().serializeToString(node).replace(/\sxmlns="http:\/\/www\.w3\.org\/2000\/svg"/g, ''))
         .join('\n');
+      instantStyleApplyingRef.current = true;
       onGeneratedSvgContentChange(nextSvg);
+      setInstantStyleVariant(variant);
       onChange({ designStyle: style });
     } catch (error) {
       console.warn('Instant style change failed.', error);
@@ -1677,23 +1706,26 @@ export const Controls: React.FC<Props> = ({
           {isIterating && (
             <div className="space-y-3">
               <div className="rounded-lg border border-[#edf3ef]/14 bg-[#edf3ef]/6 p-3">
-                <div className="mb-2 text-xs font-black uppercase tracking-wide text-[#f2d688]">Change style instantly</div>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5" aria-label="Restyle the current layout">
-                  {INSTANT_STYLE_OPTIONS.map((style) => {
-                    const meta = DESIGN_STYLE_META[style];
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <div className="text-xs font-black uppercase tracking-wide text-[#f2d688]">Instant style</div>
+                  <div className="text-[11px] font-bold text-[#edf3ef]/60">1 is generated</div>
+                </div>
+                <div className="grid grid-cols-5 gap-2" aria-label="Restyle the current layout">
+                  {INSTANT_STYLE_OPTIONS.map((option) => {
+                    const active = instantStyleVariant === option.variant;
                     return (
                       <button
-                        key={style}
+                        key={option.variant}
                         type="button"
-                        onClick={() => applyGeneratedTextStyle(style)}
-                        className={`min-h-[42px] rounded-lg border px-3 text-sm font-black transition ${
-                          state.designStyle === style
+                        onClick={() => applyGeneratedTextStyle(option.style, option.variant)}
+                        className={`aspect-square min-h-[40px] rounded-lg border text-base font-black transition ${
+                          active
                             ? 'border-[#f2d688]/70 bg-[#f2d688] text-[#13201c]'
                             : 'border-[#edf3ef]/18 bg-[#edf3ef]/8 text-[#edf3ef] hover:border-[#f2d688]/55'
                         }`}
-                        title={`Keep the layout and try ${meta.label} styling`}
+                        title={option.title}
                       >
-                        {meta.label}
+                        {option.label}
                       </button>
                     );
                   })}
