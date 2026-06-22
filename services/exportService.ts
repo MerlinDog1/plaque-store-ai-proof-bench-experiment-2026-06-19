@@ -732,48 +732,43 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
     const imageW = imageProps.width * imageScale;
     const imageH = imageProps.height * imageScale;
     const proofX = 14;
-    const proofY = 36;
+    const proofY = 30;
     const imageX = proofX + (imageBoxW - imageW) / 2;
     const imageY = proofY + (imageBoxH - imageH) / 2;
 
     doc.setFillColor(243, 239, 229);
     doc.rect(0, 0, pageW, pageH, "F");
     doc.setFillColor(8, 31, 26);
-    doc.rect(0, 0, pageW, 24, "F");
+    doc.rect(0, 0, pageW, 20, "F");
 
     doc.setTextColor(246, 240, 222);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13.5);
-    doc.text("Insta", 14, 16);
+    doc.setFontSize(12.2);
+    doc.text("Insta", 14, 13.8);
     doc.setTextColor(244, 202, 103);
-    doc.text("Plaque", 25.4, 16);
+    doc.text("Plaque", 24.3, 13.8);
 
     doc.setFillColor(237, 190, 82);
-    doc.roundedRect(pageW - 78, 6, 64, 12, 6, 6, "F");
+    doc.roundedRect(pageW - 92, 5, 78, 10, 5, 5, "F");
     doc.setTextColor(23, 32, 29);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.2);
-    doc.text(`Design saved until ${savedUntil}`, pageW - 46, 13.8, { align: "center", maxWidth: 55 });
-
-    doc.setTextColor(118, 107, 90);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.6);
-    doc.text("Private customer proof", 14, 31);
+    doc.setFontSize(6.7);
+    doc.text(`Design saved until ${savedUntil}`, pageW - 53, 11.6, { align: "center", maxWidth: 70 });
 
     doc.setFillColor(224, 217, 201);
     doc.roundedRect(proofX + 2, proofY + 3, imageBoxW, imageBoxH, 2, 2, "F");
     doc.addImage(proofImageData, "PNG", imageX, imageY, imageW, imageH);
 
     const panelX = 222;
-    const panelY = 36;
+    const panelY = 30;
     const panelW = pageW - panelX - 14;
-    const panelH = 158;
+    const panelH = 164;
     doc.setFillColor(8, 31, 26);
     doc.roundedRect(panelX, panelY, panelW, panelH, 4, 4, "F");
     doc.setDrawColor(193, 150, 64);
     doc.roundedRect(panelX, panelY, panelW, panelH, 4, 4, "S");
 
-    const specY = 49;
+    const specY = 43;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(245, 230, 186);
@@ -829,10 +824,10 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
     doc.setTextColor(237, 238, 232);
     addWrappedText(
       doc,
-      "Reopen this proof to edit or checkout.",
+      "Scan the QR code or use the link below to continue editing or checkout.",
       panelX + 7,
       178,
-      26,
+      34,
       3.4
     );
 
