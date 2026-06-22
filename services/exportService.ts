@@ -1,5 +1,9 @@
 import { PlaqueState, Fixing, Material, MemorialImageMethod } from "../types";
 
+interface PdfExportOptions {
+  continueUrl?: string;
+}
+
 // Type definitions for external libraries loaded via CDN
 declare global {
   interface Window {
@@ -660,7 +664,7 @@ export const downloadCorelSvg = async (sourceSvg: SVGSVGElement, state: PlaqueSt
   }
 };
 
-export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState) => {
+export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, options: PdfExportOptions = {}) => {
   try {
     await ensurePdfLibraries();
     const jsPDFCtor = window.jsPDF || window.jspdf?.jsPDF;
@@ -688,6 +692,24 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState) 
 
     try {
       await doc.svg(clone, { x: 0, y: 0, width: widthMm, height: heightMm });
+      if (options.continueUrl) {
+        doc.addPage("a4", "p");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.text("Continue this InstaPlaque proof", 18, 24);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text("Use this private link to reopen the designer with the same wording, layout, material, size and proof state.", 18, 36, {
+          maxWidth: 174,
+        });
+        doc.setTextColor(24, 83, 141);
+        doc.textWithLink(options.continueUrl, 18, 50, { url: options.continueUrl });
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(9);
+        doc.text("Trial feature: keep this link private. It is intended for returning to checkout or making small proof changes later.", 18, 64, {
+          maxWidth: 174,
+        });
+      }
       doc.save(`plaque_${widthMm}x${heightMm}_${state.material}.pdf`);
     } finally {
       document.body.removeChild(wrapper);

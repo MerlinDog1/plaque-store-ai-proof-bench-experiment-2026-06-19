@@ -107,6 +107,29 @@ async function prepareMemorialImageUpload(file: File): Promise<string> {
   return file.type === 'image/avif' ? convertImageDataUrlToPng(dataUrl) : dataUrl;
 }
 
+const makeLayoutSignature = (prompt: string, proofState: PlaqueState, guidance = '') => JSON.stringify({
+  prompt: prompt.trim(),
+  guidance: guidance.trim(),
+  width: proofState.width,
+  height: proofState.height,
+  shape: proofState.shape,
+  designStyle: proofState.designStyle,
+  memorialImageEnabled: proofState.memorialImageEnabled,
+  memorialImageMethod: proofState.memorialImageMethod,
+  memorialImagePlacement: proofState.memorialImagePlacement,
+  memorialImageShape: proofState.memorialImageShape,
+  memorialImageScale: proofState.memorialImageScale,
+  safeMargin: proofState.safeMargin,
+});
+
+const sanitizeProofStateForRemoteSave = (proofState: PlaqueState): PlaqueState => ({
+  ...proofState,
+  conceptImageUrl: null,
+  memorialImageSourceUrl: null,
+  memorialImagePreviewUrl: null,
+  etchmasterStyleReferenceUrl: null,
+});
+
 const App: React.FC = () => {
   const [hasAccess, setHasAccess] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
@@ -207,20 +230,54 @@ const App: React.FC = () => {
     return estimatePlaquePrice(state);
   }, [state]);
 
-  const getLayoutSignature = (prompt: string) => JSON.stringify({
-    prompt: prompt.trim(),
-    guidance: inscriptionGuidance.trim(),
-    width: state.width,
-    height: state.height,
-    shape: state.shape,
-    designStyle: state.designStyle,
-    memorialImageEnabled: state.memorialImageEnabled,
-    memorialImageMethod: state.memorialImageMethod,
-    memorialImagePlacement: state.memorialImagePlacement,
-    memorialImageShape: state.memorialImageShape,
-    memorialImageScale: state.memorialImageScale,
-    safeMargin: state.safeMargin,
-  });
+  const getLayoutSignature = (prompt: string) => makeLayoutSignature(prompt, state, inscriptionGuidance);
+
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get('proof');
+    if (!token) return;
+
+    let cancelled = false;
+    const loadProofSession = async () => {
+      try {
+        const response = await fetch(`/api/proof-sessions/${encodeURIComponent(token)}`);
+        if (!response.ok) throw new Error(`Could not load proof session (${response.status})`);
+        const payload = await response.json();
+        const proofSession = payload.proofSession;
+        if (!proofSession || cancelled) return;
+
+        const restoredState: PlaqueState = {
+          ...PROOF_BENCH_INITIAL_STATE,
+          ...(proofSession.plaque_state || {}),
+          generatedSvgContent: proofSession.generated_svg || proofSession.plaque_state?.generatedSvgContent || null,
+          aiReasoning: proofSession.ai_reasoning || proofSession.plaque_state?.aiReasoning || null,
+        };
+        const restoredWording = proofSession.wording || '';
+        const restoredGuidance = proofSession.metadata?.inscriptionGuidance || '';
+
+        setState(restoredState);
+        setInscriptionPrompt(restoredWording);
+        setInscriptionGuidance(restoredGuidance);
+        setGeneratedLayoutSignature(
+          restoredState.generatedSvgContent
+            ? makeLayoutSignature(restoredWording, restoredState, restoredGuidance)
+            : null
+        );
+        setHasSelectedSize(true);
+        setActiveStep(restoredState.generatedSvgContent ? 5 : 0);
+        setCurrentView('plaque');
+        setProofSaved(true);
+        setBasketAdded(false);
+      } catch (error) {
+        console.warn('Could not restore proof session.', error);
+        alert('That proof link could not be loaded. The designer is still available to start a new proof.');
+      }
+    };
+
+    loadProofSession();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const getInscriptionContext = (prompt: string) => {
     const normalizedPrompt = prompt.toLowerCase();
@@ -562,7 +619,35 @@ const App: React.FC = () => {
   const handleExportPdf = async () => {
     if (!svgRef.current) return;
     if (!confirmReadiness('PDF export')) return;
-    await downloadPdf(svgRef.current, state);
+    let continueUrl: string | undefined;
+    try {
+      const response = await fetch('/api/proof-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: isProductionReady ? 'proof_ready' : 'draft',
+          plaqueState: sanitizeProofStateForRemoteSave(state),
+          wording: inscriptionPrompt,
+          generatedSvg: state.generatedSvgContent,
+          aiReasoning: state.aiReasoning,
+          priceEstimatePence: Math.round(price * 100),
+          currency: 'gbp',
+          metadata: {
+            inscriptionGuidance,
+            source: 'pdf-resume-link-trial',
+          },
+        }),
+      });
+      if (!response.ok) throw new Error(`Proof session save failed (${response.status})`);
+      const payload = await response.json();
+      const token = payload.proofSession?.public_token;
+      if (token) {
+        continueUrl = `${window.location.origin}/design?proof=${encodeURIComponent(token)}`;
+      }
+    } catch (error) {
+      console.warn('PDF resume link was not added.', error);
+    }
+    await downloadPdf(svgRef.current, state, { continueUrl });
   };
 
   const handleNativePrint = () => {
