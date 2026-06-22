@@ -1,4 +1,4 @@
-import { MemorialImagePlacement, PlaqueState, Shape } from "../types";
+import { BorderStyle, Fixing, MemorialImagePlacement, PlaqueState, Shape } from "../types";
 import { getSafeMarginMm } from "./safeMargin";
 
 export interface InscriptionLayout {
@@ -68,6 +68,27 @@ function pickSideArtShare(inscription: string) {
   }, { ...candidates[0], score: Number.NEGATIVE_INFINITY });
 }
 
+function scallopedCapsTextScale(state: PlaqueState) {
+  const usesScallopedCaps = state.border
+    && state.fixing === Fixing.Caps
+    && (state.borderStyle === BorderStyle.Scalloped || state.borderStyle === BorderStyle.DoubleScalloped);
+  if (!usesScallopedCaps) return 1;
+
+  const capScale = state.capSize >= 15 ? 0.92 : 0.96;
+  return state.borderStyle === BorderStyle.DoubleScalloped ? capScale * 0.98 : capScale;
+}
+
+function applyHardwareTextClearance(state: PlaqueState, layout: InscriptionLayout): InscriptionLayout {
+  const scale = scallopedCapsTextScale(state);
+  if (scale === 1) return layout;
+
+  return {
+    ...layout,
+    textW: Math.max(10, layout.textW * scale),
+    textH: Math.max(10, layout.textH * scale),
+  };
+}
+
 export function getInscriptionLayout(
   state: PlaqueState,
   inscription = "",
@@ -89,7 +110,7 @@ export function getInscriptionLayout(
   const safeH = Math.max(10, state.height - safeMargin * 2);
 
   if (!state.memorialImageEnabled) {
-    return { textCx: cx, textCy: cy, textW: safeW, textH: safeH, artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only" };
+    return applyHardwareTextClearance(state, { textCx: cx, textCy: cy, textW: safeW, textH: safeH, artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only" });
   }
 
   const ratio = state.width / Math.max(1, state.height);
@@ -107,7 +128,7 @@ export function getInscriptionLayout(
     const textH = Math.max(18, state.height * 0.24);
     const artCx = cx;
     const artCy = offset + state.height * 0.20 + baseArtH / 2;
-    return {
+    return applyHardwareTextClearance(state, {
       textCx: cx,
       textCy: offset + state.height * 0.71,
       textW: state.width * 0.50,
@@ -117,7 +138,7 @@ export function getInscriptionLayout(
       artW,
       artH,
       profile: "art-focus",
-    };
+    });
   }
 
   if (useStacked) {
@@ -136,7 +157,7 @@ export function getInscriptionLayout(
     const remainingH = Math.max(18, safeH - baseArtH - stackedGap);
     const artCx = cx;
     const artCy = safeY + baseArtH / 2;
-    return {
+    return applyHardwareTextClearance(state, {
       textCx: cx,
       textCy: safeY + baseArtH + stackedGap + remainingH / 2,
       textW: safeW * (isFocus ? 0.88 : 0.98),
@@ -146,7 +167,7 @@ export function getInscriptionLayout(
       artW,
       artH,
       profile: allocation.profile,
-    };
+    });
   }
 
   const allocation = pickSideArtShare(inscription);
@@ -166,7 +187,7 @@ export function getInscriptionLayout(
   const portraitOnRight = state.memorialImagePlacement === MemorialImagePlacement.PortraitRight;
   const artCx = portraitOnRight ? rightCx : leftCx;
   const textCx = portraitOnRight ? leftCx : rightCx;
-  return {
+  return applyHardwareTextClearance(state, {
     textCx,
     textCy: cy,
     textW,
@@ -176,5 +197,5 @@ export function getInscriptionLayout(
     artW,
     artH,
     profile: allocation.profile,
-  };
+  });
 }

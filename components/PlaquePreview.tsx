@@ -281,6 +281,10 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     state.shape,
     state.width,
     state.wood,
+    state.border,
+    state.borderStyle,
+    state.capSize,
+    state.fixing,
   ]);
   const artworkX = layout.artX + state.memorialImageOffsetX;
   const artworkY = layout.artY + state.memorialImageOffsetY;
