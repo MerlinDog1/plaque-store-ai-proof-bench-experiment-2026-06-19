@@ -700,33 +700,35 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
     const widthMm = Math.round(viewBox.width || state.width + (state.wood ? 25 : 0));
     const heightMm = Math.round(viewBox.height || state.height + (state.wood ? 25 : 0));
     const doc = new jsPDFCtor({
-      orientation: "p",
+      orientation: "l",
       unit: "mm",
       format: "a4",
       compress: true,
     });
 
-    const pageW = 210;
-    const pageH = 297;
-    const margin = 16;
+    const pageW = 297;
+    const pageH = 210;
+    const margin = 14;
     const contentW = pageW - margin * 2;
     const proofImageBase64 = options.proofImageBase64 || await svgToPngBase64(sourceSvg, state);
     const proofImageData = proofImageBase64.startsWith("data:")
       ? proofImageBase64
       : `data:image/png;base64,${proofImageBase64}`;
     const imageProps = doc.getImageProperties(proofImageData);
-    const imageBoxW = contentW;
+    const imageBoxW = 178;
     const imageBoxH = 112;
     const imageScale = Math.min(imageBoxW / imageProps.width, imageBoxH / imageProps.height);
     const imageW = imageProps.width * imageScale;
     const imageH = imageProps.height * imageScale;
     const imageX = margin + (imageBoxW - imageW) / 2;
-    const imageY = 42 + (imageBoxH - imageH) / 2;
+    const imageY = 43 + (imageBoxH - imageH) / 2;
 
-    doc.setFillColor(246, 241, 231);
+    doc.setFillColor(245, 239, 228);
     doc.rect(0, 0, pageW, pageH, "F");
     doc.setFillColor(8, 28, 24);
-    doc.rect(0, 0, pageW, 29, "F");
+    doc.rect(0, 0, pageW, 30, "F");
+    doc.setFillColor(15, 47, 40);
+    doc.rect(0, 30, pageW, 4, "F");
     doc.setTextColor(242, 214, 136);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
@@ -737,19 +739,31 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
     doc.text(new Date().toLocaleDateString("en-GB"), pageW - margin, 19, { align: "right" });
 
     doc.setTextColor(27, 35, 31);
-    doc.setFontSize(20);
-    doc.text("Your plaque proof", margin, 38);
+    doc.setFontSize(18);
+    doc.text("Your plaque proof", margin, 40);
 
     doc.setFillColor(255, 252, 245);
-    doc.roundedRect(margin, 42, contentW, imageBoxH, 3, 3, "F");
+    doc.roundedRect(margin, 43, imageBoxW, imageBoxH, 3, 3, "F");
+    doc.setDrawColor(214, 198, 166);
+    doc.roundedRect(margin, 43, imageBoxW, imageBoxH, 3, 3, "S");
     doc.addImage(proofImageData, "PNG", imageX, imageY, imageW, imageH);
 
-    const specY = 166;
+    const panelX = 204;
+    const panelY = 43;
+    const panelW = pageW - panelX - margin;
+    const panelH = 112;
+    doc.setFillColor(255, 250, 240);
+    doc.roundedRect(panelX, panelY, panelW, panelH, 3, 3, "F");
+    doc.setDrawColor(214, 198, 166);
+    doc.roundedRect(panelX, panelY, panelW, panelH, 3, 3, "S");
+
+    const specY = 54;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("Proof details", margin, specY);
+    doc.setTextColor(27, 35, 31);
+    doc.text("Proof details", panelX + 8, specY);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(72, 76, 70);
     const specs = [
       ["Size", `${widthMm} x ${heightMm} mm`],
@@ -763,55 +777,58 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
     specs.forEach(([label, value], index) => {
       const y = specY + 8 + index * 6;
       doc.setFont("helvetica", "bold");
-      doc.text(label, margin, y);
+      doc.text(label, panelX + 8, y);
       doc.setFont("helvetica", "normal");
-      doc.text(value, margin + 38, y);
+      doc.text(value, panelX + 35, y, { maxWidth: panelW - 43 });
     });
 
-    const wordingX = 112;
+    const wordingY = specY + 57;
     doc.setTextColor(27, 35, 31);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("Wording", wordingX, specY);
+    doc.text("Wording", panelX + 8, wordingY);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(72, 76, 70);
-    addWrappedText(doc, options.wording || "Wording shown in proof image.", wordingX, specY + 8, 82, 5);
+    addWrappedText(doc, options.wording || "Wording shown in proof image.", panelX + 8, wordingY + 8, panelW - 16, 4.5);
 
-    doc.setDrawColor(219, 207, 185);
-    doc.line(margin, 218, pageW - margin, 218);
+    const footerY = 166;
+    doc.setFillColor(255, 250, 240);
+    doc.roundedRect(margin, footerY, contentW, 30, 3, 3, "F");
+    doc.setDrawColor(214, 198, 166);
+    doc.roundedRect(margin, footerY, contentW, 30, 3, 3, "S");
 
     doc.setTextColor(27, 35, 31);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("Continue or approve this proof", margin, 230);
+    doc.text("Continue or approve this proof", margin + 8, footerY + 9);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(72, 76, 70);
     addWrappedText(
       doc,
       "Use the private link below to reopen this proof, make changes, or continue to checkout. Please check every name, date, word, material, size and fixing before approving production.",
-      margin,
-      238,
-      120,
-      5
+      margin + 8,
+      footerY + 17,
+      190,
+      4.5
     );
 
     if (options.continueUrl) {
       const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 220, errorCorrectionLevel: "M" });
-      doc.addImage(qrDataUrl, "PNG", 158, 226, 34, 34);
+      doc.addImage(qrDataUrl, "PNG", pageW - margin - 31, footerY + 4, 24, 24);
       doc.setTextColor(24, 83, 141);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(8);
-      doc.textWithLink("Continue your proof online", margin, 264, { url: options.continueUrl });
+      doc.textWithLink("Continue your proof online", margin + 8, footerY + 27, { url: options.continueUrl });
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(7);
-      doc.text(options.continueUrl, margin, 270, { maxWidth: 130 });
+      doc.setFontSize(6.5);
+      doc.text(options.continueUrl, margin + 70, footerY + 27, { maxWidth: 150 });
     }
 
     doc.setTextColor(104, 98, 87);
-    doc.setFontSize(7);
-    doc.text("This customer PDF is for proof review. Production uses the separate vector artwork/export.", margin, pageH - 12);
+    doc.setFontSize(7.5);
+    doc.text("This customer PDF is for proof review. Production uses the separate vector artwork/export.", margin, pageH - 7);
     doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);
   } catch (e) {
     console.error("PDF Export failed", e);
