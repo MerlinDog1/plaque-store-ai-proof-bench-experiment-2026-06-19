@@ -647,7 +647,13 @@ const App: React.FC = () => {
     } catch (error) {
       console.warn('PDF resume link was not added.', error);
     }
-    await downloadPdf(svgRef.current, state, { continueUrl });
+    const proofImageBase64 = generatedImage || await svgToPngBase64(svgRef.current, state);
+    await downloadPdf(svgRef.current, state, {
+      continueUrl,
+      proofImageBase64,
+      wording: inscriptionPrompt,
+      price,
+    });
   };
 
   const handleNativePrint = () => {

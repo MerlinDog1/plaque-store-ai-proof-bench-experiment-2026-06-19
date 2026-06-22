@@ -1,7 +1,11 @@
 import { PlaqueState, Fixing, Material, MemorialImageMethod } from "../types";
+import QRCode from "qrcode";
 
 interface PdfExportOptions {
   continueUrl?: string;
+  proofImageBase64?: string;
+  wording?: string;
+  price?: number;
 }
 
 // Type definitions for external libraries loaded via CDN
@@ -664,56 +668,151 @@ export const downloadCorelSvg = async (sourceSvg: SVGSVGElement, state: PlaqueSt
   }
 };
 
+const labelFromSlug = (value: string) => value
+  .split("-")
+  .filter(Boolean)
+  .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+  .join(" ");
+
+const formatPrice = (value?: number) => {
+  if (!Number.isFinite(value)) return "Live price shown in designer";
+  return value!.toLocaleString("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
+const addWrappedText = (doc: any, text: string, x: number, y: number, maxWidth: number, lineHeight = 5) => {
+  const lines = doc.splitTextToSize(text || "", maxWidth);
+  doc.text(lines, x, y);
+  return y + Math.max(lines.length, 1) * lineHeight;
+};
+
 export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, options: PdfExportOptions = {}) => {
   try {
     await ensurePdfLibraries();
     const jsPDFCtor = window.jsPDF || window.jspdf?.jsPDF;
     if (!jsPDFCtor) throw new Error("PDF Library not loaded. Please refresh.");
 
-    const clone = await prepareCloneForProduction(sourceSvg, state);
-    const viewBox = clone.viewBox.baseVal;
-    const widthMm = viewBox.width || state.width + (state.wood ? 25 : 0);
-    const heightMm = viewBox.height || state.height + (state.wood ? 25 : 0);
+    const viewBox = sourceSvg.viewBox.baseVal;
+    const widthMm = Math.round(viewBox.width || state.width + (state.wood ? 25 : 0));
+    const heightMm = Math.round(viewBox.height || state.height + (state.wood ? 25 : 0));
     const doc = new jsPDFCtor({
-      orientation: widthMm >= heightMm ? "l" : "p",
+      orientation: "p",
       unit: "mm",
-      format: [widthMm, heightMm],
+      format: "a4",
       compress: true,
     });
 
-    const wrapper = document.createElement("div");
-    wrapper.style.position = "absolute";
-    wrapper.style.top = "-10000px";
-    wrapper.style.left = "-10000px";
-    wrapper.style.opacity = "0.01";
-    wrapper.style.pointerEvents = "none";
-    wrapper.appendChild(clone);
-    document.body.appendChild(wrapper);
+    const pageW = 210;
+    const pageH = 297;
+    const margin = 16;
+    const contentW = pageW - margin * 2;
+    const proofImageBase64 = options.proofImageBase64 || await svgToPngBase64(sourceSvg, state);
+    const proofImageData = proofImageBase64.startsWith("data:")
+      ? proofImageBase64
+      : `data:image/png;base64,${proofImageBase64}`;
+    const imageProps = doc.getImageProperties(proofImageData);
+    const imageBoxW = contentW;
+    const imageBoxH = 112;
+    const imageScale = Math.min(imageBoxW / imageProps.width, imageBoxH / imageProps.height);
+    const imageW = imageProps.width * imageScale;
+    const imageH = imageProps.height * imageScale;
+    const imageX = margin + (imageBoxW - imageW) / 2;
+    const imageY = 42 + (imageBoxH - imageH) / 2;
 
-    try {
-      await doc.svg(clone, { x: 0, y: 0, width: widthMm, height: heightMm });
-      if (options.continueUrl) {
-        doc.addPage("a4", "p");
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(18);
-        doc.text("Continue this InstaPlaque proof", 18, 24);
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        doc.text("Use this private link to reopen the designer with the same wording, layout, material, size and proof state.", 18, 36, {
-          maxWidth: 174,
-        });
-        doc.setTextColor(24, 83, 141);
-        doc.textWithLink(options.continueUrl, 18, 50, { url: options.continueUrl });
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(9);
-        doc.text("Trial feature: keep this link private. It is intended for returning to checkout or making small proof changes later.", 18, 64, {
-          maxWidth: 174,
-        });
-      }
-      doc.save(`plaque_${widthMm}x${heightMm}_${state.material}.pdf`);
-    } finally {
-      document.body.removeChild(wrapper);
+    doc.setFillColor(246, 241, 231);
+    doc.rect(0, 0, pageW, pageH, "F");
+    doc.setFillColor(8, 28, 24);
+    doc.rect(0, 0, pageW, 29, "F");
+    doc.setTextColor(242, 214, 136);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("InstaPlaque", margin, 18);
+    doc.setTextColor(237, 243, 239);
+    doc.setFontSize(8);
+    doc.text("CUSTOM PLAQUE PROOF", pageW - margin, 13, { align: "right" });
+    doc.text(new Date().toLocaleDateString("en-GB"), pageW - margin, 19, { align: "right" });
+
+    doc.setTextColor(27, 35, 31);
+    doc.setFontSize(20);
+    doc.text("Your plaque proof", margin, 38);
+
+    doc.setFillColor(255, 252, 245);
+    doc.roundedRect(margin, 42, contentW, imageBoxH, 3, 3, "F");
+    doc.addImage(proofImageData, "PNG", imageX, imageY, imageW, imageH);
+
+    const specY = 166;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("Proof details", margin, specY);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(72, 76, 70);
+    const specs = [
+      ["Size", `${widthMm} x ${heightMm} mm`],
+      ["Material", labelFromSlug(state.material)],
+      ["Text colour", labelFromSlug(state.textColor)],
+      ["Fixing", state.fixing === Fixing.None ? "No fixings" : labelFromSlug(state.fixing)],
+      ["Border", state.border ? labelFromSlug(state.borderStyle) : "No border"],
+      ["Wood backing", state.wood ? `${labelFromSlug(state.woodTone)} wood, ${state.woodEdge} edge` : "No backing"],
+      ["Price", `${formatPrice(options.price)} inc. UK mainland delivery`],
+    ];
+    specs.forEach(([label, value], index) => {
+      const y = specY + 8 + index * 6;
+      doc.setFont("helvetica", "bold");
+      doc.text(label, margin, y);
+      doc.setFont("helvetica", "normal");
+      doc.text(value, margin + 38, y);
+    });
+
+    const wordingX = 112;
+    doc.setTextColor(27, 35, 31);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("Wording", wordingX, specY);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(72, 76, 70);
+    addWrappedText(doc, options.wording || "Wording shown in proof image.", wordingX, specY + 8, 82, 5);
+
+    doc.setDrawColor(219, 207, 185);
+    doc.line(margin, 218, pageW - margin, 218);
+
+    doc.setTextColor(27, 35, 31);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("Continue or approve this proof", margin, 230);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(72, 76, 70);
+    addWrappedText(
+      doc,
+      "Use the private link below to reopen this proof, make changes, or continue to checkout. Please check every name, date, word, material, size and fixing before approving production.",
+      margin,
+      238,
+      120,
+      5
+    );
+
+    if (options.continueUrl) {
+      const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 220, errorCorrectionLevel: "M" });
+      doc.addImage(qrDataUrl, "PNG", 158, 226, 34, 34);
+      doc.setTextColor(24, 83, 141);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.textWithLink("Continue your proof online", margin, 264, { url: options.continueUrl });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.text(options.continueUrl, margin, 270, { maxWidth: 130 });
     }
+
+    doc.setTextColor(104, 98, 87);
+    doc.setFontSize(7);
+    doc.text("This customer PDF is for proof review. Production uses the separate vector artwork/export.", margin, pageH - 12);
+    doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);
   } catch (e) {
     console.error("PDF Export failed", e);
     alert("PDF Export failed: " + e);
