@@ -715,58 +715,60 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       ? proofImageBase64
       : `data:image/png;base64,${proofImageBase64}`;
     const imageProps = doc.getImageProperties(proofImageData);
-    const imageBoxW = 188;
-    const imageBoxH = 124;
+    const imageBoxW = 196;
+    const imageBoxH = 128;
     const imageScale = Math.min(imageBoxW / imageProps.width, imageBoxH / imageProps.height);
     const imageW = imageProps.width * imageScale;
     const imageH = imageProps.height * imageScale;
-    const imageX = margin + (imageBoxW - imageW) / 2;
-    const imageY = 42 + (imageBoxH - imageH) / 2;
+    const proofX = 14;
+    const proofY = 40;
+    const imageX = proofX + (imageBoxW - imageW) / 2;
+    const imageY = proofY + (imageBoxH - imageH) / 2;
 
-    doc.setFillColor(7, 26, 22);
+    doc.setFillColor(243, 239, 229);
     doc.rect(0, 0, pageW, pageH, "F");
-    doc.setDrawColor(174, 129, 52);
-    doc.setLineWidth(0.35);
-    doc.rect(7, 7, pageW - 14, pageH - 14, "S");
-    doc.setFillColor(12, 38, 33);
-    doc.roundedRect(margin, 12, contentW, 22, 3, 3, "F");
-    doc.setTextColor(242, 214, 136);
+    doc.setFillColor(8, 31, 26);
+    doc.rect(0, 0, pageW, 13, "F");
+    doc.setDrawColor(193, 150, 64);
+    doc.setLineWidth(0.45);
+    doc.line(14, 29, pageW - 14, 29);
+
+    doc.setTextColor(19, 38, 33);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("InstaPlaque", margin + 8, 26);
-    doc.setTextColor(237, 243, 239);
-    doc.setFontSize(8);
-    doc.text("CUSTOM PLAQUE PROOF", pageW - margin - 8, 22, { align: "right" });
-    doc.text(new Date().toLocaleDateString("en-GB"), pageW - margin - 8, 28, { align: "right" });
-
-    doc.setTextColor(246, 241, 231);
     doc.setFontSize(16);
-    doc.text("Your plaque proof", margin + 2, 39);
+    doc.text("InstaPlaque", 14, 24);
+    doc.setTextColor(96, 88, 76);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text("Private customer proof", pageW - 14, 20, { align: "right" });
+    doc.setFontSize(7);
+    doc.text(new Date().toLocaleDateString("en-GB"), pageW - 14, 25, { align: "right" });
 
-    doc.setFillColor(246, 241, 231);
-    doc.roundedRect(margin, 42, imageBoxW, imageBoxH, 3, 3, "F");
-    doc.setDrawColor(206, 164, 80);
+    doc.setFillColor(220, 213, 198);
+    doc.roundedRect(proofX + 3, proofY + 4, imageBoxW, imageBoxH, 3, 3, "F");
+    doc.setFillColor(250, 247, 240);
+    doc.roundedRect(proofX, proofY, imageBoxW, imageBoxH, 3, 3, "F");
+    doc.setDrawColor(193, 150, 64);
     doc.setLineWidth(0.5);
-    doc.roundedRect(margin, 42, imageBoxW, imageBoxH, 3, 3, "S");
+    doc.roundedRect(proofX, proofY, imageBoxW, imageBoxH, 3, 3, "S");
     doc.addImage(proofImageData, "PNG", imageX, imageY, imageW, imageH);
 
-    const panelX = 209;
-    const panelY = 42;
-    const panelW = pageW - panelX - margin;
-    const panelH = 124;
-    doc.setFillColor(250, 246, 236);
+    const panelX = 222;
+    const panelY = 40;
+    const panelW = pageW - panelX - 14;
+    const panelH = 128;
+    doc.setFillColor(8, 31, 26);
     doc.roundedRect(panelX, panelY, panelW, panelH, 3, 3, "F");
-    doc.setDrawColor(206, 164, 80);
+    doc.setDrawColor(193, 150, 64);
     doc.roundedRect(panelX, panelY, panelW, panelH, 3, 3, "S");
 
     const specY = 54;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(27, 35, 31);
-    doc.text("Proof details", panelX + 8, specY);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
-    doc.setTextColor(72, 76, 70);
+    doc.setFontSize(12);
+    doc.setTextColor(245, 230, 186);
+    doc.text("Proof details", panelX + 7, specY);
+    doc.setDrawColor(193, 150, 64);
+    doc.line(panelX + 7, specY + 4, panelX + panelW - 7, specY + 4);
     const specs = [
       ["Size", `${widthMm} x ${heightMm} mm`],
       ["Material", labelFromSlug(state.material)],
@@ -777,62 +779,65 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       ["Estimate", `${formatPrice(options.price)} inc. UK mainland delivery`],
     ];
     specs.forEach(([label, value], index) => {
-      const y = specY + 8 + index * 6;
+      const y = specY + 15 + index * 10;
       doc.setFont("helvetica", "bold");
-      doc.text(label, panelX + 8, y);
+      doc.setFontSize(6.6);
+      doc.setTextColor(177, 161, 128);
+      doc.text(String(label).toUpperCase(), panelX + 7, y);
       doc.setFont("helvetica", "normal");
-      doc.text(value, panelX + 35, y, { maxWidth: panelW - 43 });
+      doc.setFontSize(index === specs.length - 1 ? 8.7 : 8);
+      doc.setTextColor(index === specs.length - 1 ? 245 : 237, index === specs.length - 1 ? 218 : 238, index === specs.length - 1 ? 151 : 232);
+      doc.text(value, panelX + 7, y + 4.2, { maxWidth: panelW - 14 });
     });
 
-    doc.setDrawColor(218, 206, 183);
-    doc.line(panelX + 8, 107, panelX + panelW - 8, 107);
-    doc.setTextColor(27, 35, 31);
+    doc.setTextColor(19, 38, 33);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.text("Before production", panelX + 8, 119);
+    doc.text("Please check before production", 14, 180);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(72, 76, 70);
+    doc.setFontSize(7.8);
+    doc.setTextColor(76, 70, 60);
     addWrappedText(
       doc,
-      "Please check names, dates, material, size, fixings and layout. The plaque will be made from the approved proof.",
-      panelX + 8,
-      128,
-      panelW - 16,
-      4.2
+      "Check names, dates, material, size, fixings and layout. The finished plaque will be made from the approved proof.",
+      14,
+      186,
+      156,
+      4
     );
 
-    const footerY = 174;
-    doc.setFillColor(250, 246, 236);
-    doc.roundedRect(margin, footerY, contentW, 22, 3, 3, "F");
-    doc.setDrawColor(206, 164, 80);
-    doc.roundedRect(margin, footerY, contentW, 22, 3, 3, "S");
-
-    doc.setTextColor(27, 35, 31);
+    const footerX = 184;
+    const footerY = 176;
+    const footerW = pageW - footerX - 14;
+    doc.setFillColor(255, 253, 247);
+    doc.roundedRect(footerX, footerY, footerW, 18, 3, 3, "F");
+    doc.setDrawColor(193, 150, 64);
+    doc.roundedRect(footerX, footerY, footerW, 18, 3, 3, "S");
+    doc.setTextColor(19, 38, 33);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.text("Continue or checkout", margin + 8, footerY + 9);
+    doc.setFontSize(9.5);
+    doc.text("Continue online", footerX + 7, footerY + 7);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
-    doc.setTextColor(72, 76, 70);
+    doc.setFontSize(7.2);
+    doc.setTextColor(76, 70, 60);
     addWrappedText(
       doc,
-      "Use the button link or QR code to reopen this proof, make changes, or continue to checkout.",
-      margin + 8,
-      footerY + 17,
-      168,
-      4.5
+      "Reopen this proof to edit or checkout.",
+      footerX + 7,
+      footerY + 12.5,
+      38,
+      3.6
     );
 
     if (options.continueUrl) {
       const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 220, errorCorrectionLevel: "M" });
-      doc.addImage(qrDataUrl, "PNG", pageW - margin - 27, footerY + 3, 17, 17);
-      doc.setFillColor(13, 45, 38);
-      doc.roundedRect(pageW - margin - 78, footerY + 6, 42, 10, 3, 3, "F");
+      doc.addImage(qrDataUrl, "PNG", pageW - 33, footerY + 3, 12, 12);
+      doc.setFillColor(8, 31, 26);
+      doc.roundedRect(pageW - 70, footerY + 5, 32, 8, 2, 2, "F");
       doc.setTextColor(242, 214, 136);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.5);
-      doc.textWithLink("Open proof", pageW - margin - 68, footerY + 12.5, { url: options.continueUrl });
+      doc.setFontSize(7);
+      doc.textWithLink("Open proof", pageW - 62, footerY + 10.5, { url: options.continueUrl });
     }
 
     doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);
@@ -854,6 +859,32 @@ const realisticReferenceMaterialFill: Record<Material, string> = {
 const realisticReferenceWoodFill = (state?: PlaqueState) =>
   state?.woodTone === "light" ? "#b99058" : "#5b3524";
 
+const imageUrlToDataUrl = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Could not load SVG image asset: ${url}`);
+  const blob = await response.blob();
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error(`Could not encode SVG image asset: ${url}`));
+    reader.readAsDataURL(blob);
+  });
+};
+
+const inlineSvgImageHrefs = async (svg: SVGSVGElement) => {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  if (!origin) return;
+
+  await Promise.all(Array.from(svg.querySelectorAll("image")).map(async (image) => {
+    const href = image.getAttribute("href") || image.getAttribute("xlink:href");
+    if (!href || href.startsWith("data:")) return;
+    const absolute = href.startsWith("http") ? href : href.startsWith("/") ? `${origin}${href}` : new URL(href, origin).toString();
+    const dataUrl = await imageUrlToDataUrl(absolute);
+    image.setAttribute("href", dataUrl);
+    image.setAttributeNS("http://www.w3.org/1999/xlink", "href", dataUrl);
+  }));
+};
+
 export const svgToProofPngBase64 = async (sourceSvg: SVGSVGElement): Promise<string> => {
   const clone = sourceSvg.cloneNode(true) as SVGSVGElement;
   const vb = sourceSvg.viewBox.baseVal;
@@ -874,6 +905,7 @@ export const svgToProofPngBase64 = async (sourceSvg: SVGSVGElement): Promise<str
 
   try {
     await outlineTextLayer(clone, sourceSvg);
+    await inlineSvgImageHrefs(clone);
     const xml = new XMLSerializer().serializeToString(clone);
     const svg64 = btoa(unescape(encodeURIComponent(xml)));
     const image64 = `data:image/svg+xml;base64,${svg64}`;
@@ -919,6 +951,7 @@ export const svgToPngBase64 = async (sourceSvg: SVGSVGElement, state?: PlaqueSta
 
   try {
     await outlineTextLayer(clone, sourceSvg);
+    await inlineSvgImageHrefs(clone);
 
     // Realistic View needs a clear product reference, not a white-on-white mask.
     // Keep wood, fixings, border, and text visible so the image model preserves them.
