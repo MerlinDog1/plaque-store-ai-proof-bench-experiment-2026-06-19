@@ -36,6 +36,18 @@
   color: #16231e;
 }
 
+.control-input,
+.control-input option {
+  background-color: #fffaf0;
+  color: #1b231f;
+}
+
+.manual-line-panel select.control-input,
+.manual-line-panel select.control-input option {
+  background-color: #fffaf0;
+  color: #1b231f;
+}
+
 .proofbench-price-chip .proofbench-delivery-label,
 .proofbench-mobile-price .proofbench-delivery-label {
   position: relative;

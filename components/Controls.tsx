@@ -279,8 +279,8 @@ const FineTuneControl = ({
   const apply = (nextValue: number) => onChange(clampControlValue(nextValue, min, max));
 
   return (
-    <div className={`rounded-lg border p-3 transition ${locked ? 'border-[rgba(232,219,192,0.1)] bg-[#fffaf0]' : 'border-[#b98235]/28 bg-[#f4eadc]'}`}>
-      <div className="mb-2 flex items-center justify-between gap-3 text-xs font-black text-[#6a746d]">
+    <div className={`rounded-lg border p-3 transition ${locked ? 'border-[#edf3ef]/12 bg-[#17231f]' : 'border-[#b98235]/28 bg-[#f4eadc]'}`}>
+      <div className={`mb-2 flex items-center justify-between gap-3 text-xs font-black ${locked ? 'text-[#d4e0d9]' : 'text-[#5c6b63]'}`}>
         <span>{label}</span>
         <span>{valueLabel}</span>
       </div>
@@ -289,7 +289,7 @@ const FineTuneControl = ({
           type="button"
           disabled={controlDisabled}
           onClick={() => apply(value - step)}
-          className="h-11 rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffdf7] text-lg font-black text-[#9a6a16] disabled:opacity-40"
+          className={`h-11 rounded-lg border text-lg font-black disabled:cursor-not-allowed ${locked ? 'border-[#edf3ef]/12 bg-[#22302b] text-[#6f8178]' : 'border-[rgba(84, 72, 52, 0.14)] bg-[#fffdf7] text-[#9a6a16] disabled:opacity-45'}`}
           aria-label={`Decrease ${label}`}
         >
           -
@@ -302,14 +302,14 @@ const FineTuneControl = ({
           value={value}
           disabled={controlDisabled}
           onChange={(event) => apply(Number(event.target.value))}
-          className="w-full accent-[#b98235] disabled:opacity-30"
+          className="w-full accent-[#b98235] disabled:opacity-65"
           aria-label={label}
         />
         <button
           type="button"
           disabled={controlDisabled}
           onClick={() => apply(value + step)}
-          className="h-11 rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffdf7] text-lg font-black text-[#9a6a16] disabled:opacity-40"
+          className={`h-11 rounded-lg border text-lg font-black disabled:cursor-not-allowed ${locked ? 'border-[#edf3ef]/12 bg-[#22302b] text-[#6f8178]' : 'border-[rgba(84, 72, 52, 0.14)] bg-[#fffdf7] text-[#9a6a16] disabled:opacity-45'}`}
           aria-label={`Increase ${label}`}
         >
           +
