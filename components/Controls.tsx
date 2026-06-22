@@ -1706,10 +1706,7 @@ export const Controls: React.FC<Props> = ({
           {isIterating && (
             <div className="space-y-3">
               <div className="rounded-lg border border-[#edf3ef]/14 bg-[#edf3ef]/6 p-3">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <div className="text-xs font-black uppercase tracking-wide text-[#f2d688]">Instant style</div>
-                  <div className="text-[11px] font-bold text-[#edf3ef]/60">1 is generated</div>
-                </div>
+                <div className="mb-2 text-xs font-black uppercase tracking-wide text-[#f2d688]">Choose a look</div>
                 <div className="grid grid-cols-5 gap-2" aria-label="Restyle the current layout">
                   {INSTANT_STYLE_OPTIONS.map((option) => {
                     const active = instantStyleVariant === option.variant;
@@ -1718,14 +1715,18 @@ export const Controls: React.FC<Props> = ({
                         key={option.variant}
                         type="button"
                         onClick={() => applyGeneratedTextStyle(option.style, option.variant)}
-                        className={`aspect-square min-h-[40px] rounded-lg border text-base font-black transition ${
+                        aria-pressed={active}
+                        className={`relative aspect-square min-h-[40px] rounded-lg border text-base font-black transition ${
                           active
-                            ? 'border-[#f2d688]/70 bg-[#f2d688] text-[#13201c]'
+                            ? 'border-[#f2d688] bg-[#f2d688] text-[#13201c] shadow-[0_0_0_3px_rgba(242,214,136,0.25),0_12px_28px_rgba(242,214,136,0.18)] ring-2 ring-[#f2d688]/55'
                             : 'border-[#edf3ef]/18 bg-[#edf3ef]/8 text-[#edf3ef] hover:border-[#f2d688]/55'
                         }`}
                         title={option.title}
                       >
                         {option.label}
+                        {active && (
+                          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#13201c]" aria-hidden="true" />
+                        )}
                       </button>
                     );
                   })}
