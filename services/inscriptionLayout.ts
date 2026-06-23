@@ -1,5 +1,5 @@
 import { BorderStyle, Fixing, MemorialImagePlacement, PlaqueState, Shape } from "../types";
-import { getSafeMarginMm } from "./safeMargin";
+import { getSafeMarginsMm } from "./safeMargin";
 
 export interface InscriptionLayout {
   textCx: number;
@@ -102,16 +102,16 @@ export function getInscriptionLayout(
   const offset = woodExtra / 2;
   const cx = offset + state.width / 2;
   const cy = offset + state.height / 2;
-  const safeMargin = getSafeMarginMm({
+  const safeMargin = getSafeMarginsMm({
     width: state.width,
     height: state.height,
     shape: state.shape,
     safeMargin: state.safeMargin,
   });
-  const safeX = offset + safeMargin;
-  const safeY = offset + safeMargin;
-  const safeW = Math.max(10, state.width - safeMargin * 2);
-  const safeH = Math.max(10, state.height - safeMargin * 2);
+  const safeX = offset + safeMargin.x;
+  const safeY = offset + safeMargin.y;
+  const safeW = Math.max(10, state.width - safeMargin.x * 2);
+  const safeH = Math.max(10, state.height - safeMargin.y * 2);
 
   if (!state.memorialImageEnabled) {
     return applyHardwareTextClearance(state, { textCx: cx, textCy: cy, textW: safeW, textH: safeH, artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only" });

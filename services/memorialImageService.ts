@@ -9,7 +9,7 @@ import {
   MemorialImageShape,
   Shape,
 } from "../types";
-import { getSafeMarginMm } from "./safeMargin";
+import { getSafeMarginMm, getSafeMarginsMm } from "./safeMargin";
 import { getGeminiClient } from "./geminiClient";
 
 const MODEL = "gemini-3.1-flash-image-preview";
@@ -154,14 +154,14 @@ function getArtworkBoxRatio(params: {
   artworkScale: number;
   safeMargin?: number;
 }) {
-  const safeMargin = getSafeMarginMm({
+  const safeMargin = getSafeMarginsMm({
     width: params.plaqueWidth,
     height: params.plaqueHeight,
     shape: params.plaqueShape,
     safeMargin: params.safeMargin,
   });
-  const safeW = Math.max(10, params.plaqueWidth - safeMargin * 2);
-  const safeH = Math.max(10, params.plaqueHeight - safeMargin * 2);
+  const safeW = Math.max(10, params.plaqueWidth - safeMargin.x * 2);
+  const safeH = Math.max(10, params.plaqueHeight - safeMargin.y * 2);
   const gap = Math.max(8, Math.min(params.plaqueWidth, params.plaqueHeight) * 0.05);
   const scale = Math.max(0.1, params.artworkScale);
   const isSideLayout = params.layout === MemorialImagePlacement.PortraitLeft || params.layout === MemorialImagePlacement.PortraitRight;

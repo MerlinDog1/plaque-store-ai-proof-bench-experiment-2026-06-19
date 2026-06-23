@@ -1,6 +1,8 @@
 import { Shape } from "../types";
+import { isBenchPlaqueFormat } from "./plaqueRules";
 
 export const DEFAULT_SAFE_MARGIN_PERCENT = 10;
+export const BENCH_SAFE_MARGIN_PERCENT = 10;
 
 export const SAFE_MARGIN_PRESETS = [
   { label: "Normal", percent: 10 },
@@ -28,4 +30,27 @@ export function getSafeMarginMm(params: {
       ? minSide * 0.13
       : minSide * 0.16;
   return clamp(Math.max(percentMargin, shapeFloor), shapeFloor, minSide * 0.30);
+}
+
+export function getSafeMarginsMm(params: {
+  width: number;
+  height: number;
+  shape: Shape;
+  safeMargin?: number;
+}) {
+  const base = getSafeMarginMm(params);
+  if (!isBenchPlaqueFormat(params.width, params.height, params.shape)) {
+    return { x: base, y: base };
+  }
+
+  const minSide = Math.min(params.width, params.height);
+  const longSide = Math.max(params.width, params.height);
+  const percentMargin = minSide * (getSafeMarginPercent(params.safeMargin) / 100);
+  const horizontal = clamp(
+    Math.max(percentMargin, minSide * 0.18, longSide * 0.065),
+    minSide * 0.14,
+    minSide * 0.32,
+  );
+
+  return { x: horizontal, y: base };
 }

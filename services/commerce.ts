@@ -8,6 +8,7 @@ import {
   TextColor,
 } from '../types';
 import { estimatePlaquePrice } from './pricing';
+import { BENCH_SAFE_MARGIN_PERCENT } from './safeMargin';
 
 export type SiteView =
   | 'home'
@@ -86,7 +87,7 @@ export const productFamilies: ProductFamily[] = [
       borderStyle: BorderStyle.Single,
       wood: false,
       designStyle: DesignStyle.Auto,
-      safeMargin: 7,
+      safeMargin: BENCH_SAFE_MARGIN_PERCENT,
       textColor: TextColor.Black,
       cornerRadius: 0,
     },

@@ -11,6 +11,7 @@ import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
 import { MockOrder, ProductFamily, SiteView, getProductBySlug, makeMockOrder, productFamilies } from './services/commerce';
 import { isBenchPlaqueFormat } from './services/plaqueRules';
+import { BENCH_SAFE_MARGIN_PERCENT } from './services/safeMargin';
 
 const VectorSketch = lazy(async () => {
   const module = await import('./components/VectorSketch');
@@ -317,6 +318,7 @@ const App: React.FC = () => {
       const previousWasBenchPlaque = isBenchPlaqueFormat(prev.width, prev.height, prev.shape);
       if (nextIsBenchPlaque) {
         next.wood = false;
+        next.safeMargin = Math.max(next.safeMargin, BENCH_SAFE_MARGIN_PERCENT);
         if (next.fixing === Fixing.Caps || next.fixing !== Fixing.Screws || !previousWasBenchPlaque || changes.fixing === Fixing.Screws) {
           next.fixingHoleCount = 2;
         }
@@ -743,6 +745,7 @@ const App: React.FC = () => {
       if (isBenchPlaqueFormat(next.width, next.height, next.shape)) {
         next.wood = false;
         next.fixingHoleCount = 2;
+        next.safeMargin = Math.max(next.safeMargin, BENCH_SAFE_MARGIN_PERCENT);
       }
       return next;
     });

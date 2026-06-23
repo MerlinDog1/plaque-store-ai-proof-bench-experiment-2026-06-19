@@ -19,11 +19,9 @@ import {
   BorderStyle,
 } from '../types';
 import type { GenerationPhase } from '../services/geminiService';
-import { DEFAULT_SAFE_MARGIN_PERCENT, SAFE_MARGIN_PRESETS, getSafeMarginMm, getSafeMarginPercent } from '../services/safeMargin';
+import { BENCH_SAFE_MARGIN_PERCENT, DEFAULT_SAFE_MARGIN_PERCENT, SAFE_MARGIN_PRESETS, getSafeMarginMm, getSafeMarginsMm, getSafeMarginPercent } from '../services/safeMargin';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { estimatePlaqueBasePrice, estimateWoodAddOn } from '../services/pricing';
-
-const BENCH_SAFE_MARGIN_PERCENT = 7;
 
 const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
@@ -392,6 +390,12 @@ export const Controls: React.FC<Props> = ({
     : state.memorialImagePreviewUrl;
   const safeMarginPercent = getSafeMarginPercent(state.safeMargin);
   const safeMarginMm = getSafeMarginMm({
+    width: state.width,
+    height: state.height,
+    shape: state.shape,
+    safeMargin: state.safeMargin,
+  });
+  const safeMarginsMm = getSafeMarginsMm({
     width: state.width,
     height: state.height,
     shape: state.shape,
@@ -1940,7 +1944,9 @@ export const Controls: React.FC<Props> = ({
                 <div>
                   <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Safe margin</div>
                   <div className="mt-1 text-sm font-black text-[#9a6a16]">
-                    {safeMarginPercent}% · {Math.round(safeMarginMm)}mm from edge
+                    {isBenchPlaque
+                      ? `${safeMarginPercent}% · ${Math.round(safeMarginsMm.x)}mm sides / ${Math.round(safeMarginsMm.y)}mm top-bottom`
+                      : `${safeMarginPercent}% · ${Math.round(safeMarginMm)}mm from edge`}
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-1 text-[11px] font-black">
