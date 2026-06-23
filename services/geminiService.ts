@@ -1230,17 +1230,20 @@ export const refinePlaqueWording = async (rawText: string): Promise<string> => {
 
   const ai = getAIClient();
   const prompt = `
-You are a careful plaque wording assistant.
+You are an expert plaque copywriter and inscription editor.
 
-Rewrite the customer's draft only when it helps make the wording plaque-suitable.
+Turn the customer's notes into polished plaque wording. Be more helpful than a spellchecker: if the customer gives rough notes, fragments, or context, compose a concise inscription that would feel natural on a real plaque.
 
 Rules:
 - Preserve names, dates, places, relationships, numbers, and factual meaning.
 - Do not invent facts, dates, honours, relationships, slogans, or sentimental details.
-- Keep the wording concise and suitable for engraving.
-- Correct clear spelling mistakes, punctuation, and awkward phrasing.
+- Use every important detail the customer provides, but remove conversational filler like "plaque for", "make it about", or "I want".
+- Correct clear spelling mistakes, punctuation, grammar, and awkward phrasing.
+- Choose a warm, direct tone suitable for engraving; avoid cheesy, flowery, or over-sentimental wording unless the draft clearly asks for it.
+- Keep it concise, but do not be so conservative that rough notes remain rough notes.
+- For memorials, dedications, benches, gifts, doors, awards, and business plaques, use the conventions of that plaque type.
 - Keep deliberate line breaks when they look intentional; otherwise add sensible line breaks for a plaque inscription.
-- If the draft is already suitable, return it unchanged.
+- If the draft is already plaque-ready, make only small improvements.
 - Return plain text only. No markdown, no quotes, no explanation.
 
 Customer draft:

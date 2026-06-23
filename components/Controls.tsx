@@ -382,7 +382,7 @@ export const Controls: React.FC<Props> = ({
   const [customHeightInput, setCustomHeightInput] = useState(String(state.height));
   const [fixingsBorderMode, setFixingsBorderMode] = useState<'fixings' | 'border'>('fixings');
   const [manualTextOpen, setManualTextOpen] = useState(false);
-  const [wordingAssistEnabled, setWordingAssistEnabled] = useState(true);
+  const [wordingAssistEnabled, setWordingAssistEnabled] = useState(false);
   const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
   const [instantStyleVariant, setInstantStyleVariant] = useState(1);
@@ -1648,8 +1648,8 @@ export const Controls: React.FC<Props> = ({
                 <span className="block text-sm font-black">AI assist</span>
                 <span className="mt-0.5 block text-xs leading-5 opacity-80">
                   {wordingAssistEnabled
-                    ? 'Helps make your wording feel suitable for a plaque.'
-                    : 'Keeps focus on fitting the wording as written.'}
+                    ? 'Turns notes into polished plaque wording before layout.'
+                    : 'Keeps your exact wording and only fits the layout.'}
                 </span>
               </span>
               <span
@@ -1697,7 +1697,8 @@ export const Controls: React.FC<Props> = ({
                 id="inscription-wording-input"
                 value={prompt}
                 onChange={(e) => onPromptChange(e.target.value)}
-                placeholder="Type the words you want on the plaque..."
+                placeholder={`Tell us who or what the plaque is for.
+Add important dates, names, places, roles, short messages, or anything that must be included.`}
                 className={`${fieldClass} mt-1 min-h-[190px] resize-none normal-case leading-6 tracking-normal`}
               />
             </div>
