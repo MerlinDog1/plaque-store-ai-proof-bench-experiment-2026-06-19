@@ -195,6 +195,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   };
   const fillUrl = `url(#${materialFillId[state.material]})`;
   const textureUrl = materialTextureId[state.material] ? `url(#${materialTextureId[state.material]})` : null;
+  const fixingFillUrl = state.material === Material.AgedBrass && textureUrl ? textureUrl : fillUrl;
   const textureOpacity = state.material === Material.BrushedSteel
     ? 0.74
       : state.material === Material.PolishedSteel
@@ -1136,7 +1137,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
               {state.fixing === Fixing.Caps ? (
                 <g className="fixing cap">
                   {/* Cap Body - matches material */}
-                  <circle cx={h.x} cy={h.y} r={capRadius} fill={fillUrl} stroke="rgba(0,0,0,0.5)" strokeWidth={0.5} />
+                  <circle cx={h.x} cy={h.y} r={capRadius} fill={fixingFillUrl} stroke="rgba(0,0,0,0.5)" strokeWidth={0.5} />
 
                   {/* Patina for Aged Brass Caps */}
                   {state.material === Material.AgedBrass && (
@@ -1149,7 +1150,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
               ) : (
                 <g className="fixing hole">
                   {/* Countersunk screws are colour-matched to the selected plaque material. */}
-                  <circle cx={h.x} cy={h.y} r={screwRadius} fill={fillUrl} stroke="rgba(0,0,0,0.45)" strokeWidth={0.5} />
+                  <circle cx={h.x} cy={h.y} r={screwRadius} fill={fixingFillUrl} stroke="rgba(0,0,0,0.45)" strokeWidth={0.5} />
                   {state.material === Material.AgedBrass && (
                     <circle cx={h.x} cy={h.y} r={screwRadius} fill="#2b1d0e" opacity={state.ageIntensity * 0.9} style={{ mixBlendMode: 'multiply' }} className="visual-effect" />
                   )}
