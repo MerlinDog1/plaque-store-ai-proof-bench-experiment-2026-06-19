@@ -932,10 +932,8 @@ const App: React.FC = () => {
             <aside className="proofbench-customiser no-print row-start-2 min-h-0 min-w-0 overflow-hidden md:col-start-2 md:row-start-1">
               <div className="proofbench-customiser-head hidden md:flex">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d7b66a]">Selected Controls</p>
-                  <h2 className="mt-1 text-base font-black text-[#f7f1e3]">{steps[activeStep]}</h2>
+                  <h2 className="text-base font-black text-[#f7f1e3]">{steps[activeStep]}</h2>
                 </div>
-                <button className="proofbench-kebab" aria-label="More options" type="button">⋮</button>
               </div>
               <div className="proofbench-mobile-tabs md:hidden">
                 {steps.map((label, index) => (
