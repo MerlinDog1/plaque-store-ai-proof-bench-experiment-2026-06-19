@@ -100,6 +100,37 @@ const extractImage = (response) => {
   };
 };
 
+const retryGemini = async (operation, retries = 3, baseDelay = 2500) => {
+  try {
+    return await operation();
+  } catch (error) {
+    const message = String(error?.message || error || "").toLowerCase();
+    const retryable =
+      error?.status === 500 ||
+      error?.status === 503 ||
+      error?.code === 500 ||
+      error?.code === 503 ||
+      message.includes("fetch failed") ||
+      message.includes("network") ||
+      message.includes("timeout") ||
+      message.includes("timed out") ||
+      message.includes("deadline") ||
+      message.includes("internal") ||
+      message.includes("overloaded") ||
+      message.includes("unavailable") ||
+      message.includes("500") ||
+      message.includes("503");
+
+    if (retries > 0 && retryable) {
+      console.warn(`Gemini texture generation failed; retrying in ${baseDelay}ms (${retries} left).`, error);
+      await new Promise((resolve) => setTimeout(resolve, baseDelay));
+      return retryGemini(operation, retries - 1, Math.round(baseDelay * 1.5));
+    }
+
+    throw error;
+  }
+};
+
 const serveStatic = (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
   const decodedPath = decodeURIComponent(url.pathname);
@@ -147,14 +178,17 @@ const server = http.createServer(async (req, res) => {
       const spec = getOutputSpec(payload.aspectRatio);
 
       const prompt = [
-        `Use the uploaded brass photograph as the source material and expand it into a ${spec.label} premium brass texture at ${spec.dimensions}.`,
-        "This is for an ecommerce plaque material swatch: make it photorealistic, crisp, close-up, and usable as a clean material texture.",
-        "Preserve the source brass character, colour family, brushing, patina, tarnish, oxidation, scratches, grain, and uneven natural wear.",
-        "Extend the material beyond the uploaded crop naturally. Do not add plaque shapes, screws, engraving, text, logos, frames, borders, hands, tools, background objects, or watermarks.",
-        "Avoid painterly, plastic, blurry, smeared, synthetic, low-resolution, or obviously AI-generated texture artifacts.",
+        `Use the uploaded brass photograph only as material reference and create a pristine ${spec.label} brass texture at ${spec.dimensions}.`,
+        "The result must be a seamless, tileable, edge-to-edge material texture suitable for ecommerce plaque swatches and 3D material maps.",
+        "Make the whole canvas opaque brass surface. No transparent pixels, empty margins, checkerboard, alpha, letterboxing, frames, borders, or visible rectangular crop boundaries.",
+        "Preserve the source brass character, colour family, brushing, patina, tarnish, oxidation, fine scratches, grain, and uneven natural wear, but blend everything into one continuous surface.",
+        "Remove any hard seams, bands, vertical joins, repeated blocks, patch edges, vignettes, shadowed corners, glare hotspots, perspective distortion, and source-photo framing.",
+        "Use flat orthographic close-up material photography: crisp, high-resolution, natural micro-detail, balanced lighting, no object context.",
+        "Do not add plaque shapes, screws, engraving, text, logos, watermarks, hands, tools, walls, tables, or background objects.",
+        "Avoid painterly, plastic, blurry, smeared, noisy, synthetic, low-resolution, or obviously AI-generated texture artifacts.",
       ].join(" ");
 
-      const response = await ai.models.generateContent({
+      const response = await retryGemini(() => ai.models.generateContent({
         model: "gemini-3.1-flash-image-preview",
         contents: {
           parts: [
@@ -166,7 +200,7 @@ const server = http.createServer(async (req, res) => {
           responseModalities: ["IMAGE", "TEXT"],
           imageConfig: { aspectRatio: spec.aspectRatio, imageSize: "4K" },
         },
-      });
+      }));
 
       const image = extractImage(response);
       sendJson(res, 200, {

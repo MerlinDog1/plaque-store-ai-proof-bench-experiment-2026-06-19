@@ -87,6 +87,15 @@ const exactPngBlob = async (src, spec) => {
   });
 };
 
+const showExactPng = async (src, spec) => {
+  const blob = await exactPngBlob(src, spec);
+  const url = URL.createObjectURL(blob);
+  updateDownloadState(url);
+  resultImage.src = url;
+  resultImage.style.display = "block";
+  emptyState.style.display = "none";
+};
+
 const handleFile = async (file) => {
   if (!file) return;
   if (!file.type.startsWith("image/")) {
@@ -123,15 +132,11 @@ const generateTexture = async () => {
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
 
-    resultImage.src = body.imageDataUrl;
-    resultImage.style.display = "block";
-    emptyState.style.display = "none";
     previewTitle.textContent = spec.title;
     downloadLink.download = spec.filename;
     setStatus("Generated. Preparing exact-size PNG download.");
 
-    const blob = await exactPngBlob(body.imageDataUrl, spec);
-    updateDownloadState(URL.createObjectURL(blob));
+    await showExactPng(body.imageDataUrl, spec);
     setStatus(`Ready: ${spec.width} x ${spec.height} PNG.`);
   } catch (error) {
     clearResult("Generation failed");
