@@ -23,9 +23,6 @@ import { DEFAULT_SAFE_MARGIN_PERCENT, SAFE_MARGIN_PRESETS, getSafeMarginMm, getS
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { estimatePlaqueBasePrice, estimateWoodAddOn } from '../services/pricing';
 
-const MEMORIAL_PROMPT =
-  "In loving memory of Bertie. Loyal companion, garden explorer, and forever in our hearts. 2014-2026.";
-
 const BENCH_SAFE_MARGIN_PERCENT = 7;
 
 const MATERIAL_LABELS: Record<Material, string> = {
@@ -385,6 +382,7 @@ export const Controls: React.FC<Props> = ({
   const [customHeightInput, setCustomHeightInput] = useState(String(state.height));
   const [fixingsBorderMode, setFixingsBorderMode] = useState<'fixings' | 'border'>('fixings');
   const [manualTextOpen, setManualTextOpen] = useState(false);
+  const [wordingAssistEnabled, setWordingAssistEnabled] = useState(true);
   const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
   const [instantStyleVariant, setInstantStyleVariant] = useState(1);
@@ -740,11 +738,6 @@ export const Controls: React.FC<Props> = ({
     } catch (error) {
       console.warn('Manual text edit failed.', error);
     }
-  };
-
-  const useMemorialCopy = () => {
-    onPromptChange(MEMORIAL_PROMPT);
-    onChange({ designStyle: DesignStyle.MemorialSolemn });
   };
 
   const submitPrompt = () => {
@@ -1634,13 +1627,48 @@ export const Controls: React.FC<Props> = ({
                 <span />
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f2d688]">Intelligent AI typesetter</p>
-                <h3 className="mt-1 text-lg font-black leading-tight text-[#edf3ef]">Enter your text below and our AI typesetter will lay it out.</h3>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f2d688]">Plaque wording</p>
+                <h3 className="mt-1 text-lg font-black leading-tight text-[#edf3ef]">Not sure what to write? Start with your words.</h3>
                 <p className="mt-2 text-sm leading-6 text-[#aab8b0]">
-                  It chooses the line breaks, hierarchy, spacing, and font balance for the plaque size you have selected.
+                  The layout assistant fits line breaks, hierarchy, spacing, and font balance to the plaque size you have selected.
                 </p>
               </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setWordingAssistEnabled((enabled) => !enabled)}
+              aria-pressed={wordingAssistEnabled}
+              className={`mt-4 flex min-h-[48px] w-full items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left transition ${
+                wordingAssistEnabled
+                  ? 'border-[#f2d688]/55 bg-[#f2d688]/14 text-[#edf3ef]'
+                  : 'border-[#edf3ef]/18 bg-[#edf3ef]/6 text-[#aab8b0]'
+              }`}
+            >
+              <span>
+                <span className="block text-sm font-black">AI assist</span>
+                <span className="mt-0.5 block text-xs leading-5 opacity-80">
+                  {wordingAssistEnabled
+                    ? 'Helps make your wording feel suitable for a plaque.'
+                    : 'Keeps focus on fitting the wording as written.'}
+                </span>
+              </span>
+              <span
+                className={`relative h-6 w-11 shrink-0 rounded-full border transition ${
+                  wordingAssistEnabled
+                    ? 'border-[#f2d688] bg-[#f2d688]'
+                    : 'border-[#edf3ef]/22 bg-[#0f1817]'
+                }`}
+                aria-hidden="true"
+              >
+                <span
+                  className={`absolute top-1 h-4 w-4 rounded-full transition ${
+                    wordingAssistEnabled
+                      ? 'left-6 bg-[#13201c]'
+                      : 'left-1 bg-[#edf3ef]/65'
+                  }`}
+                />
+              </span>
+            </button>
             {isGenerating && (
               <div className="mt-4 rounded-lg border border-[#f2d688]/25 bg-[#f2d688]/10 p-3" role="status" aria-live="polite">
                 <div className="flex items-center justify-between gap-3 text-xs font-black uppercase tracking-[0.14em] text-[#f7d98b]">
@@ -1649,7 +1677,7 @@ export const Controls: React.FC<Props> = ({
                       ? 'Reading the wording'
                       : generationPhase === 'transcribe'
                         ? 'Setting the plaque type'
-                        : 'AI layout in progress'}
+                        : 'Layout in progress'}
                   </span>
                   <span className="ai-typesetter-dots" aria-hidden="true"><i /><i /><i /></span>
                 </div>
@@ -1693,13 +1721,10 @@ export const Controls: React.FC<Props> = ({
                     : 'Working...'
                 : isIterating
                   ? 'Regenerate'
-                  : 'Generate AI layout'}
+                  : wordingAssistEnabled
+                    ? 'Make plaque-ready layout'
+                    : 'Fit text to plaque'}
             </button>
-            {!isIterating && (
-              <button onClick={useMemorialCopy} disabled={isGenerating} className={pillClass(false)}>
-                Sample wording
-              </button>
-            )}
           </div>
           )}
 
@@ -1763,7 +1788,7 @@ export const Controls: React.FC<Props> = ({
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="text-xs font-black uppercase tracking-wide text-[#f2d688]">Line by line controls</div>
-                    <p className="mt-1 text-xs leading-5 text-[#aab8b0]">Edit the generated text blocks directly without asking the AI to redraw the layout.</p>
+                    <p className="mt-1 text-xs leading-5 text-[#aab8b0]">Edit the generated text blocks directly without redrawing the layout.</p>
                   </div>
                   <span className="rounded-full border border-[#edf3ef]/14 bg-[#edf3ef]/8 px-2 py-1 text-[10px] font-black text-[#edf3ef]">
                     {generatedTextControls.length} lines
