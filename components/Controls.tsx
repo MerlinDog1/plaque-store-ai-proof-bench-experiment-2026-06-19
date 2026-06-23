@@ -1108,7 +1108,14 @@ export const Controls: React.FC<Props> = ({
                         state.fixing === fixing ? 'border-[#c6932e] bg-[#f2d688] text-[#1b231f]' : 'border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] text-[#1b231f]'
                       } disabled:cursor-not-allowed disabled:opacity-40`}
                     >
-                      <span className="block text-sm font-black">{label}</span>
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="block text-sm font-black">{label}</span>
+                        {fixing === Fixing.Screws && state.fixing === Fixing.Screws && isBenchPlaque && (
+                          <span className="rounded-full border border-current/20 px-2 py-1 text-[10px] font-black">
+                            {state.fixingHoleCount} holes
+                          </span>
+                        )}
+                      </span>
                       <span className="mt-1 block text-xs leading-4 opacity-70">{note}</span>
                     </button>
                     {fixing === Fixing.Caps && state.fixing === Fixing.Caps && (
@@ -1128,27 +1135,27 @@ export const Controls: React.FC<Props> = ({
                         )}
                       </div>
                     )}
-                    {fixing === Fixing.Screws && state.fixing === Fixing.Screws && isBenchPlaque && (
-                      <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
-                        <div className="mb-2 text-sm font-black">Countersunk screw holes</div>
-                        <div className="grid grid-cols-2 gap-2">
-                          {[2, 4].map((count) => (
-                            <button
-                              key={count}
-                              onClick={() => update('fixingHoleCount', count)}
-                              className={pillClass(state.fixingHoleCount === count)}
-                            >
-                              {count} holes
-                            </button>
-                          ))}
-                        </div>
-                        <div className="mt-2 text-xs font-bold leading-5 text-[#6a746d]">
-                          Choose two end holes or four corner holes for bench plaque screw fixing.
-                        </div>
-                      </div>
-                    )}
                   </React.Fragment>
                 ))}
+                {state.fixing === Fixing.Screws && isBenchPlaque && (
+                  <div className="rounded-lg border border-[#c6932e]/35 bg-[#f6efe2] p-3">
+                    <div className="mb-2 text-sm font-black">Countersunk screw holes</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[2, 4].map((count) => (
+                        <button
+                          key={count}
+                          onClick={() => update('fixingHoleCount', count)}
+                          className={pillClass(state.fixingHoleCount === count)}
+                        >
+                          {count} holes
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-2 text-xs font-bold leading-5 text-[#6a746d]">
+                      Choose two end holes or four corner holes for bench plaque screw fixing.
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="mt-3 space-y-3">
