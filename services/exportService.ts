@@ -800,11 +800,23 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       });
 
       doc.setDrawColor(193, 150, 64);
-      doc.line(panelX + 7, 235, panelX + panelW - 7, 235);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(5.5);
+      doc.setTextColor(237, 238, 232);
+      addWrappedText(
+        doc,
+        "Check names, dates, material, size, fixings and layout before approval.",
+        panelX + 7,
+        238,
+        panelW - 14,
+        2.8
+      );
+
+      doc.line(panelX + 7, 245, panelX + panelW - 7, 245);
       doc.setTextColor(245, 230, 186);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.text("Continue online", panelX + 7, 249);
+      doc.text("Continue online", panelX + 7, 257);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8.2);
       doc.setTextColor(237, 238, 232);
@@ -812,20 +824,20 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
         doc,
         "Scan the QR code or use the link below to continue editing or checkout.",
         panelX + 7,
-        259,
+        266,
         94,
         4
       );
 
       if (options.continueUrl) {
         const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 260, errorCorrectionLevel: "M" });
-        doc.addImage(qrDataUrl, "PNG", pageW - 45, 249, 28, 28);
+        doc.addImage(qrDataUrl, "PNG", pageW - 45, 253, 28, 28);
         doc.setFillColor(237, 190, 82);
-        doc.roundedRect(panelX + 105, 271, 62, 11, 5.5, 5.5, "F");
+        doc.roundedRect(panelX + 105, 270, 62, 11, 5.5, 5.5, "F");
         doc.setTextColor(23, 32, 29);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
-        doc.textWithLink("Open proof", panelX + 136, 278.2, { url: options.continueUrl, align: "center" });
+        doc.textWithLink("Open proof", panelX + 136, 277.2, { url: options.continueUrl, align: "center" });
       }
 
       doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);
@@ -896,12 +908,31 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
     });
 
     doc.setDrawColor(193, 150, 64);
-    doc.line(panelX + 7, 119, panelX + panelW - 7, 119);
+    doc.line(panelX + 7, 117, panelX + panelW - 7, 117);
+
+    doc.setTextColor(245, 230, 186);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.3);
+    doc.text("Before production", panelX + 7, 126);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(5.2);
+    doc.setTextColor(237, 238, 232);
+    addWrappedText(
+      doc,
+      "Check names, dates, material, size, fixings and layout before approval.",
+      panelX + 7,
+      131,
+      panelW - 14,
+      2.7
+    );
+
+    doc.setDrawColor(193, 150, 64);
+    doc.line(panelX + 7, 144, panelX + panelW - 7, 144);
 
     doc.setTextColor(245, 230, 186);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11.5);
-    doc.text("Continue online", panelX + 7, 134);
+    doc.text("Continue online", panelX + 7, 158);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.8);
     doc.setTextColor(237, 238, 232);
@@ -909,20 +940,20 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       doc,
       "Scan the QR code or use the link below to continue editing or checkout.",
       panelX + 7,
-      145,
-      24,
+      166,
+      34,
       3.7
     );
 
     if (options.continueUrl) {
       const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 260, errorCorrectionLevel: "M" });
-      doc.addImage(qrDataUrl, "PNG", pageW - 40, 142, 24, 24);
+      doc.addImage(qrDataUrl, "PNG", pageW - 39, 158, 22, 22);
       doc.setFillColor(237, 190, 82);
-      doc.roundedRect(panelX + 7, 174, 47, 12, 6, 6, "F");
+      doc.roundedRect(panelX + 7, 183, 47, 10.5, 5.25, 5.25, "F");
       doc.setTextColor(23, 32, 29);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(8.2);
-      doc.textWithLink("Open proof", panelX + 30.5, 181.7, { url: options.continueUrl, align: "center" });
+      doc.textWithLink("Open proof", panelX + 30.5, 189.9, { url: options.continueUrl, align: "center" });
     }
 
     doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);

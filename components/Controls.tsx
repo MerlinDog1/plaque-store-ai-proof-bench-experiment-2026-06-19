@@ -1647,11 +1647,11 @@ export const Controls: React.FC<Props> = ({
                     ? 'Not sure what to write? Start with your notes.'
                     : 'Enter your text below and our typesetter will lay it out.'}
                 </h3>
-                {wordingAssistEnabled && (
-                  <p className="mt-2 text-sm leading-6 text-[#aab8b0]">
-                    AI assist turns your notes into plaque-ready wording, then the layout assistant fits it to the plaque.
-                  </p>
-                )}
+                <p className="mt-2 text-sm leading-6 text-[#aab8b0]">
+                  {wordingAssistEnabled
+                    ? 'AI assist turns your notes into plaque-ready wording, then the layout assistant fits it to the plaque.'
+                    : 'It chooses the line breaks, hierarchy, spacing, and font balance for the plaque size you have selected.'}
+                </p>
               </div>
             </div>
             <button
@@ -1665,9 +1665,7 @@ export const Controls: React.FC<Props> = ({
               }`}
             >
               <span>
-                <span className="block text-sm font-black">
-                  {wordingAssistEnabled ? 'AI assist' : 'Need help finding the right words?'}
-                </span>
+                <span className="block text-sm font-black">AI assist</span>
                 <span className="mt-0.5 block text-xs leading-5 opacity-80">
                   {wordingAssistEnabled
                     ? 'Turns notes into polished plaque wording before layout.'
