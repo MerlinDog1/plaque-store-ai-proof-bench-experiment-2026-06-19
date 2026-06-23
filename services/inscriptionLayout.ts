@@ -68,18 +68,22 @@ function pickSideArtShare(inscription: string) {
   }, { ...candidates[0], score: Number.NEGATIVE_INFINITY });
 }
 
-function scallopedCapsTextScale(state: PlaqueState) {
-  const usesScallopedCaps = state.border
-    && state.fixing === Fixing.Caps
+function scallopedHardwareTextScale(state: PlaqueState) {
+  const usesScallopedHardware = state.border
+    && (state.fixing === Fixing.Caps || state.fixing === Fixing.Screws)
     && (state.borderStyle === BorderStyle.Scalloped || state.borderStyle === BorderStyle.DoubleScalloped);
-  if (!usesScallopedCaps) return 1;
+  if (!usesScallopedHardware) return 1;
+
+  if (state.fixing === Fixing.Screws) {
+    return state.borderStyle === BorderStyle.DoubleScalloped ? 0.94 : 0.96;
+  }
 
   const capScale = state.capSize >= 15 ? 0.92 : 0.96;
   return state.borderStyle === BorderStyle.DoubleScalloped ? capScale * 0.98 : capScale;
 }
 
 function applyHardwareTextClearance(state: PlaqueState, layout: InscriptionLayout): InscriptionLayout {
-  const scale = scallopedCapsTextScale(state);
+  const scale = scallopedHardwareTextScale(state);
   if (scale === 1) return layout;
 
   return {
