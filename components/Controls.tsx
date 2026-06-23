@@ -1099,14 +1099,14 @@ export const Controls: React.FC<Props> = ({
                   [Fixing.Caps, 'Decorative caps', 'Thin flat metal caps for a traditional finished plaque'],
                   [Fixing.Screws, 'Countersunk screws', 'Flush screws colour-matched to the selected plaque material'],
                   [Fixing.VHB, 'Hidden adhesive', 'Clean face with no visible holes or mounting hardware'],
+                  [Fixing.None, 'No fixings', 'Your plaque will be supplied without any holes or fixings'],
                 ].map(([fixing, label, note]) => (
                   <React.Fragment key={fixing}>
                     <button
                       onClick={() => !isHeartPlaque && update('fixing', fixing)}
+                      aria-pressed={state.fixing === fixing}
                       disabled={isHeartPlaque && fixing !== Fixing.VHB}
-                      className={`min-h-[64px] rounded-lg border p-4 text-left transition active:scale-[0.99] ${
-                        state.fixing === fixing ? 'border-[#c6932e] bg-[#f2d688] text-[#1b231f]' : 'border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] text-[#1b231f]'
-                      } disabled:cursor-not-allowed disabled:opacity-40`}
+                      className={`${choiceClass(state.fixing === fixing)} min-h-[64px] disabled:cursor-not-allowed disabled:opacity-40`}
                     >
                       <span className="flex items-center justify-between gap-2">
                         <span className="block text-sm font-black">{label}</span>
