@@ -468,19 +468,15 @@ const App: React.FC = () => {
     }));
   };
 
-  const handleGenerateLayout = async (prompt: string, options?: { wordingAssist?: boolean }) => {
+  const handleGenerateLayout = async (prompt: string) => {
     setIsGeneratingLayout(true);
     setGenerationPhase(null);
     try {
       let effectivePrompt = prompt;
-      const shouldAssistWording = options?.wordingAssist ?? false;
-
-      if (shouldAssistWording) {
-        setGenerationPhase('concept');
-        effectivePrompt = await refinePlaqueWording(prompt);
-        if (effectivePrompt !== prompt) {
-          setInscriptionPrompt(effectivePrompt);
-        }
+      setGenerationPhase('concept');
+      effectivePrompt = await refinePlaqueWording(prompt);
+      if (effectivePrompt !== prompt) {
+        setInscriptionPrompt(effectivePrompt);
       }
 
       const inscriptionBox = getInscriptionLayout(state, effectivePrompt);
@@ -503,8 +499,8 @@ const App: React.FC = () => {
           ...prev,
           generatedSvgContent: result.svgContent,
           conceptImageUrl: result.conceptImageUrl,
-          aiReasoning: shouldAssistWording && effectivePrompt !== prompt
-            ? `Wording assist refined the inscription before layout. ${result.reasoning}`
+          aiReasoning: effectivePrompt !== prompt
+            ? `The typesetter corrected the inscription wording before layout. ${result.reasoning}`
             : result.reasoning
         }));
         setActiveStep(5);

@@ -151,7 +151,7 @@ const STEP_COPY = [
 interface Props {
   state: PlaqueState;
   onChange: (newState: Partial<PlaqueState>) => void;
-  onGenerate: (text: string, options?: { wordingAssist?: boolean }) => void;
+  onGenerate: (text: string) => void;
   onClear: () => void;
   prompt: string;
   onPromptChange: (prompt: string) => void;
@@ -382,7 +382,6 @@ export const Controls: React.FC<Props> = ({
   const [customHeightInput, setCustomHeightInput] = useState(String(state.height));
   const [fixingsBorderMode, setFixingsBorderMode] = useState<'fixings' | 'border'>('fixings');
   const [manualTextOpen, setManualTextOpen] = useState(false);
-  const [wordingAssistEnabled, setWordingAssistEnabled] = useState(false);
   const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
   const [instantStyleVariant, setInstantStyleVariant] = useState(1);
@@ -743,7 +742,7 @@ export const Controls: React.FC<Props> = ({
   const submitPrompt = () => {
     const copy = prompt.trim();
     if (!copy) return;
-    onGenerate(copy, { wordingAssist: wordingAssistEnabled });
+    onGenerate(copy);
   };
 
   const renderSizePresetButton = (preset: SizePreset, extraClassName = '') => {
@@ -1640,55 +1639,16 @@ export const Controls: React.FC<Props> = ({
               </div>
               <div className="min-w-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f2d688]">
-                  {wordingAssistEnabled ? 'AI wording assist' : 'Intelligent typesetter'}
+                  Intelligent typesetter
                 </p>
                 <h3 className="mt-1 text-lg font-black leading-tight text-[#edf3ef]">
-                  {wordingAssistEnabled
-                    ? 'Not sure what to write? Start with your notes.'
-                    : 'Enter your text below and our typesetter will lay it out.'}
+                  Enter your text below and our typesetter will lay it out.
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-[#aab8b0]">
-                  {wordingAssistEnabled
-                    ? 'AI assist turns your notes into plaque-ready wording, then the layout assistant fits it to the plaque.'
-                    : 'It chooses the line breaks, hierarchy, spacing, and font balance for the plaque size you have selected.'}
+                  It corrects spelling and grammar, chooses the line breaks, hierarchy, spacing, and font balance for the plaque size you have selected.
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setWordingAssistEnabled((enabled) => !enabled)}
-              aria-pressed={wordingAssistEnabled}
-              className={`mt-4 flex min-h-[48px] w-full items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left transition ${
-                wordingAssistEnabled
-                  ? 'border-[#f2d688]/55 bg-[#f2d688]/14 text-[#edf3ef]'
-                  : 'border-[#edf3ef]/18 bg-[#edf3ef]/6 text-[#aab8b0]'
-              }`}
-            >
-              <span>
-                <span className="block text-sm font-black">AI assist</span>
-                <span className="mt-0.5 block text-xs leading-5 opacity-80">
-                  {wordingAssistEnabled
-                    ? 'Turns notes into polished plaque wording before layout.'
-                    : 'Keeps your exact wording and only fits the layout.'}
-                </span>
-              </span>
-              <span
-                className={`relative h-6 w-11 shrink-0 rounded-full border transition ${
-                  wordingAssistEnabled
-                    ? 'border-[#f2d688] bg-[#f2d688]'
-                    : 'border-[#edf3ef]/22 bg-[#0f1817]'
-                }`}
-                aria-hidden="true"
-              >
-                <span
-                  className={`absolute top-1 h-4 w-4 rounded-full transition ${
-                    wordingAssistEnabled
-                      ? 'left-6 bg-[#13201c]'
-                      : 'left-1 bg-[#edf3ef]/65'
-                  }`}
-                />
-              </span>
-            </button>
             {isGenerating && (
               <div className="mt-4 rounded-lg border border-[#f2d688]/25 bg-[#f2d688]/10 p-3" role="status" aria-live="polite">
                 <div className="flex items-center justify-between gap-3 text-xs font-black uppercase tracking-[0.14em] text-[#f7d98b]">
@@ -1717,10 +1677,7 @@ export const Controls: React.FC<Props> = ({
                 id="inscription-wording-input"
                 value={prompt}
                 onChange={(e) => onPromptChange(e.target.value)}
-                placeholder={wordingAssistEnabled
-                  ? `Tell us who or what the plaque is for.
-Add important dates, names, places, roles, short messages, or anything that must be included.`
-                  : 'Type the words you want on the plaque...'}
+                placeholder="Type the words you want on the plaque..."
                 className={`${fieldClass} mt-1 min-h-[190px] resize-none normal-case leading-6 tracking-normal`}
               />
             </div>
@@ -1744,9 +1701,7 @@ Add important dates, names, places, roles, short messages, or anything that must
                     : 'Working...'
                 : isIterating
                   ? 'Regenerate'
-                  : wordingAssistEnabled
-                    ? 'Make plaque-ready layout'
-                    : 'Generate layout'}
+                  : 'Generate layout'}
             </button>
           </div>
           )}

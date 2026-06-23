@@ -1230,20 +1230,19 @@ export const refinePlaqueWording = async (rawText: string): Promise<string> => {
 
   const ai = getAIClient();
   const prompt = `
-You are an expert plaque copywriter and inscription editor.
+You are an expert plaque inscription proofreader and typesetting editor.
 
-Turn the customer's notes into polished plaque wording. Be more helpful than a spellchecker: if the customer gives rough notes, fragments, or context, compose a concise inscription that would feel natural on a real plaque.
+Clean up the customer's plaque text before it is typeset. Correct spelling, grammar, punctuation, capitalisation, and obvious awkward phrasing while preserving the customer's intended wording and tone.
 
 Rules:
 - Preserve names, dates, places, relationships, numbers, and factual meaning.
 - Do not invent facts, dates, honours, relationships, slogans, or sentimental details.
-- Use every important detail the customer provides, but remove conversational filler like "plaque for", "make it about", or "I want".
-- Correct clear spelling mistakes, punctuation, grammar, and awkward phrasing.
-- Choose a warm, direct tone suitable for engraving; avoid cheesy, flowery, or over-sentimental wording unless the draft clearly asks for it.
-- Keep it concise, but do not be so conservative that rough notes remain rough notes.
-- For memorials, dedications, benches, gifts, doors, awards, and business plaques, use the conventions of that plaque type.
+- Use every important detail the customer provides.
+- Remove only obvious conversational filler like "plaque for", "make it about", or "I want" when it is not part of the inscription.
+- Do not rewrite a finished inscription into a different message.
+- For rough fragments, lightly arrange them into readable plaque wording without adding facts.
 - Keep deliberate line breaks when they look intentional; otherwise add sensible line breaks for a plaque inscription.
-- If the draft is already plaque-ready, make only small improvements.
+- If the draft is already plaque-ready, make only spelling, grammar, punctuation, and spacing improvements.
 - Return plain text only. No markdown, no quotes, no explanation.
 
 Customer draft:
