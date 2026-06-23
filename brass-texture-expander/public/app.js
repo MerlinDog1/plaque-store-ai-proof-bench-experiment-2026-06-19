@@ -43,6 +43,14 @@ const updateDownloadState = (href = "") => {
   downloadLink.setAttribute("aria-disabled", href ? "false" : "true");
 };
 
+const clearResult = (title = "No generated texture yet") => {
+  resultImage.removeAttribute("src");
+  resultImage.style.display = "none";
+  emptyState.style.display = "block";
+  previewTitle.textContent = title;
+  updateDownloadState("");
+};
+
 const fileToDataUrl = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -95,10 +103,7 @@ const handleFile = async (file) => {
   sourceThumb.style.display = "block";
   dropText.style.display = "none";
   generateBtn.disabled = false;
-  resultImage.style.display = "none";
-  emptyState.style.display = "block";
-  previewTitle.textContent = "Ready to generate";
-  updateDownloadState("");
+  clearResult("Ready to generate");
   setStatus(`${file.name} loaded.`);
 };
 
@@ -106,7 +111,7 @@ const generateTexture = async () => {
   if (!imageDataUrl) return;
   const spec = outputSpecs[selectedRatio];
   generateBtn.disabled = true;
-  updateDownloadState("");
+  clearResult("Generating texture");
   setStatus("Generating texture with Gemini. This can take a minute.");
 
   try {
@@ -129,6 +134,7 @@ const generateTexture = async () => {
     updateDownloadState(URL.createObjectURL(blob));
     setStatus(`Ready: ${spec.width} x ${spec.height} PNG.`);
   } catch (error) {
+    clearResult("Generation failed");
     setStatus(error instanceof Error ? error.message : "Generation failed.", true);
   } finally {
     generateBtn.disabled = !imageDataUrl;
@@ -139,8 +145,7 @@ ratioButtons.forEach((button) => {
   button.addEventListener("click", () => {
     selectedRatio = button.dataset.ratio;
     ratioButtons.forEach((item) => item.classList.toggle("active", item === button));
-    updateDownloadState("");
-    previewTitle.textContent = resultImage.style.display === "block" ? "Generate again for the new shape" : "No generated texture yet";
+    clearResult(resultImage.style.display === "block" ? "Generate again for the new shape" : "No generated texture yet");
   });
 });
 
