@@ -29,7 +29,7 @@ const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
   [Material.OrbitalBrassMattLacquer]: 'Orbital brass',
   [Material.PolishedBrass]: 'Polished brass',
-  [Material.AgedBrass]: 'Aged brass',
+  [Material.AgedBrass]: 'Mid aged brass',
   [Material.BrushedSteel]: 'Brushed stainless',
   [Material.PolishedSteel]: 'Polished stainless',
 };
@@ -38,7 +38,7 @@ const MATERIAL_NOTES: Record<Material, string> = {
   [Material.BrushedBrass]: 'Hand-brushed satin brass with warm low-glare grain',
   [Material.OrbitalBrassMattLacquer]: 'Matt lacquered orbital brass with optional colour-filled etch',
   [Material.PolishedBrass]: 'Mirror-bright traditional presentation brass',
-  [Material.AgedBrass]: 'Heritage patina with darker engraving',
+  [Material.AgedBrass]: 'Mid-aged brass texture with adjustable patina depth',
   [Material.BrushedSteel]: 'Directional satin stainless with fine linear grain',
   [Material.PolishedSteel]: 'Mirror stainless with crisp reflected highlights',
 };
@@ -47,7 +47,7 @@ const MATERIAL_SWATCH: Record<Material, string> = {
   [Material.BrushedBrass]: 'repeating-linear-gradient(0deg,rgba(255,238,176,.22) 0 1px,rgba(79,49,11,.14) 1px 2px,transparent 2px 5px),linear-gradient(135deg,#9f6e20,#c89b48,#8b5d18)',
   [Material.OrbitalBrassMattLacquer]: 'repeating-radial-gradient(circle at 42% 38%,rgba(255,244,194,.32) 0 1px,rgba(84,67,37,.15) 1px 2px,transparent 2px 5px),linear-gradient(135deg,#d8c17b,#9e824a,#c8af6a)',
   [Material.PolishedBrass]: 'linear-gradient(135deg,#744307 0%,#ffc43f 18%,#fff5b5 30%,#9c5a08 43%,#fff8c4 57%,#b86d0c 70%,#6b3b05 100%)',
-  [Material.AgedBrass]: 'linear-gradient(135deg,#302315,#8c7034,#c0a158,#604822,#2a1d12)',
+  [Material.AgedBrass]: "linear-gradient(rgba(80,55,29,.18),rgba(80,55,29,.18)),url('/materials/mid-aged-brass.png') center/cover",
   [Material.BrushedSteel]: 'repeating-linear-gradient(0deg,rgba(255,255,255,.22) 0 1px,rgba(55,67,75,.14) 1px 2px,transparent 2px 5px),linear-gradient(135deg,#7a858b,#c7d0d4,#68727a)',
   [Material.PolishedSteel]: 'linear-gradient(135deg,#4a535b 0%,#d7dde1 15%,#ffffff 26%,#8c969e 38%,#f2f6f8 55%,#727d86 72%,#39434b 100%)',
 };
@@ -1024,7 +1024,7 @@ export const Controls: React.FC<Props> = ({
                 </button>
                 {material === Material.AgedBrass && state.material === Material.AgedBrass && (
                   <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
-                    <div className="mb-2 text-sm font-black">Aged brass finish</div>
+                    <div className="mb-2 text-sm font-black">Mid aged brass finish</div>
                     <div className="grid grid-cols-3 gap-2">
                       {[
                         ['Light aged', 0.18],

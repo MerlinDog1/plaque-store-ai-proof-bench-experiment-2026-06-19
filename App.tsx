@@ -851,7 +851,7 @@ const App: React.FC = () => {
     [Material.BrushedBrass]: 'Brushed brass',
     [Material.OrbitalBrassMattLacquer]: 'Orbital brass',
     [Material.PolishedBrass]: 'Polished brass',
-    [Material.AgedBrass]: 'Aged brass',
+    [Material.AgedBrass]: 'Mid aged brass',
     [Material.BrushedSteel]: 'Brushed stainless',
     [Material.PolishedSteel]: 'Polished stainless',
   };

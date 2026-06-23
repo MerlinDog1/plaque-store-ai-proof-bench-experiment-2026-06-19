@@ -1769,10 +1769,10 @@ export const generateRealisticView = async (
       details: "High-gloss mirror brass with sharp reflected highlight bands and strong golden contrast. No visible brush grain"
     },
     [Material.AgedBrass]: {
-      name: "Aged Antique Brass",
+      name: "Mid Aged Brass",
       hex: "#8B6F4E",
-      texture: "Weathered patina",
-      details: "Matte finish, uneven oxidation, vintage bronze/brown tones"
+      texture: "Mid-aged brass with fine scratches and soft patina",
+      details: "Warm brown-gold brass with subtle oxidation, fine surface wear, lightly aged uneven tone and a low-glare traditional finish. It should look like one continuous engraved plaque surface, not a patched texture or heavily corroded plate"
     },
     [Material.BrushedSteel]: {
       name: "Brushed Stainless Steel",

@@ -221,6 +221,11 @@ export const materialStories = [
     copy: 'Warm, traditional and legible. The safest premium choice for memorial, dedication and presentation plaques.',
   },
   {
+    title: 'Mid aged brass',
+    image: '/materials/mid-aged-brass.png',
+    copy: 'A warmer aged brass surface with fine wear, soft patina and enough contrast for traditional engraved plaques.',
+  },
+  {
     title: 'Brushed stainless steel',
     image: '/materials/brushed-stainless-satin.png',
     copy: 'Clean, restrained and highly suitable for outdoor bench plaques, public spaces and contemporary settings.',

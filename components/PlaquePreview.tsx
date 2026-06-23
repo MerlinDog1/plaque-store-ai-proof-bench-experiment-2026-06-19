@@ -189,6 +189,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   };
   const materialTextureId: Partial<Record<Material, string>> = {
     [Material.OrbitalBrassMattLacquer]: "orbitalBrassTexture",
+    [Material.AgedBrass]: "agedBrassTexture",
     [Material.BrushedSteel]: "brushedSteelTexture",
     [Material.PolishedSteel]: "mirrorSteelTexture",
   };
@@ -196,10 +197,12 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const textureUrl = materialTextureId[state.material] ? `url(#${materialTextureId[state.material]})` : null;
   const textureOpacity = state.material === Material.BrushedSteel
     ? 0.74
-    : state.material === Material.PolishedSteel
-      ? 0.42
-      : state.material === Material.OrbitalBrassMattLacquer
-        ? 0.12
+      : state.material === Material.PolishedSteel
+        ? 0.42
+        : state.material === Material.OrbitalBrassMattLacquer
+          ? 0.12
+          : state.material === Material.AgedBrass
+            ? 1
         : 0.24;
   const reverseMetalFillUrl = isBrass ? "url(#brushedBrass)" : "url(#mirrorSteel)";
   const engravedFill = TEXT_COLOR_VALUES[state.textColor];
@@ -740,6 +743,9 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
           </pattern>
           <pattern id="orbitalBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
             <image href="/materials/orbital-brass-matt.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+          </pattern>
+          <pattern id="agedBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
+            <image href="/materials/mid-aged-brass.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="brushedSteelTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
             <image href="/materials/brushed-stainless-satin.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
