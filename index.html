@@ -1151,26 +1151,30 @@
     }
 
     .proofbench-rail {
+      align-items: flex-end !important;
       border: 1px solid rgba(238, 244, 238, 0.12);
       border-right: 0;
       border-radius: 16px 0 0 16px;
-      background: linear-gradient(180deg, rgba(12, 22, 21, 0.98), rgba(8, 14, 14, 0.96));
-      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.26), inset 1px 0 0 rgba(255, 255, 255, 0.06);
+      background:
+        linear-gradient(90deg, rgba(7, 13, 13, 0.98), rgba(12, 22, 21, 0.98));
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.24), inset 1px 0 0 rgba(255, 255, 255, 0.05);
     }
 
     .proofbench-step-button {
+      position: relative;
       display: flex;
-      width: 64px;
-      min-height: 58px;
+      width: 68px;
+      min-height: 62px;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 4px;
-      border-left: 3px solid transparent;
-      border-radius: 10px;
-      color: #a8b5ae;
+      border: 1px solid transparent;
+      border-right: 0;
+      border-radius: 14px 0 0 14px;
+      color: #9ca9a3;
       font-size: 0;
-      transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+      transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, width 160ms ease;
     }
 
     .proofbench-step-button::before {
@@ -1193,17 +1197,31 @@
 
     .proofbench-step-button:hover,
     .proofbench-step-button.is-active {
-      background: rgba(215, 182, 106, 0.13);
+      background: rgba(215, 182, 106, 0.10);
       color: #f5d27b;
-      transform: translateX(2px);
     }
 
     .proofbench-step-button.is-active {
-      border-left-color: #f5d27b;
+      z-index: 2;
+      width: 82px;
+      margin-right: -1px;
+      border-color: rgba(238, 244, 238, 0.16);
+      border-right-color: rgba(13, 23, 22, 0.98);
+      background:
+        linear-gradient(90deg, rgba(245, 210, 123, 0.16), rgba(13, 23, 22, 0.98) 42%),
+        linear-gradient(180deg, rgba(18, 31, 29, 0.99), rgba(9, 16, 15, 0.98));
+      box-shadow:
+        inset 3px 0 0 #f5d27b,
+        0 12px 30px rgba(0, 0, 0, 0.22);
     }
 
     .proofbench-step-button.is-complete {
-      color: #62d79a;
+      color: #9ca9a3;
+    }
+
+    .proofbench-step-button.is-complete:hover,
+    .proofbench-step-button.is-complete.is-active {
+      color: #f5d27b;
     }
 
     .proofbench-rail-utility,
