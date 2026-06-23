@@ -555,12 +555,15 @@ function getFixingPositions(state: PlaqueState) {
     : state.fixing === Fixing.Screws ? 7 : 10 + (state.capSize === 15 ? 2 : 0);
   const sideMountedFixings = state.shape !== Shape.Rect || state.height < 80;
   const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
-  const requestedHoleCount = isBenchPlaque && state.fixing === Fixing.Screws ? state.fixingHoleCount ?? 2 : 2;
+  const requestedHoleCount = state.fixing === Fixing.Screws
+    ? state.fixingHoleCount ?? (isBenchPlaque ? 2 : 4)
+    : 2;
   const offset = state.wood ? WOOD_BACKING_EXTRA_MM / 2 : 0;
   const cx = offset + state.width / 2;
   const cy = offset + state.height / 2;
 
-  if (sideMountedFixings && requestedHoleCount !== 4) {
+  const useCornerFixings = requestedHoleCount === 4 || (state.fixing === Fixing.Caps && !sideMountedFixings);
+  if (!useCornerFixings) {
     const xOffset = state.width / 2 - holeInset;
     return [{ x: cx - xOffset, y: cy }, { x: cx + xOffset, y: cy }];
   }

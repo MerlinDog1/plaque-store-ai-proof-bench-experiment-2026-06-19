@@ -562,6 +562,13 @@ export const Controls: React.FC<Props> = ({
       });
       return;
     }
+    if (key === 'fixing' && value === Fixing.Screws) {
+      onChange({
+        fixing: value,
+        fixingHoleCount: state.fixing === Fixing.Screws ? state.fixingHoleCount : isBenchPlaque ? 2 : 4,
+      });
+      return;
+    }
     if (key === 'fixing' && value !== Fixing.Screws) {
       onChange({
         fixing: value,
@@ -1124,7 +1131,7 @@ export const Controls: React.FC<Props> = ({
                     >
                       <span className="flex items-center justify-between gap-2">
                         <span className="block text-sm font-black">{label}</span>
-                        {fixing === Fixing.Screws && state.fixing === Fixing.Screws && isBenchPlaque && (
+                        {fixing === Fixing.Screws && state.fixing === Fixing.Screws && (
                           <span className="rounded-full border border-current/20 px-2 py-1 text-[10px] font-black">
                             {state.fixingHoleCount} holes
                           </span>
@@ -1132,12 +1139,12 @@ export const Controls: React.FC<Props> = ({
                       </span>
                       <span className="mt-1 block text-xs leading-4 opacity-70">{note}</span>
                     </button>
-                    {fixing === Fixing.Screws && state.fixing === Fixing.Screws && isBenchPlaque && (
+                    {fixing === Fixing.Screws && state.fixing === Fixing.Screws && !isHeartPlaque && (
                       <div className="rounded-lg border border-[#c6932e]/35 bg-[#f6efe2] p-3">
                         <div className="mb-2 flex items-center justify-between gap-2">
                           <div className="text-sm font-black">Countersunk screw holes</div>
                           <div className="rounded-full bg-[#fffaf0] px-2 py-1 text-[10px] font-black text-[#6a746d]">
-                            Bench plaque
+                            {isBenchPlaque ? 'Bench plaque' : 'Visible screws'}
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
@@ -1152,7 +1159,7 @@ export const Controls: React.FC<Props> = ({
                           ))}
                         </div>
                         <div className="mt-2 text-xs font-bold leading-5 text-[#6a746d]">
-                          Choose two end holes or four corner holes for bench plaque screw fixing.
+                          Choose two end holes or four corner holes for countersunk screw fixing.
                         </div>
                       </div>
                     )}

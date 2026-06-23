@@ -1,6 +1,5 @@
 import { Type } from "@google/genai";
 import { AVAILABLE_FONTS, PlaqueState, Shape, Material, Fixing, MemorialImageMethod, DesignStyle, STYLE_FONT_PALETTES, FontPalette, TypographyEngine, TextColor } from "../types";
-import { isBenchPlaqueFormat } from "./plaqueRules";
 import { composeEditorialTypography } from "./editorialComposer";
 import { getGeminiClient } from "./geminiClient";
 
@@ -1829,8 +1828,7 @@ export const generateRealisticView = async (
     backingDesc = "None. No wood backing board for this heart plaque.";
   } else if (state.fixing === Fixing.Screws || state.fixing === Fixing.Caps) {
     const isFourHole = state.shape === Shape.Rect
-      && (!isBenchPlaqueFormat(state.width, state.height, state.shape)
-        || (state.fixing === Fixing.Screws && state.fixingHoleCount === 4));
+      && (state.fixing === Fixing.Caps || state.fixingHoleCount === 4);
     const count = isFourHole ? "4x" : "2x";
     const pos = isFourHole
       ? "in the four corners"

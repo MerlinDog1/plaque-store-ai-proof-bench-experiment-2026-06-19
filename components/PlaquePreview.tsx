@@ -231,7 +231,9 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     : state.fixing === Fixing.Screws ? 7 : 10 + (state.capSize === 15 ? 2 : 0);
   const sideMountedFixings = state.shape !== Shape.Rect || state.height < 80;
   const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
-  const requestedHoleCount = isBenchPlaque && state.fixing === Fixing.Screws ? state.fixingHoleCount ?? 2 : 2;
+  const requestedHoleCount = state.fixing === Fixing.Screws
+    ? state.fixingHoleCount ?? (isBenchPlaque ? 2 : 4)
+    : 2;
 
   let holes: { x: number, y: number }[] = [];
   const cx = offset + state.width / 2;
@@ -239,7 +241,8 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
 
   // Calculate fixing positions
   if (hasVisibleFixings && !isHeartPlaque) {
-    if (!sideMountedFixings || requestedHoleCount === 4) {
+    const useCornerFixings = requestedHoleCount === 4 || (state.fixing === Fixing.Caps && !sideMountedFixings);
+    if (useCornerFixings) {
       const x1 = offset + holeInset;
       const x2 = offset + state.width - holeInset;
       const y1 = offset + holeInset;
