@@ -209,10 +209,10 @@ function HomeMaterialPanels() {
     <section className="commerce-section commerce-material-showcase">
       <div className="commerce-section__head">
         <p className="commerce-eyebrow">Materials</p>
-        <h2>Tactile finishes, chosen for real engraved plaques.</h2>
+        <h2>Engraved with care, on the finest materials.</h2>
         <p>
-          Each plaque is engraved with care on quality metal or wood-backed finishes, then checked
-          before it is packed for delivery.
+          Choose from premium brass, stainless steel, and wood-backed finishes selected for clean engraving,
+          lasting detail, and a substantial feel.
         </p>
       </div>
       <div className="commerce-material-grid commerce-material-grid--home">
