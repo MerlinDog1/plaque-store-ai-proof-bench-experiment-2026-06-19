@@ -867,7 +867,7 @@
   gap: 1.5rem;
   max-width: none;
   margin: 0;
-  padding: 34px clamp(18px, 5vw, 72px) 40px;
+  padding: 22px clamp(18px, 4vw, 56px) 24px;
   border-top: 1px solid rgba(242, 214, 136, 0.18);
   background:
     radial-gradient(circle at 12% 0%, rgba(242, 214, 136, 0.12), transparent 26rem),
@@ -882,7 +882,7 @@
 .commerce-footer .brand-wordmark--footer {
   display: inline-flex;
   margin-bottom: 0.25rem;
-  font-size: clamp(30px, 4vw, 48px);
+  font-size: clamp(24px, 2.6vw, 34px);
   font-weight: 950;
   line-height: 0.95;
 }
@@ -899,7 +899,7 @@
   max-width: 620px;
   margin: 0;
   color: rgba(242, 248, 243, 0.72);
-  font-size: 13px;
+  font-size: 11px;
   line-height: 1.5;
 }
 
@@ -907,7 +907,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.9rem;
+  gap: 0.55rem;
 }
 
 .commerce-footer-socials,
@@ -918,28 +918,28 @@
 }
 
 .commerce-footer-socials {
-  gap: 0.7rem;
+  gap: 0.45rem;
 }
 
 .commerce-footer-payment-badge {
   display: block;
-  width: min(360px, 100%);
+  width: min(248px, 100%);
   height: auto;
-  border-radius: 7px;
+  border-radius: 5px;
   background: transparent;
-  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.22));
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.18));
 }
 
 .commerce-footer-legal {
-  gap: 0.45rem;
+  gap: 0.36rem;
 }
 
 .commerce-footer-socials button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 68px;
-  min-height: 68px;
+  width: 48px;
+  min-height: 48px;
   border: 1px solid rgba(242, 214, 136, 0.48);
   border-radius: 8px;
   background: rgba(255, 250, 240, 0.08);
@@ -949,8 +949,8 @@
 }
 
 .commerce-footer-socials svg {
-  width: 38px;
-  height: 38px;
+  width: 26px;
+  height: 26px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -963,9 +963,9 @@
 }
 
 .commerce-footer-legal button {
-  min-height: 24px;
+  min-height: 20px;
   color: rgba(242, 248, 243, 0.72);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -1877,14 +1877,14 @@
 
   .commerce-footer {
     flex-direction: column;
-    gap: 1.15rem;
-    padding: 30px 18px 36px;
+    gap: 0.9rem;
+    padding: 24px 18px 28px;
   }
 
   .commerce-footer__right {
     align-items: flex-start;
     width: 100%;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
   .commerce-footer-socials,
@@ -1893,26 +1893,26 @@
   }
 
   .commerce-footer-socials button {
-    width: 72px;
-    min-height: 72px;
+    width: 52px;
+    min-height: 52px;
   }
 
   .commerce-footer-socials svg {
-    width: 42px;
-    height: 42px;
+    width: 28px;
+    height: 28px;
   }
 
   .commerce-footer-payment-badge {
     width: 100%;
-    max-width: 362px;
+    max-width: 260px;
   }
 
   .commerce-footer .brand-wordmark--footer {
-    font-size: 34px;
+    font-size: 28px;
   }
 
   .commerce-footer p {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .commerce-home-story__gallery div {
