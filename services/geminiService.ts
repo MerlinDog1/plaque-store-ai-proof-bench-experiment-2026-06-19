@@ -1224,6 +1224,57 @@ export function cleanSvgContent(svg: string): string {
 // ─── Generation Phase Callback Type ──────────────────────────────
 export type GenerationPhase = 'concept' | 'transcribe' | null;
 
+export const refinePlaqueWording = async (rawText: string): Promise<string> => {
+  const source = rawText.trim();
+  if (!source) return source;
+
+  const ai = getAIClient();
+  const prompt = `
+You are a careful plaque wording assistant.
+
+Rewrite the customer's draft only when it helps make the wording plaque-suitable.
+
+Rules:
+- Preserve names, dates, places, relationships, numbers, and factual meaning.
+- Do not invent facts, dates, honours, relationships, slogans, or sentimental details.
+- Keep the wording concise and suitable for engraving.
+- Correct clear spelling mistakes, punctuation, and awkward phrasing.
+- Keep deliberate line breaks when they look intentional; otherwise add sensible line breaks for a plaque inscription.
+- If the draft is already suitable, return it unchanged.
+- Return plain text only. No markdown, no quotes, no explanation.
+
+Customer draft:
+---BEGIN DRAFT---
+${source}
+---END DRAFT---
+`;
+
+  const response = await retryWrapper(async () => ai.models.generateContent({
+    model: "gemini-3.5-flash",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          refinedText: { type: Type.STRING },
+        },
+        required: ["refinedText"],
+      },
+    },
+  }));
+
+  if (!response.text) return source;
+  try {
+    const parsed = JSON.parse(response.text) as { refinedText?: string };
+    const refined = parsed.refinedText?.trim();
+    return refined || source;
+  } catch (error) {
+    console.warn("Plaque wording assist returned invalid JSON.", error);
+    return source;
+  }
+};
+
 // ─── Stage 1: Generate Concept Image via Gemini Image Gen ────────
 const generateConceptImage = async (
   promptText: string,

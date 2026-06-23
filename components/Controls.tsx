@@ -151,7 +151,7 @@ const STEP_COPY = [
 interface Props {
   state: PlaqueState;
   onChange: (newState: Partial<PlaqueState>) => void;
-  onGenerate: (text: string) => void;
+  onGenerate: (text: string, options?: { wordingAssist?: boolean }) => void;
   onClear: () => void;
   prompt: string;
   onPromptChange: (prompt: string) => void;
@@ -743,7 +743,7 @@ export const Controls: React.FC<Props> = ({
   const submitPrompt = () => {
     const copy = prompt.trim();
     if (!copy) return;
-    onGenerate(copy);
+    onGenerate(copy, { wordingAssist: wordingAssistEnabled });
   };
 
   const renderSizePresetButton = (preset: SizePreset, extraClassName = '') => {
@@ -1715,7 +1715,7 @@ export const Controls: React.FC<Props> = ({
             >
               {isGenerating
                 ? generationPhase === 'concept'
-                  ? 'Creating concept...'
+                  ? 'Preparing wording...'
                   : generationPhase === 'transcribe'
                     ? 'Fitting your layout...'
                     : 'Working...'

@@ -5,7 +5,7 @@ import { Controls } from './components/Controls';
 import { RealisticPreviewModal } from './components/RealisticPreviewModal';
 import { SiteExperience } from './components/SiteExperience';
 import { BorderStyle, DesignStyle, EtchmasterImageMode, EtchmasterShapeMask, Fixing, INITIAL_STATE, Material, MemorialImageMethod, MemorialImagePlacement, MemorialImageShape, PlaqueState, Shape, TextColor, TypographyEngine } from './types';
-import { generatePlaqueDesign, generateRealisticView, GenerationPhase } from './services/geminiService';
+import { generatePlaqueDesign, generateRealisticView, refinePlaqueWording, GenerationPhase } from './services/geminiService';
 import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
@@ -468,13 +468,24 @@ const App: React.FC = () => {
     }));
   };
 
-  const handleGenerateLayout = async (prompt: string) => {
+  const handleGenerateLayout = async (prompt: string, options?: { wordingAssist?: boolean }) => {
     setIsGeneratingLayout(true);
     setGenerationPhase(null);
     try {
-      const inscriptionBox = getInscriptionLayout(state, prompt);
+      let effectivePrompt = prompt;
+      const shouldAssistWording = options?.wordingAssist ?? false;
+
+      if (shouldAssistWording) {
+        setGenerationPhase('concept');
+        effectivePrompt = await refinePlaqueWording(prompt);
+        if (effectivePrompt !== prompt) {
+          setInscriptionPrompt(effectivePrompt);
+        }
+      }
+
+      const inscriptionBox = getInscriptionLayout(state, effectivePrompt);
       const result = await generatePlaqueDesign(
-        prompt,
+        effectivePrompt,
         state.width,
         state.height,
         state.shape,
@@ -482,17 +493,19 @@ const App: React.FC = () => {
         null,
         (phase) => setGenerationPhase(phase),
         { width: inscriptionBox.textW, height: inscriptionBox.textH },
-        getInscriptionContext(prompt),
+        getInscriptionContext(effectivePrompt),
         TypographyEngine.GeminiAuthored
       );
 
       if (result) {
-        setGeneratedLayoutSignature(getLayoutSignature(prompt));
+        setGeneratedLayoutSignature(getLayoutSignature(effectivePrompt));
         setState(prev => ({
           ...prev,
           generatedSvgContent: result.svgContent,
           conceptImageUrl: result.conceptImageUrl,
-          aiReasoning: result.reasoning
+          aiReasoning: shouldAssistWording && effectivePrompt !== prompt
+            ? `Wording assist refined the inscription before layout. ${result.reasoning}`
+            : result.reasoning
         }));
         setActiveStep(5);
       }
