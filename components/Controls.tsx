@@ -1627,10 +1627,18 @@ export const Controls: React.FC<Props> = ({
                 <span />
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f2d688]">Plaque wording</p>
-                <h3 className="mt-1 text-lg font-black leading-tight text-[#edf3ef]">Not sure what to write? Start with your words.</h3>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f2d688]">
+                  {wordingAssistEnabled ? 'AI wording assist' : 'Intelligent typesetter'}
+                </p>
+                <h3 className="mt-1 text-lg font-black leading-tight text-[#edf3ef]">
+                  {wordingAssistEnabled
+                    ? 'Not sure what to write? Start with your notes.'
+                    : 'Enter your text below and our typesetter will lay it out.'}
+                </h3>
                 <p className="mt-2 text-sm leading-6 text-[#aab8b0]">
-                  The layout assistant fits line breaks, hierarchy, spacing, and font balance to the plaque size you have selected.
+                  {wordingAssistEnabled
+                    ? 'AI assist turns your notes into plaque-ready wording, then the layout assistant fits it to the plaque.'
+                    : 'It chooses the line breaks, hierarchy, spacing, and font balance for the plaque size you have selected.'}
                 </p>
               </div>
             </div>
@@ -1697,8 +1705,10 @@ export const Controls: React.FC<Props> = ({
                 id="inscription-wording-input"
                 value={prompt}
                 onChange={(e) => onPromptChange(e.target.value)}
-                placeholder={`Tell us who or what the plaque is for.
-Add important dates, names, places, roles, short messages, or anything that must be included.`}
+                placeholder={wordingAssistEnabled
+                  ? `Tell us who or what the plaque is for.
+Add important dates, names, places, roles, short messages, or anything that must be included.`
+                  : 'Type the words you want on the plaque...'}
                 className={`${fieldClass} mt-1 min-h-[190px] resize-none normal-case leading-6 tracking-normal`}
               />
             </div>
@@ -1724,7 +1734,7 @@ Add important dates, names, places, roles, short messages, or anything that must
                   ? 'Regenerate'
                   : wordingAssistEnabled
                     ? 'Make plaque-ready layout'
-                    : 'Fit text to plaque'}
+                    : 'Generate layout'}
             </button>
           </div>
           )}
