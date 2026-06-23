@@ -374,6 +374,7 @@ export const Controls: React.FC<Props> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const styleInputRef = useRef<HTMLInputElement>(null);
   const sizePresetStackRef = useRef<HTMLDivElement>(null);
+  const inscriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
   const instantStyleApplyingRef = useRef(false);
   const [fineTuneUnlocked, setFineTuneUnlocked] = useState(false);
   const [sizeMode, setSizeMode] = useState<'standard' | 'custom'>('standard');
@@ -398,6 +399,14 @@ export const Controls: React.FC<Props> = ({
   });
   const pictureOffsetXLimit = Math.max(80, Math.ceil(state.width));
   const pictureOffsetYLimit = Math.max(80, Math.ceil(state.height));
+  const resizeInscriptionTextarea = () => {
+    const textarea = inscriptionTextareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 240), 360);
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY = textarea.scrollHeight > nextHeight ? 'auto' : 'hidden';
+  };
   const generatedTextControls = React.useMemo<GeneratedTextControl[]>(() => {
     if (!state.generatedSvgContent || typeof DOMParser === 'undefined') return [];
     try {
@@ -469,6 +478,12 @@ export const Controls: React.FC<Props> = ({
   useEffect(() => {
     setCustomHeightInput(String(state.height));
   }, [state.height]);
+
+  useEffect(() => {
+    if (activeStep !== 5) return;
+    const frame = requestAnimationFrame(resizeInscriptionTextarea);
+    return () => cancelAnimationFrame(frame);
+  }, [activeStep, prompt]);
 
   useEffect(() => {
     if (
@@ -1674,11 +1689,15 @@ export const Controls: React.FC<Props> = ({
                 Enter your text
               </label>
               <textarea
+                ref={inscriptionTextareaRef}
                 id="inscription-wording-input"
                 value={prompt}
-                onChange={(e) => onPromptChange(e.target.value)}
+                onChange={(e) => {
+                  onPromptChange(e.target.value);
+                  requestAnimationFrame(resizeInscriptionTextarea);
+                }}
                 placeholder="Type the words you want on the plaque..."
-                className={`${fieldClass} mt-1 min-h-[190px] resize-none normal-case leading-6 tracking-normal`}
+                className={`${fieldClass} mt-1 min-h-[240px] max-h-[360px] resize-none overflow-hidden normal-case leading-6 tracking-normal`}
               />
             </div>
           </div>
