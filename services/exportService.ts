@@ -740,35 +740,33 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
 
     if (isPortraitPdf) {
       const imageBoxW = 184;
-      const imageBoxH = 128;
+      const imageBoxH = 132;
       const imageScale = Math.min(imageBoxW / imageProps.width, imageBoxH / imageProps.height);
       const imageW = imageProps.width * imageScale;
       const imageH = imageProps.height * imageScale;
       const proofX = 13;
-      const proofY = 32;
+      const proofY = 25;
       const imageX = proofX + (imageBoxW - imageW) / 2;
       const imageY = proofY + (imageBoxH - imageH) / 2;
 
       doc.setFillColor(243, 239, 229);
       doc.rect(0, 0, pageW, pageH, "F");
       doc.setFillColor(8, 31, 26);
-      doc.rect(0, 0, pageW, 20, "F");
+      doc.rect(0, 0, pageW, 13, "F");
       doc.setTextColor(246, 240, 222);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(12.2);
-      doc.text("Insta", 13, 13.8);
+      doc.setFontSize(15.8);
+      doc.text("Insta", 13, 9.9);
       doc.setTextColor(244, 202, 103);
-      doc.text("Plaque", 23.3, 13.8);
+      doc.text("Plaque", 26.4, 9.9);
 
       doc.setFillColor(237, 190, 82);
-      doc.roundedRect(pageW - 91, 5.2, 78, 9.4, 4.7, 4.7, "F");
+      doc.roundedRect(pageW - 98, 1.9, 85, 9.2, 4.6, 4.6, "F");
       doc.setTextColor(23, 32, 29);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(5.8);
-      doc.text(`Design saved until ${savedUntil}`, pageW - 52, 11.1, { align: "center" });
+      doc.setFontSize(8.7);
+      doc.text(`Design saved until ${savedUntil}`, pageW - 55.5, 8.1, { align: "center" });
 
-      doc.setFillColor(224, 217, 201);
-      doc.roundedRect(proofX + 2, proofY + 3, imageBoxW, imageBoxH, 2, 2, "F");
       doc.addImage(proofImageData, "PNG", imageX, imageY, imageW, imageH);
 
       const panelX = 13;
@@ -803,7 +801,7 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
 
       doc.setDrawColor(193, 150, 64);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(6.4);
+      doc.setFontSize(5.5);
       doc.setTextColor(237, 238, 232);
       addWrappedText(
         doc,
@@ -811,35 +809,35 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
         panelX + 7,
         238,
         panelW - 14,
-        3.3
+        2.8
       );
 
-      doc.line(panelX + 7, 249, panelX + panelW - 7, 249);
+      doc.line(panelX + 7, 245, panelX + panelW - 7, 245);
       doc.setTextColor(245, 230, 186);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(9);
-      doc.text("Continue online", panelX + 7, 260);
+      doc.setFontSize(12);
+      doc.text("Continue online", panelX + 7, 257);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(7.1);
+      doc.setFontSize(8.2);
       doc.setTextColor(237, 238, 232);
       addWrappedText(
         doc,
         "Scan the QR code or use the link below to continue editing or checkout.",
         panelX + 7,
-        267,
-        86,
-        3.6
+        266,
+        94,
+        4
       );
 
       if (options.continueUrl) {
         const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 260, errorCorrectionLevel: "M" });
-        doc.addImage(qrDataUrl, "PNG", pageW - 42, 254, 24, 24);
+        doc.addImage(qrDataUrl, "PNG", pageW - 45, 253, 28, 28);
         doc.setFillColor(237, 190, 82);
-        doc.roundedRect(panelX + 96, 272, 46, 9, 4.5, 4.5, "F");
+        doc.roundedRect(panelX + 105, 270, 62, 11, 5.5, 5.5, "F");
         doc.setTextColor(23, 32, 29);
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(7);
-        doc.textWithLink("Open proof", panelX + 119, 277.8, { url: options.continueUrl, align: "center" });
+        doc.setFontSize(8);
+        doc.textWithLink("Open proof", panelX + 136, 277.2, { url: options.continueUrl, align: "center" });
       }
 
       doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);
@@ -852,47 +850,45 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
     const imageW = imageProps.width * imageScale;
     const imageH = imageProps.height * imageScale;
     const proofX = 14;
-    const proofY = 30;
+    const proofY = 22;
     const imageX = proofX + (imageBoxW - imageW) / 2;
     const imageY = proofY + (imageBoxH - imageH) / 2;
 
     doc.setFillColor(243, 239, 229);
     doc.rect(0, 0, pageW, pageH, "F");
     doc.setFillColor(8, 31, 26);
-    doc.rect(0, 0, pageW, 20, "F");
+    doc.rect(0, 0, pageW, 13, "F");
 
     doc.setTextColor(246, 240, 222);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(12.2);
-    doc.text("Insta", 14, 13.8);
+    doc.setFontSize(15.8);
+    doc.text("Insta", 14, 9.9);
     doc.setTextColor(244, 202, 103);
-    doc.text("Plaque", 24.3, 13.8);
+    doc.text("Plaque", 27.4, 9.9);
 
-    const savedPillX = pageW - 77;
-    const savedPillY = 5.2;
-    const savedPillW = 63;
-    const savedPillH = 9.4;
+    const savedPillX = pageW - 91;
+    const savedPillY = 1.9;
+    const savedPillW = 77;
+    const savedPillH = 9.2;
     doc.setFillColor(237, 190, 82);
     doc.roundedRect(savedPillX, savedPillY, savedPillW, savedPillH, savedPillH / 2, savedPillH / 2, "F");
     doc.setTextColor(23, 32, 29);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.8);
-    doc.text(`Design saved until ${savedUntil}`, savedPillX + savedPillW / 2, savedPillY + 5.9, { align: "center" });
+    doc.setFontSize(8.7);
+    doc.text(`Design saved until ${savedUntil}`, savedPillX + savedPillW / 2, savedPillY + 6.2, { align: "center" });
 
-    doc.setFillColor(224, 217, 201);
-    doc.roundedRect(proofX + 2, proofY + 3, imageBoxW, imageBoxH, 2, 2, "F");
     doc.addImage(proofImageData, "PNG", imageX, imageY, imageW, imageH);
 
     const panelX = 222;
-    const panelY = 30;
+    const panelY = 22;
     const panelW = pageW - panelX - 14;
-    const panelH = 164;
+    const panelH = 172;
     doc.setFillColor(8, 31, 26);
     doc.roundedRect(panelX, panelY, panelW, panelH, 4, 4, "F");
     doc.setDrawColor(193, 150, 64);
     doc.roundedRect(panelX, panelY, panelW, panelH, 4, 4, "S");
 
-    const specY = 43;
+    const specY = 35;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(245, 230, 186);
@@ -912,52 +908,52 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
     });
 
     doc.setDrawColor(193, 150, 64);
-    doc.line(panelX + 7, 123, panelX + panelW - 7, 123);
+    doc.line(panelX + 7, 117, panelX + panelW - 7, 117);
 
     doc.setTextColor(245, 230, 186);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.6);
-    doc.text("Before production", panelX + 7, 133);
+    doc.setFontSize(7.3);
+    doc.text("Before production", panelX + 7, 126);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.4);
+    doc.setFontSize(5.2);
     doc.setTextColor(237, 238, 232);
     addWrappedText(
       doc,
       "Check names, dates, material, size, fixings and layout before approval.",
       panelX + 7,
-      139,
+      131,
       panelW - 14,
-      3.2
+      2.7
     );
 
     doc.setDrawColor(193, 150, 64);
-    doc.line(panelX + 7, 154, panelX + panelW - 7, 154);
+    doc.line(panelX + 7, 144, panelX + panelW - 7, 144);
 
     doc.setTextColor(245, 230, 186);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.6);
-    doc.text("Continue online", panelX + 7, 165);
+    doc.setFontSize(11.5);
+    doc.text("Continue online", panelX + 7, 158);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.7);
+    doc.setFontSize(7.8);
     doc.setTextColor(237, 238, 232);
     addWrappedText(
       doc,
       "Scan the QR code or use the link below to continue editing or checkout.",
       panelX + 7,
-      171,
-      31,
-      3.1
+      166,
+      34,
+      3.7
     );
 
     if (options.continueUrl) {
       const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 260, errorCorrectionLevel: "M" });
-      doc.addImage(qrDataUrl, "PNG", pageW - 36, 164, 18, 18);
+      doc.addImage(qrDataUrl, "PNG", pageW - 39, 158, 22, 22);
       doc.setFillColor(237, 190, 82);
-      doc.roundedRect(panelX + 7, 184, 39, 9, 4.5, 4.5, "F");
+      doc.roundedRect(panelX + 7, 183, 47, 10.5, 5.25, 5.25, "F");
       doc.setTextColor(23, 32, 29);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.2);
-      doc.textWithLink("Open proof", panelX + 26.5, 189.8, { url: options.continueUrl, align: "center" });
+      doc.setFontSize(8.2);
+      doc.textWithLink("Open proof", panelX + 30.5, 189.9, { url: options.continueUrl, align: "center" });
     }
 
     doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);
