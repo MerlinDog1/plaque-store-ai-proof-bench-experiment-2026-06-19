@@ -1,7 +1,7 @@
 import React, { RefObject, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Fixing, Material, PlaqueState, Shape } from '../types';
+import { BorderStyle, Fixing, Material, PlaqueState, Shape } from '../types';
 import { outlinePreviewTextLayer } from '../services/exportService';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 
@@ -24,7 +24,7 @@ const METAL_THICKNESS_MM = 1.5;
 const WOOD_BACKING_THICKNESS_MM = 15;
 const WOOD_BACKING_BEVEL_SIZE_MM = 8.4;
 const WOOD_BACKING_BEVEL_THICKNESS_MM = 5.25;
-const CAP_THICKNESS_MM = 2;
+const CAP_THICKNESS_MM = 1.25;
 const SCENE_PLAQUE_WIDTH = 3.4;
 
 type TextureCrop = {
@@ -485,6 +485,20 @@ function makeExtrudedMesh(
   return new THREE.Mesh(geometry, material);
 }
 
+function makeRaisedCapGeometry(radius: number, depth: number) {
+  const profile = [
+    new THREE.Vector2(0, -depth / 2),
+    new THREE.Vector2(radius * 0.92, -depth / 2),
+    new THREE.Vector2(radius, -depth * 0.18),
+    new THREE.Vector2(radius * 0.96, depth * 0.18),
+    new THREE.Vector2(radius * 0.74, depth * 0.43),
+    new THREE.Vector2(0, depth / 2),
+  ];
+  const geometry = new THREE.LatheGeometry(profile, 48);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 function makeRectFrontChamferedWoodMesh(
   dims: ReturnType<typeof getSceneDimensions>,
   material: THREE.Material,
@@ -568,13 +582,23 @@ function getFixingPositions(state: PlaqueState) {
   if (state.shape === Shape.Heart) return [];
 
   const borderOuterInset = 3;
-  const fixingBorderClearance = state.fixing === Fixing.Screws ? 0.75 : 2;
+  const borderInnerInset = 5;
+  const fixingBorderClearance = state.fixing === Fixing.Screws ? 2.25 : 2;
   const screwRadius = 2.5;
   const capRadius = state.capSize / 2;
   const fixingRadius = state.fixing === Fixing.Caps ? capRadius : screwRadius;
-  const borderFixingInset = borderOuterInset;
+  const isScallopedBorder = state.borderStyle === BorderStyle.Scalloped || state.borderStyle === BorderStyle.DoubleScalloped;
+  const scallopedCapCenterInset = state.capSize === 15 ? 12 : 10;
+  const capBorderInset = state.borderStyle === BorderStyle.Double ? borderInnerInset : borderOuterInset;
+  const screwBorderInset = state.borderStyle === BorderStyle.Double ? borderInnerInset : borderOuterInset;
+  const borderedCapInset = isScallopedBorder
+    ? scallopedCapCenterInset
+    : capBorderInset + capRadius + 2;
+  const borderedFixingInset = state.fixing === Fixing.Caps
+    ? borderedCapInset
+    : screwBorderInset + fixingRadius + fixingBorderClearance;
   const holeInset = state.border
-    ? borderFixingInset + fixingRadius + fixingBorderClearance
+    ? borderedFixingInset
     : state.fixing === Fixing.Screws ? 7 : 10 + (state.capSize === 15 ? 2 : 0);
   const sideMountedFixings = state.shape !== Shape.Rect || state.height < 80;
   const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
@@ -628,6 +652,10 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
     controls.enablePan = false;
     controls.minDistance = 4.4;
     controls.maxDistance = 13;
+    controls.minPolarAngle = 0.45;
+    controls.maxPolarAngle = 2.45;
+    controls.minAzimuthAngle = -1.25;
+    controls.maxAzimuthAngle = 1.25;
     controls.target.set(0, 0, 0);
 
     const group = new THREE.Group();
@@ -774,6 +802,9 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
         color: tone.face,
         metalness: tone.metalness,
         roughness: tone.roughness,
+        polygonOffset: true,
+        polygonOffsetFactor: -8,
+        polygonOffsetUnits: -8,
       });
       makeMaterialTexture(state.material).then((texture) => {
         if (cancelled) {
@@ -785,15 +816,24 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
       });
       const radiusMm = state.fixing === Fixing.Caps ? state.capSize / 2 : 2.5;
       const hardwareDepth = state.fixing === Fixing.Caps ? dims.capDepth : Math.max(dims.unitPerMm * 0.5, dims.metalDepth * 0.35);
+      const radius = radiusMm * dims.unitPerMm;
+      const faceZ = dims.metalDepth + Math.max(0.012, dims.unitPerMm * 0.35);
+      const hardwareBackZ = state.fixing === Fixing.Caps
+        ? faceZ + Math.max(0.004, dims.unitPerMm * 0.24)
+        : dims.metalDepth + 0.002;
       getFixingPositions(state).forEach((point) => {
         const cap = new THREE.Mesh(
-          new THREE.CylinderGeometry(radiusMm * dims.unitPerMm, radiusMm * dims.unitPerMm, hardwareDepth, 40),
+          state.fixing === Fixing.Caps
+            ? makeRaisedCapGeometry(radius, hardwareDepth)
+            : new THREE.CylinderGeometry(radius, radius, hardwareDepth, 40),
           capMaterial,
         );
         cap.rotation.x = Math.PI / 2;
         cap.position.x = (point.x - dims.totalWidthMm / 2) * dims.unitPerMm;
         cap.position.y = -(point.y - dims.totalHeightMm / 2) * dims.unitPerMm;
-        cap.position.z = dims.metalDepth + hardwareDepth / 2 + 0.002;
+        cap.position.z = hardwareBackZ + hardwareDepth / 2;
+        cap.renderOrder = 8;
+        cap.userData.hardware = state.fixing;
         existingGroup.add(cap);
       });
     }
@@ -870,6 +910,7 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
         state.borderStyle,
         state.capSize,
         state.fixing,
+        state.fixingHoleCount,
         state.generatedSvgContent,
         state.height,
         state.material,
@@ -899,6 +940,7 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
     state.borderStyle,
     state.capSize,
     state.fixing,
+    state.fixingHoleCount,
     state.generatedSvgContent,
     state.height,
     state.material,
