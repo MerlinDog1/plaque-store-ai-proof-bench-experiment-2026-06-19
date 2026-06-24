@@ -722,6 +722,10 @@ export const Controls: React.FC<Props> = ({
     wood: false,
   });
   const woodAddOnPrice = estimateWoodAddOn(state);
+  const baseProofPrice = Math.max(0, price - (state.wood ? woodAddOnPrice : 0));
+  const estimatedTurnaround = state.memorialImageEnabled
+    ? 'Estimated 5-7 working days after proof approval'
+    : 'Estimated 3-5 working days after proof approval';
 
   const updateGeneratedTextLine = (lineIndex: number, changes: Partial<Pick<GeneratedTextControl, 'text' | 'fontFamily' | 'fontSize' | 'fontWeight'>>) => {
     if (!state.generatedSvgContent || typeof DOMParser === 'undefined') return;
@@ -2075,10 +2079,33 @@ export const Controls: React.FC<Props> = ({
           )}
 
           <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
-            <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Customer proof</div>
-            <p className="mt-1 text-sm leading-6 text-[#6a746d]">
-              Save a review PDF with a secure resume link and QR code, or continue to basket when the proof is ready.
+            <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Order summary</div>
+            <div className="mt-3 space-y-2 text-sm font-bold text-[#2f3832]">
+              <div className="flex items-center justify-between gap-3 border-b border-[rgba(84,72,52,0.12)] pb-2">
+                <span>{state.width} x {state.height}mm {MATERIAL_LABELS[state.material]}</span>
+                <strong>{formatPrice(baseProofPrice)}</strong>
+              </div>
+              {state.wood && (
+                <div className="flex items-center justify-between gap-3 border-b border-[rgba(84,72,52,0.12)] pb-2">
+                  <span>15mm timber backing board</span>
+                  <strong>{formatPrice(woodAddOnPrice)}</strong>
+                </div>
+              )}
+              <div className="flex items-center justify-between gap-3 border-b border-[rgba(84,72,52,0.12)] pb-2">
+                <span>UK mainland delivery</span>
+                <strong>Included</strong>
+              </div>
+              <div className="flex items-center justify-between gap-3 pt-1 text-lg text-[#17231f]">
+                <span>Total</span>
+                <strong>{formatPrice(price)}</strong>
+              </div>
+            </div>
+            <p className="mt-3 text-xs font-bold leading-5 text-[#6a746d]">
+              UK mainland delivery is included. Highlands, islands and non-UK delivery may need a manual quote before production.
             </p>
+            <div className="mt-3 rounded-lg border border-[#2f7f69]/25 bg-[#e3f4eb] p-3 text-sm font-black leading-5 text-[#173c2d]">
+              {estimatedTurnaround}
+            </div>
             {adminProofToolsOpen && (
               <div className="mt-4 rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
                 <label className="block text-xs font-black uppercase tracking-wide text-[#6a746d]">
@@ -2111,18 +2138,30 @@ export const Controls: React.FC<Props> = ({
                 </div>
               </div>
             )}
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <button onClick={onSaveProof} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
-                Save proof
+            <div className="mt-4 grid gap-2">
+              <button
+                onClick={onAddToBasket}
+                disabled={!isProductionReady}
+                className="studio-press min-h-[56px] w-full rounded-lg bg-[#f2d688] px-5 text-sm font-black text-[#1b231f] shadow-[0_14px_34px_rgba(216,177,95,0.18)] disabled:cursor-not-allowed disabled:bg-[#d8ceb9] disabled:text-[#8d8371] disabled:shadow-none"
+              >
+                {basketAdded ? 'Added to basket' : isProductionReady ? 'Checkout' : 'Complete checklist to checkout'}
               </button>
+              <button onClick={onExportPdf} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
+                Save design for later
+              </button>
+              <p className="text-xs font-bold leading-5 text-[#6a746d]">
+                The PDF includes a QR code and secure link so you can continue or buy later with no account. Saved links last 30 days.
+              </p>
+              {adminProofToolsOpen && (
+                <button onClick={onSaveProof} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
+                  Save proof locally
+                </button>
+              )}
               {adminProofToolsOpen && (
                 <button onClick={onRealisticPreview} className="col-span-2 min-h-[52px] rounded-lg bg-[#b98235] px-4 text-sm font-black text-[#1b231f]">
                   Realistic preview
                 </button>
               )}
-              <button onClick={onExportPdf} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
-                Save review PDF
-              </button>
               {adminProofToolsOpen && (
                 <button onClick={onPrint} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
                   Print
@@ -2143,20 +2182,13 @@ export const Controls: React.FC<Props> = ({
           </details>
           )}
 
-          <button
-            onClick={onAddToBasket}
-            disabled={!isProductionReady}
-            className="studio-press min-h-[56px] w-full rounded-lg bg-[#f2d688] px-5 text-sm font-black text-[#1b231f] shadow-[0_14px_34px_rgba(216,177,95,0.18)] disabled:cursor-not-allowed disabled:bg-[#d8ceb9] disabled:text-[#8d8371] disabled:shadow-none"
-          >
-            {basketAdded ? 'Added to basket' : isProductionReady ? 'Add to basket' : 'Complete the checklist to add to basket'}
-          </button>
-
           {basketAdded && (
             <div className="rounded-lg border border-[#2f7f69]/35 bg-[#151f1b] p-4 text-sm font-bold leading-6 text-[#1f755f]">
-              Added to basket. This prototype now reaches a clear handoff point; checkout can be connected later.
+              Added to basket. Continue through checkout to open the Stripe test payment step.
             </div>
           )}
 
+          {adminProofToolsOpen && (
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
               <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Size</div>
@@ -2175,14 +2207,15 @@ export const Controls: React.FC<Props> = ({
               <div className="mt-1 text-lg font-black">{state.generatedSvgContent ? 'Fitted' : 'Draft'}</div>
             </div>
           </div>
+          )}
 
-          {state.aiReasoning && (
+          {adminProofToolsOpen && state.aiReasoning && (
             <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4 text-sm italic leading-6 text-[#6a746d]">
               {state.aiReasoning}
             </div>
           )}
 
-          {state.conceptImageUrl && (
+          {adminProofToolsOpen && state.conceptImageUrl && (
             <div className="overflow-hidden rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-2">
               <img src={state.conceptImageUrl} alt="AI design concept" className="h-auto w-full rounded-lg object-contain" />
             </div>
