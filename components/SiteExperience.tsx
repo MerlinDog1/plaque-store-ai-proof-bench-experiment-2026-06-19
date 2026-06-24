@@ -205,24 +205,58 @@ function ProductGrid({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
 }
 
 function HomeMaterialPanels() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeMaterial = materialStories[activeIndex] ?? materialStories[0];
+
   return (
     <section className="commerce-section commerce-material-showcase">
-      <div className="commerce-section__head">
-        <p className="commerce-eyebrow">Materials</p>
-        <h2>Choose a finish by feel.</h2>
-        <p>
-          Brass, stainless steel and wood textures shown as tactile samples, using lighter preview images so the page stays quick.
-        </p>
+      <div className="commerce-material-atelier">
+        <div className="commerce-material-atelier__copy">
+          <p className="commerce-eyebrow">Materials</p>
+          <h2>Choose a finish by feel.</h2>
+          <p>
+            Move through real brass, stainless steel and wood scans as tactile samples. The page uses lightweight WebP previews
+            here, then the designer loads the production textures only when needed.
+          </p>
+          <div className="commerce-material-atelier__meta" aria-label="Selected material details">
+            <span>{activeMaterial.family}</span>
+            <strong>{activeMaterial.title}</strong>
+            <em>{activeMaterial.tone}</em>
+          </div>
+        </div>
+
+        <div className="commerce-material-stage" aria-live="polite">
+          <div className="commerce-material-stage__plate">
+            <img
+              src={activeMaterial.thumbnail}
+              alt={`${activeMaterial.title} material texture`}
+              width="960"
+              height="540"
+              decoding="async"
+            />
+          </div>
+          <div className="commerce-material-stage__edge" aria-hidden="true" />
+          <div className="commerce-material-stage__caption">
+            <span>{activeMaterial.family}</span>
+            <h3>{activeMaterial.title}</h3>
+            <p>{activeMaterial.copy}</p>
+          </div>
+        </div>
       </div>
-      <div className="commerce-material-folio" aria-label="Plaque material samples">
+
+      <div className="commerce-material-filmstrip" aria-label="Plaque material samples">
         {materialStories.map((material, index) => (
-          <article
-            className="commerce-material-card commerce-material-card--folio"
+          <button
+            type="button"
+            className="commerce-material-chip"
+            data-active={index === activeIndex}
             key={material.title}
-            style={{ '--material-index': index } as React.CSSProperties}
-            tabIndex={0}
+            onClick={() => setActiveIndex(index)}
+            onFocus={() => setActiveIndex(index)}
+            onMouseEnter={() => setActiveIndex(index)}
+            aria-pressed={index === activeIndex}
           >
-            <div className="commerce-material-card__sample">
+            <span className="commerce-material-chip__sample">
               <img
                 src={material.thumbnail}
                 alt={`${material.title} texture sample`}
@@ -231,14 +265,12 @@ function HomeMaterialPanels() {
                 width="960"
                 height="540"
               />
-            </div>
-            <div className="commerce-material-card__body">
-              <span>{material.family}</span>
-              <h3>{material.title}</h3>
-              <strong>{material.tone}</strong>
-              <p>{material.copy}</p>
-            </div>
-          </article>
+            </span>
+            <span>
+              <strong>{material.title}</strong>
+              <em>{material.tone}</em>
+            </span>
+          </button>
         ))}
       </div>
     </section>
