@@ -190,14 +190,15 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const materialTextureId: Partial<Record<Material, string>> = {
     [Material.BrushedBrass]: "brushedBrassTexture",
     [Material.OrbitalBrassMattLacquer]: "orbitalBrassTexture",
+    [Material.PolishedBrass]: "polishedBrassTexture",
     [Material.AgedBrass]: "agedBrassTexture",
     [Material.BrushedSteel]: "brushedSteelTexture",
     [Material.PolishedSteel]: "mirrorSteelTexture",
   };
   const fillUrl = `url(#${materialFillId[state.material]})`;
   const textureUrl = materialTextureId[state.material] ? `url(#${materialTextureId[state.material]})` : null;
-  const fixingFillUrl = (state.material === Material.BrushedBrass || state.material === Material.AgedBrass) && textureUrl ? textureUrl : fillUrl;
-  const textureOpacity = state.material === Material.BrushedBrass
+  const fixingFillUrl = (state.material === Material.BrushedBrass || state.material === Material.PolishedBrass || state.material === Material.AgedBrass) && textureUrl ? textureUrl : fillUrl;
+  const textureOpacity = state.material === Material.BrushedBrass || state.material === Material.PolishedBrass
     ? 1
     : state.material === Material.BrushedSteel
     ? 0.74
@@ -744,6 +745,9 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
 
           <pattern id="brushedBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
             <image href="/materials/brushed-brass-clean.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+          </pattern>
+          <pattern id="polishedBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
+            <image href="/materials/polished-brass-clean.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="orbitalBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
             <image href="/materials/orbital-brass-matt.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
