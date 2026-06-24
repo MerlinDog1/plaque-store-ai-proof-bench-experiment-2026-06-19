@@ -62,7 +62,7 @@ const materialTexturePath: Partial<Record<Material, string>> = {
   [Material.OrbitalBrassMattLacquer]: '/materials/orbital-brass-clean.png',
   [Material.PolishedBrass]: '/materials/polished-brass-clean.png',
   [Material.AgedBrass]: '/materials/mid-aged-brass.png',
-  [Material.PolishedSteel]: '/materials/mirror-stainless.png',
+  [Material.PolishedSteel]: '/materials/polished-stainless-clean.png',
 };
 
 const stepFaceText: Record<number, string[]> = {

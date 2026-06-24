@@ -233,7 +233,7 @@ export const materialStories = [
   },
   {
     title: 'Mirror stainless',
-    image: '/materials/mirror-stainless.png',
+    image: '/materials/polished-stainless-clean.png',
     copy: 'Crisp and reflective, best for modern professional plaques where a polished look matters.',
   },
   {

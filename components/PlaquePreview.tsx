@@ -754,7 +754,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             <image href="/materials/brushed-stainless-satin.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="mirrorSteelTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
-            <image href="/materials/mirror-stainless.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+            <image href="/materials/polished-stainless-clean.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
 
           {/* Brushed Metal Texture */}
