@@ -740,7 +740,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
           </pattern>
 
           <pattern id="brushedBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
-            <image href="/materials/brushed-brass-satin.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+            <image href="/materials/brushed-brass-clean.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="orbitalBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
             <image href="/materials/orbital-brass-matt.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />

@@ -218,7 +218,7 @@ export const productFamilies: ProductFamily[] = [
 export const materialStories = [
   {
     title: 'Brushed brass',
-    image: '/materials/brushed-brass-satin.png',
+    image: '/materials/brushed-brass-clean.png',
     copy: 'Warm, traditional and legible. The safest premium choice for memorial, dedication and presentation plaques.',
   },
   {
