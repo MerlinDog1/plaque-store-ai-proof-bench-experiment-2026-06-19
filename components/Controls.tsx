@@ -47,7 +47,7 @@ const MATERIAL_SWATCH: Record<Material, string> = {
   [Material.PolishedBrass]: "url('/materials/polished-brass-clean.png') center/cover",
   [Material.AgedBrass]: "linear-gradient(rgba(80,55,29,.18),rgba(80,55,29,.18)),url('/materials/mid-aged-brass.png') center/cover",
   [Material.BrushedSteel]: 'repeating-linear-gradient(0deg,rgba(255,255,255,.22) 0 1px,rgba(55,67,75,.14) 1px 2px,transparent 2px 5px),linear-gradient(135deg,#7a858b,#c7d0d4,#68727a)',
-  [Material.PolishedSteel]: 'linear-gradient(135deg,#4a535b 0%,#d7dde1 15%,#ffffff 26%,#8c969e 38%,#f2f6f8 55%,#727d86 72%,#39434b 100%)',
+  [Material.PolishedSteel]: "url('/materials/mirror-stainless.png') center/cover",
 };
 
 const MATERIAL_ORDER: Material[] = [

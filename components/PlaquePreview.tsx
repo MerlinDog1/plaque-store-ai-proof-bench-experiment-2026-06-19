@@ -196,14 +196,12 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   };
   const fillUrl = `url(#${materialFillId[state.material]})`;
   const textureUrl = materialTextureId[state.material] ? `url(#${materialTextureId[state.material]})` : null;
-  const fixingFillUrl = (state.material === Material.BrushedBrass || state.material === Material.OrbitalBrassMattLacquer || state.material === Material.PolishedBrass || state.material === Material.AgedBrass) && textureUrl ? textureUrl : fillUrl;
-  const textureOpacity = state.material === Material.BrushedBrass || state.material === Material.OrbitalBrassMattLacquer || state.material === Material.PolishedBrass
+  const fixingFillUrl = (state.material === Material.BrushedBrass || state.material === Material.OrbitalBrassMattLacquer || state.material === Material.PolishedBrass || state.material === Material.AgedBrass || state.material === Material.PolishedSteel) && textureUrl ? textureUrl : fillUrl;
+  const textureOpacity = state.material === Material.BrushedBrass || state.material === Material.OrbitalBrassMattLacquer || state.material === Material.PolishedBrass || state.material === Material.PolishedSteel
     ? 1
     : state.material === Material.BrushedSteel
     ? 0.74
-      : state.material === Material.PolishedSteel
-        ? 0.42
-        : state.material === Material.AgedBrass
+      : state.material === Material.AgedBrass
             ? 1
         : 0.24;
   const reverseMetalFillUrl = isBrass ? "url(#brushedBrass)" : "url(#mirrorSteel)";
