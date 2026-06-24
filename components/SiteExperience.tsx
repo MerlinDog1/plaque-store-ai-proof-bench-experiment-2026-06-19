@@ -269,12 +269,12 @@ function HomeMaterialPanels() {
                 >
                   <span className="commerce-material-slide__surface">
                     <img
-                      src={material.thumbnail}
+                      src={material.sliderImage}
                       alt={`${material.title} texture sample`}
                       loading={isActive ? 'eager' : 'lazy'}
                       decoding="async"
-                      width="960"
-                      height="540"
+                      width="1280"
+                      height="1600"
                     />
                   </span>
                   <span className="commerce-material-slide__edge" aria-hidden="true" />

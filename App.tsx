@@ -51,12 +51,15 @@ const routeViews: Partial<Record<string, SiteView>> = {
   '/faq': 'faq',
   '/quote': 'quote',
   '/contact': 'contact',
+  '/checkout': 'checkout',
+  '/admin': 'admin',
   '/terms': 'terms',
   '/privacy': 'privacy',
   '/cookies': 'cookies',
   '/returns': 'returns',
   '/returns-and-cancellations': 'returns',
   '/design': 'plaque',
+  '/etchmaster': 'vector',
 };
 
 const viewRoutes: Partial<Record<SiteView, string>> = {
@@ -66,11 +69,14 @@ const viewRoutes: Partial<Record<SiteView, string>> = {
   faq: '/faq',
   quote: '/quote',
   contact: '/contact',
+  checkout: '/checkout',
+  admin: '/admin',
   terms: '/terms',
   privacy: '/privacy',
   cookies: '/cookies',
   returns: '/returns-and-cancellations',
   plaque: '/design',
+  vector: '/etchmaster',
 };
 
 const getInitialView = (): SiteView => {

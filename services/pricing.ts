@@ -21,22 +21,22 @@ const PRICING_BANDS: PricingBand[] = [
   {
     id: 'a5',
     maxArea: 210 * 148,
-    woodAddOn: 69,
+    woodAddOn: 70,
   },
   {
     id: 'a4',
     maxArea: 297 * 210,
-    woodAddOn: 99,
+    woodAddOn: 100,
   },
   {
     id: 'stable-300x200',
     maxArea: 300 * 200,
-    woodAddOn: 99,
+    woodAddOn: 100,
   },
   {
     id: 'statement-400x300',
     maxArea: 400 * 300,
-    woodAddOn: 169,
+    woodAddOn: 170,
   },
 ];
 
@@ -69,8 +69,8 @@ function getPricingBand(state: PlaqueState) {
   return PRICING_BANDS.find((band) => area <= band.maxArea) ?? PRICING_BANDS[PRICING_BANDS.length - 1];
 }
 
-function roundToNearestHalfPound(value: number) {
-  return Math.round(value * 2) / 2;
+function roundToNearestPound(value: number) {
+  return Math.round(value);
 }
 
 function getTradeEtchedCost(state: PlaqueState, material: PricingMaterial) {
@@ -105,7 +105,7 @@ export function estimatePlaquePrice(state: PlaqueState) {
   const benchMinimumRetail = normalizedWidth === 150 && normalizedHeight === 50 ? 69 : 0;
   const plaqueRetail = Math.max(
     benchMinimumRetail,
-    roundToNearestHalfPound(fitsProductionBed(state) ? baseRetail : baseRetail * OVERSIZED_BED_UPLIFT)
+    roundToNearestPound(fitsProductionBed(state) ? baseRetail : baseRetail * OVERSIZED_BED_UPLIFT)
   );
   const woodAddOn = state.wood && state.shape !== Shape.Heart ? band.woodAddOn : 0;
 
