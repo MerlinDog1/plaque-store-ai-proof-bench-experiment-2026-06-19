@@ -36,6 +36,7 @@ type TextureCrop = {
 
 const faceTextureCanvasCache = new Map<string, HTMLCanvasElement>();
 const woodImageCache = new Map<string, Promise<HTMLImageElement | null>>();
+const materialImageCache = new Map<string, Promise<HTMLImageElement | null>>();
 
 function rememberFaceTextureCanvas(key: string | undefined, canvas: HTMLCanvasElement, fontsOutlined = false) {
   if (!key) return;
@@ -54,6 +55,13 @@ const materialTone: Record<Material, { face: number; side: number; roughness: nu
   [Material.AgedBrass]: { face: 0x76613a, side: 0x332716, roughness: 0.72, metalness: 0.66 },
   [Material.BrushedSteel]: { face: 0xaeb8be, side: 0x5c666d, roughness: 0.42, metalness: 0.9 },
   [Material.PolishedSteel]: { face: 0xd9e0e4, side: 0x4b555e, roughness: 0.16, metalness: 0.96 },
+};
+
+const materialTexturePath: Partial<Record<Material, string>> = {
+  [Material.BrushedBrass]: '/materials/brushed-brass-clean.png',
+  [Material.OrbitalBrassMattLacquer]: '/materials/orbital-brass-clean.png',
+  [Material.PolishedBrass]: '/materials/polished-brass-clean.png',
+  [Material.AgedBrass]: '/materials/mid-aged-brass.png',
 };
 
 const stepFaceText: Record<number, string[]> = {
@@ -234,6 +242,39 @@ function makeWoodTexture(tone: PlaqueState['woodTone']) {
     texture.needsUpdate = true;
     return texture;
   });
+}
+
+function makeMaterialTexture(material: Material) {
+  const texturePath = materialTexturePath[material];
+  if (!texturePath) return Promise.resolve(null);
+
+  if (!materialImageCache.has(texturePath)) {
+    materialImageCache.set(texturePath, new Promise((resolve) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => resolve(null);
+      image.src = texturePath;
+    }));
+  }
+
+  return materialImageCache.get(texturePath)!.then((image) => {
+    if (!image) return null;
+    const texture = new THREE.Texture(image);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1, 1);
+    texture.anisotropy = 8;
+    texture.needsUpdate = true;
+    return texture;
+  });
+}
+
+function applyMaterialTexture(target: THREE.MeshStandardMaterial, texture: THREE.Texture | null) {
+  if (!texture) return;
+  target.map = texture;
+  target.color.set(0xffffff);
+  target.needsUpdate = true;
 }
 
 function makeFallbackWoodTexture(tone: PlaqueState['woodTone']) {
@@ -733,6 +774,14 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
         color: tone.face,
         metalness: tone.metalness,
         roughness: tone.roughness,
+      });
+      makeMaterialTexture(state.material).then((texture) => {
+        if (cancelled) {
+          texture?.dispose();
+          return;
+        }
+        applyMaterialTexture(capMaterial, texture);
+        host.dataset.capTexture = texture ? 'material' : 'flat';
       });
       const radiusMm = state.fixing === Fixing.Caps ? state.capSize / 2 : 2.5;
       const hardwareDepth = state.fixing === Fixing.Caps ? dims.capDepth : Math.max(dims.unitPerMm * 0.5, dims.metalDepth * 0.35);
