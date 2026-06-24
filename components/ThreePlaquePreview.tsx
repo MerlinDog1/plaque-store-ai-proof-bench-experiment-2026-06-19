@@ -134,25 +134,6 @@ function makeFaceTexture(state: PlaqueState, activeStep: number, inscription: st
     }
   }
 
-  if (state.fixing === 'screws' || state.fixing === 'caps') {
-    const inset = width * 0.06;
-    const radius = state.fixing === 'caps' ? width * 0.025 : width * 0.016;
-    const points = [[inset, inset], [width - inset, inset], [width - inset, height - inset], [inset, height - inset]];
-    const metal = ctx.createRadialGradient(0, 0, 1, 0, 0, radius);
-    metal.addColorStop(0, '#ffffff');
-    metal.addColorStop(0.42, '#bfc7cc');
-    metal.addColorStop(1, '#4b5359');
-    points.forEach(([x, y]) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.fillStyle = metal;
-      ctx.beginPath();
-      ctx.arc(0, 0, radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    });
-  }
-
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 8;
@@ -329,6 +310,7 @@ async function makeSvgFaceTexture(sourceSvg: SVGSVGElement, crop?: TextureCrop, 
   clone.setAttribute('overflow', 'visible');
   inlineComputedSvgStyles(sourceSvg, clone);
   if (crop) pruneWoodBackingFromProofTexture(clone);
+  clone.querySelectorAll('#fixings-layer, .fixing').forEach((element) => element.remove());
   const sourceTextLayer = sourceSvg.querySelector('#ai-text-layer');
   const textFill = sourceTextLayer ? window.getComputedStyle(sourceTextLayer).fill : '';
   let fontsOutlined = false;
