@@ -207,16 +207,25 @@ function ProductGrid({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
 function HomeMaterialPanels() {
   const [activeIndex, setActiveIndex] = useState(0);
   const activeMaterial = materialStories[activeIndex] ?? materialStories[0];
+  const materialCount = materialStories.length;
+  const moveMaterial = (direction: number) => {
+    setActiveIndex((current) => (current + direction + materialCount) % materialCount);
+  };
+  const getSliderSlot = (index: number) => {
+    const rawOffset = index - activeIndex;
+    const wrappedOffset = ((rawOffset + materialCount / 2) % materialCount) - materialCount / 2;
+    return Math.round(wrappedOffset);
+  };
 
   return (
     <section className="commerce-section commerce-material-showcase">
-      <div className="commerce-material-atelier">
+      <div className="commerce-material-slider">
         <div className="commerce-material-atelier__copy">
           <p className="commerce-eyebrow">Materials</p>
-          <h2>Choose a finish by feel.</h2>
+          <h2>Spin through the finishes.</h2>
           <p>
-            Move through real brass, stainless steel and wood scans as tactile samples. The page uses lightweight WebP previews
-            here, then the designer loads the production textures only when needed.
+            A tactile 3D material slider built from real brass, stainless steel and wood scans. These are lightweight WebP
+            previews; the designer only loads full production textures when the customer starts building.
           </p>
           <div className="commerce-material-atelier__meta" aria-label="Selected material details">
             <span>{activeMaterial.family}</span>
@@ -225,53 +234,56 @@ function HomeMaterialPanels() {
           </div>
         </div>
 
-        <div className="commerce-material-stage" aria-live="polite">
-          <div className="commerce-material-stage__plate">
-            <img
-              src={activeMaterial.thumbnail}
-              alt={`${activeMaterial.title} material texture`}
-              width="960"
-              height="540"
-              decoding="async"
-            />
+        <div className="commerce-material-carousel-wrap">
+          <div className="commerce-material-carousel" aria-live="polite" aria-label="3D plaque material slider">
+            {materialStories.map((material, index) => {
+              const slot = getSliderSlot(index);
+              const isActive = index === activeIndex;
+              const isVisible = Math.abs(slot) <= 3;
+
+              return (
+                <button
+                  type="button"
+                  className="commerce-material-slide"
+                  data-active={isActive}
+                  data-visible={isVisible}
+                  key={material.title}
+                  onClick={() => setActiveIndex(index)}
+                  onFocus={() => setActiveIndex(index)}
+                  aria-pressed={isActive}
+                  style={{ '--slot': slot } as React.CSSProperties}
+                >
+                  <span className="commerce-material-slide__surface">
+                    <img
+                      src={material.thumbnail}
+                      alt={`${material.title} texture sample`}
+                      loading={isActive ? 'eager' : 'lazy'}
+                      decoding="async"
+                      width="960"
+                      height="540"
+                    />
+                  </span>
+                  <span className="commerce-material-slide__edge" aria-hidden="true" />
+                  <span className="commerce-material-slide__label">
+                    <strong>{material.title}</strong>
+                    <em>{material.family}</em>
+                  </span>
+                </button>
+              );
+            })}
+            <div className="commerce-material-carousel__shadow" aria-hidden="true" />
           </div>
-          <div className="commerce-material-stage__edge" aria-hidden="true" />
-          <div className="commerce-material-stage__caption">
-            <span>{activeMaterial.family}</span>
-            <h3>{activeMaterial.title}</h3>
-            <p>{activeMaterial.copy}</p>
+
+          <div className="commerce-material-controls">
+            <button type="button" onClick={() => moveMaterial(-1)} aria-label="Previous material">‹</button>
+            <div className="commerce-material-stage__caption">
+              <span>{activeMaterial.family}</span>
+              <h3>{activeMaterial.title}</h3>
+              <p>{activeMaterial.copy}</p>
+            </div>
+            <button type="button" onClick={() => moveMaterial(1)} aria-label="Next material">›</button>
           </div>
         </div>
-      </div>
-
-      <div className="commerce-material-filmstrip" aria-label="Plaque material samples">
-        {materialStories.map((material, index) => (
-          <button
-            type="button"
-            className="commerce-material-chip"
-            data-active={index === activeIndex}
-            key={material.title}
-            onClick={() => setActiveIndex(index)}
-            onFocus={() => setActiveIndex(index)}
-            onMouseEnter={() => setActiveIndex(index)}
-            aria-pressed={index === activeIndex}
-          >
-            <span className="commerce-material-chip__sample">
-              <img
-                src={material.thumbnail}
-                alt={`${material.title} texture sample`}
-                loading="lazy"
-                decoding="async"
-                width="960"
-                height="540"
-              />
-            </span>
-            <span>
-              <strong>{material.title}</strong>
-              <em>{material.tone}</em>
-            </span>
-          </button>
-        ))}
       </div>
     </section>
   );
