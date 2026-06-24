@@ -178,7 +178,6 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const hasVisibleFixings = state.fixing === Fixing.Screws || state.fixing === Fixing.Caps;
   const isBrass = state.material.includes('brass');
   const isSteel = state.material.includes('stainless');
-  const isOrbitalBrass = state.material === Material.OrbitalBrassMattLacquer;
   const materialFillId: Record<Material, string> = {
     [Material.BrushedBrass]: "brushedBrass",
     [Material.OrbitalBrassMattLacquer]: "orbitalBrass",
@@ -197,16 +196,14 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   };
   const fillUrl = `url(#${materialFillId[state.material]})`;
   const textureUrl = materialTextureId[state.material] ? `url(#${materialTextureId[state.material]})` : null;
-  const fixingFillUrl = (state.material === Material.BrushedBrass || state.material === Material.PolishedBrass || state.material === Material.AgedBrass) && textureUrl ? textureUrl : fillUrl;
-  const textureOpacity = state.material === Material.BrushedBrass || state.material === Material.PolishedBrass
+  const fixingFillUrl = (state.material === Material.BrushedBrass || state.material === Material.OrbitalBrassMattLacquer || state.material === Material.PolishedBrass || state.material === Material.AgedBrass) && textureUrl ? textureUrl : fillUrl;
+  const textureOpacity = state.material === Material.BrushedBrass || state.material === Material.OrbitalBrassMattLacquer || state.material === Material.PolishedBrass
     ? 1
     : state.material === Material.BrushedSteel
     ? 0.74
       : state.material === Material.PolishedSteel
         ? 0.42
-        : state.material === Material.OrbitalBrassMattLacquer
-          ? 0.12
-          : state.material === Material.AgedBrass
+        : state.material === Material.AgedBrass
             ? 1
         : 0.24;
   const reverseMetalFillUrl = isBrass ? "url(#brushedBrass)" : "url(#mirrorSteel)";
@@ -750,7 +747,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             <image href="/materials/polished-brass-clean.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="orbitalBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
-            <image href="/materials/orbital-brass-matt.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+            <image href="/materials/orbital-brass-clean.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="agedBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
             <image href="/materials/mid-aged-brass.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
@@ -958,28 +955,6 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
                 </>
               )}
             </g>
-          )}
-
-          {isOrbitalBrass && (
-            state.shape === Shape.Rect ? (
-              <rect
-                x={offset} y={offset} width={state.width} height={state.height} rx={cornerR}
-                fill="url(#orbitalSwirl)" opacity={0.12} style={{ mixBlendMode: 'soft-light' }}
-                className="visual-effect"
-              />
-            ) : state.shape === Shape.Heart ? (
-              <path
-                d={heartPathD(offset, offset, state.width, state.height)}
-                fill="url(#orbitalSwirl)" opacity={0.12} style={{ mixBlendMode: 'soft-light' }}
-                className="visual-effect"
-              />
-            ) : (
-              <ellipse
-                cx={cx} cy={cy} rx={state.width / 2} ry={state.height / 2}
-                fill="url(#orbitalSwirl)" opacity={0.12} style={{ mixBlendMode: 'soft-light' }}
-                className="visual-effect"
-              />
-            )
           )}
 
           {state.material === Material.PolishedSteel && (
