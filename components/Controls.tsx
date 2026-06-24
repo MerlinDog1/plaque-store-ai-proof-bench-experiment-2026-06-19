@@ -1930,15 +1930,9 @@ export const Controls: React.FC<Props> = ({
             </button>
           </div>
 
-          <div className={`rounded-lg border p-4 text-sm leading-6 ${
-            isProductionReady
-              ? 'border-[#2f7f69]/35 bg-[#151f1b] text-[#1f755f]'
-              : 'border-[#c6932e]/45 bg-[#221d12] text-[#e8c875]'
-          }`}>
-            <div className="font-black">{isProductionReady ? 'Your proof is ready' : 'Finish these steps before adding to basket'}</div>
-            {isProductionReady ? (
-              <p className="mt-1">The inscription layout and required portrait artwork are ready for your final review.</p>
-            ) : (
+          {!isProductionReady && (
+            <div className="rounded-lg border border-[#c6932e]/45 bg-[#221d12] p-4 text-sm leading-6 text-[#e8c875]">
+              <div className="font-black">Finish these steps before checkout</div>
               <ul className="mt-3 space-y-2">
                 {readinessItems.filter(item => !item.ready).map((item) => (
                   <li key={item.label}>
@@ -1951,8 +1945,8 @@ export const Controls: React.FC<Props> = ({
                   </li>
                 ))}
               </ul>
-            )}
-          </div>
+            </div>
+          )}
 
           {adminProofToolsOpen && (
           <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
@@ -2140,12 +2134,21 @@ export const Controls: React.FC<Props> = ({
               </div>
             </div>
             <p className="mt-3 text-xs font-bold leading-5 text-[#6a746d]">
-              UK mainland delivery is included. Highlands, islands and non-UK delivery may need a manual quote before production.
+              UK mainland delivery included. Highlands, islands and non-UK delivery can be worked out at checkout.
             </p>
             <div className="proof-turnaround mt-3 rounded-lg p-3">
-              <span>Turnaround</span>
+              <div className="proof-turnaround-header">
+                <span>Turnaround</span>
+                <button
+                  type="button"
+                  className="proof-info-button"
+                  aria-label={`Why this turnaround: ${turnaroundEstimate.note}`}
+                >
+                  ?
+                  <small role="tooltip">{turnaroundEstimate.note}</small>
+                </button>
+              </div>
               <strong>{turnaroundEstimate.label}</strong>
-              <small>{turnaroundEstimate.note}</small>
             </div>
             {adminProofToolsOpen && (
               <div className="mt-4 rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
