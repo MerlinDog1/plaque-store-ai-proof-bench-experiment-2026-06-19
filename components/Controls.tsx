@@ -42,7 +42,7 @@ const MATERIAL_NOTES: Record<Material, string> = {
 };
 
 const MATERIAL_SWATCH: Record<Material, string> = {
-  [Material.BrushedBrass]: 'repeating-linear-gradient(0deg,rgba(255,238,176,.22) 0 1px,rgba(79,49,11,.14) 1px 2px,transparent 2px 5px),linear-gradient(135deg,#9f6e20,#c89b48,#8b5d18)',
+  [Material.BrushedBrass]: "url('/materials/brushed-brass-clean.png') center/cover",
   [Material.OrbitalBrassMattLacquer]: 'repeating-radial-gradient(circle at 42% 38%,rgba(255,244,194,.32) 0 1px,rgba(84,67,37,.15) 1px 2px,transparent 2px 5px),linear-gradient(135deg,#d8c17b,#9e824a,#c8af6a)',
   [Material.PolishedBrass]: 'linear-gradient(135deg,#744307 0%,#ffc43f 18%,#fff5b5 30%,#9c5a08 43%,#fff8c4 57%,#b86d0c 70%,#6b3b05 100%)',
   [Material.AgedBrass]: "linear-gradient(rgba(80,55,29,.18),rgba(80,55,29,.18)),url('/materials/mid-aged-brass.png') center/cover",
