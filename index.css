@@ -144,6 +144,111 @@
   transform: translateY(1px);
 }
 
+.proof-checkout-panel {
+  color: #25302b !important;
+}
+
+.proof-turnaround {
+  display: grid;
+  gap: 0.18rem;
+  border: 1px solid rgba(47, 127, 105, 0.34) !important;
+  background: linear-gradient(180deg, #e6f6ee, #d3eadf) !important;
+  color: #143828 !important;
+}
+
+.proof-turnaround span,
+.proof-save-later-card span,
+.proof-stripe-note span {
+  color: #557064 !important;
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.proof-turnaround strong {
+  color: #143828 !important;
+  font-size: 15px;
+  font-weight: 950;
+  line-height: 1.25;
+}
+
+.proof-turnaround small {
+  color: #315747 !important;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.proof-checkout-button {
+  border: 1px solid rgba(82, 55, 13, 0.28) !important;
+  background: linear-gradient(180deg, #f8de8c, #c79232) !important;
+  box-shadow: 0 16px 36px rgba(199, 146, 50, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.48) !important;
+  color: #17231f !important;
+}
+
+.proof-checkout-button:disabled {
+  border-color: rgba(238, 244, 238, 0.12) !important;
+  background: rgba(238, 244, 238, 0.10) !important;
+  color: #93a29a !important;
+}
+
+.proof-stripe-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  min-height: 36px;
+  border: 1px solid rgba(84, 72, 52, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.74);
+  padding: 0.35rem 0.65rem;
+}
+
+.proof-stripe-note img {
+  width: 112px;
+  max-width: 44%;
+  height: auto;
+}
+
+.proof-save-later-card {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid rgba(47, 127, 105, 0.28) !important;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(47, 127, 105, 0.10), rgba(245, 210, 123, 0.10)),
+    rgba(255, 253, 247, 0.88) !important;
+  padding: 0.9rem;
+  color: #263b34 !important;
+}
+
+.proof-save-later-card strong,
+.proof-save-later-card small {
+  display: block;
+}
+
+.proof-save-later-card strong {
+  margin-top: 0.16rem;
+  color: #17231f !important;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.proof-save-later-card small {
+  margin-top: 0.35rem;
+  color: #4f6259 !important;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.proof-save-later-card button {
+  border: 1px solid rgba(47, 127, 105, 0.26) !important;
+  background: #fffaf0 !important;
+  color: #173c2d !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
 .turnaround-toast {
   position: sticky;
   top: 0;

@@ -108,6 +108,47 @@ const fitsCustomFastTurnaround = (width: number, height: number) => {
   return longest <= CUSTOM_FAST_TURNAROUND_WIDTH_MM && shortest <= CUSTOM_FAST_TURNAROUND_HEIGHT_MM;
 };
 
+const sizeMatches = (width: number, height: number, targetWidth: number, targetHeight: number) => {
+  return Math.max(width, height) === Math.max(targetWidth, targetHeight)
+    && Math.min(width, height) === Math.min(targetWidth, targetHeight);
+};
+
+const isA4OrA5Size = (state: Pick<PlaqueState, 'width' | 'height'>) => {
+  return sizeMatches(state.width, state.height, 210, 148)
+    || sizeMatches(state.width, state.height, 297, 210);
+};
+
+const STANDARD_TURNAROUND_SIZES = [
+  ...SIZE_PRESETS,
+  ...BENCH_SIZE_PRESETS,
+  { width: 300, height: 200 },
+  { width: 400, height: 300 },
+];
+
+const isStandardTurnaroundSize = (state: Pick<PlaqueState, 'width' | 'height' | 'shape'>) => {
+  if (state.shape === Shape.Heart) return false;
+  if (!fitsCustomFastTurnaround(state.width, state.height)) return false;
+  return STANDARD_TURNAROUND_SIZES.some((preset) => sizeMatches(state.width, state.height, preset.width, preset.height));
+};
+
+const getTurnaroundEstimate = (state: PlaqueState) => {
+  if (state.wood) {
+    return isA4OrA5Size(state)
+      ? { days: 10, label: 'Estimated 10 working days after proof approval', note: 'A4/A5 plaques with wood backing need extra workshop time.' }
+      : { days: 15, label: 'Estimated 15 working days after proof approval', note: 'Custom or non-standard wood-backed plaques need a longer workshop slot.' };
+  }
+
+  if (!isStandardTurnaroundSize(state)) {
+    return { days: 15, label: 'Estimated 15 working days after proof approval', note: 'Custom sizes and non-standard combinations need a longer workshop slot.' };
+  }
+
+  if (state.material === Material.AgedBrass) {
+    return { days: 7, label: 'Estimated 7 working days after proof approval', note: 'Aged brass needs additional finishing time.' };
+  }
+
+  return { days: 5, label: 'Estimated 5 working days after proof approval', note: 'Standard size, standard finish, fitting the 600 x 400mm production bed.' };
+};
+
 const STEP_COPY = [
   {
     eyebrow: 'Step 1 of 7',
@@ -723,9 +764,7 @@ export const Controls: React.FC<Props> = ({
   });
   const woodAddOnPrice = estimateWoodAddOn(state);
   const baseProofPrice = Math.max(0, price - (state.wood ? woodAddOnPrice : 0));
-  const estimatedTurnaround = state.memorialImageEnabled
-    ? 'Estimated 5-7 working days after proof approval'
-    : 'Estimated 3-5 working days after proof approval';
+  const turnaroundEstimate = getTurnaroundEstimate(state);
 
   const updateGeneratedTextLine = (lineIndex: number, changes: Partial<Pick<GeneratedTextControl, 'text' | 'fontFamily' | 'fontSize' | 'fontWeight'>>) => {
     if (!state.generatedSvgContent || typeof DOMParser === 'undefined') return;
@@ -2078,7 +2117,7 @@ export const Controls: React.FC<Props> = ({
           </div>
           )}
 
-          <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
+          <div className="proof-checkout-panel rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Order summary</div>
             <div className="mt-3 space-y-2 text-sm font-bold text-[#2f3832]">
               <div className="flex items-center justify-between gap-3 border-b border-[rgba(84,72,52,0.12)] pb-2">
@@ -2103,8 +2142,10 @@ export const Controls: React.FC<Props> = ({
             <p className="mt-3 text-xs font-bold leading-5 text-[#6a746d]">
               UK mainland delivery is included. Highlands, islands and non-UK delivery may need a manual quote before production.
             </p>
-            <div className="mt-3 rounded-lg border border-[#2f7f69]/25 bg-[#e3f4eb] p-3 text-sm font-black leading-5 text-[#173c2d]">
-              {estimatedTurnaround}
+            <div className="proof-turnaround mt-3 rounded-lg p-3">
+              <span>Turnaround</span>
+              <strong>{turnaroundEstimate.label}</strong>
+              <small>{turnaroundEstimate.note}</small>
             </div>
             {adminProofToolsOpen && (
               <div className="mt-4 rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
@@ -2142,16 +2183,24 @@ export const Controls: React.FC<Props> = ({
               <button
                 onClick={onAddToBasket}
                 disabled={!isProductionReady}
-                className="studio-press min-h-[56px] w-full rounded-lg bg-[#f2d688] px-5 text-sm font-black text-[#1b231f] shadow-[0_14px_34px_rgba(216,177,95,0.18)] disabled:cursor-not-allowed disabled:bg-[#d8ceb9] disabled:text-[#8d8371] disabled:shadow-none"
+                className="proof-checkout-button studio-press min-h-[58px] w-full rounded-lg px-5 text-sm font-black disabled:cursor-not-allowed disabled:shadow-none"
               >
                 {basketAdded ? 'Added to basket' : isProductionReady ? 'Checkout' : 'Complete checklist to checkout'}
               </button>
-              <button onClick={onExportPdf} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
-                Save design for later
-              </button>
-              <p className="text-xs font-bold leading-5 text-[#6a746d]">
-                The PDF includes a QR code and secure link so you can continue or buy later with no account. Saved links last 30 days.
-              </p>
+              <div className="proof-stripe-note" aria-label="Secure test checkout powered by Stripe">
+                <span>Secure card checkout</span>
+                <img src="/site-images/powered-by-stripe-blurple.svg" alt="Powered by Stripe" loading="lazy" />
+              </div>
+              <div className="proof-save-later-card">
+                <div>
+                  <span>Not ready to buy?</span>
+                  <strong>Save this design for later</strong>
+                  <small>No account needed. Your PDF includes a QR code and secure link to continue or checkout later. Saved links last 30 days.</small>
+                </div>
+                <button onClick={onExportPdf} className="min-h-[52px] rounded-lg px-4 text-sm font-black">
+                  Download proof PDF
+                </button>
+              </div>
               {adminProofToolsOpen && (
                 <button onClick={onSaveProof} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
                   Save proof locally
