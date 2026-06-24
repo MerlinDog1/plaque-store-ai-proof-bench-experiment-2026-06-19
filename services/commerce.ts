@@ -57,12 +57,49 @@ export interface MockOrder {
   customerName: string;
   customerEmail: string;
   productTitle: string;
-  status: 'proof-approved' | 'needs-check' | 'quote-requested' | 'in-production' | 'dispatched';
+  status:
+    | 'proof-approved'
+    | 'checkout-started'
+    | 'payment-simulated'
+    | 'hub-queued'
+    | 'needs-check'
+    | 'quote-requested'
+    | 'in-production'
+    | 'dispatched';
+  paymentStatus: 'unpaid' | 'test-paid' | 'requires-check';
   total: number;
   inscription: string;
   proofApproved: boolean;
   state: PlaqueState;
   priceBreakdown: PriceBreakdown;
+  stripeSimulation: {
+    provider: 'mock' | 'stripe';
+    mode: 'test';
+    checkoutSessionId: string;
+    paymentIntentId: string;
+    receiptUrl: string;
+    checkoutUrl?: string;
+  };
+  proofPackage: {
+    productionSvg: string | null;
+    visualProofSvg: string | null;
+    productionFilename: string;
+    visualFilename: string;
+    lockedAt: string;
+  };
+  emailEvents: Array<{
+    id: string;
+    type: 'order_confirmation' | 'proof_received' | 'production_handoff';
+    recipient: string;
+    template: string;
+    status: 'mock-queued';
+  }>;
+  adminHub: {
+    destination: 'central-admin-hub';
+    queue: 'orders.production-proof-intake';
+    status: 'queued';
+    payloadVersion: '2026-06-24';
+  };
 }
 
 export const productFamilies: ProductFamily[] = [
@@ -331,20 +368,68 @@ export function makeMockOrder(
   productTitle: string,
   customerName: string,
   customerEmail: string,
+  artifacts: { productionSvg?: string | null; visualProofSvg?: string | null } = {},
 ): MockOrder {
   const priceBreakdown = getPriceBreakdown(state, inscription);
   const stamp = Date.now().toString().slice(-6);
+  const id = `PSAI-${stamp}`;
+  const createdAt = new Date().toISOString();
+  const needsCheck = priceBreakdown.quoteRequired;
   return {
-    id: `PSAI-${stamp}`,
-    createdAt: new Date().toISOString(),
+    id,
+    createdAt,
     customerName,
     customerEmail,
     productTitle,
-    status: priceBreakdown.quoteRequired ? 'needs-check' : 'proof-approved',
+    status: needsCheck ? 'needs-check' : 'hub-queued',
+    paymentStatus: needsCheck ? 'requires-check' : 'test-paid',
     total: priceBreakdown.total,
     inscription,
-    proofApproved: !priceBreakdown.quoteRequired,
+    proofApproved: !needsCheck,
     state,
     priceBreakdown,
+    stripeSimulation: {
+      provider: 'mock',
+      mode: 'test',
+      checkoutSessionId: `cs_test_mock_${stamp}`,
+      paymentIntentId: `pi_test_mock_${stamp}`,
+      receiptUrl: `/mock-receipts/${id}`,
+    },
+    proofPackage: {
+      productionSvg: artifacts.productionSvg || state.generatedSvgContent || null,
+      visualProofSvg: artifacts.visualProofSvg || artifacts.productionSvg || state.generatedSvgContent || null,
+      productionFilename: `${id}-production-proof.svg`,
+      visualFilename: `${id}-visual-proof.svg`,
+      lockedAt: createdAt,
+    },
+    emailEvents: [
+      {
+        id: `${id}-email-customer-confirmation`,
+        type: 'order_confirmation',
+        recipient: customerEmail,
+        template: 'customer-order-confirmation',
+        status: 'mock-queued',
+      },
+      {
+        id: `${id}-email-customer-proof`,
+        type: 'proof_received',
+        recipient: customerEmail,
+        template: 'customer-approved-proof-copy',
+        status: 'mock-queued',
+      },
+      {
+        id: `${id}-email-admin-handoff`,
+        type: 'production_handoff',
+        recipient: 'central-admin-hub',
+        template: 'admin-production-proof-intake',
+        status: 'mock-queued',
+      },
+    ],
+    adminHub: {
+      destination: 'central-admin-hub',
+      queue: 'orders.production-proof-intake',
+      status: 'queued',
+      payloadVersion: '2026-06-24',
+    },
   };
 }

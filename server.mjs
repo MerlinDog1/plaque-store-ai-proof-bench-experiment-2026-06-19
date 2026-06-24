@@ -31,6 +31,14 @@ const {
   getProofSessionByToken,
   getSupabaseConfig,
 } = await import("./server/supabase.mjs");
+const {
+  createMockHubOrder,
+  listMockHubOrders,
+} = await import("./server/mockHub.mjs");
+const {
+  createStripeCheckoutSession,
+  getStripeConfig,
+} = await import("./server/stripe.mjs");
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY || "";
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
@@ -113,6 +121,46 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && url.pathname === "/api/supabase/health") {
     const config = getSupabaseConfig();
     sendJson(res, 200, { ok: true, ...config });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/stripe/config") {
+    sendJson(res, 200, { ok: true, ...getStripeConfig() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/stripe/checkout-session") {
+    try {
+      const payload = JSON.parse(await readBody(req));
+      const session = await createStripeCheckoutSession(payload);
+      sendJson(res, 201, { ok: true, session });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not create Stripe checkout session.";
+      sendJson(res, 500, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/mock-admin-hub/orders") {
+    try {
+      const orders = await listMockHubOrders();
+      sendJson(res, 200, { ok: true, orders });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not list mock admin hub orders.";
+      sendJson(res, 500, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/mock-admin-hub/orders") {
+    try {
+      const payload = JSON.parse(await readBody(req));
+      const order = await createMockHubOrder(payload);
+      sendJson(res, 201, { ok: true, order });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not create mock admin hub order.";
+      sendJson(res, 500, { error: message });
+    }
     return;
   }
 

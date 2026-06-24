@@ -20,6 +20,7 @@ test-results/
 playwright-report/
 output/
 tmp/
+data/
 
 # Local tooling and agent files
 .openclaw/

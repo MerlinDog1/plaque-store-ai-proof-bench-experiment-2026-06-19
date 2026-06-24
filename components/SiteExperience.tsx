@@ -24,7 +24,7 @@ interface SiteProps {
   onNavigate: (view: SiteView, productSlug?: string) => void;
   onStartDesign: () => void;
   onLaunchProduct: (product: ProductFamily) => void;
-  onCreateMockOrder: (name: string, email: string) => MockOrder;
+  onCreateMockOrder: (name: string, email: string) => Promise<MockOrder>;
 }
 
 type HomeCarouselItem = {
@@ -559,12 +559,18 @@ function CheckoutPage({
   const [email, setEmail] = useState('customer@example.com');
   const [accepted, setAccepted] = useState(false);
   const [createdOrder, setCreatedOrder] = useState<MockOrder | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const breakdown = getPriceBreakdown(state, inscription);
 
-  const submit = (event: React.FormEvent) => {
+  const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!accepted) return;
-    setCreatedOrder(onCreateMockOrder(name, email));
+    if (!accepted || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      setCreatedOrder(await onCreateMockOrder(name, email));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -578,8 +584,10 @@ function CheckoutPage({
         </div>
         <form className="commerce-checkout-panel" onSubmit={submit}>
           <p className="commerce-eyebrow">Approve before ordering</p>
-          <h1>Confirm the exact proof for production.</h1>
-          <p>This prototype simulates the future Stripe/Supabase order flow. No payment or email is sent.</p>
+          <h1>Simulate paid checkout and proof handoff.</h1>
+          <p>
+            This mock behaves like a Stripe test payment, then queues the customer emails and sends the locked production proof package to the central admin hub inbox.
+          </p>
           {!isProductionReady && (
             <div className="commerce-warning">
               The proof is not production-ready yet. In production this would route back to the proof step or into artwork check.
@@ -609,14 +617,29 @@ function CheckoutPage({
             <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} />
             <span>I approve this proof for production. I understand the plaque will be made using this wording, layout, material and size.</span>
           </label>
-          <button className="commerce-primary" type="submit" disabled={!accepted}>
-            Create mock order
+          <div className="commerce-checkout-flow" aria-label="Mock checkout flow">
+            <span>Proof approved</span>
+            <span>Stripe test checkout</span>
+            <span>Customer emails queued</span>
+            <span>Admin hub handoff</span>
+          </div>
+          <button className="commerce-primary" type="submit" disabled={!accepted || isSubmitting}>
+            {isSubmitting ? 'Creating test payment...' : 'Pay with Stripe test mode'}
           </button>
           {createdOrder && (
             <div className="commerce-success">
               <strong>Order package created: {createdOrder.id}</strong>
-              <span>Status: {createdOrder.status.replace('-', ' ')}</span>
-              <button type="button" onClick={() => onNavigate('admin')}>Open admin view</button>
+              <span>
+                Stripe: {createdOrder.stripeSimulation.provider === 'stripe' ? createdOrder.stripeSimulation.checkoutSessionId : 'mock fallback'}
+              </span>
+              <span>Emails queued: {createdOrder.emailEvents.length}</span>
+              <span>Hub queue: {createdOrder.adminHub.queue}</span>
+              {createdOrder.stripeSimulation.checkoutUrl && (
+                <button type="button" onClick={() => window.location.assign(createdOrder.stripeSimulation.checkoutUrl!)}>
+                  Continue to Stripe test checkout
+                </button>
+              )}
+              <button type="button" onClick={() => onNavigate('admin')}>Open hub inbox preview</button>
             </div>
           )}
         </form>
@@ -627,40 +650,50 @@ function CheckoutPage({
 
 function AdminPage({ orders }: Pick<SiteProps, 'orders'>) {
   const counts = {
-    approved: orders.filter((order) => order.status === 'proof-approved').length,
+    paid: orders.filter((order) => order.paymentStatus === 'test-paid').length,
     check: orders.filter((order) => order.status === 'needs-check' || order.status === 'quote-requested').length,
-    production: orders.filter((order) => order.status === 'in-production').length,
+    hub: orders.filter((order) => order.adminHub?.status === 'queued').length,
+    emails: orders.reduce((total, order) => total + (order.emailEvents?.length || 0), 0),
   };
   return (
     <div className="commerce-page">
       <section className="commerce-section">
         <div className="commerce-section__head">
-          <p className="commerce-eyebrow">Internal mock dashboard</p>
-          <h1>Production queue shaped around approved proof snapshots.</h1>
+          <p className="commerce-eyebrow">Central hub mock inbox</p>
+          <h1>Storefront orders arrive here as paid proof packages.</h1>
+          <p>
+            This is not the future admin URL. It is a local preview of the payload this storefront will send into the shared admin hub: payment result, customer email events, production proof and visual proof.
+          </p>
         </div>
         <div className="commerce-ops-strip">
-          <div><span>Approved proofs</span><strong>{counts.approved}</strong></div>
+          <div><span>Stripe test paid</span><strong>{counts.paid}</strong></div>
           <div><span>Needs check/quote</span><strong>{counts.check}</strong></div>
-          <div><span>In production</span><strong>{counts.production}</strong></div>
-          <div><span>Service mode</span><strong>Mock</strong></div>
+          <div><span>Hub queued</span><strong>{counts.hub}</strong></div>
+          <div><span>Email events</span><strong>{counts.emails}</strong></div>
         </div>
         <div className="commerce-admin-grid">
           {(orders.length ? orders : []).map((order) => (
             <article className="commerce-admin-card" key={order.id}>
               <div>
                 <strong>{order.id}</strong>
-                <span>{order.status.replace('-', ' ')}</span>
+                <span>{(order.paymentStatus || order.status).replace('-', ' ')}</span>
               </div>
               <p>{order.productTitle}</p>
               <p>{order.customerName} · {order.customerEmail}</p>
-              <p>{order.priceBreakdown.quoteRequired ? `Check: ${order.priceBreakdown.quoteReasons.join(', ')}` : 'Production approval captured at checkout.'}</p>
+              <p>{order.priceBreakdown.quoteRequired ? `Check: ${order.priceBreakdown.quoteReasons.join(', ')}` : 'Stripe test payment complete. Proof package queued for admin hub.'}</p>
               <p className="commerce-admin-price">{formatPrice(order.total)}</p>
+              <div className="commerce-admin-package">
+                <span>{order.proofPackage?.productionFilename || 'production-proof.svg'}</span>
+                <span>{order.proofPackage?.visualFilename || 'visual-proof.svg'}</span>
+                <span>{order.emailEvents?.length || 0} email events</span>
+                <span>{order.adminHub?.queue || 'orders.production-proof-intake'}</span>
+              </div>
             </article>
           ))}
           {!orders.length && (
             <div className="commerce-empty-state">
-              <strong>No mock orders yet.</strong>
-              <span>Create one through the checkout prototype and it will appear here.</span>
+              <strong>No hub payloads yet.</strong>
+              <span>Create one through the Stripe test checkout mock and it will appear here.</span>
             </div>
           )}
         </div>

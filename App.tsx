@@ -201,6 +201,26 @@ const App: React.FC = () => {
     } catch {
       setMockOrders([]);
     }
+
+    let cancelled = false;
+    const loadHubOrders = async () => {
+      try {
+        const response = await fetch('/api/mock-admin-hub/orders');
+        if (!response.ok) return;
+        const payload = await response.json();
+        if (cancelled || !Array.isArray(payload.orders)) return;
+        setMockOrders(prev => {
+          const knownIds = new Set(prev.map(order => order.id));
+          return [...prev, ...payload.orders.filter((order: MockOrder) => !knownIds.has(order.id))];
+        });
+      } catch {
+        // Local storage remains enough for the storefront prototype if the hub mock is unavailable.
+      }
+    };
+    loadHubOrders();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -766,10 +786,47 @@ const App: React.FC = () => {
     }
   };
 
-  const handleCreateMockOrder = (customerName: string, customerEmail: string) => {
-    const order = makeMockOrder(state, inscriptionPrompt, selectedProduct.title, customerName, customerEmail);
+  const handleCreateMockOrder = async (customerName: string, customerEmail: string) => {
+    const visualProofSvg = svgRef.current?.outerHTML || state.generatedSvgContent || null;
+    const order = makeMockOrder(state, inscriptionPrompt, selectedProduct.title, customerName, customerEmail, {
+      productionSvg: state.generatedSvgContent,
+      visualProofSvg,
+    });
+    let checkoutOrder = order;
+    try {
+      const response = await fetch('/api/stripe/checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.id,
+          customerEmail,
+          productTitle: selectedProduct.title,
+          totalPence: Math.round(order.total * 100),
+          origin: window.location.origin,
+        }),
+      });
+      if (!response.ok) throw new Error(`Stripe checkout failed (${response.status})`);
+      const payload = await response.json();
+      const session = payload.session;
+      if (session?.id && session?.url) {
+        checkoutOrder = {
+          ...order,
+          status: order.status === 'needs-check' ? order.status : 'checkout-started',
+          stripeSimulation: {
+            provider: 'stripe',
+            mode: 'test',
+            checkoutSessionId: session.id,
+            paymentIntentId: session.paymentIntentId || '',
+            receiptUrl: session.url,
+            checkoutUrl: session.url,
+          },
+        };
+      }
+    } catch (error) {
+      console.warn('Stripe checkout session could not be created; keeping mock checkout package.', error);
+    }
     setMockOrders(prev => {
-      const next = [order, ...prev];
+      const next = [checkoutOrder, ...prev];
       try {
         localStorage.setItem('plaques-ai-mock-orders', JSON.stringify(next));
       } catch {
@@ -777,7 +834,16 @@ const App: React.FC = () => {
       }
       return next;
     });
-    return order;
+    try {
+      await fetch('/api/mock-admin-hub/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(checkoutOrder),
+      });
+    } catch (error) {
+      console.warn('Mock admin hub handoff was not persisted on the server.', error);
+    }
+    return checkoutOrder;
   };
 
   // --- Render ---
