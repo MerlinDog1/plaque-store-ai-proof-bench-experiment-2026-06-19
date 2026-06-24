@@ -1753,14 +1753,14 @@ export const generateRealisticView = async (
     [Material.BrushedBrass]: {
       name: "Brushed Brass",
       hex: "#C99A35",
-      texture: "Hand-brushed satin brass with a fine directional grain",
-      details: "Warm brass that has been manually brushed and softened to a satin sheen. Low glare, no mirror reflection, with visible fine horizontal finishing lines and slightly varied gold tones across the face. Avoid glossy gold, foil shine, heavy gradients, or cartoon stripe reflections"
+      texture: "Clean hand-brushed satin brass with a fine directional manufacturing grain",
+      details: "Warm brass that has been manually brushed and softened to a satin sheen. Low glare, no mirror reflection, with uniform fine horizontal finishing grain and slightly varied gold tones across a clean, well-kept face. Avoid glossy gold, foil shine, heavy gradients, cartoon stripe reflections, scratches, scuffs, dents, pits, stains, tarnish spots, chips, grime, fingerprints, or random wear marks"
     },
     [Material.OrbitalBrassMattLacquer]: {
       name: "Orbital Finished Brass with Matt Lacquer",
       hex: "#C9AE6A",
-      texture: "Very fine orbital micro-abrasion across brass",
-      details: "Muted straw-gold brass under a low-sheen matt lacquer, with tiny dense non-directional orbital sanding marks like fine Scotch-Brite or DA sander haze. It should feel flatter and more lacquered than brushed brass"
+      texture: "Clean matt-lacquered orbital brass with a controlled fine orbital finishing haze",
+      details: "Muted straw-gold brass under a low-sheen matt lacquer, with a tiny dense non-directional orbital manufacturing finish like a very fine satin haze. It should feel flatter and more lacquered than brushed brass. The surface must still look pristine and professionally finished, not scratched, scuffed, dirty, stained, chipped, pitted, blotchy, or worn"
     },
     [Material.PolishedBrass]: {
       name: "Polished Brass",
@@ -1771,14 +1771,14 @@ export const generateRealisticView = async (
     [Material.AgedBrass]: {
       name: "Mid Aged Brass",
       hex: "#8B6F4E",
-      texture: "Mid-aged brass with fine scratches and soft patina",
-      details: "Warm brown-gold brass with subtle oxidation, fine surface wear, lightly aged uneven tone and a low-glare traditional finish. It should look like one continuous engraved plaque surface, not a patched texture or heavily corroded plate"
+      texture: "Clean mid-aged brass with intentional warm patina and no damage marks",
+      details: "Warm brown-gold brass with controlled factory ageing, soft even patina, restrained tonal depth, and a low-glare traditional finish. The ageing is intentional colour and finish treatment only: the surface should be smooth, clean, premium, and in very good condition. No scratches, scuffs, scrape lines, dents, pits, stains, grime, fingerprints, chips, corrosion spots, black speckles, random wear marks, or distressed/antique damage. It should look like one continuous engraved plaque surface, not a patched texture, dirty plate, or heavily corroded metal"
     },
     [Material.BrushedSteel]: {
       name: "Brushed Stainless Steel",
       hex: "#C0C0C0",
-      texture: "Fine directional stainless brush grain",
-      details: "Cool satin stainless with long horizontal hairline brushing, soft diffused highlights, and a restrained industrial silver tone. It is not mirror reflective and should not have chrome-like reflection bands"
+      texture: "Clean fine directional stainless brush grain",
+      details: "Cool satin stainless with uniform long horizontal manufacturing grain, soft diffused highlights, and a restrained industrial silver tone. It is not mirror reflective and should not have chrome-like reflection bands. Keep the surface pristine: no scratches, scuffs, fingerprints, dents, pits, stains, chips, grime, or random marks"
     },
     [Material.PolishedSteel]: {
       name: "Mirror Polished Stainless Steel",
@@ -1881,13 +1881,15 @@ Product details:
 - Hardware: ${hardwareDesc}.
 - Finish: ${portraitFinishInstruction}.
 - Engraving/text colour: ${textColourDesc}. Match this colour in the generated realistic render unless reverse etch is enabled.
+- Surface quality rule for every material: render a new, premium, clean, professionally finished plaque. Do not add scratches, scuffs, scrape lines, pitting, dents, chips, stains, water marks, fingerprints, dust, dirt, grime, corrosion spots, black speckles, random distressing, or accidental wear. Brush grain, orbital haze, polishing reflections, and aged-brass patina are controlled factory finishes only, never damage.
+- Aged brass rule: aged brass means intentional warm brown-gold patina and controlled tonal ageing on a smooth clean metal face. It must not look battered, pitted, scratched, dirty, antique-distressed, or randomly marked.
 - The lettering and border must remain clearly visible and legible in the final render. Do not fade the text into the metal, wash it out, blur it, emboss it as barely visible relief, or convert black filled etch into pale scratches.
 - Never add star glyphs, sparkle glyphs, rosettes, fleurons, bullets, dots, diamonds, decorative Unicode symbols, or repeated ornamental marks between title and body text. If the plaque needs a separator, use only one simple plain thin horizontal line, not three stars or ornamental icons.
 - If decorative caps are selected, render them as plain flat circular metal caps, only 2-3mm thick. They should look like thin flat discs sitting on the plaque surface: flat top face, straight vertical side wall, crisp circular edge. No bevel or chamfer. Never render domed button caps, hemispheres, rounded knobs, convex rivets, screw heads, mushroom-shaped hardware, or chunky raised standoffs.
 - If the shape is Heart, render a classic upright memorial heart: full rounded lobes, clear central top notch, balanced shoulders, and a defined lower point. Do not make it a wide flattened love-heart.
-- If the material is orbital brass with matt lacquer, render a very fine orbital sanding haze: tiny dense overlapping micro-scratch arcs, not visible large swirls or circular rings. The finish should read close to fine brushed grain under matt lacquer, muted lacquered brass, low glare, no mirror reflection. The engraving must be a crisp precision surface etch with hairline-sharp boundaries and clear separation between closely spaced hatch marks. Keep the etch visually shallow and flat, without bevelled walls, rounded grooves, raised rims, heavy recess shadows, bleeding, blur, or loss of fine detail. Use the selected ${textColourDesc} as a precise filled surface etch, not a raised print or blurry ink wash.
-- If the material is brushed brass, make it a hand-finished satin brush rather than a shiny polished gold plate: warm brass, fine horizontal hairline grain, soft diffused reflection, subtle variation from manual brushing. Avoid big diagonal bands, foil shine, or CGI gold gradients.
-- If the material is brushed stainless, show fine horizontal satin grain and muted reflection, with no chrome reflections. If the material is mirror polished stainless, show smoother mirror-polished reflection contrast instead, with no brush grain and no exaggerated stripe pattern.
+- If the material is orbital brass with matt lacquer, render a very fine orbital satin haze: tiny dense overlapping factory finishing arcs, not damage scratches, visible large swirls, circular rings, or scuffed wear. The finish should read close to fine brushed grain under matt lacquer, muted lacquered brass, low glare, no mirror reflection. The engraving must be a crisp precision surface etch with hairline-sharp boundaries and clear separation between closely spaced hatch marks. Keep the etch visually shallow and flat, without bevelled walls, rounded grooves, raised rims, heavy recess shadows, bleeding, blur, or loss of fine detail. Use the selected ${textColourDesc} as a precise filled surface etch, not a raised print or blurry ink wash.
+- If the material is brushed brass, make it a clean hand-finished satin brush rather than a shiny polished gold plate: warm brass, fine horizontal manufacturing grain, soft diffused reflection, subtle variation from manual brushing. Avoid big diagonal bands, foil shine, CGI gold gradients, scratches, scuffs, stains, or wear marks.
+- If the material is brushed stainless, show clean fine horizontal satin grain and muted reflection, with no chrome reflections, scratches, scuffs, stains, fingerprints, or wear marks. If the material is mirror polished stainless, show a clean smooth mirror-polished reflection contrast instead, with no brush grain, damage marks, or exaggerated stripe pattern.
 
 Scene:
 - Close-up studio product photo, almost front-facing, with only a very slight natural perspective.
