@@ -375,6 +375,7 @@ export const Controls: React.FC<Props> = ({
   const inscriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
   const instantStyleApplyingRef = useRef(false);
   const [fineTuneUnlocked, setFineTuneUnlocked] = useState(false);
+  const [adminProofToolsOpen, setAdminProofToolsOpen] = useState(false);
   const [sizeMode, setSizeMode] = useState<'standard' | 'custom'>('standard');
   const [benchSizesExpanded, setBenchSizesExpanded] = useState(true);
   const [customWidthInput, setCustomWidthInput] = useState(String(state.width));
@@ -1872,6 +1873,20 @@ export const Controls: React.FC<Props> = ({
 
       {activeStep === 6 && (
         <section className="space-y-4">
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setAdminProofToolsOpen((open) => !open)}
+              className={`min-h-[34px] rounded-full border px-3 text-[11px] font-black uppercase tracking-wide transition ${
+                adminProofToolsOpen
+                  ? 'border-[#c6932e] bg-[#f2d688] text-[#1b231f]'
+                  : 'border-[rgba(238,244,238,0.16)] bg-[#14231f] text-[#aab8b0]'
+              }`}
+            >
+              {adminProofToolsOpen ? 'Hide admin tools' : 'Admin tools'}
+            </button>
+          </div>
+
           <div className={`rounded-lg border p-4 text-sm leading-6 ${
             isProductionReady
               ? 'border-[#2f7f69]/35 bg-[#151f1b] text-[#1f755f]'
@@ -1896,6 +1911,7 @@ export const Controls: React.FC<Props> = ({
             )}
           </div>
 
+          {adminProofToolsOpen && (
           <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -2056,58 +2072,66 @@ export const Controls: React.FC<Props> = ({
               />
             </div>
           </div>
+          )}
 
           <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Customer proof</div>
             <p className="mt-1 text-sm leading-6 text-[#6a746d]">
-              Save your progress, check a realistic preview, or download a review copy.
+              Save a review PDF with a secure resume link and QR code, or continue to basket when the proof is ready.
             </p>
-            <div className="mt-4 rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
-              <label className="block text-xs font-black uppercase tracking-wide text-[#6a746d]">
-                Realistic scene prompt
-              </label>
-              <textarea
-                value={realisticPreviewPrompt}
-                onChange={(event) => onRealisticPreviewPromptChange(event.target.value)}
-                placeholder="Example: luxury garden memorial hero image at golden hour, plaque mounted on natural stone, shallow depth of field, room for website headline on the left."
-                className="mt-2 min-h-[112px] w-full resize-y rounded-lg border border-[rgba(84, 72, 52, 0.16)] bg-[#fffaf0] px-3 py-3 text-sm leading-6 text-[#1b231f] outline-none transition focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20"
-              />
-              <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
-                <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-[#6a746d]">
-                  Ratio
-                  <select
-                    value={realisticPreviewAspectRatio}
-                    onChange={(event) => onRealisticPreviewAspectRatioChange(event.target.value)}
-                    className="min-h-[44px] rounded-lg border border-[rgba(84, 72, 52, 0.16)] bg-[#fffaf0] px-3 text-sm font-black normal-case tracking-normal text-[#1b231f] outline-none focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20"
-                  >
-                    {REALISTIC_ASPECT_RATIOS.map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label} ({value})
-                      </option>
-                    ))}
-                  </select>
+            {adminProofToolsOpen && (
+              <div className="mt-4 rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
+                <label className="block text-xs font-black uppercase tracking-wide text-[#6a746d]">
+                  Realistic scene prompt
                 </label>
-                <div className="flex min-h-[44px] items-end pb-2 text-xs font-black uppercase tracking-wide text-[#9a6a16]">
-                  4K
+                <textarea
+                  value={realisticPreviewPrompt}
+                  onChange={(event) => onRealisticPreviewPromptChange(event.target.value)}
+                  placeholder="Example: luxury garden memorial hero image at golden hour, plaque mounted on natural stone, shallow depth of field, room for website headline on the left."
+                  className="mt-2 min-h-[112px] w-full resize-y rounded-lg border border-[rgba(84, 72, 52, 0.16)] bg-[#fffaf0] px-3 py-3 text-sm leading-6 text-[#1b231f] outline-none transition focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20"
+                />
+                <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
+                  <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-[#6a746d]">
+                    Ratio
+                    <select
+                      value={realisticPreviewAspectRatio}
+                      onChange={(event) => onRealisticPreviewAspectRatioChange(event.target.value)}
+                      className="min-h-[44px] rounded-lg border border-[rgba(84, 72, 52, 0.16)] bg-[#fffaf0] px-3 text-sm font-black normal-case tracking-normal text-[#1b231f] outline-none focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20"
+                    >
+                      {REALISTIC_ASPECT_RATIOS.map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label} ({value})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <div className="flex min-h-[44px] items-end pb-2 text-xs font-black uppercase tracking-wide text-[#9a6a16]">
+                    4K
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button onClick={onSaveProof} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
                 Save proof
               </button>
-              <button onClick={onRealisticPreview} className="col-span-2 min-h-[52px] rounded-lg bg-[#b98235] px-4 text-sm font-black text-[#1b231f]">
-                Realistic preview
-              </button>
+              {adminProofToolsOpen && (
+                <button onClick={onRealisticPreview} className="col-span-2 min-h-[52px] rounded-lg bg-[#b98235] px-4 text-sm font-black text-[#1b231f]">
+                  Realistic preview
+                </button>
+              )}
               <button onClick={onExportPdf} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
-                Review PDF
+                Save review PDF
               </button>
-              <button onClick={onPrint} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
-                Print
-              </button>
+              {adminProofToolsOpen && (
+                <button onClick={onPrint} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
+                  Print
+                </button>
+              )}
             </div>
           </div>
 
+          {adminProofToolsOpen && (
           <details className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <summary className="cursor-pointer text-sm font-black text-[#6a746d]">Production file for our workshop</summary>
             <p className="mt-2 text-xs leading-5 text-[#6a746d]">
@@ -2117,6 +2141,7 @@ export const Controls: React.FC<Props> = ({
               Download workshop SVG
             </button>
           </details>
+          )}
 
           <button
             onClick={onAddToBasket}
