@@ -196,7 +196,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   };
   const fillUrl = `url(#${materialFillId[state.material]})`;
   const textureUrl = materialTextureId[state.material] ? `url(#${materialTextureId[state.material]})` : null;
-  const fixingFillUrl = state.material === Material.AgedBrass && textureUrl ? textureUrl : fillUrl;
+  const fixingFillUrl = (state.material === Material.BrushedBrass || state.material === Material.AgedBrass) && textureUrl ? textureUrl : fillUrl;
   const textureOpacity = state.material === Material.BrushedBrass
     ? 1
     : state.material === Material.BrushedSteel
@@ -224,7 +224,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const capRadius = state.capSize / 2;
   const fixingRadius = state.fixing === Fixing.Caps ? capRadius : screwRadius;
   const scallopedCapCenterInset = state.capSize === 15 ? 12 : 10;
-  const standardCapBorderClearance = 2;
+  const standardCapBorderClearance = state.borderStyle === BorderStyle.Double ? 4 : 2;
   const capBorderInset = state.borderStyle === BorderStyle.Double ? borderInnerInset : borderOuterInset;
   const screwBorderInset = state.borderStyle === BorderStyle.Double ? borderInnerInset : borderOuterInset;
   const borderedCapInset = isScallopedBorder
