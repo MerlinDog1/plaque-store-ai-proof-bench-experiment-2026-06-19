@@ -181,11 +181,12 @@ const server = http.createServer(async (req, res) => {
         `Use the uploaded brass photograph only as material reference and create a pristine ${spec.label} brass texture at ${spec.dimensions}.`,
         "The result must be a seamless, tileable, edge-to-edge material texture suitable for ecommerce plaque swatches and 3D material maps.",
         "Make the whole canvas opaque brass surface. No transparent pixels, empty margins, checkerboard, alpha, letterboxing, frames, borders, or visible rectangular crop boundaries.",
-        "Preserve the source brass character, colour family, brushing, patina, tarnish, oxidation, fine scratches, grain, and uneven natural wear, but blend everything into one continuous surface.",
-        "Remove any hard seams, bands, vertical joins, repeated blocks, patch edges, vignettes, shadowed corners, glare hotspots, perspective distortion, and source-photo framing.",
+        "Preserve the source brass character, colour family, intentional brushing direction, controlled patina, warm oxidation tone, and manufacturing grain, but blend everything into one continuous premium sheet surface.",
+        "The generated brass must look new, clean, and professionally finished. Patina means intentional tonal ageing only, not damage, dirt, distressing, or accidental wear.",
+        "Remove any hard seams, bands, vertical joins, repeated blocks, patch edges, vignettes, shadowed corners, glare hotspots, perspective distortion, source-photo framing, scratches, scuffs, scrape lines, pits, dents, chips, stains, fingerprints, grime, dust, black speckles, corrosion spots, random blemishes, water marks, dirty patches, or worn areas.",
         "Use flat orthographic close-up material photography: crisp, high-resolution, natural micro-detail, balanced lighting, no object context.",
         "Do not add plaque shapes, screws, engraving, text, logos, watermarks, hands, tools, walls, tables, or background objects.",
-        "Avoid painterly, plastic, blurry, smeared, noisy, synthetic, low-resolution, or obviously AI-generated texture artifacts.",
+        "Avoid painterly, plastic, blurry, smeared, noisy, synthetic, low-resolution, damaged, dirty, antique-distressed, or obviously AI-generated texture artifacts.",
       ].join(" ");
 
       const response = await retryGemini(() => ai.models.generateContent({
