@@ -277,6 +277,15 @@ function applyMaterialTexture(target: THREE.MeshStandardMaterial, texture: THREE
   target.needsUpdate = true;
 }
 
+function applyWoodTexture(target: THREE.MeshStandardMaterial, texture: THREE.Texture | null) {
+  if (!texture) return;
+  target.map = texture;
+  target.color.set(0xffffff);
+  target.roughness = 0.82;
+  target.metalness = 0.01;
+  target.needsUpdate = true;
+}
+
 function makeFallbackWoodTexture(tone: PlaqueState['woodTone']) {
   const width = 1024;
   const height = 512;
@@ -547,6 +556,14 @@ function makeRectFrontChamferedWoodMesh(
 
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const uvs = new Float32Array(positions.length / 3 * 2);
+  for (let i = 0; i < positions.length / 3; i += 1) {
+    const x = positions[i * 3];
+    const y = positions[i * 3 + 1];
+    uvs[i * 2] = (x + halfOuterW) / Math.max(0.001, halfOuterW * 2);
+    uvs[i * 2 + 1] = 1 - ((y + halfOuterH) / Math.max(0.001, halfOuterH * 2));
+  }
+  geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
   const mesh = new THREE.Mesh(geometry, material);
@@ -790,10 +807,12 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
           woodTexture?.dispose();
           return;
         }
+        const bodyTexture = woodTexture.clone();
+        bodyTexture.needsUpdate = true;
+        applyWoodTexture(woodBody.material as THREE.MeshStandardMaterial, bodyTexture);
         const faceMaterial = woodFace.material as THREE.MeshStandardMaterial;
-        faceMaterial.map = woodTexture;
-        faceMaterial.needsUpdate = true;
-        host.dataset.woodTexture = 'scan';
+        applyWoodTexture(faceMaterial, woodTexture);
+        host.dataset.woodTexture = 'scan-body';
       });
     }
 
