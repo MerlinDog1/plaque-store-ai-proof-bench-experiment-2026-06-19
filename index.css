@@ -323,6 +323,13 @@
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.56);
 }
 
+.proofbench-customiser .controls-instrument .proof-checkout-button,
+.proofbench-customiser .controls-instrument .proof-checkout-button:disabled,
+.proofbench-customiser .controls-instrument .proof-save-later-card button {
+  color: #17201d !important;
+  text-shadow: 0 1px 0 rgba(255, 244, 190, 0.38);
+}
+
 .proofbench-customiser .controls-instrument .proof-turnaround span {
   color: #557064 !important;
 }
