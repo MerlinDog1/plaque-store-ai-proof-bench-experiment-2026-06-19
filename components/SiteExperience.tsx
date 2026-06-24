@@ -209,18 +209,35 @@ function HomeMaterialPanels() {
     <section className="commerce-section commerce-material-showcase">
       <div className="commerce-section__head">
         <p className="commerce-eyebrow">Materials</p>
-        <h2>Engraved with care, on the finest materials.</h2>
+        <h2>Choose a finish by feel.</h2>
         <p>
-          Choose from premium brass, stainless steel, and wood-backed finishes selected for clean engraving,
-          lasting detail, and a substantial feel.
+          Brass, stainless steel and wood textures shown as tactile samples, using lighter preview images so the page stays quick.
         </p>
       </div>
-      <div className="commerce-material-grid commerce-material-grid--home">
-        {materialStories.map((material) => (
-          <article className="commerce-material-card commerce-material-card--tactile" key={material.title}>
-            <div style={{ backgroundImage: `url('${material.image}')` }} aria-hidden="true" />
-            <h3>{material.title}</h3>
-            <p>{material.copy}</p>
+      <div className="commerce-material-folio" aria-label="Plaque material samples">
+        {materialStories.map((material, index) => (
+          <article
+            className="commerce-material-card commerce-material-card--folio"
+            key={material.title}
+            style={{ '--material-index': index } as React.CSSProperties}
+            tabIndex={0}
+          >
+            <div className="commerce-material-card__sample">
+              <img
+                src={material.thumbnail}
+                alt={`${material.title} texture sample`}
+                loading="lazy"
+                decoding="async"
+                width="960"
+                height="540"
+              />
+            </div>
+            <div className="commerce-material-card__body">
+              <span>{material.family}</span>
+              <h3>{material.title}</h3>
+              <strong>{material.tone}</strong>
+              <p>{material.copy}</p>
+            </div>
           </article>
         ))}
       </div>
@@ -390,7 +407,7 @@ function MaterialsPage() {
         <div className="commerce-material-grid">
           {materialStories.map((material) => (
             <article className="commerce-material-card" key={material.title}>
-              <div style={{ backgroundImage: `url(${material.image})` }} />
+              <div style={{ backgroundImage: `url(${material.thumbnail})` }} />
               <h3>{material.title}</h3>
               <p>{material.copy}</p>
             </article>
