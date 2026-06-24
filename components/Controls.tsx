@@ -2179,23 +2179,25 @@ export const Controls: React.FC<Props> = ({
                 </div>
               </div>
             )}
-            <div className="mt-4 grid gap-2">
-              <button
-                onClick={onAddToBasket}
-                disabled={!isProductionReady}
-                className="proof-checkout-button studio-press min-h-[58px] w-full rounded-lg px-5 text-sm font-black disabled:cursor-not-allowed disabled:shadow-none"
-              >
-                {basketAdded ? 'Added to basket' : isProductionReady ? 'Checkout' : 'Complete checklist to checkout'}
-              </button>
-              <div className="proof-stripe-note" aria-label="Secure test checkout powered by Stripe">
-                <span>Secure card checkout</span>
-                <img src="/site-images/powered-by-stripe-blurple.svg" alt="Powered by Stripe" loading="lazy" />
+            <div className="mt-4 grid gap-3">
+              <div className="proof-payment-pill">
+                <button
+                  onClick={onAddToBasket}
+                  disabled={!isProductionReady}
+                  className="proof-checkout-button studio-press min-h-[58px] w-full px-5 text-sm font-black disabled:cursor-not-allowed disabled:shadow-none"
+                >
+                  {basketAdded ? 'Added to basket' : isProductionReady ? 'Checkout' : 'Complete checklist to checkout'}
+                </button>
+                <div className="proof-stripe-note" aria-label="Secure test checkout powered by Stripe">
+                  <span>Secure card checkout</span>
+                  <img src="/site-images/powered-by-stripe-black.svg" alt="Powered by Stripe" loading="lazy" />
+                </div>
               </div>
               <div className="proof-save-later-card">
                 <div>
-                  <span>Not ready to buy?</span>
+                  <span>Proof PDF and return link</span>
                   <strong>Save this design for later</strong>
-                  <small>No account needed. Your PDF includes a QR code and secure link to continue or checkout later. Saved links last 30 days.</small>
+                  <small>No account needed. The PDF includes your QR code and secure link to return, continue editing, or checkout later. Saved links last 30 days.</small>
                 </div>
                 <button onClick={onExportPdf} className="min-h-[52px] rounded-lg px-4 text-sm font-black">
                   Download proof PDF

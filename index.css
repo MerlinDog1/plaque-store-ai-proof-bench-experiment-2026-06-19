@@ -179,17 +179,34 @@
   line-height: 1.35;
 }
 
-.proof-checkout-button {
-  border: 1px solid rgba(82, 55, 13, 0.28) !important;
-  background: linear-gradient(180deg, #f8de8c, #c79232) !important;
-  box-shadow: 0 16px 36px rgba(199, 146, 50, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.48) !important;
+.proof-payment-pill {
+  overflow: hidden;
+  border: 1px solid rgba(82, 55, 13, 0.34);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 244, 190, 0.72), rgba(255, 244, 190, 0) 42%),
+    linear-gradient(180deg, #f7d66f 0%, #e5aa2e 58%, #b97a17 100%);
+  box-shadow: 0 18px 42px rgba(199, 146, 50, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.58);
   color: #17231f !important;
 }
 
+.proof-checkout-button {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #17231f !important;
+  text-shadow: 0 1px 0 rgba(255, 244, 190, 0.48);
+}
+
+.proof-checkout-button:not(:disabled):hover,
+.proof-checkout-button:not(:disabled):focus-visible {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
 .proof-checkout-button:disabled {
-  border-color: rgba(238, 244, 238, 0.12) !important;
-  background: rgba(238, 244, 238, 0.10) !important;
-  color: #93a29a !important;
+  background: rgba(238, 244, 238, 0.12) !important;
+  color: rgba(23, 35, 31, 0.56) !important;
 }
 
 .proof-stripe-note {
@@ -197,11 +214,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.7rem;
-  min-height: 36px;
-  border: 1px solid rgba(84, 72, 52, 0.12);
-  border-radius: 8px;
-  background: rgba(255, 253, 247, 0.74);
-  padding: 0.35rem 0.65rem;
+  min-height: 40px;
+  border-top: 1px solid rgba(82, 55, 13, 0.24);
+  background: rgba(255, 250, 240, 0.28);
+  padding: 0.42rem 0.75rem;
 }
 
 .proof-stripe-note img {
@@ -213,13 +229,14 @@
 .proof-save-later-card {
   display: grid;
   gap: 0.75rem;
-  border: 1px solid rgba(47, 127, 105, 0.28) !important;
-  border-radius: 8px;
+  border: 1px solid rgba(237, 190, 82, 0.42) !important;
+  border-radius: 12px;
   background:
-    linear-gradient(135deg, rgba(47, 127, 105, 0.10), rgba(245, 210, 123, 0.10)),
-    rgba(255, 253, 247, 0.88) !important;
-  padding: 0.9rem;
-  color: #263b34 !important;
+    linear-gradient(135deg, rgba(237, 190, 82, 0.16), rgba(237, 190, 82, 0) 46%),
+    linear-gradient(180deg, #20342d, #16251f) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.08), 0 14px 30px rgba(0, 0, 0, 0.14);
+  padding: 1rem;
+  color: #edf0e8 !important;
 }
 
 .proof-save-later-card strong,
@@ -229,24 +246,48 @@
 
 .proof-save-later-card strong {
   margin-top: 0.16rem;
-  color: #17231f !important;
+  color: #f5d27b !important;
   font-size: 15px;
   font-weight: 950;
 }
 
 .proof-save-later-card small {
   margin-top: 0.35rem;
-  color: #4f6259 !important;
+  color: #edf0e8 !important;
   font-size: 12px;
   font-weight: 800;
   line-height: 1.45;
 }
 
 .proof-save-later-card button {
-  border: 1px solid rgba(47, 127, 105, 0.26) !important;
-  background: #fffaf0 !important;
-  color: #173c2d !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(237, 190, 82, 0.62) !important;
+  background: linear-gradient(180deg, #f3d886, #ddb34a) !important;
+  color: #17201d !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.56);
+}
+
+.proofbench-customiser .controls-instrument .proof-turnaround span {
+  color: #557064 !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-turnaround strong {
+  color: #143828 !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-turnaround small {
+  color: #315747 !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-save-later-card span {
+  color: #d9b85d !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-save-later-card strong {
+  color: #f5d27b !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-save-later-card small {
+  color: #edf0e8 !important;
 }
 
 .turnaround-toast {
