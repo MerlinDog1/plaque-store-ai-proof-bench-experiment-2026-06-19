@@ -25,7 +25,8 @@
       }
 
       button,
-      input {
+      input,
+      textarea {
         font: inherit;
       }
 
@@ -151,6 +152,22 @@
         color: #c8d4cc;
         font-size: 13px;
         font-weight: 700;
+      }
+
+      .prompt-box {
+        width: 100%;
+        min-height: 118px;
+        resize: vertical;
+        border: 1px solid rgba(237, 243, 239, 0.14);
+        border-radius: 8px;
+        padding: 12px;
+        color: #edf3ef;
+        background: rgba(255, 255, 255, 0.05);
+        line-height: 1.45;
+      }
+
+      .prompt-box::placeholder {
+        color: #7f8a82;
       }
 
       .segment {
@@ -306,6 +323,10 @@
                 <button class="active" type="button" data-ratio="16:9">16:9<br />3840 x 2160</button>
                 <button type="button" data-ratio="1:1">1:1<br />4096 x 4096</button>
               </div>
+            </div>
+            <div>
+              <label class="label" for="promptInput">Texture prompt</label>
+              <textarea class="prompt-box" id="promptInput" maxlength="900" placeholder="Optional: e.g. clean pale brushed brass, no dark marks, fine horizontal grain, lighter champagne tone"></textarea>
             </div>
             <button class="primary" id="generateBtn" type="button" disabled>Generate 4K texture</button>
             <div class="status" id="status">Upload a brass source image to begin.</div>

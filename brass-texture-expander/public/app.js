@@ -3,6 +3,7 @@ const dropZone = document.querySelector("#dropZone");
 const dropText = document.querySelector("#dropText");
 const sourceThumb = document.querySelector("#sourceThumb");
 const generateBtn = document.querySelector("#generateBtn");
+const promptInput = document.querySelector("#promptInput");
 const statusEl = document.querySelector("#status");
 const ratioButtons = [...document.querySelectorAll("[data-ratio]")];
 const resultImage = document.querySelector("#resultImage");
@@ -124,10 +125,11 @@ const generateTexture = async () => {
   setStatus("Generating texture with Gemini. This can take a minute.");
 
   try {
+    const prompt = promptInput.value.trim();
     const response = await fetch("/api/expand", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imageDataUrl, aspectRatio: selectedRatio }),
+      body: JSON.stringify({ imageDataUrl, aspectRatio: selectedRatio, prompt }),
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);

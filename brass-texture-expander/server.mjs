@@ -176,18 +176,21 @@ const server = http.createServer(async (req, res) => {
       const payload = JSON.parse(await readBody(req));
       const source = parseDataUrl(payload.imageDataUrl);
       const spec = getOutputSpec(payload.aspectRatio);
+      const customPrompt = String(payload.prompt || "").trim().slice(0, 900);
 
       const prompt = [
         `Use the uploaded brass photograph only as material reference and create a pristine ${spec.label} brass texture at ${spec.dimensions}.`,
         "The result must be a seamless, tileable, edge-to-edge material texture suitable for ecommerce plaque swatches and 3D material maps.",
         "Make the whole canvas opaque brass surface. No transparent pixels, empty margins, checkerboard, alpha, letterboxing, frames, borders, or visible rectangular crop boundaries.",
         "Preserve the source brass character, colour family, intentional brushing direction, controlled patina, warm oxidation tone, and manufacturing grain, but blend everything into one continuous premium sheet surface.",
+        customPrompt ? `Additional user texture direction: ${customPrompt}` : "",
+        customPrompt ? "Follow the additional direction for colour, grain, brightness, and finish character, but do not override the cleanliness, seamlessness, no-damage, no-object, and no-text rules." : "",
         "The generated brass must look new, clean, and professionally finished. Patina means intentional tonal ageing only, not damage, dirt, distressing, or accidental wear.",
         "Remove any hard seams, bands, vertical joins, repeated blocks, patch edges, vignettes, shadowed corners, glare hotspots, perspective distortion, source-photo framing, scratches, scuffs, scrape lines, pits, dents, chips, stains, fingerprints, grime, dust, black speckles, corrosion spots, random blemishes, water marks, dirty patches, or worn areas.",
         "Use flat orthographic close-up material photography: crisp, high-resolution, natural micro-detail, balanced lighting, no object context.",
         "Do not add plaque shapes, screws, engraving, text, logos, watermarks, hands, tools, walls, tables, or background objects.",
         "Avoid painterly, plastic, blurry, smeared, noisy, synthetic, low-resolution, damaged, dirty, antique-distressed, or obviously AI-generated texture artifacts.",
-      ].join(" ");
+      ].filter(Boolean).join(" ");
 
       const response = await retryGemini(() => ai.models.generateContent({
         model: "gemini-3.1-flash-image-preview",
