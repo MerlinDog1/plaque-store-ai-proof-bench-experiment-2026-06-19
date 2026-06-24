@@ -224,13 +224,14 @@ function HomeMaterialPanels() {
           <p className="commerce-eyebrow">Materials</p>
           <h2>Spin through the finishes.</h2>
           <p>
-            A tactile 3D material slider built from real brass, stainless steel and wood scans. These are lightweight WebP
-            previews; the designer only loads full production textures when the customer starts building.
+            Real brass, stainless steel and wood scans, staged as lightweight WebP previews so the finish feels tangible
+            without making the homepage carry production-sized textures.
           </p>
           <div className="commerce-material-atelier__meta" aria-label="Selected material details">
-            <span>{activeMaterial.family}</span>
+            <span>{activeMaterial.family} finish</span>
             <strong>{activeMaterial.title}</strong>
             <em>{activeMaterial.tone}</em>
+            <p>{activeMaterial.copy}</p>
           </div>
         </div>
 
@@ -264,10 +265,6 @@ function HomeMaterialPanels() {
                     />
                   </span>
                   <span className="commerce-material-slide__edge" aria-hidden="true" />
-                  <span className="commerce-material-slide__label">
-                    <strong>{material.title}</strong>
-                    <em>{material.family}</em>
-                  </span>
                 </button>
               );
             })}
@@ -276,11 +273,6 @@ function HomeMaterialPanels() {
 
           <div className="commerce-material-controls">
             <button type="button" onClick={() => moveMaterial(-1)} aria-label="Previous material">‹</button>
-            <div className="commerce-material-stage__caption">
-              <span>{activeMaterial.family}</span>
-              <h3>{activeMaterial.title}</h3>
-              <p>{activeMaterial.copy}</p>
-            </div>
             <button type="button" onClick={() => moveMaterial(1)} aria-label="Next material">›</button>
           </div>
         </div>
