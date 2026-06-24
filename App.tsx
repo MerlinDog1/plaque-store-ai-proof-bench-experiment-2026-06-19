@@ -30,7 +30,7 @@ const PROOF_BENCH_INITIAL_STATE: PlaqueState = {
   ...INITIAL_STATE,
   width: 297,
   height: 210,
-  material: Material.BrushedBrass,
+  material: Material.BrushedSteel,
   textColor: TextColor.Black,
   reverseEtch: false,
   border: false,

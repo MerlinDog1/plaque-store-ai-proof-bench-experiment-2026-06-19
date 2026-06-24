@@ -236,7 +236,7 @@ export const INITIAL_STATE: PlaqueState = {
   width: 300,
   height: 200,
   shape: Shape.Rect,
-  material: Material.BrushedBrass,
+  material: Material.BrushedSteel,
   fixing: Fixing.None,
   fixingHoleCount: 4,
   capSize: 10,
