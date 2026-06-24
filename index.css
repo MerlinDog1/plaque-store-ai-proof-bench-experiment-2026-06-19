@@ -130,6 +130,18 @@
 .proofbench-mobile-price {
   min-width: 104px;
   padding-inline: 7px;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.proofbench-mobile-price:hover,
+.proofbench-mobile-price:focus-visible {
+  border-color: rgba(245, 210, 123, 0.48);
+  background: rgba(245, 210, 123, 0.10);
+}
+
+.proofbench-mobile-price:active {
+  transform: translateY(1px);
 }
 
 .turnaround-toast {

@@ -724,7 +724,7 @@ const App: React.FC = () => {
       return;
     }
     setBasketAdded(true);
-    setCurrentView('checkout');
+    handleNavigate('checkout');
   };
 
   const handleNavigate = (view: SiteView, productSlug?: string) => {
@@ -1070,12 +1070,21 @@ const App: React.FC = () => {
                   <small title={proofSpecTrail}>{proofSpecTrail}</small>
                 </button>
                 {showProofPrice && (
-                  <div className="proofbench-mobile-price" aria-label={`Current price ${formattedPrice} including UK delivery`}>
+                  <button
+                    type="button"
+                    className="proofbench-mobile-price"
+                    aria-label={
+                      isProductionReady
+                        ? `Checkout with current price ${formattedPrice} including UK delivery`
+                        : `Review proof before checkout. Current price ${formattedPrice} including UK delivery`
+                    }
+                    onClick={handleAddToBasket}
+                  >
                     <span className="proofbench-delivery-label">
                       Inc UK delivery
-                      <button type="button" className="proofbench-info-dot" aria-label={DELIVERY_HELP} title={DELIVERY_HELP}>
+                      <span className="proofbench-info-dot" aria-label={DELIVERY_HELP} title={DELIVERY_HELP}>
                         i
-                      </button>
+                      </span>
                     </span>
                     <strong>
                       <svg className="proofbench-price-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -1084,7 +1093,7 @@ const App: React.FC = () => {
                       </svg>
                       {formattedPrice}
                     </strong>
-                  </div>
+                  </button>
                 )}
               </div>
 
