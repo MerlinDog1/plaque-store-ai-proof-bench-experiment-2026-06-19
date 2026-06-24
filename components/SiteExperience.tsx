@@ -206,10 +206,17 @@ function ProductGrid({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
 
 function HomeMaterialPanels() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const activeMaterial = materialStories[activeIndex] ?? materialStories[0];
   const materialCount = materialStories.length;
   const moveMaterial = (direction: number) => {
     setActiveIndex((current) => (current + direction + materialCount) % materialCount);
+  };
+  const handleMaterialTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartX === null) return;
+    const delta = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
+    if (Math.abs(delta) > 36) moveMaterial(delta < 0 ? 1 : -1);
+    setTouchStartX(null);
   };
   const getSliderSlot = (index: number) => {
     const rawOffset = index - activeIndex;
@@ -236,7 +243,13 @@ function HomeMaterialPanels() {
         </div>
 
         <div className="commerce-material-carousel-wrap">
-          <div className="commerce-material-carousel" aria-live="polite" aria-label="3D plaque material slider">
+          <div
+            className="commerce-material-carousel"
+            aria-live="polite"
+            aria-label="3D plaque material slider"
+            onTouchStart={(event) => setTouchStartX(event.touches[0]?.clientX ?? null)}
+            onTouchEnd={handleMaterialTouchEnd}
+          >
             {materialStories.map((material, index) => {
               const slot = getSliderSlot(index);
               const isActive = index === activeIndex;
