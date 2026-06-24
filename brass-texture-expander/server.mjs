@@ -86,6 +86,35 @@ const getOutputSpec = (aspectRatio) => {
   };
 };
 
+const materialProfiles = {
+  brass: {
+    label: "brass",
+    surface: "brass",
+    preserve: "source brass character, colour family, intentional brushing direction, controlled patina, warm oxidation tone, and manufacturing grain",
+    finish: "The generated brass must look new, clean, and professionally finished. Patina means intentional tonal ageing only, not damage, dirt, distressing, or accidental wear.",
+    avoid: "antique-distressed, corroded, green verdigris, dirty, plastic, painted gold",
+  },
+  stainless: {
+    label: "stainless steel",
+    surface: "stainless steel",
+    preserve: "source stainless steel character, cool silver colour family, brushing direction, satin or polished reflectivity, and fine manufacturing grain",
+    finish: "The generated stainless steel must look clean, new, premium, and professionally finished. Keep the tone neutral silver without yellow brass warmth.",
+    avoid: "rust, tarnish, brass or gold colour, dirty marks, carbon steel darkness, plastic, mirror glare hotspots",
+  },
+  wood: {
+    label: "wood",
+    surface: "wood veneer",
+    preserve: "source wood species character, grain direction, natural colour family, veneer figure, pores, subtle growth lines, and premium timber warmth",
+    finish: "The generated wood must look like clean finished veneer or polished timber suitable for plaque backing boards. Keep natural grain detail without damage or rough saw marks.",
+    avoid: "metallic shine, brass colour, rust, paint, rot, knots that dominate the image, cracks, dirt, wormholes, splinters, bark, live-edge context",
+  },
+};
+
+const getMaterialProfile = (materialType) => {
+  const key = String(materialType || "brass").toLowerCase();
+  return materialProfiles[key] || materialProfiles.brass;
+};
+
 const extractImage = (response) => {
   const parts = response?.candidates?.[0]?.content?.parts || [];
   const image = parts.find((part) => part.inlineData?.data);
@@ -176,20 +205,21 @@ const server = http.createServer(async (req, res) => {
       const payload = JSON.parse(await readBody(req));
       const source = parseDataUrl(payload.imageDataUrl);
       const spec = getOutputSpec(payload.aspectRatio);
+      const material = getMaterialProfile(payload.materialType);
       const customPrompt = String(payload.prompt || "").trim().slice(0, 900);
 
       const prompt = [
-        `Use the uploaded brass photograph only as material reference and create a pristine ${spec.label} brass texture at ${spec.dimensions}.`,
+        `Use the uploaded ${material.label} photograph only as material reference and create a pristine ${spec.label} ${material.surface} texture at ${spec.dimensions}.`,
         "The result must be a seamless, tileable, edge-to-edge material texture suitable for ecommerce plaque swatches and 3D material maps.",
-        "Make the whole canvas opaque brass surface. No transparent pixels, empty margins, checkerboard, alpha, letterboxing, frames, borders, or visible rectangular crop boundaries.",
-        "Preserve the source brass character, colour family, intentional brushing direction, controlled patina, warm oxidation tone, and manufacturing grain, but blend everything into one continuous premium sheet surface.",
+        `Make the whole canvas opaque ${material.surface} surface. No transparent pixels, empty margins, checkerboard, alpha, letterboxing, frames, borders, or visible rectangular crop boundaries.`,
+        `Preserve the ${material.preserve}, but blend everything into one continuous premium sheet surface.`,
         customPrompt ? `Additional user texture direction: ${customPrompt}` : "",
         customPrompt ? "Follow the additional direction for colour, grain, brightness, and finish character, but do not override the cleanliness, seamlessness, no-damage, no-object, and no-text rules." : "",
-        "The generated brass must look new, clean, and professionally finished. Patina means intentional tonal ageing only, not damage, dirt, distressing, or accidental wear.",
+        material.finish,
         "Remove any hard seams, bands, vertical joins, repeated blocks, patch edges, vignettes, shadowed corners, glare hotspots, perspective distortion, source-photo framing, scratches, scuffs, scrape lines, pits, dents, chips, stains, fingerprints, grime, dust, black speckles, corrosion spots, random blemishes, water marks, dirty patches, or worn areas.",
         "Use flat orthographic close-up material photography: crisp, high-resolution, natural micro-detail, balanced lighting, no object context.",
         "Do not add plaque shapes, screws, engraving, text, logos, watermarks, hands, tools, walls, tables, or background objects.",
-        "Avoid painterly, plastic, blurry, smeared, noisy, synthetic, low-resolution, damaged, dirty, antique-distressed, or obviously AI-generated texture artifacts.",
+        `Avoid painterly, blurry, smeared, noisy, synthetic, low-resolution, damaged, ${material.avoid}, or obviously AI-generated texture artifacts.`,
       ].filter(Boolean).join(" ");
 
       const response = await retryGemini(() => ai.models.generateContent({
@@ -209,6 +239,7 @@ const server = http.createServer(async (req, res) => {
       const image = extractImage(response);
       sendJson(res, 200, {
         ok: true,
+        materialType: payload.materialType || "brass",
         aspectRatio: spec.aspectRatio,
         dimensions: spec.dimensions,
         imageDataUrl: `data:${image.mimeType};base64,${image.data}`,
@@ -229,5 +260,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(port, host, () => {
-  console.log(`Brass texture expander listening on http://${host}:${port}; Gemini key configured: ${Boolean(apiKey)}`);
+  console.log(`Material texture expander listening on http://${host}:${port}; Gemini key configured: ${Boolean(apiKey)}`);
 });

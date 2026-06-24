@@ -5,6 +5,7 @@ const sourceThumb = document.querySelector("#sourceThumb");
 const generateBtn = document.querySelector("#generateBtn");
 const promptInput = document.querySelector("#promptInput");
 const statusEl = document.querySelector("#status");
+const materialButtons = [...document.querySelectorAll("[data-material]")];
 const ratioButtons = [...document.querySelectorAll("[data-ratio]")];
 const resultImage = document.querySelector("#resultImage");
 const emptyState = document.querySelector("#emptyState");
@@ -14,22 +15,55 @@ const healthDot = document.querySelector("#healthDot");
 const healthText = document.querySelector("#healthText");
 
 let imageDataUrl = "";
+let selectedMaterial = "brass";
 let selectedRatio = "16:9";
 let downloadObjectUrl = "";
+
+const materialSpecs = {
+  brass: {
+    label: "brass",
+    slug: "brass",
+    fill: "#b78334",
+    prompt: "Optional: e.g. clean pale brushed brass, no dark marks, fine horizontal grain, lighter champagne tone",
+  },
+  stainless: {
+    label: "stainless steel",
+    slug: "stainless-steel",
+    fill: "#aeb8be",
+    prompt: "Optional: e.g. clean brushed stainless, cool silver tone, fine horizontal grain, soft satin finish",
+  },
+  wood: {
+    label: "wood",
+    slug: "wood",
+    fill: "#9b6132",
+    prompt: "Optional: e.g. clean oak veneer, straight horizontal grain, warm honey tone, no knots or dark cracks",
+  },
+};
 
 const outputSpecs = {
   "16:9": {
     width: 3840,
     height: 2160,
-    filename: "brass-texture-16x9-4k.png",
-    title: "16:9 brass texture - 3840 x 2160",
+    suffix: "16x9-4k",
+    title: "16:9",
   },
   "1:1": {
     width: 4096,
     height: 4096,
-    filename: "brass-texture-square-4k.png",
-    title: "Square brass texture - 4096 x 4096",
+    suffix: "square-4k",
+    title: "Square",
   },
+};
+
+const currentMaterial = () => materialSpecs[selectedMaterial] || materialSpecs.brass;
+
+const getOutputLabel = () => {
+  const material = currentMaterial();
+  const spec = outputSpecs[selectedRatio];
+  return {
+    filename: `${material.slug}-texture-${spec.suffix}.png`,
+    title: `${spec.title} ${material.label} texture - ${spec.width} x ${spec.height}`,
+  };
 };
 
 const setStatus = (message, isError = false) => {
@@ -76,7 +110,7 @@ const exactPngBlob = async (src, spec) => {
   const ctx = canvas.getContext("2d", { alpha: false });
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
-  ctx.fillStyle = "#b78334";
+  ctx.fillStyle = currentMaterial().fill;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
@@ -129,13 +163,14 @@ const generateTexture = async () => {
     const response = await fetch("/api/expand", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imageDataUrl, aspectRatio: selectedRatio, prompt }),
+      body: JSON.stringify({ imageDataUrl, materialType: selectedMaterial, aspectRatio: selectedRatio, prompt }),
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
 
-    previewTitle.textContent = spec.title;
-    downloadLink.download = spec.filename;
+    const label = getOutputLabel();
+    previewTitle.textContent = label.title;
+    downloadLink.download = label.filename;
     setStatus("Generated. Preparing exact-size PNG download.");
 
     await showExactPng(body.imageDataUrl, spec);
@@ -147,6 +182,15 @@ const generateTexture = async () => {
     generateBtn.disabled = !imageDataUrl;
   }
 };
+
+materialButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedMaterial = button.dataset.material;
+    materialButtons.forEach((item) => item.classList.toggle("active", item === button));
+    promptInput.placeholder = currentMaterial().prompt;
+    clearResult(resultImage.style.display === "block" ? "Generate again for the new material" : "No generated texture yet");
+  });
+});
 
 ratioButtons.forEach((button) => {
   button.addEventListener("click", () => {

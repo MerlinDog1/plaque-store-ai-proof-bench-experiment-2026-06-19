@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Brass Texture Expander</title>
+    <title>Material Texture Expander</title>
     <style>
       :root {
         color-scheme: dark;
@@ -176,6 +176,10 @@
         gap: 8px;
       }
 
+      .material-segment {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
       .segment button,
       .primary,
       .secondary {
@@ -302,8 +306,8 @@
     <main class="shell">
       <header>
         <div>
-          <h1>Brass Texture Expander</h1>
-          <p class="subhead">Upload a brass reference photo, then generate a clean 4K texture as either 16:9 or square.</p>
+          <h1>Material Texture Expander</h1>
+          <p class="subhead">Upload a brass, stainless, or wood reference photo, then generate a clean 4K texture as either 16:9 or square.</p>
         </div>
         <div class="health"><span class="dot" id="healthDot"></span><span id="healthText">Checking Gemini</span></div>
       </header>
@@ -312,11 +316,19 @@
         <aside class="panel">
           <label class="drop" id="dropZone">
             <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
-            <img class="source-thumb" id="sourceThumb" alt="Uploaded brass source" />
-            <span id="dropText"><strong>Drop brass image here</strong><span>PNG, JPG, or WebP. A sharper source gives a sharper generated texture.</span></span>
+            <img class="source-thumb" id="sourceThumb" alt="Uploaded material source" />
+            <span id="dropText"><strong>Drop material image here</strong><span>PNG, JPG, or WebP. A sharper source gives a sharper generated texture.</span></span>
           </label>
 
           <div class="controls">
+            <div>
+              <span class="label">Material type</span>
+              <div class="segment material-segment" role="group" aria-label="Material type">
+                <button class="active" type="button" data-material="brass">Brass</button>
+                <button type="button" data-material="stainless">Stainless</button>
+                <button type="button" data-material="wood">Wood</button>
+              </div>
+            </div>
             <div>
               <span class="label">Output shape</span>
               <div class="segment" role="group" aria-label="Output aspect ratio">
@@ -329,18 +341,18 @@
               <textarea class="prompt-box" id="promptInput" maxlength="900" placeholder="Optional: e.g. clean pale brushed brass, no dark marks, fine horizontal grain, lighter champagne tone"></textarea>
             </div>
             <button class="primary" id="generateBtn" type="button" disabled>Generate 4K texture</button>
-            <div class="status" id="status">Upload a brass source image to begin.</div>
+            <div class="status" id="status">Upload a material source image to begin.</div>
           </div>
         </aside>
 
         <section class="preview">
           <div class="preview-head">
             <p class="preview-title" id="previewTitle">No generated texture yet</p>
-            <a class="secondary" id="downloadLink" href="#" download="brass-texture-16x9-4k.png" aria-disabled="true">Download PNG</a>
+            <a class="secondary" id="downloadLink" href="#" download="material-texture-16x9-4k.png" aria-disabled="true">Download PNG</a>
           </div>
           <div class="stage">
-            <img class="result" id="resultImage" alt="Generated brass texture" />
-            <p class="empty" id="emptyState">The generated brass texture will appear here at preview size. The download is resized in-browser to the exact target dimensions.</p>
+            <img class="result" id="resultImage" alt="Generated material texture" />
+            <p class="empty" id="emptyState">The generated material texture will appear here at preview size. The download is resized in-browser to the exact target dimensions.</p>
           </div>
         </section>
       </section>
