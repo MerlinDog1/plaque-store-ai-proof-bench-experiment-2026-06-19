@@ -6,6 +6,7 @@ export const getStripeConfig = () => ({
   secretKeyIsTest: stripeSecretKey.startsWith("sk_test_"),
   hasPublishableKey: Boolean(stripePublishableKey),
   publishableKeyIsTest: stripePublishableKey.startsWith("pk_test_"),
+  publishableKey: stripePublishableKey.startsWith("pk_test_") ? stripePublishableKey : "",
   configured: Boolean(stripeSecretKey && stripePublishableKey),
 });
 
@@ -22,6 +23,7 @@ export const createStripeCheckoutSession = async (payload) => {
   const customerEmail = String(payload.customerEmail || "").trim();
   const totalPence = Math.round(Number(payload.totalPence || 0));
   const origin = String(payload.origin || "").replace(/\/$/, "");
+  const uiMode = payload.uiMode === "embedded" ? "embedded" : "hosted";
 
   if (!orderId) throw new Error("Missing order ID for Stripe checkout.");
   if (!origin) throw new Error("Missing origin for Stripe checkout.");
@@ -32,8 +34,13 @@ export const createStripeCheckoutSession = async (payload) => {
   const params = new URLSearchParams();
   params.set("mode", "payment");
   params.set("client_reference_id", orderId);
-  params.set("success_url", `${origin}/checkout?stripe=success&session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
-  params.set("cancel_url", `${origin}/checkout?stripe=cancelled&order=${encodeURIComponent(orderId)}`);
+  if (uiMode === "embedded") {
+    params.set("ui_mode", "embedded_page");
+    params.set("return_url", `${origin}/checkout?stripe=success&session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
+  } else {
+    params.set("success_url", `${origin}/checkout?stripe=success&session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
+    params.set("cancel_url", `${origin}/checkout?stripe=cancelled&order=${encodeURIComponent(orderId)}`);
+  }
   params.set("payment_method_types[0]", "card");
   if (customerEmail.includes("@")) {
     params.set("customer_email", customerEmail);
@@ -65,6 +72,9 @@ export const createStripeCheckoutSession = async (payload) => {
   return {
     id: data.id,
     url: data.url,
+    clientSecret: data.client_secret,
+    publishableKey: stripePublishableKey,
+    uiMode,
     mode: data.mode,
     paymentStatus: data.payment_status,
     clientReferenceId: data.client_reference_id,

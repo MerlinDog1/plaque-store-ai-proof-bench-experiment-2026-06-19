@@ -803,12 +803,13 @@ const App: React.FC = () => {
           productTitle: selectedProduct.title,
           totalPence: Math.round(order.total * 100),
           origin: window.location.origin,
+          uiMode: 'embedded',
         }),
       });
       if (!response.ok) throw new Error(`Stripe checkout failed (${response.status})`);
       const payload = await response.json();
       const session = payload.session;
-      if (session?.id && session?.url) {
+      if (session?.id && (session?.url || session?.clientSecret)) {
         checkoutOrder = {
           ...order,
           status: order.status === 'needs-check' ? order.status : 'checkout-started',
@@ -819,6 +820,9 @@ const App: React.FC = () => {
             paymentIntentId: session.paymentIntentId || '',
             receiptUrl: session.url,
             checkoutUrl: session.url,
+            embeddedClientSecret: session.clientSecret || '',
+            publishableKey: session.publishableKey || '',
+            uiMode: session.uiMode || 'hosted',
           },
         };
       }

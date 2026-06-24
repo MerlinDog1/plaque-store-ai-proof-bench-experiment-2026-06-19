@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PlaquePreview from './PlaquePreview';
 import { MockOrder, ProductFamily, SiteView, getPriceBreakdown, materialStories, productFamilies } from '../services/commerce';
 import { PlaqueState } from '../types';
@@ -26,6 +26,45 @@ interface SiteProps {
   onLaunchProduct: (product: ProductFamily) => void;
   onCreateMockOrder: (name: string, email: string) => Promise<MockOrder>;
 }
+
+type EmbeddedCheckoutInstance = {
+  mount: (selectorOrElement: string | HTMLElement) => void;
+  destroy?: () => void;
+};
+
+type StripeBrowser = {
+  initEmbeddedCheckout: (options: { clientSecret: string }) => Promise<EmbeddedCheckoutInstance>;
+};
+
+declare global {
+  interface Window {
+    Stripe?: (publishableKey: string) => StripeBrowser | null;
+  }
+}
+
+let stripeJsPromise: Promise<void> | null = null;
+
+const loadStripeJs = () => {
+  if (typeof window === 'undefined') return Promise.reject(new Error('Stripe.js needs a browser.'));
+  if (window.Stripe) return Promise.resolve();
+  if (!stripeJsPromise) {
+    stripeJsPromise = new Promise<void>((resolve, reject) => {
+      const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://js.stripe.com/v3/"]');
+      if (existingScript) {
+        existingScript.addEventListener('load', () => resolve(), { once: true });
+        existingScript.addEventListener('error', () => reject(new Error('Stripe.js failed to load.')), { once: true });
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://js.stripe.com/v3/';
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Stripe.js failed to load.'));
+      document.head.appendChild(script);
+    });
+  }
+  return stripeJsPromise;
+};
 
 type HomeCarouselItem = {
   id: string;
@@ -560,18 +599,62 @@ function CheckoutPage({
   const [accepted, setAccepted] = useState(false);
   const [createdOrder, setCreatedOrder] = useState<MockOrder | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [embeddedStatus, setEmbeddedStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [embeddedError, setEmbeddedError] = useState<string | null>(null);
+  const embeddedMountRef = useRef<HTMLDivElement | null>(null);
   const breakdown = getPriceBreakdown(state, inscription);
+  const embeddedClientSecret = createdOrder?.stripeSimulation.embeddedClientSecret;
+  const stripePublishableKey = createdOrder?.stripeSimulation.publishableKey;
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!accepted || isSubmitting) return;
     setIsSubmitting(true);
+    setCreatedOrder(null);
+    setEmbeddedStatus('idle');
+    setEmbeddedError(null);
     try {
       setCreatedOrder(await onCreateMockOrder(name, email));
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (!createdOrder || !embeddedClientSecret || !stripePublishableKey || !embeddedMountRef.current) {
+      return;
+    }
+
+    let mounted = true;
+    let embeddedCheckout: EmbeddedCheckoutInstance | null = null;
+    setEmbeddedStatus('loading');
+    setEmbeddedError(null);
+
+    loadStripeJs()
+      .then(async () => {
+        const stripe = window.Stripe?.(stripePublishableKey);
+        if (!stripe) throw new Error('Stripe.js did not initialise.');
+        const checkout = await stripe.initEmbeddedCheckout({ clientSecret: embeddedClientSecret });
+        if (!mounted) {
+          checkout.destroy?.();
+          return;
+        }
+        embeddedCheckout = checkout;
+        checkout.mount(embeddedMountRef.current!);
+        setEmbeddedStatus('ready');
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        setEmbeddedStatus('error');
+        setEmbeddedError(error instanceof Error ? error.message : 'Embedded Stripe checkout could not be loaded.');
+      });
+
+    return () => {
+      mounted = false;
+      embeddedCheckout?.destroy?.();
+      if (embeddedMountRef.current) embeddedMountRef.current.replaceChildren();
+    };
+  }, [createdOrder, embeddedClientSecret, stripePublishableKey]);
 
   return (
     <div className="commerce-page">
@@ -582,58 +665,73 @@ function CheckoutPage({
             <PlaquePreview state={state} activeStep={6} inscription={inscription} />
           </div>
         </div>
-        <form className="commerce-checkout-panel" onSubmit={submit}>
-          <p className="commerce-eyebrow">Approve before ordering</p>
-          <h1>Simulate paid checkout and proof handoff.</h1>
-          <p>
-            This mock behaves like a Stripe test payment, then queues the customer emails and sends the locked production proof package to the central admin hub inbox.
-          </p>
-          {!isProductionReady && (
-            <div className="commerce-warning">
-              The proof is not production-ready yet. In production this would route back to the proof step or into artwork check.
+        <div className="commerce-checkout-panel">
+          <form className="commerce-checkout-form" onSubmit={submit}>
+            <p className="commerce-eyebrow">Approve before ordering</p>
+            <h1>Pay securely without leaving the proof.</h1>
+            <p>
+              Approve the locked proof package, then complete the Stripe test card payment in the secure checkout panel below.
+            </p>
+            {!isProductionReady && (
+              <div className="commerce-warning">
+                The proof is not production-ready yet. In production this would route back to the proof step or into artwork check.
+              </div>
+            )}
+            {breakdown.quoteRequired && (
+              <div className="commerce-warning">
+                Quote/check route: {breakdown.quoteReasons.join(', ')}.
+              </div>
+            )}
+            <label>
+              Name
+              <input value={name} onChange={(event) => setName(event.target.value)} />
+            </label>
+            <label>
+              Email
+              <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" />
+            </label>
+            <div className="commerce-summary-lines">
+              <span><strong>{selectedProduct.title}</strong></span>
+              <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
+              {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
+              <span>UK delivery <strong>Included</strong></span>
+              <span className="commerce-summary-total">Total <strong>{formatPrice(breakdown.total)}</strong></span>
             </div>
-          )}
-          {breakdown.quoteRequired && (
-            <div className="commerce-warning">
-              Quote/check route: {breakdown.quoteReasons.join(', ')}.
+            <label className="commerce-approval">
+              <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} />
+              <span>I approve this proof for production. I understand the plaque will be made using this wording, layout, material and size.</span>
+            </label>
+            <div className="commerce-checkout-flow" aria-label="Embedded checkout flow">
+              <span>Proof approved</span>
+              <span>Secure card payment</span>
+              <span>Customer emails queued</span>
+              <span>Admin hub handoff</span>
             </div>
-          )}
-          <label>
-            Name
-            <input value={name} onChange={(event) => setName(event.target.value)} />
-          </label>
-          <label>
-            Email
-            <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" />
-          </label>
-          <div className="commerce-summary-lines">
-            <span><strong>{selectedProduct.title}</strong></span>
-            <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
-            {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
-            <span>UK delivery <strong>Included</strong></span>
-            <span className="commerce-summary-total">Total <strong>{formatPrice(breakdown.total)}</strong></span>
-          </div>
-          <label className="commerce-approval">
-            <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} />
-            <span>I approve this proof for production. I understand the plaque will be made using this wording, layout, material and size.</span>
-          </label>
-          <div className="commerce-checkout-flow" aria-label="Mock checkout flow">
-            <span>Proof approved</span>
-            <span>Stripe test checkout</span>
-            <span>Customer emails queued</span>
-            <span>Admin hub handoff</span>
-          </div>
-          <button className="commerce-primary" type="submit" disabled={!accepted || isSubmitting}>
-            {isSubmitting ? 'Creating test payment...' : 'Pay with Stripe test mode'}
-          </button>
+            <button className="commerce-primary" type="submit" disabled={!accepted || isSubmitting}>
+              {isSubmitting ? 'Preparing secure payment...' : createdOrder ? 'Refresh secure payment' : 'Open secure payment'}
+            </button>
+          </form>
           {createdOrder && (
             <div className="commerce-success">
               <strong>Order package created: {createdOrder.id}</strong>
               <span>
-                Stripe: {createdOrder.stripeSimulation.provider === 'stripe' ? createdOrder.stripeSimulation.checkoutSessionId : 'mock fallback'}
+                Stripe: {createdOrder.stripeSimulation.provider === 'stripe' ? `${createdOrder.stripeSimulation.checkoutSessionId} (${createdOrder.stripeSimulation.uiMode || 'hosted'})` : 'mock fallback'}
               </span>
               <span>Emails queued: {createdOrder.emailEvents.length}</span>
               <span>Hub queue: {createdOrder.adminHub.queue}</span>
+              {createdOrder.stripeSimulation.embeddedClientSecret && createdOrder.stripeSimulation.publishableKey && (
+                <div className="commerce-embedded-checkout" aria-live="polite">
+                  <div className="commerce-embedded-checkout__head">
+                    <strong>Secure Stripe checkout</strong>
+                    <span>Card details stay inside Stripe.</span>
+                  </div>
+                  {embeddedStatus === 'loading' && <span>Loading secure payment form...</span>}
+                  {embeddedStatus === 'error' && (
+                    <span className="commerce-embedded-checkout__error">{embeddedError}</span>
+                  )}
+                  <div ref={embeddedMountRef} className="commerce-embedded-checkout__mount" />
+                </div>
+              )}
               {createdOrder.stripeSimulation.checkoutUrl && (
                 <button type="button" onClick={() => window.location.assign(createdOrder.stripeSimulation.checkoutUrl!)}>
                   Continue to Stripe test checkout
@@ -642,7 +740,7 @@ function CheckoutPage({
               <button type="button" onClick={() => onNavigate('admin')}>Open hub inbox preview</button>
             </div>
           )}
-        </form>
+        </div>
       </section>
     </div>
   );

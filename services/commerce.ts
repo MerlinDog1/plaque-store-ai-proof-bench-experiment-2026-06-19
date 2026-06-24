@@ -79,6 +79,9 @@ export interface MockOrder {
     paymentIntentId: string;
     receiptUrl: string;
     checkoutUrl?: string;
+    embeddedClientSecret?: string;
+    publishableKey?: string;
+    uiMode?: 'hosted' | 'embedded';
   };
   proofPackage: {
     productionSvg: string | null;
