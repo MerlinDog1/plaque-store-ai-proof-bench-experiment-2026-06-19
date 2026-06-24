@@ -188,6 +188,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     [Material.PolishedSteel]: "mirrorSteel",
   };
   const materialTextureId: Partial<Record<Material, string>> = {
+    [Material.BrushedBrass]: "brushedBrassTexture",
     [Material.OrbitalBrassMattLacquer]: "orbitalBrassTexture",
     [Material.AgedBrass]: "agedBrassTexture",
     [Material.BrushedSteel]: "brushedSteelTexture",
@@ -196,7 +197,9 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const fillUrl = `url(#${materialFillId[state.material]})`;
   const textureUrl = materialTextureId[state.material] ? `url(#${materialTextureId[state.material]})` : null;
   const fixingFillUrl = state.material === Material.AgedBrass && textureUrl ? textureUrl : fillUrl;
-  const textureOpacity = state.material === Material.BrushedSteel
+  const textureOpacity = state.material === Material.BrushedBrass
+    ? 1
+    : state.material === Material.BrushedSteel
     ? 0.74
       : state.material === Material.PolishedSteel
         ? 0.42
@@ -932,11 +935,6 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
                     fill="url(#satinBrushGrain)"
                     opacity={0.08}
                   />
-                  <rect
-                    x={offset} y={offset} width={state.width} height={state.height} rx={cornerR}
-                    fill="url(#satinScuffs)"
-                    opacity={0.04}
-                  />
                 </>
               ) : state.shape === Shape.Heart ? (
                 <>
@@ -945,11 +943,6 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
                     fill="url(#satinBrushGrain)"
                     opacity={0.08}
                   />
-                  <path
-                    d={heartPathD(offset, offset, state.width, state.height)}
-                    fill="url(#satinScuffs)"
-                    opacity={0.04}
-                  />
                 </>
               ) : (
                 <>
@@ -957,11 +950,6 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
                     cx={cx} cy={cy} rx={state.width / 2} ry={state.height / 2}
                     fill="url(#satinBrushGrain)"
                     opacity={0.08}
-                  />
-                  <ellipse
-                    cx={cx} cy={cy} rx={state.width / 2} ry={state.height / 2}
-                    fill="url(#satinScuffs)"
-                    opacity={0.04}
                   />
                 </>
               )}
