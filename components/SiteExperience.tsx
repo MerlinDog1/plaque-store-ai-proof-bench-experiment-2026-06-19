@@ -116,6 +116,25 @@ const downloadTextFile = (filename: string, content: string, mimeType = 'image/s
   URL.revokeObjectURL(url);
 };
 
+const ensureSvgDocument = (content: string, state?: PlaqueState) => {
+  const trimmed = content.trim();
+  if (/^(<\?xml[\s\S]*?)?<svg[\s>]/i.test(trimmed)) return trimmed;
+
+  const width = Number(state?.width || 300);
+  const height = Number(state?.height || 200);
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}mm" height="${height}mm" viewBox="0 0 ${width} ${height}">`,
+    trimmed,
+    '</svg>',
+    '',
+  ].join('\n');
+};
+
+const downloadSvgFile = (filename: string, content: string, state?: PlaqueState) => {
+  downloadTextFile(filename, ensureSvgDocument(content, state), 'image/svg+xml');
+};
+
 type HomeCarouselItem = {
   id: string;
   image: string;
@@ -897,7 +916,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
             <button
               type="button"
               className="commerce-secondary"
-              onClick={() => downloadTextFile(order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`, order.proofPackage!.visualProofSvg!)}
+              onClick={() => downloadSvgFile(order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`, order.proofPackage!.visualProofSvg!, order.plaqueState)}
             >
               Download approved proof
             </button>
@@ -1013,9 +1032,10 @@ function AdminPage() {
                 <button
                   type="button"
                   disabled={!selectedOrder.proofPackage?.productionSvg}
-                  onClick={() => selectedOrder.proofPackage?.productionSvg && downloadTextFile(
+                  onClick={() => selectedOrder.proofPackage?.productionSvg && downloadSvgFile(
                     selectedOrder.proofPackage.productionFilename || `${selectedOrder.id}-production-artwork.svg`,
                     selectedOrder.proofPackage.productionSvg,
+                    selectedOrder.plaqueState,
                   )}
                 >
                   Download production SVG
@@ -1023,9 +1043,10 @@ function AdminPage() {
                 <button
                   type="button"
                   disabled={!selectedOrder.proofPackage?.visualProofSvg}
-                  onClick={() => selectedOrder.proofPackage?.visualProofSvg && downloadTextFile(
+                  onClick={() => selectedOrder.proofPackage?.visualProofSvg && downloadSvgFile(
                     selectedOrder.proofPackage.visualFilename || `${selectedOrder.id}-approved-proof.svg`,
                     selectedOrder.proofPackage.visualProofSvg,
+                    selectedOrder.plaqueState,
                   )}
                 >
                   Download approved proof
