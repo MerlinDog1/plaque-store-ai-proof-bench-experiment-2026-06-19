@@ -43,6 +43,7 @@ const {
 } = await import("./server/stripe.mjs");
 const {
   attachStripeSessionToOrder,
+  createExternalOrder,
   createPendingOrder,
   getOrderById,
   listOrders,
@@ -61,6 +62,31 @@ const {
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY || "";
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+
+const parseStorefrontKeys = () => {
+  const raw = process.env.STOREFRONT_INGEST_KEYS || process.env.STOREFRONT_API_KEYS || "";
+  return raw
+    .split(",")
+    .map((entry) => {
+      const [source, key] = entry.includes(":") ? entry.split(/:(.*)/s) : ["*", entry];
+      return { source: source.trim().toLowerCase(), key: key.trim() };
+    })
+    .filter((entry) => entry.key);
+};
+
+const getStorefrontAuth = (req) => {
+  const configuredKeys = parseStorefrontKeys();
+  if (!configuredKeys.length) return { ok: true, source: "unconfigured-preview", authRequired: false };
+
+  const headerKey = String(req.headers["x-storefront-api-key"] || req.headers.authorization?.replace(/^Bearer\s+/i, "") || "").trim();
+  const headerSource = String(req.headers["x-storefront-source"] || "").trim().toLowerCase();
+  const match = configuredKeys.find((entry) => entry.key === headerKey && (entry.source === "*" || !headerSource || entry.source === headerSource));
+  return {
+    ok: Boolean(match),
+    source: headerSource || match?.source || "",
+    authRequired: true,
+  };
+};
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -195,6 +221,41 @@ const server = http.createServer(async (req, res) => {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Stripe webhook failed.";
       sendJson(res, 400, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/webhooks/stripe") {
+    try {
+      const rawBody = await readBody(req);
+      const event = parseStripeWebhook(rawBody, req.headers["stripe-signature"]);
+      if (event.type === "checkout.session.completed") {
+        await markOrderPaidFromSession(event.data.object);
+      }
+      sendJson(res, 200, { ok: true, received: true });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Stripe webhook failed.";
+      sendJson(res, 400, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/storefront/orders") {
+    const auth = getStorefrontAuth(req);
+    if (!auth.ok) {
+      sendJson(res, 401, { error: "Storefront API key required." });
+      return;
+    }
+    try {
+      const payload = JSON.parse(await readBody(req));
+      const order = await createExternalOrder({
+        ...payload,
+        source: payload.source || auth.source || req.headers["x-storefront-source"],
+      });
+      sendJson(res, 201, { ok: true, order });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not ingest storefront order.";
+      sendJson(res, 500, { error: message });
     }
     return;
   }

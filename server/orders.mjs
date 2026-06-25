@@ -22,7 +22,7 @@ const writeLocalOrders = async (orders) => {
 
 const shouldUseLocalFallback = (error) => {
   const message = `${error?.code || ""} ${error?.message || ""}`.toLowerCase();
-  return message.includes("42p01") || message.includes("storefront_orders");
+  return message.includes("42p01") || message.includes("pgrst205") || message.includes("storefront_orders");
 };
 
 const toRow = (order) => ({
@@ -120,6 +120,102 @@ const normaliseFromMockOrder = (input) => {
   };
 };
 
+const normaliseStatus = (status, fallback = "paid") => {
+  const value = String(status || fallback).replace(/-/g, "_");
+  const aliases = {
+    proof_approved: "paid",
+    checkout_started: "checkout_started",
+    payment_simulated: "paid",
+    hub_queued: "paid",
+    needs_check: "issue",
+    quote_requested: "issue",
+    in_production: "in_production",
+    dispatched: "dispatched",
+    complete: "complete",
+    cancelled: "cancelled",
+    refunded: "refunded",
+    issue: "issue",
+    paid: "paid",
+  };
+  return aliases[value] || fallback;
+};
+
+const normalisePaymentStatus = (status, fallback = "paid") => {
+  const value = String(status || fallback).replace(/-/g, "_");
+  const aliases = {
+    test_paid: "paid",
+    requires_check: "unpaid",
+    unpaid: "unpaid",
+    paid: "paid",
+    failed: "failed",
+    refunded: "refunded",
+  };
+  return aliases[value] || fallback;
+};
+
+const normaliseFulfilmentStatus = (status, fallback = "not_started") => {
+  const value = String(status || fallback).replace(/-/g, "_");
+  const aliases = {
+    not_started: "not_started",
+    in_production: "in_production",
+    dispatched: "dispatched",
+    delivered: "delivered",
+    issue: "issue",
+  };
+  return aliases[value] || fallback;
+};
+
+const normaliseExternalOrder = (input) => {
+  const order = input?.order || input || {};
+  const now = nowIso();
+  const source = String(input?.source || order.source || order.metadata?.source || "external-storefront")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "external-storefront";
+  const externalId = String(order.id || order.orderId || input?.orderId || "").trim();
+  const id = externalId || `${source}-${Date.now().toString(36)}`;
+
+  return {
+    id,
+    stripeCheckoutSessionId: order.stripeCheckoutSessionId || order.stripe_checkout_session_id || null,
+    stripePaymentIntentId: order.stripePaymentIntentId || order.stripe_payment_intent_id || null,
+    customerEmail: order.customerEmail || order.customer_email || input?.customerEmail || "",
+    customerName: order.customerName || order.customer_name || input?.customerName || "",
+    status: normaliseStatus(order.status, "paid"),
+    paymentStatus: normalisePaymentStatus(order.paymentStatus || order.payment_status, "paid"),
+    fulfilmentStatus: normaliseFulfilmentStatus(order.fulfilmentStatus || order.fulfilment_status, "not_started"),
+    totalPence: Math.round(Number(order.totalPence ?? order.total_pence ?? input?.totalPence ?? 0)),
+    currency: order.currency || "gbp",
+    productTitle: order.productTitle || order.product_title || input?.productTitle || "Custom plaque",
+    inscription: order.inscription || order.wording || "",
+    plaqueState: order.plaqueState || order.plaque_state || {},
+    priceBreakdown: order.priceBreakdown || order.price_breakdown || {},
+    proofPackage: order.proofPackage || order.proof_package || {},
+    shippingAddress: order.shippingAddress || order.shipping_address || {},
+    stripeSession: order.stripeSession || order.stripe_session || {},
+    emailEvents: order.emailEvents || order.email_events || [],
+    events: [
+      {
+        type: "storefront_ingested",
+        label: `Order received from ${source}`,
+        at: order.createdAt || order.created_at || now,
+      },
+      ...(order.events || []),
+    ],
+    metadata: {
+      ...(order.metadata || {}),
+      source,
+      sourceOrderId: externalId || order.metadata?.sourceOrderId || "",
+      payloadVersion: input?.payloadVersion || order.metadata?.payloadVersion || "2026-06-25",
+    },
+    approvedAt: order.approvedAt || order.approved_at || null,
+    paidAt: order.paidAt || order.paid_at || (order.paymentStatus === "paid" || order.payment_status === "paid" ? now : null),
+    createdAt: order.createdAt || order.created_at || now,
+    updatedAt: now,
+  };
+};
+
 const saveOrder = async (order) => {
   const next = { ...order, updatedAt: nowIso() };
   const supabase = getSupabaseServiceClient();
@@ -145,6 +241,10 @@ const saveOrder = async (order) => {
 
 export const createPendingOrder = async (payload) => {
   return saveOrder(normaliseFromMockOrder(payload));
+};
+
+export const createExternalOrder = async (payload) => {
+  return saveOrder(normaliseExternalOrder(payload));
 };
 
 export const attachStripeSessionToOrder = async (orderId, session) => {
