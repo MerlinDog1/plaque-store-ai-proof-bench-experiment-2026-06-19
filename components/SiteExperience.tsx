@@ -52,6 +52,8 @@ type PaidOrder = {
   proofPackage?: {
     productionSvg?: string | null;
     visualProofSvg?: string | null;
+    productionFilename?: string;
+    visualFilename?: string;
     lockedAt?: string;
   };
   shippingAddress?: Record<string, string>;
@@ -100,6 +102,18 @@ const formatPence = (value: number, currency = 'gbp') => {
     style: 'currency',
     currency: currency.toUpperCase(),
   });
+};
+
+const downloadTextFile = (filename: string, content: string, mimeType = 'image/svg+xml') => {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 };
 
 type HomeCarouselItem = {
@@ -879,6 +893,15 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
             <span>Production preparation</span>
             <span>Dispatch email follows</span>
           </div>
+          {order.proofPackage?.visualProofSvg && (
+            <button
+              type="button"
+              className="commerce-secondary"
+              onClick={() => downloadTextFile(order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`, order.proofPackage!.visualProofSvg!)}
+            >
+              Download approved proof
+            </button>
+          )}
           <button type="button" className="commerce-secondary" onClick={() => window.print()}>
             Print confirmation
           </button>
@@ -987,6 +1010,26 @@ function AdminPage() {
                 <span>{selectedOrder.fulfilmentStatus?.replace(/_/g, ' ') || 'not started'}</span>
               </div>
               <div className="commerce-admin-actions">
+                <button
+                  type="button"
+                  disabled={!selectedOrder.proofPackage?.productionSvg}
+                  onClick={() => selectedOrder.proofPackage?.productionSvg && downloadTextFile(
+                    selectedOrder.proofPackage.productionFilename || `${selectedOrder.id}-production-artwork.svg`,
+                    selectedOrder.proofPackage.productionSvg,
+                  )}
+                >
+                  Download production SVG
+                </button>
+                <button
+                  type="button"
+                  disabled={!selectedOrder.proofPackage?.visualProofSvg}
+                  onClick={() => selectedOrder.proofPackage?.visualProofSvg && downloadTextFile(
+                    selectedOrder.proofPackage.visualFilename || `${selectedOrder.id}-approved-proof.svg`,
+                    selectedOrder.proofPackage.visualProofSvg,
+                  )}
+                >
+                  Download approved proof
+                </button>
                 <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'in_production', fulfilmentStatus: 'in_production', emailTemplate: 'customer-in-production' })}>
                   Mark in production + email
                 </button>

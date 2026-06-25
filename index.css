@@ -2259,6 +2259,12 @@
   font-weight: 950;
 }
 
+.commerce-admin-actions button:disabled {
+  cursor: not-allowed;
+  background: #d7ddd7;
+  color: #77847d;
+}
+
 .commerce-admin-timeline div {
   display: grid;
   gap: 0.15rem;
