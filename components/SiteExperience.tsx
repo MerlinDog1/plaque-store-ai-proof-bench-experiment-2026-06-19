@@ -110,6 +110,23 @@ const formatPence = (value: number, currency = 'gbp') => {
   });
 };
 
+const formatOrderSource = (order: PaidOrder) => {
+  const source = order.metadata?.source || 'instaplaque';
+  if (source.includes('instaplaque')) return 'InstaPlaque';
+  return source
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+const formatAdminDate = (value?: string) => value ? new Date(value).toLocaleString('en-GB', {
+  day: '2-digit',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+}) : 'Not set';
+
 const downloadTextFile = (filename: string, content: string, mimeType = 'image/svg+xml') => {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
@@ -1071,17 +1088,24 @@ function AdminPage() {
   };
 
   return (
-    <div className="commerce-page">
-      <section className="commerce-section">
-        <div className="commerce-section__head">
-          <p className="commerce-eyebrow">Admin orders</p>
-          <h1>Paid proof packages arrive here.</h1>
-          <p>
-            Review paid orders, download the approved production proof, update status, and send customer progress emails.
-          </p>
+    <div className="admin-console">
+      <section className="admin-console__shell">
+        <div className="admin-console__head">
+          <div>
+            <p>Operations</p>
+            <h1>Orders</h1>
+          </div>
+          <div className="admin-console__head-actions">
+            <span>{orders.length} orders</span>
+            {authConfig?.authRequired && adminToken && (
+              <button type="button" className="admin-console__ghost-button" onClick={logoutAdmin}>
+                Lock
+              </button>
+            )}
+          </div>
         </div>
         {authConfig?.authRequired && !adminToken && (
-          <form className="commerce-admin-login" onSubmit={loginAdmin}>
+          <form className="admin-console__login" onSubmit={loginAdmin}>
             <label htmlFor="admin-passcode">{authConfig.label || 'Admin passcode'}</label>
             <div>
               <input
@@ -1099,56 +1123,70 @@ function AdminPage() {
           </form>
         )}
         {adminError && <div className="commerce-warning">{adminError}</div>}
-        {authConfig?.authRequired && adminToken && (
-          <button type="button" className="commerce-admin-lock" onClick={logoutAdmin}>
-            Lock admin
-          </button>
-        )}
         {loading && <div className="commerce-success">Loading orders...</div>}
         {authConfig?.authRequired && !adminToken ? null : (
           <>
-        <div className="commerce-ops-strip">
+        <div className="admin-console__stats">
           <div><span>Paid</span><strong>{counts.paid}</strong></div>
           <div><span>In production</span><strong>{counts.production}</strong></div>
           <div><span>Dispatched</span><strong>{counts.dispatched}</strong></div>
           <div><span>Email events</span><strong>{counts.emails}</strong></div>
         </div>
-        <div className="commerce-admin-layout">
-          <div className="commerce-admin-grid">
+        <div className="admin-console__layout">
+          <div className="admin-console__orders" role="list" aria-label="Orders">
+            <div className="admin-console__orders-head" aria-hidden="true">
+              <span>Order</span>
+              <span>Source</span>
+              <span>Customer</span>
+              <span>Status</span>
+              <span>Total</span>
+            </div>
             {orders.map((order) => (
-              <button className={`commerce-admin-card ${selectedOrder?.id === order.id ? 'is-active' : ''}`} key={order.id} onClick={() => setSelectedId(order.id)}>
-                <div>
+              <button className={`admin-console__order-row ${selectedOrder?.id === order.id ? 'is-active' : ''}`} key={order.id} onClick={() => setSelectedId(order.id)} role="listitem">
+                <span>
                   <strong>{order.id}</strong>
-                  <span>{order.paymentStatus || order.status}</span>
-                </div>
-                <p>{order.productTitle}</p>
-                <p>{order.customerName || 'Customer'} · {order.customerEmail || 'Email held by Stripe'}</p>
-                <p className="commerce-admin-price">{formatPence(order.totalPence, order.currency)}</p>
+                  <small>{order.productTitle}</small>
+                </span>
+                <span>{formatOrderSource(order)}</span>
+                <span>
+                  <strong>{order.customerName || 'Customer'}</strong>
+                  <small>{order.customerEmail || 'Email held by Stripe'}</small>
+                </span>
+                <span>
+                  <mark>{order.fulfilmentStatus?.replace(/_/g, ' ') || order.status.replace(/_/g, ' ')}</mark>
+                  <small>{formatAdminDate(order.paidAt || order.createdAt)}</small>
+                </span>
+                <span>{formatPence(order.totalPence, order.currency)}</span>
               </button>
             ))}
             {!orders.length && !loading && (
-              <div className="commerce-empty-state">
+              <div className="admin-console__empty">
                 <strong>No paid orders yet.</strong>
-                <span>Completed Stripe checkout orders will appear here.</span>
+                <span>Completed checkout orders from connected storefronts will appear here.</span>
               </div>
             )}
           </div>
           {selectedOrder && (
-            <article className="commerce-admin-detail">
-              <div>
-                <p className="commerce-eyebrow">Order detail</p>
-                <h2>{selectedOrder.id}</h2>
+            <article className="admin-console__detail">
+              <div className="admin-console__detail-head">
+                <div>
+                  <p>{formatOrderSource(selectedOrder)}</p>
+                  <h2>{selectedOrder.id}</h2>
+                </div>
+                <strong>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</strong>
               </div>
-              <div className="commerce-admin-proof">
+              <div className="admin-console__proof">
                 <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
               </div>
-              <div className="commerce-admin-package">
-                <span>{selectedOrder.productTitle}</span>
-                <span>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</span>
-                <span>{selectedOrder.status.replace(/_/g, ' ')}</span>
-                <span>{selectedOrder.fulfilmentStatus?.replace(/_/g, ' ') || 'not started'}</span>
+              <div className="admin-console__data-grid">
+                <div><span>Product</span><strong>{selectedOrder.productTitle}</strong></div>
+                <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
+                <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
+                <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
+                <div><span>Order status</span><strong>{selectedOrder.status.replace(/_/g, ' ')}</strong></div>
+                <div><span>Fulfilment</span><strong>{selectedOrder.fulfilmentStatus?.replace(/_/g, ' ') || 'not started'}</strong></div>
               </div>
-              <div className="commerce-admin-actions">
+              <div className="admin-console__actions">
                 <button
                   type="button"
                   disabled={!selectedOrder}
@@ -1184,7 +1222,7 @@ function AdminPage() {
                   Resend confirmation
                 </button>
               </div>
-              <div className="commerce-admin-timeline">
+              <div className="admin-console__timeline">
                 {(selectedOrder.events || []).map((event, index) => (
                   <div key={`${event.type}-${event.at}-${index}`}>
                     <strong>{event.label}</strong>
@@ -1323,6 +1361,10 @@ export function SiteExperience(props: SiteProps) {
     page = <LegalPlaceholderPage view={props.view} />;
   } else {
     page = <HomePage onNavigate={props.onNavigate} onStartDesign={props.onStartDesign} onLaunchProduct={props.onLaunchProduct} />;
+  }
+
+  if (props.view === 'admin') {
+    return <>{page}</>;
   }
 
   return (

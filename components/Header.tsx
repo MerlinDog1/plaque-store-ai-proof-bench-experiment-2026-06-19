@@ -13,18 +13,23 @@ const DELIVERY_HELP = 'UK mainland only. Highlands, islands and non-UK delivery 
 
 export const Header: React.FC<Props> = ({ onNavigate, onStartDesign, currentView, priceLabel, showPrice }) => {
   const isDesigner = currentView === 'plaque' || currentView === 'vector';
-  const showDesignCta = !isDesigner && currentView !== 'checkout';
+  const isAdmin = currentView === 'admin';
+  const showDesignCta = !isDesigner && currentView !== 'checkout' && !isAdmin;
   const showCheckoutCta = isDesigner && showPrice;
 
   return (
-    <header className={`proofbench-titlebar print:hidden ${currentView === 'home' ? 'is-home' : ''} ${isDesigner ? 'is-designer' : ''}`}>
+    <header className={`proofbench-titlebar print:hidden ${currentView === 'home' ? 'is-home' : ''} ${isDesigner ? 'is-designer' : ''} ${isAdmin ? 'is-admin' : ''}`}>
       <div className="proofbench-titlebar__inner mx-auto flex h-full max-w-[1540px] items-center justify-between gap-4 px-4 md:px-8">
         <div className="flex min-w-0 items-center gap-4">
           <button className="proofbench-mark-wrap flex min-w-0 cursor-pointer items-center gap-3 text-left" onClick={() => onNavigate('home')} type="button">
             <div className="min-w-0">
-              <span className="brand-wordmark brand-wordmark--header">
-                <span>Insta</span><span>Plaque</span>
-              </span>
+              {isAdmin ? (
+                <span className="admin-header-title">Order admin</span>
+              ) : (
+                <span className="brand-wordmark brand-wordmark--header">
+                  <span>Insta</span><span>Plaque</span>
+                </span>
+              )}
             </div>
           </button>
         </div>
