@@ -22,7 +22,7 @@ import type { GenerationPhase } from '../services/geminiService';
 import { BENCH_SAFE_MARGIN_PERCENT, DEFAULT_SAFE_MARGIN_PERCENT, SAFE_MARGIN_PRESETS, getSafeMarginMm, getSafeMarginsMm, getSafeMarginPercent } from '../services/safeMargin';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { estimatePlaqueBasePrice, estimateWoodAddOn } from '../services/pricing';
-import type { DeliveryAddress, MockOrder } from '../services/commerce';
+import type { MockOrder } from '../services/commerce';
 
 const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
@@ -216,7 +216,7 @@ interface Props {
   onGoToStep: (step: number) => void;
   onSaveProof: () => void;
   onAddToBasket: () => void;
-  onCreateMockOrder: (name: string, email: string, deliveryAddress?: DeliveryAddress) => Promise<MockOrder>;
+  onCreateMockOrder: (name: string, email: string) => Promise<MockOrder>;
   onRealisticPreview: () => void;
   realisticPreviewPrompt: string;
   onRealisticPreviewPromptChange: (prompt: string) => void;
@@ -469,15 +469,6 @@ export const Controls: React.FC<Props> = ({
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
   const [instantStyleVariant, setInstantStyleVariant] = useState(1);
   const [proofApproved, setProofApproved] = useState(false);
-  const [checkoutName, setCheckoutName] = useState('');
-  const [checkoutEmail, setCheckoutEmail] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
-    line1: '',
-    line2: '',
-    town: '',
-    postcode: '',
-    country: 'United Kingdom',
-  });
   const [checkoutOrder, setCheckoutOrder] = useState<MockOrder | null>(null);
   const [checkoutSubmitting, setCheckoutSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
@@ -823,22 +814,9 @@ export const Controls: React.FC<Props> = ({
   const woodAddOnPrice = estimateWoodAddOn(state);
   const baseProofPrice = Math.max(0, price - (state.wood ? woodAddOnPrice : 0));
   const turnaroundEstimate = getTurnaroundEstimate(state);
-  const requiredAddressComplete = Boolean(
-    checkoutName.trim()
-      && checkoutEmail.trim().includes('@')
-      && deliveryAddress.line1.trim()
-      && deliveryAddress.town.trim()
-      && deliveryAddress.postcode.trim()
-      && deliveryAddress.country.trim()
-  );
-  const checkoutReady = isProductionReady && proofApproved && requiredAddressComplete && !checkoutSubmitting;
+  const checkoutReady = isProductionReady && proofApproved && !checkoutSubmitting;
   const embeddedClientSecret = checkoutOrder?.stripeSimulation.embeddedClientSecret;
   const stripePublishableKey = checkoutOrder?.stripeSimulation.publishableKey;
-
-  const updateDeliveryAddress = (key: keyof DeliveryAddress, value: string) => {
-    setDeliveryAddress(prev => ({ ...prev, [key]: value }));
-    setCheckoutError(null);
-  };
 
   const handleProofCheckoutSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -850,23 +828,13 @@ export const Controls: React.FC<Props> = ({
       setCheckoutError('Approve the proof before payment.');
       return;
     }
-    if (!requiredAddressComplete) {
-      setCheckoutError('Add the customer details and delivery address before payment.');
-      return;
-    }
     setCheckoutSubmitting(true);
     setCheckoutError(null);
     setCheckoutOrder(null);
     setEmbeddedStatus('idle');
     setEmbeddedError(null);
     try {
-      const order = await onCreateMockOrder(checkoutName.trim(), checkoutEmail.trim(), {
-        line1: deliveryAddress.line1.trim(),
-        line2: deliveryAddress.line2.trim(),
-        town: deliveryAddress.town.trim(),
-        postcode: deliveryAddress.postcode.trim().toUpperCase(),
-        country: deliveryAddress.country.trim(),
-      });
+      const order = await onCreateMockOrder('Stripe checkout customer', '');
       setCheckoutOrder(order);
       onAddToBasket();
     } catch (error) {
@@ -2346,36 +2314,9 @@ export const Controls: React.FC<Props> = ({
                 />
                 <span>I have checked the wording, layout, material, size and fixings, and approve this proof for production.</span>
               </label>
-              <div className="proof-address-grid">
-                <label>
-                  Name
-                  <input value={checkoutName} onChange={(event) => setCheckoutName(event.target.value)} autoComplete="name" placeholder="Full name" />
-                </label>
-                <label>
-                  Email
-                  <input value={checkoutEmail} onChange={(event) => setCheckoutEmail(event.target.value)} type="email" autoComplete="email" placeholder="Email address" />
-                </label>
-                <label className="proof-address-grid__wide">
-                  Delivery address
-                  <input value={deliveryAddress.line1} onChange={(event) => updateDeliveryAddress('line1', event.target.value)} autoComplete="shipping address-line1" placeholder="Address line 1" />
-                </label>
-                <label className="proof-address-grid__wide">
-                  Address line 2
-                  <input value={deliveryAddress.line2} onChange={(event) => updateDeliveryAddress('line2', event.target.value)} autoComplete="shipping address-line2" placeholder="Optional" />
-                </label>
-                <label>
-                  Town / city
-                  <input value={deliveryAddress.town} onChange={(event) => updateDeliveryAddress('town', event.target.value)} autoComplete="shipping address-level2" />
-                </label>
-                <label>
-                  Postcode
-                  <input value={deliveryAddress.postcode} onChange={(event) => updateDeliveryAddress('postcode', event.target.value)} autoComplete="shipping postal-code" />
-                </label>
-                <label className="proof-address-grid__wide">
-                  Country
-                  <input value={deliveryAddress.country} onChange={(event) => updateDeliveryAddress('country', event.target.value)} autoComplete="shipping country-name" />
-                </label>
-              </div>
+              <p className="proof-stripe-collection-note">
+                Stripe will collect contact email, delivery address, shipping option and payment details in the secure checkout below.
+              </p>
               {checkoutError && <div className="proof-checkout-error">{checkoutError}</div>}
               <div className="proof-payment-pill">
                 <button
@@ -2394,7 +2335,7 @@ export const Controls: React.FC<Props> = ({
                 <div className="proof-embedded-checkout" aria-live="polite">
                   <div className="proof-embedded-checkout__head">
                     <strong>Secure Stripe checkout</strong>
-                    <span>Card details stay inside Stripe. Delivery details are attached to the order.</span>
+                    <span>Stripe collects delivery address, shipping option and card details.</span>
                   </div>
                   {embeddedStatus === 'loading' && <span>Loading secure payment form...</span>}
                   {embeddedStatus === 'error' && <span className="proof-checkout-error">{embeddedError}</span>}

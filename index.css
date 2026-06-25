@@ -363,6 +363,17 @@
   box-shadow: 0 0 0 4px rgba(185, 130, 53, 0.16);
 }
 
+.proof-stripe-collection-note {
+  border: 1px solid rgba(47, 127, 105, 0.22);
+  border-radius: 10px;
+  background: #eef8f2;
+  padding: 0.75rem 0.82rem;
+  color: #173c2d !important;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
 .proof-checkout-error {
   border: 1px solid rgba(155, 53, 39, 0.2);
   border-radius: 8px;
@@ -522,6 +533,10 @@
 
 .proofbench-customiser .controls-instrument .proof-address-grid input::placeholder {
   color: #6f7b74 !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-stripe-collection-note {
+  color: #173c2d !important;
 }
 
 .proofbench-customiser .controls-instrument .proof-embedded-checkout__head strong {
