@@ -210,7 +210,6 @@ interface Props {
   showMaterialPrices: boolean;
   price: number;
   readinessItems: { label: string; ready: boolean; step: number }[];
-  layoutRegenNotice: { tone: 'orientation' | 'size' | 'general'; message: string } | null;
   isProductionReady: boolean;
   basketAdded: boolean;
   onGoToStep: (step: number) => void;
@@ -397,7 +396,6 @@ export const Controls: React.FC<Props> = ({
   showMaterialPrices,
   price,
   readinessItems,
-  layoutRegenNotice,
   isProductionReady,
   basketAdded,
   onGoToStep,
@@ -1971,15 +1969,6 @@ export const Controls: React.FC<Props> = ({
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
-
-          {layoutRegenNotice && (
-            <div className={`proof-regen-toast proof-regen-toast--${layoutRegenNotice.tone}`}>
-              <span>{layoutRegenNotice.message}</span>
-              <button type="button" onClick={() => onGoToStep(5)}>
-                Regenerate text
-              </button>
             </div>
           )}
 

@@ -287,39 +287,78 @@
   height: auto;
 }
 
-.proof-regen-toast {
+.layout-regen-toast {
+  position: fixed;
+  z-index: 80;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
   display: grid;
-  gap: 0.65rem;
-  border: 1px solid rgba(232, 200, 117, 0.28);
-  border-radius: 10px;
-  background: rgba(232, 200, 117, 0.08);
-  padding: 0.78rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.7rem 0.85rem;
+  width: min(420px, calc(100vw - 2rem));
+  border: 1px solid rgba(232, 200, 117, 0.32);
+  border-radius: 8px;
+  background: rgba(18, 29, 26, 0.96);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+  padding: 0.9rem 2.6rem 0.9rem 1rem;
   color: #eef4ee;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 850;
   line-height: 1.45;
+  backdrop-filter: blur(14px);
 }
 
-.proof-regen-toast--orientation {
-  border-color: rgba(245, 210, 123, 0.4);
-  background: rgba(245, 210, 123, 0.1);
+.layout-regen-toast--orientation {
+  border-color: rgba(245, 210, 123, 0.46);
 }
 
-.proof-regen-toast span {
+.layout-regen-toast span {
   color: #edf0e8 !important;
 }
 
-.proof-regen-toast button {
-  min-height: 38px;
+.layout-regen-toast__action {
+  align-self: end;
+  min-height: 36px;
   width: fit-content;
   max-width: 100%;
   border: 1px solid rgba(245, 210, 123, 0.5);
   border-radius: 8px;
   background: #20342d;
-  padding: 0.45rem 0.7rem;
+  padding: 0.42rem 0.7rem;
   color: #f5d27b !important;
   font-size: 12px;
   font-weight: 950;
+  white-space: nowrap;
+}
+
+.layout-regen-toast__close {
+  position: absolute;
+  right: 0.55rem;
+  top: 0.5rem;
+  display: grid;
+  height: 28px;
+  width: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 250, 240, 0.08);
+  color: #edf0e8;
+  font-size: 20px;
+  line-height: 1;
+}
+
+@media (max-width: 760px) {
+  .layout-regen-toast {
+    left: max(0.75rem, env(safe-area-inset-left));
+    right: max(0.75rem, env(safe-area-inset-right));
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    width: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .layout-regen-toast__action {
+    justify-self: start;
+  }
 }
 
 .proof-inline-checkout {

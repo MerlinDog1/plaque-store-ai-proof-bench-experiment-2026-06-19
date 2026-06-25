@@ -173,6 +173,7 @@ const App: React.FC = () => {
   const [generationPhase, setGenerationPhase] = useState<GenerationPhase>(null);
   const [isProofExpanded, setIsProofExpanded] = useState(false);
   const [memorialSourceImage, setMemorialSourceImage] = useState<string | null>(null);
+  const [showLayoutRegenToast, setShowLayoutRegenToast] = useState(false);
   const [isGeneratingMemorial, setIsGeneratingMemorial] = useState(false);
   const [memorialStatus, setMemorialStatus] = useState<string | null>(null);
   const [proofSaved, setProofSaved] = useState(false);
@@ -646,6 +647,17 @@ const App: React.FC = () => {
     };
   }, [generatedLayoutSignature, generatedProofFrame, inscriptionPrompt, state]);
 
+  React.useEffect(() => {
+    if (!layoutRegenNotice) {
+      setShowLayoutRegenToast(false);
+      return;
+    }
+
+    setShowLayoutRegenToast(true);
+    const timer = window.setTimeout(() => setShowLayoutRegenToast(false), 8500);
+    return () => window.clearTimeout(timer);
+  }, [layoutRegenNotice?.message]);
+
   const isProductionReady = readinessWarnings.length === 0;
   const readinessItems = [
     {
@@ -998,6 +1010,31 @@ const App: React.FC = () => {
         showPrice={showHeaderPrice}
       />
 
+      {layoutRegenNotice && showLayoutRegenToast && (
+        <div className={`layout-regen-toast layout-regen-toast--${layoutRegenNotice.tone}`} role="status" aria-live="polite">
+          <button
+            type="button"
+            className="layout-regen-toast__close"
+            aria-label="Dismiss"
+            onClick={() => setShowLayoutRegenToast(false)}
+          >
+            ×
+          </button>
+          <span>{layoutRegenNotice.message}</span>
+          <button
+            type="button"
+            className="layout-regen-toast__action"
+            onClick={() => {
+              setCurrentView('plaque');
+              setActiveStep(5);
+              setShowLayoutRegenToast(false);
+            }}
+          >
+            Regenerate text
+          </button>
+        </div>
+      )}
+
       <main className={`min-h-0 w-full flex-1 ${currentView === 'plaque' || currentView === 'vector' ? 'overflow-hidden' : 'overflow-auto'}`}>
 
         {currentView !== 'plaque' && currentView !== 'vector' ? (
@@ -1084,7 +1121,6 @@ const App: React.FC = () => {
                   showMaterialPrices={showMaterialPrices}
                   price={price}
                   readinessItems={readinessItems}
-                  layoutRegenNotice={layoutRegenNotice}
                   isProductionReady={isProductionReady}
                   basketAdded={basketAdded}
                   onGoToStep={setActiveStep}
