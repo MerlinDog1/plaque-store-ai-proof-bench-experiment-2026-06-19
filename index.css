@@ -2227,6 +2227,60 @@
   align-items: start;
 }
 
+.commerce-admin-login {
+  max-width: 540px;
+  border: 1px solid rgba(84, 72, 52, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.74);
+  padding: 1rem;
+}
+
+.commerce-admin-login label {
+  display: block;
+  margin-bottom: 0.55rem;
+  color: #21342e;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.commerce-admin-login div {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.commerce-admin-login input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid rgba(84, 72, 52, 0.22);
+  border-radius: 8px;
+  background: #fffef8;
+  padding: 0.75rem 0.8rem;
+  color: #17231f;
+  font: inherit;
+}
+
+.commerce-admin-login button,
+.commerce-admin-lock {
+  border: 0;
+  border-radius: 8px;
+  background: #20342d;
+  padding: 0.75rem 0.95rem;
+  color: #fffaf0;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.commerce-admin-login button:disabled {
+  cursor: not-allowed;
+  background: #d7ddd7;
+  color: #77847d;
+}
+
+.commerce-admin-lock {
+  margin-bottom: 1rem;
+}
+
 .commerce-admin-card {
   cursor: pointer;
   text-align: left;

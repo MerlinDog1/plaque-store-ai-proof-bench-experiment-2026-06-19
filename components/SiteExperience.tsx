@@ -68,6 +68,11 @@ type PaidOrder = {
   updatedAt?: string;
 };
 
+type AdminAuthConfig = {
+  authRequired: boolean;
+  label?: string;
+};
+
 declare global {
   interface Window {
     Stripe?: (publishableKey: string) => StripeBrowser | null;
@@ -965,15 +970,29 @@ function AdminPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [adminError, setAdminError] = useState<string | null>(null);
+  const [authConfig, setAuthConfig] = useState<AdminAuthConfig | null>(null);
+  const [adminToken, setAdminToken] = useState(() => localStorage.getItem('instaplaque-admin-token') || '');
+  const [password, setPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
   const adminProofSvgRef = useRef<SVGSVGElement | null>(null);
   const selectedOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
+  const adminHeaders = adminToken ? { 'x-admin-token': adminToken } : {};
 
   const loadOrders = async () => {
+    if (authConfig?.authRequired && !adminToken) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setAdminError(null);
     try {
-      const response = await fetch('/api/admin/orders');
+      const response = await fetch('/api/admin/orders', { headers: adminHeaders });
       const payload = await response.json();
+      if (response.status === 401) {
+        localStorage.removeItem('instaplaque-admin-token');
+        setAdminToken('');
+        throw new Error('Admin access required.');
+      }
       if (!response.ok) throw new Error(payload.error || `Could not load orders (${response.status}).`);
       setOrders(payload.orders || []);
       setSelectedId((current) => current || payload.orders?.[0]?.id || null);
@@ -985,13 +1004,58 @@ function AdminPage() {
   };
 
   useEffect(() => {
-    loadOrders();
+    const loadAuthConfig = async () => {
+      try {
+        const response = await fetch('/api/admin/auth-config');
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || 'Could not check admin access.');
+        setAuthConfig({ authRequired: Boolean(payload.authRequired), label: payload.label });
+      } catch (error) {
+        setAdminError(error instanceof Error ? error.message : 'Could not check admin access.');
+        setLoading(false);
+      }
+    };
+    loadAuthConfig();
   }, []);
+
+  useEffect(() => {
+    if (!authConfig) return;
+    loadOrders();
+  }, [authConfig, adminToken]);
+
+  const loginAdmin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAuthLoading(true);
+    setAdminError(null);
+    try {
+      const response = await fetch('/api/admin/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || 'Admin passcode was not accepted.');
+      localStorage.setItem('instaplaque-admin-token', payload.token);
+      setAdminToken(payload.token);
+      setPassword('');
+    } catch (error) {
+      setAdminError(error instanceof Error ? error.message : 'Admin passcode was not accepted.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const logoutAdmin = () => {
+    localStorage.removeItem('instaplaque-admin-token');
+    setAdminToken('');
+    setOrders([]);
+    setSelectedId(null);
+  };
 
   const updateOrder = async (orderId: string, payload: Record<string, string>) => {
     const response = await fetch(`/api/admin/orders/${encodeURIComponent(orderId)}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...adminHeaders },
       body: JSON.stringify(payload),
     });
     const data = await response.json();
@@ -1016,8 +1080,33 @@ function AdminPage() {
             Review paid orders, download the approved production proof, update status, and send customer progress emails.
           </p>
         </div>
+        {authConfig?.authRequired && !adminToken && (
+          <form className="commerce-admin-login" onSubmit={loginAdmin}>
+            <label htmlFor="admin-passcode">{authConfig.label || 'Admin passcode'}</label>
+            <div>
+              <input
+                id="admin-passcode"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Enter admin passcode"
+                autoComplete="current-password"
+              />
+              <button type="submit" disabled={authLoading || !password.trim()}>
+                {authLoading ? 'Checking...' : 'Unlock orders'}
+              </button>
+            </div>
+          </form>
+        )}
         {adminError && <div className="commerce-warning">{adminError}</div>}
+        {authConfig?.authRequired && adminToken && (
+          <button type="button" className="commerce-admin-lock" onClick={logoutAdmin}>
+            Lock admin
+          </button>
+        )}
         {loading && <div className="commerce-success">Loading orders...</div>}
+        {authConfig?.authRequired && !adminToken ? null : (
+          <>
         <div className="commerce-ops-strip">
           <div><span>Paid</span><strong>{counts.paid}</strong></div>
           <div><span>In production</span><strong>{counts.production}</strong></div>
@@ -1089,7 +1178,7 @@ function AdminPage() {
                 </button>
                 <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  headers: { 'Content-Type': 'application/json', ...adminHeaders },
                   body: JSON.stringify({ template: 'customer-order-confirmation' }),
                 }).then(loadOrders)}>
                   Resend confirmation
@@ -1106,6 +1195,8 @@ function AdminPage() {
             </article>
           )}
         </div>
+          </>
+        )}
       </section>
     </div>
   );

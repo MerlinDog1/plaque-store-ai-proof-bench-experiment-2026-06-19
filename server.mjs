@@ -53,6 +53,11 @@ const {
 const {
   getEmailConfig,
 } = await import("./server/email.mjs");
+const {
+  createAdminSession,
+  getAdminAuthConfig,
+  isAdminRequest,
+} = await import("./server/adminAuth.mjs");
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY || "";
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
@@ -148,6 +153,23 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "GET" && url.pathname === "/api/admin/auth-config") {
+    sendJson(res, 200, { ok: true, ...getAdminAuthConfig() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/admin/session") {
+    try {
+      const payload = JSON.parse(await readBody(req));
+      const session = createAdminSession(payload.password || payload.token);
+      sendJson(res, 200, { ok: true, ...session });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not create admin session.";
+      sendJson(res, error.statusCode || 401, { error: message });
+    }
+    return;
+  }
+
   if (req.method === "POST" && url.pathname === "/api/stripe/checkout-session") {
     try {
       const payload = JSON.parse(await readBody(req));
@@ -178,6 +200,10 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/admin/orders") {
+    if (!isAdminRequest(req)) {
+      sendJson(res, 401, { error: "Admin access required." });
+      return;
+    }
     try {
       const orders = await listOrders();
       sendJson(res, 200, { ok: true, orders });
@@ -214,6 +240,10 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "PATCH" && url.pathname.startsWith("/api/admin/orders/")) {
+    if (!isAdminRequest(req)) {
+      sendJson(res, 401, { error: "Admin access required." });
+      return;
+    }
     try {
       const orderId = decodeURIComponent(url.pathname.replace("/api/admin/orders/", ""));
       const payload = JSON.parse(await readBody(req));
@@ -230,6 +260,10 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "POST" && url.pathname.match(/^\/api\/admin\/orders\/[^/]+\/emails$/)) {
+    if (!isAdminRequest(req)) {
+      sendJson(res, 401, { error: "Admin access required." });
+      return;
+    }
     try {
       const orderId = decodeURIComponent(url.pathname.split("/")[4]);
       const payload = JSON.parse(await readBody(req));
