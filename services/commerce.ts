@@ -18,6 +18,7 @@ export type SiteView =
   | 'faq'
   | 'quote'
   | 'checkout'
+  | 'order-confirmed'
   | 'admin'
   | 'contact'
   | 'terms'

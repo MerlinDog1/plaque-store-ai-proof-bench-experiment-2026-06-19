@@ -38,7 +38,21 @@ const {
 const {
   createStripeCheckoutSession,
   getStripeConfig,
+  parseStripeWebhook,
+  retrieveStripeCheckoutSession,
 } = await import("./server/stripe.mjs");
+const {
+  attachStripeSessionToOrder,
+  createPendingOrder,
+  getOrderById,
+  listOrders,
+  markOrderPaidFromSession,
+  sendAndRecordOrderEmail,
+  updateOrderStatus,
+} = await import("./server/orders.mjs");
+const {
+  getEmailConfig,
+} = await import("./server/email.mjs");
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY || "";
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
@@ -129,13 +143,105 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "GET" && url.pathname === "/api/email/config") {
+    sendJson(res, 200, { ok: true, ...getEmailConfig() });
+    return;
+  }
+
   if (req.method === "POST" && url.pathname === "/api/stripe/checkout-session") {
     try {
       const payload = JSON.parse(await readBody(req));
+      const pendingOrder = await createPendingOrder(payload);
       const session = await createStripeCheckoutSession(payload);
-      sendJson(res, 201, { ok: true, session });
+      const order = await attachStripeSessionToOrder(pendingOrder.id, session.raw || session);
+      sendJson(res, 201, { ok: true, session, order });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create Stripe checkout session.";
+      sendJson(res, 500, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/stripe/webhook") {
+    try {
+      const rawBody = await readBody(req);
+      const event = parseStripeWebhook(rawBody, req.headers["stripe-signature"]);
+      if (event.type === "checkout.session.completed") {
+        await markOrderPaidFromSession(event.data.object);
+      }
+      sendJson(res, 200, { ok: true, received: true });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Stripe webhook failed.";
+      sendJson(res, 400, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/admin/orders") {
+    try {
+      const orders = await listOrders();
+      sendJson(res, 200, { ok: true, orders });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not list orders.";
+      sendJson(res, 500, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname.startsWith("/api/orders/")) {
+    try {
+      const orderId = decodeURIComponent(url.pathname.replace("/api/orders/", ""));
+      let order = await getOrderById(orderId);
+      const sessionId = url.searchParams.get("session_id");
+      if (order && sessionId && order.paymentStatus !== "paid") {
+        const stripeSession = await retrieveStripeCheckoutSession(sessionId);
+        if (stripeSession.payment_status === "paid" || stripeSession.status === "complete") {
+          order = await markOrderPaidFromSession(stripeSession);
+        } else {
+          order = await attachStripeSessionToOrder(order.id, stripeSession);
+        }
+      }
+      if (!order) {
+        sendJson(res, 404, { error: "Order not found." });
+        return;
+      }
+      sendJson(res, 200, { ok: true, order });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not load order.";
+      sendJson(res, 500, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === "PATCH" && url.pathname.startsWith("/api/admin/orders/")) {
+    try {
+      const orderId = decodeURIComponent(url.pathname.replace("/api/admin/orders/", ""));
+      const payload = JSON.parse(await readBody(req));
+      let order = await updateOrderStatus(orderId, payload);
+      if (payload.emailTemplate) {
+        order = await sendAndRecordOrderEmail(order, payload.emailTemplate, order.customerEmail, payload);
+      }
+      sendJson(res, 200, { ok: true, order });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not update order.";
+      sendJson(res, 500, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname.match(/^\/api\/admin\/orders\/[^/]+\/emails$/)) {
+    try {
+      const orderId = decodeURIComponent(url.pathname.split("/")[4]);
+      const payload = JSON.parse(await readBody(req));
+      const order = await getOrderById(orderId);
+      if (!order) {
+        sendJson(res, 404, { error: "Order not found." });
+        return;
+      }
+      const next = await sendAndRecordOrderEmail(order, payload.template || "customer-order-confirmation", payload.recipient || order.customerEmail, payload);
+      sendJson(res, 200, { ok: true, order: next });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not send order email.";
       sendJson(res, 500, { error: message });
     }
     return;

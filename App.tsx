@@ -52,6 +52,7 @@ const routeViews: Partial<Record<string, SiteView>> = {
   '/quote': 'quote',
   '/contact': 'contact',
   '/checkout': 'checkout',
+  '/order-confirmed': 'order-confirmed',
   '/admin': 'admin',
   '/terms': 'terms',
   '/privacy': 'privacy',
@@ -70,6 +71,7 @@ const viewRoutes: Partial<Record<SiteView, string>> = {
   quote: '/quote',
   contact: '/contact',
   checkout: '/checkout',
+  'order-confirmed': '/order-confirmed',
   admin: '/admin',
   terms: '/terms',
   privacy: '/privacy',
@@ -849,6 +851,7 @@ const App: React.FC = () => {
           origin: window.location.origin,
           uiMode: 'embedded',
           deliveryAddress,
+          orderSnapshot: order,
         }),
       });
       if (!response.ok) throw new Error(`Stripe checkout failed (${response.status})`);

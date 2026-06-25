@@ -1,5 +1,8 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
+
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
 const stripePublishableKey = process.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
+const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
 
 export const getStripeConfig = () => ({
   hasSecretKey: Boolean(stripeSecretKey),
@@ -7,6 +10,7 @@ export const getStripeConfig = () => ({
   hasPublishableKey: Boolean(stripePublishableKey),
   publishableKeyIsTest: stripePublishableKey.startsWith("pk_test_"),
   publishableKey: stripePublishableKey.startsWith("pk_test_") ? stripePublishableKey : "",
+  hasWebhookSecret: Boolean(stripeWebhookSecret),
   configured: Boolean(stripeSecretKey && stripePublishableKey),
 });
 
@@ -36,9 +40,9 @@ export const createStripeCheckoutSession = async (payload) => {
   params.set("client_reference_id", orderId);
   if (uiMode === "embedded") {
     params.set("ui_mode", "embedded_page");
-    params.set("return_url", `${origin}/checkout?stripe=success&session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
+    params.set("return_url", `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
   } else {
-    params.set("success_url", `${origin}/checkout?stripe=success&session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
+    params.set("success_url", `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
     params.set("cancel_url", `${origin}/checkout?stripe=cancelled&order=${encodeURIComponent(orderId)}`);
   }
   params.set("payment_method_types[0]", "card");
@@ -87,5 +91,48 @@ export const createStripeCheckoutSession = async (payload) => {
     mode: data.mode,
     paymentStatus: data.payment_status,
     clientReferenceId: data.client_reference_id,
+    paymentIntentId: data.payment_intent,
+    raw: data,
   };
+};
+
+export const retrieveStripeCheckoutSession = async (sessionId) => {
+  if (!stripeSecretKey) throw new Error("STRIPE_SECRET_KEY is not configured on the server.");
+  const url = new URL(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`);
+  url.searchParams.set("expand[]", "payment_intent");
+  url.searchParams.append("expand[]", "line_items");
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${stripeSecretKey}` },
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data?.error?.message || `Could not retrieve Stripe checkout session (${response.status}).`);
+  }
+  return data;
+};
+
+export const parseStripeWebhook = (rawBody, signatureHeader = "") => {
+  if (!stripeWebhookSecret) {
+    return JSON.parse(rawBody);
+  }
+
+  const parts = Object.fromEntries(
+    String(signatureHeader)
+      .split(",")
+      .map((part) => part.split("="))
+      .filter(([key, value]) => key && value),
+  );
+  const timestamp = parts.t;
+  const signature = parts.v1;
+  if (!timestamp || !signature) throw new Error("Missing Stripe webhook signature.");
+
+  const signedPayload = `${timestamp}.${rawBody}`;
+  const expected = createHmac("sha256", stripeWebhookSecret).update(signedPayload).digest("hex");
+  const actual = Buffer.from(signature, "hex");
+  const expectedBuffer = Buffer.from(expected, "hex");
+  if (actual.length !== expectedBuffer.length || !timingSafeEqual(actual, expectedBuffer)) {
+    throw new Error("Invalid Stripe webhook signature.");
+  }
+
+  return JSON.parse(rawBody);
 };

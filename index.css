@@ -348,6 +348,15 @@
 }
 
 @media (max-width: 760px) {
+  .commerce-order-confirmed,
+  .commerce-admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .commerce-admin-detail {
+    position: static;
+  }
+
   .layout-regen-toast {
     left: max(0.75rem, env(safe-area-inset-left));
     right: max(0.75rem, env(safe-area-inset-right));
@@ -2146,6 +2155,115 @@
   min-height: 180px;
   place-items: center;
   text-align: center;
+}
+
+.commerce-order-confirmed {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 1.2rem;
+  align-items: start;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.commerce-order-confirmed__main,
+.commerce-order-card,
+.commerce-admin-detail {
+  border: 1px solid rgba(84, 72, 52, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.92);
+  box-shadow: 0 18px 46px rgba(38, 47, 42, 0.09);
+  padding: 1.2rem;
+}
+
+.commerce-order-confirmed h1,
+.commerce-admin-detail h2 {
+  color: #211d18;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(34px, 5vw, 62px);
+  font-weight: 400;
+  line-height: 1.02;
+}
+
+.commerce-order-proof,
+.commerce-admin-proof {
+  margin-top: 1rem;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.commerce-order-card,
+.commerce-admin-detail,
+.commerce-admin-timeline {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.commerce-order-card div:not(.commerce-checkout-flow) {
+  display: grid;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgba(84, 72, 52, 0.12);
+  padding-bottom: 0.8rem;
+}
+
+.commerce-order-card span,
+.commerce-order-card p,
+.commerce-admin-timeline span {
+  color: #627166;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.commerce-order-card strong {
+  color: #17231f;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.commerce-admin-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.commerce-admin-card {
+  cursor: pointer;
+  text-align: left;
+}
+
+.commerce-admin-card.is-active {
+  border-color: rgba(198, 147, 46, 0.52);
+  box-shadow: 0 0 0 3px rgba(198, 147, 46, 0.16);
+}
+
+.commerce-admin-detail {
+  position: sticky;
+  top: 1rem;
+}
+
+.commerce-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.commerce-admin-actions button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: #20342d;
+  padding: 0 0.85rem;
+  color: #fffaf0;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.commerce-admin-timeline div {
+  display: grid;
+  gap: 0.15rem;
+  border-top: 1px solid rgba(84, 72, 52, 0.12);
+  padding-top: 0.55rem;
 }
 
 .commerce-page:has(.commerce-hero--premium) {

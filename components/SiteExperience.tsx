@@ -36,6 +36,35 @@ type StripeBrowser = {
   initEmbeddedCheckout: (options: { clientSecret: string }) => Promise<EmbeddedCheckoutInstance>;
 };
 
+type PaidOrder = {
+  id: string;
+  customerEmail?: string;
+  customerName?: string;
+  status: string;
+  paymentStatus: string;
+  fulfilmentStatus?: string;
+  totalPence: number;
+  currency: string;
+  productTitle: string;
+  inscription: string;
+  plaqueState: PlaqueState;
+  priceBreakdown?: Record<string, unknown>;
+  proofPackage?: {
+    productionSvg?: string | null;
+    visualProofSvg?: string | null;
+    lockedAt?: string;
+  };
+  shippingAddress?: Record<string, string>;
+  stripeCheckoutSessionId?: string;
+  emailEvents?: Array<{ id?: string; type: string; recipient: string; status: string; subject?: string; at?: string }>;
+  events?: Array<{ type: string; label: string; at: string; note?: string; recipient?: string; trackingReference?: string }>;
+  metadata?: Record<string, string>;
+  approvedAt?: string;
+  paidAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 declare global {
   interface Window {
     Stripe?: (publishableKey: string) => StripeBrowser | null;
@@ -64,6 +93,13 @@ const loadStripeJs = () => {
     });
   }
   return stripeJsPromise;
+};
+
+const formatPence = (value: number, currency = 'gbp') => {
+  return (Number(value || 0) / 100).toLocaleString('en-GB', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+  });
 };
 
 type HomeCarouselItem = {
@@ -516,7 +552,7 @@ function HowItWorksPage() {
           The customer creates a production-style proof before checkout. They can keep editing until the approval step, then the order records a locked design snapshot.
         </p>
         <div className="commerce-flow-panel">
-          {['Select product', 'Generate AI proof', 'Review price', 'Approve proof', 'Mock checkout', 'Production queue'].map((item) => (
+          {['Select product', 'Generate AI proof', 'Review price', 'Approve proof', 'Secure checkout', 'Production queue'].map((item) => (
             <span key={item}>{item}</span>
           ))}
         </div>
@@ -578,7 +614,7 @@ function QuotePage({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
             <li>Special materials, mounting, installation, or delivery requests</li>
           </ul>
           <div className="commerce-warning">
-            Future service hook: this page becomes a Supabase quote request with a Resend confirmation email and staff dashboard task.
+            Send the proof through and we will confirm anything unusual before payment.
           </div>
         </div>
       </section>
@@ -734,53 +770,246 @@ function CheckoutPage({
   );
 }
 
-function AdminPage({ orders }: Pick<SiteProps, 'orders'>) {
+function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
+  const [order, setOrder] = useState<PaidOrder | null>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('order') || '';
+    const sessionId = params.get('session_id') || '';
+    if (!orderId) {
+      setStatus('error');
+      setError('Order reference missing.');
+      return;
+    }
+
+    let cancelled = false;
+    const loadOrder = async () => {
+      try {
+        const url = `/api/orders/${encodeURIComponent(orderId)}${sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : ''}`;
+        const response = await fetch(url);
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || `Could not load order (${response.status}).`);
+        if (cancelled) return;
+        setOrder(payload.order);
+        setStatus('ready');
+      } catch (loadError) {
+        if (cancelled) return;
+        setError(loadError instanceof Error ? loadError.message : 'Could not load order.');
+        setStatus('error');
+      }
+    };
+    loadOrder();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (status === 'loading') {
+    return (
+      <div className="commerce-page">
+        <section className="commerce-section">
+          <div className="commerce-success">Confirming your order...</div>
+        </section>
+      </div>
+    );
+  }
+
+  if (status === 'error' || !order) {
+    return (
+      <div className="commerce-page">
+        <section className="commerce-section">
+          <div className="commerce-warning">
+            {error || 'Could not load this order.'}
+            <button type="button" onClick={() => onNavigate('contact')}>Contact us</button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  const paid = order.paymentStatus === 'paid';
+  const address = order.shippingAddress || {};
+
+  return (
+    <div className="commerce-page">
+      <section className="commerce-order-confirmed">
+        <div className="commerce-order-confirmed__main">
+          <p className="commerce-eyebrow">{paid ? 'Order confirmed' : 'Order received'}</p>
+          <h1>{paid ? 'Your plaque order is confirmed.' : 'We are confirming your payment.'}</h1>
+          <p className="commerce-lede">
+            {paid
+              ? 'Your approved proof has been locked for production. We will prepare it and email you when it is dispatched.'
+              : 'Your order has been created. If payment has completed, this page will update once Stripe confirms it.'}
+          </p>
+          <div className="commerce-order-proof">
+            <PlaquePreview state={order.plaqueState} activeStep={6} inscription={order.inscription} />
+          </div>
+        </div>
+        <aside className="commerce-order-card">
+          <div>
+            <span>Order number</span>
+            <strong>{order.id}</strong>
+          </div>
+          <div>
+            <span>Total paid</span>
+            <strong>{formatPence(order.totalPence, order.currency)}</strong>
+          </div>
+          <div>
+            <span>Plaque</span>
+            <strong>{order.productTitle}</strong>
+          </div>
+          <div>
+            <span>Status</span>
+            <strong>{order.status.replace(/_/g, ' ')}</strong>
+          </div>
+          <div>
+            <span>Delivery address</span>
+            <p>
+              {[address.name, address.line1, address.line2, address.city, address.postal_code || address.postcode, address.country]
+                .filter(Boolean)
+                .join(', ') || 'Held by Stripe checkout'}
+            </p>
+          </div>
+          <div className="commerce-checkout-flow">
+            <span>Proof approved</span>
+            <span>Payment confirmed</span>
+            <span>Production preparation</span>
+            <span>Dispatch email follows</span>
+          </div>
+          <button type="button" className="commerce-secondary" onClick={() => window.print()}>
+            Print confirmation
+          </button>
+        </aside>
+      </section>
+    </div>
+  );
+}
+
+function AdminPage() {
+  const [orders, setOrders] = useState<PaidOrder[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const selectedOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
+
+  const loadOrders = async () => {
+    setLoading(true);
+    setAdminError(null);
+    try {
+      const response = await fetch('/api/admin/orders');
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || `Could not load orders (${response.status}).`);
+      setOrders(payload.orders || []);
+      setSelectedId((current) => current || payload.orders?.[0]?.id || null);
+    } catch (error) {
+      setAdminError(error instanceof Error ? error.message : 'Could not load orders.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const updateOrder = async (orderId: string, payload: Record<string, string>) => {
+    const response = await fetch(`/api/admin/orders/${encodeURIComponent(orderId)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || `Could not update order (${response.status}).`);
+    setOrders((current) => current.map((order) => order.id === orderId ? data.order : order));
+  };
+
   const counts = {
-    paid: orders.filter((order) => order.paymentStatus === 'test-paid').length,
-    check: orders.filter((order) => order.status === 'needs-check' || order.status === 'quote-requested').length,
-    hub: orders.filter((order) => order.adminHub?.status === 'queued').length,
+    paid: orders.filter((order) => order.paymentStatus === 'paid').length,
+    production: orders.filter((order) => order.status === 'in_production').length,
+    dispatched: orders.filter((order) => order.fulfilmentStatus === 'dispatched').length,
     emails: orders.reduce((total, order) => total + (order.emailEvents?.length || 0), 0),
   };
+
   return (
     <div className="commerce-page">
       <section className="commerce-section">
         <div className="commerce-section__head">
-          <p className="commerce-eyebrow">Central hub mock inbox</p>
-          <h1>Storefront orders arrive here as paid proof packages.</h1>
+          <p className="commerce-eyebrow">Admin orders</p>
+          <h1>Paid proof packages arrive here.</h1>
           <p>
-            This is not the future admin URL. It is a local preview of the payload this storefront will send into the shared admin hub: payment result, customer email events, production proof and visual proof.
+            Review paid orders, download the approved production proof, update status, and send customer progress emails.
           </p>
         </div>
+        {adminError && <div className="commerce-warning">{adminError}</div>}
+        {loading && <div className="commerce-success">Loading orders...</div>}
         <div className="commerce-ops-strip">
-          <div><span>Stripe test paid</span><strong>{counts.paid}</strong></div>
-          <div><span>Needs check/quote</span><strong>{counts.check}</strong></div>
-          <div><span>Hub queued</span><strong>{counts.hub}</strong></div>
+          <div><span>Paid</span><strong>{counts.paid}</strong></div>
+          <div><span>In production</span><strong>{counts.production}</strong></div>
+          <div><span>Dispatched</span><strong>{counts.dispatched}</strong></div>
           <div><span>Email events</span><strong>{counts.emails}</strong></div>
         </div>
-        <div className="commerce-admin-grid">
-          {(orders.length ? orders : []).map((order) => (
-            <article className="commerce-admin-card" key={order.id}>
-              <div>
-                <strong>{order.id}</strong>
-                <span>{(order.paymentStatus || order.status).replace('-', ' ')}</span>
+        <div className="commerce-admin-layout">
+          <div className="commerce-admin-grid">
+            {orders.map((order) => (
+              <button className={`commerce-admin-card ${selectedOrder?.id === order.id ? 'is-active' : ''}`} key={order.id} onClick={() => setSelectedId(order.id)}>
+                <div>
+                  <strong>{order.id}</strong>
+                  <span>{order.paymentStatus || order.status}</span>
+                </div>
+                <p>{order.productTitle}</p>
+                <p>{order.customerName || 'Customer'} · {order.customerEmail || 'Email held by Stripe'}</p>
+                <p className="commerce-admin-price">{formatPence(order.totalPence, order.currency)}</p>
+              </button>
+            ))}
+            {!orders.length && !loading && (
+              <div className="commerce-empty-state">
+                <strong>No paid orders yet.</strong>
+                <span>Completed Stripe checkout orders will appear here.</span>
               </div>
-              <p>{order.productTitle}</p>
-              <p>{order.customerName} · {order.customerEmail}</p>
-              <p>{order.priceBreakdown.quoteRequired ? `Check: ${order.priceBreakdown.quoteReasons.join(', ')}` : 'Stripe test payment complete. Proof package queued for admin hub.'}</p>
-              <p className="commerce-admin-price">{formatPrice(order.total)}</p>
+            )}
+          </div>
+          {selectedOrder && (
+            <article className="commerce-admin-detail">
+              <div>
+                <p className="commerce-eyebrow">Order detail</p>
+                <h2>{selectedOrder.id}</h2>
+              </div>
+              <div className="commerce-admin-proof">
+                <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
+              </div>
               <div className="commerce-admin-package">
-                <span>{order.proofPackage?.productionFilename || 'production-proof.svg'}</span>
-                <span>{order.proofPackage?.visualFilename || 'visual-proof.svg'}</span>
-                <span>{order.emailEvents?.length || 0} email events</span>
-                <span>{order.adminHub?.queue || 'orders.production-proof-intake'}</span>
+                <span>{selectedOrder.productTitle}</span>
+                <span>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</span>
+                <span>{selectedOrder.status.replace(/_/g, ' ')}</span>
+                <span>{selectedOrder.fulfilmentStatus?.replace(/_/g, ' ') || 'not started'}</span>
+              </div>
+              <div className="commerce-admin-actions">
+                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'in_production', fulfilmentStatus: 'in_production', emailTemplate: 'customer-in-production' })}>
+                  Mark in production + email
+                </button>
+                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'dispatched', fulfilmentStatus: 'dispatched', emailTemplate: 'customer-dispatched' })}>
+                  Mark dispatched + email
+                </button>
+                <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ template: 'customer-order-confirmation' }),
+                }).then(loadOrders)}>
+                  Resend confirmation
+                </button>
+              </div>
+              <div className="commerce-admin-timeline">
+                {(selectedOrder.events || []).map((event, index) => (
+                  <div key={`${event.type}-${event.at}-${index}`}>
+                    <strong>{event.label}</strong>
+                    <span>{event.at ? new Date(event.at).toLocaleString('en-GB') : ''}</span>
+                  </div>
+                ))}
               </div>
             </article>
-          ))}
-          {!orders.length && (
-            <div className="commerce-empty-state">
-              <strong>No hub payloads yet.</strong>
-              <span>Create one through the Stripe test checkout mock and it will appear here.</span>
-            </div>
           )}
         </div>
       </section>
@@ -901,8 +1130,10 @@ export function SiteExperience(props: SiteProps) {
         onNavigate={props.onNavigate}
       />
     );
+  } else if (props.view === 'order-confirmed') {
+    page = <OrderConfirmedPage onNavigate={props.onNavigate} />;
   } else if (props.view === 'admin') {
-    page = <AdminPage orders={props.orders} />;
+    page = <AdminPage />;
   } else if (legalPages[props.view]) {
     page = <LegalPlaceholderPage view={props.view} />;
   } else {
