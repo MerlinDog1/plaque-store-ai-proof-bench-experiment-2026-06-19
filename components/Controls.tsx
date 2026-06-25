@@ -135,19 +135,19 @@ const isStandardTurnaroundSize = (state: Pick<PlaqueState, 'width' | 'height' | 
 const getTurnaroundEstimate = (state: PlaqueState) => {
   if (state.wood) {
     return isA4OrA5Size(state)
-      ? { days: 10, label: 'Estimated 10 working days after proof approval', note: 'A4/A5 plaques with wood backing need extra workshop time.' }
-      : { days: 15, label: 'Estimated 15 working days after proof approval', note: 'Custom or non-standard wood-backed plaques need a longer workshop slot.' };
+      ? { days: 10, label: 'Estimated 10 working days after proof approval and payment', note: 'A4/A5 plaques with wood backing need extra workshop time.' }
+      : { days: 15, label: 'Estimated 15 working days after proof approval and payment', note: 'Custom or non-standard wood-backed plaques need a longer workshop slot.' };
   }
 
   if (!isStandardTurnaroundSize(state)) {
-    return { days: 15, label: 'Estimated 15 working days after proof approval', note: 'Custom sizes and non-standard combinations need a longer workshop slot.' };
+    return { days: 15, label: 'Estimated 15 working days after proof approval and payment', note: 'Custom sizes and non-standard combinations need a longer workshop slot.' };
   }
 
   if (state.material === Material.AgedBrass) {
-    return { days: 7, label: 'Estimated 7 working days after proof approval', note: 'Aged brass needs additional finishing time.' };
+    return { days: 7, label: 'Estimated 7 working days after proof approval and payment', note: 'Aged brass needs additional finishing time.' };
   }
 
-  return { days: 5, label: 'Estimated 5 working days after proof approval', note: 'Standard size, standard finish, fitting the 600 x 400mm production bed.' };
+  return { days: 5, label: 'Estimated 5 working days after proof approval and payment', note: 'Standard size, standard finish, fitting the 600 x 400mm production bed.' };
 };
 
 const STEP_COPY = [
@@ -469,8 +469,8 @@ export const Controls: React.FC<Props> = ({
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
   const [instantStyleVariant, setInstantStyleVariant] = useState(1);
   const [proofApproved, setProofApproved] = useState(false);
-  const [checkoutName, setCheckoutName] = useState('Demo Customer');
-  const [checkoutEmail, setCheckoutEmail] = useState('customer@example.com');
+  const [checkoutName, setCheckoutName] = useState('');
+  const [checkoutEmail, setCheckoutEmail] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
     line1: '',
     line2: '',
@@ -2293,6 +2293,7 @@ export const Controls: React.FC<Props> = ({
                   type="button"
                   className="proof-info-button"
                   aria-label={`Why this turnaround: ${turnaroundEstimate.note}`}
+                  hidden={turnaroundEstimate.days <= 5}
                 >
                   ?
                   <small role="tooltip">{turnaroundEstimate.note}</small>
@@ -2348,11 +2349,11 @@ export const Controls: React.FC<Props> = ({
               <div className="proof-address-grid">
                 <label>
                   Name
-                  <input value={checkoutName} onChange={(event) => setCheckoutName(event.target.value)} autoComplete="name" />
+                  <input value={checkoutName} onChange={(event) => setCheckoutName(event.target.value)} autoComplete="name" placeholder="Full name" />
                 </label>
                 <label>
                   Email
-                  <input value={checkoutEmail} onChange={(event) => setCheckoutEmail(event.target.value)} type="email" autoComplete="email" />
+                  <input value={checkoutEmail} onChange={(event) => setCheckoutEmail(event.target.value)} type="email" autoComplete="email" placeholder="Email address" />
                 </label>
                 <label className="proof-address-grid__wide">
                   Delivery address
@@ -2404,9 +2405,9 @@ export const Controls: React.FC<Props> = ({
             <div className="mt-3 grid gap-3">
               <div className="proof-save-later-card">
                 <div>
-                  <span>Proof PDF and return link</span>
+                  <span>Need time to decide?</span>
                   <strong>Save this design for later</strong>
-                  <small>No account needed. The PDF includes your QR code and secure link to return, continue editing, or checkout later. Saved links last 30 days.</small>
+                  <small><strong>No account needed.</strong> The PDF includes your QR code and secure link to return, continue editing, or checkout later. Saved links last 30 days.</small>
                 </div>
                 <button onClick={onExportPdf} className="min-h-[52px] rounded-lg px-4 text-sm font-black">
                   Download proof PDF

@@ -189,24 +189,28 @@
 .proof-info-button {
   position: relative;
   display: inline-grid;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   flex: 0 0 auto;
   place-items: center;
-  border: 1px solid rgba(20, 56, 40, 0.22);
+  border: 1px solid rgba(20, 56, 40, 0.18);
   border-radius: 999px;
-  background: #f5d27b;
-  color: #143828;
-  font-size: 13px;
+  background: #e8d58c;
+  color: #26392f;
+  font-size: 11px;
   font-weight: 950;
   line-height: 1;
 }
 
+.proof-info-button[hidden] {
+  display: none !important;
+}
+
 .proofbench-customiser .controls-instrument .proof-info-button {
-  border-color: rgba(20, 56, 40, 0.28) !important;
-  background: #f5d27b !important;
-  color: #143828 !important;
-  box-shadow: 0 4px 10px rgba(20, 56, 40, 0.12);
+  border-color: rgba(20, 56, 40, 0.2) !important;
+  background: #e8d58c !important;
+  color: #26392f !important;
+  box-shadow: none;
 }
 
 .proof-info-button small {
@@ -295,12 +299,16 @@
   gap: 0.7rem;
   border: 1px solid rgba(47, 127, 105, 0.24);
   border-radius: 10px;
-  background: #edf7f1;
+  background: #f3fbf6 !important;
   padding: 0.78rem;
-  color: #173c2d;
+  color: #173c2d !important;
   font-size: 13px;
   font-weight: 900;
   line-height: 1.4;
+}
+
+.proof-approval-row span {
+  color: #173c2d !important;
 }
 
 .proof-approval-row input {
@@ -319,7 +327,7 @@
 .proof-address-grid label {
   display: grid;
   gap: 0.28rem;
-  color: #5c6b63;
+  color: #e8f1eb !important;
   font-size: 10px;
   font-weight: 950;
   letter-spacing: 0;
@@ -337,12 +345,17 @@
   border-radius: 8px;
   background: #fffdf7;
   padding: 0 0.72rem;
-  color: #17231f;
+  color: #17231f !important;
   font-size: 15px;
   font-weight: 800;
   letter-spacing: 0;
   outline: none;
   text-transform: none;
+}
+
+.proof-address-grid input::placeholder {
+  color: #6f7b74 !important;
+  opacity: 1;
 }
 
 .proof-address-grid input:focus {
@@ -366,7 +379,7 @@
   gap: 0.72rem;
   border: 1px solid rgba(47, 127, 105, 0.22);
   border-radius: 10px;
-  background: #f7fbf8;
+  background: #f7fbf8 !important;
   padding: 0.76rem;
 }
 
@@ -376,14 +389,14 @@
 }
 
 .proof-embedded-checkout__head strong {
-  color: #173c2d;
+  color: #173c2d !important;
   font-size: 14px;
   font-weight: 950;
 }
 
 .proof-embedded-checkout__head span,
 .proof-embedded-checkout > span {
-  color: #547064;
+  color: #4b665a !important;
   font-size: 12px;
   font-weight: 850;
   line-height: 1.35;
@@ -428,7 +441,8 @@
 }
 
 .proof-save-later-card strong,
-.proof-save-later-card small {
+.proof-save-later-card small,
+.proof-save-later-card small strong {
   display: block;
 }
 
@@ -445,6 +459,13 @@
   font-size: 12px;
   font-weight: 800;
   line-height: 1.45;
+}
+
+.proof-save-later-card small strong {
+  margin: 0;
+  color: #ffffff !important;
+  font-size: inherit;
+  font-weight: 950;
 }
 
 .proof-save-later-card button {
@@ -483,6 +504,37 @@
 
 .proofbench-customiser .controls-instrument .proof-save-later-card small {
   color: #edf0e8 !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-approval-row,
+.proofbench-customiser .controls-instrument .proof-approval-row span {
+  color: #173c2d !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-address-grid label {
+  color: #e8f1eb !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-address-grid input {
+  background: #fffdf7 !important;
+  color: #17231f !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-address-grid input::placeholder {
+  color: #6f7b74 !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-embedded-checkout__head strong {
+  color: #173c2d !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-embedded-checkout__head span,
+.proofbench-customiser .controls-instrument .proof-embedded-checkout > span {
+  color: #4b665a !important;
+}
+
+.proofbench-customiser .controls-instrument .proof-save-later-card small strong {
+  color: #ffffff !important;
 }
 
 .turnaround-toast {
