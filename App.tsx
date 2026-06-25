@@ -627,7 +627,7 @@ const App: React.FC = () => {
   }, [generatedLayoutSignature, inscriptionGuidance, inscriptionPrompt, state.designStyle, state.generatedSvgContent, state.height, state.memorialImageEnabled, state.memorialImageMethod, state.memorialImagePlacement, state.memorialImagePreviewUrl, state.memorialImageScale, state.memorialImageShape, state.memorialImageSourceUrl, state.memorialImageSvg, state.shape, state.typographyEngine, state.width]);
 
   const layoutRegenNotice = React.useMemo(() => {
-    if (!state.generatedSvgContent || !generatedProofFrame || generatedLayoutSignature === getLayoutSignature(inscriptionPrompt)) return null;
+    if (!state.generatedSvgContent || !generatedProofFrame) return null;
     const currentFrame = getProofFrame(state);
     if (generatedProofFrame.orientation !== currentFrame.orientation) {
       return {
@@ -641,11 +641,8 @@ const App: React.FC = () => {
         message: 'Size changed since the text was generated. If the proof still looks good, you can continue; regenerate text if it needs rebalancing.',
       };
     }
-    return {
-      tone: 'general' as const,
-      message: 'The proof options changed since the text was generated. Continue if it still looks good, or regenerate text for a fresh layout.',
-    };
-  }, [generatedLayoutSignature, generatedProofFrame, inscriptionPrompt, state]);
+    return null;
+  }, [generatedProofFrame, state.generatedSvgContent, state.height, state.width]);
 
   React.useEffect(() => {
     if (!layoutRegenNotice) {
