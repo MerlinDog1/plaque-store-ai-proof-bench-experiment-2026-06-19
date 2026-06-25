@@ -594,11 +594,9 @@ function CheckoutPage({
   onCreateMockOrder,
   onNavigate,
 }: Pick<SiteProps, 'state' | 'inscription' | 'selectedProduct' | 'isProductionReady' | 'onCreateMockOrder' | 'onNavigate'>) {
-  const [name, setName] = useState('Demo Customer');
-  const [email, setEmail] = useState('customer@example.com');
-  const [accepted, setAccepted] = useState(false);
   const [createdOrder, setCreatedOrder] = useState<MockOrder | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
   const [embeddedStatus, setEmbeddedStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const [embeddedError, setEmbeddedError] = useState<string | null>(null);
   const embeddedMountRef = useRef<HTMLDivElement | null>(null);
@@ -606,19 +604,26 @@ function CheckoutPage({
   const embeddedClientSecret = createdOrder?.stripeSimulation.embeddedClientSecret;
   const stripePublishableKey = createdOrder?.stripeSimulation.publishableKey;
 
-  const submit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!accepted || isSubmitting) return;
+  const prepareCheckout = async () => {
+    if (isSubmitting) return;
     setIsSubmitting(true);
-    setCreatedOrder(null);
+    setOrderError(null);
     setEmbeddedStatus('idle');
     setEmbeddedError(null);
     try {
-      setCreatedOrder(await onCreateMockOrder(name, email));
+      setCreatedOrder(await onCreateMockOrder('Stripe checkout customer', ''));
+    } catch (error) {
+      setOrderError(error instanceof Error ? error.message : 'Secure checkout could not be prepared.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (!isProductionReady || createdOrder || isSubmitting || orderError) return;
+    prepareCheckout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isProductionReady, createdOrder, isSubmitting, orderError]);
 
   useEffect(() => {
     if (!createdOrder || !embeddedClientSecret || !stripePublishableKey || !embeddedMountRef.current) {
@@ -660,70 +665,53 @@ function CheckoutPage({
     <div className="commerce-page">
       <section className="commerce-checkout">
         <div className="commerce-checkout-proof">
-          <p className="commerce-eyebrow">Approved proof snapshot</p>
+          <p className="commerce-eyebrow">Approved proof</p>
           <div className="commerce-checkout-preview">
             <PlaquePreview state={state} activeStep={6} inscription={inscription} />
           </div>
+          <div className="commerce-summary-lines">
+            <span><strong>{selectedProduct.title}</strong></span>
+            <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
+            {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
+            <span>UK mainland delivery <strong>Included</strong></span>
+            <span className="commerce-summary-total">Total <strong>{formatPrice(breakdown.total)}</strong></span>
+          </div>
+          <button type="button" className="commerce-secondary" onClick={() => onNavigate('plaque')}>
+            Edit proof
+          </button>
         </div>
         <div className="commerce-checkout-panel">
-          <form className="commerce-checkout-form" onSubmit={submit}>
-            <p className="commerce-eyebrow">Approve before ordering</p>
-            <h1>Pay securely without leaving the proof.</h1>
+          <div className="commerce-checkout-form">
+            <p className="commerce-eyebrow">Secure checkout</p>
+            <h1>Complete your order.</h1>
             <p>
-              Approve the locked proof package, then complete the Stripe test card payment in the secure checkout panel below.
+              Enter your contact details, delivery address and payment details below.
             </p>
             {!isProductionReady && (
               <div className="commerce-warning">
-                The proof is not production-ready yet. In production this would route back to the proof step or into artwork check.
+                Finish your proof before checkout.
+                <button type="button" onClick={() => onNavigate('plaque')}>Return to proof</button>
               </div>
             )}
             {breakdown.quoteRequired && (
               <div className="commerce-warning">
-                Quote/check route: {breakdown.quoteReasons.join(', ')}.
+                This order may need a delivery or production check before payment.
               </div>
             )}
-            <label>
-              Name
-              <input value={name} onChange={(event) => setName(event.target.value)} />
-            </label>
-            <label>
-              Email
-              <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" />
-            </label>
-            <div className="commerce-summary-lines">
-              <span><strong>{selectedProduct.title}</strong></span>
-              <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
-              {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
-              <span>UK delivery <strong>Included</strong></span>
-              <span className="commerce-summary-total">Total <strong>{formatPrice(breakdown.total)}</strong></span>
-            </div>
-            <label className="commerce-approval">
-              <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} />
-              <span>I approve this proof for production. I understand the plaque will be made using this wording, layout, material and size.</span>
-            </label>
-            <div className="commerce-checkout-flow" aria-label="Embedded checkout flow">
-              <span>Proof approved</span>
-              <span>Secure card payment</span>
-              <span>Customer emails queued</span>
-              <span>Admin hub handoff</span>
-            </div>
-            <button className="commerce-primary" type="submit" disabled={!accepted || isSubmitting}>
-              {isSubmitting ? 'Preparing secure payment...' : createdOrder ? 'Refresh secure payment' : 'Open secure payment'}
-            </button>
-          </form>
-          {createdOrder && (
-            <div className="commerce-success">
-              <strong>Order package created: {createdOrder.id}</strong>
-              <span>
-                Stripe: {createdOrder.stripeSimulation.provider === 'stripe' ? `${createdOrder.stripeSimulation.checkoutSessionId} (${createdOrder.stripeSimulation.uiMode || 'hosted'})` : 'mock fallback'}
-              </span>
-              <span>Emails queued: {createdOrder.emailEvents.length}</span>
-              <span>Hub queue: {createdOrder.adminHub.queue}</span>
+            {isSubmitting && <div className="commerce-success">Preparing secure checkout...</div>}
+            {orderError && (
+              <div className="commerce-warning">
+                {orderError}
+                <button type="button" onClick={prepareCheckout}>Try again</button>
+              </div>
+            )}
+            {createdOrder ? (
+              <>
               {createdOrder.stripeSimulation.embeddedClientSecret && createdOrder.stripeSimulation.publishableKey && (
                 <div className="commerce-embedded-checkout" aria-live="polite">
                   <div className="commerce-embedded-checkout__head">
                     <strong>Secure Stripe checkout</strong>
-                    <span>Card details stay inside Stripe.</span>
+                    <span>Protected payment, address and delivery details.</span>
                   </div>
                   {embeddedStatus === 'loading' && <span>Loading secure payment form...</span>}
                   {embeddedStatus === 'error' && (
@@ -733,13 +721,13 @@ function CheckoutPage({
                 </div>
               )}
               {createdOrder.stripeSimulation.checkoutUrl && (
-                <button type="button" onClick={() => window.location.assign(createdOrder.stripeSimulation.checkoutUrl!)}>
-                  Continue to Stripe test checkout
+                <button type="button" className="commerce-primary" onClick={() => window.location.assign(createdOrder.stripeSimulation.checkoutUrl!)}>
+                  Continue to secure checkout
                 </button>
               )}
-              <button type="button" onClick={() => onNavigate('admin')}>Open hub inbox preview</button>
-            </div>
-          )}
+              </>
+            ) : null}
+          </div>
         </div>
       </section>
     </div>

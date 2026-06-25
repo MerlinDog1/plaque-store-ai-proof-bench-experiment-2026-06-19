@@ -22,7 +22,6 @@ import type { GenerationPhase } from '../services/geminiService';
 import { BENCH_SAFE_MARGIN_PERCENT, DEFAULT_SAFE_MARGIN_PERCENT, SAFE_MARGIN_PRESETS, getSafeMarginMm, getSafeMarginsMm, getSafeMarginPercent } from '../services/safeMargin';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { estimatePlaqueBasePrice, estimateWoodAddOn } from '../services/pricing';
-import type { MockOrder } from '../services/commerce';
 
 const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
@@ -217,7 +216,6 @@ interface Props {
   onGoToStep: (step: number) => void;
   onSaveProof: () => void;
   onAddToBasket: () => void;
-  onCreateMockOrder: (name: string, email: string) => Promise<MockOrder>;
   onRealisticPreview: () => void;
   realisticPreviewPrompt: string;
   onRealisticPreviewPromptChange: (prompt: string) => void;
@@ -264,45 +262,6 @@ interface GeneratedTextControl {
 
 const fieldClass =
   'control-input w-full min-h-[48px] rounded-lg border px-4 py-3 text-base text-[#1b231f] placeholder:text-[#9b9284] outline-none transition focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20 disabled:bg-[#eee4d4] disabled:text-[#8a8275]';
-
-type EmbeddedCheckoutInstance = {
-  mount: (selectorOrElement: string | HTMLElement) => void;
-  destroy?: () => void;
-};
-
-type StripeBrowser = {
-  initEmbeddedCheckout: (options: { clientSecret: string }) => Promise<EmbeddedCheckoutInstance>;
-};
-
-declare global {
-  interface Window {
-    Stripe?: (publishableKey: string) => StripeBrowser | null;
-  }
-}
-
-let stripeJsPromise: Promise<void> | null = null;
-
-const loadStripeJs = () => {
-  if (typeof window === 'undefined') return Promise.reject(new Error('Stripe.js needs a browser.'));
-  if (window.Stripe) return Promise.resolve();
-  if (!stripeJsPromise) {
-    stripeJsPromise = new Promise<void>((resolve, reject) => {
-      const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://js.stripe.com/v3/"]');
-      if (existingScript) {
-        existingScript.addEventListener('load', () => resolve(), { once: true });
-        existingScript.addEventListener('error', () => reject(new Error('Stripe.js failed to load.')), { once: true });
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://js.stripe.com/v3/';
-      script.async = true;
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Stripe.js failed to load.'));
-      document.head.appendChild(script);
-    });
-  }
-  return stripeJsPromise;
-};
 
 const choiceClass = (active: boolean) =>
   `control-choice studio-press min-h-[54px] rounded-lg border px-4 py-3 text-left text-sm font-black transition active:scale-[0.98] ${
@@ -444,7 +403,6 @@ export const Controls: React.FC<Props> = ({
   onGoToStep,
   onSaveProof,
   onAddToBasket,
-  onCreateMockOrder,
   onRealisticPreview,
   realisticPreviewPrompt,
   onRealisticPreviewPromptChange,
@@ -471,12 +429,8 @@ export const Controls: React.FC<Props> = ({
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
   const [instantStyleVariant, setInstantStyleVariant] = useState(1);
   const [proofApproved, setProofApproved] = useState(false);
-  const [checkoutOrder, setCheckoutOrder] = useState<MockOrder | null>(null);
   const [checkoutSubmitting, setCheckoutSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [embeddedStatus, setEmbeddedStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
-  const [embeddedError, setEmbeddedError] = useState<string | null>(null);
-  const embeddedMountRef = useRef<HTMLDivElement | null>(null);
   const isIterating = !!state.generatedSvgContent;
   const portraitPreviewUrl = state.memorialImageMethod === MemorialImageMethod.UvPrinted
     ? state.memorialImageSourceUrl || state.memorialImagePreviewUrl
@@ -817,8 +771,6 @@ export const Controls: React.FC<Props> = ({
   const baseProofPrice = Math.max(0, price - (state.wood ? woodAddOnPrice : 0));
   const turnaroundEstimate = getTurnaroundEstimate(state);
   const checkoutReady = isProductionReady && proofApproved && !checkoutSubmitting;
-  const embeddedClientSecret = checkoutOrder?.stripeSimulation.embeddedClientSecret;
-  const stripePublishableKey = checkoutOrder?.stripeSimulation.publishableKey;
 
   const handleProofCheckoutSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -832,59 +784,13 @@ export const Controls: React.FC<Props> = ({
     }
     setCheckoutSubmitting(true);
     setCheckoutError(null);
-    setCheckoutOrder(null);
-    setEmbeddedStatus('idle');
-    setEmbeddedError(null);
-    try {
-      const order = await onCreateMockOrder('Stripe checkout customer', '');
-      setCheckoutOrder(order);
-      onAddToBasket();
-    } catch (error) {
-      setCheckoutError(error instanceof Error ? error.message : 'Could not prepare secure payment.');
-    } finally {
-      setCheckoutSubmitting(false);
-    }
+    onAddToBasket();
+    setCheckoutSubmitting(false);
   };
 
   useEffect(() => {
     if (!isProductionReady && proofApproved) setProofApproved(false);
   }, [isProductionReady, proofApproved]);
-
-  useEffect(() => {
-    if (!checkoutOrder || !embeddedClientSecret || !stripePublishableKey || !embeddedMountRef.current) {
-      return;
-    }
-
-    let mounted = true;
-    let embeddedCheckout: EmbeddedCheckoutInstance | null = null;
-    setEmbeddedStatus('loading');
-    setEmbeddedError(null);
-
-    loadStripeJs()
-      .then(async () => {
-        const stripe = window.Stripe?.(stripePublishableKey);
-        if (!stripe) throw new Error('Stripe.js did not initialise.');
-        const checkout = await stripe.initEmbeddedCheckout({ clientSecret: embeddedClientSecret });
-        if (!mounted) {
-          checkout.destroy?.();
-          return;
-        }
-        embeddedCheckout = checkout;
-        checkout.mount(embeddedMountRef.current!);
-        setEmbeddedStatus('ready');
-      })
-      .catch((error) => {
-        if (!mounted) return;
-        setEmbeddedStatus('error');
-        setEmbeddedError(error instanceof Error ? error.message : 'Embedded Stripe checkout could not be loaded.');
-      });
-
-    return () => {
-      mounted = false;
-      embeddedCheckout?.destroy?.();
-      if (embeddedMountRef.current) embeddedMountRef.current.replaceChildren();
-    };
-  }, [checkoutOrder, embeddedClientSecret, stripePublishableKey]);
 
   const updateGeneratedTextLine = (lineIndex: number, changes: Partial<Pick<GeneratedTextControl, 'text' | 'fontFamily' | 'fontSize' | 'fontWeight'>>) => {
     if (!state.generatedSvgContent || typeof DOMParser === 'undefined') return;
@@ -2325,9 +2231,6 @@ export const Controls: React.FC<Props> = ({
                 />
                 <span>I have checked the wording, layout, material, size and fixings, and approve this proof for production.</span>
               </label>
-              <p className="proof-stripe-collection-note">
-                Stripe will collect contact email, delivery address, shipping option and payment details in the secure checkout below.
-              </p>
               {checkoutError && <div className="proof-checkout-error">{checkoutError}</div>}
               <div className="proof-payment-pill">
                 <button
@@ -2335,24 +2238,13 @@ export const Controls: React.FC<Props> = ({
                   disabled={!checkoutReady}
                   className="proof-checkout-button studio-press min-h-[58px] w-full px-5 text-sm font-black disabled:cursor-not-allowed disabled:shadow-none"
                 >
-                  {checkoutSubmitting ? 'Preparing secure checkout...' : checkoutOrder ? 'Refresh secure checkout' : basketAdded ? 'Secure checkout ready' : 'Approve proof and pay'}
+                  {checkoutSubmitting ? 'Opening checkout...' : 'Continue to secure checkout'}
                 </button>
                 <div className="proof-stripe-note" aria-label="Secure test checkout powered by Stripe">
                   <span>Secure card checkout</span>
                   <img src="/site-images/powered-by-stripe-black.svg" alt="Powered by Stripe" loading="lazy" />
                 </div>
               </div>
-              {checkoutOrder && (
-                <div className="proof-embedded-checkout" aria-live="polite">
-                  <div className="proof-embedded-checkout__head">
-                    <strong>Secure Stripe checkout</strong>
-                    <span>Stripe collects delivery address, shipping option and card details.</span>
-                  </div>
-                  {embeddedStatus === 'loading' && <span>Loading secure payment form...</span>}
-                  {embeddedStatus === 'error' && <span className="proof-checkout-error">{embeddedError}</span>}
-                  <div ref={embeddedMountRef} className="proof-embedded-checkout__mount" />
-                </div>
-              )}
             </form>
             <div className="mt-3 grid gap-3">
               <div className="proof-save-later-card">

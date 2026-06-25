@@ -757,11 +757,7 @@ const App: React.FC = () => {
       return;
     }
     setBasketAdded(true);
-    setActiveStep(6);
-    setCurrentView('plaque');
-    if (window.location.pathname !== '/design') {
-      window.history.pushState({}, '', '/design');
-    }
+    handleNavigate('checkout');
   };
 
   const handleNavigate = (view: SiteView, productSlug?: string) => {
