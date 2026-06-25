@@ -821,7 +821,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             {state.shape === Shape.Rect ? (
               <>
                 <rect
-                  x={0} y={0} width={totalW} height={totalH} rx={3} ry={3}
+                  x={0} y={0} width={totalW} height={totalH}
                   fill={woodFill}
                 />
                 <path
@@ -844,7 +844,6 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
                   y={woodChamfer}
                   width={Math.max(1, totalW - woodChamfer * 2)}
                   height={Math.max(1, totalH - woodChamfer * 2)}
-                  rx={2}
                   fill="none"
                   stroke="rgba(255,248,226,0.22)"
                   strokeWidth={0.6}

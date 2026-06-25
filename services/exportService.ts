@@ -529,6 +529,10 @@ const prepareCloneForProduction = async (sourceSvg: SVGSVGElement, state: Plaque
     const woodBacking = clone.querySelector('.wood-backing');
     if (woodBacking) {
       woodBacking.removeAttribute('filter');
+      woodBacking.querySelectorAll('rect').forEach(rect => {
+        rect.removeAttribute('rx');
+        rect.removeAttribute('ry');
+      });
       const shapes = Array.from(woodBacking.querySelectorAll('rect, ellipse, path'));
       shapes.forEach((shape, index) => {
         if (index === 0) {

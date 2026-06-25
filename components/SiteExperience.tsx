@@ -137,7 +137,22 @@ const downloadSvgFile = (filename: string, content: string, state?: PlaqueState)
 };
 
 const downloadRenderedProofSvg = (filename: string, sourceSvg: SVGSVGElement) => {
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(sourceSvg)}`;
+  const clone = sourceSvg.cloneNode(true) as SVGSVGElement;
+  const box = sourceSvg.viewBox.baseVal;
+  const width = box.width || Number(sourceSvg.getAttribute('width')) || 300;
+  const height = box.height || Number(sourceSvg.getAttribute('height')) || 200;
+  clone.removeAttribute('class');
+  clone.removeAttribute('style');
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', `${width}mm`);
+  clone.setAttribute('height', `${height}mm`);
+  clone.setAttribute('viewBox', `${box.x || 0} ${box.y || 0} ${width} ${height}`);
+  clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  clone.querySelectorAll('.wood-backing rect').forEach((rect) => {
+    rect.removeAttribute('rx');
+    rect.removeAttribute('ry');
+  });
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(clone)}`;
   downloadTextFile(filename, xml, 'image/svg+xml');
 };
 
