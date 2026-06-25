@@ -129,6 +129,18 @@ const makeLayoutSignature = (prompt: string, proofState: PlaqueState, guidance =
   safeMargin: proofState.safeMargin,
 });
 
+type GeneratedProofFrame = {
+  width: number;
+  height: number;
+  orientation: 'landscape' | 'portrait' | 'square';
+};
+
+const getProofFrame = (proofState: Pick<PlaqueState, 'width' | 'height'>): GeneratedProofFrame => ({
+  width: proofState.width,
+  height: proofState.height,
+  orientation: proofState.width > proofState.height ? 'landscape' : proofState.width < proofState.height ? 'portrait' : 'square',
+});
+
 const sanitizeProofStateForRemoteSave = (proofState: PlaqueState): PlaqueState => ({
   ...proofState,
   conceptImageUrl: null,
@@ -150,6 +162,7 @@ const App: React.FC = () => {
   const [inscriptionPrompt, setInscriptionPrompt] = useState('');
   const [inscriptionGuidance, setInscriptionGuidance] = useState('');
   const [generatedLayoutSignature, setGeneratedLayoutSignature] = useState<string | null>(null);
+  const [generatedProofFrame, setGeneratedProofFrame] = useState<GeneratedProofFrame | null>(null);
   const [isGeneratingLayout, setIsGeneratingLayout] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [realisticPreviewPrompt, setRealisticPreviewPrompt] = useState('');
@@ -289,6 +302,7 @@ const App: React.FC = () => {
             ? makeLayoutSignature(restoredWording, restoredState, restoredGuidance)
             : null
         );
+        setGeneratedProofFrame(restoredState.generatedSvgContent ? getProofFrame(restoredState) : null);
         setHasSelectedSize(true);
         setActiveStep(restoredState.generatedSvgContent ? 5 : 0);
         setCurrentView('plaque');
@@ -372,6 +386,7 @@ const App: React.FC = () => {
 
   const handleClearDesign = () => {
     setGeneratedLayoutSignature(null);
+    setGeneratedProofFrame(null);
     setState(prev => ({
       ...prev,
       generatedSvgContent: null,
@@ -523,6 +538,7 @@ const App: React.FC = () => {
 
       if (result) {
         setGeneratedLayoutSignature(getLayoutSignature(effectivePrompt));
+        setGeneratedProofFrame(getProofFrame(state));
         setState(prev => ({
           ...prev,
           generatedSvgContent: result.svgContent,
@@ -599,8 +615,6 @@ const App: React.FC = () => {
     const warnings: string[] = [];
     if (!state.generatedSvgContent) {
       warnings.push('Generate your inscription layout. The preview is still showing guide text.');
-    } else if (generatedLayoutSignature !== getLayoutSignature(inscriptionPrompt)) {
-      warnings.push('Update the inscription layout after your latest plaque changes.');
     }
     if (state.memorialImageEnabled && state.memorialImageMethod === MemorialImageMethod.Engraved && !state.memorialImageSvg) {
       warnings.push('Generate the engraved artwork.');
@@ -611,15 +625,34 @@ const App: React.FC = () => {
     return warnings;
   }, [generatedLayoutSignature, inscriptionGuidance, inscriptionPrompt, state.designStyle, state.generatedSvgContent, state.height, state.memorialImageEnabled, state.memorialImageMethod, state.memorialImagePlacement, state.memorialImagePreviewUrl, state.memorialImageScale, state.memorialImageShape, state.memorialImageSourceUrl, state.memorialImageSvg, state.shape, state.typographyEngine, state.width]);
 
+  const layoutRegenNotice = React.useMemo(() => {
+    if (!state.generatedSvgContent || !generatedProofFrame || generatedLayoutSignature === getLayoutSignature(inscriptionPrompt)) return null;
+    const currentFrame = getProofFrame(state);
+    if (generatedProofFrame.orientation !== currentFrame.orientation) {
+      return {
+        tone: 'orientation' as const,
+        message: `You switched from ${generatedProofFrame.orientation} to ${currentFrame.orientation}. The text may still work, but regenerate it if the layout looks off.`,
+      };
+    }
+    if (generatedProofFrame.width !== currentFrame.width || generatedProofFrame.height !== currentFrame.height) {
+      return {
+        tone: 'size' as const,
+        message: 'Size changed since the text was generated. If the proof still looks good, you can continue; regenerate text if it needs rebalancing.',
+      };
+    }
+    return {
+      tone: 'general' as const,
+      message: 'The proof options changed since the text was generated. Continue if it still looks good, or regenerate text for a fresh layout.',
+    };
+  }, [generatedLayoutSignature, generatedProofFrame, inscriptionPrompt, state]);
+
   const isProductionReady = readinessWarnings.length === 0;
   const readinessItems = [
     {
       label: state.generatedSvgContent
-        ? generatedLayoutSignature === getLayoutSignature(inscriptionPrompt)
-          ? 'Inscription layout is up to date'
-          : 'Update the inscription layout after your latest changes'
+        ? 'Inscription layout is generated'
         : 'Generate your inscription layout',
-      ready: !!state.generatedSvgContent && generatedLayoutSignature === getLayoutSignature(inscriptionPrompt),
+      ready: !!state.generatedSvgContent,
       step: 5,
     },
     {
@@ -747,6 +780,7 @@ const App: React.FC = () => {
     setInscriptionPrompt('');
     setInscriptionGuidance('');
     setGeneratedLayoutSignature(null);
+    setGeneratedProofFrame(null);
     setGeneratedImage(null);
     setRealisticReferenceImage(null);
     setMemorialSourceImage(null);
@@ -781,6 +815,7 @@ const App: React.FC = () => {
     });
     setInscriptionPrompt(product.proofPrompt);
     setGeneratedLayoutSignature(null);
+    setGeneratedProofFrame(null);
     setProofSaved(false);
     setBasketAdded(false);
     setCurrentView('plaque');
@@ -1053,6 +1088,7 @@ const App: React.FC = () => {
                   showMaterialPrices={showMaterialPrices}
                   price={price}
                   readinessItems={readinessItems}
+                  layoutRegenNotice={layoutRegenNotice}
                   isProductionReady={isProductionReady}
                   basketAdded={basketAdded}
                   onGoToStep={setActiveStep}
