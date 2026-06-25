@@ -644,10 +644,14 @@ const prepareCloneForProduction = async (sourceSvg: SVGSVGElement, state: Plaque
   }
 };
 
+export const createCorelSvgText = async (sourceSvg: SVGSVGElement, state: PlaqueState) => {
+  const clone = await prepareCloneForProduction(sourceSvg, state);
+  return `<?xml version="1.0" encoding="UTF-8"?>\n` + new XMLSerializer().serializeToString(clone);
+};
+
 export const downloadCorelSvg = async (sourceSvg: SVGSVGElement, state: PlaqueState) => {
   try {
-    const clone = await prepareCloneForProduction(sourceSvg, state);
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` + new XMLSerializer().serializeToString(clone);
+    const xml = await createCorelSvgText(sourceSvg, state);
     const blob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(blob);
 

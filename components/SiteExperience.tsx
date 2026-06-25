@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import PlaquePreview from './PlaquePreview';
 import { MockOrder, ProductFamily, SiteView, getPriceBreakdown, materialStories, productFamilies } from '../services/commerce';
 import { PlaqueState } from '../types';
+import { createCorelSvgText } from '../services/exportService';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -133,6 +134,21 @@ const ensureSvgDocument = (content: string, state?: PlaqueState) => {
 
 const downloadSvgFile = (filename: string, content: string, state?: PlaqueState) => {
   downloadTextFile(filename, ensureSvgDocument(content, state), 'image/svg+xml');
+};
+
+const downloadRenderedProofSvg = (filename: string, sourceSvg: SVGSVGElement) => {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(sourceSvg)}`;
+  downloadTextFile(filename, xml, 'image/svg+xml');
+};
+
+const downloadProductionSvg = async (filename: string, sourceSvg: SVGSVGElement, state: PlaqueState) => {
+  try {
+    const xml = await createCorelSvgText(sourceSvg, state);
+    downloadTextFile(filename, xml, 'image/svg+xml');
+  } catch (error) {
+    console.error('Production SVG download failed.', error);
+    alert(`Production SVG download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 };
 
 type HomeCarouselItem = {
@@ -807,6 +823,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   const [order, setOrder] = useState<PaidOrder | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
+  const proofSvgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -878,7 +895,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
               : 'Your order has been created. If payment has completed, this page will update once Stripe confirms it.'}
           </p>
           <div className="commerce-order-proof">
-            <PlaquePreview state={order.plaqueState} activeStep={6} inscription={order.inscription} />
+            <PlaquePreview ref={proofSvgRef} state={order.plaqueState} activeStep={6} inscription={order.inscription} />
           </div>
         </div>
         <aside className="commerce-order-card">
@@ -912,15 +929,13 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
             <span>Production preparation</span>
             <span>Dispatch email follows</span>
           </div>
-          {order.proofPackage?.visualProofSvg && (
-            <button
-              type="button"
-              className="commerce-secondary"
-              onClick={() => downloadSvgFile(order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`, order.proofPackage!.visualProofSvg!, order.plaqueState)}
-            >
-              Download approved proof
-            </button>
-          )}
+          <button
+            type="button"
+            className="commerce-secondary"
+            onClick={() => proofSvgRef.current && downloadRenderedProofSvg(order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`, proofSvgRef.current)}
+          >
+            Download approved proof
+          </button>
           <button type="button" className="commerce-secondary" onClick={() => window.print()}>
             Print confirmation
           </button>
@@ -935,6 +950,7 @@ function AdminPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [adminError, setAdminError] = useState<string | null>(null);
+  const adminProofSvgRef = useRef<SVGSVGElement | null>(null);
   const selectedOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
 
   const loadOrders = async () => {
@@ -1020,7 +1036,7 @@ function AdminPage() {
                 <h2>{selectedOrder.id}</h2>
               </div>
               <div className="commerce-admin-proof">
-                <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
+                <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
               </div>
               <div className="commerce-admin-package">
                 <span>{selectedOrder.productTitle}</span>
@@ -1031,10 +1047,10 @@ function AdminPage() {
               <div className="commerce-admin-actions">
                 <button
                   type="button"
-                  disabled={!selectedOrder.proofPackage?.productionSvg}
-                  onClick={() => selectedOrder.proofPackage?.productionSvg && downloadSvgFile(
-                    selectedOrder.proofPackage.productionFilename || `${selectedOrder.id}-production-artwork.svg`,
-                    selectedOrder.proofPackage.productionSvg,
+                  disabled={!selectedOrder}
+                  onClick={() => adminProofSvgRef.current && downloadProductionSvg(
+                    selectedOrder.proofPackage?.productionFilename || `${selectedOrder.id}-production-artwork.svg`,
+                    adminProofSvgRef.current,
                     selectedOrder.plaqueState,
                   )}
                 >
@@ -1042,11 +1058,10 @@ function AdminPage() {
                 </button>
                 <button
                   type="button"
-                  disabled={!selectedOrder.proofPackage?.visualProofSvg}
-                  onClick={() => selectedOrder.proofPackage?.visualProofSvg && downloadSvgFile(
-                    selectedOrder.proofPackage.visualFilename || `${selectedOrder.id}-approved-proof.svg`,
-                    selectedOrder.proofPackage.visualProofSvg,
-                    selectedOrder.plaqueState,
+                  disabled={!selectedOrder}
+                  onClick={() => adminProofSvgRef.current && downloadRenderedProofSvg(
+                    selectedOrder.proofPackage?.visualFilename || `${selectedOrder.id}-approved-proof.svg`,
+                    adminProofSvgRef.current,
                   )}
                 >
                   Download approved proof
