@@ -9,7 +9,7 @@ import { generatePlaqueDesign, generateRealisticView, refinePlaqueWording, Gener
 import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
-import { MockOrder, ProductFamily, SiteView, getProductBySlug, makeMockOrder, productFamilies } from './services/commerce';
+import { DeliveryAddress, MockOrder, ProductFamily, SiteView, getProductBySlug, makeMockOrder, productFamilies } from './services/commerce';
 import { isBenchPlaqueFormat } from './services/plaqueRules';
 import { BENCH_SAFE_MARGIN_PERCENT } from './services/safeMargin';
 
@@ -724,7 +724,11 @@ const App: React.FC = () => {
       return;
     }
     setBasketAdded(true);
-    handleNavigate('checkout');
+    setActiveStep(6);
+    setCurrentView('plaque');
+    if (window.location.pathname !== '/design') {
+      window.history.pushState({}, '', '/design');
+    }
   };
 
   const handleNavigate = (view: SiteView, productSlug?: string) => {
@@ -786,12 +790,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleCreateMockOrder = async (customerName: string, customerEmail: string) => {
+  const handleCreateMockOrder = async (customerName: string, customerEmail: string, deliveryAddress?: DeliveryAddress) => {
     const visualProofSvg = svgRef.current?.outerHTML || state.generatedSvgContent || null;
     const order = makeMockOrder(state, inscriptionPrompt, selectedProduct.title, customerName, customerEmail, {
       productionSvg: state.generatedSvgContent,
       visualProofSvg,
-    });
+    }, deliveryAddress);
     let checkoutOrder = order;
     try {
       const response = await fetch('/api/stripe/checkout-session', {
@@ -804,6 +808,7 @@ const App: React.FC = () => {
           totalPence: Math.round(order.total * 100),
           origin: window.location.origin,
           uiMode: 'embedded',
+          deliveryAddress,
         }),
       });
       if (!response.ok) throw new Error(`Stripe checkout failed (${response.status})`);
@@ -1053,6 +1058,7 @@ const App: React.FC = () => {
                   onGoToStep={setActiveStep}
                   onSaveProof={handleSaveProof}
                   onAddToBasket={handleAddToBasket}
+                  onCreateMockOrder={handleCreateMockOrder}
                   onRealisticPreview={handleRealPreview}
                   realisticPreviewPrompt={realisticPreviewPrompt}
                   onRealisticPreviewPromptChange={setRealisticPreviewPrompt}

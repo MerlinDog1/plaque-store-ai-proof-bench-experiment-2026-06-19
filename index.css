@@ -283,6 +283,137 @@
   height: auto;
 }
 
+.proof-inline-checkout {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.proof-approval-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: flex-start;
+  gap: 0.7rem;
+  border: 1px solid rgba(47, 127, 105, 0.24);
+  border-radius: 10px;
+  background: #edf7f1;
+  padding: 0.78rem;
+  color: #173c2d;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.proof-approval-row input {
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  accent-color: #2f7f69;
+}
+
+.proof-address-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+.proof-address-grid label {
+  display: grid;
+  gap: 0.28rem;
+  color: #5c6b63;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.proof-address-grid__wide {
+  grid-column: 1 / -1;
+}
+
+.proof-address-grid input {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid rgba(84, 72, 52, 0.16);
+  border-radius: 8px;
+  background: #fffdf7;
+  padding: 0 0.72rem;
+  color: #17231f;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0;
+  outline: none;
+  text-transform: none;
+}
+
+.proof-address-grid input:focus {
+  border-color: #c6932e;
+  box-shadow: 0 0 0 4px rgba(185, 130, 53, 0.16);
+}
+
+.proof-checkout-error {
+  border: 1px solid rgba(155, 53, 39, 0.2);
+  border-radius: 8px;
+  background: #fff0e9;
+  padding: 0.72rem;
+  color: #9b3527 !important;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.proof-embedded-checkout {
+  display: grid;
+  gap: 0.72rem;
+  border: 1px solid rgba(47, 127, 105, 0.22);
+  border-radius: 10px;
+  background: #f7fbf8;
+  padding: 0.76rem;
+}
+
+.proof-embedded-checkout__head {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.proof-embedded-checkout__head strong {
+  color: #173c2d;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.proof-embedded-checkout__head span,
+.proof-embedded-checkout > span {
+  color: #547064;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.proof-embedded-checkout__mount {
+  min-height: 420px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+@media (max-width: 420px) {
+  .proof-address-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .proof-payment-pill {
+    border-radius: 10px;
+  }
+
+  .proof-embedded-checkout {
+    padding: 0.55rem;
+  }
+
+  .proof-embedded-checkout__mount {
+    min-height: 500px;
+  }
+}
+
 .proof-save-later-card {
   display: grid;
   gap: 0.75rem;

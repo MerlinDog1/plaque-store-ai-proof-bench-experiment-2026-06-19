@@ -22,6 +22,7 @@ import type { GenerationPhase } from '../services/geminiService';
 import { BENCH_SAFE_MARGIN_PERCENT, DEFAULT_SAFE_MARGIN_PERCENT, SAFE_MARGIN_PRESETS, getSafeMarginMm, getSafeMarginsMm, getSafeMarginPercent } from '../services/safeMargin';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { estimatePlaqueBasePrice, estimateWoodAddOn } from '../services/pricing';
+import type { DeliveryAddress, MockOrder } from '../services/commerce';
 
 const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
@@ -215,6 +216,7 @@ interface Props {
   onGoToStep: (step: number) => void;
   onSaveProof: () => void;
   onAddToBasket: () => void;
+  onCreateMockOrder: (name: string, email: string, deliveryAddress?: DeliveryAddress) => Promise<MockOrder>;
   onRealisticPreview: () => void;
   realisticPreviewPrompt: string;
   onRealisticPreviewPromptChange: (prompt: string) => void;
@@ -261,6 +263,45 @@ interface GeneratedTextControl {
 
 const fieldClass =
   'control-input w-full min-h-[48px] rounded-lg border px-4 py-3 text-base text-[#1b231f] placeholder:text-[#9b9284] outline-none transition focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20 disabled:bg-[#eee4d4] disabled:text-[#8a8275]';
+
+type EmbeddedCheckoutInstance = {
+  mount: (selectorOrElement: string | HTMLElement) => void;
+  destroy?: () => void;
+};
+
+type StripeBrowser = {
+  initEmbeddedCheckout: (options: { clientSecret: string }) => Promise<EmbeddedCheckoutInstance>;
+};
+
+declare global {
+  interface Window {
+    Stripe?: (publishableKey: string) => StripeBrowser | null;
+  }
+}
+
+let stripeJsPromise: Promise<void> | null = null;
+
+const loadStripeJs = () => {
+  if (typeof window === 'undefined') return Promise.reject(new Error('Stripe.js needs a browser.'));
+  if (window.Stripe) return Promise.resolve();
+  if (!stripeJsPromise) {
+    stripeJsPromise = new Promise<void>((resolve, reject) => {
+      const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://js.stripe.com/v3/"]');
+      if (existingScript) {
+        existingScript.addEventListener('load', () => resolve(), { once: true });
+        existingScript.addEventListener('error', () => reject(new Error('Stripe.js failed to load.')), { once: true });
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://js.stripe.com/v3/';
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Stripe.js failed to load.'));
+      document.head.appendChild(script);
+    });
+  }
+  return stripeJsPromise;
+};
 
 const choiceClass = (active: boolean) =>
   `control-choice studio-press min-h-[54px] rounded-lg border px-4 py-3 text-left text-sm font-black transition active:scale-[0.98] ${
@@ -401,6 +442,7 @@ export const Controls: React.FC<Props> = ({
   onGoToStep,
   onSaveProof,
   onAddToBasket,
+  onCreateMockOrder,
   onRealisticPreview,
   realisticPreviewPrompt,
   onRealisticPreviewPromptChange,
@@ -426,6 +468,22 @@ export const Controls: React.FC<Props> = ({
   const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
   const [instantStyleVariant, setInstantStyleVariant] = useState(1);
+  const [proofApproved, setProofApproved] = useState(false);
+  const [checkoutName, setCheckoutName] = useState('Demo Customer');
+  const [checkoutEmail, setCheckoutEmail] = useState('customer@example.com');
+  const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
+    line1: '',
+    line2: '',
+    town: '',
+    postcode: '',
+    country: 'United Kingdom',
+  });
+  const [checkoutOrder, setCheckoutOrder] = useState<MockOrder | null>(null);
+  const [checkoutSubmitting, setCheckoutSubmitting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [embeddedStatus, setEmbeddedStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [embeddedError, setEmbeddedError] = useState<string | null>(null);
+  const embeddedMountRef = useRef<HTMLDivElement | null>(null);
   const isIterating = !!state.generatedSvgContent;
   const portraitPreviewUrl = state.memorialImageMethod === MemorialImageMethod.UvPrinted
     ? state.memorialImageSourceUrl || state.memorialImagePreviewUrl
@@ -765,6 +823,98 @@ export const Controls: React.FC<Props> = ({
   const woodAddOnPrice = estimateWoodAddOn(state);
   const baseProofPrice = Math.max(0, price - (state.wood ? woodAddOnPrice : 0));
   const turnaroundEstimate = getTurnaroundEstimate(state);
+  const requiredAddressComplete = Boolean(
+    checkoutName.trim()
+      && checkoutEmail.trim().includes('@')
+      && deliveryAddress.line1.trim()
+      && deliveryAddress.town.trim()
+      && deliveryAddress.postcode.trim()
+      && deliveryAddress.country.trim()
+  );
+  const checkoutReady = isProductionReady && proofApproved && requiredAddressComplete && !checkoutSubmitting;
+  const embeddedClientSecret = checkoutOrder?.stripeSimulation.embeddedClientSecret;
+  const stripePublishableKey = checkoutOrder?.stripeSimulation.publishableKey;
+
+  const updateDeliveryAddress = (key: keyof DeliveryAddress, value: string) => {
+    setDeliveryAddress(prev => ({ ...prev, [key]: value }));
+    setCheckoutError(null);
+  };
+
+  const handleProofCheckoutSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!isProductionReady) {
+      setCheckoutError('Finish the proof checklist before payment.');
+      return;
+    }
+    if (!proofApproved) {
+      setCheckoutError('Approve the proof before payment.');
+      return;
+    }
+    if (!requiredAddressComplete) {
+      setCheckoutError('Add the customer details and delivery address before payment.');
+      return;
+    }
+    setCheckoutSubmitting(true);
+    setCheckoutError(null);
+    setCheckoutOrder(null);
+    setEmbeddedStatus('idle');
+    setEmbeddedError(null);
+    try {
+      const order = await onCreateMockOrder(checkoutName.trim(), checkoutEmail.trim(), {
+        line1: deliveryAddress.line1.trim(),
+        line2: deliveryAddress.line2.trim(),
+        town: deliveryAddress.town.trim(),
+        postcode: deliveryAddress.postcode.trim().toUpperCase(),
+        country: deliveryAddress.country.trim(),
+      });
+      setCheckoutOrder(order);
+      onAddToBasket();
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : 'Could not prepare secure payment.');
+    } finally {
+      setCheckoutSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isProductionReady && proofApproved) setProofApproved(false);
+  }, [isProductionReady, proofApproved]);
+
+  useEffect(() => {
+    if (!checkoutOrder || !embeddedClientSecret || !stripePublishableKey || !embeddedMountRef.current) {
+      return;
+    }
+
+    let mounted = true;
+    let embeddedCheckout: EmbeddedCheckoutInstance | null = null;
+    setEmbeddedStatus('loading');
+    setEmbeddedError(null);
+
+    loadStripeJs()
+      .then(async () => {
+        const stripe = window.Stripe?.(stripePublishableKey);
+        if (!stripe) throw new Error('Stripe.js did not initialise.');
+        const checkout = await stripe.initEmbeddedCheckout({ clientSecret: embeddedClientSecret });
+        if (!mounted) {
+          checkout.destroy?.();
+          return;
+        }
+        embeddedCheckout = checkout;
+        checkout.mount(embeddedMountRef.current!);
+        setEmbeddedStatus('ready');
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        setEmbeddedStatus('error');
+        setEmbeddedError(error instanceof Error ? error.message : 'Embedded Stripe checkout could not be loaded.');
+      });
+
+    return () => {
+      mounted = false;
+      embeddedCheckout?.destroy?.();
+      if (embeddedMountRef.current) embeddedMountRef.current.replaceChildren();
+    };
+  }, [checkoutOrder, embeddedClientSecret, stripePublishableKey]);
 
   const updateGeneratedTextLine = (lineIndex: number, changes: Partial<Pick<GeneratedTextControl, 'text' | 'fontFamily' | 'fontSize' | 'fontWeight'>>) => {
     if (!state.generatedSvgContent || typeof DOMParser === 'undefined') return;
@@ -2182,20 +2332,76 @@ export const Controls: React.FC<Props> = ({
                 </div>
               </div>
             )}
-            <div className="mt-4 grid gap-3">
+            <form className="proof-inline-checkout mt-4" onSubmit={handleProofCheckoutSubmit}>
+              <label className="proof-approval-row">
+                <input
+                  type="checkbox"
+                  checked={proofApproved}
+                  disabled={!isProductionReady}
+                  onChange={(event) => {
+                    setProofApproved(event.target.checked);
+                    setCheckoutError(null);
+                  }}
+                />
+                <span>I have checked the wording, layout, material, size and fixings, and approve this proof for production.</span>
+              </label>
+              <div className="proof-address-grid">
+                <label>
+                  Name
+                  <input value={checkoutName} onChange={(event) => setCheckoutName(event.target.value)} autoComplete="name" />
+                </label>
+                <label>
+                  Email
+                  <input value={checkoutEmail} onChange={(event) => setCheckoutEmail(event.target.value)} type="email" autoComplete="email" />
+                </label>
+                <label className="proof-address-grid__wide">
+                  Delivery address
+                  <input value={deliveryAddress.line1} onChange={(event) => updateDeliveryAddress('line1', event.target.value)} autoComplete="shipping address-line1" placeholder="Address line 1" />
+                </label>
+                <label className="proof-address-grid__wide">
+                  Address line 2
+                  <input value={deliveryAddress.line2} onChange={(event) => updateDeliveryAddress('line2', event.target.value)} autoComplete="shipping address-line2" placeholder="Optional" />
+                </label>
+                <label>
+                  Town / city
+                  <input value={deliveryAddress.town} onChange={(event) => updateDeliveryAddress('town', event.target.value)} autoComplete="shipping address-level2" />
+                </label>
+                <label>
+                  Postcode
+                  <input value={deliveryAddress.postcode} onChange={(event) => updateDeliveryAddress('postcode', event.target.value)} autoComplete="shipping postal-code" />
+                </label>
+                <label className="proof-address-grid__wide">
+                  Country
+                  <input value={deliveryAddress.country} onChange={(event) => updateDeliveryAddress('country', event.target.value)} autoComplete="shipping country-name" />
+                </label>
+              </div>
+              {checkoutError && <div className="proof-checkout-error">{checkoutError}</div>}
               <div className="proof-payment-pill">
                 <button
-                  onClick={onAddToBasket}
-                  disabled={!isProductionReady}
+                  type="submit"
+                  disabled={!checkoutReady}
                   className="proof-checkout-button studio-press min-h-[58px] w-full px-5 text-sm font-black disabled:cursor-not-allowed disabled:shadow-none"
                 >
-                  {basketAdded ? 'Added to basket' : isProductionReady ? 'Checkout' : 'Complete checklist to checkout'}
+                  {checkoutSubmitting ? 'Preparing secure checkout...' : checkoutOrder ? 'Refresh secure checkout' : basketAdded ? 'Secure checkout ready' : 'Approve proof and pay'}
                 </button>
                 <div className="proof-stripe-note" aria-label="Secure test checkout powered by Stripe">
                   <span>Secure card checkout</span>
                   <img src="/site-images/powered-by-stripe-black.svg" alt="Powered by Stripe" loading="lazy" />
                 </div>
               </div>
+              {checkoutOrder && (
+                <div className="proof-embedded-checkout" aria-live="polite">
+                  <div className="proof-embedded-checkout__head">
+                    <strong>Secure Stripe checkout</strong>
+                    <span>Card details stay inside Stripe. Delivery details are attached to the order.</span>
+                  </div>
+                  {embeddedStatus === 'loading' && <span>Loading secure payment form...</span>}
+                  {embeddedStatus === 'error' && <span className="proof-checkout-error">{embeddedError}</span>}
+                  <div ref={embeddedMountRef} className="proof-embedded-checkout__mount" />
+                </div>
+              )}
+            </form>
+            <div className="mt-3 grid gap-3">
               <div className="proof-save-later-card">
                 <div>
                   <span>Proof PDF and return link</span>
@@ -2238,7 +2444,7 @@ export const Controls: React.FC<Props> = ({
 
           {basketAdded && (
             <div className="rounded-lg border border-[#2f7f69]/35 bg-[#151f1b] p-4 text-sm font-bold leading-6 text-[#1f755f]">
-              Added to basket. Continue through checkout to open the Stripe test payment step.
+              Proof approved and checkout prepared. Complete the secure Stripe payment on this page.
             </div>
           )}
 

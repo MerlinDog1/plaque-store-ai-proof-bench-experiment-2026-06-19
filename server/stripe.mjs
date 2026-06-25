@@ -24,6 +24,7 @@ export const createStripeCheckoutSession = async (payload) => {
   const totalPence = Math.round(Number(payload.totalPence || 0));
   const origin = String(payload.origin || "").replace(/\/$/, "");
   const uiMode = payload.uiMode === "embedded" ? "embedded" : "hosted";
+  const deliveryAddress = payload.deliveryAddress && typeof payload.deliveryAddress === "object" ? payload.deliveryAddress : {};
 
   if (!orderId) throw new Error("Missing order ID for Stripe checkout.");
   if (!origin) throw new Error("Missing origin for Stripe checkout.");
@@ -53,6 +54,16 @@ export const createStripeCheckoutSession = async (payload) => {
   params.set("metadata[order_id]", orderId);
   params.set("metadata[source]", "instaplaque-local-test");
   params.set("metadata[payload_version]", "2026-06-24");
+  for (const [key, value] of Object.entries({
+    delivery_line1: deliveryAddress.line1,
+    delivery_line2: deliveryAddress.line2,
+    delivery_town: deliveryAddress.town,
+    delivery_postcode: deliveryAddress.postcode,
+    delivery_country: deliveryAddress.country,
+  })) {
+    const text = String(value || "").trim();
+    if (text) params.set(`metadata[${key}]`, text.slice(0, 500));
+  }
 
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",

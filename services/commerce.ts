@@ -51,11 +51,20 @@ export interface PriceBreakdown {
   quoteReasons: string[];
 }
 
+export interface DeliveryAddress {
+  line1: string;
+  line2: string;
+  town: string;
+  postcode: string;
+  country: string;
+}
+
 export interface MockOrder {
   id: string;
   createdAt: string;
   customerName: string;
   customerEmail: string;
+  deliveryAddress?: DeliveryAddress;
   productTitle: string;
   status:
     | 'proof-approved'
@@ -372,6 +381,7 @@ export function makeMockOrder(
   customerName: string,
   customerEmail: string,
   artifacts: { productionSvg?: string | null; visualProofSvg?: string | null } = {},
+  deliveryAddress?: DeliveryAddress,
 ): MockOrder {
   const priceBreakdown = getPriceBreakdown(state, inscription);
   const stamp = Date.now().toString().slice(-6);
@@ -383,6 +393,7 @@ export function makeMockOrder(
     createdAt,
     customerName,
     customerEmail,
+    deliveryAddress,
     productTitle,
     status: needsCheck ? 'needs-check' : 'hub-queued',
     paymentStatus: needsCheck ? 'requires-check' : 'test-paid',
