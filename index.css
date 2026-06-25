@@ -1865,9 +1865,10 @@
 
 .commerce-embedded-checkout__mount {
   min-height: 520px;
-  overflow: hidden;
+  overflow: auto;
   border-radius: 8px;
   background: #ffffff;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media (min-width: 1181px) {
@@ -1928,6 +1929,7 @@
   .commerce-embedded-checkout__mount {
     min-height: 0;
     height: 100%;
+    overflow: auto;
   }
 }
 
