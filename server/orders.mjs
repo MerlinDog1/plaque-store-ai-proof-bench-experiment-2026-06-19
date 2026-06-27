@@ -330,6 +330,35 @@ export const attachStripeSessionToOrder = async (orderId, session) => {
   });
 };
 
+export const attachVisualProofToOrder = async (orderId, payload = {}) => {
+  const order = await getOrderById(orderId);
+  if (!order) throw new Error(`Order ${orderId} was not found.`);
+
+  const sessionId = String(payload.stripeCheckoutSessionId || "").trim();
+  if (order.stripeCheckoutSessionId && sessionId !== order.stripeCheckoutSessionId) {
+    throw new Error("Proof image did not match the checkout session.");
+  }
+
+  const visualProofPng = String(payload.visualProofPng || "").trim();
+  const visualProofSvg = String(payload.visualProofSvg || "").trim();
+  if (!visualProofPng.startsWith("data:image/png;base64,") && !/^[a-z0-9+/]+=*$/i.test(visualProofPng)) {
+    throw new Error("Proof image must be a PNG data URL or base64 PNG.");
+  }
+
+  return saveOrder({
+    ...order,
+    proofPackage: {
+      ...(order.proofPackage || {}),
+      visualProofSvg: visualProofSvg || order.proofPackage?.visualProofSvg || null,
+      visualProofPng,
+    },
+    events: [
+      { type: "proof_image_attached", label: "Browser-rendered proof image attached", at: nowIso() },
+      ...(order.events || []),
+    ],
+  });
+};
+
 export const getOrderById = async (orderId) => {
   const supabase = getSupabaseServiceClient();
   if (supabase) {

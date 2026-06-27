@@ -877,6 +877,26 @@ const App: React.FC = () => {
       const payload = await response.json();
       const session = payload.session;
       if (session?.id && (session?.url || session?.clientSecret)) {
+        if (proofSourceSvg) {
+          fireAndForget(
+            withTimeout(svgToProofPngBase64(proofSourceSvg), 8000, 'Proof image capture')
+              .then((proofImageBase64) => fetch(`/api/orders/${encodeURIComponent(order.id)}/proof-image`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  stripeCheckoutSessionId: session.id,
+                  visualProofSvg,
+                  visualProofPng: `data:image/png;base64,${proofImageBase64.replace(/^data:image\/png;base64,/, '')}`,
+                }),
+              }))
+              .then((proofResponse) => {
+                if (!proofResponse.ok) throw new Error(`Proof image upload failed (${proofResponse.status})`);
+              }),
+            (error) => {
+              console.warn('Browser-rendered order proof image was not attached.', error);
+            },
+          );
+        }
         checkoutOrder = {
           ...order,
           status: order.status === 'needs-check' ? order.status : 'checkout-started',

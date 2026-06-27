@@ -44,6 +44,7 @@ const {
 } = await import("./server/stripe.mjs");
 const {
   attachStripeSessionToOrder,
+  attachVisualProofToOrder,
   createExternalOrder,
   createPendingOrder,
   getOrderById,
@@ -338,6 +339,19 @@ export const handleRequest = async (req, res) => {
       const message = error instanceof Error ? error.message : "Could not load proof image.";
       res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
       res.end(message);
+    }
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname.match(/^\/api\/orders\/[^/]+\/proof-image$/)) {
+    try {
+      const orderId = decodeURIComponent(url.pathname.match(/^\/api\/orders\/([^/]+)\/proof-image$/)?.[1] || "");
+      const payload = JSON.parse(await readBody(req));
+      const order = await attachVisualProofToOrder(orderId, payload);
+      sendJson(res, 200, { ok: true, order });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not attach proof image.";
+      sendJson(res, 400, { error: message });
     }
     return;
   }
