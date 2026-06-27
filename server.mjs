@@ -283,34 +283,16 @@ export const handleRequest = async (req, res) => {
       const orderId = decodeURIComponent(url.pathname.match(/^\/api\/orders\/([^/]+)\/proof-image\.png$/)?.[1] || "");
       const order = await getOrderById(orderId);
       const image = String(order?.proofPackage?.visualProofPng || "").replace(/^data:image\/png;base64,/, "");
-      if (!order || (!image && !order?.proofPackage?.visualProofSvg)) {
+      if (!order || !image) {
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
         res.end("Proof image not found");
         return;
       }
-      if (image) {
-        res.writeHead(200, {
-          "Content-Type": "image/png",
-          "Cache-Control": "public, max-age=86400",
-        });
-        res.end(Buffer.from(image, "base64"));
-        return;
-      }
-      try {
-        const body = await svgToPngBuffer(prepareStoredProofSvgForRaster(order));
-        res.writeHead(200, {
-          "Content-Type": "image/png",
-          "Cache-Control": "public, max-age=86400",
-        });
-        res.end(body);
-      } catch {
-        const svg = prepareStoredProofSvgForRaster(order);
-        res.writeHead(200, {
-          "Content-Type": "image/svg+xml; charset=utf-8",
-          "Cache-Control": "public, max-age=86400",
-        });
-        res.end(svg);
-      }
+      res.writeHead(200, {
+        "Content-Type": "image/png",
+        "Cache-Control": "public, max-age=86400",
+      });
+      res.end(Buffer.from(image, "base64"));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not load proof image.";
       res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });

@@ -2205,6 +2205,21 @@
   border-radius: 8px;
 }
 
+.commerce-order-proof__image,
+.admin-console__proof-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.commerce-order-proof__pending {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  color: #667085;
+  font-weight: 800;
+}
+
 .commerce-order-card,
 .commerce-admin-detail,
 .commerce-admin-timeline {

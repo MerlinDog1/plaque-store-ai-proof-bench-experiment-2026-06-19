@@ -53,6 +53,7 @@ type PaidOrder = {
   proofPackage?: {
     productionSvg?: string | null;
     visualProofSvg?: string | null;
+    visualProofPng?: string | null;
     productionFilename?: string;
     visualFilename?: string;
     lockedAt?: string;
@@ -181,6 +182,9 @@ const downloadRenderedProofSvg = (filename: string, sourceSvg: SVGSVGElement) =>
 };
 
 const downloadOrderProofPng = async (order: PaidOrder) => {
+  if (!order.proofPackage?.visualProofPng) {
+    throw new Error('Canonical approved proof image is not available.');
+  }
   const response = await fetch(`/api/orders/${encodeURIComponent(order.id)}/proof-image.png`);
   if (!response.ok) throw new Error(`Could not download proof image (${response.status}).`);
   const blob = await response.blob();
@@ -195,6 +199,9 @@ const downloadOrderProofPng = async (order: PaidOrder) => {
 };
 
 const asPdfFilename = (filename: string) => filename.replace(/\.[^.]+$/, '') + '.pdf';
+
+const orderProofImageUrl = (order: Pick<PaidOrder, 'id'>) =>
+  `/api/orders/${encodeURIComponent(order.id)}/proof-image.png`;
 
 type HomeCarouselItem = {
   id: string;
@@ -881,8 +888,8 @@ function CheckoutPage({
 function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   const [order, setOrder] = useState<PaidOrder | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [proofReady, setProofReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const proofSvgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -915,6 +922,35 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!order) return;
+    let cancelled = false;
+    let attempt = 0;
+
+    const checkProof = async () => {
+      if (!order.proofPackage?.visualProofPng) return;
+      attempt += 1;
+      try {
+        const response = await fetch(orderProofImageUrl(order), { cache: 'no-store' });
+        if (!cancelled && response.ok && response.headers.get('content-type')?.includes('image/png')) {
+          setProofReady(true);
+          return;
+        }
+      } catch {
+        // The proof image may still be attaching immediately after checkout.
+      }
+      if (!cancelled && attempt < 8) {
+        window.setTimeout(checkProof, 1000);
+      }
+    };
+
+    setProofReady(false);
+    checkProof();
+    return () => {
+      cancelled = true;
+    };
+  }, [order?.id]);
 
   if (status === 'loading') {
     return (
@@ -956,7 +992,15 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
                 : 'Your order has been created. If payment has completed, this page will update once Stripe confirms it.'}
           </p>
           <div className="commerce-order-proof">
-            <PlaquePreview ref={proofSvgRef} state={order.plaqueState} activeStep={6} inscription={order.inscription} />
+            {order.proofPackage?.visualProofPng && proofReady ? (
+              <img
+                src={`${orderProofImageUrl(order)}?v=${encodeURIComponent(order.updatedAt || order.id)}`}
+                alt="Approved plaque proof"
+                className="commerce-order-proof__image"
+              />
+            ) : (
+              <div className="commerce-order-proof__pending">Loading approved proof...</div>
+            )}
           </div>
         </div>
         <aside className="commerce-order-card">
@@ -995,7 +1039,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
             className="commerce-secondary"
             onClick={() => downloadOrderProofPng(order).catch((downloadError) => {
               console.error('Proof PNG download failed.', downloadError);
-              if (proofSvgRef.current) downloadRenderedProofSvg(order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`, proofSvgRef.current);
+              window.alert('The approved proof image is still being prepared. Please try again in a few seconds.');
             })}
           >
             Download approved proof
@@ -1203,7 +1247,18 @@ function AdminPage() {
                 <strong>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</strong>
               </div>
               <div className="admin-console__proof">
-                <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
+                {selectedOrder.proofPackage?.visualProofPng ? (
+                  <img
+                    src={`${orderProofImageUrl(selectedOrder)}?v=${encodeURIComponent(selectedOrder.updatedAt || selectedOrder.id)}`}
+                    alt="Approved plaque proof"
+                    className="admin-console__proof-image"
+                  />
+                ) : (
+                  <div className="commerce-order-proof__pending">Canonical approved proof image unavailable</div>
+                )}
+                <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+                  <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
+                </div>
               </div>
               <div className="admin-console__data-grid">
                 <div><span>Product</span><strong>{selectedOrder.productTitle}</strong></div>
@@ -1228,10 +1283,10 @@ function AdminPage() {
                 <button
                   type="button"
                   disabled={!selectedOrder}
-                  onClick={() => adminProofSvgRef.current && downloadRenderedProofSvg(
-                    selectedOrder.proofPackage?.visualFilename || `${selectedOrder.id}-approved-proof.svg`,
-                    adminProofSvgRef.current,
-                  )}
+                  onClick={() => downloadOrderProofPng(selectedOrder).catch((downloadError) => {
+                    console.error('Approved proof PNG download failed.', downloadError);
+                    window.alert('The approved proof image is not available yet. Please try again in a few seconds.');
+                  })}
                 >
                   Download approved proof
                 </button>

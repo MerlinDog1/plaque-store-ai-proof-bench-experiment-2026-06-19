@@ -851,7 +851,11 @@ const App: React.FC = () => {
   const handleCreateMockOrder = async (customerName: string, customerEmail: string, deliveryAddress?: DeliveryAddress, proofSvg?: SVGSVGElement | null) => {
     const proofSourceSvg = proofSvg || svgRef.current;
     const visualProofSvg = proofSourceSvg?.outerHTML || state.generatedSvgContent || null;
-    const visualProofPng: string | null = null;
+    if (!proofSourceSvg) {
+      throw new Error('The approved proof is not ready. Please return to the proof step and try again.');
+    }
+    const proofImageBase64 = await withTimeout(svgToProofPngBase64(proofSourceSvg), 20000, 'Approved proof capture');
+    const visualProofPng = `data:image/png;base64,${proofImageBase64.replace(/^data:image\/png;base64,/, '')}`;
     const order = makeMockOrder(state, inscriptionPrompt, selectedProduct.title, customerName, customerEmail, {
       productionSvg: state.generatedSvgContent,
       visualProofSvg,
@@ -877,26 +881,6 @@ const App: React.FC = () => {
       const payload = await response.json();
       const session = payload.session;
       if (session?.id && (session?.url || session?.clientSecret)) {
-        if (proofSourceSvg) {
-          fireAndForget(
-            withTimeout(svgToProofPngBase64(proofSourceSvg), 8000, 'Proof image capture')
-              .then((proofImageBase64) => fetch(`/api/orders/${encodeURIComponent(order.id)}/proof-image`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  stripeCheckoutSessionId: session.id,
-                  visualProofSvg,
-                  visualProofPng: `data:image/png;base64,${proofImageBase64.replace(/^data:image\/png;base64,/, '')}`,
-                }),
-              }))
-              .then((proofResponse) => {
-                if (!proofResponse.ok) throw new Error(`Proof image upload failed (${proofResponse.status})`);
-              }),
-            (error) => {
-              console.warn('Browser-rendered order proof image was not attached.', error);
-            },
-          );
-        }
         checkoutOrder = {
           ...order,
           status: order.status === 'needs-check' ? order.status : 'checkout-started',
