@@ -42,12 +42,12 @@ const MATERIAL_NOTES: Record<Material, string> = {
 };
 
 const MATERIAL_SWATCH: Record<Material, string> = {
-  [Material.BrushedBrass]: "url('/materials/brushed-brass-clean.png') center/cover",
-  [Material.OrbitalBrassMattLacquer]: "url('/materials/orbital-brass-clean.png') center/cover",
-  [Material.PolishedBrass]: "url('/materials/polished-brass-clean.png') center/cover",
-  [Material.AgedBrass]: "linear-gradient(rgba(80,55,29,.18),rgba(80,55,29,.18)),url('/materials/mid-aged-brass.png') center/cover",
+  [Material.BrushedBrass]: "url('/materials/optimized/brushed-brass-clean.webp') center/cover",
+  [Material.OrbitalBrassMattLacquer]: "url('/materials/optimized/orbital-brass-clean.webp') center/cover",
+  [Material.PolishedBrass]: "url('/materials/optimized/polished-brass-clean.webp') center/cover",
+  [Material.AgedBrass]: "linear-gradient(rgba(80,55,29,.18),rgba(80,55,29,.18)),url('/materials/optimized/mid-aged-brass.webp') center/cover",
   [Material.BrushedSteel]: 'repeating-linear-gradient(0deg,rgba(255,255,255,.22) 0 1px,rgba(55,67,75,.14) 1px 2px,transparent 2px 5px),linear-gradient(135deg,#7a858b,#c7d0d4,#68727a)',
-  [Material.PolishedSteel]: "url('/materials/polished-stainless-clean.png') center/cover",
+  [Material.PolishedSteel]: "url('/materials/optimized/polished-stainless-clean.webp') center/cover",
 };
 
 const MATERIAL_ORDER: Material[] = [

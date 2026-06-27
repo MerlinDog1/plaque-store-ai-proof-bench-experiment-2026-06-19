@@ -58,11 +58,11 @@ const materialTone: Record<Material, { face: number; side: number; roughness: nu
 };
 
 const materialTexturePath: Partial<Record<Material, string>> = {
-  [Material.BrushedBrass]: '/materials/brushed-brass-clean.png',
-  [Material.OrbitalBrassMattLacquer]: '/materials/orbital-brass-clean.png',
-  [Material.PolishedBrass]: '/materials/polished-brass-clean.png',
-  [Material.AgedBrass]: '/materials/mid-aged-brass.png',
-  [Material.PolishedSteel]: '/materials/polished-stainless-clean.png',
+  [Material.BrushedBrass]: '/materials/optimized/brushed-brass-clean.webp',
+  [Material.OrbitalBrassMattLacquer]: '/materials/optimized/orbital-brass-clean.webp',
+  [Material.PolishedBrass]: '/materials/optimized/polished-brass-clean.webp',
+  [Material.AgedBrass]: '/materials/optimized/mid-aged-brass.webp',
+  [Material.PolishedSteel]: '/materials/optimized/polished-stainless-clean.webp',
 };
 
 const stepFaceText: Record<number, string[]> = {
@@ -221,8 +221,8 @@ function inlineComputedSvgStyles(source: SVGSVGElement, clone: SVGSVGElement) {
 
 function makeWoodTexture(tone: PlaqueState['woodTone']) {
   const texturePath = tone === 'dark'
-    ? '/materials/wood-dark-mahogany-veneer.webp'
-    : '/materials/wood-light-oak-veneer.webp';
+    ? '/materials/optimized/wood-dark-mahogany-veneer.webp'
+    : '/materials/optimized/wood-light-oak-veneer.webp';
 
   if (!woodImageCache.has(texturePath)) {
     woodImageCache.set(texturePath, new Promise((resolve) => {

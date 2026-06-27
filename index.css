@@ -1088,12 +1088,12 @@
 }
 
 .commerce-product-visual--brass .commerce-product-plaque {
-  background-image: url('/materials/brushed-brass-clean.png');
+  background-image: url('/materials/optimized/brushed-brass-clean.webp');
   background-size: cover;
 }
 
 .commerce-product-visual--stainless .commerce-product-plaque {
-  background-image: url('/materials/brushed-stainless-satin.png');
+  background-image: url('/materials/optimized/brushed-stainless-satin.webp');
   background-size: cover;
 }
 
@@ -1102,7 +1102,7 @@
 }
 
 .commerce-product-visual--wood .commerce-product-plaque {
-  background-image: url('/materials/wood-light-oak-veneer.webp');
+  background-image: url('/materials/optimized/wood-light-oak-veneer.webp');
   background-size: cover;
 }
 

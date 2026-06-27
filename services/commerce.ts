@@ -269,7 +269,7 @@ export const productFamilies: ProductFamily[] = [
 export const materialStories = [
   {
     title: 'Brushed brass',
-    image: '/materials/brushed-brass-clean.png',
+    image: '/materials/optimized/brushed-brass-clean.webp',
     thumbnail: '/materials/thumbs/brushed-brass.webp',
     sliderImage: '/materials/slider/brushed-brass.webp',
     family: 'Brass',
@@ -278,7 +278,7 @@ export const materialStories = [
   },
   {
     title: 'Polished brass',
-    image: '/materials/polished-brass-clean.png',
+    image: '/materials/optimized/polished-brass-clean.webp',
     thumbnail: '/materials/thumbs/polished-brass.webp',
     sliderImage: '/materials/slider/polished-brass.webp',
     family: 'Brass',
@@ -287,7 +287,7 @@ export const materialStories = [
   },
   {
     title: 'Mid aged brass',
-    image: '/materials/mid-aged-brass.png',
+    image: '/materials/optimized/mid-aged-brass.webp',
     thumbnail: '/materials/thumbs/aged-brass.webp',
     sliderImage: '/materials/slider/aged-brass.webp',
     family: 'Brass',
@@ -296,7 +296,7 @@ export const materialStories = [
   },
   {
     title: 'Orbital brass',
-    image: '/materials/orbital-brass-clean.png',
+    image: '/materials/optimized/orbital-brass-clean.webp',
     thumbnail: '/materials/thumbs/orbital-brass.webp',
     sliderImage: '/materials/slider/orbital-brass.webp',
     family: 'Brass',
@@ -305,7 +305,7 @@ export const materialStories = [
   },
   {
     title: 'Brushed stainless steel',
-    image: '/materials/brushed-stainless-satin.png',
+    image: '/materials/optimized/brushed-stainless-satin.webp',
     thumbnail: '/materials/thumbs/brushed-stainless.webp',
     sliderImage: '/materials/slider/brushed-stainless.webp',
     family: 'Stainless',
@@ -314,7 +314,7 @@ export const materialStories = [
   },
   {
     title: 'Mirror stainless',
-    image: '/materials/polished-stainless-clean.png',
+    image: '/materials/optimized/polished-stainless-clean.webp',
     thumbnail: '/materials/thumbs/polished-stainless.webp',
     sliderImage: '/materials/slider/polished-stainless.webp',
     family: 'Stainless',
@@ -323,7 +323,7 @@ export const materialStories = [
   },
   {
     title: 'Dark wood backing',
-    image: '/materials/wood-dark-mahogany-veneer.webp',
+    image: '/materials/optimized/wood-dark-mahogany-veneer.webp',
     thumbnail: '/materials/thumbs/dark-wood.webp',
     sliderImage: '/materials/slider/dark-wood.webp',
     family: 'Wood',
@@ -332,7 +332,7 @@ export const materialStories = [
   },
   {
     title: 'Light wood backing',
-    image: '/materials/wood-light-oak-veneer.webp',
+    image: '/materials/optimized/wood-light-oak-veneer.webp',
     thumbnail: '/materials/thumbs/light-wood.webp',
     sliderImage: '/materials/slider/light-wood.webp',
     family: 'Wood',

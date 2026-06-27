@@ -732,29 +732,29 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             <stop offset="1" stopColor="#a98467" />
           </linearGradient>
           <pattern id="woodDarkTexture" x="0" y="0" width={totalW} height={totalH} patternUnits="userSpaceOnUse">
-            <image href="/materials/wood-dark-mahogany-veneer.webp" x="0" y="0" width={totalW} height={totalH} preserveAspectRatio="none" />
+            <image href="/materials/optimized/wood-dark-mahogany-veneer.webp" x="0" y="0" width={totalW} height={totalH} preserveAspectRatio="none" />
           </pattern>
           <pattern id="woodLightTexture" x="0" y="0" width={totalW} height={totalH} patternUnits="userSpaceOnUse">
-            <image href="/materials/wood-light-oak-veneer.webp" x="0" y="0" width={totalW} height={totalH} preserveAspectRatio="none" />
+            <image href="/materials/optimized/wood-light-oak-veneer.webp" x="0" y="0" width={totalW} height={totalH} preserveAspectRatio="none" />
           </pattern>
 
           <pattern id="brushedBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
-            <image href="/materials/brushed-brass-clean.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+            <image href="/materials/optimized/brushed-brass-clean.webp" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="polishedBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
-            <image href="/materials/polished-brass-clean.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+            <image href="/materials/optimized/polished-brass-clean.webp" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="orbitalBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
-            <image href="/materials/orbital-brass-clean.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+            <image href="/materials/optimized/orbital-brass-clean.webp" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="agedBrassTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
-            <image href="/materials/mid-aged-brass.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+            <image href="/materials/optimized/mid-aged-brass.webp" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="brushedSteelTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
-            <image href="/materials/brushed-stainless-satin.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+            <image href="/materials/optimized/brushed-stainless-satin.webp" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
           <pattern id="mirrorSteelTexture" x={offset} y={offset} width={state.width} height={state.height} patternUnits="userSpaceOnUse">
-            <image href="/materials/polished-stainless-clean.png" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
+            <image href="/materials/optimized/polished-stainless-clean.webp" x="0" y="0" width={state.width} height={state.height} preserveAspectRatio="none" />
           </pattern>
 
           {/* Brushed Metal Texture */}
