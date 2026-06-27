@@ -3547,3 +3547,55 @@
     text-align: left;
   }
 }
+
+@media (max-width: 760px) {
+  .commerce-order-confirmed {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+    width: 100%;
+    max-width: 100%;
+    padding: 0.85rem;
+  }
+
+  .commerce-order-confirmed__main,
+  .commerce-order-card {
+    width: 100%;
+    min-width: 0;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .commerce-order-confirmed h1 {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    font-size: 34px;
+    line-height: 1.05;
+  }
+
+  .commerce-order-confirmed .commerce-lede {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .commerce-order-proof {
+    max-height: 42vh;
+    overflow: hidden;
+  }
+
+  .commerce-order-card {
+    gap: 0.75rem;
+  }
+
+  .commerce-order-card div:not(.commerce-checkout-flow) {
+    padding-bottom: 0.65rem;
+  }
+
+  .commerce-order-card strong {
+    font-size: 16px;
+  }
+
+  .commerce-order-card .commerce-checkout-flow {
+    grid-template-columns: 1fr;
+  }
+}

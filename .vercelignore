@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+data/
+logs/
+output/
+test-results/
+playwright-report/
+*.log
+/*.png
+/*.jpg
+/*.jpeg
+/*.webp
+/*.gif
+brass-texture-expander/

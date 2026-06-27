@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import PlaquePreview from './PlaquePreview';
 import { MockOrder, ProductFamily, SiteView, getPriceBreakdown, materialStories, productFamilies } from '../services/commerce';
 import { PlaqueState } from '../types';
-import { createCorelSvgText } from '../services/exportService';
+import { downloadCorelPdf } from '../services/exportService';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -25,7 +25,7 @@ interface SiteProps {
   onNavigate: (view: SiteView, productSlug?: string) => void;
   onStartDesign: () => void;
   onLaunchProduct: (product: ProductFamily) => void;
-  onCreateMockOrder: (name: string, email: string) => Promise<MockOrder>;
+  onCreateMockOrder: (name: string, email: string, deliveryAddress?: unknown, proofSvg?: SVGSVGElement | null) => Promise<MockOrder>;
 }
 
 type EmbeddedCheckoutInstance = {
@@ -78,6 +78,8 @@ declare global {
     Stripe?: (publishableKey: string) => StripeBrowser | null;
   }
 }
+
+const USE_CUSTOMER_COPY_PASS = true;
 
 let stripeJsPromise: Promise<void> | null = null;
 
@@ -178,15 +180,21 @@ const downloadRenderedProofSvg = (filename: string, sourceSvg: SVGSVGElement) =>
   downloadTextFile(filename, xml, 'image/svg+xml');
 };
 
-const downloadProductionSvg = async (filename: string, sourceSvg: SVGSVGElement, state: PlaqueState) => {
-  try {
-    const xml = await createCorelSvgText(sourceSvg, state);
-    downloadTextFile(filename, xml, 'image/svg+xml');
-  } catch (error) {
-    console.error('Production SVG download failed.', error);
-    alert(`Production SVG download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
+const downloadOrderProofPng = async (order: PaidOrder) => {
+  const response = await fetch(`/api/orders/${encodeURIComponent(order.id)}/proof-image.png`);
+  if (!response.ok) throw new Error(`Could not download proof image (${response.status}).`);
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`).replace(/\.[^.]+$/, '.png');
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
+
+const asPdfFilename = (filename: string) => filename.replace(/\.[^.]+$/, '') + '.pdf';
 
 type HomeCarouselItem = {
   id: string;
@@ -321,8 +329,9 @@ function SiteHero({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
           <span>Your finished plaque in <strong>5 working days</strong></span>
         </div>
         <p>
-          Our unique intelligent plaque design system turns your wording into a production-ready proof in minutes.
-          Skip the artwork back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.
+          {USE_CUSTOMER_COPY_PASS
+            ? 'Create a professional plaque proof in minutes from your wording. Skip the artwork back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'
+            : 'Our unique intelligent plaque design system turns your wording into a production-ready proof in minutes. Skip the artwork back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'}
         </p>
         <div className="commerce-actions">
           <button type="button" className="commerce-primary commerce-primary--cream" onClick={onStartDesign}>
@@ -392,8 +401,9 @@ function HomeMaterialPanels() {
           <p className="commerce-eyebrow">Materials</p>
           <h2>Spin through the finishes.</h2>
           <p>
-            Real brass, stainless steel and wood scans, staged as lightweight WebP previews so the finish feels tangible
-            without making the homepage carry production-sized textures.
+            {USE_CUSTOMER_COPY_PASS
+              ? 'Compare brass, stainless steel and wood finishes before you choose. Each material is shown clearly so you can feel confident about the look of your plaque.'
+              : 'Real brass, stainless steel and wood scans, staged as lightweight WebP previews so the finish feels tangible without making the homepage carry production-sized textures.'}
           </p>
           <div className="commerce-material-atelier__meta" aria-label="Selected material details">
             <span>{activeMaterial.family} finish</span>
@@ -531,9 +541,9 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
           <p className="commerce-eyebrow">Why this is different</p>
           <h2>You choose the details. We shape the plaque.</h2>
           <p>
-            Choose the plaque type, size, material and wording. Our intelligent plaque proofing system
-            handles the layout, spacing, line breaks and production details, then shows you a realistic
-            proof before you order.
+            {USE_CUSTOMER_COPY_PASS
+              ? 'Choose the plaque type, size, material and wording. We handle the layout, spacing and line breaks, then show you a realistic proof before you order.'
+              : 'Choose the plaque type, size, material and wording. Our intelligent plaque proofing system handles the layout, spacing, line breaks and production details, then shows you a realistic proof before you order.'}
           </p>
           <p>
             No guesswork and no hidden costs: engraving, standard fixings and UK mainland delivery are
@@ -544,10 +554,10 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
           </button>
           <small>Your InstaPlaque proof is 100% free. Need time to decide? Download the PDF proof and use the link inside to continue or checkout later. No account needed.</small>
         </article>
-        <div className="commerce-proof-first-steps" aria-label="How the proofing system works">
+        <div className="commerce-proof-first-steps" aria-label={USE_CUSTOMER_COPY_PASS ? 'How your proof works' : 'How the proofing system works'}>
           {[
             ['Choose your plaque options', 'Pick the size, material, fixings and finish in plain steps.'],
-            ['Add the wording', 'Type the inscription once. The system handles the hard layout work.'],
+            ['Add the wording', USE_CUSTOMER_COPY_PASS ? 'Type the inscription once. We shape it into a clear plaque layout.' : 'Type the inscription once. The system handles the hard layout work.'],
             ['Review the proof and price', 'See a realistic proof and live price before checkout.'],
           ].map(([title, detail], index) => (
             <div className="commerce-proof-first-step" key={title}>
@@ -590,7 +600,7 @@ function ProductPage({ selectedProduct, onLaunchProduct }: Pick<SiteProps, 'sele
       <section className="commerce-section">
         <div className="commerce-section__head">
           <p className="commerce-eyebrow">Product questions</p>
-          <h2>Fast answers before customers enter the proof bench.</h2>
+          <h2>{USE_CUSTOMER_COPY_PASS ? 'Fast answers before you start your proof.' : 'Fast answers before customers enter the proof bench.'}</h2>
         </div>
         <div className="commerce-faq-grid">
           {selectedProduct.faqs.map((faq) => (
@@ -611,8 +621,12 @@ function MaterialsPage() {
       <section className="commerce-section">
         <div className="commerce-section__head">
           <p className="commerce-eyebrow">Material guide</p>
-          <h1>Real plaque finishes, shown before the customer orders.</h1>
-          <p>Customers should understand the finish before they approve the proof. These stories give the site a product-led layer around the design tool.</p>
+          <h1>{USE_CUSTOMER_COPY_PASS ? 'Real plaque finishes, shown before you order.' : 'Real plaque finishes, shown before the customer orders.'}</h1>
+          <p>
+            {USE_CUSTOMER_COPY_PASS
+              ? 'See the character of each finish before you approve your proof, from brushed metals to warm wood veneers.'
+              : 'Customers should understand the finish before they approve the proof. These stories give the site a product-led layer around the design tool.'}
+          </p>
         </div>
         <div className="commerce-material-grid">
           {materialStories.map((material) => (
@@ -632,13 +646,18 @@ function HowItWorksPage() {
   return (
     <div className="commerce-page">
       <section className="commerce-section commerce-deep-copy">
-        <p className="commerce-eyebrow">The new model</p>
-        <h1>Instant proof approval replaces the slow PDF loop.</h1>
+        <p className="commerce-eyebrow">{USE_CUSTOMER_COPY_PASS ? 'How it works' : 'The new model'}</p>
+        <h1>{USE_CUSTOMER_COPY_PASS ? 'Create, check and approve your plaque proof online.' : 'Instant proof approval replaces the slow PDF loop.'}</h1>
         <p>
-          The customer creates a production-style proof before checkout. They can keep editing until the approval step, then the order records a locked design snapshot.
+          {USE_CUSTOMER_COPY_PASS
+            ? 'Choose your plaque, add your wording and review the proof before you place the order. You can keep editing until everything looks right.'
+            : 'The customer creates a production-style proof before checkout. They can keep editing until the approval step, then the order records a locked design snapshot.'}
         </p>
         <div className="commerce-flow-panel">
-          {['Select product', 'Generate AI proof', 'Review price', 'Approve proof', 'Secure checkout', 'Production queue'].map((item) => (
+          {(USE_CUSTOMER_COPY_PASS
+            ? ['Choose plaque', 'Add wording', 'Review proof', 'Approve design', 'Secure checkout', 'Preparing your plaque']
+            : ['Select product', 'Generate AI proof', 'Review price', 'Approve proof', 'Secure checkout', 'Production queue']
+          ).map((item) => (
             <span key={item}>{item}</span>
           ))}
         </div>
@@ -650,9 +669,9 @@ function HowItWorksPage() {
 function FaqPage() {
   const faqs = [
     ['Can I change the design?', 'Yes. Change as much as you like until you approve the proof and place the order.'],
-    ['Is the proof instant?', 'The typography engine creates a professional layout immediately after the customer enters wording and generates the proof.'],
-    ['What if my order needs a quote?', 'The app can still capture the design, but routes unusual sizes, artwork or complex jobs to quote review.'],
-    ['Do I need an account?', 'No. The intended customer flow is guest checkout with magic links for saved designs and order pages later.'],
+    ['Is the proof instant?', USE_CUSTOMER_COPY_PASS ? 'Yes. Add your wording and we will create a professional proof for you to check straight away.' : 'The typography engine creates a professional layout immediately after the customer enters wording and generates the proof.'],
+    ['What if my order needs a quote?', USE_CUSTOMER_COPY_PASS ? 'You can still start with a proof. We will check unusual sizes, artwork or complex requests before you pay.' : 'The app can still capture the design, but routes unusual sizes, artwork or complex jobs to quote review.'],
+    ['Do I need an account?', USE_CUSTOMER_COPY_PASS ? 'No. You can create a proof and place an order without setting up an account.' : 'No. The intended customer flow is guest checkout with magic links for saved designs and order pages later.'],
   ];
   return (
     <div className="commerce-page">
@@ -680,10 +699,12 @@ function QuotePage({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
     <div className="commerce-page">
       <section className="commerce-product-detail">
         <div>
-          <p className="commerce-eyebrow">Bespoke route</p>
-          <h1>Start with an instant proof, then route complex work to quote.</h1>
+          <p className="commerce-eyebrow">{USE_CUSTOMER_COPY_PASS ? 'Bespoke plaques' : 'Bespoke route'}</p>
+          <h1>{USE_CUSTOMER_COPY_PASS ? 'Need something made to measure?' : 'Start with an instant proof, then route complex work to quote.'}</h1>
           <p className="commerce-lede">
-            Customers should not hit a dead-end when a plaque is unusual. They can still create a proof, then the system flags oversized, artwork-heavy or batch work for manual price confirmation.
+            {USE_CUSTOMER_COPY_PASS
+              ? 'Start with a proof and tell us what you need. We will confirm anything unusual, including oversized plaques, supplied artwork and batch orders, before payment.'
+              : 'Customers should not hit a dead-end when a plaque is unusual. They can still create a proof, then the system flags oversized, artwork-heavy or batch work for manual price confirmation.'}
           </p>
           <div className="commerce-actions">
             <button type="button" className="commerce-primary" onClick={() => onLaunchProduct(bespoke)}>
@@ -692,7 +713,7 @@ function QuotePage({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
           </div>
         </div>
         <div className="commerce-quote-panel">
-          <p className="commerce-eyebrow">Quote triggers</p>
+          <p className="commerce-eyebrow">{USE_CUSTOMER_COPY_PASS ? 'We can quote for' : 'Quote triggers'}</p>
           <ul>
             <li>Oversized dimensions outside the standard production bed</li>
             <li>Customer logos, portraits, or supplied artwork</li>
@@ -722,6 +743,7 @@ function CheckoutPage({
   const [embeddedStatus, setEmbeddedStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const [embeddedError, setEmbeddedError] = useState<string | null>(null);
   const embeddedMountRef = useRef<HTMLDivElement | null>(null);
+  const checkoutProofSvgRef = useRef<SVGSVGElement | null>(null);
   const breakdown = getPriceBreakdown(state, inscription);
   const embeddedClientSecret = createdOrder?.stripeSimulation.embeddedClientSecret;
   const stripePublishableKey = createdOrder?.stripeSimulation.publishableKey;
@@ -733,7 +755,7 @@ function CheckoutPage({
     setEmbeddedStatus('idle');
     setEmbeddedError(null);
     try {
-      setCreatedOrder(await onCreateMockOrder('Stripe checkout customer', ''));
+      setCreatedOrder(await onCreateMockOrder('Stripe checkout customer', '', undefined, checkoutProofSvgRef.current));
     } catch (error) {
       setOrderError(error instanceof Error ? error.message : 'Secure checkout could not be prepared.');
     } finally {
@@ -789,7 +811,7 @@ function CheckoutPage({
         <div className="commerce-checkout-proof">
           <p className="commerce-eyebrow">Approved proof</p>
           <div className="commerce-checkout-preview">
-            <PlaquePreview state={state} activeStep={6} inscription={inscription} />
+            <PlaquePreview ref={checkoutProofSvgRef} state={state} activeStep={6} inscription={inscription} />
           </div>
           <div className="commerce-summary-lines">
             <span><strong>{selectedProduct.title}</strong></span>
@@ -929,7 +951,9 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
           <p className="commerce-lede">
             {paid
               ? 'Your approved proof has been locked for production. We will prepare it and email you when it is dispatched.'
-              : 'Your order has been created. If payment has completed, this page will update once Stripe confirms it.'}
+              : USE_CUSTOMER_COPY_PASS
+                ? 'We are waiting for payment confirmation. This usually takes a few seconds.'
+                : 'Your order has been created. If payment has completed, this page will update once Stripe confirms it.'}
           </p>
           <div className="commerce-order-proof">
             <PlaquePreview ref={proofSvgRef} state={order.plaqueState} activeStep={6} inscription={order.inscription} />
@@ -963,13 +987,16 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
           <div className="commerce-checkout-flow">
             <span>Proof approved</span>
             <span>Payment confirmed</span>
-            <span>Production preparation</span>
+            <span>{USE_CUSTOMER_COPY_PASS ? 'Preparing your plaque' : 'Production preparation'}</span>
             <span>Dispatch email follows</span>
           </div>
           <button
             type="button"
             className="commerce-secondary"
-            onClick={() => proofSvgRef.current && downloadRenderedProofSvg(order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`, proofSvgRef.current)}
+            onClick={() => downloadOrderProofPng(order).catch((downloadError) => {
+              console.error('Proof PNG download failed.', downloadError);
+              if (proofSvgRef.current) downloadRenderedProofSvg(order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`, proofSvgRef.current);
+            })}
           >
             Download approved proof
           </button>
@@ -1190,13 +1217,13 @@ function AdminPage() {
                 <button
                   type="button"
                   disabled={!selectedOrder}
-                  onClick={() => adminProofSvgRef.current && downloadProductionSvg(
-                    selectedOrder.proofPackage?.productionFilename || `${selectedOrder.id}-production-artwork.svg`,
+                  onClick={() => adminProofSvgRef.current && downloadCorelPdf(
                     adminProofSvgRef.current,
                     selectedOrder.plaqueState,
+                    asPdfFilename(selectedOrder.proofPackage?.productionFilename || `${selectedOrder.id}-production-artwork.pdf`),
                   )}
                 >
-                  Download production SVG
+                  Download production PDF
                 </button>
                 <button
                   type="button"
@@ -1213,6 +1240,13 @@ function AdminPage() {
                 </button>
                 <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'dispatched', fulfilmentStatus: 'dispatched', emailTemplate: 'customer-dispatched' })}>
                   Mark dispatched + email
+                </button>
+                <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', ...adminHeaders },
+                  body: JSON.stringify({ template: 'customer-review-request' }),
+                }).then(loadOrders)}>
+                  Send review follow-up
                 </button>
                 <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
                   method: 'POST',

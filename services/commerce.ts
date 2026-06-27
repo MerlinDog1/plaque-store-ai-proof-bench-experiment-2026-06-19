@@ -96,6 +96,7 @@ export interface MockOrder {
   proofPackage: {
     productionSvg: string | null;
     visualProofSvg: string | null;
+    visualProofPng?: string | null;
     productionFilename: string;
     visualFilename: string;
     lockedAt: string;
@@ -381,7 +382,7 @@ export function makeMockOrder(
   productTitle: string,
   customerName: string,
   customerEmail: string,
-  artifacts: { productionSvg?: string | null; visualProofSvg?: string | null } = {},
+  artifacts: { productionSvg?: string | null; visualProofSvg?: string | null; visualProofPng?: string | null } = {},
   deliveryAddress?: DeliveryAddress,
 ): MockOrder {
   const priceBreakdown = getPriceBreakdown(state, inscription);
@@ -413,6 +414,7 @@ export function makeMockOrder(
     proofPackage: {
       productionSvg: artifacts.productionSvg || state.generatedSvgContent || null,
       visualProofSvg: artifacts.visualProofSvg || artifacts.productionSvg || state.generatedSvgContent || null,
+      visualProofPng: artifacts.visualProofPng || null,
       productionFilename: `${id}-production-proof.svg`,
       visualFilename: `${id}-visual-proof.svg`,
       lockedAt: createdAt,

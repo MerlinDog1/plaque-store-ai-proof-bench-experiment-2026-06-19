@@ -111,6 +111,22 @@ const convertImageDataUrlToPng = (dataUrl: string): Promise<string> => new Promi
   img.src = dataUrl;
 });
 
+const withTimeout = async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+  let timeoutId: number | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error(`${label} timed out.`)), ms);
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId) window.clearTimeout(timeoutId);
+  }
+};
+
+const fireAndForget = (promise: Promise<unknown>, onError: (error: unknown) => void) => {
+  promise.catch(onError);
+};
+
 async function prepareMemorialImageUpload(file: File): Promise<string> {
   const dataUrl = await readFileAsDataUrl(file);
   return file.type === 'image/avif' ? convertImageDataUrlToPng(dataUrl) : dataUrl;
@@ -158,7 +174,7 @@ const App: React.FC = () => {
   const [selectedProductSlug, setSelectedProductSlug] = useState(productFamilies[0].slug);
   const [mockOrders, setMockOrders] = useState<MockOrder[]>([]);
   const [activeStep, setActiveStep] = useState(0);
-  const [hasSelectedSize, setHasSelectedSize] = useState(false);
+  const [hasSelectedSize, setHasSelectedSize] = useState(true);
 
   const [state, setState] = useState<PlaqueState>(PROOF_BENCH_INITIAL_STATE);
   const [inscriptionPrompt, setInscriptionPrompt] = useState('');
@@ -794,7 +810,7 @@ const App: React.FC = () => {
     setMemorialStatus(null);
     setProofSaved(false);
     setBasketAdded(false);
-    setHasSelectedSize(false);
+    setHasSelectedSize(true);
     setActiveStep(0);
     setCurrentView('plaque');
     if (window.location.pathname !== '/design') {
@@ -832,11 +848,22 @@ const App: React.FC = () => {
     }
   };
 
-  const handleCreateMockOrder = async (customerName: string, customerEmail: string, deliveryAddress?: DeliveryAddress) => {
-    const visualProofSvg = svgRef.current?.outerHTML || state.generatedSvgContent || null;
+  const handleCreateMockOrder = async (customerName: string, customerEmail: string, deliveryAddress?: DeliveryAddress, proofSvg?: SVGSVGElement | null) => {
+    const proofSourceSvg = proofSvg || svgRef.current;
+    const visualProofSvg = proofSourceSvg?.outerHTML || state.generatedSvgContent || null;
+    let visualProofPng: string | null = null;
+    if (proofSourceSvg) {
+      try {
+        const proofPngBase64 = await withTimeout(svgToProofPngBase64(proofSourceSvg), 6000, 'Proof image capture');
+        visualProofPng = `data:image/png;base64,${proofPngBase64}`;
+      } catch (error) {
+        console.warn('Checkout proof PNG capture did not finish; SVG fallback will be kept for this order.', error);
+      }
+    }
     const order = makeMockOrder(state, inscriptionPrompt, selectedProduct.title, customerName, customerEmail, {
       productionSvg: state.generatedSvgContent,
       visualProofSvg,
+      visualProofPng,
     }, deliveryAddress);
     let checkoutOrder = order;
     try {
@@ -886,21 +913,19 @@ const App: React.FC = () => {
       }
       return next;
     });
-    try {
-      await fetch('/api/mock-admin-hub/orders', {
+    fireAndForget(fetch('/api/mock-admin-hub/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(checkoutOrder),
-      });
-    } catch (error) {
+      }), (error) => {
       console.warn('Mock admin hub handoff was not persisted on the server.', error);
-    }
+    });
     return checkoutOrder;
   };
 
   // --- Render ---
-  const steps = ['Material', 'Size/Shape', 'Colour', 'Fixings and border', 'Wood', 'Text', 'Proof'];
-  const stepShortLabels = ['Material', 'Size', 'Colour', 'Fixings', 'Wood', 'Text', 'Proof'];
+  const steps = ['Size/Shape', 'Material', 'Colour', 'Fixings and border', 'Wood', 'Text', 'Proof'];
+  const stepShortLabels = ['Size', 'Material', 'Colour', 'Fixings', 'Wood', 'Text', 'Proof'];
   const progress = ((activeStep + 1) / steps.length) * 100;
   const canGoBack = activeStep > 0;
   const canGoNext = activeStep < steps.length - 1;
@@ -962,7 +987,7 @@ const App: React.FC = () => {
     );
   }
 
-  const stepIcons = ['▦', '◉', '●', '⌁', '▥', 'T', '✓'];
+  const stepIcons = ['◉', '▦', '●', '⌁', '▥', 'T', '✓'];
   const formattedPrice = (() => {
     const hasPence = Math.round(price * 100) % 100 !== 0;
     return price.toLocaleString('en-GB', {
@@ -972,8 +997,8 @@ const App: React.FC = () => {
       maximumFractionDigits: hasPence ? 2 : 0,
     });
   })();
-  const showProofPrice = currentView === 'plaque' && hasSelectedSize;
-  const showHeaderPrice = currentView === 'plaque' ? hasSelectedSize : currentView === 'product' || currentView === 'checkout';
+  const showProofPrice = currentView === 'plaque';
+  const showHeaderPrice = currentView === 'plaque' || currentView === 'product' || currentView === 'checkout';
   const materialTrailLabels: Record<Material, string> = {
     [Material.BrushedBrass]: 'Brushed brass',
     [Material.OrbitalBrassMattLacquer]: 'Orbital brass',

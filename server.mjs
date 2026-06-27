@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
+import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { GoogleGenAI } from "@google/genai";
 
@@ -48,6 +49,7 @@ const {
   getOrderById,
   listOrders,
   markOrderPaidFromSession,
+  processReviewFollowUps,
   sendAndRecordOrderEmail,
   updateOrderStatus,
 } = await import("./server/orders.mjs");
@@ -62,6 +64,92 @@ const {
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY || "";
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+
+const escapeXml = (value = "") => String(value)
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;");
+
+const proofMaterialFill = (material = "") => ({
+  "brushed-brass": "url(#brushedBrassFallback)",
+  "polished-brass": "url(#polishedBrassFallback)",
+  "orbital-brass-matt-lacquer": "url(#orbitalBrassFallback)",
+  "aged-brass": "url(#agedBrassFallback)",
+  "brushed-steel": "url(#brushedSteelFallback)",
+  "brushed-stainless": "url(#brushedSteelFallback)",
+  "polished-steel": "url(#polishedSteelFallback)",
+  "polished-stainless": "url(#polishedSteelFallback)",
+})[material] || "url(#brushedBrassFallback)";
+
+const proofTextFill = (state = {}) => ({
+  black: "#111111",
+  grey: "#555555",
+  white: "#ffffff",
+  cream: "#fff1c7",
+}[state.textColor] || "#111111");
+
+const wrapProofSvg = (order, body) => {
+  const state = order?.plaqueState || {};
+  const width = Number(state.width || 300);
+  const height = Number(state.height || 200);
+  const woodExtra = state.wood ? 25 : 0;
+  const totalW = width + woodExtra;
+  const totalH = height + woodExtra;
+  const offset = woodExtra / 2;
+  const textFill = proofTextFill(state);
+  const materialFill = proofMaterialFill(state.material);
+  const lines = String(order?.inscription || "Approved plaque proof").split(/\r?\n/).filter(Boolean).slice(0, 8);
+  const fontSize = lines.length > 5 ? 8.5 : lines.length > 3 ? 10.5 : 14;
+  const content = lines.map((line, index) => {
+    const y = (index - (lines.length - 1) / 2) * (fontSize * 1.75);
+    const isTitle = index === 1 || (lines.length <= 2 && index === 0);
+    return `<text x="0" y="${y.toFixed(2)}" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="${isTitle ? fontSize * 1.35 : fontSize}" font-weight="${isTitle ? "700" : "500"}" letter-spacing="${isTitle ? ".03em" : ".06em"}">${escapeXml(line)}</text>`;
+  }).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}" role="img" aria-label="Approved plaque proof">
+    <defs>
+      <linearGradient id="brushedSteelFallback" x1="0" y1="0" x2="1" y2=".08"><stop offset="0%" stop-color="#7a858b"/><stop offset="26%" stop-color="#b6c0c5"/><stop offset="52%" stop-color="#e3e8ea"/><stop offset="76%" stop-color="#98a4aa"/><stop offset="100%" stop-color="#67727a"/></linearGradient>
+      <linearGradient id="polishedSteelFallback" x1="0" y1="0" x2="1" y2=".18"><stop offset="0%" stop-color="#4e5860"/><stop offset="22%" stop-color="#eef3f4"/><stop offset="42%" stop-color="#8d989f"/><stop offset="70%" stop-color="#ffffff"/><stop offset="100%" stop-color="#68727a"/></linearGradient>
+      <linearGradient id="brushedBrassFallback" x1="0" y1="0" x2="1" y2=".08"><stop offset="0%" stop-color="#8f641f"/><stop offset="30%" stop-color="#c99745"/><stop offset="58%" stop-color="#e4c16f"/><stop offset="100%" stop-color="#875c1c"/></linearGradient>
+      <linearGradient id="polishedBrassFallback" x1="0" y1="0" x2="1" y2=".18"><stop offset="0%" stop-color="#784808"/><stop offset="20%" stop-color="#f5c84b"/><stop offset="44%" stop-color="#fff2a8"/><stop offset="66%" stop-color="#b66c0c"/><stop offset="100%" stop-color="#efbd37"/></linearGradient>
+      <radialGradient id="orbitalBrassFallback" cx="40%" cy="34%" r="82%"><stop offset="0%" stop-color="#ead89b"/><stop offset="36%" stop-color="#c2a463"/><stop offset="64%" stop-color="#8f7641"/><stop offset="100%" stop-color="#d4bd7a"/></radialGradient>
+      <linearGradient id="agedBrassFallback" x1="0" y1="0" x2="1" y2=".16"><stop offset="0%" stop-color="#46321c"/><stop offset="32%" stop-color="#907238"/><stop offset="58%" stop-color="#c0a45a"/><stop offset="100%" stop-color="#5f4725"/></linearGradient>
+      <linearGradient id="woodFallback" x1="0" y1="0" x2="1" y2=".2"><stop offset="0%" stop-color="#4a2b17"/><stop offset="35%" stop-color="#7b4a28"/><stop offset="70%" stop-color="#3a2112"/><stop offset="100%" stop-color="#8a5934"/></linearGradient>
+    </defs>
+    ${state.wood ? `<rect width="${totalW}" height="${totalH}" rx="12" fill="url(#woodFallback)"/><rect x="4" y="4" width="${totalW - 8}" height="${totalH - 8}" rx="10" fill="none" stroke="#2b170d" stroke-opacity=".45"/>` : ""}
+    <rect x="${offset}" y="${offset}" width="${width}" height="${height}" rx="8" fill="${materialFill}"/>
+    <rect x="${offset + 8}" y="${offset + 8}" width="${width - 16}" height="${height - 16}" rx="6" fill="none" stroke="${textFill}" stroke-opacity=".68"/>
+    <g transform="translate(${offset + width / 2} ${offset + height / 2})" fill="${textFill}" color="${textFill}">${content}</g>
+  </svg>`;
+};
+
+const prepareStoredProofSvgForRaster = (order) => {
+  const raw = String(order?.proofPackage?.visualProofSvg || "").trim();
+  if (!raw.startsWith("<svg")) return wrapProofSvg(order, raw);
+  return raw.replace(/\s(?:href|xlink:href)=["']\/([^"']+)["']/g, (match, assetPath) => {
+    const localPath = path.join(distDir, assetPath);
+    if (!fs.existsSync(localPath)) return match;
+    const attr = match.trim().startsWith("xlink:href") ? "xlink:href" : "href";
+    return ` ${attr}="file://${localPath}"`;
+  });
+};
+
+const svgToPngBuffer = (svg) => new Promise((resolve, reject) => {
+  const child = spawn("rsvg-convert", ["--format", "png", "--width", "1200"]);
+  const chunks = [];
+  const errors = [];
+  child.stdout.on("data", (chunk) => chunks.push(chunk));
+  child.stderr.on("data", (chunk) => errors.push(chunk));
+  child.on("error", reject);
+  child.on("close", (code) => {
+    if (code === 0) {
+      resolve(Buffer.concat(chunks));
+      return;
+    }
+    reject(new Error(Buffer.concat(errors).toString("utf8") || `rsvg-convert exited ${code}`));
+  });
+  child.stdin.end(svg);
+});
 
 const parseStorefrontKeys = () => {
   const raw = process.env.STOREFRONT_INGEST_KEYS || process.env.STOREFRONT_API_KEYS || "";
@@ -155,7 +243,7 @@ const serveStatic = (req, res) => {
   fs.createReadStream(filePath).pipe(res);
 };
 
-const server = http.createServer(async (req, res) => {
+export const handleRequest = async (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
 
   if (req.method === "GET" && url.pathname === "/api/gemini/health") {
@@ -176,6 +264,56 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/email/config") {
     sendJson(res, 200, { ok: true, ...getEmailConfig() });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname.match(/^\/api\/orders\/[^/]+\/proof-image\.png$/)) {
+    try {
+      const orderId = decodeURIComponent(url.pathname.match(/^\/api\/orders\/([^/]+)\/proof-image\.png$/)?.[1] || "");
+      const order = await getOrderById(orderId);
+      const image = String(order?.proofPackage?.visualProofPng || "").replace(/^data:image\/png;base64,/, "");
+      if (!order || (!image && !order?.proofPackage?.visualProofSvg)) {
+        res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+        res.end("Proof image not found");
+        return;
+      }
+      const body = image
+        ? Buffer.from(image, "base64")
+        : await svgToPngBuffer(prepareStoredProofSvgForRaster(order));
+      res.writeHead(200, {
+        "Content-Type": "image/png",
+        "Cache-Control": "public, max-age=86400",
+      });
+      res.end(body);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not load proof image.";
+      res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+      res.end(message);
+    }
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname.match(/^\/api\/orders\/[^/]+\/proof-image\.svg$/)) {
+    try {
+      const orderId = decodeURIComponent(url.pathname.match(/^\/api\/orders\/([^/]+)\/proof-image\.svg$/)?.[1] || "");
+      const order = await getOrderById(orderId);
+      const rawSvg = String(order?.proofPackage?.visualProofSvg || "");
+      if (!order || !rawSvg) {
+        res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+        res.end("Proof image not found");
+        return;
+      }
+      const svg = rawSvg.trim().startsWith("<svg") ? rawSvg : wrapProofSvg(order, rawSvg);
+      res.writeHead(200, {
+        "Content-Type": "image/svg+xml; charset=utf-8",
+        "Cache-Control": "public, max-age=86400",
+      });
+      res.end(svg);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not load proof image.";
+      res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+      res.end(message);
+    }
     return;
   }
 
@@ -433,8 +571,27 @@ const server = http.createServer(async (req, res) => {
   }
 
   sendJson(res, 405, { error: "Method not allowed." });
-});
+};
 
-server.listen(port, host, () => {
-  console.log(`InstaPlaque listening on http://${host}:${port}; Gemini key configured: ${Boolean(apiKey)}`);
-});
+export default handleRequest;
+
+const reviewFollowUpIntervalMs = Number(process.env.REVIEW_FOLLOWUP_CHECK_INTERVAL_MS || 6 * 60 * 60 * 1000);
+const runReviewFollowUpSweep = () => {
+  processReviewFollowUps()
+    .then((result) => {
+      if (result.sent) console.log(`Review follow-up emails sent: ${result.sent}`);
+    })
+    .catch((error) => console.warn("Review follow-up sweep failed.", error));
+};
+
+if (!process.env.VERCEL) {
+  const server = http.createServer(handleRequest);
+  server.listen(port, host, () => {
+    console.log(`InstaPlaque listening on http://${host}:${port}; Gemini key configured: ${Boolean(apiKey)}`);
+  });
+}
+
+if (!process.env.VERCEL && reviewFollowUpIntervalMs > 0) {
+  setTimeout(runReviewFollowUpSweep, 30 * 1000);
+  setInterval(runReviewFollowUpSweep, reviewFollowUpIntervalMs);
+}

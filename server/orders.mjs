@@ -81,6 +81,7 @@ const fromRow = (row) => row && ({
 const normaliseFromMockOrder = (input) => {
   const order = input?.orderSnapshot || input?.order || input || {};
   const createdAt = order.createdAt || nowIso();
+  const publicOrigin = String(input.origin || order.metadata?.publicOrigin || "").replace(/\/$/, "");
   return {
     id: String(order.id || input.orderId || `PSAI-${Date.now().toString().slice(-6)}`),
     stripeCheckoutSessionId: order.stripeSimulation?.checkoutSessionId || null,
@@ -111,6 +112,7 @@ const normaliseFromMockOrder = (input) => {
     ],
     metadata: {
       source: "instaplaque-checkout",
+      publicOrigin,
       mockOrder: order,
     },
     approvedAt: order.proofPackage?.lockedAt || createdAt,
@@ -404,4 +406,42 @@ export const updateOrderStatus = async (orderId, payload) => {
       trackingReference: payload.trackingReference || order.metadata?.trackingReference || "",
     },
   });
+};
+
+const reviewFollowUpDelayMs = () => {
+  const days = Number(process.env.REVIEW_FOLLOWUP_DAYS || 3);
+  return Number.isFinite(days) && days > 0 ? days * 24 * 60 * 60 * 1000 : 0;
+};
+
+const dispatchedAtForOrder = (order) => {
+  const events = order.events || [];
+  const dispatchedEvent = events.find((event) =>
+    event.trackingReference ||
+    String(event.label || "").toLowerCase().includes("dispatched") ||
+    String(event.note || "").toLowerCase().includes("dispatched")
+  );
+  return dispatchedEvent?.at || order.metadata?.dispatchedAt || order.updatedAt;
+};
+
+export const processReviewFollowUps = async () => {
+  const delayMs = reviewFollowUpDelayMs();
+  if (!delayMs) return { checked: 0, sent: 0, skipped: "disabled" };
+
+  const orders = await listOrders();
+  let sent = 0;
+  const now = Date.now();
+
+  for (const order of orders) {
+    if (order.fulfilmentStatus !== "dispatched" && order.status !== "dispatched") continue;
+    if (!order.customerEmail) continue;
+    if ((order.emailEvents || []).some((event) => event.type === "customer-review-request")) continue;
+
+    const dispatchedAt = Date.parse(dispatchedAtForOrder(order) || "");
+    if (!Number.isFinite(dispatchedAt) || now - dispatchedAt < delayMs) continue;
+
+    await sendAndRecordOrderEmail(order, "customer-review-request", order.customerEmail);
+    sent += 1;
+  }
+
+  return { checked: orders.length, sent };
 };

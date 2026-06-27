@@ -37,3 +37,5 @@ USER.md
 .idea/
 .DS_Store
 *.sw?
+.vercel
+.env*

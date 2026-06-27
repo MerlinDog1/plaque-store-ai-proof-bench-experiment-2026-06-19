@@ -59,6 +59,8 @@ const MATERIAL_ORDER: Material[] = [
   Material.AgedBrass,
 ];
 
+const USE_CUSTOMER_COPY_PASS = true;
+
 const BORDER_STYLE_OPTIONS: { value: BorderStyle; label: string; note: string }[] = [
   { value: BorderStyle.Single, label: 'Single', note: 'One clean engraved keyline' },
   { value: BorderStyle.Double, label: 'Double', note: 'Two balanced inset lines' },
@@ -152,13 +154,13 @@ const getTurnaroundEstimate = (state: PlaqueState) => {
 const STEP_COPY = [
   {
     eyebrow: 'Step 1 of 7',
-    title: 'Material',
-    detail: 'Choose the metal finish first so size prices reflect the selected material.',
+    title: 'Size/Shape',
+    detail: 'Choose a standard plaque size with live starting prices, or open custom size.',
   },
   {
     eyebrow: 'Step 2 of 7',
-    title: 'Size/Shape',
-    detail: 'Choose a standard plaque size with live starting prices, or open custom size.',
+    title: 'Material',
+    detail: 'Choose the metal finish. Prices update from the selected plaque size.',
   },
   {
     eyebrow: 'Step 3 of 7',
@@ -544,13 +546,13 @@ export const Controls: React.FC<Props> = ({
   }, [isBenchPlaque, onChange, state.borderStyle]);
 
   useEffect(() => {
-    if (activeStep === 1 && sizeMode === 'standard' && activeBenchSize) {
+    if (activeStep === 0 && sizeMode === 'standard' && activeBenchSize) {
       setBenchSizesExpanded(true);
     }
   }, [activeBenchSize, activeStep, sizeMode]);
 
   useEffect(() => {
-    if (activeStep !== 1 || sizeMode !== 'standard') return;
+    if (activeStep !== 0 || sizeMode !== 'standard') return;
     const selected = sizePresetStackRef.current?.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
     if (!selected) return;
     window.setTimeout(() => {
@@ -559,11 +561,11 @@ export const Controls: React.FC<Props> = ({
   }, [activeStep, sizeMode, state.height, state.shape, state.width]);
 
   useEffect(() => {
-    if (activeStep !== 1 || sizeMode !== 'custom') {
+    if (activeStep !== 0 || sizeMode !== 'custom') {
       setTurnaroundToast(null);
       return;
     }
-    if (activeStep !== 1 || sizeMode !== 'custom' || !customLongTurnaround) return;
+    if (activeStep !== 0 || sizeMode !== 'custom' || !customLongTurnaround) return;
     const message = '10 working days due to the custom size.';
     setTurnaroundToast(message);
     const timer = window.setTimeout(() => setTurnaroundToast(null), 4200);
@@ -571,7 +573,7 @@ export const Controls: React.FC<Props> = ({
   }, [activeStep, customLongTurnaround, sizeMode]);
 
   const update = (key: keyof PlaqueState, value: any) => {
-    if (activeStep === 1 && (key === 'width' || key === 'height' || key === 'shape')) {
+    if (activeStep === 0 && (key === 'width' || key === 'height' || key === 'shape')) {
       onSizeSelected();
     }
     if (key === 'width' || key === 'height') value = clampDimension(value);
@@ -888,7 +890,7 @@ export const Controls: React.FC<Props> = ({
       )}
       <StepIntro step={activeStep} />
 
-      {activeStep === 1 && (
+      {activeStep === 0 && (
         <section className="space-y-4">
           <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <div className="grid grid-cols-2 gap-2 rounded-lg bg-[#efe4d1] p-1">
@@ -1071,7 +1073,7 @@ export const Controls: React.FC<Props> = ({
         </section>
       )}
 
-      {activeStep === 0 && (
+      {activeStep === 1 && (
         <section className="space-y-4">
           <div className="grid gap-2">
             {MATERIAL_ORDER.map((material) => (
@@ -1125,7 +1127,9 @@ export const Controls: React.FC<Props> = ({
           <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <div className="text-sm font-black">Engraving colour</div>
             <div className="mt-1 text-xs leading-5 text-[#6a746d]">
-              This controls the visible inscription colour in the proof and final SVG.
+              {USE_CUSTOMER_COPY_PASS
+                ? 'Choose the colour used for the engraved wording.'
+                : 'This controls the visible inscription colour in the proof and final SVG.'}
             </div>
             <div className="mt-3 grid grid-cols-4 gap-2">
               {[
@@ -2229,7 +2233,7 @@ export const Controls: React.FC<Props> = ({
                 >
                   {checkoutSubmitting ? 'Opening checkout...' : 'Continue to secure checkout'}
                 </button>
-                <div className="proof-stripe-note" aria-label="Secure test checkout powered by Stripe">
+                <div className="proof-stripe-note" aria-label={USE_CUSTOMER_COPY_PASS ? 'Secure checkout powered by Stripe' : 'Secure test checkout powered by Stripe'}>
                   <span>Secure card checkout</span>
                   <img src="/site-images/powered-by-stripe-black.svg" alt="Powered by Stripe" loading="lazy" />
                 </div>
