@@ -851,15 +851,7 @@ const App: React.FC = () => {
   const handleCreateMockOrder = async (customerName: string, customerEmail: string, deliveryAddress?: DeliveryAddress, proofSvg?: SVGSVGElement | null) => {
     const proofSourceSvg = proofSvg || svgRef.current;
     const visualProofSvg = proofSourceSvg?.outerHTML || state.generatedSvgContent || null;
-    let visualProofPng: string | null = null;
-    if (proofSourceSvg) {
-      try {
-        const proofPngBase64 = await withTimeout(svgToProofPngBase64(proofSourceSvg), 6000, 'Proof image capture');
-        visualProofPng = `data:image/png;base64,${proofPngBase64}`;
-      } catch (error) {
-        console.warn('Checkout proof PNG capture did not finish; SVG fallback will be kept for this order.', error);
-      }
-    }
+    const visualProofPng: string | null = null;
     const order = makeMockOrder(state, inscriptionPrompt, selectedProduct.title, customerName, customerEmail, {
       productionSvg: state.generatedSvgContent,
       visualProofSvg,
