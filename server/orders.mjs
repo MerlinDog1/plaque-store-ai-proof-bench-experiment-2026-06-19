@@ -79,6 +79,71 @@ const fromRow = (row) => row && ({
   updatedAt: row.updated_at,
 });
 
+const orderProofSessionToken = (orderId) => `storefront-order-${orderId}`;
+
+const toProofSessionOrderRow = (order) => ({
+  public_token: orderProofSessionToken(order.id),
+  email: order.customerEmail || null,
+  status: "converted",
+  plaque_state: order.plaqueState || {},
+  wording: order.inscription || "",
+  generated_svg: order.proofPackage?.productionSvg || order.proofPackage?.visualProofSvg || null,
+  price_estimate_pence: order.totalPence || 0,
+  currency: order.currency || "gbp",
+  quote_flags: {},
+  metadata: {
+    kind: "storefront_order",
+    order,
+  },
+  expires_at: null,
+});
+
+const fromProofSessionOrderRow = (row) => {
+  const order = row?.metadata?.order;
+  if (!order) return null;
+  return {
+    ...order,
+    customerEmail: order.customerEmail || row.email || "",
+    inscription: order.inscription || row.wording || "",
+    plaqueState: order.plaqueState || row.plaque_state || {},
+    totalPence: order.totalPence || row.price_estimate_pence || 0,
+    currency: order.currency || row.currency || "gbp",
+    updatedAt: order.updatedAt || row.updated_at,
+    createdAt: order.createdAt || row.created_at,
+  };
+};
+
+const saveOrderToProofSessions = async (supabase, order) => {
+  const { data, error } = await supabase
+    .from("proof_sessions")
+    .upsert(toProofSessionOrderRow(order), { onConflict: "public_token" })
+    .select("email, wording, plaque_state, price_estimate_pence, currency, metadata, created_at, updated_at")
+    .single();
+  if (error) throw error;
+  return fromProofSessionOrderRow(data) || order;
+};
+
+const getProofSessionOrderById = async (supabase, orderId) => {
+  const { data, error } = await supabase
+    .from("proof_sessions")
+    .select("email, wording, plaque_state, price_estimate_pence, currency, metadata, created_at, updated_at")
+    .eq("public_token", orderProofSessionToken(orderId))
+    .maybeSingle();
+  if (error) throw error;
+  return fromProofSessionOrderRow(data);
+};
+
+const listProofSessionOrders = async (supabase) => {
+  const { data, error } = await supabase
+    .from("proof_sessions")
+    .select("email, wording, plaque_state, price_estimate_pence, currency, metadata, created_at, updated_at")
+    .eq("metadata->>kind", "storefront_order")
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) throw error;
+  return data.map(fromProofSessionOrderRow).filter(Boolean);
+};
+
 const normaliseFromMockOrder = (input) => {
   const order = input?.orderSnapshot || input?.order || input || {};
   const createdAt = order.createdAt || nowIso();
@@ -230,9 +295,13 @@ const saveOrder = async (order) => {
       .single();
     if (error && !shouldUseLocalFallback(error)) throw error;
     if (error && shouldUseLocalFallback(error)) {
-      const orders = await readLocalOrders();
-      await writeLocalOrders([next, ...orders.filter((item) => item.id !== next.id)]);
-      return next;
+      try {
+        return await saveOrderToProofSessions(supabase, next);
+      } catch {
+        const orders = await readLocalOrders();
+        await writeLocalOrders([next, ...orders.filter((item) => item.id !== next.id)]);
+        return next;
+      }
     }
     return fromRow(data);
   }
@@ -271,6 +340,12 @@ export const getOrderById = async (orderId) => {
       .maybeSingle();
     if (error && !shouldUseLocalFallback(error)) throw error;
     if (error && shouldUseLocalFallback(error)) {
+      try {
+        const order = await getProofSessionOrderById(supabase, orderId);
+        if (order) return order;
+      } catch {
+        // Fall through to the local emergency store.
+      }
       const orders = await readLocalOrders();
       return orders.find((order) => order.id === orderId) || null;
     }
@@ -291,6 +366,13 @@ export const getOrderByStripeSession = async (sessionId) => {
       .maybeSingle();
     if (error && !shouldUseLocalFallback(error)) throw error;
     if (error && shouldUseLocalFallback(error)) {
+      try {
+        const orders = await listProofSessionOrders(supabase);
+        const order = orders.find((order) => order.stripeCheckoutSessionId === sessionId);
+        if (order) return order;
+      } catch {
+        // Fall through to the local emergency store.
+      }
       const orders = await readLocalOrders();
       return orders.find((order) => order.stripeCheckoutSessionId === sessionId) || null;
     }
@@ -310,7 +392,13 @@ export const listOrders = async () => {
       .order("created_at", { ascending: false })
       .limit(200);
     if (error && !shouldUseLocalFallback(error)) throw error;
-    if (error && shouldUseLocalFallback(error)) return readLocalOrders();
+    if (error && shouldUseLocalFallback(error)) {
+      try {
+        return await listProofSessionOrders(supabase);
+      } catch {
+        return readLocalOrders();
+      }
+    }
     return data.map(fromRow);
   }
 

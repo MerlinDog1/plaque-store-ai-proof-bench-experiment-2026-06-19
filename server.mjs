@@ -134,22 +134,32 @@ const prepareStoredProofSvgForRaster = (order) => {
   });
 };
 
-const svgToPngBuffer = (svg) => new Promise((resolve, reject) => {
-  const child = spawn("rsvg-convert", ["--format", "png", "--width", "1200"]);
-  const chunks = [];
-  const errors = [];
-  child.stdout.on("data", (chunk) => chunks.push(chunk));
-  child.stderr.on("data", (chunk) => errors.push(chunk));
-  child.on("error", reject);
-  child.on("close", (code) => {
-    if (code === 0) {
-      resolve(Buffer.concat(chunks));
-      return;
-    }
-    reject(new Error(Buffer.concat(errors).toString("utf8") || `rsvg-convert exited ${code}`));
-  });
-  child.stdin.end(svg);
-});
+const svgToPngBuffer = async (svg) => {
+  try {
+    const { Resvg } = await import("@resvg/resvg-js");
+    return Buffer.from(new Resvg(svg, {
+      fitTo: { mode: "width", value: 1200 },
+      font: { loadSystemFonts: true },
+    }).render().asPng());
+  } catch (resvgError) {
+    return new Promise((resolve, reject) => {
+      const child = spawn("rsvg-convert", ["--format", "png", "--width", "1200"]);
+      const chunks = [];
+      const errors = [];
+      child.stdout.on("data", (chunk) => chunks.push(chunk));
+      child.stderr.on("data", (chunk) => errors.push(chunk));
+      child.on("error", () => reject(resvgError));
+      child.on("close", (code) => {
+        if (code === 0) {
+          resolve(Buffer.concat(chunks));
+          return;
+        }
+        reject(new Error(Buffer.concat(errors).toString("utf8") || `rsvg-convert exited ${code}`));
+      });
+      child.stdin.end(svg);
+    });
+  }
+};
 
 const parseStorefrontKeys = () => {
   const raw = process.env.STOREFRONT_INGEST_KEYS || process.env.STOREFRONT_API_KEYS || "";
@@ -277,14 +287,29 @@ export const handleRequest = async (req, res) => {
         res.end("Proof image not found");
         return;
       }
-      const body = image
-        ? Buffer.from(image, "base64")
-        : await svgToPngBuffer(prepareStoredProofSvgForRaster(order));
-      res.writeHead(200, {
-        "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=86400",
-      });
-      res.end(body);
+      if (image) {
+        res.writeHead(200, {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400",
+        });
+        res.end(Buffer.from(image, "base64"));
+        return;
+      }
+      try {
+        const body = await svgToPngBuffer(prepareStoredProofSvgForRaster(order));
+        res.writeHead(200, {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400",
+        });
+        res.end(body);
+      } catch {
+        const svg = prepareStoredProofSvgForRaster(order);
+        res.writeHead(200, {
+          "Content-Type": "image/svg+xml; charset=utf-8",
+          "Cache-Control": "public, max-age=86400",
+        });
+        res.end(svg);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not load proof image.";
       res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });

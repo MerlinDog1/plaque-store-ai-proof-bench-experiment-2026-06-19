@@ -25,7 +25,7 @@ const proofImageUrl = (order) => {
   const base = process.env.PUBLIC_SITE_URL || order.metadata?.publicOrigin || "";
   if (!base) return "";
   const root = base.replace(/\/$/, "");
-  if (order.proofPackage?.visualProofPng || order.proofPackage?.visualProofSvg) return `${root}/api/orders/${encodeURIComponent(order.id)}/proof-image.png`;
+  if (order.proofPackage?.visualProofPng) return `${root}/api/orders/${encodeURIComponent(order.id)}/proof-image.png`;
   return "";
 };
 
