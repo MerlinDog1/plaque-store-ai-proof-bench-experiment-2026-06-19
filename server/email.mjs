@@ -61,88 +61,13 @@ const shippingText = (address = {}) =>
     address.country,
   ].filter(Boolean).join(", ");
 
-const materialStyles = {
-  "brushed-steel": {
-    background: "linear-gradient(135deg,#6f7a82 0%,#c8d1d5 42%,#7b8790 100%)",
-    color: "#111827",
-    border: "#d7dde1",
-  },
-  "polished-steel": {
-    background: "linear-gradient(135deg,#4b5563 0%,#f8fafc 30%,#9ca3af 55%,#ffffff 72%,#475569 100%)",
-    color: "#111827",
-    border: "#e5e7eb",
-  },
-  "brushed-brass": {
-    background: "linear-gradient(135deg,#8a5a16 0%,#c89536 40%,#e5c46f 62%,#9a681c 100%)",
-    color: "#1f1608",
-    border: "#e3bd63",
-  },
-  "polished-brass": {
-    background: "linear-gradient(135deg,#79480a 0%,#f5c84b 26%,#fff1a3 44%,#b66c0c 62%,#f2bf37 100%)",
-    color: "#1f1608",
-    border: "#f3d36b",
-  },
-  "orbital-brass-matt-lacquer": {
-    background: "radial-gradient(circle at 35% 28%,#ead89b 0%,#c0a05d 38%,#8a733f 70%,#d4bd7a 100%)",
-    color: "#1f1608",
-    border: "#ddc47b",
-  },
-  "aged-brass": {
-    background: "linear-gradient(135deg,#3f2d18 0%,#907238 36%,#c0a45a 56%,#5f4725 100%)",
-    color: "#fff6df",
-    border: "#b49348",
-  },
-};
-
-const textColorForState = (state) => ({
-  black: "#111111",
-  grey: "#555555",
-  white: "#ffffff",
-  cream: "#fff1c7",
-}[state.textColor] || "#111111");
-
 const plaquePreviewHtml = (order) => {
   const proofUrl = proofImageUrl(order);
-  if (proofUrl || order.proofPackage?.visualProofPng) {
-    return `
-      <div style="padding:18px;background:#f5efe2;border-radius:18px;border:1px solid #e6d8bd;">
-        <img src="${escapeHtml(proofUrl || "cid:approved-proof")}" alt="Approved plaque proof" style="display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:14px;border:1px solid #e6d8bd;box-shadow:0 18px 42px rgba(36,28,12,.18);" />
-        <p style="margin:14px 0 0;text-align:center;color:#76684f;font:12px Arial,sans-serif;">${USE_CUSTOMER_COPY_PASS ? "Approved proof." : "Your actual approved proof."}</p>
-      </div>
-    `;
-  }
-
-  const state = stateForOrder(order);
-  const material = materialStyles[state.material] || materialStyles["brushed-steel"];
-  const width = Number(state.width || 300);
-  const height = Number(state.height || 200);
-  const aspect = Math.max(1.2, Math.min(4.6, width / Math.max(1, height)));
-  const previewWidth = 420;
-  const previewHeight = Math.max(92, Math.min(210, Math.round(previewWidth / aspect)));
-  const lines = String(order.inscription || order.wording || "Approved plaque proof")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .slice(0, 7);
-  const displayLines = lines.length ? lines : ["Approved plaque proof"];
-  const fontSize = displayLines.length > 5 ? 15 : displayLines.length > 3 ? 18 : 22;
-  const requestedTextColor = state.reverseEtch ? material.color : textColorForState(state);
-  const textColor = ["#ffffff", "#fff1c7"].includes(String(requestedTextColor).toLowerCase()) ? "#2a2111" : requestedTextColor;
-  const border = state.border ? `<div style="position:absolute;inset:12px;border:1px solid ${escapeHtml(textColor)};opacity:.55;border-radius:8px;"></div>` : "";
-  const fixingDots = state.fixing && state.fixing !== "none"
-    ? `<div style="position:absolute;left:15px;top:50%;width:7px;height:7px;margin-top:-4px;border-radius:50%;background:${escapeHtml(textColor)};opacity:.65;"></div><div style="position:absolute;right:15px;top:50%;width:7px;height:7px;margin-top:-4px;border-radius:50%;background:${escapeHtml(textColor)};opacity:.65;"></div>`
-    : "";
-
+  if (!proofUrl && !order.proofPackage?.visualProofPng) return "";
   return `
     <div style="padding:18px;background:#f5efe2;border-radius:18px;border:1px solid #e6d8bd;">
-      <div style="max-width:${previewWidth}px;height:${previewHeight}px;margin:0 auto;position:relative;border-radius:14px;border:1px solid ${material.border};background:${material.background};box-shadow:0 18px 42px rgba(36,28,12,.22);overflow:hidden;">
-        ${border}
-        ${fixingDots}
-        <div style="position:absolute;inset:24px 34px;display:flex;align-items:center;justify-content:center;text-align:center;color:${escapeHtml(textColor)};font-family:Georgia,'Times New Roman',serif;font-size:${fontSize}px;line-height:1.32;font-weight:700;letter-spacing:.02em;">
-          <div>${displayLines.map((line) => `<div>${escapeHtml(line)}</div>`).join("")}</div>
-        </div>
-      </div>
-      <p style="margin:14px 0 0;text-align:center;color:#76684f;font:12px Arial,sans-serif;">Approved proof preview - final finish may vary slightly in production.</p>
+      <img src="${escapeHtml(proofUrl || "cid:approved-proof")}" alt="Approved plaque proof" style="display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:14px;border:1px solid #e6d8bd;box-shadow:0 18px 42px rgba(36,28,12,.18);" />
+      <p style="margin:14px 0 0;text-align:center;color:#76684f;font:12px Arial,sans-serif;">Approved proof.</p>
     </div>
   `;
 };
