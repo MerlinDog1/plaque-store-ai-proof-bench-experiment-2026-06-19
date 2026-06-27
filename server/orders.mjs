@@ -3,7 +3,8 @@ import path from "node:path";
 import { getSupabaseServiceClient } from "./supabase.mjs";
 import { getAdminEmail, sendEmail } from "./email.mjs";
 
-const storePath = path.join(process.cwd(), "data", "storefront-orders.json");
+const storeRoot = process.env.VERCEL ? "/tmp" : process.cwd();
+const storePath = path.join(storeRoot, "data", "storefront-orders.json");
 
 const nowIso = () => new Date().toISOString();
 
