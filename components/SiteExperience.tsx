@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import PlaquePreview from './PlaquePreview';
 import { MockOrder, ProductFamily, SiteView, getPriceBreakdown, materialStories, productFamilies } from '../services/commerce';
 import { PlaqueState } from '../types';
-import { downloadCorelPdf } from '../services/exportService';
+import { downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -950,6 +950,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [proofReady, setProofReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const proofRenderSvgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1012,6 +1013,45 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
     };
   }, [order?.id]);
 
+  useEffect(() => {
+    if (!order || order.proofPackage?.visualProofPng || !proofRenderSvgRef.current) return;
+
+    let cancelled = false;
+    const attachRenderedProof = async () => {
+      try {
+        await document.fonts?.ready;
+        await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+        const sourceSvg = proofRenderSvgRef.current;
+        if (!sourceSvg || cancelled) return;
+        const proofImageBase64 = await svgToProofPngBase64(sourceSvg);
+        if (cancelled) return;
+        const response = await fetch(`/api/orders/${encodeURIComponent(order.id)}/proof-image`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            stripeCheckoutSessionId: order.stripeCheckoutSessionId,
+            visualProofSvg: sourceSvg.outerHTML,
+            visualProofPng: proofImageBase64,
+            sendCustomerEmail: true,
+          }),
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || `Could not attach proof image (${response.status}).`);
+        if (!cancelled) {
+          setOrder(payload.order);
+          setProofReady(true);
+        }
+      } catch (attachError) {
+        console.warn('Approved proof image could not be attached after checkout.', attachError);
+      }
+    };
+
+    attachRenderedProof();
+    return () => {
+      cancelled = true;
+    };
+  }, [order?.id, order?.proofPackage?.visualProofPng]);
+
   if (status === 'loading') {
     return (
       <div className="commerce-page">
@@ -1042,6 +1082,11 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
     <div className="commerce-page">
       <section className="commerce-order-confirmed">
         <div className="commerce-order-confirmed__main">
+          {order.plaqueState && (
+            <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+              <PlaquePreview ref={proofRenderSvgRef} state={order.plaqueState} activeStep={6} inscription={order.inscription} />
+            </div>
+          )}
           <p className="commerce-eyebrow">{paid ? 'Order confirmed' : 'Order received'}</p>
           <h1>{paid ? 'Your plaque order is confirmed.' : 'We are confirming your payment.'}</h1>
           <p className="commerce-lede">

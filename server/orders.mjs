@@ -470,7 +470,9 @@ export const markOrderPaidFromSession = async (session) => {
     ],
   });
 
-  await sendAndRecordOrderEmail(next, "customer-order-confirmation", customerEmail);
+  if (next.proofPackage?.visualProofPng) {
+    await sendAndRecordOrderEmail(next, "customer-order-confirmation", customerEmail);
+  }
 
   const adminEmail = getAdminEmail();
   if (adminEmail) {

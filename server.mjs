@@ -329,7 +329,10 @@ export const handleRequest = async (req, res) => {
     try {
       const orderId = decodeURIComponent(url.pathname.match(/^\/api\/orders\/([^/]+)\/proof-image$/)?.[1] || "");
       const payload = JSON.parse(await readBody(req));
-      const order = await attachVisualProofToOrder(orderId, payload);
+      let order = await attachVisualProofToOrder(orderId, payload);
+      if (payload.sendCustomerEmail && order.customerEmail) {
+        order = await sendAndRecordOrderEmail(order, "customer-order-confirmation", order.customerEmail);
+      }
       sendJson(res, 200, { ok: true, order });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not attach proof image.";
