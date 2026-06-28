@@ -160,12 +160,13 @@ const getProofSessionOrderById = async (supabase, orderId) => {
 const listProofSessionOrders = async (supabase) => {
   const { data, error } = await supabase
     .from("proof_sessions")
-    .select("email, wording, plaque_state, generated_svg, price_estimate_pence, currency, created_at, updated_at")
+    .select("email, wording, plaque_state, generated_svg, price_estimate_pence, currency, metadata, created_at, updated_at")
     .eq("metadata->>kind", "storefront_order")
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw error;
   return data.map((row) => ({
+    ...(fromProofSessionOrderRow(row) || {
     id: `PSAI-${new Date(row.created_at || Date.now()).getTime().toString().slice(-6)}`,
     stripeCheckoutSessionId: null,
     stripePaymentIntentId: null,
@@ -190,6 +191,7 @@ const listProofSessionOrders = async (supabase) => {
     paidAt: row.created_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    }),
   }));
 };
 
