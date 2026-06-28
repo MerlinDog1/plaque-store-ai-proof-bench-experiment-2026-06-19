@@ -39,7 +39,7 @@ export const createStripeCheckoutSession = async (payload) => {
   params.set("mode", "payment");
   params.set("client_reference_id", orderId);
   if (uiMode === "embedded") {
-    params.set("ui_mode", "embedded_page");
+    params.set("ui_mode", "embedded");
     params.set("return_url", `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
   } else {
     params.set("success_url", `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);

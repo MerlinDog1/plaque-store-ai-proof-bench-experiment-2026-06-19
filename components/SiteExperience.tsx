@@ -84,22 +84,66 @@ const USE_CUSTOMER_COPY_PASS = true;
 
 let stripeJsPromise: Promise<void> | null = null;
 
+const withClientTimeout = async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+  let timeoutId: number | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error(`${label} timed out. Please try again or use the secure checkout button.`)), ms);
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId) window.clearTimeout(timeoutId);
+  }
+};
+
 const loadStripeJs = () => {
   if (typeof window === 'undefined') return Promise.reject(new Error('Stripe.js needs a browser.'));
   if (window.Stripe) return Promise.resolve();
   if (!stripeJsPromise) {
     stripeJsPromise = new Promise<void>((resolve, reject) => {
+      let pollId: number | undefined;
+      const timeoutId = window.setTimeout(() => {
+        if (pollId) window.clearInterval(pollId);
+        stripeJsPromise = null;
+        reject(new Error('Stripe.js took too long to load.'));
+      }, 10000);
+      const finish = () => {
+        if (pollId) window.clearInterval(pollId);
+        window.clearTimeout(timeoutId);
+        if (window.Stripe) {
+          resolve();
+        } else {
+          reject(new Error('Stripe.js loaded but did not initialise.'));
+        }
+      };
       const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://js.stripe.com/v3/"]');
       if (existingScript) {
-        existingScript.addEventListener('load', () => resolve(), { once: true });
-        existingScript.addEventListener('error', () => reject(new Error('Stripe.js failed to load.')), { once: true });
+        if (window.Stripe) {
+          finish();
+          return;
+        }
+        pollId = window.setInterval(() => {
+          if (!window.Stripe) return;
+          finish();
+        }, 100);
+        existingScript.addEventListener('load', finish, { once: true });
+        existingScript.addEventListener('error', () => {
+          window.clearInterval(pollId);
+          window.clearTimeout(timeoutId);
+          stripeJsPromise = null;
+          reject(new Error('Stripe.js failed to load.'));
+        }, { once: true });
         return;
       }
       const script = document.createElement('script');
       script.src = 'https://js.stripe.com/v3/';
       script.async = true;
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Stripe.js failed to load.'));
+      script.onload = finish;
+      script.onerror = () => {
+        window.clearTimeout(timeoutId);
+        stripeJsPromise = null;
+        reject(new Error('Stripe.js failed to load.'));
+      };
       document.head.appendChild(script);
     });
   }
@@ -790,7 +834,11 @@ function CheckoutPage({
       .then(async () => {
         const stripe = window.Stripe?.(stripePublishableKey);
         if (!stripe) throw new Error('Stripe.js did not initialise.');
-        const checkout = await stripe.initEmbeddedCheckout({ clientSecret: embeddedClientSecret });
+        const checkout = await withClientTimeout(
+          stripe.initEmbeddedCheckout({ clientSecret: embeddedClientSecret }),
+          12000,
+          'Stripe checkout',
+        );
         if (!mounted) {
           checkout.destroy?.();
           return;
@@ -866,7 +914,10 @@ function CheckoutPage({
                   </div>
                   {embeddedStatus === 'loading' && <span>Loading secure payment form...</span>}
                   {embeddedStatus === 'error' && (
-                    <span className="commerce-embedded-checkout__error">{embeddedError}</span>
+                    <span className="commerce-embedded-checkout__error">
+                      {embeddedError}
+                      <button type="button" className="commerce-secondary" onClick={prepareCheckout}>Retry secure checkout</button>
+                    </span>
                   )}
                   <div ref={embeddedMountRef} className="commerce-embedded-checkout__mount" />
                 </div>
