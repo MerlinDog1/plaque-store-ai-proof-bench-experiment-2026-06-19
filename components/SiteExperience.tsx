@@ -806,19 +806,17 @@ function CheckoutPage({
     setEmbeddedStatus('idle');
     setEmbeddedError(null);
     try {
-      setCreatedOrder(await onCreateMockOrder('Stripe checkout customer', '', undefined, checkoutProofSvgRef.current));
+      const order = await onCreateMockOrder('Stripe checkout customer', '', undefined, checkoutProofSvgRef.current);
+      setCreatedOrder(order);
+      if (order.stripeSimulation.checkoutUrl && order.stripeSimulation.uiMode !== 'embedded') {
+        window.location.assign(order.stripeSimulation.checkoutUrl);
+      }
     } catch (error) {
       setOrderError(error instanceof Error ? error.message : 'Secure checkout could not be prepared.');
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    if (!isProductionReady || createdOrder || isSubmitting || orderError) return;
-    prepareCheckout();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isProductionReady, createdOrder, isSubmitting, orderError]);
 
   useEffect(() => {
     if (!createdOrder || !embeddedClientSecret || !stripePublishableKey || !embeddedMountRef.current) {
@@ -922,13 +920,24 @@ function CheckoutPage({
                   <div ref={embeddedMountRef} className="commerce-embedded-checkout__mount" />
                 </div>
               )}
-              {createdOrder.stripeSimulation.checkoutUrl && (
-                <button type="button" className="commerce-primary" onClick={() => window.location.assign(createdOrder.stripeSimulation.checkoutUrl!)}>
-                  Continue to secure checkout
-                </button>
-              )}
               </>
             ) : null}
+            {isProductionReady && (
+              <button
+                type="button"
+                className="commerce-primary"
+                disabled={isSubmitting}
+                onClick={() => {
+                  if (createdOrder?.stripeSimulation.checkoutUrl) {
+                    window.location.assign(createdOrder.stripeSimulation.checkoutUrl);
+                    return;
+                  }
+                  prepareCheckout();
+                }}
+              >
+                {isSubmitting ? 'Preparing secure checkout...' : 'Continue to secure Stripe checkout'}
+              </button>
+            )}
           </div>
         </div>
       </section>
