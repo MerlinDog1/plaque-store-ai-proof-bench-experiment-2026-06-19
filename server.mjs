@@ -344,7 +344,7 @@ export const handleRequest = async (req, res) => {
       const payload = JSON.parse(await readBody(req));
       let order = await attachVisualProofToOrder(orderId, payload);
       if (payload.sendCustomerEmail && order.customerEmail) {
-        order = await sendAndRecordOrderEmail(order, "customer-order-confirmation", order.customerEmail);
+        order = await sendAndRecordOrderEmail(order, "customer-proof-copy", order.customerEmail);
       }
       sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(order) });
     } catch (error) {

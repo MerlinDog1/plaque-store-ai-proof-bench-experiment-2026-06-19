@@ -276,6 +276,22 @@ export const buildEmail = (template, order, extra = {}) => {
     return customerOrderConfirmation(order, { orderLink, title, total });
   }
 
+  if (template === "customer-proof-copy") {
+    return brandedOrderUpdate(order, {
+      subject: `Your approved proof: ${order.id}`,
+      eyebrow: "Approved proof",
+      heading: "Your proof copy is ready.",
+      intro: "A copy of the approved plaque proof is attached for your records.",
+      panelTitle: "Saved with your order",
+      panelCopy: "This is the proof linked to your confirmed order. We will use it when preparing your plaque for production.",
+      orderLink,
+      title,
+      ctaLabel: "View your order",
+      footer: "If anything looks wrong, reply to this email as soon as possible before production progresses.",
+      includeProof: true,
+    });
+  }
+
   if (template === "customer-in-production") {
     return brandedOrderUpdate(order, {
       subject: `Your plaque is in production: ${order.id}`,
