@@ -872,7 +872,7 @@ const App: React.FC = () => {
           productTitle: selectedProduct.title,
           totalPence: Math.round(order.total * 100),
           origin: window.location.origin,
-          uiMode: 'embedded',
+          uiMode: 'hosted',
           deliveryAddress,
           orderSnapshot: order,
         }),

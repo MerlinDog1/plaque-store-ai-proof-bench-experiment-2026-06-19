@@ -884,7 +884,7 @@ function CheckoutPage({
             <p className="commerce-eyebrow">Secure checkout</p>
             <h1>Complete your order.</h1>
             <p>
-              Enter your contact details, delivery address and payment details below.
+              Continue to Stripe's secure checkout page to enter contact, delivery and payment details.
             </p>
             {!isProductionReady && (
               <div className="commerce-warning">
