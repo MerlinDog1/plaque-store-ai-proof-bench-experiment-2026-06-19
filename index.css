@@ -2231,6 +2231,23 @@
   aspect-ratio: 4 / 3;
 }
 
+.admin-console__export-source {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  width: 1200px;
+  height: 900px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.admin-console__export-source .proof-canvas {
+  width: 1200px;
+  max-width: none;
+  max-height: none;
+}
+
 .commerce-order-proof__pending {
   display: grid;
   min-height: 220px;

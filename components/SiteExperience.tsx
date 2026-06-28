@@ -1318,8 +1318,16 @@ function AdminPage() {
   const canDownloadSelectedProductionArtwork = Boolean(canRenderSelectedProof || selectedStoredProofSvg);
   const adminHeaders = adminToken ? { 'x-admin-token': adminToken } : {};
 
-  const downloadProductionArtwork = (order: PaidOrder) => {
-    if (canRenderSelectedProof && adminProofSvgRef.current) {
+  const downloadProductionArtwork = async (order: PaidOrder) => {
+    if (hasRenderablePlaqueState(order.plaqueState)) {
+      if (!adminProofSvgRef.current) {
+        window.alert('Production PDF is still preparing from the approved preview. Please try again in a moment.');
+        return;
+      }
+      if ('fonts' in document) {
+        await document.fonts.ready;
+      }
+      await new Promise((resolve) => requestAnimationFrame(resolve));
       downloadCorelPdf(
         adminProofSvgRef.current,
         order.plaqueState,
@@ -1739,11 +1747,6 @@ function AdminPage() {
                 ) : (
                   <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
                 )}
-                {canRenderSelectedProof && (
-                  <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
-                    <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
-                  </div>
-                )}
               </div>
               <div className="admin-console__data-grid">
                 <div><span>Product</span><strong>{selectedOrder.productTitle}</strong></div>
@@ -1854,6 +1857,11 @@ function AdminPage() {
             </AdminDetailBoundary>
           )}
         </div>
+        {selectedOrder && canRenderSelectedProof && (
+          <div className="admin-console__export-source" aria-hidden="true">
+            <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
+          </div>
+        )}
           </>
         )}
       </section>
