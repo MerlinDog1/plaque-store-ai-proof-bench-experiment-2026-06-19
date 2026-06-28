@@ -455,8 +455,19 @@ export const handleRequest = async (req, res) => {
       const orderId = decodeURIComponent(url.pathname.replace("/api/orders/", ""));
       let order = await getOrderById(orderId);
       const sessionId = url.searchParams.get("session_id");
-      if (order && sessionId && order.paymentStatus !== "paid") {
-        const stripeSession = await retrieveStripeCheckoutSession(sessionId);
+      const storedSessionId = order?.stripeCheckoutSessionId;
+      const needsStripeRefresh = Boolean(
+        order
+          && (sessionId || storedSessionId)
+          && (
+            order.paymentStatus !== "paid"
+            || !order.shippingAddress
+            || !Object.keys(order.shippingAddress).length
+            || !order.stripePaymentIntentId
+          ),
+      );
+      if (order && needsStripeRefresh) {
+        const stripeSession = await retrieveStripeCheckoutSession(sessionId || storedSessionId);
         if (stripeSession.payment_status === "paid" || stripeSession.status === "complete") {
           order = await markOrderPaidFromSession(stripeSession);
         } else {

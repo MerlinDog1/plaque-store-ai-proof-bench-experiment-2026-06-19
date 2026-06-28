@@ -496,11 +496,15 @@ export const markOrderPaidFromSession = async (session) => {
   const order = orderId ? await getOrderById(orderId) : await getOrderByStripeSession(sessionId);
   if (!order) throw new Error("Paid Stripe session could not be matched to an order.");
 
+  const wasAlreadyPaid = order.paymentStatus === "paid";
   const shipping = session?.shipping_details || session?.shipping || {};
   const customer = session?.customer_details || {};
   const customerEmail = customer.email || session.customer_email || order.customerEmail;
   const customerName = customer.name || shipping.name || order.customerName;
-  const paidAt = nowIso();
+  const paidAt = order.paidAt || nowIso();
+  const paymentEvent = wasAlreadyPaid
+    ? []
+    : [{ type: "payment_received", label: "Payment received", at: paidAt }];
   const next = await saveOrder({
     ...order,
     customerEmail,
@@ -514,16 +518,18 @@ export const markOrderPaidFromSession = async (session) => {
     stripeSession: session,
     paidAt,
     events: [
-      { type: "payment_received", label: "Payment received", at: paidAt },
+      ...paymentEvent,
       ...(order.events || []),
     ],
   });
 
-  await sendAndRecordOrderEmail(next, "customer-order-confirmation", customerEmail);
+  if (!wasAlreadyPaid) {
+    await sendAndRecordOrderEmail(next, "customer-order-confirmation", customerEmail);
 
-  const adminEmail = getAdminEmail();
-  if (adminEmail) {
-    await sendAndRecordOrderEmail(next, "admin-new-paid-order", adminEmail).catch(() => null);
+    const adminEmail = getAdminEmail();
+    if (adminEmail) {
+      await sendAndRecordOrderEmail(next, "admin-new-paid-order", adminEmail).catch(() => null);
+    }
   }
 
   return next;
