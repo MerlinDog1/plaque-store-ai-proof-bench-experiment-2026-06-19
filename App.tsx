@@ -866,9 +866,12 @@ const App: React.FC = () => {
     }, deliveryAddress);
     let checkoutOrder = order;
     try {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 12000);
       const response = await fetch('/api/stripe/checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           orderId: order.id,
           customerEmail,
@@ -880,6 +883,7 @@ const App: React.FC = () => {
           orderSnapshot: order,
         }),
       });
+      window.clearTimeout(timeout);
       if (!response.ok) throw new Error(`Stripe checkout failed (${response.status})`);
       const payload = await response.json();
       const session = payload.session;
@@ -899,6 +903,9 @@ const App: React.FC = () => {
             uiMode: session.uiMode || 'hosted',
           },
         };
+        if (checkoutOrder.stripeSimulation.checkoutUrl && checkoutOrder.stripeSimulation.uiMode !== 'embedded') {
+          return checkoutOrder;
+        }
       } else {
         throw new Error('Stripe checkout did not return a checkout URL.');
       }
