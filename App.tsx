@@ -896,9 +896,12 @@ const App: React.FC = () => {
             uiMode: session.uiMode || 'hosted',
           },
         };
+      } else {
+        throw new Error('Stripe checkout did not return a checkout URL.');
       }
     } catch (error) {
-      console.warn('Stripe checkout session could not be created; keeping mock checkout package.', error);
+      console.error('Stripe checkout session could not be created.', error);
+      throw error;
     }
     setMockOrders(prev => {
       const next = [checkoutOrder, ...prev];
