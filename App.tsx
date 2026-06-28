@@ -859,12 +859,10 @@ const App: React.FC = () => {
     if (!proofSourceSvg) {
       throw new Error('The approved proof is not ready. Please return to the proof step and try again.');
     }
-    const proofImageBase64 = await withTimeout(svgToProofPngBase64(proofSourceSvg), 20000, 'Approved proof capture');
-    const visualProofPng = `data:image/png;base64,${proofImageBase64.replace(/^data:image\/png;base64,/, '')}`;
     const order = makeMockOrder(state, inscriptionPrompt, selectedProduct.title, customerName, customerEmail, {
       productionSvg: state.generatedSvgContent,
       visualProofSvg,
-      visualProofPng,
+      visualProofPng: null,
     }, deliveryAddress);
     let checkoutOrder = order;
     try {
