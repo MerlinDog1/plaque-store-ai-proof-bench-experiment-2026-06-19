@@ -52,6 +52,30 @@ const toRow = (order) => ({
   updated_at: nowIso(),
 });
 
+const listOrderColumns = [
+  "id",
+  "stripe_checkout_session_id",
+  "stripe_payment_intent_id",
+  "customer_email",
+  "customer_name",
+  "status",
+  "payment_status",
+  "fulfilment_status",
+  "total_pence",
+  "currency",
+  "product_title",
+  "inscription",
+  "plaque_state",
+  "price_breakdown",
+  "shipping_address",
+  "email_events",
+  "events",
+  "approved_at",
+  "paid_at",
+  "created_at",
+  "updated_at",
+].join(",");
+
 const fromRow = (row) => row && ({
   id: row.id,
   stripeCheckoutSessionId: row.stripe_checkout_session_id,
@@ -136,12 +160,37 @@ const getProofSessionOrderById = async (supabase, orderId) => {
 const listProofSessionOrders = async (supabase) => {
   const { data, error } = await supabase
     .from("proof_sessions")
-    .select("email, wording, plaque_state, price_estimate_pence, currency, metadata, created_at, updated_at")
+    .select("email, wording, plaque_state, generated_svg, price_estimate_pence, currency, created_at, updated_at")
     .eq("metadata->>kind", "storefront_order")
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw error;
-  return data.map(fromProofSessionOrderRow).filter(Boolean);
+  return data.map((row) => ({
+    id: `PSAI-${new Date(row.created_at || Date.now()).getTime().toString().slice(-6)}`,
+    stripeCheckoutSessionId: null,
+    stripePaymentIntentId: null,
+    customerEmail: row.email || "",
+    customerName: "",
+    status: "paid",
+    paymentStatus: "paid",
+    fulfilmentStatus: "not_started",
+    totalPence: row.price_estimate_pence || 0,
+    currency: row.currency || "gbp",
+    productTitle: "Custom plaque",
+    inscription: row.wording || "",
+    plaqueState: row.plaque_state || {},
+    priceBreakdown: {},
+    proofPackage: row.generated_svg ? { productionSvg: row.generated_svg, visualProofSvg: row.generated_svg } : {},
+    shippingAddress: {},
+    stripeSession: {},
+    emailEvents: [],
+    events: [],
+    metadata: {},
+    approvedAt: row.created_at,
+    paidAt: row.created_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
 };
 
 const normaliseFromMockOrder = (input) => {
@@ -417,7 +466,7 @@ export const listOrders = async () => {
   if (supabase) {
     const { data, error } = await supabase
       .from("storefront_orders")
-      .select("*")
+      .select(listOrderColumns)
       .order("created_at", { ascending: false })
       .limit(200);
     if (error && !shouldUseLocalFallback(error)) throw error;
