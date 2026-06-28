@@ -465,8 +465,16 @@ export const attachVisualProofToOrder = async (orderId, payload = {}) => {
 
   const visualProofPng = String(payload.visualProofPng || "").trim();
   const visualProofSvg = String(payload.visualProofSvg || "").trim();
+  const productionArtworkPdf = String(payload.productionArtworkPdf || "").trim();
   if (!visualProofPng.startsWith("data:image/png;base64,") && !/^[a-z0-9+/]+=*$/i.test(visualProofPng)) {
     throw new Error("Proof image must be a PNG data URL or base64 PNG.");
+  }
+  if (
+    productionArtworkPdf &&
+    !productionArtworkPdf.startsWith("data:application/pdf;base64,") &&
+    !/^[a-z0-9+/]+=*$/i.test(productionArtworkPdf)
+  ) {
+    throw new Error("Production artwork must be a PDF data URL or base64 PDF.");
   }
 
   return saveOrder({
@@ -475,6 +483,7 @@ export const attachVisualProofToOrder = async (orderId, payload = {}) => {
       ...(order.proofPackage || {}),
       visualProofSvg: visualProofSvg || order.proofPackage?.visualProofSvg || null,
       visualProofPng,
+      productionArtworkPdf: productionArtworkPdf || order.proofPackage?.productionArtworkPdf || null,
     },
     events: [
       { type: "proof_image_attached", label: "Browser-rendered proof image attached", at: nowIso() },

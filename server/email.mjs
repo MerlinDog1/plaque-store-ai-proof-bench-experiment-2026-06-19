@@ -181,8 +181,14 @@ const internalProductionAttachments = (order) => {
     const visualSvg = fullSvg(order.proofPackage?.visualProofSvg, order);
     if (visualSvg) attachments.push(svgAttachment(`${order.id}-visual-proof.svg`, visualSvg));
   }
-  const productionSvg = fullSvg(order.proofPackage?.productionSvg, order);
-  if (productionSvg) attachments.push(svgAttachment(`${order.id}-production-artwork.svg`, productionSvg));
+  const productionPdf = String(order.proofPackage?.productionArtworkPdf || "").trim();
+  if (productionPdf) {
+    attachments.push({
+      filename: `${order.id}-production-artwork.pdf`,
+      content: productionPdf.replace(/^data:application\/pdf;base64,/, ""),
+      content_type: "application/pdf",
+    });
+  }
   return attachments;
 };
 

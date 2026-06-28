@@ -677,34 +677,49 @@ export const downloadCorelSvg = async (sourceSvg: SVGSVGElement, state: PlaqueSt
   }
 };
 
+export const createCorelPdfBlob = async (sourceSvg: SVGSVGElement, state: PlaqueState) => {
+  await ensurePdfLibraries();
+  const jsPDFCtor = window.jsPDF || window.jspdf?.jsPDF;
+  const svg2pdf = window.svg2pdf?.svg2pdf || window.svg2pdf;
+  if (!jsPDFCtor || !svg2pdf) throw new Error("PDF library not loaded. Please refresh.");
+
+  const xml = await createCorelSvgText(sourceSvg, state);
+  const docSvg = new DOMParser().parseFromString(xml, "image/svg+xml").querySelector("svg");
+  if (!docSvg) throw new Error("Production artwork could not be prepared.");
+
+  const box = docSvg.viewBox.baseVal;
+  const width = box.width || Number.parseFloat(docSvg.getAttribute("width") || "") || state.width;
+  const height = box.height || Number.parseFloat(docSvg.getAttribute("height") || "") || state.height;
+  const pdf = new jsPDFCtor({
+    orientation: width >= height ? "l" : "p",
+    unit: "mm",
+    format: [width, height],
+    compress: true,
+  });
+
+  await svg2pdf(docSvg, pdf, {
+    x: 0,
+    y: 0,
+    width,
+    height,
+  });
+  return pdf.output("blob") as Blob;
+};
+
 export const downloadCorelPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, filename?: string) => {
   try {
-    await ensurePdfLibraries();
-    const jsPDFCtor = window.jsPDF || window.jspdf?.jsPDF;
-    const svg2pdf = window.svg2pdf?.svg2pdf || window.svg2pdf;
-    if (!jsPDFCtor || !svg2pdf) throw new Error("PDF library not loaded. Please refresh.");
-
-    const xml = await createCorelSvgText(sourceSvg, state);
-    const docSvg = new DOMParser().parseFromString(xml, "image/svg+xml").querySelector("svg");
-    if (!docSvg) throw new Error("Production artwork could not be prepared.");
-
-    const box = docSvg.viewBox.baseVal;
-    const width = box.width || Number.parseFloat(docSvg.getAttribute("width") || "") || state.width;
-    const height = box.height || Number.parseFloat(docSvg.getAttribute("height") || "") || state.height;
-    const pdf = new jsPDFCtor({
-      orientation: width >= height ? "l" : "p",
-      unit: "mm",
-      format: [width, height],
-      compress: true,
-    });
-
-    await svg2pdf(docSvg, pdf, {
-      x: 0,
-      y: 0,
-      width,
-      height,
-    });
-    pdf.save(filename || `plaque_${state.width}x${state.height}_${state.material}.pdf`);
+    const blob = await createCorelPdfBlob(sourceSvg, state);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename || `plaque_${state.width}x${state.height}_${state.material}.pdf`;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
   } catch (e) {
     console.error("Production PDF export failed", e);
     alert("Production PDF export failed: " + e);

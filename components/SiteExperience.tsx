@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import PlaquePreview from './PlaquePreview';
 import { MockOrder, ProductFamily, SiteView, getPriceBreakdown, materialStories, productFamilies } from '../services/commerce';
 import { PlaqueState } from '../types';
-import { downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
+import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -54,6 +54,7 @@ type PaidOrder = {
     productionSvg?: string | null;
     visualProofSvg?: string | null;
     visualProofPng?: string | null;
+    productionArtworkPdf?: string | null;
     productionFilename?: string;
     visualFilename?: string;
     lockedAt?: string;
@@ -285,6 +286,13 @@ const ensureSvgDocument = (content: string, state?: Partial<PlaqueState>) => {
 const downloadSvgFile = (filename: string, content: string, state?: Partial<PlaqueState>) => {
   downloadTextFile(filename, ensureSvgDocument(content, state), 'image/svg+xml');
 };
+
+const blobToDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result || ''));
+  reader.onerror = () => reject(reader.error || new Error('Could not read generated file.'));
+  reader.readAsDataURL(blob);
+});
 
 const storedProofSvgDataUrl = (order: PaidOrder) => {
   const svg = storedProofSvgForOrder(order);
@@ -1159,6 +1167,12 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
         const sourceSvg = proofRenderSvgRef.current;
         if (!sourceSvg || cancelled) return;
         const proofImageBase64 = await svgToProofPngBase64(sourceSvg);
+        let productionArtworkPdf = '';
+        try {
+          productionArtworkPdf = await blobToDataUrl(await createCorelPdfBlob(sourceSvg, order.plaqueState));
+        } catch (pdfError) {
+          console.warn('Production PDF could not be generated for the internal pack.', pdfError);
+        }
         if (cancelled) return;
         const response = await fetch(`/api/orders/${encodeURIComponent(order.id)}/proof-image`, {
           method: 'POST',
@@ -1167,6 +1181,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
             stripeCheckoutSessionId: order.stripeCheckoutSessionId,
             visualProofSvg: sourceSvg.outerHTML,
             visualProofPng: proofImageBase64,
+            productionArtworkPdf,
             sendCustomerEmail: true,
           }),
         });

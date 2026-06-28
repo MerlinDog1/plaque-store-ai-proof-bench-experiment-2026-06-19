@@ -347,12 +347,14 @@ export const handleRequest = async (req, res) => {
       if (payload.sendCustomerEmail && order.customerEmail) {
         order = await sendAndRecordOrderEmail(order, "customer-proof-copy", order.customerEmail);
       }
-      for (const internalEmail of getInternalProductionEmails()) {
-        const alreadySent = (order.emailEvents || []).some(
-          (event) => event.type === "admin-production-pack" && event.recipient === internalEmail,
-        );
-        if (!alreadySent) {
-          order = await sendAndRecordOrderEmail(order, "admin-production-pack", internalEmail);
+      if (order.proofPackage?.productionArtworkPdf) {
+        for (const internalEmail of getInternalProductionEmails()) {
+          const alreadySent = (order.emailEvents || []).some(
+            (event) => event.type === "admin-production-pack" && event.recipient === internalEmail,
+          );
+          if (!alreadySent) {
+            order = await sendAndRecordOrderEmail(order, "admin-production-pack", internalEmail);
+          }
         }
       }
       sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(order) });
