@@ -170,6 +170,22 @@ const lightweightFallbackOrder = (order) => order && ({
   updatedAt: order.updatedAt || null,
 });
 
+const paymentIntentId = (value) => {
+  if (!value) return null;
+  if (typeof value === "string") return value;
+  return value.id || null;
+};
+
+const shippingFromPaymentIntent = (paymentIntent) => {
+  const shipping = paymentIntent?.shipping || {};
+  if (!shipping.address) return {};
+  return {
+    name: shipping.name || "",
+    phone: shipping.phone || "",
+    ...shipping.address,
+  };
+};
+
 const saveOrderToProofSessions = async (supabase, order) => {
   const { data, error } = await supabase
     .from("proof_sessions")
@@ -193,39 +209,63 @@ const getProofSessionOrderById = async (supabase, orderId) => {
 const listProofSessionOrders = async (supabase) => {
   const { data, error } = await supabase
     .from("proof_sessions")
-    .select("email, wording, plaque_state, generated_svg, price_estimate_pence, currency, metadata, created_at, updated_at")
+    .select([
+      "email",
+      "wording",
+      "price_estimate_pence",
+      "currency",
+      "created_at",
+      "updated_at",
+      "order_id:metadata->order->id",
+      "stripe_checkout_session_id:metadata->order->stripeCheckoutSessionId",
+      "stripe_payment_intent_id:metadata->order->stripePaymentIntentId",
+      "shipping_address:metadata->order->shippingAddress",
+      "status:metadata->order->status",
+      "payment_status:metadata->order->paymentStatus",
+      "fulfilment_status:metadata->order->fulfilmentStatus",
+      "customer_email:metadata->order->customerEmail",
+      "customer_name:metadata->order->customerName",
+      "product_title:metadata->order->productTitle",
+      "inscription:metadata->order->inscription",
+      "total_pence:metadata->order->totalPence",
+      "paid_at:metadata->order->paidAt",
+      "approved_at:metadata->order->approvedAt",
+    ].join(","))
     .eq("metadata->>kind", "storefront_order")
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw error;
-  return data.map((row) => ({
-    ...(lightweightFallbackOrder(fromProofSessionOrderRow(row)) || {
-    id: `PSAI-${new Date(row.created_at || Date.now()).getTime().toString().slice(-6)}`,
-    stripeCheckoutSessionId: null,
-    stripePaymentIntentId: null,
-    customerEmail: row.email || "",
-    customerName: "",
-    status: "paid",
-    paymentStatus: "paid",
-    fulfilmentStatus: "not_started",
-    totalPence: row.price_estimate_pence || 0,
-    currency: row.currency || "gbp",
-    productTitle: "Custom plaque",
-    inscription: row.wording || "",
-    plaqueState: row.plaque_state || {},
-    priceBreakdown: {},
-    proofPackage: row.generated_svg ? { productionSvg: row.generated_svg, visualProofSvg: row.generated_svg } : {},
-    shippingAddress: {},
-    stripeSession: {},
-    emailEvents: [],
-    events: [],
-    metadata: {},
-    approvedAt: row.created_at,
-    paidAt: row.created_at,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    }),
-  }));
+  return data.map((row) => {
+    const shippingAddress = row.shipping_address && Object.keys(row.shipping_address).length
+      ? row.shipping_address
+      : shippingFromPaymentIntent(row.stripe_payment_intent_id);
+    return {
+      id: row.order_id || `PSAI-${new Date(row.created_at || Date.now()).getTime().toString().slice(-6)}`,
+      stripeCheckoutSessionId: row.stripe_checkout_session_id || null,
+      stripePaymentIntentId: paymentIntentId(row.stripe_payment_intent_id),
+      customerEmail: row.customer_email || row.email || "",
+      customerName: row.customer_name || shippingAddress.name || "",
+      status: row.status || "paid",
+      paymentStatus: row.payment_status || "paid",
+      fulfilmentStatus: row.fulfilment_status || "not_started",
+      totalPence: row.total_pence || row.price_estimate_pence || 0,
+      currency: row.currency || "gbp",
+      productTitle: row.product_title || "Custom plaque",
+      inscription: row.inscription || row.wording || "",
+      plaqueState: {},
+      priceBreakdown: {},
+      proofPackage: {},
+      shippingAddress,
+      stripeSession: {},
+      emailEvents: [],
+      events: [],
+      metadata: {},
+      approvedAt: row.approved_at || row.created_at,
+      paidAt: row.paid_at || row.created_at,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  });
 };
 
 const normaliseFromMockOrder = (input) => {
