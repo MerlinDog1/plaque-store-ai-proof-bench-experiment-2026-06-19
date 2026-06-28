@@ -236,6 +236,7 @@ const addressLinesForOrder = (order: PaidOrder) => {
     address.state,
     address.postal_code || address.postcode,
     address.country,
+    address.phone,
   ].filter(Boolean);
 };
 

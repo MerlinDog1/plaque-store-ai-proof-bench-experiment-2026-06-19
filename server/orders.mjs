@@ -514,7 +514,7 @@ export const markOrderPaidFromSession = async (session) => {
     fulfilmentStatus: order.fulfilmentStatus || "not_started",
     stripeCheckoutSessionId: sessionId || order.stripeCheckoutSessionId,
     stripePaymentIntentId: session.payment_intent || order.stripePaymentIntentId,
-    shippingAddress: shipping.address ? { name: shipping.name, ...shipping.address } : order.shippingAddress,
+    shippingAddress: shipping.address ? { name: shipping.name, phone: customer.phone || session.phone_number || "", ...shipping.address } : order.shippingAddress,
     stripeSession: session,
     paidAt,
     events: [

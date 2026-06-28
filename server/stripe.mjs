@@ -49,6 +49,7 @@ export const createStripeCheckoutSession = async (payload) => {
   if (customerEmail.includes("@")) {
     params.set("customer_email", customerEmail);
   }
+  params.set("phone_number_collection[enabled]", "true");
   params.set("line_items[0][quantity]", "1");
   params.set("line_items[0][price_data][currency]", "gbp");
   params.set("line_items[0][price_data][unit_amount]", String(totalPence));
