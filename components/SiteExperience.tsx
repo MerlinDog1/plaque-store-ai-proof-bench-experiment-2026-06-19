@@ -1589,6 +1589,17 @@ function AdminPage() {
                       </button>
                       <button
                         type="button"
+                        disabled={!selectedOrder || !canRenderSelectedProof}
+                        onClick={() => adminProofSvgRef.current && downloadCorelPdf(
+                          adminProofSvgRef.current,
+                          selectedOrder.plaqueState,
+                          asPdfFilename(selectedOrder.proofPackage?.productionFilename || `${selectedOrder.id}-production-artwork.pdf`),
+                        )}
+                      >
+                        Download production PDF
+                      </button>
+                      <button
+                        type="button"
                         disabled={!selectedOrder}
                         onClick={() => downloadOrderProofPng(selectedOrder).catch((downloadError) => {
                           console.error('Approved proof PNG download failed.', downloadError);
