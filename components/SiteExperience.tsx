@@ -167,6 +167,17 @@ const formatOrderSource = (order: PaidOrder) => {
     .join(' ');
 };
 
+const hasRenderablePlaqueState = (state?: Partial<PlaqueState> | null) =>
+  Boolean(
+    state
+    && Number.isFinite(state.width)
+    && Number.isFinite(state.height)
+    && typeof state.material === 'string'
+    && typeof state.shape === 'string'
+    && typeof state.textColor === 'string'
+    && typeof state.fixing === 'string',
+  );
+
 const formatAdminDate = (value?: string) => value ? new Date(value).toLocaleString('en-GB', {
   day: '2-digit',
   month: 'short',
@@ -1165,6 +1176,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 function AdminPage() {
   const [orders, setOrders] = useState<PaidOrder[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedOrderDetail, setSelectedOrderDetail] = useState<PaidOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [adminError, setAdminError] = useState<string | null>(null);
   const [authConfig, setAuthConfig] = useState<AdminAuthConfig | null>(null);
@@ -1172,7 +1184,9 @@ function AdminPage() {
   const [password, setPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const adminProofSvgRef = useRef<SVGSVGElement | null>(null);
-  const selectedOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
+  const selectedSummaryOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
+  const selectedOrder = selectedOrderDetail?.id === selectedSummaryOrder?.id ? selectedOrderDetail : selectedSummaryOrder;
+  const canRenderSelectedProof = hasRenderablePlaqueState(selectedOrder?.plaqueState);
   const adminHeaders = adminToken ? { 'x-admin-token': adminToken } : {};
 
   const loadOrders = async () => {
@@ -1191,8 +1205,11 @@ function AdminPage() {
         throw new Error('Admin access required.');
       }
       if (!response.ok) throw new Error(payload.error || `Could not load orders (${response.status}).`);
-      setOrders(payload.orders || []);
-      setSelectedId((current) => current || payload.orders?.[0]?.id || null);
+      const nextOrders = payload.orders || [];
+      setOrders(nextOrders);
+      setSelectedId((current) => nextOrders.some((order: PaidOrder) => order.id === current)
+        ? current
+        : nextOrders[0]?.id || null);
     } catch (error) {
       setAdminError(error instanceof Error ? error.message : 'Could not load orders.');
     } finally {
@@ -1219,6 +1236,29 @@ function AdminPage() {
     if (!authConfig) return;
     loadOrders();
   }, [authConfig, adminToken]);
+
+  useEffect(() => {
+    if (!selectedId) {
+      setSelectedOrderDetail(null);
+      return;
+    }
+    let cancelled = false;
+    setSelectedOrderDetail(null);
+    const loadSelectedOrder = async () => {
+      try {
+        const response = await fetch(`/api/orders/${encodeURIComponent(selectedId)}`);
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || `Could not load order detail (${response.status}).`);
+        if (!cancelled) setSelectedOrderDetail(payload.order);
+      } catch (error) {
+        console.warn('Admin order detail could not be loaded.', error);
+      }
+    };
+    loadSelectedOrder();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedId]);
 
   const loginAdmin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -1247,6 +1287,7 @@ function AdminPage() {
     setAdminToken('');
     setOrders([]);
     setSelectedId(null);
+    setSelectedOrderDetail(null);
   };
 
   const updateOrder = async (orderId: string, payload: Record<string, string>) => {
@@ -1362,16 +1403,18 @@ function AdminPage() {
                     alt="Approved plaque proof"
                     className="admin-console__proof-image"
                   />
-                ) : selectedOrder.plaqueState ? (
+                ) : canRenderSelectedProof ? (
                   <div className="admin-console__proof-live-preview">
                     <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
                   </div>
                 ) : (
                   <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
                 )}
-                <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
-                  <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
-                </div>
+                {canRenderSelectedProof && (
+                  <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+                    <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
+                  </div>
+                )}
               </div>
               <div className="admin-console__data-grid">
                 <div><span>Product</span><strong>{selectedOrder.productTitle}</strong></div>
@@ -1384,7 +1427,7 @@ function AdminPage() {
               <div className="admin-console__actions">
                 <button
                   type="button"
-                  disabled={!selectedOrder}
+                  disabled={!selectedOrder || !canRenderSelectedProof}
                   onClick={() => adminProofSvgRef.current && downloadCorelPdf(
                     adminProofSvgRef.current,
                     selectedOrder.plaqueState,
