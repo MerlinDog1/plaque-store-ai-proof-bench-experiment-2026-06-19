@@ -137,6 +137,39 @@ const fromProofSessionOrderRow = (row) => {
   };
 };
 
+const lightweightFallbackOrder = (order) => order && ({
+  id: order.id,
+  stripeCheckoutSessionId: order.stripeCheckoutSessionId || null,
+  stripePaymentIntentId: order.stripePaymentIntentId || null,
+  customerEmail: order.customerEmail || "",
+  customerName: order.customerName || "",
+  status: order.status || "paid",
+  paymentStatus: order.paymentStatus || "paid",
+  fulfilmentStatus: order.fulfilmentStatus || "not_started",
+  totalPence: order.totalPence || 0,
+  currency: order.currency || "gbp",
+  productTitle: order.productTitle || "Custom plaque",
+  inscription: order.inscription || "",
+  plaqueState: order.plaqueState || {},
+  priceBreakdown: order.priceBreakdown || {},
+  proofPackage: order.proofPackage?.visualProofPng ? { visualProofPng: "stored" } : {},
+  shippingAddress: order.shippingAddress || {},
+  stripeSession: {},
+  emailEvents: order.emailEvents || [],
+  events: order.events || [],
+  metadata: {
+    source: order.metadata?.source || "",
+    turnaroundWorkingDays: order.metadata?.turnaroundWorkingDays || "",
+    turnaroundDays: order.metadata?.turnaroundDays || "",
+    turnaroundLabel: order.metadata?.turnaroundLabel || "",
+    turnaround: order.metadata?.turnaround || "",
+  },
+  approvedAt: order.approvedAt || null,
+  paidAt: order.paidAt || null,
+  createdAt: order.createdAt || null,
+  updatedAt: order.updatedAt || null,
+});
+
 const saveOrderToProofSessions = async (supabase, order) => {
   const { data, error } = await supabase
     .from("proof_sessions")
@@ -166,7 +199,7 @@ const listProofSessionOrders = async (supabase) => {
     .limit(200);
   if (error) throw error;
   return data.map((row) => ({
-    ...(fromProofSessionOrderRow(row) || {
+    ...(lightweightFallbackOrder(fromProofSessionOrderRow(row)) || {
     id: `PSAI-${new Date(row.created_at || Date.now()).getTime().toString().slice(-6)}`,
     stripeCheckoutSessionId: null,
     stripePaymentIntentId: null,
