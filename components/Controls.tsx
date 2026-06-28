@@ -216,7 +216,7 @@ interface Props {
   basketAdded: boolean;
   onGoToStep: (step: number) => void;
   onSaveProof: () => void;
-  onAddToBasket: () => void;
+  onAddToBasket: () => void | Promise<void>;
   onRealisticPreview: () => void;
   realisticPreviewPrompt: string;
   onRealisticPreviewPromptChange: (prompt: string) => void;
@@ -784,8 +784,12 @@ export const Controls: React.FC<Props> = ({
     }
     setCheckoutSubmitting(true);
     setCheckoutError(null);
-    onAddToBasket();
-    setCheckoutSubmitting(false);
+    try {
+      await onAddToBasket();
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : 'Secure checkout could not be opened.');
+      setCheckoutSubmitting(false);
+    }
   };
 
   useEffect(() => {

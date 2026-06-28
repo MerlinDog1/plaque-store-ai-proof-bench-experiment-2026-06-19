@@ -778,13 +778,18 @@ const App: React.FC = () => {
     }
   };
 
-  const handleAddToBasket = () => {
+  const handleAddToBasket = async () => {
     if (!isProductionReady) {
       goToProof();
       return;
     }
     setBasketAdded(true);
-    handleNavigate('checkout');
+    const order = await handleCreateMockOrder('Stripe checkout customer', '');
+    const checkoutUrl = order.stripeSimulation.checkoutUrl;
+    if (!checkoutUrl) {
+      throw new Error('Stripe checkout did not return a checkout URL.');
+    }
+    window.location.assign(checkoutUrl);
   };
 
   const handleNavigate = (view: SiteView, productSlug?: string) => {
@@ -1180,7 +1185,11 @@ const App: React.FC = () => {
                         ? `Checkout with current price ${formattedPrice} including UK delivery`
                         : `Review proof before checkout. Current price ${formattedPrice} including UK delivery`
                     }
-                    onClick={handleAddToBasket}
+                    onClick={() => {
+                      void handleAddToBasket().catch((error) => {
+                        alert(error instanceof Error ? error.message : 'Secure checkout could not be opened.');
+                      });
+                    }}
                   >
                     <span className="proofbench-delivery-label">
                       Inc UK delivery
