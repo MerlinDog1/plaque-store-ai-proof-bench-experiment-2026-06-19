@@ -403,59 +403,72 @@ type LegalPage = {
   sections: Array<{ title: string; copy: string }>;
 };
 
+const businessContact = {
+  tradingName: 'InstaPlaque',
+  legalForm: 'UK sole trader',
+  email: 'hello@instaplaque.co.uk',
+  phone: 'Phone number to be added',
+  address: '4 Dunkirk Avenue, Kettering, NN14 2PL, United Kingdom',
+  updated: '28 June 2026',
+};
+
 const legalPages: Partial<Record<SiteView, LegalPage>> = {
   contact: {
     eyebrow: 'Contact',
     title: 'Contact InstaPlaque.',
-    intro: 'Placeholder contact page for the live business details.',
+    intro: `For order questions, proof changes or delivery support, contact ${businessContact.tradingName} using the details below.`,
     sections: [
-      { title: 'Trading identity', copy: 'InstaPlaque Ltd. Company number: [company number to be added before launch].' },
-      { title: 'Registered office', copy: '[Registered office address to be added before launch].' },
-      { title: 'Email', copy: '[Contact email address to be added before launch].' },
-      { title: 'Phone', copy: '[Phone number to be added if available].' },
+      { title: 'Trading identity', copy: `${businessContact.tradingName} is operated as a ${businessContact.legalForm}.` },
+      { title: 'Business address', copy: businessContact.address },
+      { title: 'Email', copy: businessContact.email },
+      { title: 'Phone', copy: businessContact.phone },
     ],
   },
   terms: {
     eyebrow: 'Terms',
     title: 'Terms and conditions.',
-    intro: 'Placeholder terms page for proof approval, payment, production, delivery and customer support terms.',
+    intro: `These terms apply to orders placed with ${businessContact.tradingName}. Last updated ${businessContact.updated}.`,
     sections: [
-      { title: 'Orders and proofs', copy: 'Customers create and approve a plaque proof before production. Final terms will explain when the proof becomes binding.' },
-      { title: 'Prices', copy: 'Prices are shown in pounds sterling and include UK mainland delivery unless stated otherwise. InstaPlaque Ltd is not VAT registered.' },
-      { title: 'Production and delivery', copy: 'Production times and delivery estimates will be shown before checkout. Custom work may need manual confirmation.' },
-      { title: 'Faults and support', copy: 'Customers keep their statutory rights if goods are faulty, not as described, or not made with reasonable care.' },
+      { title: 'Orders and proofs', copy: 'You create and approve a digital proof before payment. By approving the proof, you confirm that the wording, layout, material, size, fixings and any wood backing are correct for production.' },
+      { title: 'Prices and payment', copy: 'Prices are shown in pounds sterling. Payment is taken securely by Stripe. UK mainland delivery is included unless stated otherwise before checkout. We are not VAT registered.' },
+      { title: 'Production and delivery', copy: 'Estimated production times are shown before checkout and run from proof approval and payment. Standard orders are usually estimated at 5 working days; aged brass, custom sizes and wood-backed plaques may take longer.' },
+      { title: 'Customer details', copy: 'You must provide accurate contact and delivery details at checkout. We may contact you if an order detail needs checking before production or dispatch.' },
+      { title: 'Faults and support', copy: 'Your statutory rights are not affected. If goods are faulty, damaged, not as described or not made with reasonable care, contact us as soon as possible so we can put things right.' },
+      { title: 'Contact', copy: `${businessContact.email}. ${businessContact.address}.` },
     ],
   },
   privacy: {
     eyebrow: 'Privacy',
     title: 'Privacy policy.',
-    intro: 'Placeholder privacy page for how InstaPlaque handles customer and order data.',
+    intro: `${businessContact.tradingName} uses customer data to create proofs, process orders and provide support. Last updated ${businessContact.updated}.`,
     sections: [
       { title: 'Data collected', copy: 'Customer name, contact details, delivery details, plaque wording, proof details and order history may be collected to fulfil orders.' },
-      { title: 'Why it is used', copy: 'Data is used to create proofs, process orders, arrange delivery, provide customer support and keep business records.' },
-      { title: 'Processors', copy: 'Final policy will list payment, hosting, email, analytics and delivery providers used by the business.' },
-      { title: 'Customer rights', copy: 'Customers can ask to access, correct or delete their personal data where the law allows.' },
+      { title: 'Why it is used', copy: 'Data is used to create and save plaque proofs, take payment, send order emails, prepare production files, arrange delivery, provide customer support and keep accounting and legal records.' },
+      { title: 'Service providers', copy: 'We use trusted providers to run the service, including Stripe for payments, Vercel/Supabase for hosting and order storage, Resend for transactional email, and delivery providers where needed.' },
+      { title: 'How long data is kept', copy: 'Order information is kept for as long as needed for production, support, accounting and legal record keeping. Proof artwork may be retained so we can remake or support the order.' },
+      { title: 'Customer rights', copy: `You can ask to access, correct or delete personal data where the law allows by emailing ${businessContact.email}.` },
     ],
   },
   cookies: {
     eyebrow: 'Cookies',
     title: 'Cookie policy.',
-    intro: 'Placeholder cookie page for essential and optional cookies used by the site.',
+    intro: `${businessContact.tradingName} uses a small number of essential technologies to make the proof and checkout flow work.`,
     sections: [
-      { title: 'Essential cookies', copy: 'The site may use essential cookies or local storage to keep the proof bench and checkout working.' },
-      { title: 'Analytics and marketing', copy: 'Non-essential analytics or advertising cookies will require consent before they are used.' },
-      { title: 'Managing cookies', copy: 'Final copy will explain how customers can change cookie settings in the site or browser.' },
+      { title: 'Essential storage', copy: 'The site may use cookies or local storage to remember proof progress, admin access and checkout state. These are needed for the service to work properly.' },
+      { title: 'Payments', copy: 'Stripe may use cookies and similar technologies when processing secure checkout and fraud prevention.' },
+      { title: 'Analytics and marketing', copy: 'We will not use non-essential analytics or advertising cookies without adding the appropriate consent controls.' },
+      { title: 'Managing cookies', copy: 'You can block or delete cookies in your browser settings, but some proof, checkout or admin features may stop working correctly.' },
     ],
   },
   returns: {
     eyebrow: 'Returns and cancellations',
     title: 'Returns and cancellations.',
-    intro: 'Placeholder returns page for personalised and made-to-order plaque rules.',
+    intro: `Most ${businessContact.tradingName} products are personalised or made to order from an approved proof.`,
     sections: [
-      { title: 'Personalised plaques', copy: 'Because plaques are made to the customer specification, change-of-mind cancellation may not apply after proof approval and production starts.' },
-      { title: 'Before production', copy: 'Final terms will explain when an order can still be changed or cancelled before manufacture.' },
-      { title: 'Faulty goods', copy: 'Customers still keep normal rights if a plaque is faulty, not as described, or not made with reasonable care.' },
-      { title: 'How to raise an issue', copy: 'Contact details and evidence requirements will be added before launch.' },
+      { title: 'Personalised plaques', copy: 'Because plaques are made to your specification, change-of-mind cancellation normally cannot be accepted once you have approved the proof and production has started.' },
+      { title: 'Before production', copy: `If you need to change or cancel an order, email ${businessContact.email} immediately. We will help where possible if production has not started.` },
+      { title: 'Faulty or damaged goods', copy: 'Your statutory rights are not affected. If your plaque arrives damaged, faulty, not as described or not made with reasonable care, contact us promptly with photos and your order number.' },
+      { title: 'Returns process', copy: 'Do not return an item without contacting us first. We will confirm the best next step, which may be a remake, repair, refund or return depending on the issue.' },
     ],
   },
 };
@@ -1940,7 +1953,7 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
         <strong className="brand-wordmark brand-wordmark--footer">
           <span>Insta</span><span>Plaque</span>
         </strong>
-        <p>InstaPlaque Ltd. Company number: [to be added]. Registered office: [to be added]. Not VAT registered.</p>
+        <p>{businessContact.tradingName} is operated as a UK sole trader. Business address: {businessContact.address}. Email: {businessContact.email}. Not VAT registered.</p>
       </div>
       <div className="commerce-footer__right">
         <div className="commerce-footer-socials" aria-label="Social links">
