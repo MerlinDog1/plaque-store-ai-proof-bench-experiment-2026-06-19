@@ -2445,6 +2445,27 @@
   margin-bottom: 14px;
 }
 
+.admin-console__filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(150px, auto) minmax(150px, auto);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-console__filters input,
+.admin-console__filters select {
+  min-height: 42px;
+  min-width: 0;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  background: #fff;
+  padding: 0 12px;
+  color: #101828;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .admin-console__stats div,
 .admin-console__orders,
 .admin-console__detail {
@@ -2472,6 +2493,14 @@
   color: #101828;
   font-size: 22px;
   font-weight: 850;
+}
+
+.admin-console__stats small {
+  display: block;
+  margin-top: 3px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .admin-console__layout {
@@ -2613,6 +2642,77 @@
   overflow-wrap: anywhere;
 }
 
+.admin-console__info-panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.admin-console__info-panels section {
+  min-width: 0;
+  border: 1px solid #eaecf0;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.admin-console__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.admin-console__section-head button,
+.admin-console__link-row a {
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  background: #f9fafb;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.admin-console__section-head button {
+  min-height: 30px;
+  padding: 0 9px;
+}
+
+.admin-console__section-head button:disabled {
+  opacity: 0.5;
+}
+
+.admin-console__info-panels address,
+.admin-console__info-panels p {
+  margin: 0;
+  color: #101828;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.admin-console__info-panels address span {
+  display: block;
+}
+
+.admin-console__link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.admin-console__link-row a {
+  padding: 7px 9px;
+}
+
 .admin-console__actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2660,6 +2760,10 @@
 
   .admin-console__stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-console__filters {
+    grid-template-columns: 1fr;
   }
 
   .admin-console__layout {
@@ -2712,6 +2816,7 @@
 
   .admin-console__stats,
   .admin-console__data-grid,
+  .admin-console__info-panels,
   .admin-console__actions {
     grid-template-columns: 1fr;
   }

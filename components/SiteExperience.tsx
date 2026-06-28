@@ -60,6 +60,7 @@ type PaidOrder = {
   };
   shippingAddress?: Record<string, string>;
   stripeCheckoutSessionId?: string;
+  stripePaymentIntentId?: string;
   emailEvents?: Array<{ id?: string; type: string; recipient: string; status: string; subject?: string; at?: string }>;
   events?: Array<{ type: string; label: string; at: string; note?: string; recipient?: string; trackingReference?: string }>;
   metadata?: Record<string, string>;
@@ -177,6 +178,69 @@ const hasRenderablePlaqueState = (state?: Partial<PlaqueState> | null) =>
     && typeof state.textColor === 'string'
     && typeof state.fixing === 'string',
   );
+
+type AdminStatusFilter = 'active' | 'all' | 'paid' | 'in_production' | 'ready_to_dispatch' | 'dispatched' | 'issue' | 'archived';
+type AdminSortMode = 'newest' | 'oldest' | 'due' | 'status' | 'value';
+
+const statusLabel = (value?: string) => String(value || 'not_started').replace(/_/g, ' ');
+
+const orderDate = (order: PaidOrder) => {
+  const raw = order.paidAt || order.createdAt || order.updatedAt || '';
+  const time = raw ? new Date(raw).getTime() : 0;
+  return Number.isFinite(time) ? time : 0;
+};
+
+const sameLocalDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+const sameLocalMonth = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+
+const addWorkingDays = (date: Date, workingDays: number) => {
+  const next = new Date(date);
+  let remaining = Math.max(0, Math.round(workingDays));
+  while (remaining > 0) {
+    next.setDate(next.getDate() + 1);
+    const day = next.getDay();
+    if (day !== 0 && day !== 6) remaining -= 1;
+  }
+  return next;
+};
+
+const turnaroundDaysForOrder = (order: PaidOrder) => {
+  const metadataDays = Number(order.metadata?.turnaroundWorkingDays || order.metadata?.turnaroundDays || 0);
+  if (Number.isFinite(metadataDays) && metadataDays > 0) return metadataDays;
+  const eventText = `${order.metadata?.turnaroundLabel || ''} ${order.metadata?.turnaround || ''}`;
+  const parsed = Number(eventText.match(/(\d+)\s*working/i)?.[1] || 0);
+  if (parsed > 0) return parsed;
+  return 5;
+};
+
+const dueDateForOrder = (order: PaidOrder) => {
+  const start = new Date(order.paidAt || order.createdAt || order.updatedAt || Date.now());
+  return addWorkingDays(start, turnaroundDaysForOrder(order));
+};
+
+const formatShortDate = (date: Date) => date.toLocaleDateString('en-GB', {
+  day: '2-digit',
+  month: 'short',
+});
+
+const addressLinesForOrder = (order: PaidOrder) => {
+  const address = order.shippingAddress || {};
+  return [
+    address.name,
+    address.line1,
+    address.line2,
+    address.city || address.town,
+    address.state,
+    address.postal_code || address.postcode,
+    address.country,
+  ].filter(Boolean);
+};
+
+const stripeDashboardUrl = (kind: 'payments' | 'checkout/sessions', id?: string) =>
+  id ? `https://dashboard.stripe.com/test/${kind}/${encodeURIComponent(id)}` : '';
 
 const formatAdminDate = (value?: string) => value ? new Date(value).toLocaleString('en-GB', {
   day: '2-digit',
@@ -1183,6 +1247,9 @@ function AdminPage() {
   const [adminToken, setAdminToken] = useState(() => localStorage.getItem('instaplaque-admin-token') || '');
   const [password, setPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<AdminStatusFilter>('active');
+  const [sortMode, setSortMode] = useState<AdminSortMode>('newest');
+  const [searchTerm, setSearchTerm] = useState('');
   const adminProofSvgRef = useRef<SVGSVGElement | null>(null);
   const selectedSummaryOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
   const selectedOrder = selectedOrderDetail?.id === selectedSummaryOrder?.id ? selectedOrderDetail : selectedSummaryOrder;
@@ -1299,13 +1366,53 @@ function AdminPage() {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || `Could not update order (${response.status}).`);
     setOrders((current) => current.map((order) => order.id === orderId ? data.order : order));
+    setSelectedOrderDetail(data.order);
   };
 
+  const now = new Date();
+  const filteredOrders = orders
+    .filter((order) => {
+      const status = order.fulfilmentStatus || order.status;
+      if (statusFilter === 'active') return !['dispatched', 'archived', 'cancelled', 'refunded'].includes(status);
+      if (statusFilter === 'all') return true;
+      return order.status === statusFilter || order.fulfilmentStatus === statusFilter;
+    })
+    .filter((order) => {
+      const query = searchTerm.trim().toLowerCase();
+      if (!query) return true;
+      return [
+        order.id,
+        order.customerName,
+        order.customerEmail,
+        order.productTitle,
+        order.inscription,
+        order.shippingAddress?.postal_code,
+        order.shippingAddress?.postcode,
+      ].filter(Boolean).join(' ').toLowerCase().includes(query);
+    })
+    .sort((a, b) => {
+      if (sortMode === 'oldest') return orderDate(a) - orderDate(b);
+      if (sortMode === 'due') return dueDateForOrder(a).getTime() - dueDateForOrder(b).getTime();
+      if (sortMode === 'status') return statusLabel(a.fulfilmentStatus || a.status).localeCompare(statusLabel(b.fulfilmentStatus || b.status));
+      if (sortMode === 'value') return (b.totalPence || 0) - (a.totalPence || 0);
+      return orderDate(b) - orderDate(a);
+    });
+
+  const paidOrders = orders.filter((order) => order.paymentStatus === 'paid');
+  const todayOrders = paidOrders.filter((order) => sameLocalDay(new Date(orderDate(order)), now));
+  const monthOrders = paidOrders.filter((order) => sameLocalMonth(new Date(orderDate(order)), now));
+  const overdueOrders = orders.filter((order) => {
+    const status = order.fulfilmentStatus || order.status;
+    return !['dispatched', 'archived', 'cancelled', 'refunded'].includes(status) && dueDateForOrder(order).getTime() < now.getTime();
+  });
   const counts = {
     paid: orders.filter((order) => order.paymentStatus === 'paid').length,
     production: orders.filter((order) => order.status === 'in_production').length,
     dispatched: orders.filter((order) => order.fulfilmentStatus === 'dispatched').length,
     emails: orders.reduce((total, order) => total + (order.emailEvents?.length || 0), 0),
+    todayRevenue: todayOrders.reduce((total, order) => total + (order.totalPence || 0), 0),
+    monthRevenue: monthOrders.reduce((total, order) => total + (order.totalPence || 0), 0),
+    overdue: overdueOrders.length,
   };
 
   return (
@@ -1348,10 +1455,35 @@ function AdminPage() {
         {authConfig?.authRequired && !adminToken ? null : (
           <>
         <div className="admin-console__stats">
-          <div><span>Paid</span><strong>{counts.paid}</strong></div>
-          <div><span>In production</span><strong>{counts.production}</strong></div>
-          <div><span>Dispatched</span><strong>{counts.dispatched}</strong></div>
-          <div><span>Email events</span><strong>{counts.emails}</strong></div>
+          <div><span>Sold today</span><strong>{todayOrders.length}</strong><small>{formatPence(counts.todayRevenue)}</small></div>
+          <div><span>This month</span><strong>{monthOrders.length}</strong><small>{formatPence(counts.monthRevenue)}</small></div>
+          <div><span>In production</span><strong>{counts.production}</strong><small>{counts.dispatched} dispatched</small></div>
+          <div><span>Overdue</span><strong>{counts.overdue}</strong><small>{counts.emails} email events</small></div>
+        </div>
+        <div className="admin-console__filters">
+          <input
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search order, customer, email, postcode or wording"
+          />
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as AdminStatusFilter)}>
+            <option value="active">Active orders</option>
+            <option value="all">All orders</option>
+            <option value="paid">Paid/new</option>
+            <option value="in_production">In production</option>
+            <option value="ready_to_dispatch">Ready to dispatch</option>
+            <option value="dispatched">Dispatched</option>
+            <option value="issue">Issue/on hold</option>
+            <option value="archived">Archived</option>
+          </select>
+          <select value={sortMode} onChange={(event) => setSortMode(event.target.value as AdminSortMode)}>
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="due">Due date</option>
+            <option value="status">Status</option>
+            <option value="value">Order value</option>
+          </select>
         </div>
         <div className="admin-console__layout">
           <div className="admin-console__orders" role="list" aria-label="Orders">
@@ -1362,7 +1494,7 @@ function AdminPage() {
               <span>Status</span>
               <span>Total</span>
             </div>
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <button className={`admin-console__order-row ${selectedOrder?.id === order.id ? 'is-active' : ''}`} key={order.id} onClick={() => setSelectedId(order.id)} role="listitem">
                 <span>
                   <strong>{order.id}</strong>
@@ -1375,15 +1507,15 @@ function AdminPage() {
                 </span>
                 <span>
                   <mark>{order.fulfilmentStatus?.replace(/_/g, ' ') || order.status.replace(/_/g, ' ')}</mark>
-                  <small>{formatAdminDate(order.paidAt || order.createdAt)}</small>
+                  <small>Due {formatShortDate(dueDateForOrder(order))}</small>
                 </span>
                 <span>{formatPence(order.totalPence, order.currency)}</span>
               </button>
             ))}
-            {!orders.length && !loading && (
+            {!filteredOrders.length && !loading && (
               <div className="admin-console__empty">
-                <strong>No paid orders yet.</strong>
-                <span>Completed checkout orders from connected storefronts will appear here.</span>
+                <strong>No matching orders.</strong>
+                <span>Adjust search, status or sort controls.</span>
               </div>
             )}
           </div>
@@ -1423,8 +1555,49 @@ function AdminPage() {
                 <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
                 <div><span>Order status</span><strong>{selectedOrder.status.replace(/_/g, ' ')}</strong></div>
                 <div><span>Fulfilment</span><strong>{selectedOrder.fulfilmentStatus?.replace(/_/g, ' ') || 'not started'}</strong></div>
+                <div><span>Paid</span><strong>{formatAdminDate(selectedOrder.paidAt || selectedOrder.createdAt)}</strong></div>
+                <div><span>Due</span><strong>{formatShortDate(dueDateForOrder(selectedOrder))}</strong></div>
+              </div>
+              <div className="admin-console__info-panels">
+                <section>
+                  <div className="admin-console__section-head">
+                    <span>Shipping address</span>
+                    <button
+                      type="button"
+                      disabled={!addressLinesForOrder(selectedOrder).length}
+                      onClick={() => navigator.clipboard?.writeText(addressLinesForOrder(selectedOrder).join('\n'))}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  {addressLinesForOrder(selectedOrder).length ? (
+                    <address>
+                      {addressLinesForOrder(selectedOrder).map((line) => <span key={line}>{line}</span>)}
+                    </address>
+                  ) : (
+                    <p>No shipping address stored yet.</p>
+                  )}
+                </section>
+                <section>
+                  <div className="admin-console__section-head">
+                    <span>Stripe</span>
+                  </div>
+                  <p><strong>Session</strong> {selectedOrder.stripeCheckoutSessionId || 'Not linked'}</p>
+                  <p><strong>Payment</strong> {selectedOrder.stripePaymentIntentId || 'Not linked'}</p>
+                  <div className="admin-console__link-row">
+                    {selectedOrder.stripeCheckoutSessionId && (
+                      <a href={stripeDashboardUrl('checkout/sessions', selectedOrder.stripeCheckoutSessionId)} target="_blank" rel="noreferrer">Open session</a>
+                    )}
+                    {selectedOrder.stripePaymentIntentId && (
+                      <a href={stripeDashboardUrl('payments', selectedOrder.stripePaymentIntentId)} target="_blank" rel="noreferrer">Open payment</a>
+                    )}
+                  </div>
+                </section>
               </div>
               <div className="admin-console__actions">
+                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'proof_check', fulfilmentStatus: 'not_started' })}>
+                  Mark proof checked
+                </button>
                 <button
                   type="button"
                   disabled={!selectedOrder || !canRenderSelectedProof}
@@ -1449,8 +1622,17 @@ function AdminPage() {
                 <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'in_production', fulfilmentStatus: 'in_production', emailTemplate: 'customer-in-production' })}>
                   Mark in production + email
                 </button>
+                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'ready_to_dispatch', fulfilmentStatus: 'ready_to_dispatch' })}>
+                  Mark ready to dispatch
+                </button>
                 <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'dispatched', fulfilmentStatus: 'dispatched', emailTemplate: 'customer-dispatched' })}>
                   Mark dispatched + email
+                </button>
+                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'issue', fulfilmentStatus: 'issue' })}>
+                  Put on hold
+                </button>
+                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'archived', fulfilmentStatus: 'archived' })}>
+                  Archive test/order
                 </button>
                 <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
                   method: 'POST',
