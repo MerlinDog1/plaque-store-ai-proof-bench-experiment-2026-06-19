@@ -1495,22 +1495,123 @@ function AdminPage() {
               <span>Total</span>
             </div>
             {filteredOrders.map((order) => (
-              <button className={`admin-console__order-row ${selectedOrder?.id === order.id ? 'is-active' : ''}`} key={order.id} onClick={() => setSelectedId(order.id)} role="listitem">
-                <span>
-                  <strong>{order.id}</strong>
-                  <small>{order.productTitle}</small>
-                </span>
-                <span>{formatOrderSource(order)}</span>
-                <span>
-                  <strong>{order.customerName || 'Customer'}</strong>
-                  <small>{order.customerEmail || 'Email held by Stripe'}</small>
-                </span>
-                <span>
-                  <mark>{order.fulfilmentStatus?.replace(/_/g, ' ') || order.status.replace(/_/g, ' ')}</mark>
-                  <small>Due {formatShortDate(dueDateForOrder(order))}</small>
-                </span>
-                <span>{formatPence(order.totalPence, order.currency)}</span>
-              </button>
+              <React.Fragment key={order.id}>
+                <button className={`admin-console__order-row ${selectedOrder?.id === order.id ? 'is-active' : ''}`} onClick={() => setSelectedId(order.id)} role="listitem">
+                  <span>
+                    <strong>{order.id}</strong>
+                    <small>{order.productTitle}</small>
+                  </span>
+                  <span>{formatOrderSource(order)}</span>
+                  <span>
+                    <strong>{order.customerName || 'Customer'}</strong>
+                    <small>{order.customerEmail || 'Email held by Stripe'}</small>
+                  </span>
+                  <span>
+                    <mark>{order.fulfilmentStatus?.replace(/_/g, ' ') || order.status.replace(/_/g, ' ')}</mark>
+                    <small>Due {formatShortDate(dueDateForOrder(order))}</small>
+                  </span>
+                  <span>{formatPence(order.totalPence, order.currency)}</span>
+                </button>
+                {selectedOrder?.id === order.id && (
+                  <article className="admin-console__detail admin-console__detail--mobile">
+                    <div className="admin-console__detail-head">
+                      <div>
+                        <p>{formatOrderSource(selectedOrder)}</p>
+                        <h2>{selectedOrder.id}</h2>
+                      </div>
+                      <strong>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</strong>
+                    </div>
+                    <div className="admin-console__proof">
+                      {selectedOrder.proofPackage?.visualProofPng ? (
+                        <img
+                          src={`${orderProofImageUrl(selectedOrder)}?v=${encodeURIComponent(selectedOrder.updatedAt || selectedOrder.id)}`}
+                          alt="Approved plaque proof"
+                          className="admin-console__proof-image"
+                        />
+                      ) : canRenderSelectedProof ? (
+                        <div className="admin-console__proof-live-preview">
+                          <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
+                        </div>
+                      ) : (
+                        <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
+                      )}
+                    </div>
+                    <div className="admin-console__data-grid">
+                      <div><span>Product</span><strong>{selectedOrder.productTitle}</strong></div>
+                      <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
+                      <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
+                      <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
+                      <div><span>Order status</span><strong>{selectedOrder.status.replace(/_/g, ' ')}</strong></div>
+                      <div><span>Fulfilment</span><strong>{selectedOrder.fulfilmentStatus?.replace(/_/g, ' ') || 'not started'}</strong></div>
+                      <div><span>Paid</span><strong>{formatAdminDate(selectedOrder.paidAt || selectedOrder.createdAt)}</strong></div>
+                      <div><span>Due</span><strong>{formatShortDate(dueDateForOrder(selectedOrder))}</strong></div>
+                    </div>
+                    <div className="admin-console__info-panels">
+                      <section>
+                        <div className="admin-console__section-head">
+                          <span>Shipping address</span>
+                          <button
+                            type="button"
+                            disabled={!addressLinesForOrder(selectedOrder).length}
+                            onClick={() => navigator.clipboard?.writeText(addressLinesForOrder(selectedOrder).join('\n'))}
+                          >
+                            Copy
+                          </button>
+                        </div>
+                        {addressLinesForOrder(selectedOrder).length ? (
+                          <address>
+                            {addressLinesForOrder(selectedOrder).map((line) => <span key={line}>{line}</span>)}
+                          </address>
+                        ) : (
+                          <p>No shipping address stored yet.</p>
+                        )}
+                      </section>
+                      <section>
+                        <div className="admin-console__section-head">
+                          <span>Stripe</span>
+                        </div>
+                        <p><strong>Session</strong> {selectedOrder.stripeCheckoutSessionId || 'Not linked'}</p>
+                        <p><strong>Payment</strong> {selectedOrder.stripePaymentIntentId || 'Not linked'}</p>
+                        <div className="admin-console__link-row">
+                          {selectedOrder.stripeCheckoutSessionId && (
+                            <a href={stripeDashboardUrl('checkout/sessions', selectedOrder.stripeCheckoutSessionId)} target="_blank" rel="noreferrer">Open session</a>
+                          )}
+                          {selectedOrder.stripePaymentIntentId && (
+                            <a href={stripeDashboardUrl('payments', selectedOrder.stripePaymentIntentId)} target="_blank" rel="noreferrer">Open payment</a>
+                          )}
+                        </div>
+                      </section>
+                    </div>
+                    <div className="admin-console__actions">
+                      <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'proof_check', fulfilmentStatus: 'not_started' })}>
+                        Mark proof checked
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!selectedOrder}
+                        onClick={() => downloadOrderProofPng(selectedOrder).catch((downloadError) => {
+                          console.error('Approved proof PNG download failed.', downloadError);
+                          window.alert('The approved proof image is not available yet. Please try again in a few seconds.');
+                        })}
+                      >
+                        Download approved proof
+                      </button>
+                      <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'in_production', fulfilmentStatus: 'in_production', emailTemplate: 'customer-in-production' })}>
+                        Mark in production + email
+                      </button>
+                      <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'ready_to_dispatch', fulfilmentStatus: 'ready_to_dispatch' })}>
+                        Mark ready to dispatch
+                      </button>
+                      <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'dispatched', fulfilmentStatus: 'dispatched', emailTemplate: 'customer-dispatched' })}>
+                        Mark dispatched + email
+                      </button>
+                      <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'issue', fulfilmentStatus: 'issue' })}>
+                        Put on hold
+                      </button>
+                    </div>
+                  </article>
+                )}
+              </React.Fragment>
             ))}
             {!filteredOrders.length && !loading && (
               <div className="admin-console__empty">
@@ -1520,7 +1621,7 @@ function AdminPage() {
             )}
           </div>
           {selectedOrder && (
-            <article className="admin-console__detail">
+            <article className="admin-console__detail admin-console__detail--desktop">
               <div className="admin-console__detail-head">
                 <div>
                   <p>{formatOrderSource(selectedOrder)}</p>

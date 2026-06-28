@@ -2601,6 +2601,10 @@
   top: 12px;
 }
 
+.admin-console__detail--mobile {
+  display: none;
+}
+
 .admin-console__detail-head {
   display: flex;
   align-items: flex-start;
@@ -2772,6 +2776,17 @@
 
   .admin-console__detail {
     position: static;
+  }
+
+  .admin-console__detail--desktop {
+    display: none;
+  }
+
+  .admin-console__detail--mobile {
+    display: grid;
+    border-width: 0 0 1px;
+    border-radius: 0;
+    box-shadow: inset 3px 0 0 #2e6bff;
   }
 
   .admin-console__orders-head {
