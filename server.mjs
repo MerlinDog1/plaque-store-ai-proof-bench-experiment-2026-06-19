@@ -208,6 +208,19 @@ const sendJson = (res, status, payload) => {
   res.end(JSON.stringify(payload));
 };
 
+const stripHeavyProofPayload = (order) => {
+  if (!order?.proofPackage?.visualProofPng) return order;
+  return {
+    ...order,
+    proofPackage: {
+      ...order.proofPackage,
+      visualProofPng: "stored",
+    },
+  };
+};
+
+const stripHeavyProofPayloads = (orders) => orders.map(stripHeavyProofPayload);
+
 const readBody = (req) =>
   new Promise((resolve, reject) => {
     let body = "";
@@ -333,7 +346,7 @@ export const handleRequest = async (req, res) => {
       if (payload.sendCustomerEmail && order.customerEmail) {
         order = await sendAndRecordOrderEmail(order, "customer-order-confirmation", order.customerEmail);
       }
-      sendJson(res, 200, { ok: true, order });
+      sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not attach proof image.";
       sendJson(res, 400, { error: message });
@@ -364,7 +377,7 @@ export const handleRequest = async (req, res) => {
       const pendingOrder = await createPendingOrder(payload);
       const session = await createStripeCheckoutSession(payload);
       const order = await attachStripeSessionToOrder(pendingOrder.id, session.raw || session);
-      sendJson(res, 201, { ok: true, session, order });
+      sendJson(res, 201, { ok: true, session, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create Stripe checkout session.";
       sendJson(res, 500, { error: message });
@@ -429,7 +442,7 @@ export const handleRequest = async (req, res) => {
     }
     try {
       const orders = await listOrders();
-      sendJson(res, 200, { ok: true, orders });
+      sendJson(res, 200, { ok: true, orders: stripHeavyProofPayloads(orders) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not list orders.";
       sendJson(res, 500, { error: message });
@@ -454,7 +467,7 @@ export const handleRequest = async (req, res) => {
         sendJson(res, 404, { error: "Order not found." });
         return;
       }
-      sendJson(res, 200, { ok: true, order });
+      sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not load order.";
       sendJson(res, 500, { error: message });
@@ -474,7 +487,7 @@ export const handleRequest = async (req, res) => {
       if (payload.emailTemplate) {
         order = await sendAndRecordOrderEmail(order, payload.emailTemplate, order.customerEmail, payload);
       }
-      sendJson(res, 200, { ok: true, order });
+      sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not update order.";
       sendJson(res, 500, { error: message });
@@ -496,7 +509,7 @@ export const handleRequest = async (req, res) => {
         return;
       }
       const next = await sendAndRecordOrderEmail(order, payload.template || "customer-order-confirmation", payload.recipient || order.customerEmail, payload);
-      sendJson(res, 200, { ok: true, order: next });
+      sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(next) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not send order email.";
       sendJson(res, 500, { error: message });
