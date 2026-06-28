@@ -56,6 +56,7 @@ const {
 } = await import("./server/orders.mjs");
 const {
   getEmailConfig,
+  getInternalProductionEmails,
 } = await import("./server/email.mjs");
 const {
   createAdminSession,
@@ -345,6 +346,14 @@ export const handleRequest = async (req, res) => {
       let order = await attachVisualProofToOrder(orderId, payload);
       if (payload.sendCustomerEmail && order.customerEmail) {
         order = await sendAndRecordOrderEmail(order, "customer-proof-copy", order.customerEmail);
+      }
+      for (const internalEmail of getInternalProductionEmails()) {
+        const alreadySent = (order.emailEvents || []).some(
+          (event) => event.type === "admin-production-pack" && event.recipient === internalEmail,
+        );
+        if (!alreadySent) {
+          order = await sendAndRecordOrderEmail(order, "admin-production-pack", internalEmail);
+        }
       }
       sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(order) });
     } catch (error) {

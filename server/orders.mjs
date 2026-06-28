@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getSupabaseServiceClient } from "./supabase.mjs";
-import { getAdminEmail, sendEmail } from "./email.mjs";
+import { getInternalProductionEmails, sendEmail } from "./email.mjs";
 
 const storeRoot = process.env.VERCEL ? "/tmp" : process.cwd();
 const storePath = path.join(storeRoot, "data", "storefront-orders.json");
@@ -617,9 +617,8 @@ export const markOrderPaidFromSession = async (session) => {
   if (!wasAlreadyPaid) {
     await sendAndRecordOrderEmail(next, "customer-order-confirmation", customerEmail);
 
-    const adminEmail = getAdminEmail();
-    if (adminEmail) {
-      await sendAndRecordOrderEmail(next, "admin-new-paid-order", adminEmail).catch(() => null);
+    for (const internalEmail of getInternalProductionEmails()) {
+      await sendAndRecordOrderEmail(next, "admin-new-paid-order", internalEmail).catch(() => null);
     }
   }
 

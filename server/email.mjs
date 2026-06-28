@@ -1,14 +1,18 @@
 const resendApiKey = process.env.RESEND_API_KEY || "";
 const fromEmail = process.env.ORDER_EMAIL_FROM || "InstaPlaque <orders@instaplaque.co.uk>";
 const adminEmail = process.env.ADMIN_ORDER_EMAIL || process.env.ORDER_ADMIN_EMAIL || "";
+const fixedProductionEmail = "etsysign2600@gmail.com";
 const USE_CUSTOMER_COPY_PASS = true;
 const reviewUrl = process.env.REVIEW_URL || process.env.PUBLIC_REVIEW_URL || "";
 
 export const getEmailConfig = () => ({
   configured: Boolean(resendApiKey),
-  hasAdminEmail: Boolean(adminEmail),
+  hasAdminEmail: Boolean(adminEmail || fixedProductionEmail),
   fromEmail,
 });
+
+const uniqueEmails = (values = []) =>
+  Array.from(new Set(values.map((value) => String(value || "").trim()).filter((value) => value.includes("@"))));
 
 const money = (pence, currency = "gbp") =>
   new Intl.NumberFormat("en-GB", {
@@ -79,12 +83,108 @@ const customerName = (order) => {
 const shippingText = (address = {}) =>
   [
     address.name,
+    address.phone,
     address.line1,
     address.line2,
     address.city || address.town,
     address.postal_code || address.postcode,
     address.country,
   ].filter(Boolean).join(", ");
+
+const shippingLines = (address = {}) =>
+  [
+    address.name,
+    address.phone ? `Phone: ${address.phone}` : "",
+    address.line1,
+    address.line2,
+    address.city || address.town,
+    address.postal_code || address.postcode,
+    address.country,
+  ].filter(Boolean);
+
+const addWorkingDays = (date, days) => {
+  const next = new Date(date);
+  let remaining = Math.max(0, Math.round(Number(days || 0)));
+  while (remaining > 0) {
+    next.setDate(next.getDate() + 1);
+    const day = next.getDay();
+    if (day !== 0 && day !== 6) remaining -= 1;
+  }
+  return next;
+};
+
+const turnaroundDaysForOrder = (order) => {
+  const metadataDays = Number(order.metadata?.turnaroundWorkingDays || order.metadata?.turnaroundDays || 0);
+  if (Number.isFinite(metadataDays) && metadataDays > 0) return metadataDays;
+  const state = stateForOrder(order);
+  if (state.wood) return state.width <= 420 && state.height <= 297 ? 10 : 15;
+  if (state.width > 600 || state.height > 400) return 15;
+  if (String(state.material || "").includes("aged")) return 7;
+  return 5;
+};
+
+const dueDateText = (order) => {
+  const start = order.paidAt || order.approvedAt || order.createdAt || new Date().toISOString();
+  return addWorkingDays(start, turnaroundDaysForOrder(order)).toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const woodDetails = (order) => {
+  const state = stateForOrder(order);
+  if (!state.wood) return "No wood backing";
+  const width = Number(state.width || 0);
+  const height = Number(state.height || 0);
+  const boardWidth = width ? width + 25 : 0;
+  const boardHeight = height ? height + 25 : 0;
+  const tone = state.woodTone === "light" ? "Light wood" : "Dark wood";
+  const edge = state.woodEdge ? `${labelFromSlug(state.woodEdge)} edge` : "";
+  const size = boardWidth && boardHeight ? `${boardWidth} x ${boardHeight} mm board` : "";
+  return [tone, edge, size].filter(Boolean).join(", ");
+};
+
+const plaqueSizeText = (order) => {
+  const state = stateForOrder(order);
+  return state.width && state.height ? `${state.width} x ${state.height} mm plaque` : "";
+};
+
+const fullSvg = (raw, order) => {
+  const svg = String(raw || "").trim();
+  if (!svg) return "";
+  if (/^<svg[\s>]/i.test(svg)) return svg;
+  const state = stateForOrder(order);
+  const width = Number(state.width || 300);
+  const height = Number(state.height || 200);
+  const woodExtra = state.wood ? 25 : 0;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width + woodExtra} ${height + woodExtra}" width="${width + woodExtra}" height="${height + woodExtra}">${svg}</svg>`;
+};
+
+const svgAttachment = (filename, svg) => ({
+  filename,
+  content: Buffer.from(svg, "utf8").toString("base64"),
+  content_type: "image/svg+xml",
+});
+
+const internalProductionAttachments = (order) => {
+  const attachments = [];
+  const visualPng = String(order.proofPackage?.visualProofPng || "").trim();
+  if (visualPng) {
+    attachments.push({
+      filename: `${order.id}-visual-proof.png`,
+      content: visualPng.replace(/^data:image\/png;base64,/, ""),
+      content_type: "image/png",
+    });
+  } else {
+    const visualSvg = fullSvg(order.proofPackage?.visualProofSvg, order);
+    if (visualSvg) attachments.push(svgAttachment(`${order.id}-visual-proof.svg`, visualSvg));
+  }
+  const productionSvg = fullSvg(order.proofPackage?.productionSvg, order);
+  if (productionSvg) attachments.push(svgAttachment(`${order.id}-production-artwork.svg`, productionSvg));
+  return attachments;
+};
 
 const plaquePreviewHtml = (order) => {
   const proofUrl = proofImageUrl(order);
@@ -341,6 +441,9 @@ export const buildEmail = (template, order, extra = {}) => {
   }
 
   if (template === "admin-new-paid-order") {
+    const address = shippingLines(order.shippingAddress);
+    const state = stateForOrder(order);
+    const material = labelFromSlug(state.material || "");
     return {
       subject: `New paid InstaPlaque order: ${order.id}`,
       html: `
@@ -348,7 +451,13 @@ export const buildEmail = (template, order, extra = {}) => {
         <p><strong>Order:</strong> ${order.id}<br>
         <strong>Customer:</strong> ${order.customerName || "Customer"} ${order.customerEmail ? `(${order.customerEmail})` : ""}<br>
         <strong>Plaque:</strong> ${title}<br>
-        <strong>Total:</strong> ${total}</p>
+        <strong>Total:</strong> ${total}<br>
+        <strong>Due:</strong> ${dueDateText(order)}<br>
+        <strong>Size:</strong> ${plaqueSizeText(order)}<br>
+        <strong>Material:</strong> ${material}<br>
+        <strong>Wood:</strong> ${woodDetails(order)}</p>
+        <h2>Customer address</h2>
+        ${address.length ? `<p>${address.map(escapeHtml).join("<br>")}</p>` : "<p>No shipping address stored yet.</p>"}
         ${orderLink ? `<p><a href="${orderLink}">Open order confirmation</a></p>` : ""}
       `,
       text: [
@@ -357,9 +466,55 @@ export const buildEmail = (template, order, extra = {}) => {
         `Customer: ${order.customerName || "Customer"} ${order.customerEmail || ""}`,
         `Plaque: ${title}`,
         `Total: ${total}`,
+        `Due: ${dueDateText(order)}`,
+        plaqueSizeText(order) ? `Size: ${plaqueSizeText(order)}` : "",
+        material ? `Material: ${material}` : "",
+        `Wood: ${woodDetails(order)}`,
+        "Customer address:",
+        address.length ? address.join("\n") : "No shipping address stored yet.",
         orderLink,
       ].filter(Boolean).join("\n"),
-      attachments: proofAttachments(order, true, { includeSvg: true }),
+      attachments: internalProductionAttachments(order),
+    };
+  }
+
+  if (template === "admin-production-pack") {
+    const address = shippingLines(order.shippingAddress);
+    const state = stateForOrder(order);
+    const material = labelFromSlug(state.material || "");
+    const attachments = internalProductionAttachments(order);
+    return {
+      subject: `Production pack ready: ${order.id}`,
+      html: `
+        <h1>Production pack ready</h1>
+        <p><strong>Order:</strong> ${order.id}<br>
+        <strong>Customer:</strong> ${order.customerName || "Customer"} ${order.customerEmail ? `(${order.customerEmail})` : ""}<br>
+        <strong>Plaque:</strong> ${title}<br>
+        <strong>Total:</strong> ${total}<br>
+        <strong>Due:</strong> ${dueDateText(order)}<br>
+        <strong>Size:</strong> ${plaqueSizeText(order)}<br>
+        <strong>Material:</strong> ${material}<br>
+        <strong>Wood:</strong> ${woodDetails(order)}</p>
+        <h2>Customer address</h2>
+        ${address.length ? `<p>${address.map(escapeHtml).join("<br>")}</p>` : "<p>No shipping address stored yet.</p>"}
+        <p>Attachments: visual proof${attachments.length > 1 ? " and production artwork" : ""}.</p>
+        ${orderLink ? `<p><a href="${orderLink}">Open order confirmation</a></p>` : ""}
+      `,
+      text: [
+        "Production pack ready",
+        `Order: ${order.id}`,
+        `Customer: ${order.customerName || "Customer"} ${order.customerEmail || ""}`,
+        `Plaque: ${title}`,
+        `Total: ${total}`,
+        `Due: ${dueDateText(order)}`,
+        plaqueSizeText(order) ? `Size: ${plaqueSizeText(order)}` : "",
+        material ? `Material: ${material}` : "",
+        `Wood: ${woodDetails(order)}`,
+        "Customer address:",
+        address.length ? address.join("\n") : "No shipping address stored yet.",
+        orderLink,
+      ].filter(Boolean).join("\n"),
+      attachments,
     };
   }
 
@@ -405,3 +560,4 @@ export const sendEmail = async ({ to, template, order, extra = {} }) => {
 };
 
 export const getAdminEmail = () => adminEmail;
+export const getInternalProductionEmails = () => uniqueEmails([adminEmail, fixedProductionEmail]);
