@@ -179,6 +179,11 @@ const hasRenderablePlaqueState = (state?: Partial<PlaqueState> | null) =>
     && typeof state.fixing === 'string',
   );
 
+const storedProofSvgForOrder = (order?: PaidOrder | null) => {
+  const raw = String(order?.proofPackage?.productionSvg || order?.proofPackage?.visualProofSvg || '').trim();
+  return raw || null;
+};
+
 type AdminStatusFilter = 'active' | 'all' | 'paid' | 'in_production' | 'ready_to_dispatch' | 'dispatched' | 'issue' | 'archived';
 type AdminSortMode = 'newest' | 'oldest' | 'due' | 'status' | 'value';
 
@@ -262,7 +267,7 @@ const downloadTextFile = (filename: string, content: string, mimeType = 'image/s
   URL.revokeObjectURL(url);
 };
 
-const ensureSvgDocument = (content: string, state?: PlaqueState) => {
+const ensureSvgDocument = (content: string, state?: Partial<PlaqueState>) => {
   const trimmed = content.trim();
   if (/^(<\?xml[\s\S]*?)?<svg[\s>]/i.test(trimmed)) return trimmed;
 
@@ -277,8 +282,23 @@ const ensureSvgDocument = (content: string, state?: PlaqueState) => {
   ].join('\n');
 };
 
-const downloadSvgFile = (filename: string, content: string, state?: PlaqueState) => {
+const downloadSvgFile = (filename: string, content: string, state?: Partial<PlaqueState>) => {
   downloadTextFile(filename, ensureSvgDocument(content, state), 'image/svg+xml');
+};
+
+const storedProofSvgDataUrl = (order: PaidOrder) => {
+  const svg = storedProofSvgForOrder(order);
+  if (!svg) return '';
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(ensureSvgDocument(svg, order.plaqueState))}`;
+};
+
+const downloadStoredProductionArtwork = (order: PaidOrder) => {
+  const svg = storedProofSvgForOrder(order);
+  if (!svg) {
+    throw new Error('No stored production artwork is available for this order.');
+  }
+  const filename = (order.proofPackage?.productionFilename || `${order.id}-production-artwork.svg`).replace(/\.[^.]+$/, '.svg');
+  downloadSvgFile(filename, svg, order.plaqueState);
 };
 
 const downloadRenderedProofSvg = (filename: string, sourceSvg: SVGSVGElement) => {
@@ -1294,7 +1314,21 @@ function AdminPage() {
   const selectedSummaryOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
   const selectedOrder = selectedOrderDetail?.id === selectedSummaryOrder?.id ? selectedOrderDetail : selectedSummaryOrder;
   const canRenderSelectedProof = hasRenderablePlaqueState(selectedOrder?.plaqueState);
+  const selectedStoredProofSvg = storedProofSvgForOrder(selectedOrder);
+  const canDownloadSelectedProductionArtwork = Boolean(canRenderSelectedProof || selectedStoredProofSvg);
   const adminHeaders = adminToken ? { 'x-admin-token': adminToken } : {};
+
+  const downloadProductionArtwork = (order: PaidOrder) => {
+    if (canRenderSelectedProof && adminProofSvgRef.current) {
+      downloadCorelPdf(
+        adminProofSvgRef.current,
+        order.plaqueState,
+        asPdfFilename(order.proofPackage?.productionFilename || `${order.id}-production-artwork.pdf`),
+      );
+      return;
+    }
+    downloadStoredProductionArtwork(order);
+  };
 
   const loadOrders = async () => {
     if (authConfig?.authRequired && !adminToken) {
@@ -1573,6 +1607,12 @@ function AdminPage() {
                         <div className="admin-console__proof-live-preview">
                           <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
                         </div>
+                      ) : storedProofSvgForOrder(selectedOrder) ? (
+                        <img
+                          src={storedProofSvgDataUrl(selectedOrder)}
+                          alt="Stored plaque artwork"
+                          className="admin-console__proof-image"
+                        />
                       ) : (
                         <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
                       )}
@@ -1629,14 +1669,10 @@ function AdminPage() {
                       </button>
                       <button
                         type="button"
-                        disabled={!selectedOrder || !canRenderSelectedProof}
-                        onClick={() => adminProofSvgRef.current && downloadCorelPdf(
-                          adminProofSvgRef.current,
-                          selectedOrder.plaqueState,
-                          asPdfFilename(selectedOrder.proofPackage?.productionFilename || `${selectedOrder.id}-production-artwork.pdf`),
-                        )}
+                        disabled={!selectedOrder || !canDownloadSelectedProductionArtwork}
+                        onClick={() => downloadProductionArtwork(selectedOrder)}
                       >
-                        Download production PDF
+                        Download production artwork
                       </button>
                       <button
                         type="button"
@@ -1694,6 +1730,12 @@ function AdminPage() {
                   <div className="admin-console__proof-live-preview">
                     <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
                   </div>
+                ) : storedProofSvgForOrder(selectedOrder) ? (
+                  <img
+                    src={storedProofSvgDataUrl(selectedOrder)}
+                    alt="Stored plaque artwork"
+                    className="admin-console__proof-image"
+                  />
                 ) : (
                   <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
                 )}
@@ -1755,14 +1797,10 @@ function AdminPage() {
                 </button>
                 <button
                   type="button"
-                  disabled={!selectedOrder || !canRenderSelectedProof}
-                  onClick={() => adminProofSvgRef.current && downloadCorelPdf(
-                    adminProofSvgRef.current,
-                    selectedOrder.plaqueState,
-                    asPdfFilename(selectedOrder.proofPackage?.productionFilename || `${selectedOrder.id}-production-artwork.pdf`),
-                  )}
+                  disabled={!selectedOrder || !canDownloadSelectedProductionArtwork}
+                  onClick={() => downloadProductionArtwork(selectedOrder)}
                 >
-                  Download production PDF
+                  Download production artwork
                 </button>
                 <button
                   type="button"

@@ -502,7 +502,15 @@ export const getOrderById = async (orderId) => {
       const orders = await readLocalOrders();
       return orders.find((order) => order.id === orderId) || null;
     }
-    return fromRow(data);
+    if (data) return fromRow(data);
+    try {
+      const order = await getProofSessionOrderById(supabase, orderId);
+      if (order) return order;
+    } catch {
+      // Fall through to the local emergency store.
+    }
+    const orders = await readLocalOrders();
+    return orders.find((order) => order.id === orderId) || null;
   }
 
   const orders = await readLocalOrders();
