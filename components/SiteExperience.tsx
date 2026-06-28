@@ -318,6 +318,45 @@ const downloadOrderProofPng = async (order: PaidOrder) => {
   URL.revokeObjectURL(url);
 };
 
+type AdminDetailBoundaryProps = {
+  resetKey: string;
+  children: React.ReactNode;
+};
+
+type AdminDetailBoundaryState = {
+  hasError: boolean;
+};
+
+class AdminDetailBoundary extends React.Component<AdminDetailBoundaryProps, AdminDetailBoundaryState> {
+  state: AdminDetailBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    console.error('Admin order detail render failed.', error);
+  }
+
+  componentDidUpdate(previousProps: AdminDetailBoundaryProps) {
+    if (previousProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="admin-console__detail-error">
+          <strong>This order detail could not render.</strong>
+          <span>The order list is still usable. Try another order, or refresh after the legacy proof data is repaired.</span>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const asPdfFilename = (filename: string) => filename.replace(/\.[^.]+$/, '') + '.pdf';
 
 const orderProofImageUrl = (order: Pick<PaidOrder, 'id'>) =>
@@ -1203,7 +1242,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
           </div>
           <div>
             <span>Status</span>
-            <strong>{order.status.replace(/_/g, ' ')}</strong>
+            <strong>{statusLabel(order.status)}</strong>
           </div>
           <div>
             <span>Delivery address</span>
@@ -1508,12 +1547,13 @@ function AdminPage() {
                     <small>{order.customerEmail || 'Email held by Stripe'}</small>
                   </span>
                   <span>
-                    <mark>{order.fulfilmentStatus?.replace(/_/g, ' ') || order.status.replace(/_/g, ' ')}</mark>
+                    <mark>{statusLabel(order.fulfilmentStatus || order.status)}</mark>
                     <small>Due {formatShortDate(dueDateForOrder(order))}</small>
                   </span>
                   <span>{formatPence(order.totalPence, order.currency)}</span>
                 </button>
                 {selectedOrder?.id === order.id && (
+                  <AdminDetailBoundary resetKey={`mobile-${selectedOrder.id}-${selectedOrder.updatedAt || ''}`}>
                   <article className="admin-console__detail admin-console__detail--mobile">
                     <div className="admin-console__detail-head">
                       <div>
@@ -1542,8 +1582,8 @@ function AdminPage() {
                       <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
                       <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
                       <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
-                      <div><span>Order status</span><strong>{selectedOrder.status.replace(/_/g, ' ')}</strong></div>
-                      <div><span>Fulfilment</span><strong>{selectedOrder.fulfilmentStatus?.replace(/_/g, ' ') || 'not started'}</strong></div>
+                      <div><span>Order status</span><strong>{statusLabel(selectedOrder.status)}</strong></div>
+                      <div><span>Fulfilment</span><strong>{statusLabel(selectedOrder.fulfilmentStatus)}</strong></div>
                       <div><span>Paid</span><strong>{formatAdminDate(selectedOrder.paidAt || selectedOrder.createdAt)}</strong></div>
                       <div><span>Due</span><strong>{formatShortDate(dueDateForOrder(selectedOrder))}</strong></div>
                     </div>
@@ -1622,6 +1662,7 @@ function AdminPage() {
                       </button>
                     </div>
                   </article>
+                  </AdminDetailBoundary>
                 )}
               </React.Fragment>
             ))}
@@ -1633,6 +1674,7 @@ function AdminPage() {
             )}
           </div>
           {selectedOrder && (
+            <AdminDetailBoundary resetKey={`desktop-${selectedOrder.id}-${selectedOrder.updatedAt || ''}`}>
             <article className="admin-console__detail admin-console__detail--desktop">
               <div className="admin-console__detail-head">
                 <div>
@@ -1666,8 +1708,8 @@ function AdminPage() {
                 <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
                 <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
                 <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
-                <div><span>Order status</span><strong>{selectedOrder.status.replace(/_/g, ' ')}</strong></div>
-                <div><span>Fulfilment</span><strong>{selectedOrder.fulfilmentStatus?.replace(/_/g, ' ') || 'not started'}</strong></div>
+                <div><span>Order status</span><strong>{statusLabel(selectedOrder.status)}</strong></div>
+                <div><span>Fulfilment</span><strong>{statusLabel(selectedOrder.fulfilmentStatus)}</strong></div>
                 <div><span>Paid</span><strong>{formatAdminDate(selectedOrder.paidAt || selectedOrder.createdAt)}</strong></div>
                 <div><span>Due</span><strong>{formatShortDate(dueDateForOrder(selectedOrder))}</strong></div>
               </div>
@@ -1771,6 +1813,7 @@ function AdminPage() {
                 ))}
               </div>
             </article>
+            </AdminDetailBoundary>
           )}
         </div>
           </>

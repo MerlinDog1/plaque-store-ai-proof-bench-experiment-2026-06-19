@@ -2605,6 +2605,31 @@
   display: none;
 }
 
+.admin-console__detail-error {
+  border: 1px solid #fec84b;
+  border-radius: 8px;
+  background: #fffcf5;
+  padding: 14px;
+  color: #7a2e0e;
+}
+
+.admin-console__detail-error strong,
+.admin-console__detail-error span {
+  display: block;
+}
+
+.admin-console__detail-error strong {
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.admin-console__detail-error span {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
 .admin-console__detail-head {
   display: flex;
   align-items: flex-start;
