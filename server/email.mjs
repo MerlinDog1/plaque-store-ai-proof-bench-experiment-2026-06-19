@@ -29,6 +29,31 @@ const proofImageUrl = (order) => {
   return "";
 };
 
+const proofSvg = (order) =>
+  order.proofPackage?.visualProofSvg || order.proofPackage?.productionSvg || "";
+
+const proofAttachments = (order, includeProof = true) => {
+  if (!includeProof) return [];
+  if (order.proofPackage?.visualProofPng) {
+    return [
+      {
+        filename: `${order.id}-approved-proof.png`,
+        content: String(order.proofPackage.visualProofPng).replace(/^data:image\/png;base64,/, ""),
+        content_id: "approved-proof",
+      },
+    ];
+  }
+  const svg = proofSvg(order);
+  if (!svg) return [];
+  return [
+    {
+      filename: `${order.id}-approved-proof.svg`,
+      content: Buffer.from(svg, "utf8").toString("base64"),
+      content_type: "image/svg+xml",
+    },
+  ];
+};
+
 const escapeHtml = (value = "") =>
   String(value)
     .replace(/&/g, "&amp;")
@@ -63,7 +88,16 @@ const shippingText = (address = {}) =>
 
 const plaquePreviewHtml = (order) => {
   const proofUrl = proofImageUrl(order);
-  if (!proofUrl && !order.proofPackage?.visualProofPng) return "";
+  const hasSvg = Boolean(proofSvg(order));
+  if (!proofUrl && !order.proofPackage?.visualProofPng && !hasSvg) return "";
+  if (!proofUrl && hasSvg) {
+    return `
+      <div style="padding:18px;background:#f5efe2;border-radius:18px;border:1px solid #e6d8bd;text-align:center;">
+        <p style="margin:0;color:#1f2a24;font:700 15px Arial,sans-serif;">Approved proof attached</p>
+        <p style="margin:10px 0 0;color:#76684f;font:13px Arial,sans-serif;line-height:1.5;">A copy of the approved SVG proof is attached to this email for your records.</p>
+      </div>
+    `;
+  }
   return `
     <div style="padding:18px;background:#f5efe2;border-radius:18px;border:1px solid #e6d8bd;">
       <img src="${escapeHtml(proofUrl || "cid:approved-proof")}" alt="Approved plaque proof" style="display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:14px;border:1px solid #e6d8bd;box-shadow:0 18px 42px rgba(36,28,12,.18);" />
@@ -147,13 +181,7 @@ const customerOrderConfirmation = (order, { orderLink, title, total }) => {
       "Your approved proof has been received for production. We will email you when it is dispatched.",
       orderLink ? `View your order: ${orderLink}` : "",
     ].filter(Boolean).join("\n"),
-    attachments: order.proofPackage?.visualProofPng ? [
-      {
-        filename: `${order.id}-approved-proof.png`,
-        content: String(order.proofPackage.visualProofPng).replace(/^data:image\/png;base64,/, ""),
-        content_id: "approved-proof",
-      },
-    ] : [],
+    attachments: proofAttachments(order),
   };
 };
 
@@ -234,13 +262,7 @@ const brandedOrderUpdate = (order, {
       primaryCtaUrl ? `${primaryCtaLabel}: ${primaryCtaUrl}` : "",
       footer,
     ].filter(Boolean).join("\n"),
-    attachments: includeProof && order.proofPackage?.visualProofPng ? [
-      {
-        filename: `${order.id}-approved-proof.png`,
-        content: String(order.proofPackage.visualProofPng).replace(/^data:image\/png;base64,/, ""),
-        content_id: "approved-proof",
-      },
-    ] : [],
+    attachments: proofAttachments(order, includeProof),
   };
 };
 
@@ -321,6 +343,7 @@ export const buildEmail = (template, order, extra = {}) => {
         `Total: ${total}`,
         orderLink,
       ].filter(Boolean).join("\n"),
+      attachments: proofAttachments(order),
     };
   }
 

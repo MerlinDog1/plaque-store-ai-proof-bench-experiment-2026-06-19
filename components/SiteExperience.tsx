@@ -247,6 +247,11 @@ const asPdfFilename = (filename: string) => filename.replace(/\.[^.]+$/, '') + '
 const orderProofImageUrl = (order: Pick<PaidOrder, 'id'>) =>
   `/api/orders/${encodeURIComponent(order.id)}/proof-image.png`;
 
+const orderProofSvgDataUrl = (order: Pick<PaidOrder, 'proofPackage'>) => {
+  const svg = order.proofPackage?.visualProofSvg || order.proofPackage?.productionSvg || '';
+  return svg ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}` : '';
+};
+
 type HomeCarouselItem = {
   id: string;
   image: string;
@@ -1058,6 +1063,12 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
                 alt="Approved plaque proof"
                 className="commerce-order-proof__image"
               />
+            ) : orderProofSvgDataUrl(order) ? (
+              <img
+                src={orderProofSvgDataUrl(order)}
+                alt="Approved plaque proof"
+                className="commerce-order-proof__image"
+              />
             ) : (
               <div className="commerce-order-proof__pending">Loading approved proof...</div>
             )}
@@ -1313,8 +1324,14 @@ function AdminPage() {
                     alt="Approved plaque proof"
                     className="admin-console__proof-image"
                   />
+                ) : orderProofSvgDataUrl(selectedOrder) ? (
+                  <img
+                    src={orderProofSvgDataUrl(selectedOrder)}
+                    alt="Approved plaque proof"
+                    className="admin-console__proof-image"
+                  />
                 ) : (
-                  <div className="commerce-order-proof__pending">Canonical approved proof image unavailable</div>
+                  <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
                 )}
                 <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
                   <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
