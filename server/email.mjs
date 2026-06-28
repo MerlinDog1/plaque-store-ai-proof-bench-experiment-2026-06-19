@@ -32,7 +32,7 @@ const proofImageUrl = (order) => {
 const proofSvg = (order) =>
   order.proofPackage?.visualProofSvg || order.proofPackage?.productionSvg || "";
 
-const proofAttachments = (order, includeProof = true) => {
+const proofAttachments = (order, includeProof = true, { includeSvg = false } = {}) => {
   if (!includeProof) return [];
   if (order.proofPackage?.visualProofPng) {
     return [
@@ -44,7 +44,7 @@ const proofAttachments = (order, includeProof = true) => {
     ];
   }
   const svg = proofSvg(order);
-  if (!svg) return [];
+  if (!svg || !includeSvg) return [];
   return [
     {
       filename: `${order.id}-approved-proof.svg`,
@@ -93,8 +93,8 @@ const plaquePreviewHtml = (order) => {
   if (!proofUrl && hasSvg) {
     return `
       <div style="padding:18px;background:#f5efe2;border-radius:18px;border:1px solid #e6d8bd;text-align:center;">
-        <p style="margin:0;color:#1f2a24;font:700 15px Arial,sans-serif;">Approved proof attached</p>
-        <p style="margin:10px 0 0;color:#76684f;font:13px Arial,sans-serif;line-height:1.5;">A copy of the approved SVG proof is attached to this email for your records.</p>
+        <p style="margin:0;color:#1f2a24;font:700 15px Arial,sans-serif;">Approved proof saved</p>
+        <p style="margin:10px 0 0;color:#76684f;font:13px Arial,sans-serif;line-height:1.5;">Your approved proof is saved with the order. Use the order link below to review it.</p>
       </div>
     `;
   }
@@ -181,7 +181,7 @@ const customerOrderConfirmation = (order, { orderLink, title, total }) => {
       "Your approved proof has been received for production. We will email you when it is dispatched.",
       orderLink ? `View your order: ${orderLink}` : "",
     ].filter(Boolean).join("\n"),
-    attachments: proofAttachments(order),
+    attachments: proofAttachments(order, true, { includeSvg: false }),
   };
 };
 
@@ -262,7 +262,7 @@ const brandedOrderUpdate = (order, {
       primaryCtaUrl ? `${primaryCtaLabel}: ${primaryCtaUrl}` : "",
       footer,
     ].filter(Boolean).join("\n"),
-    attachments: proofAttachments(order, includeProof),
+    attachments: proofAttachments(order, includeProof, { includeSvg: false }),
   };
 };
 
@@ -343,7 +343,7 @@ export const buildEmail = (template, order, extra = {}) => {
         `Total: ${total}`,
         orderLink,
       ].filter(Boolean).join("\n"),
-      attachments: proofAttachments(order),
+      attachments: proofAttachments(order, true, { includeSvg: true }),
     };
   }
 
