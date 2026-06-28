@@ -512,7 +512,15 @@ export const listOrders = async () => {
         return readLocalOrders();
       }
     }
-    return data.map(fromRow);
+    const storefrontOrders = data.map(fromRow);
+    if (storefrontOrders.length) return storefrontOrders;
+    try {
+      const fallbackOrders = await listProofSessionOrders(supabase);
+      if (fallbackOrders.length) return fallbackOrders;
+    } catch {
+      // Keep the primary storefront result if the legacy fallback cannot be read.
+    }
+    return storefrontOrders;
   }
 
   return readLocalOrders();
