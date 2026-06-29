@@ -177,9 +177,6 @@ const internalProductionAttachments = (order) => {
       content: visualPng.replace(/^data:image\/png;base64,/, ""),
       content_type: "image/png",
     });
-  } else {
-    const visualSvg = fullSvg(order.proofPackage?.visualProofSvg, order);
-    if (visualSvg) attachments.push(svgAttachment(`${order.id}-visual-proof.svg`, visualSvg));
   }
   const productionPdf = String(order.proofPackage?.productionArtworkPdf || "").trim();
   if (productionPdf) {

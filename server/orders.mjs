@@ -626,8 +626,10 @@ export const markOrderPaidFromSession = async (session) => {
   if (!wasAlreadyPaid) {
     await sendAndRecordOrderEmail(next, "customer-order-confirmation", customerEmail);
 
-    for (const internalEmail of getInternalProductionEmails()) {
-      await sendAndRecordOrderEmail(next, "admin-new-paid-order", internalEmail).catch(() => null);
+    if (next.proofPackage?.productionArtworkPdf) {
+      for (const internalEmail of getInternalProductionEmails()) {
+        await sendAndRecordOrderEmail(next, "admin-new-paid-order", internalEmail).catch(() => null);
+      }
     }
   }
 

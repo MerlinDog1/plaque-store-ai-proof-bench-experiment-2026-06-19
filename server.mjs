@@ -350,10 +350,10 @@ export const handleRequest = async (req, res) => {
       if (order.proofPackage?.productionArtworkPdf) {
         for (const internalEmail of getInternalProductionEmails()) {
           const alreadySent = (order.emailEvents || []).some(
-            (event) => event.type === "admin-production-pack" && event.recipient === internalEmail,
+            (event) => event.type === "admin-new-paid-order" && event.recipient === internalEmail,
           );
           if (!alreadySent) {
-            order = await sendAndRecordOrderEmail(order, "admin-production-pack", internalEmail);
+            order = await sendAndRecordOrderEmail(order, "admin-new-paid-order", internalEmail);
           }
         }
       }
