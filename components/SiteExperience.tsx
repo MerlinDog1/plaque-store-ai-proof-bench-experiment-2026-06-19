@@ -1021,12 +1021,12 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
           <button type="button" className="commerce-carousel-arrow commerce-carousel-arrow--next" onClick={() => moveCarousel(1)} aria-label="Next plaque example">›</button>
         </div>
         <article className="commerce-proof-first-copy">
-          <p className="commerce-eyebrow">Why this is different</p>
-          <h2>You choose the details. We shape the plaque.</h2>
+          <p className="commerce-eyebrow">Proof first</p>
+          <h2>See your plaque before you order.</h2>
           <p>
             {USE_CUSTOMER_COPY_PASS
-              ? 'Choose the plaque type, size, material and wording. We handle the layout, spacing and line breaks, then show you a realistic proof before you order.'
-              : 'Choose the plaque type, size, material and wording. Our intelligent plaque proofing system handles the layout, spacing, line breaks and production details, then shows you a realistic proof before you order.'}
+              ? 'Choose the plaque type, size, material and wording, then check a realistic proof before you pay.'
+              : 'Choose the plaque type, size, material and wording, then check a production-style proof before you pay.'}
           </p>
           <p>
             No guesswork and no hidden costs: engraving, standard fixings and UK mainland delivery are
