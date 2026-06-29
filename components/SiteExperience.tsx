@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PlaquePreview from './PlaquePreview';
-import { MockOrder, ProductFamily, SiteView, getPriceBreakdown, materialStories, productFamilies } from '../services/commerce';
+import { MockOrder, ProductFamily, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies } from '../services/commerce';
 import { PlaqueState } from '../types';
 import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
 
@@ -1031,7 +1031,7 @@ function CheckoutPage({
             <PlaquePreview ref={checkoutProofSvgRef} state={state} activeStep={6} inscription={inscription} />
           </div>
           <div className="commerce-summary-lines">
-            <span><strong>{selectedProduct.title}</strong></span>
+            <span><strong>{getPlaqueSummaryTitle(state, selectedProduct.title)}</strong></span>
             <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
             {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
             <span>UK mainland delivery <strong>Included</strong></span>
@@ -1315,7 +1315,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
           </div>
           <div>
             <span>Plaque</span>
-            <strong>{order.productTitle}</strong>
+            <strong>{getPlaqueSummaryTitle(order.plaqueState, order.productTitle)}</strong>
           </div>
           <div>
             <span>Status</span>
@@ -1531,7 +1531,7 @@ function AdminPage() {
         order.id,
         order.customerName,
         order.customerEmail,
-        order.productTitle,
+        getPlaqueSummaryTitle(order.plaqueState, order.productTitle),
         order.inscription,
         order.shippingAddress?.postal_code,
         order.shippingAddress?.postcode,
@@ -1646,7 +1646,7 @@ function AdminPage() {
                 <button className={`admin-console__order-row ${selectedOrder?.id === order.id ? 'is-active' : ''}`} onClick={() => setSelectedId(order.id)} role="listitem">
                   <span>
                     <strong>{order.id}</strong>
-                    <small>{order.productTitle}</small>
+                    <small>{getPlaqueSummaryTitle(order.plaqueState, order.productTitle)}</small>
                   </span>
                   <span>{formatOrderSource(order)}</span>
                   <span>
@@ -1691,7 +1691,7 @@ function AdminPage() {
                       )}
                     </div>
                     <div className="admin-console__data-grid">
-                      <div><span>Product</span><strong>{selectedOrder.productTitle}</strong></div>
+                      <div><span>Product</span><strong>{getPlaqueSummaryTitle(selectedOrder.plaqueState, selectedOrder.productTitle)}</strong></div>
                       <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
                       <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
                       <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
@@ -1816,7 +1816,7 @@ function AdminPage() {
                 )}
               </div>
               <div className="admin-console__data-grid">
-                <div><span>Product</span><strong>{selectedOrder.productTitle}</strong></div>
+                <div><span>Product</span><strong>{getPlaqueSummaryTitle(selectedOrder.plaqueState, selectedOrder.productTitle)}</strong></div>
                 <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
                 <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
                 <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>

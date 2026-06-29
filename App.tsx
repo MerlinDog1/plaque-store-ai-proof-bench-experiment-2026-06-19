@@ -9,7 +9,7 @@ import { generatePlaqueDesign, generateRealisticView, refinePlaqueWording, Gener
 import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
-import { DeliveryAddress, MockOrder, ProductFamily, SiteView, getProductBySlug, makeMockOrder, productFamilies } from './services/commerce';
+import { DeliveryAddress, MockOrder, ProductFamily, SiteView, getPlaqueSummaryTitle, getProductBySlug, makeMockOrder, productFamilies } from './services/commerce';
 import { isBenchPlaqueFormat } from './services/plaqueRules';
 import { BENCH_SAFE_MARGIN_PERCENT } from './services/safeMargin';
 
@@ -859,7 +859,8 @@ const App: React.FC = () => {
     if (!proofSourceSvg) {
       throw new Error('The approved proof is not ready. Please return to the proof step and try again.');
     }
-    const order = makeMockOrder(state, inscriptionPrompt, selectedProduct.title, customerName, customerEmail, {
+    const plaqueSummaryTitle = getPlaqueSummaryTitle(state, selectedProduct.title);
+    const order = makeMockOrder(state, inscriptionPrompt, plaqueSummaryTitle, customerName, customerEmail, {
       productionSvg: state.generatedSvgContent,
       visualProofSvg,
       visualProofPng: null,
@@ -875,7 +876,7 @@ const App: React.FC = () => {
         body: JSON.stringify({
           orderId: order.id,
           customerEmail,
-          productTitle: selectedProduct.title,
+          productTitle: plaqueSummaryTitle,
           totalPence: Math.round(order.total * 100),
           origin: window.location.origin,
           uiMode: 'hosted',
@@ -1008,31 +1009,7 @@ const App: React.FC = () => {
   })();
   const showProofPrice = currentView === 'plaque';
   const showHeaderPrice = currentView === 'plaque' || currentView === 'product' || currentView === 'checkout';
-  const materialTrailLabels: Record<Material, string> = {
-    [Material.BrushedBrass]: 'Brushed brass',
-    [Material.OrbitalBrassMattLacquer]: 'Orbital brass',
-    [Material.PolishedBrass]: 'Polished brass',
-    [Material.AgedBrass]: 'Mid aged brass',
-    [Material.BrushedSteel]: 'Brushed stainless',
-    [Material.PolishedSteel]: 'Polished stainless',
-  };
-  const fixingTrailLabels: Record<Fixing, string> = {
-    [Fixing.None]: 'No fixings',
-    [Fixing.VHB]: 'VHB tape',
-    [Fixing.Screws]: 'Screws',
-    [Fixing.Caps]: 'Decoration caps',
-  };
-  const textTrailLabels: Record<TextColor, string> = {
-    [TextColor.Black]: 'Black text',
-    [TextColor.Grey]: 'Grey text',
-    [TextColor.White]: 'White text',
-    [TextColor.Cream]: 'Cream text',
-  };
-  const proofSpecTrail = [
-    materialTrailLabels[state.material],
-    fixingTrailLabels[state.fixing],
-    textTrailLabels[state.textColor],
-  ].join(' / ');
+  const proofSpecTrail = getPlaqueSummaryTitle(state);
 
   return (
     <div className={`studio-app-shell proofbench-app flex flex-col bg-transparent text-[#eef4ee] ${currentView !== 'plaque' && currentView !== 'vector' ? 'commerce-mode' : ''}`}>

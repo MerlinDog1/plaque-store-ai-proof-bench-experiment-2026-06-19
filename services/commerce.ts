@@ -116,6 +116,23 @@ export interface MockOrder {
   };
 }
 
+const PLAQUE_SUMMARY_MATERIAL_LABELS: Record<Material, string> = {
+  [Material.BrushedBrass]: 'Brushed brass',
+  [Material.OrbitalBrassMattLacquer]: 'Orbital brass',
+  [Material.PolishedBrass]: 'Polished brass',
+  [Material.AgedBrass]: 'Aged brass',
+  [Material.BrushedSteel]: 'Brushed stainless',
+  [Material.PolishedSteel]: 'Polished stainless',
+};
+
+export const getPlaqueSummaryTitle = (state: Partial<PlaqueState> = {}, fallback = 'Custom plaque') => {
+  const material = state.material ? PLAQUE_SUMMARY_MATERIAL_LABELS[state.material] || String(state.material) : '';
+  const width = Number(state.width || 0);
+  const height = Number(state.height || 0);
+  const size = width > 0 && height > 0 ? `${width} x ${height} mm` : '';
+  return [material, size].filter(Boolean).join(' / ') || fallback;
+};
+
 export const productFamilies: ProductFamily[] = [
   {
     slug: 'bench-plaques',

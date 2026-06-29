@@ -72,7 +72,34 @@ const labelFromSlug = (value = "") =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 
+const materialLabelFromState = (state = {}) => {
+  const labels = {
+    "brushed-brass": "Brushed brass",
+    "orbital-brass-matt-lacquer": "Orbital brass",
+    "polished-brass": "Polished brass",
+    "aged-brass": "Aged brass",
+    "brushed-stainless": "Brushed stainless",
+    "polished-stainless": "Polished stainless",
+  };
+  return labels[state.material] || labelFromSlug(state.material || "");
+};
+
 const stateForOrder = (order) => order.plaqueState || order.state || {};
+
+const plaqueSummaryTitle = (order, fallback = "Custom plaque") => {
+  const state = stateForOrder(order);
+  const material = materialLabelFromState(state);
+  const width = Number(state.width || 0);
+  const height = Number(state.height || 0);
+  const size = width > 0 && height > 0 ? `${width} x ${height} mm` : "";
+  return [material, size].filter(Boolean).join(" / ") || fallback;
+};
+
+const emailWordmark = () => `
+  <div style="font-family:Montserrat,Arial Black,Arial,Helvetica,sans-serif;font-size:30px;font-weight:900;line-height:.95;letter-spacing:0;mso-line-height-rule:exactly;">
+    <span style="color:#f2d688;">Insta</span><span style="color:#fffaf0;">Plaque</span>
+  </div>
+`;
 
 const customerName = (order) => {
   const raw = String(order.customerName || "").trim();
@@ -219,7 +246,7 @@ const detailRow = (label, value) => value ? `
 const customerOrderConfirmation = (order, { orderLink, title, total }) => {
   const state = stateForOrder(order);
   const size = state.width && state.height ? `${state.width} x ${state.height} mm` : "";
-  const material = labelFromSlug(state.material || "");
+  const material = materialLabelFromState(state);
   const fixing = labelFromSlug(state.fixing || "");
   const delivery = shippingText(order.shippingAddress);
   const name = customerName(order);
@@ -235,7 +262,7 @@ const customerOrderConfirmation = (order, { orderLink, title, total }) => {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#fffaf0;border-radius:22px;overflow:hidden;border:1px solid #e4d7bf;">
                 <tr>
                   <td style="background:#0f2b23;padding:24px 26px;color:#f7f1df;">
-                    <div style="font-family:Playfair Display,Georgia,'Times New Roman',serif;font-size:26px;font-weight:950;line-height:.95;letter-spacing:0;"><span style="color:#f2d688;">Insta</span><span style="color:#fffaf0;">Plaque</span></div>
+                    ${emailWordmark()}
                     <p style="margin:12px 0 0;color:#f3dfaa;font:700 13px Arial,sans-serif;text-transform:uppercase;letter-spacing:.12em;">Order confirmed</p>
                     <h1 style="margin:8px 0 0;color:#fff7df;font:800 30px Georgia,'Times New Roman',serif;line-height:1.14;">Thank you, ${escapeHtml(name)}.</h1>
                     <p style="margin:12px 0 0;color:#dfe9df;font:15px Arial,sans-serif;line-height:1.6;">Your approved plaque proof has been received. We will prepare it for production and email you again when it is dispatched.</p>
@@ -322,7 +349,7 @@ const brandedOrderUpdate = (order, {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#fffaf0;border-radius:22px;overflow:hidden;border:1px solid #e4d7bf;">
                 <tr>
                   <td style="background:#0f2b23;padding:24px 26px;color:#f7f1df;">
-                    <div style="font-family:Playfair Display,Georgia,'Times New Roman',serif;font-size:26px;font-weight:950;line-height:.95;letter-spacing:0;"><span style="color:#f2d688;">Insta</span><span style="color:#fffaf0;">Plaque</span></div>
+                    ${emailWordmark()}
                     <p style="margin:12px 0 0;color:#f3dfaa;font:700 13px Arial,sans-serif;text-transform:uppercase;letter-spacing:.12em;">${escapeHtml(eyebrow)}</p>
                     <h1 style="margin:8px 0 0;color:#fff7df;font:800 30px Georgia,'Times New Roman',serif;line-height:1.14;">${escapeHtml(heading.replace("{name}", name))}</h1>
                     <p style="margin:12px 0 0;color:#dfe9df;font:15px Arial,sans-serif;line-height:1.6;">${escapeHtml(intro)}</p>
@@ -371,7 +398,7 @@ const brandedOrderUpdate = (order, {
 
 export const buildEmail = (template, order, extra = {}) => {
   const orderLink = orderUrl(order);
-  const title = order.productTitle || "Custom plaque";
+  const title = plaqueSummaryTitle(order, order.productTitle || "Custom plaque");
   const totalPence = order.totalPence ?? (Number.isFinite(order.total) ? Math.round(order.total * 100) : 0);
   const total = money(totalPence, order.currency);
 
@@ -446,7 +473,7 @@ export const buildEmail = (template, order, extra = {}) => {
   if (template === "admin-new-paid-order") {
     const address = shippingLines(order.shippingAddress);
     const state = stateForOrder(order);
-    const material = labelFromSlug(state.material || "");
+    const material = materialLabelFromState(state);
     return {
       subject: `New paid InstaPlaque order: ${order.id}`,
       html: `
@@ -484,7 +511,7 @@ export const buildEmail = (template, order, extra = {}) => {
   if (template === "admin-production-pack") {
     const address = shippingLines(order.shippingAddress);
     const state = stateForOrder(order);
-    const material = labelFromSlug(state.material || "");
+    const material = materialLabelFromState(state);
     const attachments = internalProductionAttachments(order);
     return {
       subject: `Production pack ready: ${order.id}`,
