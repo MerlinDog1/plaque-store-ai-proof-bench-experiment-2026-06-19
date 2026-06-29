@@ -876,13 +876,22 @@ function ProductGrid({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
   );
 }
 
-function ExpandableFaqList({ faqs, openCount = 1 }: { faqs: FaqItem[]; openCount?: number }) {
+function ExpandableFaqList({ faqs, defaultOpenIndex = null }: { faqs: FaqItem[]; defaultOpenIndex?: number | null }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(defaultOpenIndex);
+
   return (
     <div className="commerce-faq-grid">
       {faqs.map((faq, index) => (
         <article className="commerce-faq-card" key={faq.question}>
-          <details open={index < openCount}>
-            <summary>{faq.question}</summary>
+          <details open={openIndex === index}>
+            <summary
+              onClick={(event) => {
+                event.preventDefault();
+                setOpenIndex((current) => current === index ? null : index);
+              }}
+            >
+              {faq.question}
+            </summary>
             <p>{faq.answer}</p>
           </details>
         </article>
@@ -1012,10 +1021,10 @@ function HomeFaq() {
   return (
     <section className="commerce-section commerce-home-faq">
       <div className="commerce-section__head">
-        <p className="commerce-eyebrow">FAQ</p>
-        <h2>Plain answers before starting a proof.</h2>
+        <p className="commerce-eyebrow">Questions</p>
+        <h2>FAQ</h2>
       </div>
-      <ExpandableFaqList faqs={homeFaqs} openCount={2} />
+      <ExpandableFaqList faqs={homeFaqs} />
     </section>
   );
 }
@@ -1133,7 +1142,7 @@ function ProductPage({ selectedProduct, onLaunchProduct }: Pick<SiteProps, 'sele
           <p className="commerce-eyebrow">Product questions</p>
           <h2>{USE_CUSTOMER_COPY_PASS ? 'Fast answers before you start your proof.' : 'Fast answers before customers enter the proof bench.'}</h2>
         </div>
-        <ExpandableFaqList faqs={selectedProduct.faqs} openCount={1} />
+        <ExpandableFaqList faqs={selectedProduct.faqs} />
       </section>
     </div>
   );
@@ -1196,9 +1205,9 @@ function FaqPage() {
       <section className="commerce-section">
         <div className="commerce-section__head">
           <p className="commerce-eyebrow">FAQ</p>
-          <h1>Questions that support confident self-service ordering.</h1>
+          <h1>FAQ</h1>
         </div>
-        <ExpandableFaqList faqs={homeFaqs} openCount={3} />
+        <ExpandableFaqList faqs={homeFaqs} />
       </section>
     </div>
   );
