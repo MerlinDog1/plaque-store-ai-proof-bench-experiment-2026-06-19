@@ -252,8 +252,8 @@ export const productFamilies: ProductFamily[] = [
     startingFrom: 'quote checked before order',
     materialCue: 'stainless',
     image: '/site-images/home-carousel-brass-wall.webp',
-    description: 'For non-standard dimensions, logos, artwork, batch orders or anything that needs a quick manual check.',
-    bestFor: ['Up to 600 mm long', 'Logos and artwork', 'Batch orders', 'Special fixing requirements'],
+    description: 'For non-standard dimensions, oval plaques, circular plaques or anything that needs a quick manual check.',
+    bestFor: ['Up to 600 mm long', 'Oval plaques', 'Circular plaques', 'Special fixing requirements'],
     proofPrompt: 'The Old Mill\nRestored 2026\nIn honour of everyone who brought this place back to life',
     preset: {
       width: 400,
@@ -277,7 +277,7 @@ export const productFamilies: ProductFamily[] = [
       },
       {
         question: 'What triggers a quote?',
-        answer: 'Oversized plaques, special materials, complex artwork, bulk quantities and unusual mounting should be checked before payment.',
+        answer: 'Oversized plaques, custom shapes, longer-turnaround finishes and unusual mounting should be checked before payment.',
       },
     ],
   },

@@ -533,7 +533,7 @@ const siteShareImage = `${siteBaseUrl}/site-images/home-realistic-proof-row.jpg`
 const homeFaqs: FaqItem[] = [
   {
     question: 'How much does a custom plaque cost?',
-    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK mainland delivery. Bench plaques start from £69, A5 plaques from £129 and A4 plaques from £149. Custom sizes are checked before payment.',
+    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK mainland delivery. Bench plaques start from £69, A5 plaques from £129 and A4 plaques from £149. Custom sizes are available up to our maximum size and may need a longer turnaround.',
   },
   {
     question: 'Can I preview my plaque before ordering?',
@@ -541,7 +541,7 @@ const homeFaqs: FaqItem[] = [
   },
   {
     question: 'What size is a bench plaque?',
-    answer: 'The compact bench plaque format starts at 150 x 50 mm for short inscriptions. If you need names, dates and several lines of wording, A5 gives more room and usually reads better.',
+    answer: 'The compact bench plaque format starts at 150 x 50 mm for short inscriptions. Larger standard bench plaques are available, and custom sizes, oval plaques and circular plaques can be made up to our maximum size.',
   },
   {
     question: 'Which material is best for an outdoor plaque?',
@@ -557,19 +557,19 @@ const homeFaqs: FaqItem[] = [
   },
   {
     question: 'Is UK delivery included?',
-    answer: 'UK mainland delivery is included in standard pricing. Any unusual delivery or oversized plaque requirements are checked before payment.',
+    answer: 'UK mainland delivery is included in standard pricing. For delivery outside UK mainland, create or email the proof first and we will confirm delivery cost before sending a payment link.',
   },
   {
     question: 'Can I save the proof and come back later?',
     answer: 'Yes. You can download the proof PDF and use the link inside it to return to the design or checkout later without creating an account.',
   },
   {
-    question: 'What if I need a custom size or supplied artwork?',
-    answer: 'Start with a custom plaque proof. Oversized plaques, logos, supplied artwork, batch work and unusual mounting can be checked before payment so the order stays realistic.',
+    question: 'What if I need a custom size or shape?',
+    answer: 'Start with a custom plaque proof for non-standard sizes, oval plaques or circular plaques. Custom sizes are available up to our maximum size and may need a longer turnaround. We are not currently accepting supplied artwork.',
   },
   {
     question: 'How quickly can my plaque be made?',
-    answer: 'Standard orders are usually estimated at 5 working days from approved proof and payment. Aged brass, custom sizes, wood backing and unusual requests may take longer and will be shown or confirmed before checkout.',
+    answer: 'Standard orders are usually estimated at 5 working days from approved proof and payment. Aged brass, custom sizes, circles, ovals and wood backing may take longer and will be shown or confirmed before checkout.',
   },
   {
     question: 'Are aged brass patinas identical?',
@@ -604,7 +604,7 @@ const homeSeoTopics = [
   },
   {
     title: 'Custom plaques',
-    copy: 'Non-standard sizes, logos, supplied artwork and batch orders can start with a proof and be checked before payment.',
+    copy: 'Non-standard sizes, oval plaques and circular plaques can start with a proof and be checked before payment where the turnaround needs confirming.',
   },
 ];
 
@@ -614,7 +614,7 @@ const orderHighlights = [
   'Secure Stripe checkout',
   'Standard, A5, A4 and custom plaque sizes',
   'Brass, aged brass and stainless steel finishes',
-  'Production artwork generated from the approved proof',
+  'Production file generated from the approved proof',
 ];
 
 const routePathForView = (view: SiteView) => {
@@ -738,7 +738,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily): SeoMe
   if (view === 'quote') {
     return {
       title: 'Custom Plaque Quotes UK | InstaPlaque',
-      description: 'Start a proof for oversized plaques, supplied artwork, logos, batch orders and custom plaque sizes in the UK.',
+      description: 'Start a proof for custom plaque sizes, oval plaques, circular plaques and longer-turnaround plaque orders in the UK.',
       path: routePath,
     };
   }
@@ -832,8 +832,8 @@ function SiteHero({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
         </div>
         <p>
           {USE_CUSTOMER_COPY_PASS
-            ? 'Create a professional plaque proof in minutes from your wording. Skip the artwork back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'
-            : 'Our unique intelligent plaque design system turns your wording into a production-ready proof in minutes. Skip the artwork back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'}
+            ? 'Create a professional plaque proof in minutes from your wording. Skip the design back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'
+            : 'Our unique intelligent plaque design system turns your wording into a production-ready proof in minutes. Skip the design back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'}
         </p>
         <div className="commerce-actions">
           <button type="button" className="commerce-primary commerce-primary--cream" onClick={onStartDesign}>
@@ -896,7 +896,7 @@ function HomeSeoContent() {
     <section className="commerce-section commerce-seo-band">
       <div className="commerce-section__head">
         <p className="commerce-eyebrow">Custom plaques UK</p>
-        <h2>Memorial, bench, brass and stainless steel plaques without the slow artwork loop.</h2>
+        <h2>Memorial, bench, brass and stainless steel plaques without the slow design loop.</h2>
         <p>
           InstaPlaque is built for UK customers who want to see the plaque before committing.
           Choose the size, finish and wording, then approve a clean proof before checkout.
@@ -1214,8 +1214,8 @@ function QuotePage({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
           <h1>{USE_CUSTOMER_COPY_PASS ? 'Need something made to measure?' : 'Start with an instant proof, then route complex work to quote.'}</h1>
           <p className="commerce-lede">
             {USE_CUSTOMER_COPY_PASS
-              ? 'Start with a proof and tell us what you need. We will confirm anything unusual, including oversized plaques, supplied artwork and batch orders, before payment.'
-              : 'Customers should not hit a dead-end when a plaque is unusual. They can still create a proof, then the system flags oversized, artwork-heavy or batch work for manual price confirmation.'}
+              ? 'Start with a proof and tell us what you need. We will confirm anything unusual, including custom sizes, oval plaques, circular plaques and longer-turnaround work, before payment.'
+              : 'Customers should not hit a dead-end when a plaque is unusual. They can still create a proof, then the system flags custom sizes, ovals, circles or longer-turnaround work for manual confirmation.'}
           </p>
           <div className="commerce-actions">
             <button type="button" className="commerce-primary" onClick={() => onLaunchProduct(bespoke)}>
@@ -1227,9 +1227,10 @@ function QuotePage({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
           <p className="commerce-eyebrow">{USE_CUSTOMER_COPY_PASS ? 'We can quote for' : 'Quote triggers'}</p>
           <ul>
             <li>Oversized dimensions outside the standard production bed</li>
-            <li>Customer logos, portraits, or supplied artwork</li>
-            <li>Bulk/industrial plaques or serialised tags</li>
-            <li>Special materials, mounting, installation, or delivery requests</li>
+            <li>Oval plaques and circular plaques</li>
+            <li>Custom sizes up to our maximum production size</li>
+            <li>Longer-turnaround finishes or wood-backed plaques</li>
+            <li>Delivery outside UK mainland</li>
           </ul>
           <div className="commerce-warning">
             Send the proof through and we will confirm anything unusual before payment.
