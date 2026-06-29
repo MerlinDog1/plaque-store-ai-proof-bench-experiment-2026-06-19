@@ -466,6 +466,7 @@ export const attachVisualProofToOrder = async (orderId, payload = {}) => {
   const visualProofPng = String(payload.visualProofPng || "").trim();
   const visualProofSvg = String(payload.visualProofSvg || "").trim();
   const productionArtworkPdf = String(payload.productionArtworkPdf || "").trim();
+  const visualProofRendererVersion = Number(payload.visualProofRendererVersion || 0);
   if (!visualProofPng.startsWith("data:image/png;base64,") && !/^[a-z0-9+/]+=*$/i.test(visualProofPng)) {
     throw new Error("Proof image must be a PNG data URL or base64 PNG.");
   }
@@ -483,6 +484,9 @@ export const attachVisualProofToOrder = async (orderId, payload = {}) => {
       ...(order.proofPackage || {}),
       visualProofSvg: visualProofSvg || order.proofPackage?.visualProofSvg || null,
       visualProofPng,
+      visualProofRendererVersion: Number.isFinite(visualProofRendererVersion) && visualProofRendererVersion > 0
+        ? visualProofRendererVersion
+        : order.proofPackage?.visualProofRendererVersion || null,
       productionArtworkPdf: productionArtworkPdf || order.proofPackage?.productionArtworkPdf || null,
     },
     events: [

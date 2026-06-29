@@ -54,6 +54,7 @@ type PaidOrder = {
     productionSvg?: string | null;
     visualProofSvg?: string | null;
     visualProofPng?: string | null;
+    visualProofRendererVersion?: number;
     productionArtworkPdf?: string | null;
     productionFilename?: string;
     visualFilename?: string;
@@ -83,6 +84,7 @@ declare global {
 }
 
 const USE_CUSTOMER_COPY_PASS = true;
+const VISUAL_PROOF_RENDERER_VERSION = 2;
 
 const DownloadIcon = () => (
   <svg className="button-icon" aria-hidden="true" viewBox="0 0 20 20" focusable="false">
@@ -1176,7 +1178,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   }, [order?.id]);
 
   useEffect(() => {
-    if (!order || order.proofPackage?.visualProofPng || !proofRenderSvgRef.current) return;
+    if (!order || order.proofPackage?.visualProofRendererVersion === VISUAL_PROOF_RENDERER_VERSION || !proofRenderSvgRef.current) return;
 
     let cancelled = false;
     const attachRenderedProof = async () => {
@@ -1200,8 +1202,9 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
             stripeCheckoutSessionId: order.stripeCheckoutSessionId,
             visualProofSvg: sourceSvg.outerHTML,
             visualProofPng: proofImageBase64,
+            visualProofRendererVersion: VISUAL_PROOF_RENDERER_VERSION,
             productionArtworkPdf,
-            sendCustomerEmail: true,
+            sendCustomerEmail: !order.proofPackage?.visualProofPng,
           }),
         });
         const payload = await response.json();
@@ -1219,7 +1222,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
     return () => {
       cancelled = true;
     };
-  }, [order?.id, order?.proofPackage?.visualProofPng]);
+  }, [order?.id, order?.proofPackage?.visualProofPng, order?.proofPackage?.visualProofRendererVersion]);
 
   if (status === 'loading') {
     return (
@@ -1258,13 +1261,21 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
     USE_CUSTOMER_COPY_PASS ? 'Preparing your plaque' : 'Production preparation',
     'Dispatch email follows',
   ];
+  const proofExportWidth = 1200;
+  const proofExportHeight = order.plaqueState
+    ? Math.max(320, Math.round(proofExportWidth * ((order.plaqueState.height + (order.plaqueState.wood ? 25 : 0)) / Math.max(1, order.plaqueState.width + (order.plaqueState.wood ? 25 : 0)))))
+    : 720;
 
   return (
     <div className="commerce-page">
       <section className="commerce-order-confirmed">
         <div className="commerce-order-confirmed__main">
           {order.plaqueState && (
-            <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+            <div
+              aria-hidden="true"
+              className="commerce-order-export-renderer"
+              style={{ width: proofExportWidth, height: proofExportHeight }}
+            >
               <PlaquePreview ref={proofRenderSvgRef} state={order.plaqueState} activeStep={6} inscription={order.inscription} />
             </div>
           )}

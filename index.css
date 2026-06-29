@@ -2353,6 +2353,22 @@
   font-weight: 800;
 }
 
+.commerce-order-export-renderer {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.commerce-order-export-renderer .proof-canvas {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+}
+
 .commerce-order-card,
 .commerce-admin-detail,
 .commerce-admin-timeline {
