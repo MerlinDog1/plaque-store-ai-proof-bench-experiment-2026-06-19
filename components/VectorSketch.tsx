@@ -672,7 +672,12 @@ export const VectorSketch: React.FC = () => {
 
           {finalSvg && (
             <div className="flex gap-4">
-              <button onClick={download} className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl border border-gray-700 transition-colors">Download SVG</button>
+              <button onClick={download} className="inline-flex flex-1 items-center justify-center gap-2 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl border border-gray-700 transition-colors">
+                <svg className="h-4 w-4" aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 2.5v9m0 0 3.4-3.4M10 11.5 6.6 8.1M4 16.5h12" />
+                </svg>
+                Download SVG
+              </button>
             </div>
           )}
         </div>

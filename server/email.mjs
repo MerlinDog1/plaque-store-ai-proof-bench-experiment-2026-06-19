@@ -202,8 +202,8 @@ const plaquePreviewHtml = (order) => {
     `;
   }
   return `
-    <div style="padding:18px;background:#f5efe2;border-radius:18px;border:1px solid #e6d8bd;">
-      <img src="${escapeHtml(proofUrl || "cid:approved-proof")}" alt="Approved plaque proof" style="display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:14px;border:1px solid #e6d8bd;box-shadow:0 18px 42px rgba(36,28,12,.18);" />
+      <div style="padding:18px;background:#f5efe2;border:1px solid #e6d8bd;">
+      <img src="${escapeHtml(proofUrl || "cid:approved-proof")}" alt="Approved plaque proof" style="display:block;width:100%;max-width:520px;height:auto;margin:0 auto;border:1px solid #e6d8bd;box-shadow:0 18px 42px rgba(36,28,12,.18);" />
       <p style="margin:14px 0 0;text-align:center;color:#76684f;font:12px Arial,sans-serif;">Approved proof.</p>
     </div>
   `;

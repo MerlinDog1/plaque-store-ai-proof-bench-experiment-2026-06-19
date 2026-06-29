@@ -84,6 +84,12 @@ declare global {
 
 const USE_CUSTOMER_COPY_PASS = true;
 
+const DownloadIcon = () => (
+  <svg className="button-icon" aria-hidden="true" viewBox="0 0 20 20" focusable="false">
+    <path d="M10 2.5v9m0 0 3.4-3.4M10 11.5 6.6 8.1M4 16.5h12" />
+  </svg>
+);
+
 let stripeJsPromise: Promise<void> | null = null;
 
 const withClientTimeout = async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
@@ -1240,6 +1246,18 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 
   const paid = order.paymentStatus === 'paid';
   const address = order.shippingAddress || {};
+  const fulfilmentStage = order.fulfilmentStatus || order.status;
+  const currentStepIndex = fulfilmentStage === 'dispatched' || fulfilmentStage === 'ready_to_dispatch'
+    ? 3
+    : paid
+      ? 2
+      : 1;
+  const orderSteps = [
+    'Proof approved',
+    'Payment confirmed',
+    USE_CUSTOMER_COPY_PASS ? 'Preparing your plaque' : 'Production preparation',
+    'Dispatch email follows',
+  ];
 
   return (
     <div className="commerce-page">
@@ -1300,11 +1318,18 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
                 .join(', ') || 'Held by Stripe checkout'}
             </p>
           </div>
-          <div className="commerce-checkout-flow">
-            <span>Proof approved</span>
-            <span>Payment confirmed</span>
-            <span>{USE_CUSTOMER_COPY_PASS ? 'Preparing your plaque' : 'Production preparation'}</span>
-            <span>Dispatch email follows</span>
+          <div className="commerce-checkout-flow" aria-label="Order progress">
+            {orderSteps.map((step, index) => (
+              <span
+                key={step}
+                className={[
+                  index < currentStepIndex ? 'is-complete' : '',
+                  index === currentStepIndex ? 'is-current' : '',
+                ].filter(Boolean).join(' ')}
+              >
+                {step}
+              </span>
+            ))}
           </div>
           <button
             type="button"
@@ -1314,6 +1339,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
               window.alert('The approved proof image is still being prepared. Please try again in a few seconds.');
             })}
           >
+            <DownloadIcon />
             Download approved proof
           </button>
           <button type="button" className="commerce-secondary" onClick={() => window.print()}>
@@ -1708,6 +1734,7 @@ function AdminPage() {
                         disabled={!selectedOrder || !canDownloadSelectedProductionArtwork}
                         onClick={() => downloadProductionArtwork(selectedOrder)}
                       >
+                        <DownloadIcon />
                         Download production artwork
                       </button>
                       <button
@@ -1718,6 +1745,7 @@ function AdminPage() {
                           window.alert('The approved proof image is not available yet. Please try again in a few seconds.');
                         })}
                       >
+                        <DownloadIcon />
                         Download approved proof
                       </button>
                       <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'in_production', fulfilmentStatus: 'in_production', emailTemplate: 'customer-in-production' })}>
@@ -1831,6 +1859,7 @@ function AdminPage() {
                   disabled={!selectedOrder || !canDownloadSelectedProductionArtwork}
                   onClick={() => downloadProductionArtwork(selectedOrder)}
                 >
+                  <DownloadIcon />
                   Download production artwork
                 </button>
                 <button
@@ -1841,6 +1870,7 @@ function AdminPage() {
                     window.alert('The approved proof image is not available yet. Please try again in a few seconds.');
                   })}
                 >
+                  <DownloadIcon />
                   Download approved proof
                 </button>
                 <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'in_production', fulfilmentStatus: 'in_production', emailTemplate: 'customer-in-production' })}>

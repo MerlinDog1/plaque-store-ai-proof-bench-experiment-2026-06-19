@@ -2250,7 +2250,10 @@ export const Controls: React.FC<Props> = ({
                   <strong>Save this design for later</strong>
                   <small><strong>No account needed.</strong> The PDF includes your QR code and secure link to return, continue editing, or checkout later. Saved links last 30 days.</small>
                 </div>
-                <button onClick={onExportPdf} className="min-h-[52px] rounded-lg px-4 text-sm font-black">
+                <button onClick={onExportPdf} className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-lg px-4 text-sm font-black">
+                  <svg className="h-4 w-4" aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10 2.5v9m0 0 3.4-3.4M10 11.5 6.6 8.1M4 16.5h12" />
+                  </svg>
                   Download proof PDF
                 </button>
               </div>
@@ -2278,7 +2281,10 @@ export const Controls: React.FC<Props> = ({
             <p className="mt-2 text-xs leading-5 text-[#6a746d]">
               Workshop handoff file. Most customers will not need this download.
             </p>
-            <button onClick={onExportSvg} className="mt-3 min-h-[48px] w-full rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
+            <button onClick={onExportSvg} className="mt-3 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
+              <svg className="h-4 w-4" aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 2.5v9m0 0 3.4-3.4M10 11.5 6.6 8.1M4 16.5h12" />
+              </svg>
               Download workshop SVG
             </button>
           </details>

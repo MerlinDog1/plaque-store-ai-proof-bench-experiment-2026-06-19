@@ -57,16 +57,22 @@ export const RealisticPreviewModal: React.FC<Props> = ({ isOpen, onClose, imageU
               <a
                 href={`data:image/png;base64,${imageUrl}`}
                 download="plaque-context-4k.png"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-[#b98235] px-5 text-sm font-black text-[#1b231f] transition-colors hover:bg-[#c49c4e]"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[#b98235] px-5 text-sm font-black text-[#1b231f] transition-colors hover:bg-[#c49c4e]"
               >
+                <svg className="h-4 w-4" aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 2.5v9m0 0 3.4-3.4M10 11.5 6.6 8.1M4 16.5h12" />
+                </svg>
                 Download 4K PNG
               </a>
               {referenceImageUrl && (
                 <a
                   href={`data:image/png;base64,${referenceImageUrl}`}
                   download="realistic-preview-reference.png"
-                  className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-[rgba(84,72,52,0.16)] bg-[#fffaf0] px-5 text-sm font-black text-[#2f3832] transition-colors hover:bg-[#efe4d1]"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-[rgba(84,72,52,0.16)] bg-[#fffaf0] px-5 text-sm font-black text-[#2f3832] transition-colors hover:bg-[#efe4d1]"
                 >
+                  <svg className="h-4 w-4" aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10 2.5v9m0 0 3.4-3.4M10 11.5 6.6 8.1M4 16.5h12" />
+                  </svg>
                   Download reference sent to Gemini
                 </a>
               )}
