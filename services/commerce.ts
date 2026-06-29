@@ -251,7 +251,7 @@ export const productFamilies: ProductFamily[] = [
     eyebrow: 'Up to 600 mm long',
     startingFrom: 'quote checked before order',
     materialCue: 'stainless',
-    image: '/site-images/home-carousel-brass-wall.webp',
+    image: '/site-images/home-custom-oval-steel.webp',
     description: 'For non-standard dimensions, oval plaques, circular plaques or anything that needs a quick manual check.',
     bestFor: ['Up to 600 mm long', 'Oval plaques', 'Circular plaques', 'Special fixing requirements'],
     proofPrompt: 'The Old Mill\nRestored 2026\nIn honour of everyone who brought this place back to life',
