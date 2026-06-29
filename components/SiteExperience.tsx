@@ -532,6 +532,10 @@ const siteShareImage = `${siteBaseUrl}/site-images/home-realistic-proof-row.jpg`
 
 const homeFaqs: FaqItem[] = [
   {
+    question: 'Is my proof really free?',
+    answer: 'Yes. Your proof is 100% free with no account, no sign up and no obligation to buy. If you need time to decide, download the proof PDF and use the link inside it to come back later.',
+  },
+  {
     question: 'How much does a custom plaque cost?',
     answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK mainland delivery. Bench plaques start from £69, A5 plaques from £129 and A4 plaques from £149. Custom sizes are available up to our maximum size and may need a longer turnaround.',
   },
@@ -561,7 +565,7 @@ const homeFaqs: FaqItem[] = [
   },
   {
     question: 'Can I save the proof and come back later?',
-    answer: 'Yes. You can download the proof PDF and use the link inside it to return to the design or checkout later without creating an account.',
+    answer: 'Yes. The proof PDF includes a link you can use to return to the design or checkout later without creating an account.',
   },
   {
     question: 'What if I need a custom size or shape?',
@@ -963,7 +967,6 @@ function HomeFaq() {
   return (
     <section className="commerce-section commerce-home-faq">
       <div className="commerce-section__head">
-        <p className="commerce-eyebrow">Questions</p>
         <h2>FAQ</h2>
       </div>
       <ExpandableFaqList faqs={homeFaqs} />
