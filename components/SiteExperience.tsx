@@ -427,7 +427,7 @@ const businessContact = {
   tradingName: 'InstaPlaque',
   legalForm: 'UK sole trader',
   email: 'hello@instaplaque.co.uk',
-  phone: 'Phone number to be added',
+  phone: '07903 379839',
   address: '4 Dunkirk Avenue, Kettering, NN14 2PL, United Kingdom',
   updated: '28 June 2026',
 };
