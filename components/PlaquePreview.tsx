@@ -604,6 +604,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     setPreviewZoom(100);
     centerPreviewViewport();
   };
+  const effectivePreviewZoom = previewZoom === 100 ? 95 : previewZoom;
 
   return (
     <div className="print-content proof-canvas relative flex aspect-[4/3] max-h-[58vh] w-full min-w-0 flex-col gap-2 overflow-hidden rounded-lg border p-3 md:aspect-video md:max-h-none md:p-5">
@@ -648,8 +649,8 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
         <div
           className="proof-preview-scale mx-auto flex h-full min-w-0 shrink items-center justify-center transition-[width,height] duration-200 md:shrink-0"
           style={{
-            width: `max(1px, calc(${previewZoom}% - var(--preview-gutter, 0px)))`,
-            height: `max(1px, calc(${previewZoom}% - var(--preview-gutter, 0px)))`,
+            width: `max(1px, calc(${effectivePreviewZoom}% - var(--preview-gutter, 0px)))`,
+            height: `max(1px, calc(${effectivePreviewZoom}% - var(--preview-gutter, 0px)))`,
           }}
         >
           <svg
