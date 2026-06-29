@@ -3920,3 +3920,201 @@
     min-height: 74px;
   }
 }
+
+@media print {
+  @page {
+    margin: 14mm;
+    size: A4 portrait;
+  }
+
+  html,
+  body,
+  #root {
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  body,
+  .proofbench-app,
+  .proofbench-app.commerce-mode {
+    background: #ffffff !important;
+    color: #17130f !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  header,
+  .proofbench-titlebar,
+  .commerce-footer,
+  .layout-regen-toast,
+  .commerce-order-export-renderer,
+  .no-print {
+    display: none !important;
+  }
+
+  main {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .commerce-page {
+    display: block !important;
+    width: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #17130f !important;
+  }
+
+  .commerce-page:has(.commerce-order-confirmed) {
+    max-width: none !important;
+  }
+
+  .commerce-order-confirmed {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8mm !important;
+    align-items: start !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .commerce-order-confirmed__main,
+  aside.commerce-order-card {
+    display: grid !important;
+    width: auto !important;
+    min-width: 0 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    border: 1px solid #d8d0c2 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    padding: 8mm !important;
+  }
+
+  .commerce-order-confirmed .commerce-eyebrow {
+    margin: 0 0 3mm !important;
+    color: #8a611b !important;
+    font-size: 8pt !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .commerce-order-confirmed h1 {
+    max-width: 150mm !important;
+    margin: 0 !important;
+    color: #17130f !important;
+    font-size: 25pt !important;
+    line-height: 1.05 !important;
+  }
+
+  .commerce-order-confirmed .commerce-lede {
+    max-width: 150mm !important;
+    margin: 4mm 0 0 !important;
+    color: #3f4843 !important;
+    font-size: 10.5pt !important;
+    line-height: 1.45 !important;
+  }
+
+  .commerce-order-proof {
+    display: block !important;
+    width: 100% !important;
+    margin: 7mm 0 0 !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+
+  .commerce-order-proof__image,
+  .commerce-order-proof__live-preview {
+    display: block !important;
+    width: min(100%, 150mm) !important;
+    height: auto !important;
+    max-height: 95mm !important;
+    margin: 0 auto !important;
+    object-fit: contain !important;
+    border: 1px solid #d8d0c2 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .commerce-order-proof__live-preview .proof-canvas {
+    width: 100% !important;
+    max-height: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .commerce-order-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 4mm 8mm !important;
+  }
+
+  .commerce-order-card div:not(.commerce-checkout-flow) {
+    display: grid !important;
+    gap: 1mm !important;
+    border-bottom: 1px solid #e4ddd2 !important;
+    padding: 0 0 3mm !important;
+  }
+
+  .commerce-order-card span,
+  .commerce-order-card p {
+    margin: 0 !important;
+    color: #5e6a62 !important;
+    font-size: 8pt !important;
+    line-height: 1.35 !important;
+  }
+
+  .commerce-order-card strong {
+    color: #17130f !important;
+    font-size: 10pt !important;
+    line-height: 1.25 !important;
+  }
+
+  .commerce-order-card .commerce-checkout-flow {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 2.5mm !important;
+    margin-top: 1mm !important;
+  }
+
+  .commerce-checkout-flow span {
+    min-height: 0 !important;
+    border: 1px solid #d8d0c2 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    color: #30423a !important;
+    padding: 3mm !important;
+    font-size: 7.5pt !important;
+    box-shadow: none !important;
+  }
+
+  .commerce-checkout-flow span.is-complete,
+  .commerce-checkout-flow span.is-current {
+    border-color: #1f755f !important;
+    background: #e6f4ee !important;
+    color: #123b2f !important;
+  }
+
+  .commerce-checkout-flow span::before {
+    margin-bottom: 1mm !important;
+    color: #1f755f !important;
+    font-size: 7pt !important;
+  }
+
+  .commerce-order-card button {
+    display: none !important;
+  }
+}
