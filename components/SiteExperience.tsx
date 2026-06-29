@@ -520,6 +520,16 @@ const homeCarouselItems: HomeCarouselItem[] = [
     image: '/site-images/home-gallery-brass-community.webp',
     label: 'Brass community centre plaque',
   },
+  {
+    id: 'brass-bench',
+    image: '/site-images/home-gallery-brass-bench.webp',
+    label: 'Brass bench memorial plaque',
+  },
+  {
+    id: 'aged-brass-wood',
+    image: '/site-images/home-gallery-aged-brass-wood.webp',
+    label: 'Aged brass memorial plaque on wood backing',
+  },
 ];
 
 const siteBaseUrl = 'https://instaplaque.co.uk';
