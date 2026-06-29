@@ -404,6 +404,18 @@ type HomeCarouselItem = {
   label: string;
 };
 
+type FaqItem = {
+  question: string;
+  answer: string;
+};
+
+type SeoMetaConfig = {
+  title: string;
+  description: string;
+  path: string;
+  schema?: unknown[];
+};
+
 type LegalPage = {
   eyebrow: string;
   title: string;
@@ -515,6 +527,281 @@ const homeCarouselItems: HomeCarouselItem[] = [
   },
 ];
 
+const siteBaseUrl = 'https://instaplaque.co.uk';
+const siteShareImage = `${siteBaseUrl}/site-images/home-realistic-proof-row.jpg`;
+
+const homeFaqs: FaqItem[] = [
+  {
+    question: 'How much does a custom plaque cost?',
+    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK mainland delivery. Bench plaques start from £69, A5 plaques from £129 and A4 plaques from £149. Custom sizes are checked before payment.',
+  },
+  {
+    question: 'Can I preview my plaque before ordering?',
+    answer: 'Yes. Add your wording, choose the material and size, then review a free proof before you pay. You can keep editing until the layout, wording and finish look right.',
+  },
+  {
+    question: 'What size is a bench plaque?',
+    answer: 'The compact bench plaque format starts at 150 x 50 mm for short inscriptions. If you need names, dates and several lines of wording, A5 gives more room and usually reads better.',
+  },
+  {
+    question: 'Which material is best for an outdoor plaque?',
+    answer: 'Brushed stainless steel is clean and restrained for exposed outdoor settings. Brass gives a warmer traditional look, and aged brass is hand-patinated for more character.',
+  },
+  {
+    question: 'Do you make brass and stainless steel plaques?',
+    answer: 'Yes. Current options include brushed brass, polished brass, aged brass, orbital brass, brushed stainless steel and mirror stainless steel, with optional wood backing on suitable sizes.',
+  },
+  {
+    question: 'Can I order a memorial plaque with my own wording?',
+    answer: 'Yes. You can enter your own wording for memorial plaques, bench plaques, garden dedications, opening plaques and presentation plaques. The proof helps you check spacing and line breaks before ordering.',
+  },
+  {
+    question: 'Is UK delivery included?',
+    answer: 'UK mainland delivery is included in standard pricing. Any unusual delivery or oversized plaque requirements are checked before payment.',
+  },
+  {
+    question: 'Can I save the proof and come back later?',
+    answer: 'Yes. You can download the proof PDF and use the link inside it to return to the design or checkout later without creating an account.',
+  },
+  {
+    question: 'What if I need a custom size or supplied artwork?',
+    answer: 'Start with a custom plaque proof. Oversized plaques, logos, supplied artwork, batch work and unusual mounting can be checked before payment so the order stays realistic.',
+  },
+  {
+    question: 'How quickly can my plaque be made?',
+    answer: 'Standard orders are usually estimated at 5 working days from approved proof and payment. Aged brass, custom sizes, wood backing and unusual requests may take longer and will be shown or confirmed before checkout.',
+  },
+  {
+    question: 'Are aged brass patinas identical?',
+    answer: 'No. Light, mid and heavy aged brass patinas are applied by hand, so each plaque is unique. The finish is sealed with a matt lacquer to slow further natural ageing.',
+  },
+  {
+    question: 'What fixings are shown in the proof?',
+    answer: 'The proof shows the visible fixing choice, including small domed cross-head screw heads where selected. Production artwork marks the drill holes separately so manufacture stays accurate.',
+  },
+];
+
+const homeSeoTopics = [
+  {
+    title: 'Bench plaques',
+    copy: 'Compact outdoor plaques for benches, seats and short memorial wording, with brass or stainless options and screw fixing support.',
+  },
+  {
+    title: 'Memorial plaques',
+    copy: 'Personal wording for remembrance, garden dedication and tribute plaques, proofed online so names, dates and line breaks can be checked before payment.',
+  },
+  {
+    title: 'Brass plaques',
+    copy: 'Brushed, polished, orbital and aged brass finishes for a warmer traditional plaque, including hand-applied patina choices.',
+  },
+  {
+    title: 'Stainless steel plaques',
+    copy: 'Brushed and mirror stainless steel plaques for a cooler contemporary finish, well suited to outdoor and public-facing locations.',
+  },
+  {
+    title: 'Wood-backed plaques',
+    copy: 'Optional light or dark wood backing adds presentation weight behind brass or stainless plates on suitable sizes.',
+  },
+  {
+    title: 'Custom plaques',
+    copy: 'Non-standard sizes, logos, supplied artwork and batch orders can start with a proof and be checked before payment.',
+  },
+];
+
+const orderHighlights = [
+  'Free online proof before payment',
+  'UK mainland delivery included on standard orders',
+  'Secure Stripe checkout',
+  'Standard, A5, A4 and custom plaque sizes',
+  'Brass, aged brass and stainless steel finishes',
+  'Production artwork generated from the approved proof',
+];
+
+const routePathForView = (view: SiteView) => {
+  const paths: Partial<Record<SiteView, string>> = {
+    home: '/',
+    materials: '/materials',
+    how: '/how-it-works',
+    faq: '/faq',
+    quote: '/quote',
+    contact: '/contact',
+    terms: '/terms',
+    privacy: '/privacy',
+    cookies: '/cookies',
+    returns: '/returns-and-cancellations',
+    checkout: '/checkout',
+    'order-confirmed': '/order-confirmed',
+    plaque: '/design',
+    vector: '/etchmaster',
+  };
+  return paths[view] || '/';
+};
+
+const setMetaContent = (selector: string, content: string) => {
+  let element = document.head.querySelector<HTMLMetaElement>(selector);
+  if (!element) {
+    element = document.createElement('meta');
+    const name = selector.match(/\[name="([^"]+)"\]/)?.[1];
+    const property = selector.match(/\[property="([^"]+)"\]/)?.[1];
+    if (name) element.setAttribute('name', name);
+    if (property) element.setAttribute('property', property);
+    document.head.appendChild(element);
+  }
+  element.setAttribute('content', content);
+};
+
+const setCanonicalHref = (href: string) => {
+  let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'canonical';
+    document.head.appendChild(link);
+  }
+  link.href = href;
+};
+
+const faqSchema = (faqs: FaqItem[]) => ({
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+});
+
+const productListSchema = () => ({
+  '@type': 'ItemList',
+  name: 'Custom plaque formats',
+  itemListElement: productFamilies.map((product, index) => {
+    const price = product.startingFrom.match(/£(\d+(?:\.\d+)?)/)?.[1];
+    return {
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Product',
+        name: product.title,
+        description: product.description,
+        image: product.image ? `${siteBaseUrl}${product.image}` : siteShareImage,
+        brand: {
+          '@type': 'Brand',
+          name: 'InstaPlaque',
+        },
+        offers: price ? {
+          '@type': 'Offer',
+          priceCurrency: 'GBP',
+          price,
+          availability: 'https://schema.org/InStock',
+          url: `${siteBaseUrl}/`,
+        } : undefined,
+      },
+    };
+  }),
+});
+
+const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily): SeoMetaConfig => {
+  const routePath = routePathForView(view);
+  if (view === 'materials') {
+    return {
+      title: 'Plaque Materials UK | Brass, Stainless Steel & Wood Backing',
+      description: 'Compare brass, aged brass, stainless steel and wood-backed plaque finishes before ordering your UK plaque proof.',
+      path: routePath,
+      schema: [{
+        '@type': 'CollectionPage',
+        name: 'Plaque materials',
+        description: 'Brass, aged brass, stainless steel and wood backing options for custom UK plaques.',
+      }],
+    };
+  }
+  if (view === 'how') {
+    return {
+      title: 'How Online Plaque Proofing Works | InstaPlaque UK',
+      description: 'Create a plaque proof online, approve the design, pay securely and receive your custom plaque after production.',
+      path: routePath,
+      schema: [{
+        '@type': 'HowTo',
+        name: 'How to order a custom plaque online',
+        step: ['Choose plaque options', 'Add your wording', 'Review the free proof', 'Approve the design', 'Checkout securely'],
+      }],
+    };
+  }
+  if (view === 'faq') {
+    return {
+      title: 'Custom Plaque FAQs UK | InstaPlaque',
+      description: 'Answers about custom plaque prices, materials, proofing, UK delivery, fixings, aged brass and bespoke plaque orders.',
+      path: routePath,
+      schema: [faqSchema(homeFaqs)],
+    };
+  }
+  if (view === 'quote') {
+    return {
+      title: 'Custom Plaque Quotes UK | InstaPlaque',
+      description: 'Start a proof for oversized plaques, supplied artwork, logos, batch orders and custom plaque sizes in the UK.',
+      path: routePath,
+    };
+  }
+  if (view === 'product') {
+    return {
+      title: `${selectedProduct.title} UK | Free Online Plaque Proof`,
+      description: `${selectedProduct.description} Create a free proof online before ordering.`,
+      path: '/',
+      schema: [faqSchema(selectedProduct.faqs)],
+    };
+  }
+  return {
+    title: 'Custom Memorial, Bench, Brass & Stainless Steel Plaques UK | InstaPlaque',
+    description: 'Create a free custom plaque proof online. UK-made memorial, bench, brass and stainless steel plaques with live pricing, secure checkout and UK mainland delivery included.',
+    path: '/',
+    schema: [productListSchema(), faqSchema(homeFaqs)],
+  };
+};
+
+const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily) => {
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const config = seoConfigForView(view, selectedProduct);
+    const url = `${siteBaseUrl}${config.path}`;
+    document.title = config.title;
+    setMetaContent('meta[name="description"]', config.description);
+    setMetaContent('meta[property="og:title"]', config.title);
+    setMetaContent('meta[property="og:description"]', config.description);
+    setMetaContent('meta[property="og:url"]', url);
+    setMetaContent('meta[property="og:image"]', siteShareImage);
+    setMetaContent('meta[name="twitter:title"]', config.title);
+    setMetaContent('meta[name="twitter:description"]', config.description);
+    setMetaContent('meta[name="twitter:image"]', siteShareImage);
+    setCanonicalHref(url);
+
+    const routeSchema = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'WebPage',
+          '@id': `${url}#webpage`,
+          url,
+          name: config.title,
+          description: config.description,
+          isPartOf: {
+            '@id': `${siteBaseUrl}/#website`,
+          },
+        },
+        ...(config.schema || []),
+      ],
+    };
+
+    let schemaElement = document.getElementById('instaplaque-route-schema') as HTMLScriptElement | null;
+    if (!schemaElement) {
+      schemaElement = document.createElement('script');
+      schemaElement.id = 'instaplaque-route-schema';
+      schemaElement.type = 'application/ld+json';
+      document.head.appendChild(schemaElement);
+    }
+    schemaElement.textContent = JSON.stringify(routeSchema);
+  }, [view, selectedProduct]);
+};
+
 function ProductMockup({ product }: { product: ProductFamily }) {
   return (
     <div className={`commerce-product-visual commerce-product-visual--${product.materialCue}`} aria-hidden="true">
@@ -584,6 +871,47 @@ function ProductGrid({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
             </div>
           </article>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function ExpandableFaqList({ faqs, openCount = 1 }: { faqs: FaqItem[]; openCount?: number }) {
+  return (
+    <div className="commerce-faq-grid">
+      {faqs.map((faq, index) => (
+        <article className="commerce-faq-card" key={faq.question}>
+          <details open={index < openCount}>
+            <summary>{faq.question}</summary>
+            <p>{faq.answer}</p>
+          </details>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function HomeSeoContent() {
+  return (
+    <section className="commerce-section commerce-seo-band">
+      <div className="commerce-section__head">
+        <p className="commerce-eyebrow">Custom plaques UK</p>
+        <h2>Memorial, bench, brass and stainless steel plaques without the slow artwork loop.</h2>
+        <p>
+          InstaPlaque is built for UK customers who want to see the plaque before committing.
+          Choose the size, finish and wording, then approve a clean proof before checkout.
+        </p>
+      </div>
+      <div className="commerce-seo-grid">
+        {homeSeoTopics.map((topic) => (
+          <article className="commerce-seo-card" key={topic.title}>
+            <h3>{topic.title}</h3>
+            <p>{topic.copy}</p>
+          </article>
+        ))}
+      </div>
+      <div className="commerce-keyword-strip" aria-label="InstaPlaque order features">
+        {orderHighlights.map((highlight) => <span key={highlight}>{highlight}</span>)}
       </div>
     </section>
   );
@@ -681,26 +1009,13 @@ function HomeMaterialPanels() {
 }
 
 function HomeFaq() {
-  const faqs = [
-    ['Is the proof really free?', 'Yes. Customers can create and review the proof before placing an order.'],
-    ['Can I change the wording?', 'Yes. Edit the wording and regenerate the proof until it feels right.'],
-    ['What if I need a custom size?', 'Start with Custom plaques. Anything unusual can be checked before payment.'],
-    ['Is delivery included?', 'UK mainland delivery is included in standard pricing. Extras are shown before checkout.'],
-  ];
   return (
     <section className="commerce-section commerce-home-faq">
       <div className="commerce-section__head">
         <p className="commerce-eyebrow">FAQ</p>
         <h2>Plain answers before starting a proof.</h2>
       </div>
-      <div className="commerce-faq-grid">
-        {faqs.map(([question, answer]) => (
-          <article className="commerce-faq-card" key={question}>
-            <h3>{question}</h3>
-            <p>{answer}</p>
-          </article>
-        ))}
-      </div>
+      <ExpandableFaqList faqs={homeFaqs} openCount={2} />
     </section>
   );
 }
@@ -786,6 +1101,7 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
         </div>
       </section>
       <ProductGrid onLaunchProduct={props.onLaunchProduct} />
+      <HomeSeoContent />
       <HomeMaterialPanels />
       <HomeFaq />
     </div>
@@ -817,14 +1133,7 @@ function ProductPage({ selectedProduct, onLaunchProduct }: Pick<SiteProps, 'sele
           <p className="commerce-eyebrow">Product questions</p>
           <h2>{USE_CUSTOMER_COPY_PASS ? 'Fast answers before you start your proof.' : 'Fast answers before customers enter the proof bench.'}</h2>
         </div>
-        <div className="commerce-faq-grid">
-          {selectedProduct.faqs.map((faq) => (
-            <article className="commerce-faq-card" key={faq.question}>
-              <h3>{faq.question}</h3>
-              <p>{faq.answer}</p>
-            </article>
-          ))}
-        </div>
+        <ExpandableFaqList faqs={selectedProduct.faqs} openCount={1} />
       </section>
     </div>
   );
@@ -882,12 +1191,6 @@ function HowItWorksPage() {
 }
 
 function FaqPage() {
-  const faqs = [
-    ['Can I change the design?', 'Yes. Change as much as you like until you approve the proof and place the order.'],
-    ['Is the proof instant?', USE_CUSTOMER_COPY_PASS ? 'Yes. Add your wording and we will create a professional proof for you to check straight away.' : 'The typography engine creates a professional layout immediately after the customer enters wording and generates the proof.'],
-    ['What if my order needs a quote?', USE_CUSTOMER_COPY_PASS ? 'You can still start with a proof. We will check unusual sizes, artwork or complex requests before you pay.' : 'The app can still capture the design, but routes unusual sizes, artwork or complex jobs to quote review.'],
-    ['Do I need an account?', USE_CUSTOMER_COPY_PASS ? 'No. You can create a proof and place an order without setting up an account.' : 'No. The intended customer flow is guest checkout with magic links for saved designs and order pages later.'],
-  ];
   return (
     <div className="commerce-page">
       <section className="commerce-section">
@@ -895,14 +1198,7 @@ function FaqPage() {
           <p className="commerce-eyebrow">FAQ</p>
           <h1>Questions that support confident self-service ordering.</h1>
         </div>
-        <div className="commerce-faq-grid">
-          {faqs.map(([question, answer]) => (
-            <article className="commerce-faq-card" key={question}>
-              <h3>{question}</h3>
-              <p>{answer}</p>
-            </article>
-          ))}
-        </div>
+        <ExpandableFaqList faqs={homeFaqs} openCount={3} />
       </section>
     </div>
   );
@@ -2023,6 +2319,8 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 }
 
 export function SiteExperience(props: SiteProps) {
+  useSeoMeta(props.view, props.selectedProduct);
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     document.querySelector('main')?.scrollTo({ top: 0, left: 0, behavior: 'auto' });

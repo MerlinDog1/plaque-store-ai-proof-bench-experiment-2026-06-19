@@ -1196,6 +1196,7 @@
 .commerce-section__head p,
 .commerce-product-card p,
 .commerce-faq-card p,
+.commerce-seo-card p,
 .commerce-material-card p,
 .commerce-deep-copy p {
   color: #526058;
@@ -1205,6 +1206,7 @@
 .commerce-product-grid,
 .commerce-material-grid,
 .commerce-faq-grid,
+.commerce-seo-grid,
 .commerce-admin-grid,
 .commerce-process-grid {
   display: grid;
@@ -1238,6 +1240,8 @@
 
 .commerce-product-card h3,
 .commerce-faq-card h3,
+.commerce-faq-card summary,
+.commerce-seo-card h3,
 .commerce-material-card h3 {
   color: #17231f;
   font-size: 18px;
@@ -1663,6 +1667,49 @@
   padding: 1rem;
 }
 
+.commerce-seo-band {
+  border-top: 1px solid rgba(84, 72, 52, 0.12);
+  border-bottom: 1px solid rgba(84, 72, 52, 0.12);
+}
+
+.commerce-seo-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.commerce-seo-card {
+  min-height: 100%;
+  border: 1px solid rgba(84, 72, 52, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.66);
+  padding: 1rem;
+}
+
+.commerce-seo-card h3 {
+  margin-bottom: 0.5rem;
+}
+
+.commerce-seo-card p {
+  margin: 0;
+}
+
+.commerce-keyword-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.commerce-keyword-strip span {
+  border: 1px solid rgba(54, 81, 71, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 253, 247, 0.78);
+  color: #365147;
+  padding: 0.48rem 0.68rem;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
 .commerce-material-card > div {
   height: 150px;
   margin-bottom: 1rem;
@@ -1674,6 +1721,58 @@
 
 .commerce-faq-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.commerce-faq-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.commerce-faq-card details {
+  height: 100%;
+  padding: 1rem;
+}
+
+.commerce-faq-card summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.commerce-faq-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.commerce-faq-card summary::after {
+  content: "+";
+  display: grid;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid rgba(84, 72, 52, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 253, 247, 0.72);
+  color: #8a6424;
+  font-family: Montserrat, sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.commerce-faq-card details[open] summary::after {
+  content: "-";
+}
+
+.commerce-faq-card details[open] {
+  background: linear-gradient(180deg, rgba(255, 253, 247, 0.92), rgba(238, 246, 241, 0.72));
+}
+
+.commerce-faq-card details p {
+  margin: 0.78rem 2.4rem 0 0;
 }
 
 .commerce-home-faq {
@@ -3789,6 +3888,7 @@
   .commerce-product-grid,
   .commerce-material-grid,
   .commerce-faq-grid,
+  .commerce-seo-grid,
   .commerce-legal-grid,
   .commerce-admin-grid,
   .commerce-checkout-flow,
