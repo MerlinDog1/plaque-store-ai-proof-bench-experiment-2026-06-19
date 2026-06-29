@@ -1244,7 +1244,7 @@ export const Controls: React.FC<Props> = ({
               <div className="mt-3 grid gap-2">
                 {[
                   [Fixing.Caps, 'Decorative caps', 'Thin flat metal caps for a traditional finished plaque'],
-                  [Fixing.Screws, 'Countersunk screws', 'Flush screws colour-matched to the selected plaque material'],
+                  [Fixing.Screws, 'Domed cross-head screws', 'Small domed screws colour-matched to the selected plaque material'],
                   [Fixing.VHB, 'Hidden adhesive', 'Clean face with no visible holes or mounting hardware'],
                   [Fixing.None, 'No fixings', 'Your plaque will be supplied without any holes or fixings'],
                 ].map(([fixing, label, note]) => (
@@ -1268,7 +1268,7 @@ export const Controls: React.FC<Props> = ({
                     {fixing === Fixing.Screws && state.fixing === Fixing.Screws && !isHeartPlaque && (
                       <div className="rounded-lg border border-[#c6932e]/35 bg-[#f6efe2] p-3">
                         <div className="mb-2 flex items-center justify-between gap-2">
-                          <div className="text-sm font-black">Countersunk screw holes</div>
+                          <div className="text-sm font-black">Domed cross-head screws</div>
                           <div className="rounded-full bg-[#fffaf0] px-2 py-1 text-[10px] font-black text-[#6a746d]">
                             {isBenchPlaque ? 'Bench plaque' : 'Visible screws'}
                           </div>
@@ -1285,7 +1285,7 @@ export const Controls: React.FC<Props> = ({
                           ))}
                         </div>
                         <div className="mt-2 text-xs font-bold leading-5 text-[#6a746d]">
-                          Choose two end holes or four corner holes for countersunk screw fixing.
+                          Choose two end holes or four corner screws. Production artwork marks 3mm drill holes; the proof shows the 5mm domed screw heads.
                         </div>
                       </div>
                     )}

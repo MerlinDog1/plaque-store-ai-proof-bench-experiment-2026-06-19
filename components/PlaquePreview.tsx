@@ -1113,11 +1113,13 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
                 </g>
               ) : (
                 <g className="fixing hole">
-                  {/* Countersunk screws are colour-matched to the selected plaque material. */}
+                  {/* Domed cross-head screw preview: 5mm head, production artwork uses 3mm drill holes. */}
                   <circle cx={h.x} cy={h.y} r={screwRadius} fill={fixingFillUrl} stroke="rgba(0,0,0,0.45)" strokeWidth={0.5} />
                   {state.material === Material.AgedBrass && (
                     <circle cx={h.x} cy={h.y} r={screwRadius} fill="#2b1d0e" opacity={state.ageIntensity * 0.9} style={{ mixBlendMode: 'multiply' }} className="visual-effect" />
                   )}
+                  <circle cx={h.x - screwRadius * 0.25} cy={h.y - screwRadius * 0.28} r={screwRadius * 0.5} fill="rgba(255,255,255,0.32)" className="visual-effect" />
+                  <circle cx={h.x + screwRadius * 0.18} cy={h.y + screwRadius * 0.2} r={screwRadius * 0.72} fill="none" stroke="rgba(0,0,0,0.22)" strokeWidth={0.45} className="visual-effect" />
                   {/* Phillips Cross */}
                   <path
                     d={`M${h.x - screwRadius * 0.45},${h.y} L${h.x + screwRadius * 0.45},${h.y} M${h.x},${h.y - screwRadius * 0.45} L${h.x},${h.y + screwRadius * 0.45}`}

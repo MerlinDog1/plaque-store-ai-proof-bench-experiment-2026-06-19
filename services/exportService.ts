@@ -569,7 +569,7 @@ const prepareCloneForProduction = async (sourceSvg: SVGSVGElement, state: Plaque
           const newCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
           newCircle.setAttribute("cx", mainCircle.getAttribute("cx") || "0");
           newCircle.setAttribute("cy", mainCircle.getAttribute("cy") || "0");
-          newCircle.setAttribute("r", "2.5");
+          newCircle.setAttribute("r", state.fixing === Fixing.Screws ? "1.5" : "2.5");
           newCircle.setAttribute("fill", "none");
           newCircle.setAttribute("stroke", "#FF0000");
           newCircle.setAttribute("stroke-width", "0.25");

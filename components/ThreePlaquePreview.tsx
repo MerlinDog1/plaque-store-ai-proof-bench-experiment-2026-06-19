@@ -835,17 +835,24 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
         host.dataset.capTexture = texture ? 'material' : 'flat';
       });
       const radiusMm = state.fixing === Fixing.Caps ? state.capSize / 2 : 2.5;
-      const hardwareDepth = state.fixing === Fixing.Caps ? dims.capDepth : Math.max(dims.unitPerMm * 0.5, dims.metalDepth * 0.35);
+      const hardwareDepth = state.fixing === Fixing.Caps ? dims.capDepth : Math.max(dims.unitPerMm * 0.75, dims.metalDepth * 0.45);
       const radius = radiusMm * dims.unitPerMm;
       const faceZ = dims.metalDepth + Math.max(0.012, dims.unitPerMm * 0.35);
       const hardwareBackZ = state.fixing === Fixing.Caps
         ? faceZ + Math.max(0.004, dims.unitPerMm * 0.24)
         : dims.metalDepth + 0.002;
+      const screwSlotMaterial = new THREE.MeshBasicMaterial({
+        color: 0x1c1c1c,
+        transparent: true,
+        opacity: 0.78,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      });
       getFixingPositions(state).forEach((point) => {
         const cap = new THREE.Mesh(
           state.fixing === Fixing.Caps
             ? makeRaisedCapGeometry(radius, hardwareDepth)
-            : new THREE.CylinderGeometry(radius, radius, hardwareDepth, 40),
+            : makeRaisedCapGeometry(radius, hardwareDepth),
           capMaterial,
         );
         cap.rotation.x = Math.PI / 2;
@@ -855,6 +862,21 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
         cap.renderOrder = 8;
         cap.userData.hardware = state.fixing;
         existingGroup.add(cap);
+        if (state.fixing === Fixing.Screws) {
+          const slotLength = radius * 1.08;
+          const slotWidth = Math.max(radius * 0.18, dims.unitPerMm * 0.42);
+          const slotZ = hardwareBackZ + hardwareDepth + Math.max(0.002, dims.unitPerMm * 0.05);
+          [0, Math.PI / 2].forEach((rotationZ) => {
+            const slot = new THREE.Mesh(
+              new THREE.PlaneGeometry(slotLength, slotWidth),
+              screwSlotMaterial,
+            );
+            slot.position.set(cap.position.x, cap.position.y, slotZ);
+            slot.rotation.z = rotationZ;
+            slot.renderOrder = 9;
+            existingGroup.add(slot);
+          });
+        }
       });
     }
 

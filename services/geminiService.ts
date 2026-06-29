@@ -1835,7 +1835,7 @@ export const generateRealisticView = async (
       : "at the horizontal center lines (left and right edges)";
 
     if (state.fixing === Fixing.Screws) {
-      hardwareDesc = `${count} Countersunk Screws positioned ${pos}. Material: ${mat.name}.`;
+      hardwareDesc = `${count} small domed cross-head screws positioned ${pos}. Material: ${mat.name}. Each screw head is about 5mm across, colour-matched to the selected plaque material, with a visible cross slot.`;
     } else {
       hardwareDesc = `${count} plain flat decorative metal caps positioned ${pos}. Diameter: ${state.capSize}mm. Material: ${mat.name}. Each cap is only 2-3mm thick: a simple flat circular disc with a flat top face and straight vertical sides. No bevel, no chamfer, no rounded rim, no dome, no bulky standoff shape.`;
     }
@@ -1882,6 +1882,7 @@ Product details:
 - Finish: ${portraitFinishInstruction}.
 - Engraving/text colour: ${textColourDesc}. Match this colour in the generated realistic render unless reverse etch is enabled.
 - Surface quality rule for every material: render a new, premium, clean, professionally finished plaque. Do not add scratches, scuffs, scrape lines, pitting, dents, chips, stains, water marks, fingerprints, dust, dirt, grime, corrosion spots, black speckles, random distressing, or accidental wear. Brush grain, orbital haze, polishing reflections, and aged-brass patina are controlled factory finishes only, never damage.
+- If visible screws are selected, render them as small domed cross-head screw heads colour-matched to the plaque material. They should look like neat 5mm screw heads sitting on the plaque face, with a clear cross slot. Do not render countersunk holes, flat drill circles, Allen bolts, rivets, caps, or large standoffs.
 - Aged brass rule: aged brass means intentional warm brown-gold patina and controlled tonal ageing on a smooth clean metal face. It must not look battered, pitted, scratched, dirty, antique-distressed, or randomly marked.
 - The lettering and border must remain clearly visible and legible in the final render. Do not fade the text into the metal, wash it out, blur it, emboss it as barely visible relief, or convert black filled etch into pale scratches.
 - Never add star glyphs, sparkle glyphs, rosettes, fleurons, bullets, dots, diamonds, decorative Unicode symbols, or repeated ornamental marks between title and body text. If the plaque needs a separator, use only one simple plain thin horizontal line, not three stars or ornamental icons.
