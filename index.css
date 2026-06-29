@@ -3923,7 +3923,7 @@
 
 @media print {
   @page {
-    margin: 14mm;
+    margin: 0;
     size: A4 portrait;
   }
 
@@ -3970,7 +3970,7 @@
     width: auto !important;
     min-height: 0 !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 14mm !important;
     background: #ffffff !important;
     color: #17130f !important;
   }
@@ -4066,6 +4066,10 @@
     gap: 1mm !important;
     border-bottom: 1px solid #e4ddd2 !important;
     padding: 0 0 3mm !important;
+  }
+
+  .commerce-order-card .commerce-order-address {
+    display: none !important;
   }
 
   .commerce-order-card span,

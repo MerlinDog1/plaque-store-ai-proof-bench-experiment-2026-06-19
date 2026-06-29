@@ -212,6 +212,7 @@ const listProofSessionOrders = async (supabase) => {
     .select([
       "email",
       "wording",
+      "plaque_state",
       "price_estimate_pence",
       "currency",
       "created_at",
@@ -252,7 +253,7 @@ const listProofSessionOrders = async (supabase) => {
       currency: row.currency || "gbp",
       productTitle: row.product_title || "Custom plaque",
       inscription: row.inscription || row.wording || "",
-      plaqueState: {},
+      plaqueState: row.plaque_state || {},
       priceBreakdown: {},
       proofPackage: {},
       shippingAddress,

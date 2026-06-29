@@ -65,7 +65,7 @@ type PaidOrder = {
   stripePaymentIntentId?: string;
   emailEvents?: Array<{ id?: string; type: string; recipient: string; status: string; subject?: string; at?: string }>;
   events?: Array<{ type: string; label: string; at: string; note?: string; recipient?: string; trackingReference?: string }>;
-  metadata?: Record<string, string>;
+  metadata?: Record<string, unknown>;
   approvedAt?: string;
   paidAt?: string;
   createdAt?: string;
@@ -1321,7 +1321,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
             <span>Status</span>
             <strong>{statusLabel(order.status)}</strong>
           </div>
-          <div>
+          <div className="commerce-order-address">
             <span>Delivery address</span>
             <p>
               {[address.name, address.line1, address.line2, address.city, address.postal_code || address.postcode, address.country]
