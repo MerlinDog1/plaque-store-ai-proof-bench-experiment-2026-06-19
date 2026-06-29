@@ -511,19 +511,14 @@ const footerSocials: Array<{ id: FooterSocial; label: string }> = [
 
 const homeCarouselItems: HomeCarouselItem[] = [
   {
-    id: 'bench-steel',
-    image: '/site-images/home-carousel-bench-steel.webp',
-    label: 'Steel bench memorial plaque',
+    id: 'oval-steel',
+    image: '/site-images/home-gallery-oval-steel.webp',
+    label: 'Oval brushed stainless memorial plaque',
   },
   {
-    id: 'garden-brass',
-    image: '/site-images/home-carousel-garden-brass.webp',
-    label: 'Brass garden dedication plaque',
-  },
-  {
-    id: 'reading-room',
-    image: '/site-images/home-carousel-reading-room.webp',
-    label: 'Interior commemorative plaque',
+    id: 'brass-community',
+    image: '/site-images/home-gallery-brass-community.webp',
+    label: 'Brass community centre plaque',
   },
 ];
 
@@ -1014,7 +1009,6 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
                   style={{ '--carousel-offset': offset } as React.CSSProperties}
                 >
                   <img src={item.image} alt="" loading={index === 0 ? 'eager' : 'lazy'} />
-                  <span>{item.label}</span>
                 </button>
               );
             })}

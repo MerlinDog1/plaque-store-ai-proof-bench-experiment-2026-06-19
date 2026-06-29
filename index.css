@@ -3338,19 +3338,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 34%),
-    linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, 0.52));
-}
-
-.commerce-proof-carousel__slide span {
-  position: absolute;
-  right: 1rem;
-  bottom: 0.85rem;
-  left: 1rem;
-  z-index: 1;
-  color: #fffaf0;
-  font-weight: 950;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 34%);
 }
 
 .commerce-proof-carousel__slide[data-offset="-2"],
