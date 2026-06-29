@@ -793,20 +793,21 @@ function SiteHero({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
       <div className="commerce-premium-hero__image" aria-hidden="true" />
       <div className="commerce-premium-hero__shade" aria-hidden="true" />
       <div className="commerce-premium-hero__copy">
-        <h1>Proof in minutes. Plaque in days.</h1>
-        <div className="commerce-hero-promise" aria-label="Free professional proof in minutes. Engraved with care using the finest materials.">
-          <span><strong>100% free</strong> professional proof before you buy</span>
-          <span>Engraved with care using the <strong>finest materials</strong></span>
+        <div className="brand-wordmark brand-wordmark--hero-title" aria-label="InstaPlaque"><span>Insta</span><span>Plaque</span></div>
+        <div className="commerce-hero-promise" aria-label="Free professional proof in minutes. Finished plaque in five working days.">
+          <span><strong>100% free</strong> professional proof in minutes</span>
+          <span>Your finished plaque in <strong>5 working days</strong></span>
         </div>
         <p>
           {USE_CUSTOMER_COPY_PASS
-            ? 'Create a professional plaque proof in minutes from your wording. No account, no sign up and no obligation to buy. Download the proof and come back later if you need time to decide.'
-            : 'Our unique intelligent plaque design system turns your wording into a production-ready proof in minutes. No account, no sign up and no obligation to buy. Download the proof and come back later if you need time to decide.'}
+            ? 'Create a professional plaque proof in minutes from your wording. Skip the design back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'
+            : 'Our unique intelligent plaque design system turns your wording into a production-ready proof in minutes. Skip the design back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'}
         </p>
         <div className="commerce-actions">
           <button type="button" className="commerce-primary commerce-primary--cream" onClick={onStartDesign}>
             Create your proof
           </button>
+          <a className="commerce-secondary commerce-secondary--glass" href="#products">View standard sizes</a>
         </div>
       </div>
     </section>
@@ -1021,12 +1022,12 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
           <button type="button" className="commerce-carousel-arrow commerce-carousel-arrow--next" onClick={() => moveCarousel(1)} aria-label="Next plaque example">›</button>
         </div>
         <article className="commerce-proof-first-copy">
-          <p className="commerce-eyebrow">Proof first</p>
-          <h2>See your plaque before you order.</h2>
+          <p className="commerce-eyebrow">Why this is different</p>
+          <h2>Proof in minutes. Plaque in days.</h2>
           <p>
             {USE_CUSTOMER_COPY_PASS
-              ? 'Choose the plaque type, size, material and wording, then check a realistic proof before you pay.'
-              : 'Choose the plaque type, size, material and wording, then check a production-style proof before you pay.'}
+              ? 'Create a professional plaque proof from your wording, check the layout before payment, then receive a plaque engraved with care using the finest materials.'
+              : 'Create a production-style plaque proof from your wording, check the layout before payment, then receive a plaque engraved with care using the finest materials.'}
           </p>
           <p>
             No guesswork and no hidden costs: engraving, standard fixings and UK mainland delivery are
