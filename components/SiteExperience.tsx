@@ -793,21 +793,20 @@ function SiteHero({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
       <div className="commerce-premium-hero__image" aria-hidden="true" />
       <div className="commerce-premium-hero__shade" aria-hidden="true" />
       <div className="commerce-premium-hero__copy">
-        <div className="brand-wordmark brand-wordmark--hero-title" aria-label="InstaPlaque"><span>Insta</span><span>Plaque</span></div>
-        <div className="commerce-hero-promise" aria-label="Free professional proof in minutes. Finished plaque in five working days.">
-          <span><strong>100% free</strong> professional proof in minutes</span>
-          <span>Your finished plaque in <strong>5 working days</strong></span>
+        <h1>Proof in minutes. Plaque in days.</h1>
+        <div className="commerce-hero-promise" aria-label="Free professional proof in minutes. Engraved with care using the finest materials.">
+          <span><strong>100% free</strong> professional proof before you buy</span>
+          <span>Engraved with care using the <strong>finest materials</strong></span>
         </div>
         <p>
           {USE_CUSTOMER_COPY_PASS
-            ? 'Create a professional plaque proof in minutes from your wording. Skip the design back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'
-            : 'Our unique intelligent plaque design system turns your wording into a production-ready proof in minutes. Skip the design back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'}
+            ? 'Create a professional plaque proof in minutes from your wording. No account, no sign up and no obligation to buy. Download the proof and come back later if you need time to decide.'
+            : 'Our unique intelligent plaque design system turns your wording into a production-ready proof in minutes. No account, no sign up and no obligation to buy. Download the proof and come back later if you need time to decide.'}
         </p>
         <div className="commerce-actions">
           <button type="button" className="commerce-primary commerce-primary--cream" onClick={onStartDesign}>
             Create your proof
           </button>
-          <a className="commerce-secondary commerce-secondary--glass" href="#products">View standard sizes</a>
         </div>
       </div>
     </section>
