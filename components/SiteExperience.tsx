@@ -84,7 +84,7 @@ declare global {
 }
 
 const USE_CUSTOMER_COPY_PASS = true;
-const VISUAL_PROOF_RENDERER_VERSION = 2;
+const VISUAL_PROOF_RENDERER_VERSION = 3;
 
 const DownloadIcon = () => (
   <svg className="button-icon" aria-hidden="true" viewBox="0 0 20 20" focusable="false">

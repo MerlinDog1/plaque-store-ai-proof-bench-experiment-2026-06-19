@@ -170,7 +170,6 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const totalH = state.height + woodExtra;
   const offset = woodExtra / 2;
   const woodFill = state.woodTone === 'dark' ? "url(#woodDarkTexture)" : "url(#woodLightTexture)";
-  const woodChamfer = Math.max(4, Math.min(8, offset * 0.55));
 
   // Helpers for geometry
   const cornerR = state.shape === Shape.Rect ? state.cornerRadius : 0;
@@ -824,26 +823,11 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
                   x={0} y={0} width={totalW} height={totalH}
                   fill={woodFill}
                 />
-                <path
-                  d={`M 0 0 H ${totalW} L ${totalW - woodChamfer} ${woodChamfer} H ${woodChamfer} L ${woodChamfer} ${totalH - woodChamfer} L 0 ${totalH} Z`}
-                  fill="#fff6d8"
-                  opacity="0.13"
-                />
-                <path
-                  d={`M ${totalW} 0 V ${totalH} L ${totalW - woodChamfer} ${totalH - woodChamfer} V ${woodChamfer} Z`}
-                  fill="#1b0f06"
-                  opacity="0.22"
-                />
-                <path
-                  d={`M 0 ${totalH} H ${totalW} L ${totalW - woodChamfer} ${totalH - woodChamfer} H ${woodChamfer} Z`}
-                  fill="#1b0f06"
-                  opacity="0.18"
-                />
                 <rect
-                  x={woodChamfer}
-                  y={woodChamfer}
-                  width={Math.max(1, totalW - woodChamfer * 2)}
-                  height={Math.max(1, totalH - woodChamfer * 2)}
+                  x={0.75}
+                  y={0.75}
+                  width={Math.max(1, totalW - 1.5)}
+                  height={Math.max(1, totalH - 1.5)}
                   fill="none"
                   stroke="rgba(255,248,226,0.22)"
                   strokeWidth={0.6}
