@@ -1196,7 +1196,6 @@
 .commerce-section__head p,
 .commerce-product-card p,
 .commerce-faq-card p,
-.commerce-seo-card p,
 .commerce-material-card p,
 .commerce-deep-copy p {
   color: #526058;
@@ -1206,7 +1205,6 @@
 .commerce-product-grid,
 .commerce-material-grid,
 .commerce-faq-grid,
-.commerce-seo-grid,
 .commerce-admin-grid,
 .commerce-process-grid {
   display: grid;
@@ -1241,7 +1239,6 @@
 .commerce-product-card h3,
 .commerce-faq-card h3,
 .commerce-faq-card summary,
-.commerce-seo-card h3,
 .commerce-material-card h3 {
   color: #17231f;
   font-size: 18px;
@@ -1665,49 +1662,6 @@
 .commerce-admin-card,
 .commerce-empty-state {
   padding: 1rem;
-}
-
-.commerce-seo-band {
-  border-top: 1px solid rgba(84, 72, 52, 0.12);
-  border-bottom: 1px solid rgba(84, 72, 52, 0.12);
-}
-
-.commerce-seo-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.commerce-seo-card {
-  min-height: 100%;
-  border: 1px solid rgba(84, 72, 52, 0.14);
-  border-radius: 8px;
-  background: rgba(255, 253, 247, 0.66);
-  padding: 1rem;
-}
-
-.commerce-seo-card h3 {
-  margin-bottom: 0.5rem;
-}
-
-.commerce-seo-card p {
-  margin: 0;
-}
-
-.commerce-keyword-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  margin-top: 1rem;
-}
-
-.commerce-keyword-strip span {
-  border: 1px solid rgba(54, 81, 71, 0.16);
-  border-radius: 999px;
-  background: rgba(255, 253, 247, 0.78);
-  color: #365147;
-  padding: 0.48rem 0.68rem;
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1.15;
 }
 
 .commerce-material-card > div {
@@ -3888,7 +3842,6 @@
   .commerce-product-grid,
   .commerce-material-grid,
   .commerce-faq-grid,
-  .commerce-seo-grid,
   .commerce-legal-grid,
   .commerce-admin-grid,
   .commerce-checkout-flow,

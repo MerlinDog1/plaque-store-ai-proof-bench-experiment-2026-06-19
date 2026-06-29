@@ -581,42 +581,6 @@ const homeFaqs: FaqItem[] = [
   },
 ];
 
-const homeSeoTopics = [
-  {
-    title: 'Bench plaques',
-    copy: 'Compact outdoor plaques for benches, seats and short memorial wording, with brass or stainless options and screw fixing support.',
-  },
-  {
-    title: 'Memorial plaques',
-    copy: 'Personal wording for remembrance, garden dedication and tribute plaques, proofed online so names, dates and line breaks can be checked before payment.',
-  },
-  {
-    title: 'Brass plaques',
-    copy: 'Brushed, polished, orbital and aged brass finishes for a warmer traditional plaque, including hand-applied patina choices.',
-  },
-  {
-    title: 'Stainless steel plaques',
-    copy: 'Brushed and mirror stainless steel plaques for a cooler contemporary finish, well suited to outdoor and public-facing locations.',
-  },
-  {
-    title: 'Wood-backed plaques',
-    copy: 'Optional light or dark wood backing adds presentation weight behind brass or stainless plates on suitable sizes.',
-  },
-  {
-    title: 'Custom plaques',
-    copy: 'Non-standard sizes, oval plaques and circular plaques can start with a proof and be checked before payment where the turnaround needs confirming.',
-  },
-];
-
-const orderHighlights = [
-  'Free online proof before payment',
-  'UK mainland delivery included on standard orders',
-  'Secure Stripe checkout',
-  'Standard, A5, A4 and custom plaque sizes',
-  'Brass, aged brass and stainless steel finishes',
-  'Production file generated from the approved proof',
-];
-
 const routePathForView = (view: SiteView) => {
   const paths: Partial<Record<SiteView, string>> = {
     home: '/',
@@ -852,6 +816,10 @@ function ProductGrid({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
       <div className="commerce-section__head">
         <p className="commerce-eyebrow">Standard sizes</p>
         <h2>Choose the format, then start your free proof.</h2>
+        <p>
+          Order UK bench plaques, memorial plaques, brass plaques and stainless steel plaques in standard sizes.
+          Custom sizes, oval plaques and circular plaques are available up to our maximum size, with turnaround confirmed before payment where needed.
+        </p>
       </div>
       <div className="commerce-product-grid">
         {productFamilies.map((product) => (
@@ -897,32 +865,6 @@ function ExpandableFaqList({ faqs, defaultOpenIndex = null }: { faqs: FaqItem[];
         </article>
       ))}
     </div>
-  );
-}
-
-function HomeSeoContent() {
-  return (
-    <section className="commerce-section commerce-seo-band">
-      <div className="commerce-section__head">
-        <p className="commerce-eyebrow">Custom plaques UK</p>
-        <h2>Memorial, bench, brass and stainless steel plaques without the slow design loop.</h2>
-        <p>
-          InstaPlaque is built for UK customers who want to see the plaque before committing.
-          Choose the size, finish and wording, then approve a clean proof before checkout.
-        </p>
-      </div>
-      <div className="commerce-seo-grid">
-        {homeSeoTopics.map((topic) => (
-          <article className="commerce-seo-card" key={topic.title}>
-            <h3>{topic.title}</h3>
-            <p>{topic.copy}</p>
-          </article>
-        ))}
-      </div>
-      <div className="commerce-keyword-strip" aria-label="InstaPlaque order features">
-        {orderHighlights.map((highlight) => <span key={highlight}>{highlight}</span>)}
-      </div>
-    </section>
   );
 }
 
@@ -1110,7 +1052,6 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
         </div>
       </section>
       <ProductGrid onLaunchProduct={props.onLaunchProduct} />
-      <HomeSeoContent />
       <HomeMaterialPanels />
       <HomeFaq />
     </div>
