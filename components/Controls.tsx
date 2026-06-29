@@ -27,7 +27,7 @@ const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
   [Material.OrbitalBrassMattLacquer]: 'Orbital brass',
   [Material.PolishedBrass]: 'Polished brass',
-  [Material.AgedBrass]: 'Mid aged brass',
+  [Material.AgedBrass]: 'Aged brass',
   [Material.BrushedSteel]: 'Brushed stainless',
   [Material.PolishedSteel]: 'Polished stainless',
 };
@@ -36,9 +36,42 @@ const MATERIAL_NOTES: Record<Material, string> = {
   [Material.BrushedBrass]: 'Hand-brushed satin brass with warm low-glare grain',
   [Material.OrbitalBrassMattLacquer]: 'Matt lacquered orbital brass with optional colour-filled etch',
   [Material.PolishedBrass]: 'Mirror-bright traditional presentation brass',
-  [Material.AgedBrass]: 'Mid-aged brass texture with adjustable patina depth',
+  [Material.AgedBrass]: 'Hand-applied patina with light, mid or heavy ageing',
   [Material.BrushedSteel]: 'Directional satin stainless with fine linear grain',
   [Material.PolishedSteel]: 'Mirror stainless with crisp reflected highlights',
+};
+
+const MATERIAL_DETAILS: Record<Material, { title: string; copy: string; detail: string }> = {
+  [Material.BrushedBrass]: {
+    title: 'Warm satin brass',
+    copy: 'A clean hand-brushed brass finish with a soft grain and low glare.',
+    detail: 'Good for memorial, bench and dedication plaques where the engraving needs to stay readable in changing light.',
+  },
+  [Material.OrbitalBrassMattLacquer]: {
+    title: 'Orbital brass',
+    copy: 'A decorative orbital grain under matt lacquer, suited to a more crafted brass face.',
+    detail: 'Works well with colour-filled surface etching when you want more contrast than plain brass engraving.',
+  },
+  [Material.PolishedBrass]: {
+    title: 'Bright polished brass',
+    copy: 'A mirror-bright traditional brass finish for formal presentation plaques.',
+    detail: 'Best where shine and a classic premium look matter more than low-glare readability.',
+  },
+  [Material.AgedBrass]: {
+    title: 'Aged brass patina',
+    copy: 'Choose light, mid or heavy ageing. Each patina is applied by hand, so every plaque has its own natural variation.',
+    detail: 'The finish is sealed with a matt lacquer to slow further natural ageing while keeping the aged brass character.',
+  },
+  [Material.BrushedSteel]: {
+    title: 'Satin stainless steel',
+    copy: 'A cooler stainless finish with fine directional grain and a restrained industrial look.',
+    detail: 'A practical choice for modern plaques, business signs and outdoor settings where brass would feel too warm.',
+  },
+  [Material.PolishedSteel]: {
+    title: 'Polished stainless steel',
+    copy: 'A bright mirror stainless finish with crisp reflected highlights.',
+    detail: 'Suited to clean contemporary plaques where a polished silver face is the right visual cue.',
+  },
 };
 
 const MATERIAL_SWATCH: Record<Material, string> = {
@@ -1100,13 +1133,23 @@ export const Controls: React.FC<Props> = ({
                     </span>
                   )}
                 </button>
+                {state.material === material && (
+                  <div className="material-detail-card">
+                    <div className="material-detail-card__sample" style={{ background: MATERIAL_SWATCH[material] }} aria-hidden="true" />
+                    <div>
+                      <strong>{MATERIAL_DETAILS[material].title}</strong>
+                      <p>{MATERIAL_DETAILS[material].copy}</p>
+                      <small>{MATERIAL_DETAILS[material].detail}</small>
+                    </div>
+                  </div>
+                )}
                 {material === Material.AgedBrass && state.material === Material.AgedBrass && (
                   <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
-                    <div className="mb-2 text-sm font-black">Mid aged brass finish</div>
+                    <div className="mb-2 text-sm font-black">Aged brass finish</div>
                     <div className="grid grid-cols-3 gap-2">
                       {[
                         ['Light aged', 0.18],
-                        ['Middle aged', 0.48],
+                        ['Mid aged', 0.48],
                         ['Heavy aged', 0.82],
                       ].map(([label, value]) => (
                         <button
@@ -1118,6 +1161,9 @@ export const Controls: React.FC<Props> = ({
                         </button>
                       ))}
                     </div>
+                    <p className="mt-2 text-xs font-bold leading-5 text-[#5e5444]">
+                      Heavy aged brass is best paired with cream or white text infill for clear contrast.
+                    </p>
                   </div>
                 )}
               </React.Fragment>

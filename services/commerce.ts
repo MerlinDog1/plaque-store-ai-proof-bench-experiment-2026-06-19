@@ -286,13 +286,13 @@ export const materialStories = [
     copy: 'A brighter brass for presentation plaques that need a formal, refined face.',
   },
   {
-    title: 'Mid aged brass',
+    title: 'Aged brass',
     image: '/materials/optimized/mid-aged-brass.webp',
     thumbnail: '/materials/thumbs/aged-brass.webp',
     sliderImage: '/materials/slider/aged-brass.webp',
     family: 'Brass',
-    tone: 'Soft aged patina',
-    copy: 'Fine wear, soft patina and enough contrast for traditional engraved plaques.',
+    tone: 'Hand-applied patina',
+    copy: 'Light, mid or heavy patina, applied by hand and sealed with matt lacquer to slow further natural ageing.',
   },
   {
     title: 'Orbital brass',
