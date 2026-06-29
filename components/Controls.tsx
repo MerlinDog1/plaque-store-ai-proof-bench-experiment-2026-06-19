@@ -79,7 +79,7 @@ const MATERIAL_SWATCH: Record<Material, string> = {
   [Material.OrbitalBrassMattLacquer]: "url('/materials/optimized/orbital-brass-clean.webp') center/cover",
   [Material.PolishedBrass]: "url('/materials/optimized/polished-brass-clean.webp') center/cover",
   [Material.AgedBrass]: "linear-gradient(rgba(80,55,29,.18),rgba(80,55,29,.18)),url('/materials/optimized/mid-aged-brass.webp') center/cover",
-  [Material.BrushedSteel]: 'repeating-linear-gradient(0deg,rgba(255,255,255,.22) 0 1px,rgba(55,67,75,.14) 1px 2px,transparent 2px 5px),linear-gradient(135deg,#7a858b,#c7d0d4,#68727a)',
+  [Material.BrushedSteel]: "url('/materials/optimized/brushed-stainless-satin.webp') center/cover",
   [Material.PolishedSteel]: "url('/materials/optimized/polished-stainless-clean.webp') center/cover",
 };
 
@@ -1125,7 +1125,7 @@ export const Controls: React.FC<Props> = ({
                   <span className="h-10 w-10 shrink-0 rounded-lg border border-black/10" style={{ background: MATERIAL_SWATCH[material] }} />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-black">{MATERIAL_LABELS[material]}</span>
-                    <span className="block text-xs leading-4 opacity-70">{MATERIAL_NOTES[material]}</span>
+                    <span className="material-option__note block text-xs leading-4">{MATERIAL_NOTES[material]}</span>
                   </span>
                   {showMaterialPrices && (
                     <span className="material-price-chip shrink-0 rounded-full px-2 py-1 text-xs font-black">

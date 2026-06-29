@@ -698,6 +698,15 @@
   color: #14231f;
 }
 
+.material-option__note {
+  color: #5d6a63;
+  font-weight: 750;
+}
+
+.material-option[aria-pressed="true"] .material-option__note {
+  color: #24372f;
+}
+
 .material-detail-card {
   display: grid;
   grid-template-columns: 92px minmax(0, 1fr);
@@ -720,7 +729,7 @@
 
 .material-detail-card strong {
   display: block;
-  color: #1b231f;
+  color: #1b231f !important;
   font-size: 14px;
   font-weight: 950;
 }
@@ -729,15 +738,27 @@
 .material-detail-card small {
   display: block;
   margin-top: 0.28rem;
-  color: #5e685f;
+  color: #405148 !important;
   font-size: 12px;
   font-weight: 750;
   line-height: 1.45;
 }
 
 .material-detail-card small {
-  color: #756752;
+  color: #6a5f4e !important;
   font-size: 11px;
+}
+
+.proofbench-customiser .controls-instrument .material-detail-card strong {
+  color: #1b231f !important;
+}
+
+.proofbench-customiser .controls-instrument .material-detail-card p {
+  color: #405148 !important;
+}
+
+.proofbench-customiser .controls-instrument .material-detail-card small {
+  color: #6a5f4e !important;
 }
 
 .bench-size-group {
