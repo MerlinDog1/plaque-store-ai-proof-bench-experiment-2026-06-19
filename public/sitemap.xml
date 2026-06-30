@@ -1,22 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+>
   <url>
     <loc>https://instaplaque.co.uk/</loc>
     <lastmod>2026-06-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://instaplaque.co.uk/site-images/home-realistic-proof-row.jpg</image:loc>
+      <image:title>Custom plaque proof examples</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-bench-steel.webp</image:loc>
+      <image:title>Bench plaque example</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-garden-brass.webp</image:loc>
+      <image:title>Garden brass plaque example</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://instaplaque.co.uk/site-images/home-custom-oval-steel.webp</image:loc>
+      <image:title>Custom oval plaque example</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://instaplaque.co.uk/design</loc>
     <lastmod>2026-06-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://instaplaque.co.uk/product-images/instant-proof-hero.png</image:loc>
+      <image:title>Online plaque proof designer</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://instaplaque.co.uk/materials</loc>
     <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://instaplaque.co.uk/site-images/proofbench-materials.png</image:loc>
+      <image:title>Brass stainless steel and wood plaque materials</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://instaplaque.co.uk/site-images/home-gallery-aged-brass-wood.webp</image:loc>
+      <image:title>Aged brass plaque on wood backing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://instaplaque.co.uk/site-images/home-gallery-brass-bench.webp</image:loc>
+      <image:title>Brass bench plaque close up</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://instaplaque.co.uk/how-it-works</loc>
