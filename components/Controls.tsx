@@ -1716,7 +1716,7 @@ export const Controls: React.FC<Props> = ({
             />
           </div>
 
-          <div className={state.memorialImageMethod === MemorialImageMethod.Engraved ? 'grid grid-cols-[1fr_auto] gap-2' : 'grid gap-2'}>
+          <div className="grid grid-cols-[1fr_auto] gap-2">
             {state.memorialImageMethod === MemorialImageMethod.Engraved ? (
               <button
                 onClick={onGenerateMemorialImage}
@@ -1731,9 +1731,13 @@ export const Controls: React.FC<Props> = ({
                 {isGeneratingMemorialImage ? 'Generating engraving...' : 'Generate engraving'}
               </button>
             ) : (
-              <div className="rounded-lg border border-[rgba(88,199,176,0.26)] bg-[#151f1b] p-3 text-xs font-bold leading-5 text-[#1f755f]">
-                UV print uses the uploaded colour image directly. Use artwork size for plaque space and photo fit only if you want the image tighter. No engraving generation is needed.
-              </div>
+              <button
+                onClick={onGenerateMemorialImage}
+                disabled={isGeneratingMemorialImage || !state.memorialImageEnabled || !portraitPreviewUrl}
+                className="min-h-[52px] rounded-lg bg-[#f2d688] px-4 py-3 text-sm font-black text-[#1b231f] transition disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isGeneratingMemorialImage ? 'Tracing colour...' : 'Vectorise colour artwork'}
+              </button>
             )}
             {(portraitPreviewUrl || state.memorialImageSvg) && (
               <button onClick={onClearMemorialImage} disabled={isGeneratingMemorialImage} className={pillClass(false)}>
@@ -1741,6 +1745,12 @@ export const Controls: React.FC<Props> = ({
               </button>
             )}
           </div>
+
+          {state.memorialImageMethod === MemorialImageMethod.UvPrinted && (
+            <p className="rounded-lg border border-[rgba(88,199,176,0.26)] bg-[#151f1b] p-3 text-xs font-bold leading-5 text-[#7fd7c2]">
+              UV print can use the uploaded image directly, or trace it into layered colour SVG paths for cleaner printable vector artwork.
+            </p>
+          )}
 
           {memorialStatus && <div className="rounded-lg border border-[#d9c289] bg-[#221d12] p-3 text-xs leading-5 text-[#e8c875]">{memorialStatus}</div>}
           </>}

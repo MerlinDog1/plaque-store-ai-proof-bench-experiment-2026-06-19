@@ -593,6 +593,10 @@ const prepareCloneForProduction = async (sourceSvg: SVGSVGElement, state: Plaque
 
     // 7. Ensure all text paths are black filled
     clone.querySelectorAll('path').forEach(path => {
+      if (path.closest('.uv-vector-artwork')) {
+        path.removeAttribute('stroke');
+        return;
+      }
       if (path.classList.contains('engraved-border') ||
         path.getAttribute('stroke') === '#FF0000' ||
         path.getAttribute('stroke') === '#0000FF') return;
@@ -603,12 +607,13 @@ const prepareCloneForProduction = async (sourceSvg: SVGSVGElement, state: Plaque
     // 8. Remove visual defs but retain UV portrait clipping geometry.
     clone.querySelectorAll('defs').forEach(defs => {
       const portraitClip = defs.querySelector('#uv-portrait-shape');
-      if (!portraitClip) {
+      const vectorClip = defs.querySelector('#uv-vector-portrait-shape');
+      if (!portraitClip && !vectorClip) {
         defs.remove();
         return;
       }
       Array.from(defs.children).forEach(child => {
-        if (child !== portraitClip) child.remove();
+        if (child !== portraitClip && child !== vectorClip) child.remove();
       });
     });
 

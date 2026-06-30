@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-type ViewMode = 'sketch' | 'style' | 'prompt' | 'vectorize';
+type ViewMode = 'sketch' | 'style' | 'prompt' | 'vectorize' | 'colour-vectorize';
 
 const STYLE_MAP: Record<string, { name: string, prompt: string }> = {
   'line-art': { name: 'Line Art', prompt: "A detailed black and white line art illustration, featuring clean, bold outlines and intricate details, with no solid shading – instead using cross‐hatched lines for any shadows. The style is monochromatic, high-contrast, with the simple, classic look of pen-and-ink line art on white paper." },
@@ -61,12 +61,15 @@ export const VectorSketch: React.FC = () => {
   const [sfpImage, setSfpImage] = useState<{data: string, mime: string} | null>(null);
   const [stBase, setStBase] = useState<{data: string, mime: string} | null>(null);
   const [stStyle, setStStyle] = useState<{data: string, mime: string} | null>(null);
+  const [colourImage, setColourImage] = useState<{data: string, mime: string} | null>(null);
   const [prompt, setPrompt] = useState("");
 
   // Settings
   const [activeStyle, setActiveStyle] = useState("line-art");
   const [creativity, setCreativity] = useState(50);
   const [isolateSubject, setIsolateSubject] = useState(true);
+  const [colourPaletteSize, setColourPaletteSize] = useState(14);
+  const [colourDetail, setColourDetail] = useState(72);
 
   // Results
   const [generatedImage, setGeneratedImage] = useState<string | null>(null); // Data URL
@@ -395,6 +398,30 @@ export const VectorSketch: React.FC = () => {
     }
   };
 
+  const runColourTrace = async () => {
+    if (!colourImage) {
+      alert("Upload a colour image.");
+      return;
+    }
+    setLoadingMsg("Tracing colour...");
+    setFinalSvg(null);
+    setGeneratedImage(`data:${colourImage.mime};base64,${colourImage.data}`);
+
+    try {
+      const { vectorizeColourImage } = await import("../services/memorialImageService");
+      const svg = await vectorizeColourImage(
+        `data:${colourImage.mime};base64,${colourImage.data}`,
+        { paletteSize: colourPaletteSize, detail: colourDetail },
+        (message) => setLoadingMsg(message),
+      );
+      setFinalSvg(svg);
+    } catch (e: any) {
+      alert("Colour trace error: " + (e?.message || e));
+    } finally {
+      setLoadingMsg(null);
+    }
+  };
+
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (v: any) => void) => {
     const f = e.target.files?.[0];
     if (f) {
@@ -424,6 +451,7 @@ export const VectorSketch: React.FC = () => {
             { id: 'sketch', label: 'Sketch Photo', icon: '📷' },
             { id: 'style', label: 'Style Transfer', icon: '🎨' },
             { id: 'prompt', label: 'Prompt Sketch', icon: '⌨️' },
+            { id: 'colour-vectorize', label: 'Colour Vector', icon: '▣' },
             { id: 'vectorize', label: 'Vector Engine', icon: '⚙️', disabled: !generatedImage }
           ].map(tab => (
             <button
@@ -553,6 +581,49 @@ export const VectorSketch: React.FC = () => {
             </div>
           )}
 
+          {/* VIEW: COLOUR VECTOR */}
+          {view === 'colour-vectorize' && (
+            <div className="space-y-5 animate-fade-in">
+              <h2 className="text-xl font-bold text-white border-b border-gray-700 pb-2">Colour Vector Trace</h2>
+
+              {!colourImage ? (
+                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 rounded-xl hover:border-indigo-500 hover:bg-gray-800 cursor-pointer transition-all">
+                  <span className="text-gray-400 text-sm">Upload colour artwork</span>
+                  <input type="file" className="hidden" accept="image/*" onChange={e => handleUpload(e, setColourImage)} />
+                </label>
+              ) : (
+                <div className="relative h-40 rounded-xl overflow-hidden border border-gray-700 group">
+                  <img src={`data:${colourImage.mime};base64,${colourImage.data}`} className="w-full h-full object-contain bg-black/40" />
+                  <button onClick={() => { setColourImage(null); setFinalSvg(null); }} className="absolute inset-0 m-auto w-max h-max px-4 py-2 bg-red-600 text-white rounded font-bold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">Remove</button>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-xs text-gray-400 mb-1">
+                    <span>Palette colours</span>
+                    <span>{colourPaletteSize}</span>
+                  </div>
+                  <input type="range" min="3" max="24" value={colourPaletteSize} onChange={e => setColourPaletteSize(Number(e.target.value))} className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" />
+                  <p className="mt-1 text-[10px] text-gray-500">Lower is cleaner for vinyl/sign work. Higher preserves photographic colour variation.</p>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-xs text-gray-400 mb-1">
+                    <span>Shape detail</span>
+                    <span>{colourDetail}%</span>
+                  </div>
+                  <input type="range" min="1" max="100" value={colourDetail} onChange={e => setColourDetail(Number(e.target.value))} className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" />
+                  <p className="mt-1 text-[10px] text-gray-500">Higher keeps tighter edges. Lower simplifies paths for cleaner production files.</p>
+                </div>
+              </div>
+
+              <button onClick={runColourTrace} disabled={!!loadingMsg || !colourImage} className="w-full py-3 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 rounded-lg text-sm font-bold text-white shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                {loadingMsg ? loadingMsg : 'Trace colour vector'}
+              </button>
+            </div>
+          )}
+
           {/* VIEW: VECTORIZE (UltraTrace Engine) */}
           {view === 'vectorize' && (
             <div className="space-y-6 animate-fade-in">
@@ -617,7 +688,7 @@ export const VectorSketch: React.FC = () => {
           )}
 
           {/* GENERATE BUTTON (Common for Sketch/Style/Prompt) */}
-          {view !== 'vectorize' && (
+          {view !== 'vectorize' && view !== 'colour-vectorize' && (
             <button
               onClick={handleGenerate}
               disabled={!!loadingMsg}
@@ -644,12 +715,18 @@ export const VectorSketch: React.FC = () => {
              ) : (
                <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-4 gap-4">
 
-                 {view === 'vectorize' && (
+                 {(view === 'vectorize' || view === 'colour-vectorize') && (
                    <div className="w-full grid grid-cols-2 gap-4 mb-4 h-64">
                       <div className="relative border border-gray-700 rounded bg-black/50 flex flex-col">
-                        <span className="absolute top-2 left-2 bg-black/70 text-[10px] px-2 py-1 rounded text-gray-300">Original / Pre-process</span>
-                        <canvas ref={canvasOrigRef} className="hidden" />
-                        <canvas ref={canvasPreRef} className="w-full h-full object-contain" />
+                        <span className="absolute top-2 left-2 bg-black/70 text-[10px] px-2 py-1 rounded text-gray-300">{view === 'colour-vectorize' ? 'Original colour' : 'Original / Pre-process'}</span>
+                        {view === 'colour-vectorize' ? (
+                          <img src={generatedImage} className="h-full w-full object-contain" />
+                        ) : (
+                          <>
+                            <canvas ref={canvasOrigRef} className="hidden" />
+                            <canvas ref={canvasPreRef} className="w-full h-full object-contain" />
+                          </>
+                        )}
                       </div>
                       <div className="relative border border-gray-700 rounded bg-white flex items-center justify-center overflow-hidden">
                         <span className="absolute top-2 left-2 bg-black/10 text-[10px] px-2 py-1 rounded text-black font-bold z-20">Vector Result</span>
@@ -662,7 +739,7 @@ export const VectorSketch: React.FC = () => {
                    </div>
                  )}
 
-                 {view !== 'vectorize' && (
+                 {view !== 'vectorize' && view !== 'colour-vectorize' && (
                    <img src={generatedImage} className="max-w-full max-h-[500px] shadow-2xl rounded-lg border border-gray-700" />
                  )}
 

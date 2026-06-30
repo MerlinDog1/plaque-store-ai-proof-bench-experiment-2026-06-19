@@ -383,3 +383,47 @@ export async function vectorizeMemorialImage(
       });
   });
 }
+
+export async function vectorizeColourImage(
+  dataUrl: string,
+  options: { paletteSize?: number; detail?: number } = {},
+  onProgress?: (message: string) => void
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (typeof Worker === "undefined") {
+      reject(new Error("This browser does not support background tracing workers."));
+      return;
+    }
+
+    const worker = new Worker(new URL("./colourTrace.worker.ts", import.meta.url), { type: "module" });
+    worker.onmessage = (event: MessageEvent<{ type?: "progress"; message?: string; svg?: string; error?: string }>) => {
+      if (event.data.type === "progress") {
+        if (event.data.message) onProgress?.(event.data.message);
+        return;
+      }
+      worker.terminate();
+      if (event.data.svg) {
+        resolve(event.data.svg);
+        return;
+      }
+      reject(new Error(event.data.error || "Colour image tracing failed."));
+    };
+    worker.onerror = event => {
+      worker.terminate();
+      reject(new Error(event.message || "Colour image tracing worker failed."));
+    };
+    dataUrlToTracePayload(dataUrl)
+      .then(({ buffer, mimeType }) => {
+        worker.postMessage({
+          imageBuffer: buffer,
+          mimeType,
+          paletteSize: options.paletteSize || 14,
+          detail: options.detail || 68,
+        }, [buffer]);
+      })
+      .catch(error => {
+        worker.terminate();
+        reject(error instanceof Error ? error : new Error("Could not prepare colour image for tracing."));
+      });
+  });
+}

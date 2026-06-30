@@ -507,20 +507,48 @@ const App: React.FC = () => {
   };
 
   const handleGenerateMemorialImage = async () => {
-    if (state.etchmasterMode !== EtchmasterImageMode.Prompt && !memorialSourceImage) {
+    const sourceArtwork = memorialSourceImage || state.memorialImageSourceUrl || state.memorialImagePreviewUrl;
+    if (state.memorialImageMethod === MemorialImageMethod.UvPrinted && !sourceArtwork) {
+      alert('Upload colour artwork first.');
+      return;
+    }
+    if (state.memorialImageMethod === MemorialImageMethod.Engraved && state.etchmasterMode !== EtchmasterImageMode.Prompt && !memorialSourceImage) {
       alert('Upload artwork first.');
       return;
     }
-    if (state.etchmasterMode === EtchmasterImageMode.SubjectStyle && !state.etchmasterStyleReferenceUrl) {
+    if (state.memorialImageMethod === MemorialImageMethod.Engraved && state.etchmasterMode === EtchmasterImageMode.SubjectStyle && !state.etchmasterStyleReferenceUrl) {
       alert('Upload a style reference image first.');
       return;
     }
 
     setIsGeneratingMemorial(true);
-    setMemorialStatus(state.etchmasterEnhancePrompt ? 'Enhancing EtchMaster prompt...' : 'Preparing detailed etchable artwork...');
+    setMemorialStatus(
+      state.memorialImageMethod === MemorialImageMethod.UvPrinted
+        ? 'Preparing colour artwork for vector tracing...'
+        : state.etchmasterEnhancePrompt ? 'Enhancing EtchMaster prompt...' : 'Preparing detailed etchable artwork...'
+    );
 
     try {
-      const { enhanceEtchingPrompt, generateMemorialEngraving, vectorizeMemorialImage } = await import('./services/memorialImageService');
+      const { enhanceEtchingPrompt, generateMemorialEngraving, vectorizeColourImage, vectorizeMemorialImage } = await import('./services/memorialImageService');
+      if (state.memorialImageMethod === MemorialImageMethod.UvPrinted) {
+        setMemorialStatus('Tracing colour artwork into layered vector paths...');
+        const svg = await vectorizeColourImage(
+          sourceArtwork!,
+          {
+            paletteSize: Math.round(Math.max(6, Math.min(24, state.etchmasterVectorThreshold / 8))),
+            detail: 72,
+          },
+          setMemorialStatus,
+        );
+        setState(prev => ({
+          ...prev,
+          memorialImagePreviewUrl: sourceArtwork,
+          memorialImageSvg: svg,
+        }));
+        setMemorialStatus('Colour vector artwork placed on the plaque.');
+        return;
+      }
+
       const extraPrompt = state.etchmasterEnhancePrompt && state.etchmasterPrompt.trim()
         ? await enhanceEtchingPrompt(state.etchmasterPrompt)
         : state.etchmasterPrompt;

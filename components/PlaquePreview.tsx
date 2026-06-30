@@ -266,6 +266,12 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
       : null,
     [state.memorialImageEnabled, state.memorialImageMethod, state.memorialImageSvg]
   );
+  const colourArtworkSvg = React.useMemo(
+    () => state.memorialImageEnabled && state.memorialImageMethod === MemorialImageMethod.UvPrinted
+      ? getSvgPayload(state.memorialImageSvg)
+      : null,
+    [state.memorialImageEnabled, state.memorialImageMethod, state.memorialImageSvg]
+  );
   const uvPrintImageUrl = state.memorialImageEnabled && state.memorialImageMethod === MemorialImageMethod.UvPrinted
     ? state.memorialImageSourceUrl || state.memorialImagePreviewUrl
     : null;
@@ -1015,7 +1021,40 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
               } as React.CSSProperties}
               fill={state.reverseEtch ? reverseMetalFillUrl : engravedFill}
             >
-              {uvPrintImageUrl ? (
+              {colourArtworkSvg ? (
+                (() => {
+                  return (
+                    <svg
+                      x={artworkX}
+                      y={artworkY}
+                      width={layout.artW}
+                      height={layout.artH}
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="xMidYMid meet"
+                      overflow="hidden"
+                      className="uv-vector-artwork"
+                    >
+                      <defs>
+                        <clipPath id="uv-vector-portrait-shape">
+                          {portraitShapeClip(state.memorialImageShape)}
+                        </clipPath>
+                      </defs>
+                      <g clipPath="url(#uv-vector-portrait-shape)">
+                        <svg
+                          x={(100 - 100 * state.memorialImageZoom) / 2}
+                          y={(100 - 100 * state.memorialImageZoom) / 2}
+                          width={100 * state.memorialImageZoom}
+                          height={100 * state.memorialImageZoom}
+                          viewBox={colourArtworkSvg.viewBox}
+                          preserveAspectRatio="xMidYMid meet"
+                        >
+                          <g dangerouslySetInnerHTML={{ __html: colourArtworkSvg.content }} />
+                        </svg>
+                      </g>
+                    </svg>
+                  );
+                })()
+              ) : uvPrintImageUrl ? (
                 <svg
                   x={artworkX}
                   y={artworkY}
