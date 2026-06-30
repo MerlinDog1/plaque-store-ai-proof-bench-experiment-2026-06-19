@@ -339,6 +339,53 @@ const App: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (window.location.pathname !== '/checkout') return;
+    const orderId = new URLSearchParams(window.location.search).get('order');
+    if (!orderId) return;
+
+    let cancelled = false;
+    const restoreCheckoutOrder = async () => {
+      try {
+        const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || `Could not load order (${response.status})`);
+        const order = payload.order;
+        if (!order || cancelled) return;
+
+        const restoredState: PlaqueState = {
+          ...PROOF_BENCH_INITIAL_STATE,
+          ...(order.plaqueState || order.state || {}),
+        };
+        const restoredWording = order.inscription || '';
+        setState(restoredState);
+        setInscriptionPrompt(restoredWording);
+        setInscriptionGuidance('');
+        setGeneratedLayoutSignature(
+          restoredState.generatedSvgContent
+            ? makeLayoutSignature(restoredWording, restoredState)
+            : null
+        );
+        setGeneratedProofFrame(restoredState.generatedSvgContent ? getProofFrame(restoredState) : null);
+        setHasSelectedSize(true);
+        setActiveStep(restoredState.generatedSvgContent ? steps.length - 1 : 0);
+        setProofSaved(true);
+        setBasketAdded(true);
+        setMockOrders(prev => {
+          if (prev.some(savedOrder => savedOrder.id === order.id)) return prev;
+          return [order, ...prev];
+        });
+      } catch (error) {
+        console.warn('Could not restore cancelled checkout order.', error);
+      }
+    };
+
+    restoreCheckoutOrder();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const getInscriptionContext = (prompt: string) => {
     const normalizedPrompt = prompt.toLowerCase();
     const purpose = state.memorialImageEnabled
@@ -853,6 +900,25 @@ const App: React.FC = () => {
     }
   };
 
+  const persistCheckoutOrder = (order: MockOrder) => {
+    setMockOrders(prev => {
+      const next = [order, ...prev.filter(savedOrder => savedOrder.id !== order.id)];
+      try {
+        localStorage.setItem('plaques-ai-mock-orders', JSON.stringify(next));
+      } catch {
+        // Non-critical: the in-memory order still exists for this prototype session.
+      }
+      return next;
+    });
+    fireAndForget(fetch('/api/mock-admin-hub/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order),
+      }), (error) => {
+      console.warn('Mock admin hub handoff was not persisted on the server.', error);
+    });
+  };
+
   const handleCreateMockOrder = async (customerName: string, customerEmail: string, deliveryAddress?: DeliveryAddress, proofSvg?: SVGSVGElement | null) => {
     const proofSourceSvg = proofSvg || svgRef.current;
     const visualProofSvg = proofSourceSvg?.outerHTML || state.generatedSvgContent || null;
@@ -905,6 +971,7 @@ const App: React.FC = () => {
           },
         };
         if (checkoutOrder.stripeSimulation.checkoutUrl && checkoutOrder.stripeSimulation.uiMode !== 'embedded') {
+          persistCheckoutOrder(checkoutOrder);
           return checkoutOrder;
         }
       } else {
@@ -914,22 +981,7 @@ const App: React.FC = () => {
       console.error('Stripe checkout session could not be created.', error);
       throw error;
     }
-    setMockOrders(prev => {
-      const next = [checkoutOrder, ...prev];
-      try {
-        localStorage.setItem('plaques-ai-mock-orders', JSON.stringify(next));
-      } catch {
-        // Non-critical: the in-memory order still exists for this prototype session.
-      }
-      return next;
-    });
-    fireAndForget(fetch('/api/mock-admin-hub/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(checkoutOrder),
-      }), (error) => {
-      console.warn('Mock admin hub handoff was not persisted on the server.', error);
-    });
+    persistCheckoutOrder(checkoutOrder);
     return checkoutOrder;
   };
 
