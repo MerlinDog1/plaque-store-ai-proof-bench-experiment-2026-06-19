@@ -36,6 +36,7 @@ export interface ProductFamily {
   description: string;
   bestFor: string[];
   startingFrom: string;
+  schemaStartingPrice?: number;
   materialCue: 'brass' | 'stainless' | 'wood' | 'aged';
   image: string;
   proofPrompt: string;
@@ -250,6 +251,7 @@ export const productFamilies: ProductFamily[] = [
     shortTitle: 'Custom',
     eyebrow: 'Up to 600 mm long',
     startingFrom: 'quote checked before order',
+    schemaStartingPrice: 149,
     materialCue: 'stainless',
     image: '/site-images/home-custom-oval-steel.webp',
     description: 'For non-standard dimensions, oval plaques, circular plaques or anything that needs a quick manual check.',

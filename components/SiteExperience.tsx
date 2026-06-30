@@ -647,7 +647,7 @@ const productListSchema = () => ({
   '@type': 'ItemList',
   name: 'Custom plaque formats',
   itemListElement: productFamilies.map((product, index) => {
-    const price = product.startingFrom.match(/£(\d+(?:\.\d+)?)/)?.[1];
+    const price = product.schemaStartingPrice?.toString() || product.startingFrom.match(/£(\d+(?:\.\d+)?)/)?.[1];
     return {
       '@type': 'ListItem',
       position: index + 1,
