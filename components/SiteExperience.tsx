@@ -501,12 +501,10 @@ const footerLinks: Array<{ view: SiteView; label: string }> = [
   { view: 'returns', label: 'Returns & cancellations' },
 ];
 
-type FooterSocial = 'instagram' | 'facebook' | 'pinterest';
+type FooterSocial = 'instagram';
 
-const footerSocials: Array<{ id: FooterSocial; label: string }> = [
-  { id: 'instagram', label: 'Instagram' },
-  { id: 'facebook', label: 'Facebook' },
-  { id: 'pinterest', label: 'Pinterest' },
+const footerSocials: Array<{ id: FooterSocial; label: string; url: string }> = [
+  { id: 'instagram', label: 'Instagram', url: 'https://www.instagram.com/insta.plaque?igsh=ZGgxdHJ5dXgxMWJn' },
 ];
 
 const homeCarouselItems: HomeCarouselItem[] = [
@@ -2218,20 +2216,6 @@ function LegalPlaceholderPage({ view }: { view: SiteView }) {
 }
 
 function SocialLogo({ type }: { type: FooterSocial }) {
-  if (type === 'facebook') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M14.2 8.1V6.7c0-.7.5-1.1 1.2-1.1h1.7V2.8c-.8-.1-1.7-.2-2.6-.2-2.6 0-4.3 1.5-4.3 4.1v1.4H7.5v3.2h2.7v8.1h3.4v-8.1H16l.5-3.2h-2.3Z" />
-      </svg>
-    );
-  }
-  if (type === 'pinterest') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12.1 2.6c-5.1 0-7.7 3.4-7.7 6.6 0 1.9 1 4.2 2.6 4.9.3.1.5 0 .6-.3l.4-1.5c.1-.2 0-.4-.1-.6-.5-.6-.8-1.4-.8-2.3 0-2.8 2.1-5.4 5.7-5.4 3.1 0 5 1.9 5 4.6 0 3.1-1.6 5.8-4 5.8-1.2 0-2.1-1-1.8-2.2.3-1.4 1-2.9 1-3.9 0-.9-.5-1.7-1.5-1.7-1.2 0-2.2 1.3-2.2 3 0 1.1.4 1.8.4 1.8l-1.5 6.2c-.3 1.3 0 3 .1 3.1.1.1.2.1.3 0 .1-.1 1.7-2.2 2-3.5l.7-2.7c.5.9 1.6 1.6 2.9 1.6 3.8 0 6.4-3.4 6.4-7.6 0-3.3-2.8-6.5-7.2-6.5Z" />
-      </svg>
-    );
-  }
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5.4" />
@@ -2253,9 +2237,9 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
       <div className="commerce-footer__right">
         <div className="commerce-footer-socials" aria-label="Social links">
           {footerSocials.map((social) => (
-            <button key={social.id} type="button" aria-label={`${social.label} link placeholder`} title={`${social.label} link placeholder`}>
+            <a key={social.id} href={social.url} target="_blank" rel="noreferrer" aria-label={`${social.label} on Instagram`} title={social.label}>
               <SocialLogo type={social.id} />
-            </button>
+            </a>
           ))}
         </div>
         <img

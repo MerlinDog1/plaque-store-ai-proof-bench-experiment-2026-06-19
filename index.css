@@ -1848,7 +1848,7 @@
   gap: 0.36rem;
 }
 
-.commerce-footer-socials button {
+.commerce-footer-socials a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1859,6 +1859,7 @@
   background: rgba(255, 250, 240, 0.08);
   padding: 0;
   color: #f2d688;
+  text-decoration: none;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 28px rgba(0, 0, 0, 0.18);
 }
 
@@ -1868,12 +1869,6 @@
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
-}
-
-.commerce-footer-socials button:nth-child(2) svg,
-.commerce-footer-socials button:nth-child(3) svg {
-  fill: currentColor;
-  stroke: none;
 }
 
 .commerce-footer-legal button {
@@ -3856,7 +3851,7 @@
     justify-content: flex-start;
   }
 
-  .commerce-footer-socials button {
+  .commerce-footer-socials a {
     width: 52px;
     min-height: 52px;
   }
