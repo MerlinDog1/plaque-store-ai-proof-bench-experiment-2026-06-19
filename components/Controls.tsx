@@ -452,6 +452,7 @@ export const Controls: React.FC<Props> = ({
   const instantStyleApplyingRef = useRef(false);
   const [fineTuneUnlocked, setFineTuneUnlocked] = useState(false);
   const [adminProofToolsOpen, setAdminProofToolsOpen] = useState(false);
+  const showAdminProofTools = import.meta.env.DEV;
   const [sizeMode, setSizeMode] = useState<'standard' | 'custom'>('standard');
   const [benchSizesExpanded, setBenchSizesExpanded] = useState(true);
   const [customWidthInput, setCustomWidthInput] = useState(String(state.width));
@@ -1994,19 +1995,21 @@ export const Controls: React.FC<Props> = ({
 
       {activeStep === 6 && (
         <section className="space-y-4">
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setAdminProofToolsOpen((open) => !open)}
-              className={`min-h-[34px] rounded-full border px-3 text-[11px] font-black uppercase tracking-wide transition ${
-                adminProofToolsOpen
-                  ? 'border-[#c6932e] bg-[#f2d688] text-[#1b231f]'
-                  : 'border-[rgba(238,244,238,0.16)] bg-[#14231f] text-[#aab8b0]'
-              }`}
-            >
-              {adminProofToolsOpen ? 'Hide admin tools' : 'Admin tools'}
-            </button>
-          </div>
+          {showAdminProofTools && (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setAdminProofToolsOpen((open) => !open)}
+                className={`min-h-[34px] rounded-full border px-3 text-[11px] font-black uppercase tracking-wide transition ${
+                  adminProofToolsOpen
+                    ? 'border-[#c6932e] bg-[#f2d688] text-[#1b231f]'
+                    : 'border-[rgba(238,244,238,0.16)] bg-[#14231f] text-[#aab8b0]'
+                }`}
+              >
+                {adminProofToolsOpen ? 'Hide admin tools' : 'Admin tools'}
+              </button>
+            </div>
+          )}
 
           {!isProductionReady && (
             <div className="rounded-lg border border-[#c6932e]/45 bg-[#221d12] p-4 text-sm leading-6 text-[#e8c875]">
@@ -2026,7 +2029,7 @@ export const Controls: React.FC<Props> = ({
             </div>
           )}
 
-          {adminProofToolsOpen && (
+          {showAdminProofTools && adminProofToolsOpen && (
           <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -2229,7 +2232,7 @@ export const Controls: React.FC<Props> = ({
               </div>
               <strong>{turnaroundEstimate.label}</strong>
             </div>
-            {adminProofToolsOpen && (
+            {showAdminProofTools && adminProofToolsOpen && (
               <div className="mt-4 rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#f6efe2] p-3">
                 <label className="block text-xs font-black uppercase tracking-wide text-[#6a746d]">
                   Realistic scene prompt
@@ -2303,17 +2306,17 @@ export const Controls: React.FC<Props> = ({
                   Download proof PDF
                 </button>
               </div>
-              {adminProofToolsOpen && (
+              {showAdminProofTools && adminProofToolsOpen && (
                 <button onClick={onSaveProof} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
                   Save proof locally
                 </button>
               )}
-              {adminProofToolsOpen && (
+              {showAdminProofTools && adminProofToolsOpen && (
                 <button onClick={onRealisticPreview} className="col-span-2 min-h-[52px] rounded-lg bg-[#b98235] px-4 text-sm font-black text-[#1b231f]">
                   Realistic preview
                 </button>
               )}
-              {adminProofToolsOpen && (
+              {showAdminProofTools && adminProofToolsOpen && (
                 <button onClick={onPrint} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
                   Print
                 </button>
@@ -2321,7 +2324,7 @@ export const Controls: React.FC<Props> = ({
             </div>
           </div>
 
-          {adminProofToolsOpen && (
+          {showAdminProofTools && adminProofToolsOpen && (
           <details className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <summary className="cursor-pointer text-sm font-black text-[#6a746d]">Production file for our workshop</summary>
             <p className="mt-2 text-xs leading-5 text-[#6a746d]">
@@ -2342,7 +2345,7 @@ export const Controls: React.FC<Props> = ({
             </div>
           )}
 
-          {adminProofToolsOpen && (
+          {showAdminProofTools && adminProofToolsOpen && (
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
               <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Size</div>
@@ -2363,13 +2366,13 @@ export const Controls: React.FC<Props> = ({
           </div>
           )}
 
-          {adminProofToolsOpen && state.aiReasoning && (
+          {showAdminProofTools && adminProofToolsOpen && state.aiReasoning && (
             <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4 text-sm italic leading-6 text-[#6a746d]">
               {state.aiReasoning}
             </div>
           )}
 
-          {adminProofToolsOpen && state.conceptImageUrl && (
+          {showAdminProofTools && adminProofToolsOpen && state.conceptImageUrl && (
             <div className="overflow-hidden rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-2">
               <img src={state.conceptImageUrl} alt="AI design concept" className="h-auto w-full rounded-lg object-contain" />
             </div>
