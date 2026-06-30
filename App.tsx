@@ -894,7 +894,7 @@ const App: React.FC = () => {
           status: order.status === 'needs-check' ? order.status : 'checkout-started',
           stripeSimulation: {
             provider: 'stripe',
-            mode: 'test',
+            mode: session.livemode ? 'live' : 'test',
             checkoutSessionId: session.id,
             paymentIntentId: session.paymentIntentId || '',
             receiptUrl: session.url,

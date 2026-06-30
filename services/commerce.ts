@@ -85,7 +85,7 @@ export interface MockOrder {
   priceBreakdown: PriceBreakdown;
   stripeSimulation: {
     provider: 'mock' | 'stripe';
-    mode: 'test';
+    mode: 'test' | 'live';
     checkoutSessionId: string;
     paymentIntentId: string;
     receiptUrl: string;

@@ -4,12 +4,18 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
 const stripePublishableKey = process.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
 
+const getStripeKeyMode = (key) => {
+  if (key.startsWith("sk_test_") || key.startsWith("pk_test_")) return "test";
+  if (key.startsWith("sk_live_") || key.startsWith("pk_live_")) return "live";
+  return "";
+};
+
 export const getStripeConfig = () => ({
   hasSecretKey: Boolean(stripeSecretKey),
-  secretKeyIsTest: stripeSecretKey.startsWith("sk_test_"),
+  secretKeyMode: getStripeKeyMode(stripeSecretKey),
   hasPublishableKey: Boolean(stripePublishableKey),
-  publishableKeyIsTest: stripePublishableKey.startsWith("pk_test_"),
-  publishableKey: stripePublishableKey.startsWith("pk_test_") ? stripePublishableKey : "",
+  publishableKeyMode: getStripeKeyMode(stripePublishableKey),
+  publishableKey: getStripeKeyMode(stripePublishableKey) ? stripePublishableKey : "",
   hasWebhookSecret: Boolean(stripeWebhookSecret),
   configured: Boolean(stripeSecretKey && stripePublishableKey),
 });
@@ -18,8 +24,20 @@ export const createStripeCheckoutSession = async (payload) => {
   if (!stripeSecretKey) {
     throw new Error("STRIPE_SECRET_KEY is not configured on the server.");
   }
-  if (!stripeSecretKey.startsWith("sk_test_")) {
-    throw new Error("Refusing to create checkout with a non-test Stripe secret key.");
+  if (!stripePublishableKey) {
+    throw new Error("VITE_STRIPE_PUBLISHABLE_KEY is not configured on the server.");
+  }
+
+  const secretKeyMode = getStripeKeyMode(stripeSecretKey);
+  const publishableKeyMode = getStripeKeyMode(stripePublishableKey);
+  if (!secretKeyMode) {
+    throw new Error("STRIPE_SECRET_KEY must be a Stripe test or live secret key.");
+  }
+  if (!publishableKeyMode) {
+    throw new Error("VITE_STRIPE_PUBLISHABLE_KEY must be a Stripe test or live publishable key.");
+  }
+  if (secretKeyMode !== publishableKeyMode) {
+    throw new Error("Stripe secret and publishable keys must both be test keys or both be live keys.");
   }
 
   const orderId = String(payload.orderId || "").trim();
@@ -65,7 +83,7 @@ export const createStripeCheckoutSession = async (payload) => {
   params.set("shipping_options[0][shipping_rate_data][delivery_estimate][maximum][unit]", "business_day");
   params.set("shipping_options[0][shipping_rate_data][delivery_estimate][maximum][value]", "5");
   params.set("metadata[order_id]", orderId);
-  params.set("metadata[source]", "instaplaque-local-test");
+  params.set("metadata[source]", "instaplaque");
   params.set("metadata[payload_version]", "2026-06-24");
 
   const controller = new AbortController();
@@ -106,6 +124,7 @@ export const createStripeCheckoutSession = async (payload) => {
     paymentStatus: data.payment_status,
     clientReferenceId: data.client_reference_id,
     paymentIntentId: data.payment_intent,
+    livemode: Boolean(data.livemode),
     raw: data,
   };
 };
