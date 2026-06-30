@@ -6,6 +6,18 @@
       "maxDuration": 30
     }
   },
+  "redirects": [
+    {
+      "source": "/etchmaster",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/etchmaster/(.*)",
+      "destination": "/",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",

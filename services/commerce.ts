@@ -25,8 +25,7 @@ export type SiteView =
   | 'privacy'
   | 'cookies'
   | 'returns'
-  | 'plaque'
-  | 'vector';
+  | 'plaque';
 
 export interface ProductFamily {
   slug: string;

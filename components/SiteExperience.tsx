@@ -603,7 +603,6 @@ const routePathForView = (view: SiteView) => {
     checkout: '/checkout',
     'order-confirmed': '/order-confirmed',
     plaque: '/design',
-    vector: '/etchmaster',
   };
   return paths[view] || '/';
 };

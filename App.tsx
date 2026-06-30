@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
+import React, { lazy, useState, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
 import PlaquePreview from './components/PlaquePreview';
 import { Controls } from './components/Controls';
@@ -12,11 +12,6 @@ import { estimatePlaquePrice } from './services/pricing';
 import { DeliveryAddress, MockOrder, ProductFamily, SiteView, getPlaqueSummaryTitle, getProductBySlug, makeMockOrder, productFamilies } from './services/commerce';
 import { isBenchPlaqueFormat } from './services/plaqueRules';
 import { BENCH_SAFE_MARGIN_PERCENT } from './services/safeMargin';
-
-const VectorSketch = lazy(async () => {
-  const module = await import('./components/VectorSketch');
-  return { default: module.VectorSketch };
-});
 
 const ThreePlaquePreview = lazy(async () => {
   const module = await import('./components/ThreePlaquePreview');
@@ -60,7 +55,6 @@ const routeViews: Partial<Record<string, SiteView>> = {
   '/returns': 'returns',
   '/returns-and-cancellations': 'returns',
   '/design': 'plaque',
-  '/etchmaster': 'vector',
 };
 
 const viewRoutes: Partial<Record<SiteView, string>> = {
@@ -78,7 +72,6 @@ const viewRoutes: Partial<Record<SiteView, string>> = {
   cookies: '/cookies',
   returns: '/returns-and-cancellations',
   plaque: '/design',
-  vector: '/etchmaster',
 };
 
 const getInitialView = (): SiteView => {
@@ -1092,7 +1085,7 @@ const App: React.FC = () => {
   const proofSpecTrail = getPlaqueSummaryTitle(state);
 
   return (
-    <div className={`studio-app-shell proofbench-app flex flex-col bg-transparent text-[#eef4ee] ${currentView !== 'plaque' && currentView !== 'vector' ? 'commerce-mode' : ''}`}>
+    <div className={`studio-app-shell proofbench-app flex flex-col bg-transparent text-[#eef4ee] ${currentView !== 'plaque' ? 'commerce-mode' : ''}`}>
       <Header
         onNavigate={handleNavigate}
         onStartDesign={handleStartDesign}
@@ -1126,9 +1119,9 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <main className={`min-h-0 w-full flex-1 ${currentView === 'plaque' || currentView === 'vector' ? 'overflow-hidden' : 'overflow-auto'}`}>
+      <main className={`min-h-0 w-full flex-1 ${currentView === 'plaque' ? 'overflow-hidden' : 'overflow-auto'}`}>
 
-        {currentView !== 'plaque' && currentView !== 'vector' ? (
+        {currentView !== 'plaque' ? (
           <SiteExperience
             view={currentView}
             selectedProduct={selectedProduct}
@@ -1142,12 +1135,6 @@ const App: React.FC = () => {
             onLaunchProduct={handleLaunchProduct}
             onCreateMockOrder={handleCreateMockOrder}
           />
-        ) : currentView === 'vector' ? (
-          <div className="h-full overflow-hidden p-3 md:p-4">
-            <Suspense fallback={<div className="studio-panel rounded-lg p-6 font-bold text-[#4c554f]">Loading artwork studio...</div>}>
-              <VectorSketch />
-            </Suspense>
-          </div>
         ) : (
           <div className="app-fade-in proofbench-board grid h-full min-h-0 w-full grid-rows-[minmax(0,46%)_minmax(0,54%)] gap-0 p-0 md:grid-cols-[82px_358px_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)] md:gap-0 md:px-8 md:pb-7 md:pt-4 xl:grid-cols-[88px_390px_minmax(0,1fr)]">
             <nav className="proofbench-rail no-print hidden min-h-0 flex-col items-center justify-center py-4 md:flex">

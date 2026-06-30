@@ -12,7 +12,7 @@ interface Props {
 const DELIVERY_HELP = 'UK mainland only. Highlands, islands and non-UK delivery may incur extra charges.';
 
 export const Header: React.FC<Props> = ({ onNavigate, onStartDesign, currentView, priceLabel, showPrice }) => {
-  const isDesigner = currentView === 'plaque' || currentView === 'vector';
+  const isDesigner = currentView === 'plaque';
   const isAdmin = currentView === 'admin';
   const showDesignCta = !isDesigner && currentView !== 'checkout' && !isAdmin;
   const showCheckoutCta = isDesigner && showPrice;
