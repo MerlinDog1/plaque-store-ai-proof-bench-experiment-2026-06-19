@@ -27,6 +27,7 @@
     "@types/d3-contour": "^3.0.6",
     "@types/d3-geo": "^3.1.0",
     "@types/qrcode": "^1.5.6",
+    "@vercel/analytics": "^2.0.1",
     "d3-contour": "^4.0.2",
     "d3-geo": "^3.1.1",
     "qrcode": "^1.5.4",
