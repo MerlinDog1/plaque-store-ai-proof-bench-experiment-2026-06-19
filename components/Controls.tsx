@@ -508,7 +508,8 @@ export const Controls: React.FC<Props> = ({
   const instantStyleApplyingRef = useRef(false);
   const [fineTuneUnlocked, setFineTuneUnlocked] = useState(false);
   const [adminProofToolsOpen, setAdminProofToolsOpen] = useState(false);
-  const showAdminProofTools = import.meta.env.DEV;
+  const showAdminProofTools = import.meta.env.DEV
+    || (typeof window !== 'undefined' && ['127.0.0.1', 'localhost'].includes(window.location.hostname));
   const [sizeMode, setSizeMode] = useState<'standard' | 'custom'>('standard');
   const [benchSizesExpanded, setBenchSizesExpanded] = useState(true);
   const [customWidthInput, setCustomWidthInput] = useState(String(state.width));
