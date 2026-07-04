@@ -16,6 +16,36 @@
       "source": "/etchmaster/(.*)",
       "destination": "/",
       "permanent": false
+    },
+    {
+      "source": "/house-plaques",
+      "destination": "/custom-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/brass-house-signs",
+      "destination": "/brass-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/stainless-steel-signs",
+      "destination": "/stainless-steel-plaques",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/admin",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
     }
   ],
   "rewrites": [

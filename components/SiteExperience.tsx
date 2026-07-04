@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PlaquePreview from './PlaquePreview';
-import { MockOrder, ProductFamily, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies } from '../services/commerce';
+import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies, seoLandingPages } from '../services/commerce';
 import { PlaqueState } from '../types';
 import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
 
@@ -17,6 +17,7 @@ const formatPrice = (value: number) => {
 interface SiteProps {
   view: SiteView;
   selectedProduct: ProductFamily;
+  selectedLanding: SeoLandingPage;
   state: PlaqueState;
   inscription: string;
   price: number;
@@ -80,11 +81,13 @@ type AdminAuthConfig = {
 declare global {
   interface Window {
     Stripe?: (publishableKey: string) => StripeBrowser | null;
+    gtag?: (...args: unknown[]) => void;
   }
 }
 
 const USE_CUSTOMER_COPY_PASS = true;
 const VISUAL_PROOF_RENDERER_VERSION = 2;
+const GOOGLE_ADS_PURCHASE_EVENT = 'ads_conversion_Purchase_1';
 
 const DownloadIcon = () => (
   <svg className="button-icon" aria-hidden="true" viewBox="0 0 20 20" focusable="false">
@@ -341,7 +344,7 @@ const downloadOrderProofPng = async (order: PaidOrder) => {
   if (!order.proofPackage?.visualProofPng) {
     throw new Error('Canonical approved proof image is not available.');
   }
-  const response = await fetch(`/api/orders/${encodeURIComponent(order.id)}/proof-image.png`);
+  const response = await fetch(orderProofImageUrl(order));
   if (!response.ok) throw new Error(`Could not download proof image (${response.status}).`);
   const blob = await response.blob();
   const url = URL.createObjectURL(blob);
@@ -395,8 +398,14 @@ class AdminDetailBoundary extends React.Component<AdminDetailBoundaryProps, Admi
 
 const asPdfFilename = (filename: string) => filename.replace(/\.[^.]+$/, '') + '.pdf';
 
-const orderProofImageUrl = (order: Pick<PaidOrder, 'id'>) =>
-  `/api/orders/${encodeURIComponent(order.id)}/proof-image.png`;
+const orderProofImageUrl = (order: Pick<PaidOrder, 'id' | 'stripeCheckoutSessionId'>) =>
+  `/api/orders/${encodeURIComponent(order.id)}/proof-image.png${order.stripeCheckoutSessionId ? `?session_id=${encodeURIComponent(order.stripeCheckoutSessionId)}` : ''}`;
+
+const versionedOrderProofImageUrl = (order: Pick<PaidOrder, 'id' | 'stripeCheckoutSessionId' | 'updatedAt'>) => {
+  const baseUrl = orderProofImageUrl(order);
+  const separator = baseUrl.includes('?') ? '&' : '?';
+  return `${baseUrl}${separator}v=${encodeURIComponent(order.updatedAt || order.id)}`;
+};
 
 type HomeCarouselItem = {
   id: string;
@@ -540,7 +549,7 @@ const homeFaqs: FaqItem[] = [
   },
   {
     question: 'How much does a custom plaque cost?',
-    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK mainland delivery. Bench plaques start from £69, A5 plaques from £129 and A4 plaques from £149. Custom sizes are available up to our maximum size and may need a longer turnaround.',
+    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK mainland delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.',
   },
   {
     question: 'Can I preview my plaque before ordering?',
@@ -664,15 +673,95 @@ const productListSchema = () => ({
           priceCurrency: 'GBP',
           price,
           availability: 'https://schema.org/InStock',
-          url: `${siteBaseUrl}/`,
+          url: `${siteBaseUrl}/${product.slug}`,
         } : undefined,
       },
     };
   }),
 });
 
-const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily): SeoMetaConfig => {
+const priceForProduct = (product: ProductFamily) =>
+  product.schemaStartingPrice?.toString() || product.startingFrom.match(/£(\d+(?:\.\d+)?)/)?.[1];
+
+const productSchema = (product: ProductFamily) => {
+  const price = priceForProduct(product);
+  return {
+    '@type': 'Product',
+    '@id': `${siteBaseUrl}/${product.slug}#product`,
+    name: product.title,
+    description: product.seoDescription || product.description,
+    image: product.image ? `${siteBaseUrl}${product.image}` : siteShareImage,
+    brand: {
+      '@type': 'Brand',
+      name: 'InstaPlaque',
+    },
+    category: 'Custom engraved plaques',
+    material: 'Brass or stainless steel',
+    offers: price ? {
+      '@type': 'Offer',
+      priceCurrency: 'GBP',
+      price,
+      availability: 'https://schema.org/InStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      url: `${siteBaseUrl}/${product.slug}`,
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'GB',
+        },
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: 0,
+          currency: 'GBP',
+        },
+      },
+    } : undefined,
+  };
+};
+
+const landingPageSchema = (page: SeoLandingPage) => ({
+  '@type': 'CollectionPage',
+  '@id': `${siteBaseUrl}/${page.slug}#collection`,
+  name: page.title,
+  description: page.seoDescription,
+  image: `${siteBaseUrl}${page.image}`,
+  about: page.relatedSearches,
+});
+
+const breadcrumbSchema = (items: Array<{ name: string; url: string }>) => ({
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: item.url,
+  })),
+});
+
+const homepageProductSlugs = ['bench-plaques', 'a5-plaques', 'a4-plaques', 'custom-plaques'];
+const homepageProducts = productFamilies.filter((product) => homepageProductSlugs.includes(product.slug));
+
+const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, selectedLanding: SeoLandingPage): SeoMetaConfig => {
   const routePath = routePathForView(view);
+  if (view === 'plaque') {
+    return {
+      title: 'Design a Custom Plaque Online | Free InstaPlaque Proof',
+      description: 'Use the InstaPlaque online plaque designer to create a free proof for a custom brass, stainless steel, bench or memorial plaque before checkout.',
+      path: routePath,
+      schema: [{
+        '@type': 'WebApplication',
+        name: 'InstaPlaque online plaque designer',
+        applicationCategory: 'DesignApplication',
+        operatingSystem: 'Web',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'GBP',
+        },
+      }],
+    };
+  }
   if (view === 'materials') {
     return {
       title: 'Plaque Materials UK | Brass, Stainless Steel & Wood Backing',
@@ -693,6 +782,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily): SeoMe
       schema: [{
         '@type': 'HowTo',
         name: 'How to order a custom plaque online',
+        description: 'Create, approve and order a custom plaque online with a free proof before checkout.',
         step: ['Choose plaque options', 'Add your wording', 'Review the free proof', 'Approve the design', 'Checkout securely'],
       }],
     };
@@ -712,26 +802,107 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily): SeoMe
       path: routePath,
     };
   }
+  if (view === 'contact') {
+    return {
+      title: 'Contact InstaPlaque | Custom Plaque Orders UK',
+      description: 'Contact InstaPlaque for custom plaque proofs, order questions, delivery support and bespoke brass or stainless steel plaque enquiries.',
+      path: routePath,
+      schema: [{
+        '@type': 'ContactPage',
+        name: 'Contact InstaPlaque',
+        description: 'Contact details for InstaPlaque custom plaque orders and support.',
+      }],
+    };
+  }
+  if (view === 'terms') {
+    return {
+      title: 'Terms and Conditions | InstaPlaque UK',
+      description: 'Read the InstaPlaque terms for custom plaque proofs, secure payment, UK delivery, production times and made-to-order plaque orders.',
+      path: routePath,
+      schema: [{
+        '@type': 'WebPage',
+        name: 'InstaPlaque terms and conditions',
+        description: 'Terms for ordering custom plaques from InstaPlaque.',
+      }],
+    };
+  }
+  if (view === 'privacy') {
+    return {
+      title: 'Privacy Policy | InstaPlaque UK',
+      description: 'How InstaPlaque uses customer, order, proof and delivery details to process UK custom plaque orders and provide support.',
+      path: routePath,
+      schema: [{
+        '@type': 'PrivacyPolicy',
+        name: 'InstaPlaque privacy policy',
+      }],
+    };
+  }
+  if (view === 'cookies') {
+    return {
+      title: 'Cookie Policy | InstaPlaque UK',
+      description: 'Cookie and essential storage information for the InstaPlaque online proof, checkout and admin systems.',
+      path: routePath,
+      schema: [{
+        '@type': 'WebPage',
+        name: 'InstaPlaque cookie policy',
+        description: 'Cookie and storage information for the InstaPlaque website.',
+      }],
+    };
+  }
+  if (view === 'returns') {
+    return {
+      title: 'Returns and Cancellations | Custom Plaques UK | InstaPlaque',
+      description: 'Returns, cancellation and faulty goods information for personalised InstaPlaque brass and stainless steel plaque orders.',
+      path: routePath,
+      schema: [{
+        '@type': 'WebPage',
+        name: 'InstaPlaque returns and cancellations',
+        description: 'Returns and cancellation policy for personalised custom plaques.',
+      }],
+    };
+  }
   if (view === 'product') {
     return {
-      title: `${selectedProduct.title} UK | Free Online Plaque Proof`,
-      description: `${selectedProduct.description} Create a free proof online before ordering.`,
-      path: '/',
-      schema: [faqSchema(selectedProduct.faqs)],
+      title: selectedProduct.seoTitle || `${selectedProduct.title} UK | Free Online Plaque Proof`,
+      description: selectedProduct.seoDescription || `${selectedProduct.description} Create a free proof online before ordering.`,
+      path: `/${selectedProduct.slug}`,
+      schema: [
+        productSchema(selectedProduct),
+        breadcrumbSchema([
+          { name: 'Home', url: siteBaseUrl },
+          { name: selectedProduct.title, url: `${siteBaseUrl}/${selectedProduct.slug}` },
+        ]),
+        faqSchema(selectedProduct.faqs),
+      ],
+    };
+  }
+  if (view === 'landing') {
+    return {
+      title: selectedLanding.seoTitle,
+      description: selectedLanding.seoDescription,
+      path: `/${selectedLanding.slug}`,
+      schema: [
+        landingPageSchema(selectedLanding),
+        breadcrumbSchema([
+          { name: 'Home', url: siteBaseUrl },
+          { name: selectedLanding.title, url: `${siteBaseUrl}/${selectedLanding.slug}` },
+        ]),
+        faqSchema(selectedLanding.faqs),
+      ],
     };
   }
   return {
-    title: 'Custom Memorial, Bench, Brass & Stainless Steel Plaques UK | InstaPlaque',
-    description: 'Create a free custom plaque proof online. UK-made memorial, bench, brass and stainless steel plaques with live pricing, secure checkout and UK mainland delivery included.',
+    title: 'Custom Plaques Made Simple | Brass, Stainless Steel & Bench Plaques UK',
+    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK mainland delivery before you order.',
     path: '/',
     schema: [productListSchema(), faqSchema(homeFaqs)],
   };
 };
 
-const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily) => {
+const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLanding: SeoLandingPage) => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    const config = seoConfigForView(view, selectedProduct);
+    const config = seoConfigForView(view, selectedProduct, selectedLanding);
     const url = `${siteBaseUrl}${config.path}`;
     document.title = config.title;
     setMetaContent('meta[name="description"]', config.description);
@@ -769,7 +940,7 @@ const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily) => {
       document.head.appendChild(schemaElement);
     }
     schemaElement.textContent = JSON.stringify(routeSchema);
-  }, [view, selectedProduct]);
+  }, [view, selectedProduct, selectedLanding]);
 };
 
 function ProductMockup({ product }: { product: ProductFamily }) {
@@ -802,8 +973,8 @@ function SiteHero({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
         </div>
         <p>
           {USE_CUSTOMER_COPY_PASS
-            ? 'Create a professional plaque proof in minutes from your wording. Skip the design back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'
-            : 'Our unique intelligent plaque design system turns your wording into a production-ready proof in minutes. Skip the design back-and-forth and receive your finished plaque in 5 working days, engraved with care using the finest materials.'}
+            ? 'Create your plaque proof before you pay. Choose the size, material, wording and fixings, then check the layout properly before it goes into production.'
+            : 'Create your plaque proof before you pay. Choose the size, material, wording and fixings, then check the layout properly before it goes into production.'}
         </p>
         <div className="commerce-actions">
           <button type="button" className="commerce-primary commerce-primary--cream" onClick={onStartDesign}>
@@ -816,19 +987,20 @@ function SiteHero({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
   );
 }
 
-function ProductGrid({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
+function ProductGrid({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
   return (
     <section className="commerce-section" id="products">
       <div className="commerce-section__head">
         <p className="commerce-eyebrow">Standard sizes</p>
         <h2>Choose the format, then start your free proof.</h2>
         <p>
-          Order UK bench plaques, memorial plaques, brass plaques and stainless steel plaques in standard sizes.
-          Custom sizes, oval plaques and circular plaques are available up to our maximum size, with turnaround confirmed before payment where needed.
+          InstaPlaque is for one-off engraved plaques where the wording matters: memorial plaques, bench dedications,
+          garden plaques, opening plaques, donor plaques and custom metal signs. Prices update as you build, with
+          engraving, standard fixings and UK mainland delivery included on standard orders.
         </p>
       </div>
       <div className="commerce-product-grid">
-        {productFamilies.map((product) => (
+        {homepageProducts.map((product) => (
           <article className="commerce-product-card" key={product.slug}>
             <ProductMockup product={product} />
             <div>
@@ -840,8 +1012,7 @@ function ProductGrid({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
               </div>
             </div>
             <div className="commerce-card-foot">
-              <span>{product.startingFrom}</span>
-              <button type="button" onClick={() => onLaunchProduct(product)}>Start proof</button>
+              <button type="button" onClick={onStartDesign}>Start proof</button>
             </div>
           </article>
         ))}
@@ -965,18 +1136,60 @@ function HomeMaterialPanels() {
   );
 }
 
-function HomeFaq() {
+const mergeFaqs = (...groups: FaqItem[][]) => {
+  const seen = new Set<string>();
+  return groups.flat().filter((faq) => {
+    const key = faq.question.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+function HomeFaq({ faqs = homeFaqs }: { faqs?: FaqItem[] }) {
   return (
     <section className="commerce-section commerce-home-faq">
       <div className="commerce-section__head">
         <h2>FAQ</h2>
       </div>
-      <ExpandableFaqList faqs={homeFaqs} />
+      <ExpandableFaqList faqs={faqs} />
     </section>
   );
 }
 
-function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLaunchProduct'>) {
+function SeoLandingLinks({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
+  return (
+    <section className="commerce-section commerce-product-seo">
+      <div className="commerce-section__head">
+        <p className="commerce-eyebrow">Popular plaque searches</p>
+        <h2>Find the right plaque for the job.</h2>
+        <p>
+          These guides cover common plaque uses and point you towards the right starting size, material and proof route.
+        </p>
+      </div>
+      <div className="commerce-seo-grid">
+        {seoLandingPages.map((page) => (
+          <article className="commerce-seo-card" key={page.slug}>
+            <h3>{page.title}</h3>
+            <p>{page.description}</p>
+            <a
+              className="commerce-text-link"
+              href={`/${page.slug}`}
+              onClick={(event) => {
+                event.preventDefault();
+                onNavigate('landing', page.slug);
+              }}
+            >
+              View {page.shortTitle.toLowerCase()} guide
+            </a>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const moveCarousel = (direction: number) => {
@@ -984,97 +1197,103 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
   };
 
   return (
+    <section className="commerce-section commerce-home-story">
+      <div
+        className="commerce-proof-carousel commerce-proof-carousel--coverflow"
+        aria-label="Swipe through InstaPlaque proof examples"
+        onTouchStart={(event) => setTouchStartX(event.touches[0]?.clientX ?? null)}
+        onTouchEnd={(event) => {
+          if (touchStartX === null) return;
+          const delta = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
+          if (Math.abs(delta) > 36) moveCarousel(delta < 0 ? 1 : -1);
+          setTouchStartX(null);
+        }}
+      >
+        <button type="button" className="commerce-carousel-arrow commerce-carousel-arrow--prev" onClick={() => moveCarousel(-1)} aria-label="Previous plaque example">‹</button>
+        <div className="commerce-proof-carousel__deck" aria-live="polite">
+          {homeCarouselItems.map((item, index) => {
+            let offset = index - activeCarouselIndex;
+            if (offset > homeCarouselItems.length / 2) offset -= homeCarouselItems.length;
+            if (offset < -homeCarouselItems.length / 2) offset += homeCarouselItems.length;
+            return (
+              <button
+                type="button"
+                key={item.id}
+                className="commerce-proof-carousel__slide"
+                data-offset={offset}
+                aria-label={item.label}
+                aria-pressed={index === activeCarouselIndex}
+                onClick={() => setActiveCarouselIndex(index)}
+                style={{ '--carousel-offset': offset } as React.CSSProperties}
+              >
+                <img src={item.image} alt="" loading={index === 0 ? 'eager' : 'lazy'} />
+              </button>
+            );
+          })}
+        </div>
+        <button type="button" className="commerce-carousel-arrow commerce-carousel-arrow--next" onClick={() => moveCarousel(1)} aria-label="Next plaque example">›</button>
+      </div>
+      <article className="commerce-proof-first-copy">
+        <p className="commerce-eyebrow">Why this is different</p>
+        <h2>Proof in minutes. Plaque in days.</h2>
+        <p>
+          {USE_CUSTOMER_COPY_PASS
+            ? 'Create a professional plaque proof from your wording, check the layout before payment, then receive a plaque engraved with care using the finest materials.'
+            : 'Create a production-style plaque proof from your wording, check the layout before payment, then receive a plaque engraved with care using the finest materials.'}
+        </p>
+        <p>
+          No guesswork and no hidden costs: engraving, standard fixings and UK mainland delivery are
+          included, with optional extras shown clearly before checkout.
+        </p>
+        <button type="button" className="commerce-primary" onClick={onStartDesign}>
+          Start your free proof
+        </button>
+        <small>Your InstaPlaque proof is 100% free. Need time to decide? Download the PDF proof and use the link inside to continue or checkout later. No account needed.</small>
+      </article>
+      <div className="commerce-proof-first-steps" aria-label={USE_CUSTOMER_COPY_PASS ? 'How your proof works' : 'How the proofing system works'}>
+        {[
+          ['Choose your plaque options', 'Pick the size, material, fixings and finish in plain steps.'],
+          ['Add the wording', USE_CUSTOMER_COPY_PASS ? 'Type the inscription once. We shape it into a clear plaque layout.' : 'Type the inscription once. The system handles the hard layout work.'],
+          ['Review the proof and price', 'See a realistic proof and live price before checkout.'],
+        ].map(([title, detail], index) => (
+          <div className="commerce-proof-first-step" key={title}>
+            <span>{index + 1}</span>
+            <div>
+              <strong>{title}</strong>
+              <p>{detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLaunchProduct'>) {
+  return (
     <div className="commerce-page">
       <SiteHero onStartDesign={props.onStartDesign} />
-      <section className="commerce-section commerce-home-story">
-        <div
-          className="commerce-proof-carousel commerce-proof-carousel--coverflow"
-          aria-label="Swipe through InstaPlaque proof examples"
-          onTouchStart={(event) => setTouchStartX(event.touches[0]?.clientX ?? null)}
-          onTouchEnd={(event) => {
-            if (touchStartX === null) return;
-            const delta = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
-            if (Math.abs(delta) > 36) moveCarousel(delta < 0 ? 1 : -1);
-            setTouchStartX(null);
-          }}
-        >
-          <button type="button" className="commerce-carousel-arrow commerce-carousel-arrow--prev" onClick={() => moveCarousel(-1)} aria-label="Previous plaque example">‹</button>
-          <div className="commerce-proof-carousel__deck" aria-live="polite">
-            {homeCarouselItems.map((item, index) => {
-              let offset = index - activeCarouselIndex;
-              if (offset > homeCarouselItems.length / 2) offset -= homeCarouselItems.length;
-              if (offset < -homeCarouselItems.length / 2) offset += homeCarouselItems.length;
-              return (
-                <button
-                  type="button"
-                  key={item.id}
-                  className="commerce-proof-carousel__slide"
-                  data-offset={offset}
-                  aria-label={item.label}
-                  aria-pressed={index === activeCarouselIndex}
-                  onClick={() => setActiveCarouselIndex(index)}
-                  style={{ '--carousel-offset': offset } as React.CSSProperties}
-                >
-                  <img src={item.image} alt="" loading={index === 0 ? 'eager' : 'lazy'} />
-                </button>
-              );
-            })}
-          </div>
-          <button type="button" className="commerce-carousel-arrow commerce-carousel-arrow--next" onClick={() => moveCarousel(1)} aria-label="Next plaque example">›</button>
-        </div>
-        <article className="commerce-proof-first-copy">
-          <p className="commerce-eyebrow">Why this is different</p>
-          <h2>Proof in minutes. Plaque in days.</h2>
-          <p>
-            {USE_CUSTOMER_COPY_PASS
-              ? 'Create a professional plaque proof from your wording, check the layout before payment, then receive a plaque engraved with care using the finest materials.'
-              : 'Create a production-style plaque proof from your wording, check the layout before payment, then receive a plaque engraved with care using the finest materials.'}
-          </p>
-          <p>
-            No guesswork and no hidden costs: engraving, standard fixings and UK mainland delivery are
-            included, with optional extras shown clearly before checkout.
-          </p>
-          <button type="button" className="commerce-primary" onClick={props.onStartDesign}>
-            Start your free proof
-          </button>
-          <small>Your InstaPlaque proof is 100% free. Need time to decide? Download the PDF proof and use the link inside to continue or checkout later. No account needed.</small>
-        </article>
-        <div className="commerce-proof-first-steps" aria-label={USE_CUSTOMER_COPY_PASS ? 'How your proof works' : 'How the proofing system works'}>
-          {[
-            ['Choose your plaque options', 'Pick the size, material, fixings and finish in plain steps.'],
-            ['Add the wording', USE_CUSTOMER_COPY_PASS ? 'Type the inscription once. We shape it into a clear plaque layout.' : 'Type the inscription once. The system handles the hard layout work.'],
-            ['Review the proof and price', 'See a realistic proof and live price before checkout.'],
-          ].map(([title, detail], index) => (
-            <div className="commerce-proof-first-step" key={title}>
-              <span>{index + 1}</span>
-              <div>
-                <strong>{title}</strong>
-                <p>{detail}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-      <ProductGrid onLaunchProduct={props.onLaunchProduct} />
+      <ProofStorySection onStartDesign={props.onStartDesign} />
+      <ProductGrid onStartDesign={props.onStartDesign} />
+      <SeoLandingLinks onNavigate={props.onNavigate} />
       <HomeMaterialPanels />
       <HomeFaq />
     </div>
   );
 }
 
-function ProductPage({ selectedProduct, onLaunchProduct }: Pick<SiteProps, 'selectedProduct' | 'onLaunchProduct'>) {
+function ProductPage({ selectedProduct, onStartDesign, onNavigate }: Pick<SiteProps, 'selectedProduct' | 'onStartDesign' | 'onNavigate'>) {
   return (
     <div className="commerce-page">
       <section className="commerce-product-detail">
         <div>
           <p className="commerce-eyebrow">{selectedProduct.eyebrow}</p>
           <h1>{selectedProduct.title}</h1>
-          <p className="commerce-lede">{selectedProduct.description}</p>
+          <p className="commerce-lede">{selectedProduct.seoIntro || selectedProduct.description}</p>
           <div className="commerce-actions">
-            <button type="button" className="commerce-primary" onClick={() => onLaunchProduct(selectedProduct)}>
-              Design this plaque
+            <button type="button" className="commerce-primary" onClick={onStartDesign}>
+              Start your proof
             </button>
-            <span className="commerce-price-note">{selectedProduct.startingFrom} · UK mainland delivery included</span>
           </div>
           <ul className="commerce-bullet-list">
             {selectedProduct.bestFor.map((item) => <li key={item}>{item}</li>)}
@@ -1082,13 +1301,134 @@ function ProductPage({ selectedProduct, onLaunchProduct }: Pick<SiteProps, 'sele
         </div>
         <ProductMockup product={selectedProduct} />
       </section>
-      <section className="commerce-section">
-        <div className="commerce-section__head">
-          <p className="commerce-eyebrow">Product questions</p>
-          <h2>{USE_CUSTOMER_COPY_PASS ? 'Fast answers before you start your proof.' : 'Fast answers before customers enter the proof bench.'}</h2>
+      {selectedProduct.seoSections?.length ? (
+        <section className="commerce-section commerce-product-seo">
+          <div className="commerce-section__head">
+            <p className="commerce-eyebrow">{selectedProduct.title} guide</p>
+            <h2>What to know before you order.</h2>
+          </div>
+          <div className="commerce-seo-grid">
+            {selectedProduct.seoSections.map((section) => (
+              <article className="commerce-seo-card" key={section.title}>
+                <h3>{section.title}</h3>
+                <p>{section.copy}</p>
+              </article>
+            ))}
+          </div>
+          {selectedProduct.relatedSearches?.length ? (
+            <div className="commerce-related-searches" aria-label="Related plaque searches">
+              {selectedProduct.relatedSearches.map((item) => <span key={item}>{item}</span>)}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+      <ProofStorySection onStartDesign={onStartDesign} />
+      <ProductGrid onStartDesign={onStartDesign} />
+      <SeoLandingLinks onNavigate={onNavigate} />
+      <HomeMaterialPanels />
+      <HomeFaq faqs={mergeFaqs(selectedProduct.faqs, homeFaqs)} />
+    </div>
+  );
+}
+
+function LandingPage({
+  selectedLanding,
+  onStartDesign,
+  onNavigate,
+}: Pick<SiteProps, 'selectedLanding' | 'onStartDesign' | 'onNavigate'>) {
+  const relatedProduct = productFamilies.find((product) => product.slug === selectedLanding.relatedProductSlug) ?? productFamilies[0];
+
+  return (
+    <div className="commerce-page">
+      <section className="commerce-product-detail">
+        <div>
+          <p className="commerce-eyebrow">{selectedLanding.eyebrow}</p>
+          <h1>{selectedLanding.title}</h1>
+          <p className="commerce-lede">{selectedLanding.heroCopy}</p>
+          <div className="commerce-actions">
+            <button type="button" className="commerce-primary" onClick={onStartDesign}>
+              {selectedLanding.proofCta}
+            </button>
+            <a
+              className="commerce-secondary"
+              href={`/${relatedProduct.slug}`}
+              onClick={(event) => {
+                event.preventDefault();
+                onNavigate('product', relatedProduct.slug);
+              }}
+            >
+              View {relatedProduct.title}
+            </a>
+          </div>
+          <div className="commerce-related-searches" aria-label="Related plaque searches">
+            {selectedLanding.relatedSearches.map((item) => <span key={item}>{item}</span>)}
+          </div>
         </div>
-        <ExpandableFaqList faqs={selectedProduct.faqs} />
+        <div className="commerce-product-visual commerce-product-visual--stainless" aria-hidden="true">
+          <picture>
+            {selectedLanding.mobileImage ? (
+              <source media="(max-width: 720px)" srcSet={selectedLanding.mobileImage} />
+            ) : null}
+            <img src={selectedLanding.image} alt="" loading="eager" />
+          </picture>
+        </div>
       </section>
+      <section className="commerce-section commerce-product-seo">
+        <div className="commerce-section__head">
+          <p className="commerce-eyebrow">{selectedLanding.title} guide</p>
+          <h2>What to know before you order.</h2>
+        </div>
+        <div className="commerce-seo-grid">
+          {selectedLanding.sections.map((section) => (
+            <article className="commerce-seo-card" key={section.title}>
+              <h3>{section.title}</h3>
+              <p>{section.copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+      {selectedLanding.examples?.length ? (
+        <section className="commerce-section commerce-example-section">
+          <div className="commerce-section__head">
+            <p className="commerce-eyebrow">Realistic proof examples</p>
+            <h2>Different finishes in real settings.</h2>
+            <p>
+              These images were made from actual app-generated plaque proofs using the realistic preview tool. Final production follows the wording and options approved in your own proof.
+            </p>
+          </div>
+          <div className="commerce-example-grid">
+            {selectedLanding.examples.map((example) => (
+              <article className="commerce-example-card" key={example.title}>
+                <img src={example.image} alt={example.alt} loading="eager" decoding="async" />
+                <div>
+                  <h3>{example.title}</h3>
+                  <p>{example.copy}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+      {selectedLanding.buyingGuide?.length ? (
+        <section className="commerce-section commerce-product-seo">
+          <div className="commerce-section__head">
+            <p className="commerce-eyebrow">Ordering guide</p>
+            <h2>Small plaque, careful decisions.</h2>
+          </div>
+          <div className="commerce-seo-grid">
+            {selectedLanding.buyingGuide.map((section) => (
+              <article className="commerce-seo-card" key={section.title}>
+                <h3>{section.title}</h3>
+                <p>{section.copy}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+      <ProofStorySection onStartDesign={onStartDesign} />
+      <ProductGrid onStartDesign={onStartDesign} />
+      <SeoLandingLinks onNavigate={onNavigate} />
+      <HomeFaq faqs={mergeFaqs(selectedLanding.faqs, homeFaqs)} />
     </div>
   );
 }
@@ -1158,8 +1498,7 @@ function FaqPage() {
   );
 }
 
-function QuotePage({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
-  const bespoke = productFamilies.find((product) => product.slug === 'custom-plaques') ?? productFamilies[0];
+function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
   return (
     <div className="commerce-page">
       <section className="commerce-product-detail">
@@ -1172,7 +1511,7 @@ function QuotePage({ onLaunchProduct }: Pick<SiteProps, 'onLaunchProduct'>) {
               : 'Customers should not hit a dead-end when a plaque is unusual. They can still create a proof, then the system flags custom sizes, ovals, circles or longer-turnaround work for manual confirmation.'}
           </p>
           <div className="commerce-actions">
-            <button type="button" className="commerce-primary" onClick={() => onLaunchProduct(bespoke)}>
+            <button type="button" className="commerce-primary" onClick={onStartDesign}>
               Start bespoke proof
             </button>
           </div>
@@ -1475,6 +1814,18 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
     };
   }, [order?.id, order?.proofPackage?.visualProofPng, order?.proofPackage?.visualProofRendererVersion]);
 
+  useEffect(() => {
+    if (!order || order.paymentStatus !== 'paid' || typeof window.gtag !== 'function') return;
+    const conversionKey = `google-ads-purchase-${order.id}`;
+    if (sessionStorage.getItem(conversionKey)) return;
+    window.gtag('event', GOOGLE_ADS_PURCHASE_EVENT, {
+      value: Math.max(0, (order.totalPence || 0) / 100),
+      currency: (order.currency || 'GBP').toUpperCase(),
+      transaction_id: order.id,
+    });
+    sessionStorage.setItem(conversionKey, 'sent');
+  }, [order?.id, order?.paymentStatus, order?.totalPence, order?.currency]);
+
   if (status === 'loading') {
     return (
       <div className="commerce-page">
@@ -1542,7 +1893,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
           <div className="commerce-order-proof">
             {order.proofPackage?.visualProofPng && proofReady ? (
               <img
-                src={`${orderProofImageUrl(order)}?v=${encodeURIComponent(order.updatedAt || order.id)}`}
+                src={versionedOrderProofImageUrl(order)}
                 alt="Approved plaque proof"
                 className="commerce-order-proof__image"
               />
@@ -1620,7 +1971,7 @@ function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [adminError, setAdminError] = useState<string | null>(null);
   const [authConfig, setAuthConfig] = useState<AdminAuthConfig | null>(null);
-  const [adminToken, setAdminToken] = useState(() => localStorage.getItem('instaplaque-admin-token') || '');
+  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<AdminStatusFilter>('active');
@@ -1632,7 +1983,6 @@ function AdminPage() {
   const canRenderSelectedProof = hasRenderablePlaqueState(selectedOrder?.plaqueState);
   const selectedStoredProofSvg = storedProofSvgForOrder(selectedOrder);
   const canDownloadSelectedProductionArtwork = Boolean(canRenderSelectedProof || selectedStoredProofSvg);
-  const adminHeaders = adminToken ? { 'x-admin-token': adminToken } : {};
 
   const downloadProductionArtwork = async (order: PaidOrder) => {
     if (hasRenderablePlaqueState(order.plaqueState)) {
@@ -1655,18 +2005,17 @@ function AdminPage() {
   };
 
   const loadOrders = async () => {
-    if (authConfig?.authRequired && !adminToken) {
+    if (authConfig?.authRequired && !adminAuthenticated) {
       setLoading(false);
       return;
     }
     setLoading(true);
     setAdminError(null);
     try {
-      const response = await fetch('/api/admin/orders', { headers: adminHeaders });
+      const response = await fetch('/api/admin/orders', { credentials: 'same-origin' });
       const payload = await response.json();
       if (response.status === 401) {
-        localStorage.removeItem('instaplaque-admin-token');
-        setAdminToken('');
+        setAdminAuthenticated(false);
         throw new Error('Admin access required.');
       }
       if (!response.ok) throw new Error(payload.error || `Could not load orders (${response.status}).`);
@@ -1689,6 +2038,12 @@ function AdminPage() {
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.error || 'Could not check admin access.');
         setAuthConfig({ authRequired: Boolean(payload.authRequired), label: payload.label });
+        if (payload.authRequired) {
+          const sessionResponse = await fetch('/api/admin/session', { credentials: 'same-origin' });
+          setAdminAuthenticated(sessionResponse.ok);
+        } else {
+          setAdminAuthenticated(true);
+        }
       } catch (error) {
         setAdminError(error instanceof Error ? error.message : 'Could not check admin access.');
         setLoading(false);
@@ -1700,7 +2055,7 @@ function AdminPage() {
   useEffect(() => {
     if (!authConfig) return;
     loadOrders();
-  }, [authConfig, adminToken]);
+  }, [authConfig, adminAuthenticated]);
 
   useEffect(() => {
     if (!selectedId) {
@@ -1711,7 +2066,7 @@ function AdminPage() {
     setSelectedOrderDetail(null);
     const loadSelectedOrder = async () => {
       try {
-        const response = await fetch(`/api/orders/${encodeURIComponent(selectedId)}`);
+        const response = await fetch(`/api/admin/orders/${encodeURIComponent(selectedId)}`, { credentials: 'same-origin' });
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.error || `Could not load order detail (${response.status}).`);
         if (!cancelled) setSelectedOrderDetail(payload.order);
@@ -1733,12 +2088,12 @@ function AdminPage() {
       const response = await fetch('/api/admin/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ password }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || 'Admin passcode was not accepted.');
-      localStorage.setItem('instaplaque-admin-token', payload.token);
-      setAdminToken(payload.token);
+      setAdminAuthenticated(true);
       setPassword('');
     } catch (error) {
       setAdminError(error instanceof Error ? error.message : 'Admin passcode was not accepted.');
@@ -1747,9 +2102,9 @@ function AdminPage() {
     }
   };
 
-  const logoutAdmin = () => {
-    localStorage.removeItem('instaplaque-admin-token');
-    setAdminToken('');
+  const logoutAdmin = async () => {
+    await fetch('/api/admin/session', { method: 'DELETE', credentials: 'same-origin' }).catch(() => null);
+    setAdminAuthenticated(false);
     setOrders([]);
     setSelectedId(null);
     setSelectedOrderDetail(null);
@@ -1758,7 +2113,8 @@ function AdminPage() {
   const updateOrder = async (orderId: string, payload: Record<string, string>) => {
     const response = await fetch(`/api/admin/orders/${encodeURIComponent(orderId)}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', ...adminHeaders },
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
     const data = await response.json();
@@ -1823,14 +2179,14 @@ function AdminPage() {
           </div>
           <div className="admin-console__head-actions">
             <span>{orders.length} orders</span>
-            {authConfig?.authRequired && adminToken && (
+            {authConfig?.authRequired && adminAuthenticated && (
               <button type="button" className="admin-console__ghost-button" onClick={logoutAdmin}>
                 Lock
               </button>
             )}
           </div>
         </div>
-        {authConfig?.authRequired && !adminToken && (
+        {authConfig?.authRequired && !adminAuthenticated && (
           <form className="admin-console__login" onSubmit={loginAdmin}>
             <label htmlFor="admin-passcode">{authConfig.label || 'Admin passcode'}</label>
             <div>
@@ -1850,7 +2206,7 @@ function AdminPage() {
         )}
         {adminError && <div className="commerce-warning">{adminError}</div>}
         {loading && <div className="commerce-success">Loading orders...</div>}
-        {authConfig?.authRequired && !adminToken ? null : (
+        {authConfig?.authRequired && !adminAuthenticated ? null : (
           <>
         <div className="admin-console__stats">
           <div><span>Sold today</span><strong>{todayOrders.length}</strong><small>{formatPence(counts.todayRevenue)}</small></div>
@@ -1923,7 +2279,7 @@ function AdminPage() {
                     <div className="admin-console__proof">
                       {selectedOrder.proofPackage?.visualProofPng ? (
                         <img
-                          src={`${orderProofImageUrl(selectedOrder)}?v=${encodeURIComponent(selectedOrder.updatedAt || selectedOrder.id)}`}
+                          src={versionedOrderProofImageUrl(selectedOrder)}
                           alt="Approved plaque proof"
                           className="admin-console__proof-image"
                         />
@@ -2048,7 +2404,7 @@ function AdminPage() {
               <div className="admin-console__proof">
                 {selectedOrder.proofPackage?.visualProofPng ? (
                   <img
-                    src={`${orderProofImageUrl(selectedOrder)}?v=${encodeURIComponent(selectedOrder.updatedAt || selectedOrder.id)}`}
+                    src={versionedOrderProofImageUrl(selectedOrder)}
                     alt="Approved plaque proof"
                     className="admin-console__proof-image"
                   />
@@ -2152,17 +2508,27 @@ function AdminPage() {
                 </button>
                 <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json', ...adminHeaders },
+                  credentials: 'same-origin',
+                  headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ template: 'customer-review-request' }),
                 }).then(loadOrders)}>
                   Send review follow-up
                 </button>
                 <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json', ...adminHeaders },
+                  credentials: 'same-origin',
+                  headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ template: 'customer-order-confirmation' }),
                 }).then(loadOrders)}>
                   Resend confirmation
+                </button>
+                <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
+                  method: 'POST',
+                  credentials: 'same-origin',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ template: 'customer-proof-copy' }),
+                }).then(loadOrders)}>
+                  Resend proof email
                 </button>
               </div>
               <div className="admin-console__timeline">
@@ -2260,7 +2626,7 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 }
 
 export function SiteExperience(props: SiteProps) {
-  useSeoMeta(props.view, props.selectedProduct);
+  useSeoMeta(props.view, props.selectedProduct, props.selectedLanding);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -2270,7 +2636,9 @@ export function SiteExperience(props: SiteProps) {
   let page: React.ReactNode;
 
   if (props.view === 'product') {
-    page = <ProductPage selectedProduct={props.selectedProduct} onLaunchProduct={props.onLaunchProduct} />;
+    page = <ProductPage selectedProduct={props.selectedProduct} onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />;
+  } else if (props.view === 'landing') {
+    page = <LandingPage selectedLanding={props.selectedLanding} onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />;
   } else if (props.view === 'materials') {
     page = <MaterialsPage />;
   } else if (props.view === 'how') {
@@ -2278,7 +2646,7 @@ export function SiteExperience(props: SiteProps) {
   } else if (props.view === 'faq') {
     page = <FaqPage />;
   } else if (props.view === 'quote') {
-    page = <QuotePage onLaunchProduct={props.onLaunchProduct} />;
+    page = <QuotePage onStartDesign={props.onStartDesign} />;
   } else if (props.view === 'checkout') {
     page = (
       <CheckoutPage

@@ -1,4 +1,4 @@
-import React, { lazy, useState, useRef, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
 import PlaquePreview from './components/PlaquePreview';
 import { Controls } from './components/Controls';
@@ -9,7 +9,7 @@ import { generatePlaqueDesign, generateRealisticView, refinePlaqueWording, Gener
 import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
-import { DeliveryAddress, MockOrder, ProductFamily, SiteView, getPlaqueSummaryTitle, getProductBySlug, makeMockOrder, productFamilies } from './services/commerce';
+import { DEFAULT_PRODUCT_SLUG, DeliveryAddress, MockOrder, ProductFamily, SiteView, getLandingPageBySlug, getPlaqueSummaryTitle, getProductBySlug, makeMockOrder, productFamilies, seoLandingPages } from './services/commerce';
 import { isBenchPlaqueFormat } from './services/plaqueRules';
 import { BENCH_SAFE_MARGIN_PERCENT } from './services/safeMargin';
 
@@ -74,9 +74,34 @@ const viewRoutes: Partial<Record<SiteView, string>> = {
   plaque: '/design',
 };
 
+const productRouteSlugs = new Set(productFamilies.map((product) => product.slug));
+const landingRouteSlugs = new Set(seoLandingPages.map((page) => page.slug));
+
+const getProductSlugFromPath = (pathname: string) => {
+  const slug = pathname.replace(/^\/+|\/+$/g, '');
+  return productRouteSlugs.has(slug) ? slug : null;
+};
+
+const getLandingSlugFromPath = (pathname: string) => {
+  const slug = pathname.replace(/^\/+|\/+$/g, '');
+  return landingRouteSlugs.has(slug) ? slug : null;
+};
+
 const getInitialView = (): SiteView => {
   if (typeof window === 'undefined') return 'home';
+  if (getProductSlugFromPath(window.location.pathname)) return 'product';
+  if (getLandingSlugFromPath(window.location.pathname)) return 'landing';
   return routeViews[window.location.pathname] ?? 'home';
+};
+
+const getInitialProductSlug = () => {
+  if (typeof window === 'undefined') return DEFAULT_PRODUCT_SLUG;
+  return getProductSlugFromPath(window.location.pathname) ?? DEFAULT_PRODUCT_SLUG;
+};
+
+const getInitialLandingSlug = () => {
+  if (typeof window === 'undefined') return seoLandingPages[0]?.slug || '';
+  return getLandingSlugFromPath(window.location.pathname) ?? seoLandingPages[0]?.slug ?? '';
 };
 
 const readFileAsDataUrl = (file: File): Promise<string> => new Promise((resolve, reject) => {
@@ -164,10 +189,11 @@ const App: React.FC = () => {
   const [hasAccess, setHasAccess] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [currentView, setCurrentView] = useState<SiteView>(getInitialView);
-  const [selectedProductSlug, setSelectedProductSlug] = useState(productFamilies[0].slug);
+  const [selectedProductSlug, setSelectedProductSlug] = useState(getInitialProductSlug);
+  const [selectedLandingSlug, setSelectedLandingSlug] = useState(getInitialLandingSlug);
   const [mockOrders, setMockOrders] = useState<MockOrder[]>([]);
   const [activeStep, setActiveStep] = useState(0);
-  const [hasSelectedSize, setHasSelectedSize] = useState(true);
+  const [hasSelectedSize, setHasSelectedSize] = useState(false);
 
   const [state, setState] = useState<PlaqueState>(PROOF_BENCH_INITIAL_STATE);
   const [inscriptionPrompt, setInscriptionPrompt] = useState('');
@@ -192,6 +218,7 @@ const App: React.FC = () => {
 
   const svgRef = useRef<SVGSVGElement>(null);
   const selectedProduct = getProductBySlug(selectedProductSlug);
+  const selectedLanding = getLandingPageBySlug(selectedLandingSlug);
 
   // --- Auth & Startup Logic ---
   useEffect(() => {
@@ -250,6 +277,18 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handlePopState = () => {
+      const productSlug = getProductSlugFromPath(window.location.pathname);
+      if (productSlug) {
+        setSelectedProductSlug(productSlug);
+        setCurrentView('product');
+        return;
+      }
+      const landingSlug = getLandingSlugFromPath(window.location.pathname);
+      if (landingSlug) {
+        setSelectedLandingSlug(landingSlug);
+        setCurrentView('landing');
+        return;
+      }
       setCurrentView(routeViews[window.location.pathname] ?? 'home');
     };
     window.addEventListener('popstate', handlePopState);
@@ -861,11 +900,14 @@ const App: React.FC = () => {
   };
 
   const handleNavigate = (view: SiteView, productSlug?: string) => {
-    if (productSlug) {
+    if (view === 'product' && productSlug) {
       setSelectedProductSlug(productSlug);
     }
+    if (view === 'landing' && productSlug) {
+      setSelectedLandingSlug(productSlug);
+    }
     setCurrentView(view);
-    const route = viewRoutes[view];
+    const route = (view === 'product' || view === 'landing') && productSlug ? `/${productSlug}` : viewRoutes[view];
     if (route && window.location.pathname !== route) {
       window.history.pushState({}, '', route);
     }
@@ -883,7 +925,7 @@ const App: React.FC = () => {
     setMemorialStatus(null);
     setProofSaved(false);
     setBasketAdded(false);
-    setHasSelectedSize(true);
+    setHasSelectedSize(false);
     setActiveStep(0);
     setCurrentView('plaque');
     if (window.location.pathname !== '/design') {
@@ -1081,7 +1123,7 @@ const App: React.FC = () => {
     });
   })();
   const showProofPrice = currentView === 'plaque';
-  const showHeaderPrice = currentView === 'plaque' || currentView === 'product' || currentView === 'checkout';
+  const showHeaderPrice = currentView === 'plaque';
   const proofSpecTrail = getPlaqueSummaryTitle(state);
 
   return (
@@ -1125,6 +1167,7 @@ const App: React.FC = () => {
           <SiteExperience
             view={currentView}
             selectedProduct={selectedProduct}
+            selectedLanding={selectedLanding}
             state={state}
             inscription={inscriptionPrompt}
             price={price}
@@ -1195,6 +1238,7 @@ const App: React.FC = () => {
                   isGeneratingMemorialImage={isGeneratingMemorial}
                   memorialStatus={memorialStatus}
                   activeStep={activeStep}
+                  hasSelectedSize={hasSelectedSize}
                   onSizeSelected={() => setHasSelectedSize(true)}
                   showMaterialPrices={showMaterialPrices}
                   price={price}

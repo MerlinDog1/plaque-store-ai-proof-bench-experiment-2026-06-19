@@ -125,7 +125,6 @@ const BENCH_SIZE_PRESETS: SizePreset[] = [
   { label: '150 x 75 mm', note: 'Compact deeper bench plaque', shape: Shape.Rect, width: 150, height: 75 },
   { label: '150 x 65 mm', note: 'Compact balanced bench plaque', shape: Shape.Rect, width: 150, height: 65 },
   { label: '200 x 50 mm', note: 'Long narrow bench strip', shape: Shape.Rect, width: 200, height: 50 },
-  { label: '125 x 50 mm', note: 'Small bench or seat strip', shape: Shape.Rect, width: 125, height: 50 },
 ];
 
 const MIN_CUSTOM_DIMENSION_MM = 50;
@@ -241,6 +240,7 @@ interface Props {
   isGeneratingMemorialImage: boolean;
   memorialStatus: string | null;
   activeStep: number;
+  hasSelectedSize: boolean;
   onSizeSelected: () => void;
   showMaterialPrices: boolean;
   price: number;
@@ -297,6 +297,12 @@ interface GeneratedTextControl {
 const fieldClass =
   'control-input w-full min-h-[48px] rounded-lg border px-4 py-3 text-base text-[#1b231f] placeholder:text-[#9b9284] outline-none transition focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20 disabled:bg-[#eee4d4] disabled:text-[#8a8275]';
 
+const stepperButtonClass =
+  'studio-press flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-lg border border-[rgba(84,72,52,0.16)] bg-[#fffaf0] text-xl font-black text-[#1b231f] transition active:scale-[0.96] disabled:opacity-45';
+
+const darkStepperButtonClass =
+  'studio-press flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-lg border border-[#edf3ef]/18 bg-[#edf3ef]/8 text-lg font-black text-[#edf3ef] transition active:scale-[0.96] disabled:opacity-45';
+
 const choiceClass = (active: boolean) =>
   `control-choice studio-press min-h-[54px] rounded-lg border px-4 py-3 text-left text-sm font-black transition active:scale-[0.98] ${
     active
@@ -308,6 +314,55 @@ const pillClass = (active: boolean) =>
   `control-pill studio-press min-h-[44px] rounded-lg border px-4 py-2 text-center text-sm font-black transition active:scale-[0.98] ${
     active ? 'is-active border-[#c6932e] bg-[#f2d688] text-[#1b231f]' : 'border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] text-[#2f3832] hover:border-[#c6932e]/70 hover:bg-[#efe4d1]'
   }`;
+
+function NumberStepper({
+  value,
+  min,
+  max,
+  step,
+  label,
+  onStep,
+  tone = 'light',
+}: {
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  label: string;
+  onStep: (nextValue: number) => void;
+  tone?: 'light' | 'dark';
+}) {
+  const buttonClass = tone === 'dark' ? darkStepperButtonClass : stepperButtonClass;
+  const clamp = (nextValue: number) => Math.min(max, Math.max(min, nextValue));
+  const decimals = String(step).includes('.') ? String(step).split('.')[1].length : 0;
+  const changeBy = (delta: number) => {
+    const nextValue = Number((value + delta).toFixed(decimals));
+    onStep(clamp(nextValue));
+  };
+
+  return (
+    <div className="flex items-center gap-2" aria-label={label}>
+      <button
+        type="button"
+        className={buttonClass}
+        onClick={() => changeBy(-step)}
+        disabled={value <= min}
+        aria-label={`Decrease ${label}`}
+      >
+        -
+      </button>
+      <button
+        type="button"
+        className={buttonClass}
+        onClick={() => changeBy(step)}
+        disabled={value >= max}
+        aria-label={`Increase ${label}`}
+      >
+        +
+      </button>
+    </div>
+  );
+}
 
 const StepIntro = ({ step }: { step: number }) => (
   <div className="step-intro mb-4">
@@ -427,6 +482,7 @@ export const Controls: React.FC<Props> = ({
   isGeneratingMemorialImage,
   memorialStatus,
   activeStep,
+  hasSelectedSize,
   onSizeSelected,
   showMaterialPrices,
   price,
@@ -541,9 +597,9 @@ export const Controls: React.FC<Props> = ({
   const clampDimension = (value: number) => Math.min(MAX_CUSTOM_DIMENSION_MM, Math.max(MIN_CUSTOM_DIMENSION_MM, Number.isFinite(value) ? value : MIN_CUSTOM_DIMENSION_MM));
   const isHeartPlaque = state.shape === Shape.Heart;
   const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
-  const activeBenchSize = BENCH_SIZE_PRESETS.find((preset) => (
+  const activeBenchSize = hasSelectedSize ? BENCH_SIZE_PRESETS.find((preset) => (
     state.shape === preset.shape && state.width === preset.width && state.height === preset.height
-  ));
+  )) : undefined;
   const visibleBorderStyleOptions = useMemo(() => (
     isBenchPlaque
       ? BORDER_STYLE_OPTIONS.filter((option) => option.value !== BorderStyle.Scalloped && option.value !== BorderStyle.DoubleScalloped)
@@ -693,6 +749,13 @@ export const Controls: React.FC<Props> = ({
       event.currentTarget.blur();
       commitDimensionDraft(key);
     }
+  };
+
+  const setDimensionFromStepper = (key: 'width' | 'height', value: number) => {
+    const nextValue = clampDimension(value);
+    if (key === 'width') setCustomWidthInput(String(nextValue));
+    if (key === 'height') setCustomHeightInput(String(nextValue));
+    update(key, nextValue);
   };
 
   const applySizePreset = (preset: SizePreset) => {
@@ -880,7 +943,7 @@ export const Controls: React.FC<Props> = ({
   };
 
   const renderSizePresetButton = (preset: SizePreset, extraClassName = '') => {
-    const active = state.shape === preset.shape && state.width === preset.width && state.height === preset.height;
+    const active = hasSelectedSize && state.shape === preset.shape && state.width === preset.width && state.height === preset.height;
     return (
       <button
         key={`${preset.label}-${preset.width}-${preset.height}`}
@@ -1057,18 +1120,26 @@ export const Controls: React.FC<Props> = ({
                       }}
                       className="w-full accent-[#b98235]"
                     />
-                    <input
-                      type="number"
-                      min={MIN_CUSTOM_DIMENSION_MM}
-                      max={MAX_CUSTOM_DIMENSION_MM}
-                      step="1"
-                      value={customWidthInput}
-                      inputMode="numeric"
-                      onChange={(e) => handleDimensionDraft('width', e.target.value)}
-                      onBlur={() => commitDimensionDraft('width')}
-                      onKeyDown={(e) => commitDimensionOnEnter(e, 'width')}
-                      className={`${fieldClass} mt-2`}
-                    />
+                    <div className="mt-2 grid grid-cols-[1fr_auto] items-center gap-2">
+                      <input
+                        type="text"
+                        value={customWidthInput}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        onChange={(e) => handleDimensionDraft('width', e.target.value)}
+                        onBlur={() => commitDimensionDraft('width')}
+                        onKeyDown={(e) => commitDimensionOnEnter(e, 'width')}
+                        className={fieldClass}
+                      />
+                      <NumberStepper
+                        value={state.width}
+                        min={MIN_CUSTOM_DIMENSION_MM}
+                        max={MAX_CUSTOM_DIMENSION_MM}
+                        step={1}
+                        label={state.shape === Shape.Circle ? 'diameter' : 'width'}
+                        onStep={(nextValue) => setDimensionFromStepper('width', nextValue)}
+                      />
+                    </div>
                   </label>
 
                   {state.shape !== Shape.Circle && (
@@ -1089,18 +1160,26 @@ export const Controls: React.FC<Props> = ({
                         }}
                         className="w-full accent-[#b98235]"
                       />
-                      <input
-                        type="number"
-                        min={MIN_CUSTOM_DIMENSION_MM}
-                        max={MAX_CUSTOM_DIMENSION_MM}
-                        step="1"
-                        value={customHeightInput}
-                        inputMode="numeric"
-                        onChange={(e) => handleDimensionDraft('height', e.target.value)}
-                        onBlur={() => commitDimensionDraft('height')}
-                        onKeyDown={(e) => commitDimensionOnEnter(e, 'height')}
-                        className={`${fieldClass} mt-2`}
-                      />
+                      <div className="mt-2 grid grid-cols-[1fr_auto] items-center gap-2">
+                        <input
+                          type="text"
+                          value={customHeightInput}
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          onChange={(e) => handleDimensionDraft('height', e.target.value)}
+                          onBlur={() => commitDimensionDraft('height')}
+                          onKeyDown={(e) => commitDimensionOnEnter(e, 'height')}
+                          className={fieldClass}
+                        />
+                        <NumberStepper
+                          value={state.height}
+                          min={MIN_CUSTOM_DIMENSION_MM}
+                          max={MAX_CUSTOM_DIMENSION_MM}
+                          step={1}
+                          label="height"
+                          onStep={(nextValue) => setDimensionFromStepper('height', nextValue)}
+                        />
+                      </div>
                     </label>
                   )}
                 </div>
@@ -1938,11 +2017,11 @@ export const Controls: React.FC<Props> = ({
                 <div className="mt-3 space-y-3">
                   {generatedTextControls.length ? generatedTextControls.map((line) => (
                     <div key={line.index} className="rounded-lg border border-[#edf3ef]/14 bg-[#edf3ef]/6 p-3">
-                      <div className="flex items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
                         <label className="text-xs font-black text-[#edf3ef]" htmlFor={`generated-text-line-${line.index}`}>
                           Line {line.index + 1}
                         </label>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
                             onClick={() => updateGeneratedTextLine(line.index, { fontWeight: line.fontWeight === '700' || line.fontWeight === 'bold' ? '400' : '700' })}
@@ -1957,17 +2036,29 @@ export const Controls: React.FC<Props> = ({
                           >
                             B
                           </button>
-                          <label className="flex min-w-[118px] items-center gap-2 text-xs font-black text-[#aab8b0]">
+                          <label className="flex min-w-[176px] items-center gap-2 text-xs font-black text-[#aab8b0]">
                             <span>Size</span>
                             <input
-                              type="number"
-                              min="4"
-                              max="120"
-                              step="0.5"
-                              value={line.fontSize}
-                              onChange={(event) => updateGeneratedTextLine(line.index, { fontSize: Number(event.target.value) })}
-                              className="h-[38px] w-[74px] rounded-lg border border-[#edf3ef]/18 bg-[#0f1817] px-2 text-sm font-black text-[#edf3ef] outline-none transition focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20"
+                              type="text"
+                              inputMode="decimal"
+                              value={Number.isInteger(line.fontSize) ? String(line.fontSize) : line.fontSize.toFixed(1)}
+                              onChange={(event) => {
+                                const nextValue = Number(event.target.value);
+                                if (Number.isFinite(nextValue)) {
+                                  updateGeneratedTextLine(line.index, { fontSize: nextValue });
+                                }
+                              }}
+                              className="h-[38px] w-[58px] rounded-lg border border-[#edf3ef]/18 bg-[#0f1817] px-2 text-sm font-black text-[#edf3ef] outline-none transition focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20"
                               aria-label={`Font size for ${line.label}`}
+                            />
+                            <NumberStepper
+                              value={line.fontSize}
+                              min={4}
+                              max={120}
+                              step={0.5}
+                              label={`font size for ${line.label}`}
+                              onStep={(nextValue) => updateGeneratedTextLine(line.index, { fontSize: nextValue })}
+                              tone="dark"
                             />
                           </label>
                         </div>

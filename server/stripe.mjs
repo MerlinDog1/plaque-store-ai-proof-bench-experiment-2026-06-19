@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
 const stripePublishableKey = process.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+const canonicalSiteUrl = "https://instaplaque.co.uk";
 
 const getStripeKeyMode = (key) => {
   if (key.startsWith("sk_test_") || key.startsWith("pk_test_")) return "test";
@@ -44,7 +45,10 @@ export const createStripeCheckoutSession = async (payload) => {
   const productTitle = String(payload.productTitle || "InstaPlaque custom plaque").trim();
   const customerEmail = String(payload.customerEmail || "").trim();
   const totalPence = Math.round(Number(payload.totalPence || 0));
-  const origin = String(payload.origin || "").replace(/\/$/, "");
+  const requestedOrigin = String(payload.origin || "").replace(/\/$/, "");
+  const origin = String(process.env.PUBLIC_SITE_URL || requestedOrigin || "")
+    .replace(/\/$/, "")
+    .replace(/https:\/\/instaplaque(?:-[^.]+)?\.vercel\.app$/i, canonicalSiteUrl);
   const uiMode = payload.uiMode === "embedded" ? "embedded" : "hosted";
 
   if (!orderId) throw new Error("Missing order ID for Stripe checkout.");

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm exec -- vite build && node scripts/prerender-product-pages.mjs",
     "check:bold-toggle": "node scripts/check-bold-toggle.cjs",
     "check:fixings-border-ui": "node scripts/check-fixings-border-ui.cjs",
     "check:curved-scallop-border": "node scripts/check-curved-scallop-border.cjs",

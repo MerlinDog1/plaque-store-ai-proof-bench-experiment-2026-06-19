@@ -4,6 +4,17 @@ const adminEmail = process.env.ADMIN_ORDER_EMAIL || process.env.ORDER_ADMIN_EMAI
 const fixedProductionEmail = "etsysign2600@gmail.com";
 const USE_CUSTOMER_COPY_PASS = true;
 const reviewUrl = process.env.REVIEW_URL || process.env.PUBLIC_REVIEW_URL || "";
+const canonicalSiteUrl = "https://instaplaque.co.uk";
+
+const publicSiteRoot = (order = {}) => {
+  const configured = process.env.PUBLIC_SITE_URL || "";
+  const captured = order.metadata?.publicOrigin || "";
+  const base = configured || captured || canonicalSiteUrl;
+  return String(base).replace(/\/$/, "").replace(/https:\/\/instaplaque(?:-[^.]+)?\.vercel\.app$/i, canonicalSiteUrl);
+};
+
+const orderSessionQuery = (order) =>
+  order.stripeCheckoutSessionId ? `&session_id=${encodeURIComponent(order.stripeCheckoutSessionId)}` : "";
 
 export const getEmailConfig = () => ({
   configured: Boolean(resendApiKey),
@@ -21,15 +32,16 @@ const money = (pence, currency = "gbp") =>
   }).format(Number(pence || 0) / 100);
 
 const orderUrl = (order) => {
-  const base = process.env.PUBLIC_SITE_URL || order.metadata?.publicOrigin || "";
-  return base ? `${base.replace(/\/$/, "")}/order-confirmed?order=${encodeURIComponent(order.id)}` : "";
+  const base = publicSiteRoot(order);
+  return `${base}/order-confirmed?order=${encodeURIComponent(order.id)}${orderSessionQuery(order)}`;
 };
 
 const proofImageUrl = (order) => {
-  const base = process.env.PUBLIC_SITE_URL || order.metadata?.publicOrigin || "";
-  if (!base) return "";
-  const root = base.replace(/\/$/, "");
-  if (order.proofPackage?.visualProofPng) return `${root}/api/orders/${encodeURIComponent(order.id)}/proof-image.png`;
+  const root = publicSiteRoot(order);
+  if (order.proofPackage?.visualProofPng) {
+    const query = order.stripeCheckoutSessionId ? `?session_id=${encodeURIComponent(order.stripeCheckoutSessionId)}` : "";
+    return `${root}/api/orders/${encodeURIComponent(order.id)}/proof-image.png${query}`;
+  }
   return "";
 };
 

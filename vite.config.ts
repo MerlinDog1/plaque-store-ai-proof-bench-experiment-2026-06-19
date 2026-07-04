@@ -8,6 +8,9 @@ export default defineConfig(() => {
         port: 3000,
         host: '0.0.0.0',
         allowedHosts: ['.trycloudflare.com'],
+        proxy: {
+          '/api': 'http://127.0.0.1:4179',
+        },
       },
       plugins: [react()],
       resolve: {

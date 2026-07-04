@@ -61,6 +61,7 @@ const {
 const {
   createAdminSession,
   getAdminAuthConfig,
+  getAdminSessionCookieName,
   isAdminRequest,
 } = await import("./server/adminAuth.mjs");
 
@@ -209,6 +210,56 @@ const sendJson = (res, status, payload) => {
   res.end(JSON.stringify(payload));
 };
 
+const sendJsonWithHeaders = (res, status, payload, headers = {}) => {
+  res.writeHead(status, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store",
+    ...headers,
+  });
+  res.end(JSON.stringify(payload));
+};
+
+const adminLoginAttempts = new Map();
+const adminLoginWindowMs = 15 * 60 * 1000;
+const maxAdminLoginAttempts = 8;
+
+const clientIp = (req) =>
+  String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "unknown").split(",")[0].trim();
+
+const checkAdminLoginRateLimit = (req) => {
+  const key = clientIp(req);
+  const now = Date.now();
+  const current = adminLoginAttempts.get(key);
+  if (!current || current.resetAt <= now) {
+    adminLoginAttempts.set(key, { count: 1, resetAt: now + adminLoginWindowMs });
+    return { ok: true };
+  }
+  if (current.count >= maxAdminLoginAttempts) {
+    return { ok: false, retryAfter: Math.ceil((current.resetAt - now) / 1000) };
+  }
+  current.count += 1;
+  return { ok: true };
+};
+
+const clearAdminLoginRateLimit = (req) => {
+  adminLoginAttempts.delete(clientIp(req));
+};
+
+const isLocalHost = (hostValue = "") => /^(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i.test(String(hostValue));
+
+const adminSessionCookie = (req, token, expiresAt) => {
+  const secure = isLocalHost(req.headers.host) ? "" : "; Secure";
+  return `${getAdminSessionCookieName()}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict${secure}; Expires=${new Date(expiresAt).toUTCString()}`;
+};
+
+const clearAdminSessionCookie = (req) => {
+  const secure = isLocalHost(req.headers.host) ? "" : "; Secure";
+  return `${getAdminSessionCookieName()}=; Path=/; HttpOnly; SameSite=Strict${secure}; Max-Age=0`;
+};
+
+const orderSessionMatches = (order, sessionId) =>
+  Boolean(order?.stripeCheckoutSessionId && sessionId && order.stripeCheckoutSessionId === sessionId);
+
 const stripHeavyProofPayload = (order) => {
   if (!order?.proofPackage?.visualProofPng) return order;
   return {
@@ -261,9 +312,11 @@ const serveStatic = (req, res) => {
   }
 
   const ext = path.extname(filePath).toLowerCase();
+  const isAdminPage = url.pathname === "/admin";
   res.writeHead(200, {
     "Content-Type": mimeTypes[ext] || "application/octet-stream",
-    "Cache-Control": ext === ".html" ? "no-cache" : "public, max-age=31536000, immutable",
+    "Cache-Control": ext === ".html" ? (isAdminPage ? "no-store" : "no-cache") : "public, max-age=31536000, immutable",
+    ...(isAdminPage ? { "X-Robots-Tag": "noindex, nofollow" } : {}),
   });
   fs.createReadStream(filePath).pipe(res);
 };
@@ -296,6 +349,11 @@ export const handleRequest = async (req, res) => {
     try {
       const orderId = decodeURIComponent(url.pathname.match(/^\/api\/orders\/([^/]+)\/proof-image\.png$/)?.[1] || "");
       const order = await getOrderById(orderId);
+      if (!isAdminRequest(req) && !orderSessionMatches(order, url.searchParams.get("session_id"))) {
+        res.writeHead(401, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+        res.end("Order access required");
+        return;
+      }
       const image = String(order?.proofPackage?.visualProofPng || "").replace(/^data:image\/png;base64,/, "");
       if (!order || !image) {
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
@@ -319,6 +377,11 @@ export const handleRequest = async (req, res) => {
     try {
       const orderId = decodeURIComponent(url.pathname.match(/^\/api\/orders\/([^/]+)\/proof-image\.svg$/)?.[1] || "");
       const order = await getOrderById(orderId);
+      if (!isAdminRequest(req) && !orderSessionMatches(order, url.searchParams.get("session_id"))) {
+        res.writeHead(401, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+        res.end("Order access required");
+        return;
+      }
       const rawSvg = String(order?.proofPackage?.visualProofSvg || "");
       if (!order || !rawSvg) {
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
@@ -371,14 +434,34 @@ export const handleRequest = async (req, res) => {
   }
 
   if (req.method === "POST" && url.pathname === "/api/admin/session") {
+    const limit = checkAdminLoginRateLimit(req);
+    if (!limit.ok) {
+      sendJsonWithHeaders(res, 429, { error: "Too many admin login attempts. Try again shortly." }, { "Retry-After": String(limit.retryAfter) });
+      return;
+    }
     try {
       const payload = JSON.parse(await readBody(req));
       const session = createAdminSession(payload.password || payload.token);
-      sendJson(res, 200, { ok: true, ...session });
+      clearAdminLoginRateLimit(req);
+      sendJsonWithHeaders(res, 200, { ok: true, expiresAt: session.expiresAt }, {
+        "Set-Cookie": adminSessionCookie(req, session.token, session.expiresAt),
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create admin session.";
       sendJson(res, error.statusCode || 401, { error: message });
     }
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/admin/session") {
+    sendJson(res, isAdminRequest(req) ? 200 : 401, { ok: isAdminRequest(req), authenticated: isAdminRequest(req) });
+    return;
+  }
+
+  if (req.method === "DELETE" && url.pathname === "/api/admin/session") {
+    sendJsonWithHeaders(res, 200, { ok: true }, {
+      "Set-Cookie": clearAdminSessionCookie(req),
+    });
     return;
   }
 
@@ -461,11 +544,35 @@ export const handleRequest = async (req, res) => {
     return;
   }
 
+  if (req.method === "GET" && url.pathname.match(/^\/api\/admin\/orders\/[^/]+$/)) {
+    if (!isAdminRequest(req)) {
+      sendJson(res, 401, { error: "Admin access required." });
+      return;
+    }
+    try {
+      const orderId = decodeURIComponent(url.pathname.replace("/api/admin/orders/", ""));
+      const order = await getOrderById(orderId);
+      if (!order) {
+        sendJson(res, 404, { error: "Order not found." });
+        return;
+      }
+      sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(order) });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not load order.";
+      sendJson(res, 500, { error: message });
+    }
+    return;
+  }
+
   if (req.method === "GET" && url.pathname.startsWith("/api/orders/")) {
     try {
       const orderId = decodeURIComponent(url.pathname.replace("/api/orders/", ""));
       let order = await getOrderById(orderId);
       const sessionId = url.searchParams.get("session_id");
+      if (!orderSessionMatches(order, sessionId)) {
+        sendJson(res, 401, { error: "Order access required." });
+        return;
+      }
       const storedSessionId = order?.stripeCheckoutSessionId;
       const needsStripeRefresh = Boolean(
         order

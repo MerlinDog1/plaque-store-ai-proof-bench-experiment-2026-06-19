@@ -5,8 +5,13 @@ import { getInternalProductionEmails, sendEmail } from "./email.mjs";
 
 const storeRoot = process.env.VERCEL ? "/tmp" : process.cwd();
 const storePath = path.join(storeRoot, "data", "storefront-orders.json");
+const canonicalSiteUrl = "https://instaplaque.co.uk";
 
 const nowIso = () => new Date().toISOString();
+const publicOriginForOrder = (origin = "") =>
+  String(process.env.PUBLIC_SITE_URL || origin || canonicalSiteUrl)
+    .replace(/\/$/, "")
+    .replace(/https:\/\/instaplaque(?:-[^.]+)?\.vercel\.app$/i, canonicalSiteUrl);
 
 const readLocalOrders = async () => {
   try {
@@ -272,7 +277,7 @@ const listProofSessionOrders = async (supabase) => {
 const normaliseFromMockOrder = (input) => {
   const order = input?.orderSnapshot || input?.order || input || {};
   const createdAt = order.createdAt || nowIso();
-  const publicOrigin = String(input.origin || order.metadata?.publicOrigin || "").replace(/\/$/, "");
+  const publicOrigin = publicOriginForOrder(input.origin || order.metadata?.publicOrigin || "");
   return {
     id: String(order.id || input.orderId || `PSAI-${Date.now().toString().slice(-6)}`),
     stripeCheckoutSessionId: order.stripeSimulation?.checkoutSessionId || null,

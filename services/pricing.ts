@@ -6,6 +6,7 @@ const PACKAGE_AND_POSTAGE = 12.5;
 const MM_PER_INCH = 25.4;
 const SUPPLIER_VAT_RATE = 0.2;
 const TARGET_GROSS_MARGIN = 0.4;
+const WOOD_TARGET_GROSS_MARGIN = 0.25;
 const SHAPED_PLAQUE_CUTTING_UPLIFT = 1.04;
 const PRODUCTION_BED_WIDTH = 610;
 const PRODUCTION_BED_HEIGHT = 420;
@@ -43,8 +44,8 @@ function getPricingMaterial(material: Material): PricingMaterial {
   return 'stainless';
 }
 
-function roundToNearestPound(value: number) {
-  return Math.round(value);
+function roundUpToNearestHalfPound(value: number) {
+  return Math.ceil(value * 2) / 2;
 }
 
 function dimensionsMatch(
@@ -77,6 +78,10 @@ function estimateWoodBoardSupplierExVat(state: PlaqueState) {
   );
 }
 
+function estimateWoodBackingSupplierExVat(state: PlaqueState) {
+  return estimateWoodBoardSupplierExVat(state) + WOOD_CARRIAGE_EX_VAT;
+}
+
 function getTradeEtchedCost(state: PlaqueState, material: PricingMaterial) {
   const areaInches = (state.width / MM_PER_INCH) * (state.height / MM_PER_INCH);
   const etchedBase = areaInches * 0.4;
@@ -100,19 +105,14 @@ export function fitsProductionBed(state: Pick<PlaqueState, 'width' | 'height'>) 
 
 export function estimatePlaquePrice(state: PlaqueState) {
   const material = getPricingMaterial(state.material);
-  const supplierCostWithVat = getTradeEtchedCost(state, material) * getShapeUplift(state.shape) * (1 + SUPPLIER_VAT_RATE);
+  const metalSupplierCostExVat = getTradeEtchedCost(state, material) * getShapeUplift(state.shape);
+  const supplierCostWithVat = metalSupplierCostExVat * (1 + SUPPLIER_VAT_RATE);
   const costBasis = supplierCostWithVat + PACKAGE_AND_POSTAGE;
   const baseRetail = costBasis / (1 - TARGET_GROSS_MARGIN);
-  const normalizedWidth = Math.max(state.width, state.height);
-  const normalizedHeight = Math.min(state.width, state.height);
-  const benchMinimumRetail = normalizedWidth === 150 && normalizedHeight === 50 ? 69 : 0;
-  const plaqueRetail = Math.max(
-    benchMinimumRetail,
-    roundToNearestPound(fitsProductionBed(state) ? baseRetail : baseRetail * OVERSIZED_BED_UPLIFT)
-  );
+  const metalRetail = roundUpToNearestHalfPound(fitsProductionBed(state) ? baseRetail : baseRetail * OVERSIZED_BED_UPLIFT);
   const woodAddOn = state.wood && state.shape !== Shape.Heart ? estimateWoodAddOn(state) : 0;
 
-  return plaqueRetail + woodAddOn;
+  return roundUpToNearestHalfPound(metalRetail + woodAddOn);
 }
 
 export function estimatePlaqueBasePrice(state: PlaqueState) {
@@ -121,10 +121,6 @@ export function estimatePlaqueBasePrice(state: PlaqueState) {
 
 export function estimateWoodAddOn(state: PlaqueState) {
   if (state.shape === Shape.Heart) return 0;
-  const boardPriceExVat = estimateWoodBoardSupplierExVat(state);
-  const supplierVat = (boardPriceExVat + WOOD_CARRIAGE_EX_VAT) * SUPPLIER_VAT_RATE;
-
-  return roundToNearestPound(
-    boardPriceExVat + supplierVat + WOOD_CARRIAGE_EX_VAT + boardPriceExVat,
-  );
+  const supplierCostWithVat = estimateWoodBackingSupplierExVat(state) * (1 + SUPPLIER_VAT_RATE);
+  return roundUpToNearestHalfPound(supplierCostWithVat / (1 - WOOD_TARGET_GROSS_MARGIN));
 }
