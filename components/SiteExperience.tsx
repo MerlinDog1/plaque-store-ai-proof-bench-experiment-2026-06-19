@@ -2131,7 +2131,8 @@ function CheckoutPage({
             )}
             {breakdown.quoteRequired && (
               <div className="commerce-warning">
-                This order may need a delivery or production check before payment.
+                This design needs a manual quote before payment: {breakdown.quoteReasons.join(', ')}.
+                <button type="button" onClick={() => onNavigate('quote')}>Request a quote</button>
               </div>
             )}
             {isSubmitting && <div className="commerce-success">Preparing secure checkout...</div>}
@@ -2161,7 +2162,7 @@ function CheckoutPage({
               )}
               </>
             ) : null}
-            {isProductionReady && (
+            {isProductionReady && !breakdown.quoteRequired && (
               <button
                 type="button"
                 className="commerce-primary"
