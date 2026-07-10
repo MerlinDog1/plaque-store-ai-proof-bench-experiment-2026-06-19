@@ -1391,7 +1391,6 @@ const App: React.FC = () => {
                   onGoToStep={setActiveStep}
                   onSaveProof={handleSaveProof}
                   onAddToBasket={handleAddToBasket}
-                  onCreateMockOrder={handleCreateMockOrder}
                   onRealisticPreview={handleRealPreview}
                   realisticPreviewPrompt={realisticPreviewPrompt}
                   onRealisticPreviewPromptChange={setRealisticPreviewPrompt}
