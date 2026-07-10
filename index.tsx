@@ -1,7 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { inject } from '@vercel/analytics';
 import App from './App';
 import './index.css';
+import { redactAnalyticsEvent } from './services/analyticsPrivacy.mjs';
+
+inject({
+  beforeSend: redactAnalyticsEvent,
+});
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
