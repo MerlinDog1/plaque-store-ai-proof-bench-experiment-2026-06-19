@@ -171,7 +171,7 @@ const formatPence = (value: number, currency = 'gbp') => {
 };
 
 const formatOrderSource = (order: PaidOrder) => {
-  const source = order.metadata?.source || 'instaplaque';
+  const source = String(order.metadata?.source || 'instaplaque');
   if (source.includes('instaplaque')) return 'InstaPlaque';
   return source
     .split(/[-_\s]+/)
