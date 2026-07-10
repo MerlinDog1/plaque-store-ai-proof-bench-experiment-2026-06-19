@@ -52,6 +52,7 @@ const {
   markOrderPaidFromSession,
   processReviewFollowUps,
   sendAndRecordOrderEmail,
+  shouldSendCustomerProofEmail,
   updateOrderStatus,
 } = await import("./server/orders.mjs");
 const {
@@ -60,10 +61,13 @@ const {
 } = await import("./server/email.mjs");
 const {
   createAdminSession,
+  getAdminAuthFailure,
   getAdminAuthConfig,
   getAdminSessionCookieName,
   isAdminRequest,
 } = await import("./server/adminAuth.mjs");
+const { createAdminLoginRateLimiter } = await import("./server/adminRateLimit.mjs");
+const { getStorefrontAuth } = await import("./server/storefrontAuth.mjs");
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY || "";
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
@@ -164,31 +168,6 @@ const svgToPngBuffer = async (svg) => {
   }
 };
 
-const parseStorefrontKeys = () => {
-  const raw = process.env.STOREFRONT_INGEST_KEYS || process.env.STOREFRONT_API_KEYS || "";
-  return raw
-    .split(",")
-    .map((entry) => {
-      const [source, key] = entry.includes(":") ? entry.split(/:(.*)/s) : ["*", entry];
-      return { source: source.trim().toLowerCase(), key: key.trim() };
-    })
-    .filter((entry) => entry.key);
-};
-
-const getStorefrontAuth = (req) => {
-  const configuredKeys = parseStorefrontKeys();
-  if (!configuredKeys.length) return { ok: true, source: "unconfigured-preview", authRequired: false };
-
-  const headerKey = String(req.headers["x-storefront-api-key"] || req.headers.authorization?.replace(/^Bearer\s+/i, "") || "").trim();
-  const headerSource = String(req.headers["x-storefront-source"] || "").trim().toLowerCase();
-  const match = configuredKeys.find((entry) => entry.key === headerKey && (entry.source === "*" || !headerSource || entry.source === headerSource));
-  return {
-    ok: Boolean(match),
-    source: headerSource || match?.source || "",
-    authRequired: true,
-  };
-};
-
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -219,31 +198,18 @@ const sendJsonWithHeaders = (res, status, payload, headers = {}) => {
   res.end(JSON.stringify(payload));
 };
 
-const adminLoginAttempts = new Map();
-const adminLoginWindowMs = 15 * 60 * 1000;
-const maxAdminLoginAttempts = 8;
-
-const clientIp = (req) =>
-  String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "unknown").split(",")[0].trim();
-
-const checkAdminLoginRateLimit = (req) => {
-  const key = clientIp(req);
-  const now = Date.now();
-  const current = adminLoginAttempts.get(key);
-  if (!current || current.resetAt <= now) {
-    adminLoginAttempts.set(key, { count: 1, resetAt: now + adminLoginWindowMs });
-    return { ok: true };
-  }
-  if (current.count >= maxAdminLoginAttempts) {
-    return { ok: false, retryAfter: Math.ceil((current.resetAt - now) / 1000) };
-  }
-  current.count += 1;
-  return { ok: true };
+const requireAdminRequest = (req, res) => {
+  if (isAdminRequest(req)) return true;
+  const failure = getAdminAuthFailure();
+  sendJson(res, failure.statusCode, {
+    ok: false,
+    code: failure.code,
+    error: failure.error,
+  });
+  return false;
 };
 
-const clearAdminLoginRateLimit = (req) => {
-  adminLoginAttempts.delete(clientIp(req));
-};
+const adminLoginRateLimiter = createAdminLoginRateLimiter();
 
 const isLocalHost = (hostValue = "") => /^(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i.test(String(hostValue));
 
@@ -406,21 +372,32 @@ export const handleRequest = async (req, res) => {
     try {
       const orderId = decodeURIComponent(url.pathname.match(/^\/api\/orders\/([^/]+)\/proof-image$/)?.[1] || "");
       const payload = JSON.parse(await readBody(req));
-      let order = await attachVisualProofToOrder(orderId, payload);
-      if (payload.sendCustomerEmail && order.customerEmail) {
-        order = await sendAndRecordOrderEmail(order, "customer-proof-copy", order.customerEmail);
+      const existingOrder = await getOrderById(orderId);
+      if (!orderSessionMatches(existingOrder, payload.stripeCheckoutSessionId)) {
+        sendJson(res, 401, { error: "Order access required." });
+        return;
       }
-      if (order.proofPackage?.productionArtworkPdf) {
-        for (const internalEmail of getInternalProductionEmails()) {
-          const alreadySent = (order.emailEvents || []).some(
-            (event) => event.type === "admin-new-paid-order" && event.recipient === internalEmail,
-          );
-          if (!alreadySent) {
-            order = await sendAndRecordOrderEmail(order, "admin-new-paid-order", internalEmail);
+      const attachment = await attachVisualProofToOrder(orderId, payload);
+      let order = attachment.order;
+      if (attachment.attached) {
+        const customerProofAlreadySent = (order.emailEvents || []).some(
+          (event) => event.type === "customer-proof-copy" && event.recipient === order.customerEmail,
+        );
+        if (shouldSendCustomerProofEmail(attachment) && !customerProofAlreadySent) {
+          order = await sendAndRecordOrderEmail(order, "customer-proof-copy", order.customerEmail);
+        }
+        if (order.proofPackage?.productionArtworkPdf) {
+          for (const internalEmail of getInternalProductionEmails()) {
+            const alreadySent = (order.emailEvents || []).some(
+              (event) => event.type === "admin-new-paid-order" && event.recipient === internalEmail,
+            );
+            if (!alreadySent) {
+              order = await sendAndRecordOrderEmail(order, "admin-new-paid-order", internalEmail);
+            }
           }
         }
       }
-      sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(order) });
+      sendJson(res, 200, { ok: true, attached: attachment.attached, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not attach proof image.";
       sendJson(res, 400, { error: message });
@@ -434,7 +411,7 @@ export const handleRequest = async (req, res) => {
   }
 
   if (req.method === "POST" && url.pathname === "/api/admin/session") {
-    const limit = checkAdminLoginRateLimit(req);
+    const limit = adminLoginRateLimiter.check(req);
     if (!limit.ok) {
       sendJsonWithHeaders(res, 429, { error: "Too many admin login attempts. Try again shortly." }, { "Retry-After": String(limit.retryAfter) });
       return;
@@ -442,19 +419,30 @@ export const handleRequest = async (req, res) => {
     try {
       const payload = JSON.parse(await readBody(req));
       const session = createAdminSession(payload.password || payload.token);
-      clearAdminLoginRateLimit(req);
+      adminLoginRateLimiter.clear(req);
       sendJsonWithHeaders(res, 200, { ok: true, expiresAt: session.expiresAt }, {
         "Set-Cookie": adminSessionCookie(req, session.token, session.expiresAt),
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create admin session.";
-      sendJson(res, error.statusCode || 401, { error: message });
+      sendJson(res, error.statusCode || 401, { error: message, ...(error.code ? { code: error.code } : {}) });
     }
     return;
   }
 
   if (req.method === "GET" && url.pathname === "/api/admin/session") {
-    sendJson(res, isAdminRequest(req) ? 200 : 401, { ok: isAdminRequest(req), authenticated: isAdminRequest(req) });
+    const authenticated = isAdminRequest(req);
+    if (authenticated) {
+      sendJson(res, 200, { ok: true, authenticated: true });
+    } else {
+      const failure = getAdminAuthFailure();
+      sendJson(res, failure.statusCode, {
+        ok: false,
+        authenticated: false,
+        code: failure.code,
+        error: failure.error,
+      });
+    }
     return;
   }
 
@@ -489,7 +477,7 @@ export const handleRequest = async (req, res) => {
       sendJson(res, 200, { ok: true, received: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Stripe webhook failed.";
-      sendJson(res, 400, { error: message });
+      sendJson(res, error.statusCode || 400, { error: message, ...(error.code ? { code: error.code } : {}) });
     }
     return;
   }
@@ -504,7 +492,7 @@ export const handleRequest = async (req, res) => {
       sendJson(res, 200, { ok: true, received: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Stripe webhook failed.";
-      sendJson(res, 400, { error: message });
+      sendJson(res, error.statusCode || 400, { error: message, ...(error.code ? { code: error.code } : {}) });
     }
     return;
   }
@@ -512,14 +500,14 @@ export const handleRequest = async (req, res) => {
   if (req.method === "POST" && url.pathname === "/api/storefront/orders") {
     const auth = getStorefrontAuth(req);
     if (!auth.ok) {
-      sendJson(res, 401, { error: "Storefront API key required." });
+      sendJson(res, auth.statusCode, { ok: false, code: auth.code, error: auth.error });
       return;
     }
     try {
       const payload = JSON.parse(await readBody(req));
       const order = await createExternalOrder({
         ...payload,
-        source: payload.source || auth.source || req.headers["x-storefront-source"],
+        source: auth.source || payload.source || req.headers["x-storefront-source"],
       });
       sendJson(res, 201, { ok: true, order });
     } catch (error) {
@@ -530,10 +518,7 @@ export const handleRequest = async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/admin/orders") {
-    if (!isAdminRequest(req)) {
-      sendJson(res, 401, { error: "Admin access required." });
-      return;
-    }
+    if (!requireAdminRequest(req, res)) return;
     try {
       const orders = await listOrders();
       sendJson(res, 200, { ok: true, orders: stripHeavyProofPayloads(orders) });
@@ -545,10 +530,7 @@ export const handleRequest = async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname.match(/^\/api\/admin\/orders\/[^/]+$/)) {
-    if (!isAdminRequest(req)) {
-      sendJson(res, 401, { error: "Admin access required." });
-      return;
-    }
+    if (!requireAdminRequest(req, res)) return;
     try {
       const orderId = decodeURIComponent(url.pathname.replace("/api/admin/orders/", ""));
       const order = await getOrderById(orderId);
@@ -605,10 +587,7 @@ export const handleRequest = async (req, res) => {
   }
 
   if (req.method === "PATCH" && url.pathname.startsWith("/api/admin/orders/")) {
-    if (!isAdminRequest(req)) {
-      sendJson(res, 401, { error: "Admin access required." });
-      return;
-    }
+    if (!requireAdminRequest(req, res)) return;
     try {
       const orderId = decodeURIComponent(url.pathname.replace("/api/admin/orders/", ""));
       const payload = JSON.parse(await readBody(req));
@@ -625,10 +604,7 @@ export const handleRequest = async (req, res) => {
   }
 
   if (req.method === "POST" && url.pathname.match(/^\/api\/admin\/orders\/[^/]+\/emails$/)) {
-    if (!isAdminRequest(req)) {
-      sendJson(res, 401, { error: "Admin access required." });
-      return;
-    }
+    if (!requireAdminRequest(req, res)) return;
     try {
       const orderId = decodeURIComponent(url.pathname.split("/")[4]);
       const payload = JSON.parse(await readBody(req));
@@ -647,6 +623,7 @@ export const handleRequest = async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/mock-admin-hub/orders") {
+    if (!requireAdminRequest(req, res)) return;
     try {
       const orders = await listMockHubOrders();
       sendJson(res, 200, { ok: true, orders });
@@ -658,6 +635,7 @@ export const handleRequest = async (req, res) => {
   }
 
   if (req.method === "POST" && url.pathname === "/api/mock-admin-hub/orders") {
+    if (!requireAdminRequest(req, res)) return;
     try {
       const payload = JSON.parse(await readBody(req));
       const order = await createMockHubOrder(payload);
