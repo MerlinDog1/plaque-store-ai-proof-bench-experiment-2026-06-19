@@ -6,6 +6,7 @@ import {
   getPlaqueSummaryTitle,
   validateCheckoutPlaqueState,
 } from "../services/checkoutPolicy.mjs";
+import { sanitizeProofPackageSvg } from "../services/svgSanitizer.mjs";
 
 const MAX_INSCRIPTION_LENGTH = 4_000;
 const MAX_EMAIL_LENGTH = 254;
@@ -128,17 +129,22 @@ const normaliseDeliveryAddress = (input) => {
   };
 };
 
-const canonicalProofPackage = (orderId, lockedAt) => ({
-  productionSvg: null,
-  visualProofSvg: null,
+const canonicalProofPackage = (orderId, lockedAt, clientProofPackage = {}) => {
+  const sanitizedProofPackage = sanitizeProofPackageSvg(clientProofPackage);
+  const productionSvg = sanitizedProofPackage.productionSvg || null;
+  const visualProofSvg = sanitizedProofPackage.visualProofSvg || productionSvg || null;
+  return {
+  productionSvg,
+  visualProofSvg,
   visualProofPng: null,
   productionArtworkPdf: null,
-  artworkStatus: "pending_sanitized_upload",
-  artifactAuthority: "none",
+  artworkStatus: visualProofSvg ? "stored_sanitized_svg" : "pending_sanitized_upload",
+  artifactAuthority: visualProofSvg ? "sanitized_client_svg" : "none",
   productionFilename: `${orderId}-production-proof.svg`,
   visualFilename: `${orderId}-visual-proof.svg`,
   lockedAt,
-});
+  };
+};
 
 const stripClientArtworkFromPlaqueState = (state) => {
   const {
@@ -260,7 +266,7 @@ export const buildServerCheckoutOrder = (
     inscription,
     plaqueState,
     priceBreakdown,
-    proofPackage: canonicalProofPackage(orderId, createdAt),
+    proofPackage: canonicalProofPackage(orderId, createdAt, order.proofPackage),
     shippingAddress: normaliseDeliveryAddress(order.deliveryAddress || payload.deliveryAddress),
     stripeSession: {},
     emailEvents: [],
