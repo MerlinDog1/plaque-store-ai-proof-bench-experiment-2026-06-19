@@ -327,7 +327,9 @@ ${params.removeBackground
       ],
       responseModalities: ["IMAGE", "TEXT"],
       imageConfig: {
-        imageSize: params.imageSize || IMAGE_GENERATION_SIZE,
+        imageSize: (params.model || MODEL) === EtchmasterImageModel.NanoBanana1
+          ? "1K"
+          : params.imageSize || IMAGE_GENERATION_SIZE,
         aspectRatio,
       },
     },

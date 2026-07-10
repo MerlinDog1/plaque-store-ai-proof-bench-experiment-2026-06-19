@@ -1,3 +1,5 @@
+import { sanitizeSvgMarkup } from "../services/svgSanitizer.mjs";
+
 const resendApiKey = process.env.RESEND_API_KEY || "";
 const fromEmail = process.env.ORDER_EMAIL_FROM || "InstaPlaque <orders@instaplaque.co.uk>";
 const adminEmail = process.env.ADMIN_ORDER_EMAIL || process.env.ORDER_ADMIN_EMAIL || "";
@@ -45,8 +47,9 @@ const proofImageUrl = (order) => {
   return "";
 };
 
-const proofSvg = (order) =>
-  order.proofPackage?.visualProofSvg || order.proofPackage?.productionSvg || "";
+const proofSvg = (order) => sanitizeSvgMarkup(
+  order.proofPackage?.visualProofSvg || order.proofPackage?.productionSvg || "",
+) || "";
 
 const proofAttachments = (order, includeProof = true, { includeSvg = false } = {}) => {
   if (!includeProof) return [];

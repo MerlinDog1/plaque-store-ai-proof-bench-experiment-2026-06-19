@@ -2,6 +2,11 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { getSupabaseServiceClient } from "./supabase.mjs";
 import { getInternalProductionEmails, sendEmail } from "./email.mjs";
+import {
+  sanitizeOrderSvgFields,
+  sanitizeProofPackageSvg,
+  sanitizeSvgMarkup,
+} from "../services/svgSanitizer.mjs";
 
 const storeRoot = process.env.VERCEL ? "/tmp" : process.cwd();
 const storePath = path.join(storeRoot, "data", "storefront-orders.json");
@@ -16,7 +21,8 @@ const publicOriginForOrder = (origin = "") =>
 
 const readLocalOrders = async () => {
   try {
-    return JSON.parse(await fs.readFile(storePath, "utf8"));
+    const orders = JSON.parse(await fs.readFile(storePath, "utf8"));
+    return Array.isArray(orders) ? orders.map((order) => sanitizeOrderSvgFields(order)) : [];
   } catch {
     return [];
   }
@@ -24,7 +30,7 @@ const readLocalOrders = async () => {
 
 const writeLocalOrders = async (orders) => {
   await fs.mkdir(path.dirname(storePath), { recursive: true });
-  await fs.writeFile(storePath, JSON.stringify(orders, null, 2));
+  await fs.writeFile(storePath, JSON.stringify(orders.map((order) => sanitizeOrderSvgFields(order)), null, 2));
 };
 
 const shouldUseLocalFallback = (error) => {
@@ -34,31 +40,34 @@ const shouldUseLocalFallback = (error) => {
 
 const isMissingProofClaimFunction = (error) => ["42883", "PGRST202"].includes(String(error?.code || "").toUpperCase());
 
-const toRow = (order) => ({
-  id: order.id,
-  stripe_checkout_session_id: order.stripeCheckoutSessionId || null,
-  stripe_payment_intent_id: order.stripePaymentIntentId || null,
-  customer_email: order.customerEmail || null,
-  customer_name: order.customerName || null,
-  status: order.status || "checkout_started",
-  payment_status: order.paymentStatus || "unpaid",
-  fulfilment_status: order.fulfilmentStatus || "not_started",
-  total_pence: order.totalPence || 0,
-  currency: order.currency || "gbp",
-  product_title: order.productTitle || "Custom plaque",
-  inscription: order.inscription || "",
-  plaque_state: order.plaqueState || {},
-  price_breakdown: order.priceBreakdown || {},
-  proof_package: order.proofPackage || {},
-  shipping_address: order.shippingAddress || {},
-  stripe_session: order.stripeSession || {},
-  email_events: order.emailEvents || [],
-  events: order.events || [],
-  metadata: order.metadata || {},
-  approved_at: order.approvedAt || null,
-  paid_at: order.paidAt || null,
-  updated_at: nowIso(),
-});
+const toRow = (input) => {
+  const order = sanitizeOrderSvgFields(input);
+  return {
+    id: order.id,
+    stripe_checkout_session_id: order.stripeCheckoutSessionId || null,
+    stripe_payment_intent_id: order.stripePaymentIntentId || null,
+    customer_email: order.customerEmail || null,
+    customer_name: order.customerName || null,
+    status: order.status || "checkout_started",
+    payment_status: order.paymentStatus || "unpaid",
+    fulfilment_status: order.fulfilmentStatus || "not_started",
+    total_pence: order.totalPence || 0,
+    currency: order.currency || "gbp",
+    product_title: order.productTitle || "Custom plaque",
+    inscription: order.inscription || "",
+    plaque_state: order.plaqueState || {},
+    price_breakdown: order.priceBreakdown || {},
+    proof_package: order.proofPackage || {},
+    shipping_address: order.shippingAddress || {},
+    stripe_session: order.stripeSession || {},
+    email_events: order.emailEvents || [],
+    events: order.events || [],
+    metadata: order.metadata || {},
+    approved_at: order.approvedAt || null,
+    paid_at: order.paidAt || null,
+    updated_at: nowIso(),
+  };
+};
 
 const listOrderColumns = [
   "id",
@@ -84,7 +93,7 @@ const listOrderColumns = [
   "updated_at",
 ].join(",");
 
-const fromRow = (row) => row && ({
+const fromRow = (row) => row && sanitizeOrderSvgFields({
   id: row.id,
   stripeCheckoutSessionId: row.stripe_checkout_session_id,
   stripePaymentIntentId: row.stripe_payment_intent_id,
@@ -113,27 +122,30 @@ const fromRow = (row) => row && ({
 
 const orderProofSessionToken = (orderId) => `storefront-order-${orderId}`;
 
-const toProofSessionOrderRow = (order) => ({
-  public_token: orderProofSessionToken(order.id),
-  email: order.customerEmail || null,
-  status: "converted",
-  plaque_state: order.plaqueState || {},
-  wording: order.inscription || "",
-  generated_svg: order.proofPackage?.productionSvg || order.proofPackage?.visualProofSvg || null,
-  price_estimate_pence: order.totalPence || 0,
-  currency: order.currency || "gbp",
-  quote_flags: {},
-  metadata: {
-    kind: "storefront_order",
-    order,
-  },
-  expires_at: null,
-});
+const toProofSessionOrderRow = (input) => {
+  const order = sanitizeOrderSvgFields(input);
+  return {
+    public_token: orderProofSessionToken(order.id),
+    email: order.customerEmail || null,
+    status: "converted",
+    plaque_state: order.plaqueState || {},
+    wording: order.inscription || "",
+    generated_svg: order.proofPackage?.productionSvg || order.proofPackage?.visualProofSvg || null,
+    price_estimate_pence: order.totalPence || 0,
+    currency: order.currency || "gbp",
+    quote_flags: {},
+    metadata: {
+      kind: "storefront_order",
+      order,
+    },
+    expires_at: null,
+  };
+};
 
 const fromProofSessionOrderRow = (row) => {
   const order = row?.metadata?.order;
   if (!order) return null;
-  return {
+  return sanitizeOrderSvgFields({
     ...order,
     customerEmail: order.customerEmail || row.email || "",
     inscription: order.inscription || row.wording || "",
@@ -142,7 +154,7 @@ const fromProofSessionOrderRow = (row) => {
     currency: order.currency || row.currency || "gbp",
     updatedAt: order.updatedAt || row.updated_at,
     createdAt: order.createdAt || row.created_at,
-  };
+  });
 };
 
 const lightweightFallbackOrder = (order) => order && ({
@@ -418,7 +430,7 @@ const normaliseExternalOrder = (input) => {
 };
 
 const saveOrder = async (order) => {
-  const next = { ...order, updatedAt: nowIso() };
+  const next = sanitizeOrderSvgFields({ ...order, updatedAt: nowIso() });
   const supabase = getSupabaseServiceClient();
   if (supabase) {
     const { data, error } = await supabase
@@ -475,7 +487,8 @@ export const prepareVisualProofAttachment = (order, payload = {}) => {
   }
 
   const visualProofPng = String(payload.visualProofPng || "").trim();
-  const visualProofSvg = String(payload.visualProofSvg || "").trim();
+  const visualProofSvg = sanitizeSvgMarkup(String(payload.visualProofSvg || "").trim()) || "";
+  const existingProofPackage = sanitizeProofPackageSvg(order.proofPackage || {});
   const productionArtworkPdf = String(payload.productionArtworkPdf || "").trim();
   const visualProofRendererVersion = Number(payload.visualProofRendererVersion || 0);
   if (!visualProofPng.startsWith("data:image/png;base64,") && !/^[a-z0-9+/]+=*$/i.test(visualProofPng)) {
@@ -494,14 +507,13 @@ export const prepareVisualProofAttachment = (order, payload = {}) => {
     order: {
       ...order,
       proofPackage: {
-        ...(order.proofPackage || {}),
-        // The initial SVG remains subject to the companion sanitizer change.
-        visualProofSvg: visualProofSvg || order.proofPackage?.visualProofSvg || null,
+        ...existingProofPackage,
+        visualProofSvg: visualProofSvg || existingProofPackage.visualProofSvg || null,
         visualProofPng,
         visualProofRendererVersion: Number.isFinite(visualProofRendererVersion) && visualProofRendererVersion > 0
           ? visualProofRendererVersion
-          : order.proofPackage?.visualProofRendererVersion || null,
-        productionArtworkPdf: productionArtworkPdf || order.proofPackage?.productionArtworkPdf || null,
+          : existingProofPackage.visualProofRendererVersion || null,
+        productionArtworkPdf: productionArtworkPdf || existingProofPackage.productionArtworkPdf || null,
       },
       events: [
         { type: "proof_image_attached", label: "Browser-rendered proof image attached", at: nowIso() },

@@ -45,6 +45,8 @@ RESEND_REPLY_TO_EMAIL=
 
 # Gemini
 GEMINI_API_KEY=
+GEMINI_PUBLIC_PROXY_ENABLED=
+GEMINI_RATE_LIMIT_UNITS_PER_MINUTE=20
 
 # App
 APP_BASE_URL=http://127.0.0.1:4179
@@ -153,6 +155,15 @@ append provider delivery statuses to the same row or create child events.
 
 The current prototype already routes Gemini through the same-origin Node server.
 Keep that pattern.
+
+The public proxy only accepts the per-model content, structured-output, image
+size, aspect-ratio, and reference-image profiles used by the proof bench.
+Production and serverless deployments keep it disabled unless
+`GEMINI_PUBLIC_PROXY_ENABLED=true` is explicitly configured. Do not enable it
+until the Gemini project has a hard spending/quota ceiling or the app uses a
+shared atomic limiter/auth service. The built-in weighted IP limiter is
+timer-free and works in the Node server and warm serverless instances, but it is
+not a global distributed counter and cold instances do not share its state.
 
 Gemini should be used for:
 
