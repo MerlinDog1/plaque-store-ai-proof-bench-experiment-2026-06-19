@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm exec -- vite build && node scripts/prerender-product-pages.mjs",
+    "build": "npm exec -- vite build",
     "typecheck": "tsc --noEmit",
     "check:analytics-redaction": "node scripts/check-analytics-redaction.mjs",
     "check:bold-toggle": "node scripts/check-bold-toggle.cjs",
