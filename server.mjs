@@ -65,6 +65,7 @@ const {
   createExternalOrder,
   createPendingOrder,
   getOrderById,
+  isPaidCompleteStripeSession,
   listOrders,
   markOrderPaidFromSession,
   processReviewFollowUps,
@@ -72,6 +73,10 @@ const {
   shouldSendCustomerProofEmail,
   updateOrderStatus,
 } = await import("./server/orders.mjs");
+const {
+  checkoutRecoveryTokenMatches,
+  stripCheckoutSecretsFromOrder,
+} = await import("./server/checkout.mjs");
 const {
   getEmailConfig,
   getInternalProductionEmails,
@@ -248,13 +253,18 @@ const clearAdminSessionCookie = (req) => {
 const orderSessionMatches = (order, sessionId) =>
   Boolean(order?.stripeCheckoutSessionId && sessionId && order.stripeCheckoutSessionId === sessionId);
 
+const orderAccessMatches = (order, sessionId, recoveryToken) => (
+  orderSessionMatches(order, sessionId) || checkoutRecoveryTokenMatches(order, recoveryToken)
+);
+
 const stripHeavyProofPayload = (order) => {
-  if (!order?.proofPackage?.visualProofPng) return order;
+  if (!order) return order;
+  const publicOrder = stripCheckoutSecretsFromOrder(order);
   return {
-    ...order,
+    ...publicOrder,
     proofPackage: {
-      ...order.proofPackage,
-      visualProofPng: "stored",
+      ...(publicOrder.proofPackage || {}),
+      ...(publicOrder.proofPackage?.visualProofPng ? { visualProofPng: "stored" } : {}),
     },
   };
 };
@@ -442,7 +452,10 @@ export const handleRequest = async (req, res) => {
       sendJson(res, 200, { ok: true, attached: attachment.attached, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not attach proof image.";
-      sendJson(res, 400, { error: message });
+      sendJson(res, error.statusCode || 400, {
+        error: message,
+        ...(error.code ? { code: error.code } : {}),
+      });
     }
     return;
   }
@@ -499,12 +512,16 @@ export const handleRequest = async (req, res) => {
     try {
       const payload = JSON.parse(await readBody(req));
       const pendingOrder = await createPendingOrder(payload);
-      const session = await createStripeCheckoutSession(payload);
+      const session = await createStripeCheckoutSession(pendingOrder, {
+        origin: payload.origin,
+        uiMode: payload.uiMode,
+      });
       const order = await attachStripeSessionToOrder(pendingOrder.id, session.raw || session);
-      sendJson(res, 201, { ok: true, session, order: stripHeavyProofPayload(order) });
+      const { raw: _rawStripeSession, ...publicSession } = session;
+      sendJson(res, 201, { ok: true, session: publicSession, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create Stripe checkout session.";
-      sendJson(res, 500, { error: message });
+      sendJson(res, error.statusCode || 500, { error: message, code: error.code || "checkout_failed" });
     }
     return;
   }
@@ -583,7 +600,7 @@ export const handleRequest = async (req, res) => {
       sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not load order.";
-      sendJson(res, 500, { error: message });
+      sendJson(res, error.statusCode || 500, { error: message, code: error.code || "order_load_failed" });
     }
     return;
   }
@@ -593,7 +610,8 @@ export const handleRequest = async (req, res) => {
       const orderId = decodeURIComponent(url.pathname.replace("/api/orders/", ""));
       let order = await getOrderById(orderId);
       const sessionId = url.searchParams.get("session_id");
-      if (!orderSessionMatches(order, sessionId)) {
+      const recoveryToken = url.searchParams.get("proof");
+      if (!orderAccessMatches(order, sessionId, recoveryToken)) {
         sendJson(res, 401, { error: "Order access required." });
         return;
       }
@@ -610,7 +628,7 @@ export const handleRequest = async (req, res) => {
       );
       if (order && needsStripeRefresh) {
         const stripeSession = await retrieveStripeCheckoutSession(sessionId || storedSessionId);
-        if (stripeSession.payment_status === "paid" || stripeSession.status === "complete") {
+        if (isPaidCompleteStripeSession(stripeSession)) {
           order = await markOrderPaidFromSession(stripeSession);
         } else {
           order = await attachStripeSessionToOrder(order.id, stripeSession);
@@ -623,7 +641,7 @@ export const handleRequest = async (req, res) => {
       sendJson(res, 200, { ok: true, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not load order.";
-      sendJson(res, 500, { error: message });
+      sendJson(res, error.statusCode || 500, { error: message, code: error.code || "order_load_failed" });
     }
     return;
   }

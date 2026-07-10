@@ -373,21 +373,32 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (window.location.pathname !== '/checkout') return;
-    const orderId = new URLSearchParams(window.location.search).get('order');
+    const checkoutParams = new URLSearchParams(window.location.search);
+    const orderId = checkoutParams.get('order');
+    const recoveryToken = checkoutParams.get('proof');
     if (!orderId) return;
 
     let cancelled = false;
     const restoreCheckoutOrder = async () => {
       try {
-        const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
+        const recoveryQuery = recoveryToken ? `?proof=${encodeURIComponent(recoveryToken)}` : '';
+        const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}${recoveryQuery}`);
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.error || `Could not load order (${response.status})`);
         const order = payload.order;
         if (!order || cancelled) return;
 
+        let locallySavedOrder: MockOrder | undefined;
+        try {
+          const savedOrders = JSON.parse(localStorage.getItem('plaques-ai-mock-orders') || '[]') as MockOrder[];
+          locallySavedOrder = savedOrders.find((savedOrder) => savedOrder.id === order.id);
+        } catch {
+          // The protected server snapshot remains available when local recovery data is unavailable.
+        }
+
         const restoredState: PlaqueState = {
           ...PROOF_BENCH_INITIAL_STATE,
-          ...(order.plaqueState || order.state || {}),
+          ...(locallySavedOrder?.state || order.plaqueState || order.state || {}),
         };
         const restoredWording = order.inscription || '';
         setState(restoredState);
@@ -400,7 +411,7 @@ const App: React.FC = () => {
         );
         setGeneratedProofFrame(restoredState.generatedSvgContent ? getProofFrame(restoredState) : null);
         setHasSelectedSize(true);
-        setActiveStep(restoredState.generatedSvgContent ? steps.length - 1 : 0);
+        setActiveStep(steps.length - 1);
         setProofSaved(true);
         setBasketAdded(true);
         setMockOrders(prev => {
@@ -973,6 +984,7 @@ const App: React.FC = () => {
       }
       return next;
     });
+    if (order.stripeSimulation.provider !== 'mock') return;
     fireAndForget(fetch('/api/mock-admin-hub/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1010,17 +1022,55 @@ const App: React.FC = () => {
           origin: window.location.origin,
           uiMode: 'hosted',
           deliveryAddress,
-          orderSnapshot: order,
+          orderSnapshot: {
+            ...order,
+            state: {
+              ...order.state,
+              generatedSvgContent: null,
+              memorialImageSvg: null,
+              memorialImageSourceUrl: null,
+              memorialImagePreviewUrl: null,
+              conceptImageUrl: null,
+              etchmasterStyleReferenceUrl: null,
+              aiReasoning: null,
+            },
+            proofPackage: {
+              ...order.proofPackage,
+              productionSvg: null,
+              visualProofSvg: null,
+              visualProofPng: null,
+            },
+          },
         }),
       });
       window.clearTimeout(timeout);
-      if (!response.ok) throw new Error(`Stripe checkout failed (${response.status})`);
       const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || `Stripe checkout failed (${response.status})`);
       const session = payload.session;
+      const serverOrder = payload.order;
       if (session?.id && (session?.url || session?.clientSecret)) {
+        const serverOrderId = serverOrder?.id || order.id;
         checkoutOrder = {
           ...order,
-          status: order.status === 'needs-check' ? order.status : 'checkout-started',
+          id: serverOrderId,
+          createdAt: serverOrder?.createdAt || order.createdAt,
+          productTitle: serverOrder?.productTitle || order.productTitle,
+          total: Number.isInteger(serverOrder?.totalPence) ? serverOrder.totalPence / 100 : order.total,
+          priceBreakdown: serverOrder?.priceBreakdown || order.priceBreakdown,
+          status: serverOrder?.status === 'checkout_started'
+            ? 'checkout-started'
+            : serverOrder?.status || 'checkout-started',
+          paymentStatus: serverOrder?.paymentStatus || 'unpaid',
+          state: order.state,
+          proofPackage: {
+            ...(serverOrder?.proofPackage || {}),
+            productionSvg: null,
+            visualProofSvg: null,
+            visualProofPng: null,
+            productionFilename: `${serverOrderId}-production-proof.svg`,
+            visualFilename: `${serverOrderId}-visual-proof.svg`,
+            lockedAt: serverOrder?.proofPackage?.lockedAt || order.proofPackage.lockedAt,
+          },
           stripeSimulation: {
             provider: 'stripe',
             mode: session.livemode ? 'live' : 'test',
