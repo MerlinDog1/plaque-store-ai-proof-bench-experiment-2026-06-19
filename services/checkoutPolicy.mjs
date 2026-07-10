@@ -14,7 +14,15 @@ const WOOD_MINIMUM_UNIT_EX_VAT = 10;
 const WOOD_CARRIAGE_EX_VAT = 15;
 const WOOD_PRICE_MATCH_TOLERANCE_MM = 0.55;
 
-export const CHECKOUT_POLICY_VERSION = "2026-07-10";
+const onePoundTestPlaqueEnabled = () => (
+  String(globalThis.process?.env?.ONE_POUND_TEST_PLAQUE_ENABLED || "").toLowerCase() === "true"
+  || String(globalThis.process?.env?.VITE_ONE_POUND_TEST_PLAQUE_ENABLED || "").toLowerCase() === "true"
+  || import.meta.env?.VITE_ONE_POUND_TEST_PLAQUE_ENABLED === "true"
+);
+
+export const CHECKOUT_POLICY_VERSION = onePoundTestPlaqueEnabled()
+  ? "2026-07-10-one-pound-test"
+  : "2026-07-10";
 export const CHECKOUT_CURRENCY = "gbp";
 export const MIN_PLAQUE_DIMENSION_MM = 50;
 export const MAX_PLAQUE_DIMENSION_MM = 600;
@@ -128,6 +136,8 @@ export const estimateWoodAddOn = (state) => {
 };
 
 export const estimatePlaquePrice = (state) => {
+  if (onePoundTestPlaqueEnabled()) return 1;
+
   const material = getPricingMaterial(state.material);
   const metalSupplierCostExVat = getTradeEtchedCost(state, material) * getShapeUplift(state.shape);
   const supplierCostWithVat = metalSupplierCostExVat * (1 + SUPPLIER_VAT_RATE);
