@@ -2303,16 +2303,16 @@ function AdminPage() {
                           alt="Approved plaque proof"
                           className="admin-console__proof-image"
                         />
-                      ) : canRenderSelectedProof ? (
-                        <div className="admin-console__proof-live-preview">
-                          <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
-                        </div>
                       ) : storedProofSvgForOrder(selectedOrder) ? (
                         <img
                           src={storedProofSvgDataUrl(selectedOrder)}
                           alt="Stored plaque artwork"
                           className="admin-console__proof-image"
                         />
+                      ) : canRenderSelectedProof ? (
+                        <div className="admin-console__proof-live-preview">
+                          <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
+                        </div>
                       ) : (
                         <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
                       )}
@@ -2428,16 +2428,16 @@ function AdminPage() {
                     alt="Approved plaque proof"
                     className="admin-console__proof-image"
                   />
-                ) : canRenderSelectedProof ? (
-                  <div className="admin-console__proof-live-preview">
-                    <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
-                  </div>
                 ) : storedProofSvgForOrder(selectedOrder) ? (
                   <img
                     src={storedProofSvgDataUrl(selectedOrder)}
                     alt="Stored plaque artwork"
                     className="admin-console__proof-image"
                   />
+                ) : canRenderSelectedProof ? (
+                  <div className="admin-console__proof-live-preview">
+                    <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
+                  </div>
                 ) : (
                   <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
                 )}
