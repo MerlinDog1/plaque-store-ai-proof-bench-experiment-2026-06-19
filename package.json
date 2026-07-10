@@ -16,6 +16,7 @@
     "check:small-border-stroke": "node scripts/check-small-border-stroke.cjs",
     "check:small-fixings": "node scripts/check-small-fixings.cjs",
     "check:gemini": "node scripts/check-gemini-authored.cjs",
+    "check:public-input-security": "node scripts/check-public-input-security.mjs",
     "check:pricing": "node scripts/check-pricing.cjs",
     "check:security": "node scripts/check-fail-closed-security.mjs",
     "check:symbols": "node scripts/check-symbol-ornaments.cjs",
@@ -37,6 +38,7 @@
     "qrcode": "^1.5.4",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
+    "sanitize-html": "2.17.5",
     "three": "^0.184.0"
   },
   "devDependencies": {

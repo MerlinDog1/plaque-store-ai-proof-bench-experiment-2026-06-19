@@ -1,5 +1,9 @@
 import { randomBytes } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import {
+  sanitizeProofSessionRecord,
+  sanitizeProofSessionSvgFields,
+} from "../services/svgSanitizer.mjs";
 
 const supabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -37,20 +41,26 @@ export const createProofSession = async (payload) => {
 
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30);
+  const sanitizedSvg = sanitizeProofSessionSvgFields(payload);
+  const sanitizedRecord = sanitizeProofSessionRecord({
+    plaque_state: sanitizedSvg.plaqueState,
+    generated_svg: sanitizedSvg.generatedSvg,
+    metadata: payload.metadata || {},
+  });
   const row = {
     public_token: makePublicToken(),
     email: payload.email || null,
     status: payload.status || "draft",
-    plaque_state: payload.plaqueState || payload.plaque_state || {},
+    plaque_state: sanitizedSvg.plaqueState,
     wording: payload.wording || "",
-    generated_svg: payload.generatedSvg || payload.generated_svg || null,
+    generated_svg: sanitizedSvg.generatedSvg,
     ai_reasoning: payload.aiReasoning || payload.ai_reasoning || null,
     price_estimate_pence: Number.isInteger(payload.priceEstimatePence)
       ? payload.priceEstimatePence
       : payload.price_estimate_pence || 0,
     currency: payload.currency || "gbp",
     quote_flags: payload.quoteFlags || payload.quote_flags || {},
-    metadata: payload.metadata || {},
+    metadata: sanitizedRecord.metadata,
     expires_at: payload.expiresAt || payload.expires_at || expiresAt.toISOString(),
   };
 
@@ -79,5 +89,5 @@ export const getProofSessionByToken = async (publicToken) => {
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return sanitizeProofSessionRecord(data);
 };

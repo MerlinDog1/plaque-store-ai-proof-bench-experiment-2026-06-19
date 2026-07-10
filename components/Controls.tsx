@@ -1558,6 +1558,9 @@ export const Controls: React.FC<Props> = ({
                         const model = event.target.value as EtchmasterImageModel;
                         onChange({
                           etchmasterModel: model,
+                          ...(model === EtchmasterImageModel.NanoBanana1
+                            ? { etchmasterImageSize: '1K' }
+                            : {}),
                           ...(model === EtchmasterImageModel.NanoBanana1 && ['4:1', '1:4', '8:1', '1:8'].includes(state.etchmasterAspectRatio)
                             ? { etchmasterAspectRatio: '1:1' }
                             : {}),

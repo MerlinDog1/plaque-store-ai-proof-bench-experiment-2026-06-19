@@ -2,8 +2,25 @@ import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { GoogleGenAI } from "@google/genai";
+import {
+  GeminiProxyRequestError,
+  MAX_GEMINI_REQUEST_BYTES,
+  createGeminiRateLimiter,
+  formatGeminiProxyError,
+  getGeminiClientIdentity,
+  hasAllowedGeminiBrowserHeaders,
+  isDeployedGeminiEnvironment,
+  isGeminiPublicProxyEnabled,
+  parseGeminiRequestJson,
+  validateGeminiGenerateContentRequest,
+} from "./server/geminiProxy.mjs";
+import {
+  prepareOrderProofSvgDocument,
+  svgDocumentResponseHeaders,
+} from "./server/svgResponse.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, "dist");
@@ -71,6 +88,12 @@ const { getStorefrontAuth } = await import("./server/storefrontAuth.mjs");
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY || "";
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+const deployedGeminiEnvironment = isDeployedGeminiEnvironment(process.env);
+const geminiPublicProxyEnabled = isGeminiPublicProxyEnabled(process.env);
+const geminiRateLimiter = createGeminiRateLimiter({
+  limit: process.env.GEMINI_RATE_LIMIT_UNITS_PER_MINUTE || 20,
+  windowMs: 60 * 1000,
+});
 
 const escapeXml = (value = "") => String(value)
   .replace(/&/g, "&amp;")
@@ -131,9 +154,8 @@ const wrapProofSvg = (order, body) => {
 };
 
 const prepareStoredProofSvgForRaster = (order) => {
-  const raw = String(order?.proofPackage?.visualProofSvg || "").trim();
-  if (!raw.startsWith("<svg")) return wrapProofSvg(order, raw);
-  return raw.replace(/\s(?:href|xlink:href)=["']\/([^"']+)["']/g, (match, assetPath) => {
+  const prepared = prepareOrderProofSvgDocument(order, wrapProofSvg) || wrapProofSvg(order, "");
+  return prepared.replace(/\s(?:href|xlink:href)=["']\/([^"']+)["']/g, (match, assetPath) => {
     const localPath = path.join(distDir, assetPath);
     if (!fs.existsSync(localPath)) return match;
     const attr = match.trim().startsWith("xlink:href") ? "xlink:href" : "href";
@@ -239,17 +261,37 @@ const stripHeavyProofPayload = (order) => {
 
 const stripHeavyProofPayloads = (orders) => orders.map(stripHeavyProofPayload);
 
-const readBody = (req) =>
+const bodyTooLargeError = (limit) => {
+  const error = new Error(`Request body exceeds the ${limit}-byte limit.`);
+  error.statusCode = 413;
+  return error;
+};
+
+const readBody = (req, limit = maxBodyBytes) =>
   new Promise((resolve, reject) => {
     let body = "";
+    let bodyBytes = 0;
+    let tooLarge = false;
+    const declaredLength = Number(req.headers["content-length"] || 0);
+    if (Number.isFinite(declaredLength) && declaredLength > limit) {
+      req.resume?.();
+      reject(bodyTooLargeError(limit));
+      return;
+    }
     req.on("data", (chunk) => {
-      body += chunk;
-      if (body.length > maxBodyBytes) {
-        reject(new Error("Request body is too large."));
-        req.destroy();
+      if (tooLarge) return;
+      bodyBytes += Buffer.isBuffer(chunk) ? chunk.length : Buffer.byteLength(chunk);
+      if (bodyBytes > limit) {
+        tooLarge = true;
+        body = "";
+        return;
       }
+      body += chunk;
     });
-    req.on("end", () => resolve(body));
+    req.on("end", () => {
+      if (tooLarge) reject(bodyTooLargeError(limit));
+      else resolve(body);
+    });
     req.on("error", reject);
   });
 
@@ -282,6 +324,7 @@ const serveStatic = (req, res) => {
   res.writeHead(200, {
     "Content-Type": mimeTypes[ext] || "application/octet-stream",
     "Cache-Control": ext === ".html" ? (isAdminPage ? "no-store" : "no-cache") : "public, max-age=31536000, immutable",
+    ...(ext === ".svg" ? svgDocumentResponseHeaders(path.basename(filePath)) : {}),
     ...(isAdminPage ? { "X-Robots-Tag": "noindex, nofollow" } : {}),
   });
   fs.createReadStream(filePath).pipe(res);
@@ -291,7 +334,7 @@ export const handleRequest = async (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
 
   if (req.method === "GET" && url.pathname === "/api/gemini/health") {
-    sendJson(res, 200, { ok: true, hasKey: Boolean(apiKey) });
+    sendJson(res, 200, { ok: true, enabled: geminiPublicProxyEnabled, hasKey: Boolean(apiKey) });
     return;
   }
 
@@ -348,15 +391,14 @@ export const handleRequest = async (req, res) => {
         res.end("Order access required");
         return;
       }
-      const rawSvg = String(order?.proofPackage?.visualProofSvg || "");
-      if (!order || !rawSvg) {
+      const svg = order ? prepareOrderProofSvgDocument(order, wrapProofSvg) : null;
+      if (!order || !svg) {
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
         res.end("Proof image not found");
         return;
       }
-      const svg = rawSvg.trim().startsWith("<svg") ? rawSvg : wrapProofSvg(order, rawSvg);
       res.writeHead(200, {
-        "Content-Type": "image/svg+xml; charset=utf-8",
+        ...svgDocumentResponseHeaders(`${orderId}-approved-proof.svg`),
         "Cache-Control": "public, max-age=86400",
       });
       res.end(svg);
@@ -680,32 +722,60 @@ export const handleRequest = async (req, res) => {
   }
 
   if (req.method === "POST" && url.pathname === "/api/gemini/generate-content") {
+    if (!geminiPublicProxyEnabled) {
+      sendJson(res, 503, { error: "Public Gemini generation is disabled." });
+      return;
+    }
     if (!ai) {
       sendJson(res, 501, { error: "GEMINI_API_KEY is not configured on the server." });
       return;
     }
+    if (!hasAllowedGeminiBrowserHeaders(req, { deployed: deployedGeminiEnvironment })) {
+      sendJson(res, 403, { error: "An explicit same-origin browser request is required." });
+      return;
+    }
+    const clientIdentity = getGeminiClientIdentity(req, { vercel: Boolean(process.env.VERCEL) });
+    if (!clientIdentity) {
+      sendJson(res, 403, { error: "A trusted client identity is required." });
+      return;
+    }
+    const requestId = randomUUID();
     try {
-      const payload = JSON.parse(await readBody(req));
-      const response = await ai.models.generateContent(payload);
-      sendJson(res, 200, addResponseText(response));
+      let rawBody;
+      try {
+        rawBody = await readBody(req, MAX_GEMINI_REQUEST_BYTES);
+      } catch (error) {
+        if (Number(error?.statusCode || 0) === 413) {
+          throw new GeminiProxyRequestError("Gemini request body is too large.", 413);
+        }
+        throw error;
+      }
+      const payload = parseGeminiRequestJson(rawBody);
+      const validated = validateGeminiGenerateContentRequest(payload);
+      const limit = geminiRateLimiter.consume(clientIdentity, validated.cost);
+      const rateHeaders = {
+        "X-RateLimit-Limit": String(limit.limit),
+        "X-RateLimit-Remaining": String(limit.remaining),
+      };
+      if (!limit.ok) {
+        sendJsonWithHeaders(res, 429, { error: "Gemini request limit reached. Try again shortly." }, {
+          ...rateHeaders,
+          "Retry-After": String(limit.retryAfter),
+        });
+        return;
+      }
+      const response = await ai.models.generateContent(validated.request);
+      sendJsonWithHeaders(res, 200, addResponseText(response), rateHeaders);
     } catch (error) {
-      sendJson(res, 500, { error: error instanceof Error ? error.message : "Gemini generateContent failed." });
+      const formatted = formatGeminiProxyError(error, requestId);
+      if (formatted.shouldLog) console.error(`Gemini generateContent failed [${requestId}].`, error);
+      sendJson(res, formatted.statusCode, formatted.payload);
     }
     return;
   }
 
   if (req.method === "POST" && url.pathname === "/api/gemini/generate-images") {
-    if (!ai) {
-      sendJson(res, 501, { error: "GEMINI_API_KEY is not configured on the server." });
-      return;
-    }
-    try {
-      const payload = JSON.parse(await readBody(req));
-      const response = await ai.models.generateImages(payload);
-      sendJson(res, 200, response);
-    } catch (error) {
-      sendJson(res, 500, { error: error instanceof Error ? error.message : "Gemini generateImages failed." });
-    }
+    sendJson(res, 404, { error: "This Gemini operation is not supported by the application." });
     return;
   }
 
