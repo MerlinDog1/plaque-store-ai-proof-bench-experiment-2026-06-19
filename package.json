@@ -2,10 +2,12 @@
   "name": "plaque-store-ai-proof-bench-experiment-2026-06-19",
   "private": true,
   "version": "0.0.0",
+  "packageManager": "npm@10.8.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "npm exec -- vite build && node scripts/prerender-product-pages.mjs",
+    "typecheck": "tsc --noEmit",
     "check:bold-toggle": "node scripts/check-bold-toggle.cjs",
     "check:fixings-border-ui": "node scripts/check-fixings-border-ui.cjs",
     "check:curved-scallop-border": "node scripts/check-curved-scallop-border.cjs",
@@ -37,6 +39,8 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@types/node": "^22.14.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "@types/three": "^0.184.1",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.5.0",
