@@ -107,6 +107,7 @@ const listOrderColumns = [
   "inscription",
   "plaque_state",
   "price_breakdown",
+  "proof_package",
   "shipping_address",
   "email_events",
   "events",
