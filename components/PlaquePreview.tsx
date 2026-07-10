@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 
 import { BorderStyle, PlaqueState, Shape, Fixing, Material, TEXT_COLOR_VALUES, MemorialImageMethod, DesignStyle, MemorialImageShape } from '../types';
 import { getInscriptionLayout } from '../services/inscriptionLayout';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
+import { sanitizeSvgMarkup } from '../services/svgSanitizer.mjs';
 
 interface Props {
   state: PlaqueState;
@@ -38,9 +39,10 @@ function getEllipseCircleIntersectionY(rx: number, ry: number, radius: number) {
 }
 
 function getSvgPayload(svg: string | null): { viewBox: string; content: string } | null {
-  if (!svg) return null;
-  const viewBox = svg.match(/viewBox=["']([^"']+)["']/i)?.[1] || "0 0 100 100";
-  const content = svg
+  const sanitizedSvg = sanitizeSvgMarkup(svg);
+  if (!sanitizedSvg) return null;
+  const viewBox = sanitizedSvg.match(/viewBox=["']([^"']+)["']/i)?.[1] || "0 0 100 100";
+  const content = sanitizedSvg
     .replace(/<svg[^>]*>/i, "")
     .replace(/<\/svg>/i, "")
     .replace(/<rect[^>]*fill=["']white["'][^>]*\/?>/gi, "")
@@ -276,7 +278,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     ? state.memorialImageSourceUrl || state.memorialImagePreviewUrl
     : null;
   const renderedGeneratedSvgContent = React.useMemo(
-    () => normalizeScriptTypography(state.generatedSvgContent),
+    () => normalizeScriptTypography(sanitizeSvgMarkup(state.generatedSvgContent)),
     [state.generatedSvgContent]
   );
 

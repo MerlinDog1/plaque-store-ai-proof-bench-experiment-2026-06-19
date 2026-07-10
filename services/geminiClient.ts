@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
 type GenerateContentArgs = Parameters<GoogleGenAI["models"]["generateContent"]>[0];
-type GenerateImagesArgs = Parameters<GoogleGenAI["models"]["generateImages"]>[0];
 
 const callGeminiProxy = async <T,>(path: string, payload: unknown): Promise<T> => {
   const response = await fetch(path, {
@@ -24,11 +23,6 @@ const createBrowserProxyClient = () => ({
         "/api/gemini/generate-content",
         args,
       ),
-    generateImages: (args: GenerateImagesArgs) =>
-      callGeminiProxy<Awaited<ReturnType<GoogleGenAI["models"]["generateImages"]>>>(
-        "/api/gemini/generate-images",
-        args,
-      ),
   },
 });
 
@@ -44,7 +38,7 @@ export const hasBrowserGeminiProxy = async (): Promise<boolean> => {
   try {
     const response = await fetch("/api/gemini/health", { method: "GET" });
     const body = await response.json();
-    return Boolean(response.ok && body?.hasKey);
+    return Boolean(response.ok && body?.enabled && body?.hasKey);
   } catch {
     return false;
   }
