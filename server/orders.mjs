@@ -7,19 +7,41 @@ import {
   sanitizeProofPackageSvg,
   sanitizeSvgMarkup,
 } from "../services/svgSanitizer.mjs";
+import {
+  CheckoutRequestError,
+  buildServerCheckoutOrder,
+  createServerOrderId,
+} from "./checkout.mjs";
 
 const storeRoot = process.env.VERCEL ? "/tmp" : process.cwd();
 const storePath = path.join(storeRoot, "data", "storefront-orders.json");
-const canonicalSiteUrl = "https://instaplaque.co.uk";
 const proofAttachmentLocks = new Map();
 
 const nowIso = () => new Date().toISOString();
-const publicOriginForOrder = (origin = "") =>
-  String(process.env.PUBLIC_SITE_URL || origin || canonicalSiteUrl)
-    .replace(/\/$/, "")
-    .replace(/https:\/\/instaplaque(?:-[^.]+)?\.vercel\.app$/i, canonicalSiteUrl);
+
+export const isLocalOrderJsonStoreEnabled = (env = process.env) => (
+  env.ALLOW_LOCAL_ORDER_JSON_STORE === "true"
+  && !env.VERCEL
+  && env.NODE_ENV !== "production"
+);
+
+export class DurableOrderStorageError extends CheckoutRequestError {
+  constructor() {
+    super(
+      "Durable Supabase order storage is required for checkout.",
+      503,
+      "durable_order_storage_required",
+    );
+    this.name = "DurableOrderStorageError";
+  }
+}
+
+export const assertLocalOrderJsonStoreEnabled = (env = process.env) => {
+  if (!isLocalOrderJsonStoreEnabled(env)) throw new DurableOrderStorageError();
+};
 
 const readLocalOrders = async () => {
+  assertLocalOrderJsonStoreEnabled();
   try {
     const orders = JSON.parse(await fs.readFile(storePath, "utf8"));
     return Array.isArray(orders) ? orders.map((order) => sanitizeOrderSvgFields(order)) : [];
@@ -29,6 +51,7 @@ const readLocalOrders = async () => {
 };
 
 const writeLocalOrders = async (orders) => {
+  assertLocalOrderJsonStoreEnabled();
   await fs.mkdir(path.dirname(storePath), { recursive: true });
   await fs.writeFile(storePath, JSON.stringify(orders.map((order) => sanitizeOrderSvgFields(order)), null, 2));
 };
@@ -216,6 +239,16 @@ const saveOrderToProofSessions = async (supabase, order) => {
   return fromProofSessionOrderRow(data) || order;
 };
 
+const insertOrderToProofSessions = async (supabase, order) => {
+  const { data, error } = await supabase
+    .from("proof_sessions")
+    .insert(toProofSessionOrderRow(order))
+    .select("email, wording, plaque_state, price_estimate_pence, currency, metadata, created_at, updated_at")
+    .single();
+  if (error) throw error;
+  return fromProofSessionOrderRow(data) || order;
+};
+
 const getProofSessionOrderById = async (supabase, orderId) => {
   const { data, error } = await supabase
     .from("proof_sessions")
@@ -287,50 +320,6 @@ const listProofSessionOrders = async (supabase) => {
       updatedAt: row.updated_at,
     };
   });
-};
-
-const normaliseFromMockOrder = (input) => {
-  const order = input?.orderSnapshot || input?.order || input || {};
-  const createdAt = order.createdAt || nowIso();
-  const publicOrigin = publicOriginForOrder(input.origin || order.metadata?.publicOrigin || "");
-  return {
-    id: String(order.id || input.orderId || `PSAI-${Date.now().toString().slice(-6)}`),
-    stripeCheckoutSessionId: order.stripeSimulation?.checkoutSessionId || null,
-    stripePaymentIntentId: order.stripeSimulation?.paymentIntentId || null,
-    customerEmail: order.customerEmail || input.customerEmail || "",
-    customerName: order.customerName || input.customerName || "",
-    status: "checkout_started",
-    paymentStatus: "unpaid",
-    fulfilmentStatus: "not_started",
-    totalPence: Number.isInteger(input.totalPence)
-      ? input.totalPence
-      : Math.round(Number(order.total || 0) * 100),
-    currency: "gbp",
-    productTitle: order.productTitle || input.productTitle || "Custom plaque",
-    inscription: order.inscription || "",
-    plaqueState: order.state || order.plaqueState || {},
-    priceBreakdown: order.priceBreakdown || {},
-    proofPackage: order.proofPackage || {},
-    shippingAddress: order.deliveryAddress || {},
-    stripeSession: {},
-    emailEvents: order.emailEvents || [],
-    events: [
-      {
-        type: "checkout_started",
-        label: "Checkout started",
-        at: createdAt,
-      },
-    ],
-    metadata: {
-      source: "instaplaque-checkout",
-      publicOrigin,
-      mockOrder: order,
-    },
-    approvedAt: order.proofPackage?.lockedAt || createdAt,
-    paidAt: null,
-    createdAt,
-    updatedAt: createdAt,
-  };
 };
 
 const normaliseStatus = (status, fallback = "paid") => {
@@ -456,8 +445,71 @@ const saveOrder = async (order) => {
   return next;
 };
 
-export const createPendingOrder = async (payload) => {
-  return saveOrder(normaliseFromMockOrder(payload));
+export class OrderIdCollisionError extends Error {
+  constructor(orderId) {
+    super(`Order ID ${orderId} is already in use.`);
+    this.name = "OrderIdCollisionError";
+    this.code = "order_id_collision";
+    this.orderId = orderId;
+  }
+}
+
+const isUniqueViolation = (error) => (
+  error instanceof OrderIdCollisionError
+  || error?.code === "23505"
+  || error?.code === "order_id_collision"
+);
+
+const insertNewOrder = async (order) => {
+  const next = { ...order, updatedAt: nowIso() };
+  const supabase = getSupabaseServiceClient();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("storefront_orders")
+      .insert(toRow(next))
+      .select("*")
+      .single();
+    if (error && isUniqueViolation(error)) throw new OrderIdCollisionError(next.id);
+    if (error && !shouldUseLocalFallback(error)) throw error;
+    if (error && shouldUseLocalFallback(error)) {
+      try {
+        return await insertOrderToProofSessions(supabase, next);
+      } catch (proofSessionError) {
+        if (isUniqueViolation(proofSessionError)) throw new OrderIdCollisionError(next.id);
+        const orders = await readLocalOrders();
+        if (orders.some((item) => item.id === next.id)) throw new OrderIdCollisionError(next.id);
+        await writeLocalOrders([next, ...orders]);
+        return next;
+      }
+    }
+    return fromRow(data);
+  }
+
+  const orders = await readLocalOrders();
+  if (orders.some((item) => item.id === next.id)) throw new OrderIdCollisionError(next.id);
+  await writeLocalOrders([next, ...orders]);
+  return next;
+};
+
+export const createPendingOrder = async (payload, dependencies = {}) => {
+  const idFactory = dependencies.idFactory || createServerOrderId;
+  const insertOrder = dependencies.insertOrder || insertNewOrder;
+  const maxAttempts = dependencies.maxAttempts || 5;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const order = buildServerCheckoutOrder(payload, { orderId: idFactory() });
+    try {
+      return await insertOrder(order);
+    } catch (error) {
+      if (!isUniqueViolation(error)) throw error;
+    }
+  }
+
+  throw new CheckoutRequestError(
+    "Could not allocate a unique order ID. Please try checkout again.",
+    503,
+    "order_id_allocation_failed",
+  );
 };
 
 export const createExternalOrder = async (payload) => {
@@ -467,6 +519,15 @@ export const createExternalOrder = async (payload) => {
 export const attachStripeSessionToOrder = async (orderId, session) => {
   const order = await getOrderById(orderId);
   if (!order) throw new Error(`Order ${orderId} was not found.`);
+  if (order.stripeCheckoutSessionId && session?.id !== order.stripeCheckoutSessionId) {
+    throw new StripePaymentVerificationError("Stripe session ID did not match the stored checkout session.");
+  }
+  if (session?.client_reference_id && session.client_reference_id !== order.id) {
+    throw new StripePaymentVerificationError("Stripe client reference did not match the server order.");
+  }
+  if (session?.metadata?.order_id && session.metadata.order_id !== order.id) {
+    throw new StripePaymentVerificationError("Stripe metadata did not match the server order.");
+  }
   return saveOrder({
     ...order,
     stripeCheckoutSessionId: session.id || order.stripeCheckoutSessionId,
@@ -679,11 +740,59 @@ export const addOrderEvent = async (orderId, event) => {
   return saveOrder({ ...order, events: [nextEvent, ...(order.events || [])] });
 };
 
-export const markOrderPaidFromSession = async (session) => {
+export class StripePaymentVerificationError extends CheckoutRequestError {
+  constructor(message) {
+    super(message, 409, "stripe_payment_verification_failed");
+    this.name = "StripePaymentVerificationError";
+  }
+}
+
+export const isPaidCompleteStripeSession = (session) => (
+  session?.payment_status === "paid"
+  && (session?.status === undefined || session?.status === null || session?.status === "complete")
+);
+
+export const assertStripePaymentMatchesOrder = (order, session) => {
+  if (!order) throw new StripePaymentVerificationError("Paid Stripe session could not be matched to an order.");
+  if (!session?.id || !order.stripeCheckoutSessionId || session.id !== order.stripeCheckoutSessionId) {
+    throw new StripePaymentVerificationError("Stripe session ID did not match the stored checkout session.");
+  }
+  if (session.payment_status !== "paid") {
+    throw new StripePaymentVerificationError("Stripe has not marked this checkout as paid.");
+  }
+  if (session.status !== undefined && session.status !== null && session.status !== "complete") {
+    throw new StripePaymentVerificationError("Stripe checkout is not complete.");
+  }
+  if (!Number.isInteger(session.amount_total) || session.amount_total !== order.totalPence) {
+    throw new StripePaymentVerificationError("Stripe payment amount did not match the server order total.");
+  }
+  if (
+    typeof session.currency !== "string"
+    || session.currency.toLowerCase() !== String(order.currency || "").toLowerCase()
+  ) {
+    throw new StripePaymentVerificationError("Stripe payment currency did not match the server order currency.");
+  }
+  if (session.client_reference_id !== order.id) {
+    throw new StripePaymentVerificationError("Stripe client reference did not match the server order.");
+  }
+  if (session.metadata?.order_id !== order.id) {
+    throw new StripePaymentVerificationError("Stripe metadata did not match the server order.");
+  }
+  return true;
+};
+
+export const markOrderPaidFromSession = async (session, dependencies = {}) => {
+  const findByStripeSession = dependencies.getOrderByStripeSession || getOrderByStripeSession;
+  const findById = dependencies.getOrderById || getOrderById;
+  const persistOrder = dependencies.saveOrder || saveOrder;
+  const sendRecordedEmail = dependencies.sendAndRecordOrderEmail || sendAndRecordOrderEmail;
+  const internalProductionEmails = dependencies.getInternalProductionEmails || getInternalProductionEmails;
   const sessionId = session?.id;
-  const orderId = session?.client_reference_id || session?.metadata?.order_id;
-  const order = orderId ? await getOrderById(orderId) : await getOrderByStripeSession(sessionId);
-  if (!order) throw new Error("Paid Stripe session could not be matched to an order.");
+  if (!sessionId) throw new StripePaymentVerificationError("Stripe session ID is required.");
+  const referencedOrderId = session?.client_reference_id;
+  const order = await findByStripeSession(sessionId)
+    || (referencedOrderId ? await findById(referencedOrderId) : null);
+  assertStripePaymentMatchesOrder(order, session);
 
   const wasAlreadyPaid = order.paymentStatus === "paid";
   const shipping = session?.shipping_details || session?.shipping || {};
@@ -694,7 +803,7 @@ export const markOrderPaidFromSession = async (session) => {
   const paymentEvent = wasAlreadyPaid
     ? []
     : [{ type: "payment_received", label: "Payment received", at: paidAt }];
-  const next = await saveOrder({
+  const next = await persistOrder({
     ...order,
     customerEmail,
     customerName,
@@ -702,9 +811,13 @@ export const markOrderPaidFromSession = async (session) => {
     paymentStatus: "paid",
     fulfilmentStatus: order.fulfilmentStatus || "not_started",
     stripeCheckoutSessionId: sessionId || order.stripeCheckoutSessionId,
-    stripePaymentIntentId: session.payment_intent || order.stripePaymentIntentId,
+    stripePaymentIntentId: paymentIntentId(session.payment_intent) || order.stripePaymentIntentId,
     shippingAddress: shipping.address ? { name: shipping.name, phone: customer.phone || session.phone_number || "", ...shipping.address } : order.shippingAddress,
     stripeSession: session,
+    metadata: {
+      ...(order.metadata || {}),
+      checkoutRecoveryToken: null,
+    },
     paidAt,
     events: [
       ...paymentEvent,
@@ -713,11 +826,11 @@ export const markOrderPaidFromSession = async (session) => {
   });
 
   if (!wasAlreadyPaid) {
-    await sendAndRecordOrderEmail(next, "customer-order-confirmation", customerEmail);
+    await sendRecordedEmail(next, "customer-order-confirmation", customerEmail);
 
     if (next.proofPackage?.productionArtworkPdf) {
-      for (const internalEmail of getInternalProductionEmails()) {
-        await sendAndRecordOrderEmail(next, "admin-new-paid-order", internalEmail).catch(() => null);
+      for (const internalEmail of internalProductionEmails()) {
+        await sendRecordedEmail(next, "admin-new-paid-order", internalEmail).catch(() => null);
       }
     }
   }

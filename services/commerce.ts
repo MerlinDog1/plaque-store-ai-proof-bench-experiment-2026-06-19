@@ -8,6 +8,10 @@ import {
   TextColor,
 } from '../types';
 import { estimatePlaquePrice } from './pricing';
+import {
+  getCheckoutPriceBreakdown,
+  getCheckoutQuoteReasons,
+} from './checkoutPolicy.mjs';
 import { BENCH_SAFE_MARGIN_PERCENT } from './safeMargin';
 
 export const DEFAULT_PRODUCT_SLUG = 'bench-plaques';
@@ -104,7 +108,7 @@ export interface MockOrder {
     | 'quote-requested'
     | 'in-production'
     | 'dispatched';
-  paymentStatus: 'unpaid' | 'test-paid' | 'requires-check';
+  paymentStatus: 'unpaid' | 'paid' | 'failed' | 'refunded' | 'test-paid' | 'requires-check';
   total: number;
   inscription: string;
   proofApproved: boolean;
@@ -955,34 +959,11 @@ export function getLandingPageBySlug(slug: string | null | undefined) {
 }
 
 export function getQuoteReasons(state: PlaqueState, inscription: string) {
-  const reasons: string[] = [];
-  if (state.width > 420 || state.height > 300) {
-    reasons.push('oversized plaque dimensions');
-  }
-  if (state.memorialImageEnabled) {
-    reasons.push('image/artwork check required');
-  }
-  if (inscription.trim().length > 360) {
-    reasons.push('long inscription needs readability review');
-  }
-  if (state.shape === Shape.Heart) {
-    reasons.push('special shape production check');
-  }
-  return reasons;
+  return getCheckoutQuoteReasons(state, inscription);
 }
 
 export function getPriceBreakdown(state: PlaqueState, inscription: string): PriceBreakdown {
-  const total = estimatePlaquePrice(state);
-  const wood = state.wood ? estimatePlaquePrice({ ...state, wood: true }) - estimatePlaquePrice({ ...state, wood: false }) : 0;
-  const quoteReasons = getQuoteReasons(state, inscription);
-  return {
-    total,
-    wood,
-    delivery: 0,
-    base: total - wood,
-    quoteRequired: quoteReasons.length > 0,
-    quoteReasons,
-  };
+  return getCheckoutPriceBreakdown(state, inscription);
 }
 
 export function makeMockOrder(

@@ -293,8 +293,8 @@ try {
     "/api/orders/security-check-missing-order/proof-image",
     JSON.stringify({ stripeCheckoutSessionId: "cs_security_check", visualProofPng: "AA==" }),
   );
-  assert.equal(proofMutationResponse.statusCode, 401);
-  assert.equal(proofMutationResponse.payload.error, "Order access required.");
+  assert.equal(proofMutationResponse.statusCode, 503);
+  assert.equal(proofMutationResponse.payload.code, "durable_order_storage_required");
 
   for (const url of ["/api/stripe/webhook", "/api/webhooks/stripe"]) {
     const response = await invokeRoute(handleRequest, "POST", url, rawStripeEvent);

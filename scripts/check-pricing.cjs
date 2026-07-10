@@ -34,7 +34,15 @@ async function clickJourneyStep(page, compactLabel) {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 
-  await page.goto(APP_URL, { waitUntil: "networkidle", timeout: 60000 });
+  await page.goto(APP_URL, { waitUntil: "domcontentloaded", timeout: 60000 });
+  await page.waitForFunction(
+    () => Array.from(document.querySelectorAll("button")).some((candidate) => {
+      const text = (candidate.textContent || "").trim().replace(/\s+/g, " ");
+      return text === "Design" || text === "Design now" || text === "Design a plaque";
+    }),
+    null,
+    { timeout: 60000 },
+  );
   await enterProofBench(page);
 
   await page.waitForFunction(() => /1\s*Size\/Shape/.test(document.body.innerText) && /2\s*Material/.test(document.body.innerText), null, { timeout: 5000 });
