@@ -6,6 +6,7 @@ import { getInternalProductionEmails, sendEmail } from "./email.mjs";
 const storeRoot = process.env.VERCEL ? "/tmp" : process.cwd();
 const storePath = path.join(storeRoot, "data", "storefront-orders.json");
 const canonicalSiteUrl = "https://instaplaque.co.uk";
+const proofAttachmentLocks = new Map();
 
 const nowIso = () => new Date().toISOString();
 const publicOriginForOrder = (origin = "") =>
@@ -30,6 +31,8 @@ const shouldUseLocalFallback = (error) => {
   const message = `${error?.code || ""} ${error?.message || ""}`.toLowerCase();
   return message.includes("42p01") || message.includes("pgrst205") || message.includes("storefront_orders");
 };
+
+const isMissingProofClaimFunction = (error) => ["42883", "PGRST202"].includes(String(error?.code || "").toUpperCase());
 
 const toRow = (order) => ({
   id: order.id,
@@ -460,13 +463,15 @@ export const attachStripeSessionToOrder = async (orderId, session) => {
   });
 };
 
-export const attachVisualProofToOrder = async (orderId, payload = {}) => {
-  const order = await getOrderById(orderId);
-  if (!order) throw new Error(`Order ${orderId} was not found.`);
-
+export const prepareVisualProofAttachment = (order, payload = {}) => {
   const sessionId = String(payload.stripeCheckoutSessionId || "").trim();
-  if (order.stripeCheckoutSessionId && sessionId !== order.stripeCheckoutSessionId) {
+  const storedSessionId = String(order?.stripeCheckoutSessionId || "").trim();
+  if (!storedSessionId || !sessionId || sessionId !== storedSessionId) {
     throw new Error("Proof image did not match the checkout session.");
+  }
+
+  if (String(order.proofPackage?.visualProofPng || "").trim()) {
+    return { attached: false, order };
   }
 
   const visualProofPng = String(payload.visualProofPng || "").trim();
@@ -484,23 +489,85 @@ export const attachVisualProofToOrder = async (orderId, payload = {}) => {
     throw new Error("Production artwork must be a PDF data URL or base64 PDF.");
   }
 
-  return saveOrder({
-    ...order,
-    proofPackage: {
-      ...(order.proofPackage || {}),
-      visualProofSvg: visualProofSvg || order.proofPackage?.visualProofSvg || null,
-      visualProofPng,
-      visualProofRendererVersion: Number.isFinite(visualProofRendererVersion) && visualProofRendererVersion > 0
-        ? visualProofRendererVersion
-        : order.proofPackage?.visualProofRendererVersion || null,
-      productionArtworkPdf: productionArtworkPdf || order.proofPackage?.productionArtworkPdf || null,
+  return {
+    attached: true,
+    order: {
+      ...order,
+      proofPackage: {
+        ...(order.proofPackage || {}),
+        // The initial SVG remains subject to the companion sanitizer change.
+        visualProofSvg: visualProofSvg || order.proofPackage?.visualProofSvg || null,
+        visualProofPng,
+        visualProofRendererVersion: Number.isFinite(visualProofRendererVersion) && visualProofRendererVersion > 0
+          ? visualProofRendererVersion
+          : order.proofPackage?.visualProofRendererVersion || null,
+        productionArtworkPdf: productionArtworkPdf || order.proofPackage?.productionArtworkPdf || null,
+      },
+      events: [
+        { type: "proof_image_attached", label: "Browser-rendered proof image attached", at: nowIso() },
+        ...(order.events || []),
+      ],
     },
-    events: [
-      { type: "proof_image_attached", label: "Browser-rendered proof image attached", at: nowIso() },
-      ...(order.events || []),
-    ],
-  });
+  };
 };
+
+export const shouldSendCustomerProofEmail = (attachment) => Boolean(
+  attachment?.attached && String(attachment?.order?.customerEmail || "").trim(),
+);
+
+const withProofAttachmentLock = async (orderId, operation) => {
+  const previous = proofAttachmentLocks.get(orderId) || Promise.resolve();
+  let release;
+  const current = new Promise((resolve) => {
+    release = resolve;
+  });
+  proofAttachmentLocks.set(orderId, current);
+  await previous;
+  try {
+    return await operation();
+  } finally {
+    release();
+    if (proofAttachmentLocks.get(orderId) === current) proofAttachmentLocks.delete(orderId);
+  }
+};
+
+const claimVisualProofInStorefrontOrders = async (originalOrder, preparedOrder) => {
+  const supabase = getSupabaseServiceClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase.rpc("claim_storefront_order_proof", {
+    p_order_id: originalOrder.id,
+    p_stripe_checkout_session_id: originalOrder.stripeCheckoutSessionId,
+    p_proof_package: preparedOrder.proofPackage,
+    p_event: preparedOrder.events[0],
+  });
+  if (error) {
+    if (isMissingProofClaimFunction(error)) return null;
+    throw error;
+  }
+
+  const claimedRow = Array.isArray(data) ? data[0] : data;
+  if (claimedRow) return { attached: true, order: fromRow(claimedRow) };
+
+  const storedOrder = await getOrderById(originalOrder.id);
+  if (
+    storedOrder?.stripeCheckoutSessionId === originalOrder.stripeCheckoutSessionId
+    && String(storedOrder.proofPackage?.visualProofPng || "").trim()
+  ) {
+    return { attached: false, order: storedOrder };
+  }
+  throw new Error("Proof image could not be claimed without replacing an existing artifact.");
+};
+
+export const attachVisualProofToOrder = async (orderId, payload = {}) => withProofAttachmentLock(orderId, async () => {
+  const order = await getOrderById(orderId);
+  if (!order) throw new Error(`Order ${orderId} was not found.`);
+  const prepared = prepareVisualProofAttachment(order, payload);
+  if (!prepared.attached) return prepared;
+  const claimed = await claimVisualProofInStorefrontOrders(order, prepared.order);
+  if (claimed) return claimed;
+  return { attached: true, order: await saveOrder(prepared.order) };
+});
 
 export const getOrderById = async (orderId) => {
   const supabase = getSupabaseServiceClient();

@@ -4,6 +4,7 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
 const stripePublishableKey = process.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
 const canonicalSiteUrl = "https://instaplaque.co.uk";
+const stripeWebhookToleranceSeconds = 5 * 60;
 
 const getStripeKeyMode = (key) => {
   if (key.startsWith("sk_test_") || key.startsWith("pk_test_")) return "test";
@@ -150,24 +151,42 @@ export const retrieveStripeCheckoutSession = async (sessionId) => {
 
 export const parseStripeWebhook = (rawBody, signatureHeader = "") => {
   if (!stripeWebhookSecret) {
-    return JSON.parse(rawBody);
+    const error = new Error("STRIPE_WEBHOOK_SECRET is not configured; Stripe webhook events are rejected.");
+    error.statusCode = 503;
+    error.code = "STRIPE_WEBHOOK_NOT_CONFIGURED";
+    throw error;
   }
 
-  const parts = Object.fromEntries(
-    String(signatureHeader)
-      .split(",")
-      .map((part) => part.split("="))
-      .filter(([key, value]) => key && value),
-  );
-  const timestamp = parts.t;
-  const signature = parts.v1;
-  if (!timestamp || !signature) throw new Error("Missing Stripe webhook signature.");
+  const parts = String(signatureHeader)
+    .split(",")
+    .map((part) => {
+      const separator = part.indexOf("=");
+      return separator === -1
+        ? ["", ""]
+        : [part.slice(0, separator).trim(), part.slice(separator + 1).trim()];
+    })
+    .filter(([key, value]) => key && value);
+  const timestamp = parts.find(([key]) => key === "t")?.[1];
+  const signatures = parts.filter(([key]) => key === "v1").map(([, value]) => value);
+  if (!timestamp || !signatures.length || !/^\d+$/.test(timestamp)) {
+    throw new Error("Missing Stripe webhook signature.");
+  }
+
+  const timestampSeconds = Number(timestamp);
+  const currentSeconds = Math.floor(Date.now() / 1000);
+  if (!Number.isSafeInteger(timestampSeconds) || Math.abs(currentSeconds - timestampSeconds) > stripeWebhookToleranceSeconds) {
+    throw new Error("Stripe webhook timestamp is outside the allowed five-minute tolerance.");
+  }
 
   const signedPayload = `${timestamp}.${rawBody}`;
   const expected = createHmac("sha256", stripeWebhookSecret).update(signedPayload).digest("hex");
-  const actual = Buffer.from(signature, "hex");
   const expectedBuffer = Buffer.from(expected, "hex");
-  if (actual.length !== expectedBuffer.length || !timingSafeEqual(actual, expectedBuffer)) {
+  const hasValidSignature = signatures.some((signature) => {
+    if (!/^[a-f0-9]{64}$/i.test(signature)) return false;
+    const actual = Buffer.from(signature, "hex");
+    return actual.length === expectedBuffer.length && timingSafeEqual(actual, expectedBuffer);
+  });
+  if (!hasValidSignature) {
     throw new Error("Invalid Stripe webhook signature.");
   }
 

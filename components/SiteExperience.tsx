@@ -75,7 +75,11 @@ type PaidOrder = {
 
 type AdminAuthConfig = {
   authRequired: boolean;
+  configured: boolean;
+  operational: boolean;
+  status: 'configured' | 'misconfigured';
   label?: string;
+  message?: string;
 };
 
 declare global {
@@ -2275,7 +2279,6 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
             visualProofPng: proofImageBase64,
             visualProofRendererVersion: VISUAL_PROOF_RENDERER_VERSION,
             productionArtworkPdf,
-            sendCustomerEmail: !order.proofPackage?.visualProofPng,
           }),
         });
         const payload = await response.json();
@@ -2486,7 +2489,7 @@ function AdminPage() {
   };
 
   const loadOrders = async () => {
-    if (authConfig?.authRequired && !adminAuthenticated) {
+    if (authConfig?.operational === false || (authConfig?.authRequired && !adminAuthenticated)) {
       setLoading(false);
       return;
     }
@@ -2518,7 +2521,21 @@ function AdminPage() {
         const response = await fetch('/api/admin/auth-config');
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.error || 'Could not check admin access.');
-        setAuthConfig({ authRequired: Boolean(payload.authRequired), label: payload.label });
+        const nextConfig: AdminAuthConfig = {
+          authRequired: Boolean(payload.authRequired),
+          configured: Boolean(payload.configured),
+          operational: Boolean(payload.operational),
+          status: payload.status || 'misconfigured',
+          label: payload.label,
+          message: payload.message,
+        };
+        setAuthConfig(nextConfig);
+        if (!nextConfig.operational) {
+          setAdminAuthenticated(false);
+          setAdminError(nextConfig.message || 'Admin access is not configured on the server.');
+          setLoading(false);
+          return;
+        }
         if (payload.authRequired) {
           const sessionResponse = await fetch('/api/admin/session', { credentials: 'same-origin' });
           setAdminAuthenticated(sessionResponse.ok);
@@ -2660,14 +2677,14 @@ function AdminPage() {
           </div>
           <div className="admin-console__head-actions">
             <span>{orders.length} orders</span>
-            {authConfig?.authRequired && adminAuthenticated && (
+            {authConfig?.operational && authConfig.authRequired && adminAuthenticated && (
               <button type="button" className="admin-console__ghost-button" onClick={logoutAdmin}>
                 Lock
               </button>
             )}
           </div>
         </div>
-        {authConfig?.authRequired && !adminAuthenticated && (
+        {authConfig?.operational && authConfig.authRequired && !adminAuthenticated && (
           <form className="admin-console__login" onSubmit={loginAdmin}>
             <label htmlFor="admin-passcode">{authConfig.label || 'Admin passcode'}</label>
             <div>
@@ -2687,7 +2704,7 @@ function AdminPage() {
         )}
         {adminError && <div className="commerce-warning">{adminError}</div>}
         {loading && <div className="commerce-success">Loading orders...</div>}
-        {authConfig?.authRequired && !adminAuthenticated ? null : (
+        {authConfig?.operational === false || (authConfig?.authRequired && !adminAuthenticated) ? null : (
           <>
         <div className="admin-console__stats">
           <div><span>Sold today</span><strong>{todayOrders.length}</strong><small>{formatPence(counts.todayRevenue)}</small></div>

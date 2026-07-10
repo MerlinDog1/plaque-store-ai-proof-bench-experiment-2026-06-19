@@ -17,6 +17,7 @@
     "check:small-fixings": "node scripts/check-small-fixings.cjs",
     "check:gemini": "node scripts/check-gemini-authored.cjs",
     "check:pricing": "node scripts/check-pricing.cjs",
+    "check:security": "node scripts/check-fail-closed-security.mjs",
     "check:symbols": "node scripts/check-symbol-ornaments.cjs",
     "experiment:layout-harness": "node scripts/layout-experiment-harness.cjs",
     "test:export-fidelity": "node scripts/validate-export-fidelity.mjs",
