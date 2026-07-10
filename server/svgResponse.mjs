@@ -21,7 +21,9 @@ export const svgDocumentResponseHeaders = (filename = "proof.svg") => ({
 
 export const prepareOrderProofSvgDocument = (value, fallbackBuilder) => {
   const order = sanitizeOrderSvgFields(value);
-  const rawSvg = sanitizeSvgMarkup(order.proofPackage?.visualProofSvg);
+  const rawSvg = sanitizeSvgMarkup(
+    order.proofPackage?.visualProofSvg || order.proofPackage?.productionSvg,
+  );
   if (!rawSvg) return null;
   const document = rawSvg.startsWith("<svg")
     ? rawSvg
