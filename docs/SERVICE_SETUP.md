@@ -50,6 +50,12 @@ GEMINI_API_KEY=
 APP_BASE_URL=http://127.0.0.1:4179
 MAGIC_LINK_SECRET=
 MOCK_SERVICES=true
+
+# Privileged routes (required for deployed admin/storefront access)
+ADMIN_PASSWORD=
+ADMIN_ACCESS_TOKEN=
+ADMIN_AUTH_SECRET=
+STOREFRONT_INGEST_KEYS=
 ```
 
 Only `SUPABASE_ANON_KEY` is safe for browser use, and even that should be used
@@ -228,5 +234,21 @@ When `MOCK_SERVICES=true`:
 - Keep `.env.example` to variable names only.
 - Never expose `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`,
   `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, or `GEMINI_API_KEY` to the browser.
-- Stripe webhooks must verify signatures before trusting payloads.
+- Stripe webhooks must accept any valid rotation `v1` signature and reject
+  signatures whose timestamp is outside a five-minute tolerance before trusting
+  payloads.
+- Admin routes deny access until `ADMIN_PASSWORD` or `ADMIN_ACCESS_TOKEN` is
+  configured. Local development requires one of these credentials too; there is
+  no credential-free admin mode.
+- Storefront order ingestion denies requests until `STOREFRONT_INGEST_KEYS` is
+  configured. The mock admin hub is admin-authenticated and is not a public
+  persistence API.
+- Proof-image upload requires the order's stored Stripe session and is
+  first-write-only; retries return the stored artifacts without replacing them
+  or dispatching email again. Apply the
+  `20260710113000_claim_storefront_order_proof.sql` migration so this claim stays
+  atomic across concurrent server instances.
+- This change does not sanitize the initial customer proof SVG. The companion
+  SVG-sanitizer change is required before production deployment; idempotency and
+  authentication do not make untrusted SVG safe to render.
 - Magic-link tokens must be long, random, and non-sequential.

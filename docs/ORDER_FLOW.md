@@ -129,7 +129,8 @@ the verified webhook can do that.
 `POST /api/webhooks/stripe`:
 
 1. Read raw request body.
-2. Verify signature with `STRIPE_WEBHOOK_SECRET`.
+2. Verify any valid `v1` signature with `STRIPE_WEBHOOK_SECRET` and reject
+   timestamps outside a five-minute tolerance.
 3. Insert event id into `stripe_events`; if it already exists, return success.
 4. Handle event by type.
 5. Update `stripe_events.processed_at` or store error.

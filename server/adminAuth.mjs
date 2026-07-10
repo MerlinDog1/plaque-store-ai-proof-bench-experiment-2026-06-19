@@ -1,16 +1,34 @@
 import crypto from "node:crypto";
 
-const configuredPassword = process.env.ADMIN_PASSWORD || "";
-const configuredToken = process.env.ADMIN_ACCESS_TOKEN || "";
-const authSecret = process.env.ADMIN_AUTH_SECRET || configuredPassword || configuredToken || "instaplaque-local-admin";
+const configuredPassword = String(process.env.ADMIN_PASSWORD || "").trim();
+const configuredToken = String(process.env.ADMIN_ACCESS_TOKEN || "").trim();
+const hasConfiguredCredential = Boolean(configuredPassword || configuredToken);
+const authSecret = String(
+  process.env.ADMIN_AUTH_SECRET
+    || configuredPassword
+    || configuredToken
+    || crypto.randomBytes(32).toString("hex"),
+);
 const sessionCookieName = "instaplaque_admin_session";
 const sessionHours = Number(process.env.ADMIN_SESSION_HOURS || 8);
 const sessionTtlMs = (Number.isFinite(sessionHours) && sessionHours > 0 ? sessionHours : 8) * 60 * 60 * 1000;
 
-export const getAdminAuthConfig = () => ({
-  authRequired: Boolean(configuredPassword || configuredToken),
-  label: configuredPassword ? "Admin passcode" : "Admin access token",
-});
+export const getAdminAuthConfig = () => {
+  return {
+    configured: hasConfiguredCredential,
+    operational: hasConfiguredCredential,
+    authRequired: true,
+    status: hasConfiguredCredential ? "configured" : "misconfigured",
+    label: configuredPassword
+      ? "Admin passcode"
+      : configuredToken
+        ? "Admin access token"
+        : "Admin access",
+    message: hasConfiguredCredential
+      ? "Admin access is configured."
+      : "Admin access is not configured. Set ADMIN_PASSWORD or ADMIN_ACCESS_TOKEN on the server, including for local development.",
+  };
+};
 
 const digest = (value) =>
   crypto.createHmac("sha256", authSecret).update(String(value)).digest("hex");
@@ -23,17 +41,21 @@ const safeEqual = (a, b) => {
 
 const expectedToken = () => configuredToken || (configuredPassword ? digest(configuredPassword) : "");
 
-export const createAdminSession = (password) => {
-  if (!getAdminAuthConfig().authRequired) {
-    const expiresAt = Date.now() + sessionTtlMs;
-    return { token: "local-preview-admin", expiresAt };
+export const createAdminSession = (credential) => {
+  if (!hasConfiguredCredential) {
+    const error = new Error("Admin access is not configured. Set ADMIN_PASSWORD or ADMIN_ACCESS_TOKEN on the server, including for local development.");
+    error.statusCode = 503;
+    error.code = "ADMIN_AUTH_NOT_CONFIGURED";
+    throw error;
   }
-  const supplied = String(password || "");
+
+  const supplied = String(credential || "");
   const validPassword = configuredPassword && safeEqual(digest(supplied), digest(configuredPassword));
   const validToken = configuredToken && safeEqual(supplied, configuredToken);
   if (!validPassword && !validToken) {
-    const error = new Error("Admin passcode is incorrect.");
+    const error = new Error("Admin credential is incorrect.");
     error.statusCode = 401;
+    error.code = "ADMIN_AUTH_INVALID";
     throw error;
   }
   const expiresAt = Date.now() + sessionTtlMs;
@@ -50,13 +72,18 @@ export const parseCookies = (req) =>
     .map((entry) => {
       const separator = entry.indexOf("=");
       if (separator === -1) return [entry, ""];
-      return [entry.slice(0, separator), decodeURIComponent(entry.slice(separator + 1))];
+      const value = entry.slice(separator + 1);
+      try {
+        return [entry.slice(0, separator), decodeURIComponent(value)];
+      } catch {
+        return [entry.slice(0, separator), value];
+      }
     }));
 
 export const getAdminSessionCookieName = () => sessionCookieName;
 
 export const verifyAdminSessionToken = (token) => {
-  if (!getAdminAuthConfig().authRequired) return true;
+  if (!hasConfiguredCredential) return false;
   const parts = String(token || "").split(".");
   if (parts.length !== 4) return false;
   const [expiresAt, nonce, tokenDigest, signature] = parts;
@@ -68,9 +95,36 @@ export const verifyAdminSessionToken = (token) => {
 };
 
 export const isAdminRequest = (req) => {
-  if (!getAdminAuthConfig().authRequired) return true;
+  if (!hasConfiguredCredential) return false;
+
   const cookieToken = parseCookies(req)[sessionCookieName];
   if (cookieToken && verifyAdminSessionToken(cookieToken)) return true;
-  const headerToken = req.headers["x-admin-token"] || req.headers.authorization?.replace(/^Bearer\s+/i, "");
-  return Boolean(headerToken && (verifyAdminSessionToken(headerToken) || safeEqual(headerToken, expectedToken())));
+
+  const authorization = Array.isArray(req.headers.authorization)
+    ? req.headers.authorization[0]
+    : req.headers.authorization;
+  const headerValue = Array.isArray(req.headers["x-admin-token"])
+    ? req.headers["x-admin-token"][0]
+    : req.headers["x-admin-token"];
+  const headerToken = headerValue || String(authorization || "").replace(/^Bearer\s+/i, "");
+  return Boolean(
+    headerToken
+      && (verifyAdminSessionToken(headerToken) || safeEqual(headerToken, expectedToken())),
+  );
+};
+
+export const getAdminAuthFailure = () => {
+  const config = getAdminAuthConfig();
+  if (!config.operational) {
+    return {
+      statusCode: 503,
+      code: "ADMIN_AUTH_NOT_CONFIGURED",
+      error: config.message,
+    };
+  }
+  return {
+    statusCode: 401,
+    code: "ADMIN_AUTH_REQUIRED",
+    error: "Admin access required.",
+  };
 };
