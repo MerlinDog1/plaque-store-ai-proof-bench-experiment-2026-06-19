@@ -104,6 +104,12 @@ const getInitialLandingSlug = () => {
   return getLandingSlugFromPath(window.location.pathname) ?? seoLandingPages[0]?.slug ?? '';
 };
 
+const isCheckoutRecoveryRoute = () => {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  return window.location.pathname === '/checkout' && Boolean(params.get('order'));
+};
+
 const readFileAsDataUrl = (file: File): Promise<string> => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.onload = () => resolve(String(reader.result || ''));
@@ -200,6 +206,7 @@ const App: React.FC = () => {
   const [inscriptionGuidance, setInscriptionGuidance] = useState('');
   const [generatedLayoutSignature, setGeneratedLayoutSignature] = useState<string | null>(null);
   const [generatedProofFrame, setGeneratedProofFrame] = useState<GeneratedProofFrame | null>(null);
+  const [checkoutRecoveryLoading, setCheckoutRecoveryLoading] = useState(isCheckoutRecoveryRoute);
   const [isGeneratingLayout, setIsGeneratingLayout] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [realisticPreviewPrompt, setRealisticPreviewPrompt] = useState('');
@@ -329,6 +336,8 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get('proof');
+    const orderId = new URLSearchParams(window.location.search).get('order');
+    if (window.location.pathname === '/checkout' && orderId) return;
     if (!token) return;
 
     let cancelled = false;
@@ -365,7 +374,6 @@ const App: React.FC = () => {
         setBasketAdded(false);
       } catch (error) {
         console.warn('Could not restore proof session.', error);
-        alert('That proof link could not be loaded. The designer is still available to start a new proof.');
       }
     };
 
@@ -380,10 +388,14 @@ const App: React.FC = () => {
     const checkoutParams = new URLSearchParams(window.location.search);
     const orderId = checkoutParams.get('order');
     const recoveryToken = checkoutParams.get('proof');
-    if (!orderId) return;
+    if (!orderId) {
+      setCheckoutRecoveryLoading(false);
+      return;
+    }
 
     let cancelled = false;
     const restoreCheckoutOrder = async () => {
+      setCheckoutRecoveryLoading(true);
       try {
         const recoveryQuery = recoveryToken ? `?proof=${encodeURIComponent(recoveryToken)}` : '';
         const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}${recoveryQuery}`);
@@ -424,6 +436,8 @@ const App: React.FC = () => {
         });
       } catch (error) {
         console.warn('Could not restore cancelled checkout order.', error);
+      } finally {
+        if (!cancelled) setCheckoutRecoveryLoading(false);
       }
     };
 
@@ -1226,6 +1240,7 @@ const App: React.FC = () => {
             inscription={inscriptionPrompt}
             price={price}
             isProductionReady={isProductionReady}
+            checkoutRecoveryLoading={checkoutRecoveryLoading}
             orders={mockOrders}
             onNavigate={handleNavigate}
             onStartDesign={handleStartDesign}

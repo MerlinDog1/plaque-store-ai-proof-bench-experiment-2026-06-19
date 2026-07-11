@@ -2471,6 +2471,7 @@
   height: auto;
 }
 
+.commerce-order-proof .admin-console__proof-svg svg,
 .admin-console__proof-svg svg,
 .admin-console__stored-svg-source svg {
   display: block;
