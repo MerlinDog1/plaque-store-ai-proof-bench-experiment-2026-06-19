@@ -2471,6 +2471,13 @@
   height: auto;
 }
 
+.admin-console__proof-svg svg,
+.admin-console__stored-svg-source svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .commerce-order-proof__live-preview,
 .admin-console__proof-live-preview {
   background: #f7f1e7;
