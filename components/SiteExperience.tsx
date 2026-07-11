@@ -22,6 +22,7 @@ interface SiteProps {
   inscription: string;
   price: number;
   isProductionReady: boolean;
+  checkoutRecoveryLoading?: boolean;
   orders: MockOrder[];
   onNavigate: (view: SiteView, productSlug?: string) => void;
   onStartDesign: (startingWording?: string) => void;
@@ -2052,9 +2053,10 @@ function CheckoutPage({
   inscription,
   selectedProduct,
   isProductionReady,
+  checkoutRecoveryLoading = false,
   onCreateMockOrder,
   onNavigate,
-}: Pick<SiteProps, 'state' | 'inscription' | 'selectedProduct' | 'isProductionReady' | 'onCreateMockOrder' | 'onNavigate'>) {
+}: Pick<SiteProps, 'state' | 'inscription' | 'selectedProduct' | 'isProductionReady' | 'checkoutRecoveryLoading' | 'onCreateMockOrder' | 'onNavigate'>) {
   const [createdOrder, setCreatedOrder] = useState<MockOrder | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
@@ -2130,19 +2132,25 @@ function CheckoutPage({
       <section className="commerce-checkout">
         <div className="commerce-checkout-proof">
           <p className="commerce-eyebrow">Approved proof</p>
-          <div className="commerce-checkout-preview">
-            <PlaquePreview ref={checkoutProofSvgRef} state={state} activeStep={6} inscription={inscription} />
-          </div>
-          <div className="commerce-summary-lines">
-            <span><strong>{getPlaqueSummaryTitle(state, selectedProduct.title)}</strong></span>
-            <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
-            {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
-            <span>UK mainland delivery <strong>Included</strong></span>
-            <span className="commerce-summary-total">Total <strong>{formatPrice(breakdown.total)}</strong></span>
-          </div>
-          <button type="button" className="commerce-secondary" onClick={() => onNavigate('plaque')}>
-            Edit proof
-          </button>
+          {checkoutRecoveryLoading ? (
+            <div className="commerce-order-proof__pending">Loading approved proof...</div>
+          ) : (
+            <>
+              <div className="commerce-checkout-preview">
+                <PlaquePreview ref={checkoutProofSvgRef} state={state} activeStep={6} inscription={inscription} />
+              </div>
+              <div className="commerce-summary-lines">
+                <span><strong>{getPlaqueSummaryTitle(state, selectedProduct.title)}</strong></span>
+                <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
+                {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
+                <span>UK mainland delivery <strong>Included</strong></span>
+                <span className="commerce-summary-total">Total <strong>{formatPrice(breakdown.total)}</strong></span>
+              </div>
+              <button type="button" className="commerce-secondary" onClick={() => onNavigate('plaque')}>
+                Edit proof
+              </button>
+            </>
+          )}
         </div>
         <div className="commerce-checkout-panel">
           <div className="commerce-checkout-form">
@@ -2151,13 +2159,16 @@ function CheckoutPage({
             <p>
               Continue to Stripe's secure checkout page to enter contact, delivery and payment details.
             </p>
-            {!isProductionReady && (
+            {checkoutRecoveryLoading && (
+              <div className="commerce-success">Loading your approved proof...</div>
+            )}
+            {!checkoutRecoveryLoading && !isProductionReady && (
               <div className="commerce-warning">
                 Finish your proof before checkout.
                 <button type="button" onClick={() => onNavigate('plaque')}>Return to proof</button>
               </div>
             )}
-            {breakdown.quoteRequired && (
+            {!checkoutRecoveryLoading && breakdown.quoteRequired && (
               <div className="commerce-warning">
                 This design needs a manual quote before payment: {breakdown.quoteReasons.join(', ')}.
                 <button type="button" onClick={() => onNavigate('quote')}>Request a quote</button>
@@ -2190,7 +2201,7 @@ function CheckoutPage({
               )}
               </>
             ) : null}
-            {isProductionReady && !breakdown.quoteRequired && (
+            {!checkoutRecoveryLoading && isProductionReady && !breakdown.quoteRequired && (
               <button
                 type="button"
                 className="commerce-primary"
@@ -2219,6 +2230,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   const [proofReady, setProofReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const proofRenderSvgRef = useRef<SVGSVGElement | null>(null);
+  const storedProofSvgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -2282,14 +2294,14 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   }, [order?.id]);
 
   useEffect(() => {
-    if (!order || order.proofPackage?.visualProofRendererVersion === VISUAL_PROOF_RENDERER_VERSION || !proofRenderSvgRef.current) return;
+    if (!order || order.proofPackage?.visualProofRendererVersion === VISUAL_PROOF_RENDERER_VERSION) return;
 
     let cancelled = false;
     const attachRenderedProof = async () => {
       try {
         await document.fonts?.ready;
         await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
-        const sourceSvg = proofRenderSvgRef.current;
+        const sourceSvg = storedProofSvgRef.current || proofRenderSvgRef.current;
         if (!sourceSvg || cancelled) return;
         const proofImageBase64 = await svgToProofPngBase64(sourceSvg);
         let productionArtworkPdf = '';
@@ -2391,7 +2403,11 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
               className="commerce-order-export-renderer"
               style={{ width: proofExportWidth, height: proofExportHeight }}
             >
-              <PlaquePreview ref={proofRenderSvgRef} state={order.plaqueState} activeStep={6} inscription={order.inscription} />
+              {storedProofSvgForOrder(order) ? (
+                <StoredProofSvgPreview order={order} svgRef={storedProofSvgRef} hidden />
+              ) : (
+                <PlaquePreview ref={proofRenderSvgRef} state={order.plaqueState} activeStep={6} inscription={order.inscription} />
+              )}
             </div>
           )}
           <p className="commerce-eyebrow">{paid ? 'Order confirmed' : 'Order received'}</p>
@@ -2404,16 +2420,14 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
                 : 'Your order has been created. If payment has completed, this page will update once Stripe confirms it.'}
           </p>
           <div className="commerce-order-proof">
-            {order.proofPackage?.visualProofPng && proofReady ? (
+            {storedProofSvgForOrder(order) ? (
+              <StoredProofSvgPreview order={order} />
+            ) : order.proofPackage?.visualProofPng && proofReady ? (
               <img
                 src={versionedOrderProofImageUrl(order)}
                 alt="Approved plaque proof"
                 className="commerce-order-proof__image"
               />
-            ) : order.plaqueState ? (
-              <div className="commerce-order-proof__live-preview">
-                <PlaquePreview state={order.plaqueState} activeStep={6} inscription={order.inscription} />
-              </div>
             ) : (
               <div className="commerce-order-proof__pending">Loading approved proof...</div>
             )}
@@ -2820,14 +2834,14 @@ function AdminPage() {
                       <strong>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</strong>
                     </div>
                     <div className="admin-console__proof">
-                      {selectedOrder.proofPackage?.visualProofPng ? (
+                      {storedProofSvgForOrder(selectedOrder) ? (
+                        <StoredProofSvgPreview order={selectedOrder} />
+                      ) : selectedOrder.proofPackage?.visualProofPng ? (
                         <img
                           src={versionedOrderProofImageUrl(selectedOrder)}
                           alt="Approved plaque proof"
                           className="admin-console__proof-image"
                         />
-                      ) : storedProofSvgForOrder(selectedOrder) ? (
-                        <StoredProofSvgPreview order={selectedOrder} />
                       ) : canRenderSelectedProof ? (
                         <div className="admin-console__proof-live-preview">
                           <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
@@ -2941,14 +2955,14 @@ function AdminPage() {
                 <strong>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</strong>
               </div>
               <div className="admin-console__proof">
-                {selectedOrder.proofPackage?.visualProofPng ? (
+                {storedProofSvgForOrder(selectedOrder) ? (
+                  <StoredProofSvgPreview order={selectedOrder} />
+                ) : selectedOrder.proofPackage?.visualProofPng ? (
                   <img
                     src={versionedOrderProofImageUrl(selectedOrder)}
                     alt="Approved plaque proof"
                     className="admin-console__proof-image"
                   />
-                ) : storedProofSvgForOrder(selectedOrder) ? (
-                  <StoredProofSvgPreview order={selectedOrder} />
                 ) : canRenderSelectedProof ? (
                   <div className="admin-console__proof-live-preview">
                     <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
@@ -3201,6 +3215,7 @@ export function SiteExperience(props: SiteProps) {
         inscription={props.inscription}
         selectedProduct={props.selectedProduct}
         isProductionReady={props.isProductionReady}
+        checkoutRecoveryLoading={props.checkoutRecoveryLoading}
         onCreateMockOrder={props.onCreateMockOrder}
         onNavigate={props.onNavigate}
       />
