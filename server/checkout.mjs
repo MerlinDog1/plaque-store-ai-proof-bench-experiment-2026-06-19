@@ -129,20 +129,27 @@ const normaliseDeliveryAddress = (input) => {
   };
 };
 
+const isReviewProofPlaceholderSvg = (value) => /\bREVIEW\s+PROOF\b/i.test(String(value || ""));
+
 const canonicalProofPackage = (orderId, lockedAt, clientProofPackage = {}) => {
   const sanitizedProofPackage = sanitizeProofPackageSvg(clientProofPackage);
-  const productionSvg = sanitizedProofPackage.productionSvg || null;
-  const visualProofSvg = sanitizedProofPackage.visualProofSvg || productionSvg || null;
+  const visualProofSvg = sanitizedProofPackage.visualProofSvg || sanitizedProofPackage.productionSvg || null;
+  const productionSvg = (
+    sanitizedProofPackage.productionSvg
+    && !isReviewProofPlaceholderSvg(sanitizedProofPackage.productionSvg)
+  )
+    ? sanitizedProofPackage.productionSvg
+    : visualProofSvg;
   return {
-  productionSvg,
-  visualProofSvg,
-  visualProofPng: null,
-  productionArtworkPdf: null,
-  artworkStatus: visualProofSvg ? "stored_sanitized_svg" : "pending_sanitized_upload",
-  artifactAuthority: visualProofSvg ? "sanitized_client_svg" : "none",
-  productionFilename: `${orderId}-production-proof.svg`,
-  visualFilename: `${orderId}-visual-proof.svg`,
-  lockedAt,
+    productionSvg,
+    visualProofSvg,
+    visualProofPng: null,
+    productionArtworkPdf: null,
+    artworkStatus: visualProofSvg ? "stored_sanitized_svg" : "pending_sanitized_upload",
+    artifactAuthority: visualProofSvg ? "sanitized_client_svg" : "none",
+    productionFilename: `${orderId}-production-proof.svg`,
+    visualFilename: `${orderId}-visual-proof.svg`,
+    lockedAt,
   };
 };
 
