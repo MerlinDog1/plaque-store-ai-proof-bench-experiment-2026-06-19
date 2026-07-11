@@ -196,7 +196,7 @@ const hasRenderablePlaqueState = (state?: Partial<PlaqueState> | null) =>
   );
 
 const storedProofSvgForOrder = (order?: PaidOrder | null) => {
-  const raw = String(order?.proofPackage?.productionSvg || order?.proofPackage?.visualProofSvg || '').trim();
+  const raw = String(order?.proofPackage?.visualProofSvg || order?.proofPackage?.productionSvg || '').trim();
   return raw || null;
 };
 
@@ -1991,6 +1991,11 @@ function AdminPage() {
   const canDownloadSelectedProductionArtwork = Boolean(canRenderSelectedProof || selectedStoredProofSvg);
 
   const downloadProductionArtwork = async (order: PaidOrder) => {
+    const storedProofSvg = storedProofSvgForOrder(order);
+    if (storedProofSvg) {
+      downloadStoredProductionArtwork(order);
+      return;
+    }
     if (hasRenderablePlaqueState(order.plaqueState)) {
       if (!adminProofSvgRef.current) {
         window.alert('Production PDF is still preparing from the approved preview. Please try again in a moment.');

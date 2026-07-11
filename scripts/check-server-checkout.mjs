@@ -111,6 +111,29 @@ assert.equal(canonicalOrder.proofPackage.productionArtworkPdf, null);
 assert.equal(canonicalOrder.proofPackage.artworkStatus, "stored_sanitized_svg");
 assert(checkoutRecoveryTokenMatches(canonicalOrder, canonicalOrder.metadata.checkoutRecoveryToken));
 assert(!checkoutRecoveryTokenMatches(canonicalOrder, "not-the-token"));
+
+const realVisualProof = '<svg xmlns="http://www.w3.org/2000/svg"><text>REAL CUSTOMER WORDING</text></svg>';
+const placeholderProductionProof = '<svg xmlns="http://www.w3.org/2000/svg"><text>REVIEW PROOF</text></svg>';
+const placeholderProofOrder = buildServerCheckoutOrder({
+  ...basePayload(),
+  orderSnapshot: {
+    ...basePayload().orderSnapshot,
+    proofPackage: {
+      productionSvg: placeholderProductionProof,
+      visualProofSvg: realVisualProof,
+    },
+  },
+}, {
+  orderId: secondServerId,
+  now: fixedNow,
+});
+assert.equal(
+  placeholderProofOrder.proofPackage.productionSvg.includes("REAL CUSTOMER WORDING"),
+  true,
+  "Checkout must not store the review placeholder ahead of the real visual proof.",
+);
+assert.equal(placeholderProofOrder.proofPackage.productionSvg.includes("REVIEW PROOF"), false);
+
 assert.equal(stripCheckoutSecretsFromOrder(canonicalOrder).metadata.checkoutRecoveryToken, undefined);
 assert.equal(stripCheckoutSecretsFromOrder({
   ...canonicalOrder,
