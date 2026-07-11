@@ -315,6 +315,11 @@ const storedProofSvgDataUrl = (order: PaidOrder) => {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(ensureSvgDocument(svg, order.plaqueState))}`;
 };
 
+const storedProofSvgDocument = (order: PaidOrder) => {
+  const svg = storedProofSvgForOrder(order);
+  return svg ? ensureSvgDocument(svg, order.plaqueState) : '';
+};
+
 const downloadStoredProductionArtwork = (order: PaidOrder) => {
   const svg = storedProofSvgForOrder(order);
   if (!svg) {
@@ -410,6 +415,29 @@ const versionedOrderProofImageUrl = (order: Pick<PaidOrder, 'id' | 'stripeChecko
   const separator = baseUrl.includes('?') ? '&' : '?';
   return `${baseUrl}${separator}v=${encodeURIComponent(order.updatedAt || order.id)}`;
 };
+
+function StoredProofSvgPreview({
+  order,
+  svgRef,
+  hidden = false,
+}: {
+  order: PaidOrder;
+  svgRef?: React.MutableRefObject<SVGSVGElement | null>;
+  hidden?: boolean;
+}) {
+  const html = storedProofSvgDocument(order);
+  if (!html) return null;
+  return (
+    <div
+      className={hidden ? 'admin-console__stored-svg-source' : 'admin-console__proof-image admin-console__proof-svg'}
+      aria-hidden={hidden || undefined}
+      ref={(node) => {
+        if (svgRef) svgRef.current = node?.querySelector('svg') || null;
+      }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
 
 type HomeCarouselItem = {
   id: string;
@@ -2463,6 +2491,7 @@ function AdminPage() {
   const [sortMode, setSortMode] = useState<AdminSortMode>('newest');
   const [searchTerm, setSearchTerm] = useState('');
   const adminProofSvgRef = useRef<SVGSVGElement | null>(null);
+  const adminStoredProofSvgRef = useRef<SVGSVGElement | null>(null);
   const selectedSummaryOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
   const selectedOrder = selectedOrderDetail?.id === selectedSummaryOrder?.id ? selectedOrderDetail : selectedSummaryOrder;
   const canRenderSelectedProof = hasRenderablePlaqueState(selectedOrder?.plaqueState);
@@ -2470,9 +2499,19 @@ function AdminPage() {
   const canDownloadSelectedProductionArtwork = Boolean(canRenderSelectedProof || selectedStoredProofSvg);
 
   const downloadProductionArtwork = async (order: PaidOrder) => {
-    const storedProofSvg = storedProofSvgForOrder(order);
-    if (storedProofSvg) {
-      downloadStoredProductionArtwork(order);
+    const productionSourceSvg = selectedStoredProofSvg && selectedOrder?.id === order.id
+      ? adminStoredProofSvgRef.current
+      : adminProofSvgRef.current;
+    if (productionSourceSvg) {
+      if ('fonts' in document) {
+        await document.fonts.ready;
+      }
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      downloadCorelPdf(
+        productionSourceSvg,
+        order.plaqueState,
+        asPdfFilename(order.proofPackage?.productionFilename || `${order.id}-production-artwork.pdf`),
+      );
       return;
     }
     if (hasRenderablePlaqueState(order.plaqueState)) {
@@ -2788,11 +2827,7 @@ function AdminPage() {
                           className="admin-console__proof-image"
                         />
                       ) : storedProofSvgForOrder(selectedOrder) ? (
-                        <img
-                          src={storedProofSvgDataUrl(selectedOrder)}
-                          alt="Stored plaque artwork"
-                          className="admin-console__proof-image"
-                        />
+                        <StoredProofSvgPreview order={selectedOrder} />
                       ) : canRenderSelectedProof ? (
                         <div className="admin-console__proof-live-preview">
                           <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
@@ -2913,11 +2948,7 @@ function AdminPage() {
                     className="admin-console__proof-image"
                   />
                 ) : storedProofSvgForOrder(selectedOrder) ? (
-                  <img
-                    src={storedProofSvgDataUrl(selectedOrder)}
-                    alt="Stored plaque artwork"
-                    className="admin-console__proof-image"
-                  />
+                  <StoredProofSvgPreview order={selectedOrder} />
                 ) : canRenderSelectedProof ? (
                   <div className="admin-console__proof-live-preview">
                     <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
@@ -3047,7 +3078,12 @@ function AdminPage() {
             </AdminDetailBoundary>
           )}
         </div>
-        {selectedOrder && canRenderSelectedProof && (
+        {selectedOrder && selectedStoredProofSvg && (
+          <div className="admin-console__export-source" aria-hidden="true">
+            <StoredProofSvgPreview order={selectedOrder} svgRef={adminStoredProofSvgRef} hidden />
+          </div>
+        )}
+        {selectedOrder && canRenderSelectedProof && !selectedStoredProofSvg && (
           <div className="admin-console__export-source" aria-hidden="true">
             <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
           </div>
