@@ -24,7 +24,7 @@ interface SiteProps {
   isProductionReady: boolean;
   orders: MockOrder[];
   onNavigate: (view: SiteView, productSlug?: string) => void;
-  onStartDesign: () => void;
+  onStartDesign: (startingWording?: string) => void;
   onLaunchProduct: (product: ProductFamily) => void;
   onCreateMockOrder: (name: string, email: string, deliveryAddress?: unknown, proofSvg?: SVGSVGElement | null) => Promise<MockOrder>;
 }
@@ -1087,9 +1087,9 @@ function ProductMockup({ product }: { product: ProductFamily }) {
           </div>
         </>
       )}
-    </div>
-  );
-}
+      </div>
+    );
+  }
 
 function SearchIntentRail({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   return (
@@ -1571,19 +1571,87 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
   );
 }
 
-function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLaunchProduct'>) {
+function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLaunchProduct' | 'state'>) {
+  const [wording, setWording] = useState('');
+  const previewWording = wording.trim() || 'Your wording\nwill appear here';
+  const previewLines = previewWording.split(/\n+/).slice(0, 5);
+  const escapePreviewText = (value: string) => value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+  const lineHeight = Math.min(25, 82 / Math.max(1, previewLines.length));
+  const firstY = 74 - ((previewLines.length - 1) * lineHeight) / 2;
+  const homepagePreviewState: PlaqueState = {
+    ...props.state,
+    generatedSvgContent: `<svg viewBox="0 0 210 148"><text x="105" y="${firstY}" text-anchor="middle" fill="#171717" font-family="Playfair Display, serif" font-size="${previewLines.length > 3 ? 12 : 15}" font-weight="700">${previewLines.map((line, index) => `<tspan x="105" y="${firstY + index * lineHeight}">${escapePreviewText(line)}</tspan>`).join('')}</text></svg>`,
+  };
+  const continueToDesigner = () => props.onStartDesign(wording.trim());
+
   return (
-    <div className="commerce-page">
-      <SiteHero onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />
-      <ProductGrid onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />
-      <SeoMerchandisePanel onNavigate={props.onNavigate} />
-      <BuyingEvidenceStrip onStartDesign={props.onStartDesign} />
-      <TrustBeforeCheckout onStartDesign={props.onStartDesign} />
-      <ProofStorySection onStartDesign={props.onStartDesign} />
-      <HomeMaterialPanels />
-      <SeoLandingLinks onNavigate={props.onNavigate} />
-      <HomeFaq />
-    </div>
+    <main className="designer-home">
+      <section className="designer-home__stage">
+        <div className="designer-home__intro">
+          <p>Design your plaque</p>
+          <h1>What would you like it to say?</h1>
+          <span>Type the wording below. You can change everything before you order.</span>
+        </div>
+
+        <div className="designer-home__preview" aria-label="Live plaque preview">
+          <div className="designer-home__preview-frame">
+            <PlaquePreview state={homepagePreviewState} activeStep={5} inscription={previewWording} />
+          </div>
+          <small>Live preview</small>
+        </div>
+
+        <form
+          className="designer-home__prompt"
+          onSubmit={(event) => {
+            event.preventDefault();
+            continueToDesigner();
+          }}
+        >
+          <label htmlFor="homepage-wording">Your plaque wording</label>
+          <div>
+            <textarea
+              id="homepage-wording"
+              value={wording}
+              onChange={(event) => setWording(event.target.value)}
+              placeholder={'e.g. In loving memory of\nMargaret Rose\n1948 – 2026'}
+              rows={3}
+              autoComplete="off"
+            />
+            <button type="submit">Continue</button>
+          </div>
+          <p>Free to design <i /> Plaques from £58.50 <i /> Free UK mainland delivery</p>
+        </form>
+      </section>
+
+      <section className="designer-home__after">
+        <div>
+          <p className="commerce-eyebrow">Need a starting point?</p>
+          <h2>Choose a plaque, or just start typing.</h2>
+        </div>
+        <nav aria-label="Popular plaque types">
+          {homepageProducts.map((product) => (
+            <a
+              key={product.slug}
+              href={`/${product.slug}`}
+              onClick={(event) => {
+                event.preventDefault();
+                props.onNavigate('product', product.slug);
+              }}
+            >
+              <img src={product.image} alt="" loading="lazy" />
+              <span>{product.title}</span>
+              <small>{product.startingFrom}</small>
+            </a>
+          ))}
+        </nav>
+        <p>Not ready to order? Your design is free, and there is nothing to pay until you are happy with it.</p>
+      </section>
+    </main>
   );
 }
 
@@ -3071,7 +3139,7 @@ export function SiteExperience(props: SiteProps) {
   } else if (legalPages[props.view]) {
     page = <LegalPlaceholderPage view={props.view} />;
   } else {
-    page = <HomePage onNavigate={props.onNavigate} onStartDesign={props.onStartDesign} onLaunchProduct={props.onLaunchProduct} />;
+    page = <HomePage state={props.state} onNavigate={props.onNavigate} onStartDesign={props.onStartDesign} onLaunchProduct={props.onLaunchProduct} />;
   }
 
   if (props.view === 'admin') {

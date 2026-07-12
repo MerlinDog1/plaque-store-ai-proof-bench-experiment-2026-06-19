@@ -943,9 +943,9 @@ const App: React.FC = () => {
     }
   };
 
-  const handleStartDesign = () => {
+  const handleStartDesign = (startingWording = '') => {
     setState(PROOF_BENCH_INITIAL_STATE);
-    setInscriptionPrompt('');
+    setInscriptionPrompt(startingWording);
     setInscriptionGuidance('');
     setGeneratedLayoutSignature(null);
     setGeneratedProofFrame(null);
