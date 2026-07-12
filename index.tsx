@@ -22,6 +22,10 @@ window.requestAnimationFrame(() => {
   window.requestAnimationFrame(() => {
     const loader = document.getElementById('instaplaque-loader');
     if (!loader) return;
+    if (window.location.pathname !== '/') {
+      loader.remove();
+      return;
+    }
     const loaderWindow = window as Window & { __instaplaqueLoaderStarted?: number };
     const elapsed = Date.now() - (loaderWindow.__instaplaqueLoaderStarted || Date.now());
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

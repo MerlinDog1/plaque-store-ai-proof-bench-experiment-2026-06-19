@@ -2136,7 +2136,7 @@
       position: fixed;
       z-index: 99999;
       inset: 0;
-      display: grid;
+      display: none;
       place-items: center;
       overflow: hidden;
       background:
@@ -2145,6 +2145,10 @@
       color: #fffaf0;
       opacity: 1;
       transition: opacity 360ms ease, visibility 360ms ease;
+    }
+
+    .instaplaque-loader-enabled #instaplaque-loader {
+      display: grid;
     }
 
     #instaplaque-loader.is-leaving {
@@ -2379,6 +2383,11 @@
 </head>
 
 <body>
+  <script>
+    if (window.location.pathname === '/') {
+      document.documentElement.classList.add('instaplaque-loader-enabled');
+    }
+  </script>
   <div id="instaplaque-loader" aria-hidden="true">
     <div class="instaplaque-loader__inner">
       <div class="instaplaque-loader__brand"><span>Insta</span><span>Plaque</span></div>
