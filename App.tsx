@@ -1362,19 +1362,8 @@ const App: React.FC = () => {
                       });
                     }}
                   >
-                    <span className="proofbench-delivery-label">
-                      Inc UK delivery
-                      <span className="proofbench-info-dot" aria-label={DELIVERY_HELP} title={DELIVERY_HELP}>
-                        i
-                      </span>
-                    </span>
-                    <strong>
-                      <svg className="proofbench-price-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M6.4 8.5h11.2l-.8 10.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6.4 8.5Z" />
-                        <path d="M9 8.5V7a3 3 0 0 1 6 0v1.5" />
-                      </svg>
-                      {formattedPrice}
-                    </strong>
+                    <strong>{formattedPrice}</strong>
+                    <span>inc delivery</span>
                   </button>
                 )}
               </div>
@@ -1448,7 +1437,7 @@ const App: React.FC = () => {
             aria-expanded={designerGuideOpen}
             aria-controls="designer-guide"
           >
-            <span>i</span> Plaque guide
+            <span>?</span> Plaque guide
           </button>
 
           <aside
