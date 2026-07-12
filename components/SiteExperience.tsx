@@ -1140,42 +1140,43 @@ function MaterialSwatchStrip() {
 
 function SiteHero({ onStartDesign, onNavigate }: Pick<SiteProps, 'onStartDesign' | 'onNavigate'>) {
   return (
-    <section className="commerce-hero commerce-hero--radical">
-      <SearchIntentRail onNavigate={onNavigate} />
-      <div className="commerce-radical-hero__copy">
-        <p className="commerce-eyebrow">Custom plaques UK</p>
-        <h1>Custom plaques made simple.</h1>
+    <section className="commerce-hero commerce-hero--simple">
+      <div className="commerce-simple-hero__copy">
+        <p className="commerce-eyebrow">Quick, easy and free to try</p>
+        <h1>See your plaque in minutes.</h1>
         <p className="commerce-lede">
-          Choose the plaque, proof the wording before payment, and see standard prices with UK mainland delivery included.
+          Choose a plaque, add your wording and get a free design to check before you order. No payment needed.
         </p>
         <div className="commerce-actions">
           <button type="button" className="commerce-primary" onClick={onStartDesign}>
-            Start a free proof
+            Create my free design
           </button>
-          <a className="commerce-secondary" href="#products">Compare plaque sizes</a>
+          <a className="commerce-secondary" href="#products">See plaque types</a>
         </div>
-        <div className="commerce-proof-ledger" aria-label="Ordering facts">
-          {proofPromiseRows.map(([label, value]) => (
-            <div key={label}>
-              <strong>{label}</strong>
-              <span>{value}</span>
-            </div>
-          ))}
-        </div>
+        <p className="commerce-simple-hero__price">Plaques from £58.50 with free UK mainland delivery.</p>
       </div>
-      <div className="commerce-radical-hero__gallery" aria-label="Plaque examples">
-        {heroProofImages.map((image, index) => (
-          <figure key={image.src} className={index === 0 ? 'is-featured' : ''}>
-            <img src={image.src} alt={image.label} loading={index === 0 ? 'eager' : 'lazy'} />
-            <figcaption>{image.label}</figcaption>
-          </figure>
-        ))}
+      <div className="commerce-simple-hero__visual">
+        <img src={heroProofImages[0].src} alt={heroProofImages[0].label} loading="eager" />
+        <span>Enter your wording</span>
+        <strong>See the design before you pay</strong>
       </div>
-      <aside className="commerce-radical-hero__buybox" aria-label="Standard plaque pricing">
-        <p className="commerce-eyebrow">Standard price starts</p>
-        <PriceMatrix compact />
-        <MaterialSwatchStrip />
-      </aside>
+    </section>
+  );
+}
+
+function SimpleReasons() {
+  return (
+    <section className="commerce-simple-reasons" aria-label="Why use InstaPlaque">
+      {[
+        ['Free design in minutes', 'Add your wording and see how it looks. There is nothing to pay until you order.'],
+        ['Clear prices', 'The price updates as you choose your plaque.'],
+        ['Made in the UK', 'Standard orders are usually ready in five working days. Some options take longer.'],
+      ].map(([title, copy]) => (
+        <article key={title}>
+          <strong>{title}</strong>
+          <p>{copy}</p>
+        </article>
+      ))}
     </section>
   );
 }
@@ -1184,9 +1185,8 @@ function ProductGrid({ onStartDesign, onNavigate }: Pick<SiteProps, 'onStartDesi
   return (
     <section className="commerce-section commerce-product-shop" id="products">
       <div className="commerce-section__head">
-        <p className="commerce-eyebrow">Shop standard plaque formats</p>
-        <h2>Pick by size, then adjust material and wording in the proof.</h2>
-        <p>These are the main buying routes. Each one starts with sensible defaults and lets you change finish, fixing, border and inscription before checkout.</p>
+        <p className="commerce-eyebrow">Choose a plaque</p>
+        <h2>What would you like to make?</h2>
       </div>
       <div className="commerce-product-grid commerce-product-grid--radical">
         {homepageProducts.map((product) => (
@@ -1196,9 +1196,6 @@ function ProductGrid({ onStartDesign, onNavigate }: Pick<SiteProps, 'onStartDesi
               <p className="commerce-card-eyebrow">{product.eyebrow}</p>
               <h3>{product.title}</h3>
               <p>{product.description}</p>
-              <div className="commerce-size-meta" aria-label={`${product.title} use cases`}>
-                {product.bestFor.slice(0, 4).map((item) => <span key={item}>{item}</span>)}
-              </div>
             </div>
             <div className="commerce-card-foot">
               <span>{product.startingFrom}</span>
@@ -1209,12 +1206,40 @@ function ProductGrid({ onStartDesign, onNavigate }: Pick<SiteProps, 'onStartDesi
                   onNavigate('product', product.slug);
                 }}
               >
-                View details
+                Find out more
               </a>
-              <button type="button" className="commerce-link-button" onClick={onStartDesign}>Start proof</button>
+              <button type="button" className="commerce-link-button" onClick={onStartDesign}>Create design</button>
             </div>
           </article>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function SimpleProcess({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
+  return (
+    <section className="commerce-section commerce-simple-process" id="how-it-works">
+      <div className="commerce-section__head">
+        <p className="commerce-eyebrow">How it works</p>
+        <h2>Choose it. Type it. See it. Order it.</h2>
+      </div>
+      <div className="commerce-simple-process__steps">
+        {[
+          ['1', 'Choose a size and finish.'],
+          ['2', 'Add your wording.'],
+          ['3', 'Check the design and price.'],
+          ['4', 'Order when you are happy.'],
+        ].map(([number, copy]) => (
+          <div key={number}><span>{number}</span><strong>{copy}</strong></div>
+        ))}
+      </div>
+      <div className="commerce-simple-process__cta">
+        <div>
+          <h2>Ready to see yours?</h2>
+          <p>Create a free design now. Change it as much as you like before ordering.</p>
+        </div>
+        <button type="button" className="commerce-primary" onClick={onStartDesign}>Create my free design</button>
       </div>
     </section>
   );
@@ -1573,16 +1598,11 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
 
 function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLaunchProduct'>) {
   return (
-    <div className="commerce-page">
+    <div className="commerce-page commerce-page--simple-home">
       <SiteHero onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />
+      <SimpleReasons />
       <ProductGrid onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />
-      <SeoMerchandisePanel onNavigate={props.onNavigate} />
-      <BuyingEvidenceStrip onStartDesign={props.onStartDesign} />
-      <TrustBeforeCheckout onStartDesign={props.onStartDesign} />
-      <ProofStorySection onStartDesign={props.onStartDesign} />
-      <HomeMaterialPanels />
-      <SeoLandingLinks onNavigate={props.onNavigate} />
-      <HomeFaq />
+      <SimpleProcess onStartDesign={props.onStartDesign} />
     </div>
   );
 }
