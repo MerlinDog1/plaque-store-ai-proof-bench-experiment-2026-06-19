@@ -1321,6 +1321,13 @@ const App: React.FC = () => {
                   <i />
                   <span>Free UK mainland delivery</span>
                 </div>
+                <nav className="proofbench-designer-legal no-print" aria-label="Legal and support">
+                  <a href="/terms">Terms</a>
+                  <a href="/privacy">Privacy</a>
+                  <a href="/cookies">Cookies</a>
+                  <a href="/returns-cancellations">Returns</a>
+                  <a href="/contact">Contact</a>
+                </nav>
               </div>
             </aside>
 
