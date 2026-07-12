@@ -1,12 +1,25 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "functions": {
     "api/index.mjs": {
       "maxDuration": 30
     }
   },
   "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.instaplaque.co.uk"
+        }
+      ],
+      "destination": "https://instaplaque.co.uk/:path*",
+      "permanent": true
+    },
     {
       "source": "/etchmaster",
       "destination": "/",
@@ -31,11 +44,42 @@
       "source": "/stainless-steel-signs",
       "destination": "/stainless-steel-plaques",
       "permanent": true
+    },
+    {
+      "source": "/returns-and-cancellations",
+      "destination": "/returns-cancellations",
+      "permanent": true
     }
   ],
   "headers": [
     {
       "source": "/admin",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/checkout",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/order-confirmed",
       "headers": [
         {
           "key": "Cache-Control",
@@ -52,10 +96,6 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/index.mjs"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }

@@ -423,6 +423,7 @@ type SeoMetaConfig = {
   description: string;
   path: string;
   schema?: unknown[];
+  robots?: string;
 };
 
 type LegalPage = {
@@ -608,7 +609,7 @@ const routePathForView = (view: SiteView) => {
     terms: '/terms',
     privacy: '/privacy',
     cookies: '/cookies',
-    returns: '/returns-and-cancellations',
+    returns: '/returns-cancellations',
     checkout: '/checkout',
     'order-confirmed': '/order-confirmed',
     plaque: '/design',
@@ -742,8 +743,134 @@ const breadcrumbSchema = (items: Array<{ name: string; url: string }>) => ({
 const homepageProductSlugs = ['bench-plaques', 'a5-plaques', 'a4-plaques', 'custom-plaques'];
 const homepageProducts = productFamilies.filter((product) => homepageProductSlugs.includes(product.slug));
 
+const shopOfferFacts = [
+  ['Bench plaques', '150 x 50 mm', 'from £58.50'],
+  ['A5 plaques', '210 x 148 mm', 'from £95.50'],
+  ['A4 plaques', '297 x 210 mm', 'from £145'],
+  ['Included', 'Engraving + standard fixings', 'UK mainland delivery'],
+];
+
+const orderSteps = [
+  ['Choose', 'Pick size, material, finish and fixings.'],
+  ['Proof', 'Add wording and check the exact layout.'],
+  ['Pay', 'Approve the proof, then checkout securely.'],
+  ['Made', 'Standard orders are usually 5 working days.'],
+];
+
+const merchFactParts = (item: string) => {
+  const fromMatch = item.match(/^(.*?)\s+from\s+(£.*)$/i);
+  if (fromMatch) return { label: fromMatch[1], value: `from ${fromMatch[2]}` };
+  const priceMatch = item.match(/^(.*?)(£\d.*)$/);
+  if (priceMatch) return { label: priceMatch[1].trim(), value: priceMatch[2].trim() };
+  return { label: item, value: '' };
+};
+
+const landingProductChoiceSlugs = (landing: SeoLandingPage) => {
+  if (landing.slug === 'memorial-bench-plaques') return ['bench-plaques', 'a5-plaques', 'memorial-plaques'];
+  if (landing.slug === 'brass-memorial-plaques') return ['bench-plaques', 'brass-plaques', 'a5-plaques'];
+  if (landing.slug === 'wall-memorial-plaques') return ['a5-plaques', 'a4-plaques', 'memorial-plaques'];
+  return [landing.relatedProductSlug, 'a5-plaques', 'custom-plaques'];
+};
+
+const uniqueProductsForLanding = (landing: SeoLandingPage) => {
+  const seen = new Set<string>();
+  return landingProductChoiceSlugs(landing)
+    .map((slug) => productFamilies.find((product) => product.slug === slug))
+    .filter((product): product is ProductFamily => {
+      if (!product || seen.has(product.slug)) return false;
+      seen.add(product.slug);
+      return true;
+    });
+};
+
+const heroProofImages = [
+  {
+    src: '/seo/realistic/memorial-plaques/parents-brass-bench-memorial-plaque.webp',
+    label: 'Brass bench memorial plaque',
+  },
+  {
+    src: '/seo/realistic/memorial-plaques/stainless-steel-wood-backed-memorial-plaque.webp',
+    label: 'Stainless steel wall memorial plaque',
+  },
+  {
+    src: '/site-images/home-gallery-brass-community.webp',
+    label: 'Brass opening plaque',
+  },
+];
+
+const highIntentLandingSlugs = [
+  'memorial-bench-plaques',
+  'brass-memorial-plaques',
+  'wall-memorial-plaques',
+  'garden-plaques',
+  'opening-plaques',
+  'engraved-plaques',
+];
+
+const highIntentLandingPages = seoLandingPages.filter((page) => highIntentLandingSlugs.includes(page.slug));
+
+const productRelatedLandingSlugs: Record<string, string[]> = {
+  'bench-plaques': ['memorial-bench-plaques', 'brass-memorial-plaques', 'garden-plaques'],
+  'brass-plaques': ['brass-memorial-plaques', 'opening-plaques', 'donor-plaques'],
+  'stainless-steel-plaques': ['wall-memorial-plaques', 'opening-plaques', 'school-opening-plaques'],
+  'a5-plaques': ['garden-plaques', 'pet-memorial-plaques', 'tree-plaques'],
+  'a4-plaques': ['opening-plaques', 'donor-plaques', 'school-opening-plaques'],
+  'memorial-plaques': ['memorial-bench-plaques', 'wall-memorial-plaques', 'ashes-scattering-plaques'],
+  'custom-plaques': ['engraved-plaques', 'donor-plaques', 'commemorative-plaques'],
+};
+
+const landingRelatedLandingSlugs: Record<string, string[]> = {
+  'garden-plaques': ['tree-plaques', 'pet-memorial-plaques', 'ashes-scattering-plaques'],
+  'opening-plaques': ['school-opening-plaques', 'donor-plaques', 'commemorative-plaques'],
+  'pet-memorial-plaques': ['garden-plaques', 'tree-plaques', 'ashes-scattering-plaques'],
+  'donor-plaques': ['opening-plaques', 'school-opening-plaques', 'commemorative-plaques'],
+  'memorial-bench-plaques': ['brass-memorial-plaques', 'garden-plaques', 'wall-memorial-plaques'],
+  'brass-memorial-plaques': ['memorial-bench-plaques', 'wall-memorial-plaques', 'garden-plaques'],
+  'wall-memorial-plaques': ['brass-memorial-plaques', 'ashes-scattering-plaques', 'memorial-bench-plaques'],
+  'ashes-scattering-plaques': ['garden-plaques', 'tree-plaques', 'wall-memorial-plaques'],
+  'school-opening-plaques': ['opening-plaques', 'donor-plaques', 'commemorative-plaques'],
+};
+
+const proofPromiseRows = [
+  ['Free proof', 'before payment'],
+  ['Standard pricing', 'shown before checkout'],
+  ['UK mainland delivery', 'included on standard plaques'],
+  ['Production estimate', 'usually 5 working days'],
+];
+
+const trustRows = [
+  ['Human artwork check', 'Approved orders are checked before production files are used.'],
+  ['Proof changes', 'Spot a typo before approval and update the wording before payment.'],
+  ['Made to order', 'Cancellation rules are clear because each plaque is produced from your approved proof.'],
+  ['Secure checkout', 'Payment is handled by Stripe after you approve the plaque proof.'],
+];
+
 const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, selectedLanding: SeoLandingPage): SeoMetaConfig => {
   const routePath = routePathForView(view);
+  if (view === 'checkout') {
+    return {
+      title: 'Secure Checkout | InstaPlaque',
+      description: 'Complete payment for an approved InstaPlaque proof.',
+      path: routePath,
+      robots: 'noindex,nofollow',
+    };
+  }
+  if (view === 'order-confirmed') {
+    return {
+      title: 'Order Confirmation | InstaPlaque',
+      description: 'Confirmation details for an InstaPlaque order.',
+      path: routePath,
+      robots: 'noindex,nofollow',
+    };
+  }
+  if (view === 'admin') {
+    return {
+      title: 'Admin | InstaPlaque',
+      description: 'InstaPlaque order administration.',
+      path: '/admin',
+      robots: 'noindex,nofollow',
+    };
+  }
   if (view === 'plaque') {
     return {
       title: 'Design a Custom Plaque Online | Free InstaPlaque Proof',
@@ -892,8 +1019,8 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
     };
   }
   return {
-    title: 'Custom Plaques Made Simple | Brass, Stainless Steel & Bench Plaques UK',
-    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK mainland delivery before you order.',
+    title: 'Custom Plaques UK | Design, Proof & Order Online',
+    description: 'Order custom brass, stainless steel, memorial and bench plaques online. Free proof before payment, live standard prices and UK mainland delivery included.',
     path: '/',
     schema: [productListSchema(), faqSchema(homeFaqs)],
   };
@@ -906,6 +1033,7 @@ const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLand
     const url = `${siteBaseUrl}${config.path}`;
     document.title = config.title;
     setMetaContent('meta[name="description"]', config.description);
+    setMetaContent('meta[name="robots"]', config.robots || 'index,follow');
     setMetaContent('meta[property="og:title"]', config.title);
     setMetaContent('meta[property="og:description"]', config.description);
     setMetaContent('meta[property="og:url"]', url);
@@ -932,7 +1060,10 @@ const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLand
       ],
     };
 
-    let schemaElement = document.getElementById('instaplaque-route-schema') as HTMLScriptElement | null;
+    let schemaElement = (
+      document.getElementById('instaplaque-prerender-route-schema')
+      || document.getElementById('instaplaque-route-schema')
+    ) as HTMLScriptElement | null;
     if (!schemaElement) {
       schemaElement = document.createElement('script');
       schemaElement.id = 'instaplaque-route-schema';
@@ -945,9 +1076,9 @@ const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLand
 
 function ProductMockup({ product }: { product: ProductFamily }) {
   return (
-    <div className={`commerce-product-visual commerce-product-visual--${product.materialCue}`} aria-hidden="true">
+    <div className={`commerce-product-visual commerce-product-visual--${product.materialCue}`} aria-hidden={product.image ? undefined : true}>
       {product.image ? (
-        <img src={product.image} alt="" loading="lazy" />
+        <img src={product.image} alt={`${product.title} example`} loading="lazy" />
       ) : (
         <>
           <div className="commerce-product-shadow" />
@@ -960,63 +1091,206 @@ function ProductMockup({ product }: { product: ProductFamily }) {
   );
 }
 
-function SiteHero({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
+function SearchIntentRail({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   return (
-    <section className="commerce-hero commerce-hero--premium">
-      <div className="commerce-premium-hero__image" aria-hidden="true" />
-      <div className="commerce-premium-hero__shade" aria-hidden="true" />
-      <div className="commerce-premium-hero__copy">
-        <div className="brand-wordmark brand-wordmark--hero-title" aria-label="InstaPlaque"><span>Insta</span><span>Plaque</span></div>
-        <div className="commerce-hero-promise" aria-label="Free professional proof in minutes. Finished plaque in five working days.">
-          <span><strong>100% free</strong> professional proof in minutes</span>
-          <span>Your finished plaque in <strong>5 working days</strong></span>
+    <nav className="commerce-intent-rail" aria-label="Popular plaque categories">
+      <span>Shop by intent</span>
+      {highIntentLandingPages.map((page) => (
+        <a
+          key={page.slug}
+          href={`/${page.slug}`}
+          onClick={(event) => {
+            event.preventDefault();
+            onNavigate('landing', page.slug);
+          }}
+        >
+          {page.shortTitle}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
+function PriceMatrix({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className={`commerce-price-matrix ${compact ? 'commerce-price-matrix--compact' : ''}`} aria-label="Popular plaque prices">
+      {homepageProducts.map((product) => (
+        <div key={product.slug}>
+          <span>{product.shortTitle}</span>
+          <strong>{product.startingFrom}</strong>
+          <small>{product.eyebrow}</small>
         </div>
-        <p>
-          {USE_CUSTOMER_COPY_PASS
-            ? 'Create your plaque proof before you pay. Choose the size, material, wording and fixings, then check the layout properly before it goes into production.'
-            : 'Create your plaque proof before you pay. Choose the size, material, wording and fixings, then check the layout properly before it goes into production.'}
+      ))}
+    </div>
+  );
+}
+
+function MaterialSwatchStrip() {
+  return (
+    <div className="commerce-material-swatch-strip" aria-label="Plaque material choices">
+      {materialStories.slice(0, 5).map((material) => (
+        <div key={material.title}>
+          <img src={material.sliderImage} alt={`${material.title} plaque finish`} loading="lazy" />
+          <span>{material.title}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SiteHero({ onStartDesign, onNavigate }: Pick<SiteProps, 'onStartDesign' | 'onNavigate'>) {
+  return (
+    <section className="commerce-hero commerce-hero--radical">
+      <SearchIntentRail onNavigate={onNavigate} />
+      <div className="commerce-radical-hero__copy">
+        <p className="commerce-eyebrow">Custom plaques UK</p>
+        <h1>Custom plaques made simple.</h1>
+        <p className="commerce-lede">
+          Choose the plaque, proof the wording before payment, and see standard prices with UK mainland delivery included.
         </p>
         <div className="commerce-actions">
-          <button type="button" className="commerce-primary commerce-primary--cream" onClick={onStartDesign}>
-            Create your proof
+          <button type="button" className="commerce-primary" onClick={onStartDesign}>
+            Start a free proof
           </button>
-          <a className="commerce-secondary commerce-secondary--glass" href="#products">View standard sizes</a>
+          <a className="commerce-secondary" href="#products">Compare plaque sizes</a>
         </div>
+        <div className="commerce-proof-ledger" aria-label="Ordering facts">
+          {proofPromiseRows.map(([label, value]) => (
+            <div key={label}>
+              <strong>{label}</strong>
+              <span>{value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="commerce-radical-hero__gallery" aria-label="Plaque examples">
+        {heroProofImages.map((image, index) => (
+          <figure key={image.src} className={index === 0 ? 'is-featured' : ''}>
+            <img src={image.src} alt={image.label} loading={index === 0 ? 'eager' : 'lazy'} />
+            <figcaption>{image.label}</figcaption>
+          </figure>
+        ))}
+      </div>
+      <aside className="commerce-radical-hero__buybox" aria-label="Standard plaque pricing">
+        <p className="commerce-eyebrow">Standard price starts</p>
+        <PriceMatrix compact />
+        <MaterialSwatchStrip />
+      </aside>
+    </section>
+  );
+}
+
+function ProductGrid({ onStartDesign, onNavigate }: Pick<SiteProps, 'onStartDesign' | 'onNavigate'>) {
+  return (
+    <section className="commerce-section commerce-product-shop" id="products">
+      <div className="commerce-section__head">
+        <p className="commerce-eyebrow">Shop standard plaque formats</p>
+        <h2>Pick by size, then adjust material and wording in the proof.</h2>
+        <p>These are the main buying routes. Each one starts with sensible defaults and lets you change finish, fixing, border and inscription before checkout.</p>
+      </div>
+      <div className="commerce-product-grid commerce-product-grid--radical">
+        {homepageProducts.map((product) => (
+          <article className="commerce-product-card commerce-product-card--radical" key={product.slug}>
+            <ProductMockup product={product} />
+            <div className="commerce-product-card__body">
+              <p className="commerce-card-eyebrow">{product.eyebrow}</p>
+              <h3>{product.title}</h3>
+              <p>{product.description}</p>
+              <div className="commerce-size-meta" aria-label={`${product.title} use cases`}>
+                {product.bestFor.slice(0, 4).map((item) => <span key={item}>{item}</span>)}
+              </div>
+            </div>
+            <div className="commerce-card-foot">
+              <span>{product.startingFrom}</span>
+              <a
+                href={`/${product.slug}`}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onNavigate('product', product.slug);
+                }}
+              >
+                View details
+              </a>
+              <button type="button" className="commerce-link-button" onClick={onStartDesign}>Start proof</button>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   );
 }
 
-function ProductGrid({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
+function TrustBeforeCheckout({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
   return (
-    <section className="commerce-section" id="products">
+    <section className="commerce-section commerce-trust-before-checkout">
       <div className="commerce-section__head">
-        <p className="commerce-eyebrow">Standard sizes</p>
-        <h2>Choose the format, then start your free proof.</h2>
-        <p>
-          InstaPlaque is for one-off engraved plaques where the wording matters: memorial plaques, bench dedications,
-          garden plaques, opening plaques, donor plaques and custom metal signs. Prices update as you build, with
-          engraving, standard fixings and UK mainland delivery included on standard orders.
-        </p>
+        <p className="commerce-eyebrow">Before you pay</p>
+        <h2>Approve the proof first, then the plaque moves to production.</h2>
+        <p>Use the designer to check wording, layout, material, fixings and price before checkout. Standard UK mainland delivery is included where shown.</p>
       </div>
-      <div className="commerce-product-grid">
-        {homepageProducts.map((product) => (
-          <article className="commerce-product-card" key={product.slug}>
-            <ProductMockup product={product} />
-            <div>
-              <p className="commerce-card-eyebrow">{product.eyebrow}</p>
-              <h3>{product.title}</h3>
-              <p>{product.description}</p>
-              <div className="commerce-size-meta" aria-label={`${product.title} use cases`}>
-                {product.bestFor.slice(0, 3).map((item) => <span key={item}>{item}</span>)}
-              </div>
-            </div>
-            <div className="commerce-card-foot">
-              <button type="button" onClick={onStartDesign}>Start proof</button>
-            </div>
+      <div className="commerce-trust-before-checkout__grid">
+        {trustRows.map(([title, copy]) => (
+          <article key={title}>
+            <strong>{title}</strong>
+            <p>{copy}</p>
           </article>
         ))}
       </div>
+      <button type="button" className="commerce-primary" onClick={onStartDesign}>Start a free proof</button>
+    </section>
+  );
+}
+
+function SeoMerchandisePanel({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
+  return (
+    <section className="commerce-section commerce-seo-merch">
+      <div className="commerce-section__head">
+        <p className="commerce-eyebrow">High intent plaque pages</p>
+        <h2>Search pages that behave like shop departments.</h2>
+        <p>Use these routes when you already know the job: memorial bench, wall memorial, garden, opening, donor or engraved plaques.</p>
+      </div>
+      <div className="commerce-seo-merch__grid">
+        {highIntentLandingPages.map((page, index) => (
+          <a
+            key={page.slug}
+            href={`/${page.slug}`}
+            className={index === 0 ? 'is-featured' : ''}
+            onClick={(event) => {
+              event.preventDefault();
+              onNavigate('landing', page.slug);
+            }}
+          >
+            <span>{page.eyebrow}</span>
+            <strong>{page.title}</strong>
+            <small>{page.description}</small>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function BuyingEvidenceStrip({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
+  return (
+    <section className="commerce-section commerce-evidence-strip">
+      <div>
+        <p className="commerce-eyebrow">What the proof checks</p>
+        <h2>Line breaks, screw positions, borders and price before checkout.</h2>
+      </div>
+      <div className="commerce-evidence-strip__rows">
+        {[
+          ['Wording fit', 'Short bench wording or longer A5/A4 memorial text.'],
+          ['Visible fixings', 'Screws and caps appear in the proof so text is not cramped.'],
+          ['Material choice', 'Brass, aged brass, stainless steel and wood backing.'],
+          ['Checkout confidence', 'Approve the proof first, then pay securely.'],
+        ].map(([label, copy]) => (
+          <article key={label}>
+            <strong>{label}</strong>
+            <p>{copy}</p>
+          </article>
+        ))}
+      </div>
+      <button type="button" className="commerce-primary" onClick={onStartDesign}>Build a plaque proof</button>
     </section>
   );
 }
@@ -1157,18 +1431,26 @@ function HomeFaq({ faqs = homeFaqs }: { faqs?: FaqItem[] }) {
   );
 }
 
-function SeoLandingLinks({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
+function SeoLandingLinks({
+  onNavigate,
+  slugs,
+  eyebrow = 'Popular plaque searches',
+}: Pick<SiteProps, 'onNavigate'> & { slugs?: string[]; eyebrow?: string }) {
+  const links = slugs?.length
+    ? slugs
+      .map((slug) => seoLandingPages.find((page) => page.slug === slug))
+      .filter((page): page is SeoLandingPage => Boolean(page))
+    : seoLandingPages;
+
   return (
     <section className="commerce-section commerce-product-seo">
       <div className="commerce-section__head">
-        <p className="commerce-eyebrow">Popular plaque searches</p>
-        <h2>Find the right plaque for the job.</h2>
-        <p>
-          These guides cover common plaque uses and point you towards the right starting size, material and proof route.
-        </p>
+        <p className="commerce-eyebrow">{eyebrow}</p>
+        <h2>{slugs?.length ? 'Useful next pages for this buyer.' : 'Find the right plaque for the job.'}</h2>
+        <p>{slugs?.length ? 'Focused links based on this plaque type, use case and wording need.' : 'Choose by use, size or material. Each page starts a proof with sensible defaults.'}</p>
       </div>
       <div className="commerce-seo-grid">
-        {seoLandingPages.map((page) => (
+        {links.map((page) => (
           <article className="commerce-seo-card" key={page.slug}>
             <h3>{page.title}</h3>
             <p>{page.description}</p>
@@ -1185,6 +1467,27 @@ function SeoLandingLinks({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
           </article>
         ))}
       </div>
+    </section>
+  );
+}
+
+function ShopProcessStrip({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
+  return (
+    <section className="commerce-section commerce-shop-process">
+      <div className="commerce-section__head">
+        <p className="commerce-eyebrow">How ordering works</p>
+        <h2>Proof first. Payment second.</h2>
+      </div>
+      <div className="commerce-shop-process__grid">
+        {orderSteps.map(([title, copy], index) => (
+          <div className="commerce-shop-process__step" key={title}>
+            <span>{index + 1}</span>
+            <strong>{title}</strong>
+            <p>{copy}</p>
+          </div>
+        ))}
+      </div>
+      <button type="button" className="commerce-primary" onClick={onStartDesign}>Start your proof</button>
     </section>
   );
 }
@@ -1226,7 +1529,7 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
                 onClick={() => setActiveCarouselIndex(index)}
                 style={{ '--carousel-offset': offset } as React.CSSProperties}
               >
-                <img src={item.image} alt="" loading={index === 0 ? 'eager' : 'lazy'} />
+                <img src={item.image} alt={item.label} loading={index === 0 ? 'eager' : 'lazy'} />
               </button>
             );
           })}
@@ -1234,16 +1537,15 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
         <button type="button" className="commerce-carousel-arrow commerce-carousel-arrow--next" onClick={() => moveCarousel(1)} aria-label="Next plaque example">›</button>
       </div>
       <article className="commerce-proof-first-copy">
-        <p className="commerce-eyebrow">Why this is different</p>
-        <h2>Proof in minutes. Plaque in days.</h2>
+        <p className="commerce-eyebrow">How it works</p>
+        <h2>Design it. Check it. Order it.</h2>
         <p>
           {USE_CUSTOMER_COPY_PASS
-            ? 'Create a professional plaque proof from your wording, check the layout before payment, then receive a plaque engraved with care using the finest materials.'
-            : 'Create a production-style plaque proof from your wording, check the layout before payment, then receive a plaque engraved with care using the finest materials.'}
+            ? 'Add your wording, pick the size and material, then check the proof before you pay.'
+            : 'Add your wording, pick the size and material, then check the proof before you pay.'}
         </p>
         <p>
-          No guesswork and no hidden costs: engraving, standard fixings and UK mainland delivery are
-          included, with optional extras shown clearly before checkout.
+          Standard prices include engraving, standard fixings and UK mainland delivery. Extras show before checkout.
         </p>
         <button type="button" className="commerce-primary" onClick={onStartDesign}>
           Start your free proof
@@ -1252,9 +1554,9 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
       </article>
       <div className="commerce-proof-first-steps" aria-label={USE_CUSTOMER_COPY_PASS ? 'How your proof works' : 'How the proofing system works'}>
         {[
-          ['Choose your plaque options', 'Pick the size, material, fixings and finish in plain steps.'],
-          ['Add the wording', USE_CUSTOMER_COPY_PASS ? 'Type the inscription once. We shape it into a clear plaque layout.' : 'Type the inscription once. The system handles the hard layout work.'],
-          ['Review the proof and price', 'See a realistic proof and live price before checkout.'],
+          ['Choose options', 'Pick size, material, fixings and finish.'],
+          ['Add wording', USE_CUSTOMER_COPY_PASS ? 'Type the inscription once and check the layout.' : 'Type the inscription once and check the layout.'],
+          ['Check price and proof', 'Approve the proof before checkout.'],
         ].map(([title, detail], index) => (
           <div className="commerce-proof-first-step" key={title}>
             <span>{index + 1}</span>
@@ -1272,11 +1574,14 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
 function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLaunchProduct'>) {
   return (
     <div className="commerce-page">
-      <SiteHero onStartDesign={props.onStartDesign} />
+      <SiteHero onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />
+      <ProductGrid onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />
+      <SeoMerchandisePanel onNavigate={props.onNavigate} />
+      <BuyingEvidenceStrip onStartDesign={props.onStartDesign} />
+      <TrustBeforeCheckout onStartDesign={props.onStartDesign} />
       <ProofStorySection onStartDesign={props.onStartDesign} />
-      <ProductGrid onStartDesign={props.onStartDesign} />
-      <SeoLandingLinks onNavigate={props.onNavigate} />
       <HomeMaterialPanels />
+      <SeoLandingLinks onNavigate={props.onNavigate} />
       <HomeFaq />
     </div>
   );
@@ -1285,7 +1590,7 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
 function ProductPage({ selectedProduct, onStartDesign, onNavigate }: Pick<SiteProps, 'selectedProduct' | 'onStartDesign' | 'onNavigate'>) {
   return (
     <div className="commerce-page">
-      <section className="commerce-product-detail">
+      <section className="commerce-product-detail commerce-product-detail--radical">
         <div>
           <p className="commerce-eyebrow">{selectedProduct.eyebrow}</p>
           <h1>{selectedProduct.title}</h1>
@@ -1294,18 +1599,27 @@ function ProductPage({ selectedProduct, onStartDesign, onNavigate }: Pick<SitePr
             <button type="button" className="commerce-primary" onClick={onStartDesign}>
               Start your proof
             </button>
+            <a className="commerce-secondary" href="#products">Compare sizes</a>
           </div>
-          <ul className="commerce-bullet-list">
-            {selectedProduct.bestFor.map((item) => <li key={item}>{item}</li>)}
-          </ul>
+          <div className="commerce-shop-price-table commerce-shop-price-table--inline">
+            {selectedProduct.bestFor.map((item) => {
+              const fact = merchFactParts(item);
+              return (
+                <div key={item}>
+                  <span>{fact.label}</span>
+                  {fact.value ? <strong>{fact.value}</strong> : null}
+                </div>
+              );
+            })}
+          </div>
         </div>
         <ProductMockup product={selectedProduct} />
       </section>
       {selectedProduct.seoSections?.length ? (
-        <section className="commerce-section commerce-product-seo">
+        <section className="commerce-section commerce-product-seo commerce-product-seo--radical">
           <div className="commerce-section__head">
-            <p className="commerce-eyebrow">{selectedProduct.title} guide</p>
-            <h2>What to know before you order.</h2>
+            <p className="commerce-eyebrow">{selectedProduct.title}</p>
+            <h2>Size, material and price.</h2>
           </div>
           <div className="commerce-seo-grid">
             {selectedProduct.seoSections.map((section) => (
@@ -1322,12 +1636,77 @@ function ProductPage({ selectedProduct, onStartDesign, onNavigate }: Pick<SitePr
           ) : null}
         </section>
       ) : null}
-      <ProofStorySection onStartDesign={onStartDesign} />
-      <ProductGrid onStartDesign={onStartDesign} />
-      <SeoLandingLinks onNavigate={onNavigate} />
-      <HomeMaterialPanels />
+      <ProductGrid onStartDesign={onStartDesign} onNavigate={onNavigate} />
+      <ShopProcessStrip onStartDesign={onStartDesign} />
+      <SeoLandingLinks
+        onNavigate={onNavigate}
+        slugs={productRelatedLandingSlugs[selectedProduct.slug]}
+        eyebrow="Related buying guides"
+      />
       <HomeFaq faqs={mergeFaqs(selectedProduct.faqs, homeFaqs)} />
     </div>
+  );
+}
+
+function LandingShopPanel({
+  selectedLanding,
+  onStartDesign,
+  onNavigate,
+}: Pick<SiteProps, 'selectedLanding' | 'onStartDesign' | 'onNavigate'>) {
+  const choices = uniqueProductsForLanding(selectedLanding);
+  const facts = selectedLanding.buyingGuide?.length ? selectedLanding.buyingGuide : selectedLanding.sections;
+
+  return (
+    <section className="commerce-section commerce-landing-shop" id="buying-options">
+      <div className="commerce-section__head">
+        <p className="commerce-eyebrow">Product finder</p>
+        <h2>Choose the closest order route.</h2>
+        <p>{selectedLanding.description}</p>
+      </div>
+      <div className="commerce-landing-shop__grid">
+        <div className="commerce-landing-choice-list">
+          {choices.map((product) => (
+            <article className="commerce-landing-choice" key={product.slug}>
+              <div>
+                <p className="commerce-card-eyebrow">{product.eyebrow}</p>
+                <h3>{product.title}</h3>
+                <p>{product.description}</p>
+                <div className="commerce-size-meta" aria-label={`${product.title} order details`}>
+                  {product.bestFor.slice(0, 3).map((item) => <span key={item}>{item}</span>)}
+                </div>
+              </div>
+              <div className="commerce-landing-choice__actions">
+                <strong>{product.startingFrom}</strong>
+                <a
+                  href={`/${product.slug}`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    onNavigate('product', product.slug);
+                  }}
+                >
+                  View product
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+        <aside className="commerce-landing-checkout-box" aria-label={`${selectedLanding.title} order summary`}>
+          <p className="commerce-eyebrow">Before checkout</p>
+          <h3>{selectedLanding.proofCta.replace(/^Start a /i, 'Make a ')}</h3>
+          <div className="commerce-shop-price-table">
+            {facts.slice(0, 4).map((fact) => (
+              <div key={fact.title}>
+                <span>{fact.title}</span>
+                <small>{fact.copy}</small>
+              </div>
+            ))}
+          </div>
+          <button type="button" className="commerce-primary" onClick={onStartDesign}>
+            Start free proof
+          </button>
+        </aside>
+      </div>
+    </section>
   );
 }
 
@@ -1340,7 +1719,7 @@ function LandingPage({
 
   return (
     <div className="commerce-page">
-      <section className="commerce-product-detail">
+      <section className="commerce-product-detail commerce-product-detail--radical commerce-product-detail--landing">
         <div>
           <p className="commerce-eyebrow">{selectedLanding.eyebrow}</p>
           <h1>{selectedLanding.title}</h1>
@@ -1360,41 +1739,34 @@ function LandingPage({
               View {relatedProduct.title}
             </a>
           </div>
-          <div className="commerce-related-searches" aria-label="Related plaque searches">
-            {selectedLanding.relatedSearches.map((item) => <span key={item}>{item}</span>)}
+          <div className="commerce-shop-price-table commerce-shop-price-table--inline">
+            {relatedProduct.bestFor.slice(0, 4).map((item) => {
+              const fact = merchFactParts(item);
+              return (
+                <div key={item}>
+                  <span>{fact.label}</span>
+                  {fact.value ? <strong>{fact.value}</strong> : null}
+                </div>
+              );
+            })}
           </div>
         </div>
-        <div className="commerce-product-visual commerce-product-visual--stainless" aria-hidden="true">
+        <div className="commerce-product-visual commerce-product-visual--stainless">
           <picture>
             {selectedLanding.mobileImage ? (
               <source media="(max-width: 720px)" srcSet={selectedLanding.mobileImage} />
             ) : null}
-            <img src={selectedLanding.image} alt="" loading="eager" />
+            <img src={selectedLanding.image} alt={`${selectedLanding.title} example`} loading="eager" />
           </picture>
         </div>
       </section>
-      <section className="commerce-section commerce-product-seo">
-        <div className="commerce-section__head">
-          <p className="commerce-eyebrow">{selectedLanding.title} guide</p>
-          <h2>What to know before you order.</h2>
-        </div>
-        <div className="commerce-seo-grid">
-          {selectedLanding.sections.map((section) => (
-            <article className="commerce-seo-card" key={section.title}>
-              <h3>{section.title}</h3>
-              <p>{section.copy}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      <LandingShopPanel selectedLanding={selectedLanding} onStartDesign={onStartDesign} onNavigate={onNavigate} />
+      <TrustBeforeCheckout onStartDesign={onStartDesign} />
       {selectedLanding.examples?.length ? (
-        <section className="commerce-section commerce-example-section">
+        <section className="commerce-section commerce-example-section commerce-example-section--radical">
           <div className="commerce-section__head">
-            <p className="commerce-eyebrow">Realistic proof examples</p>
-            <h2>Different finishes in real settings.</h2>
-            <p>
-              These images were made from actual app-generated plaque proofs using the realistic preview tool. Final production follows the wording and options approved in your own proof.
-            </p>
+            <p className="commerce-eyebrow">Real examples</p>
+            <h2>Examples first, explanation second.</h2>
           </div>
           <div className="commerce-example-grid">
             {selectedLanding.examples.map((example) => (
@@ -1409,11 +1781,25 @@ function LandingPage({
           </div>
         </section>
       ) : null}
+      <section className="commerce-section commerce-product-seo commerce-product-seo--radical">
+        <div className="commerce-section__head">
+          <p className="commerce-eyebrow">{selectedLanding.title}</p>
+          <h2>What to choose before you proof.</h2>
+        </div>
+        <div className="commerce-seo-grid">
+          {selectedLanding.sections.map((section) => (
+            <article className="commerce-seo-card" key={section.title}>
+              <h3>{section.title}</h3>
+              <p>{section.copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
       {selectedLanding.buyingGuide?.length ? (
-        <section className="commerce-section commerce-product-seo">
+        <section className="commerce-section commerce-product-seo commerce-product-seo--radical commerce-product-seo--checkout">
           <div className="commerce-section__head">
             <p className="commerce-eyebrow">Ordering guide</p>
-            <h2>Small plaque, careful decisions.</h2>
+            <h2>Before you checkout.</h2>
           </div>
           <div className="commerce-seo-grid">
             {selectedLanding.buyingGuide.map((section) => (
@@ -1425,9 +1811,22 @@ function LandingPage({
           </div>
         </section>
       ) : null}
-      <ProofStorySection onStartDesign={onStartDesign} />
-      <ProductGrid onStartDesign={onStartDesign} />
-      <SeoLandingLinks onNavigate={onNavigate} />
+      <section className="commerce-section commerce-related-search-module">
+        <div className="commerce-section__head">
+          <p className="commerce-eyebrow">Related searches</p>
+          <h2>More ways customers describe this plaque.</h2>
+        </div>
+        <div className="commerce-related-searches" aria-label="Related plaque searches">
+          {selectedLanding.relatedSearches.map((item) => <span key={item}>{item}</span>)}
+        </div>
+      </section>
+      <ProductGrid onStartDesign={onStartDesign} onNavigate={onNavigate} />
+      <ShopProcessStrip onStartDesign={onStartDesign} />
+      <SeoLandingLinks
+        onNavigate={onNavigate}
+        slugs={landingRelatedLandingSlugs[selectedLanding.slug]}
+        eyebrow="Related plaque guides"
+      />
       <HomeFaq faqs={mergeFaqs(selectedLanding.faqs, homeFaqs)} />
     </div>
   );
@@ -2615,9 +3014,16 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
         />
         <nav className="commerce-footer-legal" aria-label="Legal pages">
           {footerLinks.map((link) => (
-            <button key={link.view} type="button" onClick={() => onNavigate(link.view)}>
+            <a
+              key={link.view}
+              href={routePathForView(link.view)}
+              onClick={(event) => {
+                event.preventDefault();
+                onNavigate(link.view);
+              }}
+            >
               {link.label}
-            </button>
+            </a>
           ))}
         </nav>
       </div>

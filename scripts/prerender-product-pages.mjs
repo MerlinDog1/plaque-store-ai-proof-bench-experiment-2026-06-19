@@ -17,19 +17,19 @@ const pages = [
   {
     slug: 'memorial-plaques',
     title: 'Memorial Plaques UK | Brass & Stainless Steel Remembrance Plaques',
-    description: 'Create a custom memorial plaque for a grave, garden, bench or remembrance wall. Choose brass or stainless steel and approve a proof before ordering.',
+    description: 'Memorial plaques in brass or stainless steel. Add the wording, check the proof, then order online.',
     price: 95.5,
     image: '/site-images/plaque-hero-memorial-wall-desktop.jpg',
     productType: 'Memorial plaques',
     faqs: [
       ['Can I check a memorial plaque before ordering?', 'Yes. Enter the wording and review a free online proof before approving the plaque for checkout.'],
-      ['Which material is best for a memorial plaque?', 'Brass gives a traditional warm finish, while stainless steel is a clean outdoor option. Wood backing can be added for wall and presentation plaques.'],
+      ['Which material is best for a memorial plaque?', 'Choose brass for a classic gold plaque. Choose stainless steel for a silver modern plaque. Add wood backing for wall plaques.'],
     ],
   },
   {
     slug: 'bench-plaques',
     title: 'Bench Plaques UK | Custom Brass & Stainless Steel Bench Plaques',
-    description: 'Order custom bench plaques in brass or stainless steel. Build a proof online, check the inscription and see live pricing before payment.',
+    description: 'Small engraved bench plaques from £58.50. Brass or stainless steel, with a free proof before payment.',
     price: 58.5,
     image: '/site-images/home-carousel-bench-steel.webp',
     productType: 'Bench plaques',
@@ -41,7 +41,7 @@ const pages = [
   {
     slug: 'brass-plaques',
     title: 'Brass Plaques UK | Custom Engraved Brass Plaques',
-    description: 'Custom brass plaques for memorials, benches, openings and presentation use. Choose brushed, polished, orbital or aged brass and approve a proof online.',
+    description: 'Custom brass plaques for memorials, benches, openings and presentation use. Choose the finish and approve a proof online.',
     price: 105.5,
     image: '/site-images/home-gallery-brass-bench.webp',
     productType: 'Brass plaques',
@@ -53,7 +53,7 @@ const pages = [
   {
     slug: 'stainless-steel-plaques',
     title: 'Stainless Steel Plaques UK | Outdoor Metal Plaques Made to Order',
-    description: 'Custom stainless steel plaques for outdoor, wall, bench and memorial use. Choose brushed or polished stainless and approve your proof before payment.',
+    description: 'Custom stainless steel plaques for outdoor, wall, bench and memorial use. Choose brushed or polished stainless and approve a proof before payment.',
     price: 95.5,
     image: '/site-images/home-carousel-steel-wall.webp',
     productType: 'Stainless steel plaques',
@@ -65,7 +65,7 @@ const pages = [
   {
     slug: 'a5-plaques',
     title: 'A5 Plaques UK | Custom A5 Memorial & Wall Plaques',
-    description: 'Create a custom A5 plaque in brass or stainless steel. A practical size for memorials, gardens, wall plaques and presentation wording.',
+    description: 'A5 metal plaques for memorial, garden, wall and presentation wording. Choose brass or stainless steel and check a proof online.',
     price: 95.5,
     image: '/site-images/home-carousel-garden-brass.webp',
     productType: 'A5 plaques',
@@ -77,7 +77,7 @@ const pages = [
   {
     slug: 'a4-plaques',
     title: 'A4 Plaques UK | Large Custom Memorial & Presentation Plaques',
-    description: 'Large custom A4 plaques in brass or stainless steel for longer wording, openings, donor recognition, memorials and presentation displays.',
+    description: 'Large A4 plaques in brass or stainless steel for longer wording, openings, donor recognition and memorial displays.',
     price: 145,
     image: '/site-images/home-carousel-reading-room.webp',
     productType: 'A4 plaques',
@@ -89,7 +89,7 @@ const pages = [
   {
     slug: 'custom-plaques',
     title: 'Custom Plaques UK | Bespoke Oval, Circular & Made-to-Measure Plaques',
-    description: 'Start a custom plaque proof for bespoke sizes, oval plaques, circular plaques and made-to-measure brass or stainless steel plaques.',
+    description: 'Start a custom plaque proof for bespoke sizes, oval plaques, circular plaques and made-to-measure metal plaques.',
     price: 145,
     image: '/site-images/home-custom-oval-steel.webp',
     productType: 'Custom plaques',
@@ -104,7 +104,7 @@ const landingPages = [
   {
     slug: 'garden-plaques',
     title: 'Garden Plaques UK | Custom Memorial Garden Plaques',
-    description: 'Garden plaques for memorial corners, trees, benches, planted areas, walls and family gardens. Choose brass or stainless steel and check a proof before ordering.',
+    description: 'Garden plaques for trees, benches, planted areas, walls and family gardens. Choose brass or stainless steel and check a proof before ordering.',
     image: '/site-images/home-carousel-garden-brass.webp',
     pageName: 'Garden plaques',
     faqs: [
@@ -128,7 +128,7 @@ const landingPages = [
   {
     slug: 'commemorative-plaques',
     title: 'Commemorative Plaques UK | Custom Recognition Plaques',
-    description: 'Commemorative plaques for people, places, projects, anniversaries and public recognition. Choose the right size and check the proof before ordering.',
+    description: 'Commemorative plaques for people, places, projects and dates. Choose the size, add wording and approve the proof.',
     image: '/site-images/home-carousel-reading-room.webp',
     pageName: 'Commemorative plaques',
     faqs: [
@@ -152,7 +152,7 @@ const landingPages = [
   {
     slug: 'pet-memorial-plaques',
     title: 'Pet Memorial Plaques UK | Custom Garden Pet Plaques',
-    description: 'Pet memorial plaques for gardens, homes, stables and remembrance corners. Add a name, dates and short message, then check the proof before payment.',
+    description: 'Pet memorial plaques for gardens, homes and stables. Add a name, dates and short message, then check the proof before payment.',
     image: '/site-images/plaque-hero-cat.png',
     pageName: 'Pet memorial plaques',
     faqs: [
@@ -164,7 +164,7 @@ const landingPages = [
   {
     slug: 'tree-plaques',
     title: 'Tree Plaques UK | Custom Memorial Tree Dedication Plaques',
-    description: 'Tree plaques for memorial trees, donated trees, family gardens and community planting projects, made in brass or stainless steel.',
+    description: 'Tree plaques for memorial trees, donated trees and planting projects, made in brass or stainless steel.',
     image: '/site-images/home-carousel-garden-brass.webp',
     pageName: 'Tree plaques',
     faqs: [
@@ -176,7 +176,7 @@ const landingPages = [
   {
     slug: 'donor-plaques',
     title: 'Donor Plaques UK | Custom Recognition & Fundraising Plaques',
-    description: 'Donor plaques for funded projects, restorations, gardens, rooms, benches and public recognition, with a proof before production.',
+    description: 'Donor plaques for funded projects, restorations, rooms, gardens and public recognition, with a proof before production.',
     image: '/site-images/home-gallery-brass-community.webp',
     pageName: 'Donor plaques',
     faqs: [
@@ -188,21 +188,47 @@ const landingPages = [
   {
     slug: 'memorial-bench-plaques',
     title: 'Memorial Bench Plaques UK | Custom Bench Dedication Plaques',
-    description: 'Memorial bench plaques for names, dates and short dedications. Choose brass, aged brass or stainless steel and check the proof before ordering.',
-    image: '/seo/realistic/memorial-bench-plaques/hero-16x9.jpg',
+    description: 'Order memorial bench plaques from £58.50. Brass, aged brass or stainless steel, free online proof, standard fixings and UK mainland delivery included.',
+    image: '/seo/realistic/memorial-plaques/aged-brass-bench-memorial-plaque.webp',
     pageName: 'Memorial bench plaques',
     faqs: [
       ['What size is a memorial bench plaque?', 'The compact bench plaque starts at 150 x 50 mm and is best for short inscriptions.'],
       ['Can I preview the bench plaque before ordering?', 'Yes. Enter the wording and review the free proof before checkout.'],
-      ['What wording fits on a memorial bench plaque?', 'A name, dates and one short dedication usually works best. If the message needs several sentences, choose a larger plaque rather than forcing the text into a bench size.'],
+      ['What wording fits on a memorial bench plaque?', 'A name, dates and one short message usually works best. Choose a larger plaque for poems or longer wording.'],
       ['Are screw fixings included?', 'Standard screw fixings are included for standard bench plaques, and the proof shows where the visible fixings sit.'],
     ],
     relatedSearches: ['memorial bench plaques UK', 'bench dedication plaques', 'engraved bench plaques', 'brass bench memorial plaques'],
   },
   {
+    slug: 'brass-memorial-plaques',
+    title: 'Brass Memorial Plaques UK | Custom Engraved Remembrance Plaques',
+    description: 'Order brass memorial plaques for benches, gardens and walls. Bench plaques from £58.50, A5 brass memorial plaques from £105.50, free proof before payment.',
+    image: '/seo/realistic/memorial-plaques/brass-bench-plaque-garden-rail.webp',
+    pageName: 'Brass memorial plaques',
+    faqs: [
+      ['Are brass memorial plaques suitable outside?', 'Yes. Brass can be used outdoors and is a common choice for benches, gardens and walls.'],
+      ['Can I check a brass memorial plaque before ordering?', 'Yes. Create the wording online and approve the proof before checkout.'],
+      ['What wording fits on a brass memorial plaque?', 'Most include a name, dates and one or two short lines. Longer messages usually need A5, A4 or a custom size.'],
+    ],
+    relatedSearches: ['brass memorial plaques UK', 'engraved brass memorial plaques', 'brass remembrance plaques', 'brass bench memorial plaques'],
+  },
+  {
+    slug: 'wall-memorial-plaques',
+    title: 'Wall Memorial Plaques UK | Custom Brass & Stainless Remembrance Plaques',
+    description: 'Order wall memorial plaques in brass or stainless steel. A5, A4 and wood-backed options with free online proof before payment.',
+    image: '/seo/realistic/memorial-plaques/stainless-steel-wood-backed-memorial-plaque.webp',
+    pageName: 'Wall memorial plaques',
+    faqs: [
+      ['Can wall memorial plaques be used outside?', 'Yes. Brass and stainless steel are suitable for outdoor use with appropriate fixings.'],
+      ['Which size is best for a wall memorial plaque?', 'A5 works for shorter wording. A4 or custom sizing is better for longer messages.'],
+      ['Can I add a quote or family message?', 'Yes. Add the wording in the designer and check the proof to make sure it stays readable.'],
+    ],
+    relatedSearches: ['wall memorial plaques UK', 'memorial wall plaques', 'brass wall memorial plaques', 'stainless steel memorial wall plaques'],
+  },
+  {
     slug: 'ashes-scattering-plaques',
     title: 'Ashes Scattering Plaques UK | Custom Remembrance Plaques',
-    description: 'Ashes scattering plaques for gardens, trees, benches and remembrance areas, with simple respectful wording checked in a proof before ordering.',
+    description: 'Ashes scattering plaques for gardens, trees and benches. Add simple wording and check the proof before ordering.',
     image: '/site-images/plaque-hero-memorial-wall-desktop.jpg',
     pageName: 'Ashes scattering plaques',
     faqs: [
@@ -214,7 +240,7 @@ const landingPages = [
   {
     slug: 'school-opening-plaques',
     title: 'School Opening Plaques UK | Custom School Building Plaques',
-    description: 'School opening plaques for new buildings, classrooms, libraries, gardens and formal unveilings, proofed before production.',
+    description: 'School opening plaques for new buildings, classrooms, libraries and gardens, proofed before production.',
     image: '/site-images/home-carousel-reading-room.webp',
     pageName: 'School opening plaques',
     faqs: [
@@ -260,8 +286,8 @@ const productListSchema = () => ({
 const routePages = [
   {
     slug: '',
-    title: 'Custom Plaques Made Simple | Brass, Stainless Steel & Bench Plaques UK',
-    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK mainland delivery before you order.',
+    title: 'Custom Plaques UK | Design, Proof & Order Online',
+    description: 'Order custom brass, stainless steel, memorial and bench plaques online. Free proof before payment, live standard prices and UK mainland delivery included.',
     schema: [productListSchema(), faqSchema(homeFaqs)],
   },
   {
@@ -302,6 +328,7 @@ const routePages = [
     title: 'Custom Plaque FAQs UK | InstaPlaque',
     description: 'Answers about custom plaque prices, materials, proofing, UK delivery, fixings, aged brass and bespoke plaque orders.',
     schema: [faqSchema(homeFaqs)],
+    faqs: homeFaqs,
   },
   {
     slug: 'quote',
@@ -335,9 +362,30 @@ const routePages = [
     description: 'Cookie and essential storage information for the InstaPlaque online proof, checkout and admin systems.',
   },
   {
-    slug: 'returns-and-cancellations',
+    slug: 'returns-cancellations',
     title: 'Returns and Cancellations | Custom Plaques UK | InstaPlaque',
     description: 'Returns, cancellation and faulty goods information for personalised InstaPlaque brass and stainless steel plaque orders.',
+  },
+  {
+    slug: 'checkout',
+    title: 'Secure Checkout | InstaPlaque',
+    description: 'Complete payment for an approved InstaPlaque proof.',
+    heading: 'Secure plaque checkout',
+    robots: 'noindex,nofollow',
+  },
+  {
+    slug: 'order-confirmed',
+    title: 'Order Confirmation | InstaPlaque',
+    description: 'Confirmation details for an InstaPlaque order.',
+    heading: 'Plaque order confirmation',
+    robots: 'noindex,nofollow',
+  },
+  {
+    slug: 'admin',
+    title: 'Admin | InstaPlaque',
+    description: 'InstaPlaque order administration.',
+    heading: 'InstaPlaque admin',
+    robots: 'noindex,nofollow',
   },
 ];
 
@@ -346,6 +394,54 @@ const escapeAttr = (value) => value
   .replace(/"/g, '&quot;')
   .replace(/</g, '&lt;')
   .replace(/>/g, '&gt;');
+
+const escapeHtml = escapeAttr;
+
+const primaryNav = [
+  ['Custom plaques', '/custom-plaques'],
+  ['Memorial plaques', '/memorial-plaques'],
+  ['Bench plaques', '/bench-plaques'],
+  ['Brass plaques', '/brass-plaques'],
+  ['Stainless steel plaques', '/stainless-steel-plaques'],
+  ['Garden plaques', '/garden-plaques'],
+  ['Opening plaques', '/opening-plaques'],
+  ['Plaque materials', '/materials'],
+  ['How it works', '/how-it-works'],
+  ['FAQs', '/faq'],
+  ['Contact', '/contact'],
+];
+
+const staticNav = () => `<nav aria-label="Primary navigation"><a href="/">InstaPlaque home</a>${primaryNav
+  .map(([label, href]) => `<a href="${href}">${escapeHtml(label)}</a>`)
+  .join('')}</nav>`;
+
+const staticFaqs = (faqs = []) => faqs.length
+  ? `<section aria-labelledby="prerender-faq-heading"><h2 id="prerender-faq-heading">Questions and answers</h2>${faqs
+      .map(([question, answer]) => `<article><h3>${escapeHtml(question)}</h3><p>${escapeHtml(answer)}</p></article>`)
+      .join('')}</section>`
+  : '';
+
+const staticPageMarkup = ({
+  title,
+  heading,
+  description,
+  image,
+  faqs = [],
+  price = null,
+  relatedSearches = [],
+  kind = 'page',
+}) => {
+  const visibleHeading = heading || title.split('|')[0].trim();
+  const details = kind === 'product'
+    ? `<section aria-labelledby="prerender-buy-heading"><h2 id="prerender-buy-heading">Design and order online</h2><p>Choose the plaque size, material, finish and fixings, then add your wording and check the exact proof before payment.${price ? ` Standard prices start from £${Number(price).toFixed(2).replace(/\.00$/, '')}.` : ''} Standard fixings and UK mainland delivery are included on eligible standard plaques.</p><p>Brass gives a warm, traditional finish. Stainless steel gives a clean, contemporary finish and is well suited to outdoor use. Every approved order is checked before production.</p><a href="/design">Create your free plaque proof</a></section>`
+    : kind === 'home'
+      ? `<section aria-labelledby="prerender-shop-heading"><h2 id="prerender-shop-heading">Popular custom plaque formats</h2><ul>${pages.map((page) => `<li><a href="/${page.slug}">${escapeHtml(page.productType)}</a> from £${page.price.toFixed(2).replace(/\.00$/, '')}</li>`).join('')}</ul><p>Choose brass or stainless steel, enter the wording and review a free online proof before checkout. Standard plaque prices include engraving, standard fixings and UK mainland delivery.</p><a href="/design">Start a free proof</a></section>`
+      : `<section aria-labelledby="prerender-process-heading"><h2 id="prerender-process-heading">Proof your plaque before payment</h2><p>Choose the format, add the wording and review the layout online. Standard prices are shown before checkout, with UK mainland delivery included on eligible standard plaques.</p><a href="/design">Create your free plaque proof</a></section>`;
+  const related = relatedSearches.length
+    ? `<section aria-labelledby="prerender-related-heading"><h2 id="prerender-related-heading">Related plaque advice</h2><p>${relatedSearches.map(escapeHtml).join(', ')}.</p></section>`
+    : '';
+  return `<div class="seo-prerendered-page" data-prerendered="true"><header>${staticNav()}</header><main><article><h1>${escapeHtml(visibleHeading)}</h1><p>${escapeHtml(description)}</p>${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(visibleHeading)} example" />` : ''}${details}${related}${staticFaqs(faqs)}</article></main><footer><nav aria-label="Legal"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/returns-cancellations">Returns and cancellations</a></nav></footer></div>`;
+};
 
 const replaceTag = (html, pattern, replacement) => html.replace(pattern, replacement);
 
@@ -357,22 +453,31 @@ const writePrerenderedPage = async ({
   slug,
   title,
   description,
+  image = shareImage,
   schema = [],
   productSchema = null,
+  heading = '',
+  faqs = [],
+  price = null,
+  relatedSearches = [],
+  kind = 'page',
+  robots = 'index,follow',
 }) => {
   const pathPart = slug ? `/${slug}` : '/';
   const url = `${siteBaseUrl}${pathPart}`;
+  const socialImage = image.startsWith('http') ? image : `${siteBaseUrl}${image}`;
   let html = baseHtml;
   html = replaceTag(html, /<title>.*?<\/title>/, `<title>${escapeAttr(title)}</title>`);
   html = replaceTag(html, /<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${escapeAttr(description)}" />`);
+  html = replaceTag(html, /<meta name="robots" content="[^"]*" \/>/, `<meta name="robots" content="${robots}" />`);
   html = replaceTag(html, /<link rel="canonical" href="[^"]*" \/>/, `<link rel="canonical" href="${url}" />`);
   html = replaceTag(html, /<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${escapeAttr(description)}" />`);
   html = replaceTag(html, /<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`);
-  html = replaceTag(html, /<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${shareImage}" />`);
+  html = replaceTag(html, /<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${socialImage}" />`);
   html = replaceTag(html, /<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${escapeAttr(description)}" />`);
-  html = replaceTag(html, /<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${shareImage}" />`);
+  html = replaceTag(html, /<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${socialImage}" />`);
 
   const routeSchema = {
     '@context': 'https://schema.org',
@@ -390,6 +495,10 @@ const writePrerenderedPage = async ({
     ],
   };
   html = html.replace('</head>', `  <script type="application/ld+json" id="instaplaque-prerender-route-schema">${JSON.stringify(routeSchema)}</script>\n</head>`);
+  html = html.replace(
+    '<div id="root"></div>',
+    `<div id="root">${staticPageMarkup({ title, heading, description, image, faqs, price, relatedSearches, kind })}</div>`,
+  );
 
   if (!slug) {
     await writeFile(indexPath, html);
@@ -402,7 +511,7 @@ const writePrerenderedPage = async ({
 };
 
 for (const page of routePages) {
-  await writePrerenderedPage(page);
+  await writePrerenderedPage({ ...page, kind: page.slug === '' ? 'home' : 'page' });
 }
 
 for (const page of pages) {
@@ -411,6 +520,7 @@ for (const page of pages) {
     slug: page.slug,
     title: page.title,
     description: page.description,
+    image: page.image,
     productSchema: {
       '@type': 'Product',
       '@id': `${url}#product`,
@@ -434,6 +544,10 @@ for (const page of pages) {
         },
       },
     },
+    heading: page.productType,
+    faqs: page.faqs,
+    price: page.price,
+    kind: 'product',
     schema: [
       {
         '@type': 'BreadcrumbList',
@@ -453,6 +567,11 @@ for (const page of landingPages) {
     slug: page.slug,
     title: page.title,
     description: page.description,
+    image: page.image,
+    heading: page.pageName,
+    faqs: page.faqs,
+    relatedSearches: page.relatedSearches,
+    kind: 'product',
     schema: [
       {
         '@type': 'CollectionPage',
@@ -473,6 +592,17 @@ for (const page of landingPages) {
     ],
   });
 }
+
+const notFoundHtml = baseHtml
+  .replace(/<title>.*?<\/title>/, '<title>Page Not Found | InstaPlaque</title>')
+  .replace(/<meta name="description" content="[^"]*" \/>/, '<meta name="description" content="The requested InstaPlaque page could not be found." />')
+  .replace(/<meta name="robots" content="[^"]*" \/>/, '<meta name="robots" content="noindex,follow" />')
+  .replace(/<link rel="canonical" href="[^"]*" \/>/, '<link rel="canonical" href="https://instaplaque.co.uk/404" />')
+  .replace(
+    '<div id="root"></div>',
+    '<div id="root"><main class="seo-prerendered-page" data-prerendered="true"><article><h1>Page not found</h1><p>The page you requested does not exist. Choose a plaque category or return home.</p><p><a href="/">Return to InstaPlaque</a> · <a href="/custom-plaques">View custom plaques</a> · <a href="/design">Start a free proof</a></p></article></main></div>',
+  );
+await writeFile(path.join(distDir, '404.html'), notFoundHtml);
 
 const merchantFeedPages = pages.filter((page) => page.slug !== 'custom-plaques');
 

@@ -54,6 +54,7 @@ const routeViews: Partial<Record<string, SiteView>> = {
   '/cookies': 'cookies',
   '/returns': 'returns',
   '/returns-and-cancellations': 'returns',
+  '/returns-cancellations': 'returns',
   '/design': 'plaque',
 };
 
@@ -70,7 +71,7 @@ const viewRoutes: Partial<Record<SiteView, string>> = {
   terms: '/terms',
   privacy: '/privacy',
   cookies: '/cookies',
-  returns: '/returns-and-cancellations',
+  returns: '/returns-cancellations',
   plaque: '/design',
 };
 
@@ -215,6 +216,24 @@ const App: React.FC = () => {
   const [memorialStatus, setMemorialStatus] = useState<string | null>(null);
   const [proofSaved, setProofSaved] = useState(false);
   const [basketAdded, setBasketAdded] = useState(false);
+  const [isDesktopToolLayout, setIsDesktopToolLayout] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)').matches : true,
+  );
+
+  useEffect(() => {
+    if (currentView !== 'plaque') return;
+    document.title = 'Design a Custom Plaque Online | Free InstaPlaque Proof';
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute('content', 'Use the InstaPlaque online plaque designer to create a free proof for a custom brass, stainless steel, bench or memorial plaque before checkout.');
+    document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.setAttribute('content', 'index,follow');
+    document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute('href', 'https://instaplaque.co.uk/design');
+    if (!document.getElementById('instaplaque-designer-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'instaplaque-designer-fonts';
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alex+Brush&family=Allura&family=Bebas+Neue&family=Bitter:wght@400;700&family=Caveat:wght@400;700&family=Cinzel:wght@400;700;900&family=Dancing+Script:wght@400;700&family=EB+Garamond:wght@400;600;700&family=Great+Vibes&family=Lato:wght@300;400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Open+Sans:wght@300;400;600;700&family=Oswald:wght@400;600;700&family=Pacifico&family=Pinyon+Script&family=Raleway:wght@300;400;500;700&family=Roboto+Slab:wght@300;500;700&family=Satisfy&display=swap';
+      document.head.appendChild(link);
+    }
+  }, [currentView]);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const selectedProduct = getProductBySlug(selectedProductSlug);
@@ -242,6 +261,14 @@ const App: React.FC = () => {
       }
     };
     checkAccess();
+  }, []);
+
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 768px)');
+    const updateLayout = () => setIsDesktopToolLayout(query.matches);
+    updateLayout();
+    query.addEventListener('change', updateLayout);
+    return () => query.removeEventListener('change', updateLayout);
   }, []);
 
   useEffect(() => {
@@ -1201,7 +1228,16 @@ const App: React.FC = () => {
             <aside className="proofbench-customiser no-print row-start-2 min-h-0 min-w-0 overflow-hidden md:col-start-2 md:row-start-1">
               <div className="proofbench-customiser-head hidden md:flex">
                 <div>
-                  <h2 className="text-base font-black text-[#f7f1e3]">{steps[activeStep]}</h2>
+                  <p className="proofbench-designer-kicker">Design your custom plaque</p>
+                  {isDesktopToolLayout ? (
+                    <h1 className="proofbench-designer-title">Design your custom plaque</h1>
+                  ) : (
+                    <p className="proofbench-designer-title">Design your custom plaque</p>
+                  )}
+                  <h2 className="proofbench-designer-step">{steps[activeStep]}</h2>
+                  <p className="proofbench-designer-summary">
+                    Step {activeStep + 1} of {steps.length} · {proofSpecTrail} · proof before payment
+                  </p>
                 </div>
               </div>
               <div className="proofbench-mobile-tabs md:hidden">
@@ -1263,12 +1299,19 @@ const App: React.FC = () => {
 
             <section className={`proofbench-stage relative row-start-1 min-h-0 min-w-0 overflow-hidden md:col-start-3 md:row-start-1 ${isProofExpanded ? 'is-expanded' : ''}`}>
               <div className="proofbench-mobile-top no-print md:hidden">
-                <button type="button" className="proofbench-mobile-brand" onClick={() => handleNavigate('home')}>
-                  <span className="brand-wordmark brand-wordmark--mobile-tool">
-                    <span>Insta</span><span>Plaque</span>
-                  </span>
-                  <small title={proofSpecTrail}>{proofSpecTrail}</small>
-                </button>
+                <div className="proofbench-mobile-heading">
+                  <button type="button" className="proofbench-mobile-brand" onClick={() => handleNavigate('home')}>
+                    <span className="brand-wordmark brand-wordmark--mobile-tool">
+                      <span>Insta</span><span>Plaque</span>
+                    </span>
+                    <small title={proofSpecTrail}>{proofSpecTrail}</small>
+                  </button>
+                  {isDesktopToolLayout ? (
+                    <p className="proofbench-mobile-title">Design your custom plaque</p>
+                  ) : (
+                    <h1 className="proofbench-mobile-title">Design your custom plaque</h1>
+                  )}
+                </div>
                 {showProofPrice && (
                   <button
                     type="button"
