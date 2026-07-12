@@ -36,25 +36,8 @@ export const Header: React.FC<Props> = ({ onNavigate, onStartDesign, currentView
 
         <div className="proofbench-header-actions flex items-center gap-2">
           {showDesignCta && (
-            <nav className="commerce-header-nav" aria-label="Main navigation">
-              <a href="/#products">Plaques</a>
-              <a href="/#how-it-works">How it works</a>
-              <a href="/contact">Help</a>
-            </nav>
-          )}
-          {showDesignCta && (
-            <details className="commerce-mobile-menu">
-              <summary>Menu</summary>
-              <nav aria-label="Mobile navigation">
-                <a href="/#products">Plaques</a>
-                <a href="/#how-it-works">How it works</a>
-                <a href="/contact">Help</a>
-              </nav>
-            </details>
-          )}
-          {showDesignCta && (
           <button type="button" className="commerce-header-cta inline-flex" onClick={onStartDesign}>
-            Create free design
+            Design now
           </button>
           )}
           {showPrice && (
