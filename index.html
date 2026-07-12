@@ -2174,8 +2174,8 @@
     .instaplaque-loader__plaque {
       position: relative;
       display: grid;
-      width: 210px;
-      height: 112px;
+      width: min(276px, calc(100vw - 64px));
+      aspect-ratio: 2 / 1;
       place-items: center;
       overflow: hidden;
       border: 1px solid rgba(236, 202, 118, 0.58);
@@ -2209,33 +2209,30 @@
       animation: instaplaque-loader-sheen 1.8s ease-in-out 1 both;
     }
 
-    .instaplaque-loader__lines {
+    .instaplaque-loader__message {
       position: relative;
       z-index: 1;
       display: grid;
-      gap: 9px;
+      gap: 7px;
       justify-items: center;
+      color: rgba(25, 19, 10, 0.9);
+      font: 700 17px/1.05 Georgia, 'Times New Roman', serif;
+      letter-spacing: 0.075em;
+      text-shadow: 0 1px rgba(255, 242, 191, 0.22);
+      text-transform: uppercase;
     }
 
-    .instaplaque-loader__lines i {
+    .instaplaque-loader__message span {
       display: block;
-      width: 118px;
-      height: 4px;
-      border-radius: 999px;
-      background: rgba(27, 22, 13, 0.76);
       opacity: 0;
-      transform: scaleX(0.3);
+      clip-path: inset(0 100% 0 0);
       animation: instaplaque-loader-line 1.8s ease-in-out 1 both;
     }
 
-    .instaplaque-loader__lines i:nth-child(2) {
-      width: 82px;
-      animation-delay: 120ms;
-    }
-
-    .instaplaque-loader__lines i:nth-child(3) {
-      width: 98px;
-      animation-delay: 240ms;
+    .instaplaque-loader__message span:nth-child(2) {
+      font-size: 14px;
+      letter-spacing: 0.16em;
+      animation-delay: 180ms;
     }
 
     .instaplaque-loader__copy {
@@ -2260,8 +2257,8 @@
     }
 
     @keyframes instaplaque-loader-line {
-      0%, 18% { opacity: 0; transform: scaleX(0.3); }
-      48%, 100% { opacity: 1; transform: scaleX(1); }
+      0%, 18% { opacity: 0; clip-path: inset(0 100% 0 0); }
+      48%, 100% { opacity: 1; clip-path: inset(0 0 0 0); }
     }
 
     @keyframes instaplaque-loader-sheen {
@@ -2285,7 +2282,7 @@
       .instaplaque-loader__plaque,
       .instaplaque-loader__plaque::before,
       .instaplaque-loader__plaque::after,
-      .instaplaque-loader__lines i,
+      .instaplaque-loader__message span,
       .instaplaque-loader__dots::after {
         animation: none;
       }
@@ -2294,9 +2291,9 @@
         clip-path: none;
       }
 
-      .instaplaque-loader__lines i {
+      .instaplaque-loader__message span {
         opacity: 1;
-        transform: none;
+        clip-path: none;
       }
     }
   </style>
@@ -2373,7 +2370,7 @@
     <div class="instaplaque-loader__inner">
       <div class="instaplaque-loader__brand"><span>Insta</span><span>Plaque</span></div>
       <div class="instaplaque-loader__plaque" aria-hidden="true">
-        <span class="instaplaque-loader__lines"><i></i><i></i><i></i></span>
+        <span class="instaplaque-loader__message"><span>Design your plaque</span><span>in minutes</span></span>
       </div>
       <div class="instaplaque-loader__copy">Preparing your designer<span class="instaplaque-loader__dots"></span></div>
     </div>
