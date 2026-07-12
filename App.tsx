@@ -1336,11 +1336,13 @@ const App: React.FC = () => {
                     <p className="proofbench-mobile-title proofbench-mobile-promise">
                       <span>Design your own plaque online</span>
                       <span>Free UK mainland delivery</span>
+                      <span>Secure payment powered by Stripe</span>
                     </p>
                   ) : (
                     <h1 className="proofbench-mobile-title proofbench-mobile-promise">
                       <span>Design your own plaque online</span>
                       <span>Free UK mainland delivery</span>
+                      <span>Secure payment powered by Stripe</span>
                     </h1>
                   )}
                   <small className="proofbench-mobile-spec" title={proofSpecTrail}>{proofSpecTrail}</small>
@@ -1446,7 +1448,7 @@ const App: React.FC = () => {
             aria-expanded={designerGuideOpen}
             aria-controls="designer-guide"
           >
-            <span>?</span> Plaque guide
+            <span>i</span> Plaque guide
           </button>
 
           <aside
