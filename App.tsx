@@ -40,7 +40,7 @@ const PROOF_BENCH_INITIAL_STATE: PlaqueState = {
 };
 
 const routeViews: Partial<Record<string, SiteView>> = {
-  '/': 'home',
+  '/': 'plaque',
   '/materials': 'materials',
   '/how-it-works': 'how',
   '/faq': 'faq',
@@ -72,7 +72,7 @@ const viewRoutes: Partial<Record<SiteView, string>> = {
   privacy: '/privacy',
   cookies: '/cookies',
   returns: '/returns-cancellations',
-  plaque: '/design',
+  plaque: '/',
 };
 
 const productRouteSlugs = new Set(productFamilies.map((product) => product.slug));
@@ -195,6 +195,15 @@ const App: React.FC = () => {
   const [mockOrders, setMockOrders] = useState<MockOrder[]>([]);
   const [activeStep, setActiveStep] = useState(0);
   const [hasSelectedSize, setHasSelectedSize] = useState(false);
+  const [designerGuideOpen, setDesignerGuideOpen] = useState(false);
+  const [showDesignerIntro, setShowDesignerIntro] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      return localStorage.getItem('instaplaque-designer-intro-seen') !== '1';
+    } catch {
+      return true;
+    }
+  });
 
   const [state, setState] = useState<PlaqueState>(PROOF_BENCH_INITIAL_STATE);
   const [inscriptionPrompt, setInscriptionPrompt] = useState('');
@@ -930,14 +939,15 @@ const App: React.FC = () => {
   };
 
   const handleNavigate = (view: SiteView, productSlug?: string) => {
+    const nextView = view === 'home' ? 'plaque' : view;
     if (view === 'product' && productSlug) {
       setSelectedProductSlug(productSlug);
     }
     if (view === 'landing' && productSlug) {
       setSelectedLandingSlug(productSlug);
     }
-    setCurrentView(view);
-    const route = (view === 'product' || view === 'landing') && productSlug ? `/${productSlug}` : viewRoutes[view];
+    setCurrentView(nextView);
+    const route = (nextView === 'product' || nextView === 'landing') && productSlug ? `/${productSlug}` : viewRoutes[nextView];
     if (route && window.location.pathname !== route) {
       window.history.pushState({}, '', route);
     }
@@ -958,8 +968,8 @@ const App: React.FC = () => {
     setHasSelectedSize(false);
     setActiveStep(0);
     setCurrentView('plaque');
-    if (window.location.pathname !== '/design') {
-      window.history.pushState({}, '', '/design');
+    if (window.location.pathname !== '/') {
+      window.history.pushState({}, '', '/');
     }
   };
 
@@ -988,8 +998,8 @@ const App: React.FC = () => {
     setBasketAdded(false);
     setCurrentView('plaque');
     setActiveStep(0);
-    if (window.location.pathname !== '/design') {
-      window.history.pushState({}, '', '/design');
+    if (window.location.pathname !== '/') {
+      window.history.pushState({}, '', '/');
     }
   };
 
@@ -1155,6 +1165,14 @@ const App: React.FC = () => {
   const showProofPrice = currentView === 'plaque';
   const showHeaderPrice = currentView === 'plaque';
   const proofSpecTrail = getPlaqueSummaryTitle(state);
+  const dismissDesignerIntro = () => {
+    setShowDesignerIntro(false);
+    try {
+      localStorage.setItem('instaplaque-designer-intro-seen', '1');
+    } catch {
+      // The guide can still be dismissed when storage is unavailable.
+    }
+  };
 
   return (
     <div className={`studio-app-shell proofbench-app flex flex-col bg-transparent text-[#eef4ee] ${currentView !== 'plaque' ? 'commerce-mode' : ''}`}>
@@ -1209,6 +1227,7 @@ const App: React.FC = () => {
             onCreateMockOrder={handleCreateMockOrder}
           />
         ) : (
+          <>
           <div className="app-fade-in proofbench-board grid h-full min-h-0 w-full grid-rows-[minmax(0,46%)_minmax(0,54%)] gap-0 p-0 md:grid-cols-[82px_358px_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)] md:gap-0 md:px-8 md:pb-7 md:pt-4 xl:grid-cols-[88px_390px_minmax(0,1fr)]">
             <nav className="proofbench-rail no-print hidden min-h-0 flex-col items-center justify-center py-4 md:flex">
               <div className="flex w-full flex-col items-center gap-3">
@@ -1385,6 +1404,92 @@ const App: React.FC = () => {
             </section>
 
           </div>
+
+          {showDesignerIntro && (
+            <aside className="designer-welcome no-print" aria-labelledby="designer-welcome-title">
+              <button type="button" className="designer-welcome__close" onClick={dismissDesignerIntro} aria-label="Close introduction">×</button>
+              <p>Welcome to InstaPlaque</p>
+              <h2 id="designer-welcome-title">Design your plaque here.</h2>
+              <span>Choose the material, size and wording. You will see the proof and price before you pay.</span>
+              <div>
+                <button
+                  type="button"
+                  className="designer-welcome__guide"
+                  onClick={() => {
+                    dismissDesignerIntro();
+                    setDesignerGuideOpen(true);
+                  }}
+                >
+                  Quick guide
+                </button>
+                <button type="button" className="designer-welcome__start" onClick={dismissDesignerIntro}>Start designing</button>
+              </div>
+              <small>Free to design · no account needed · free UK mainland delivery</small>
+            </aside>
+          )}
+
+          <button
+            type="button"
+            className="designer-guide-trigger no-print"
+            onClick={() => setDesignerGuideOpen(true)}
+            aria-expanded={designerGuideOpen}
+            aria-controls="designer-guide"
+          >
+            <span>?</span> Plaque guide
+          </button>
+
+          <aside
+            id="designer-guide"
+            className={`designer-guide no-print ${designerGuideOpen ? 'is-open' : ''}`}
+            aria-hidden={!designerGuideOpen}
+          >
+            <header>
+              <div>
+                <p>Help while you design</p>
+                <h2>Plaque guide</h2>
+              </div>
+              <button type="button" onClick={() => setDesignerGuideOpen(false)} aria-label="Close plaque guide">×</button>
+            </header>
+            <div className="designer-guide__scroll">
+              <section>
+                <h3>Start with the setting</h3>
+                <p>Bench plaques suit short wording. A5 is a useful starting size for gardens and walls. Choose A4 when you need more room.</p>
+                <nav aria-label="Plaque type guides">
+                  <a href="/bench-plaques">Bench plaques</a>
+                  <a href="/memorial-plaques">Memorial plaques</a>
+                  <a href="/garden-plaques">Garden plaques</a>
+                  <a href="/custom-plaques">Custom plaques</a>
+                </nav>
+              </section>
+              <details open>
+                <summary>Sizes and starting prices</summary>
+                <dl>
+                  <div><dt>Bench · 150 × 50 mm</dt><dd>from £58.50</dd></div>
+                  <div><dt>A5 · 210 × 148 mm</dt><dd>from £95.50</dd></div>
+                  <div><dt>A4 · 297 × 210 mm</dt><dd>from £145</dd></div>
+                </dl>
+              </details>
+              <details>
+                <summary>Brass or stainless steel?</summary>
+                <p>Brass has a warmer, traditional appearance. Stainless steel has a cleaner silver appearance. Both can be used outdoors.</p>
+              </details>
+              <details>
+                <summary>How the free proof works</summary>
+                <p>Build the plaque, add your wording and generate the layout. Check the spelling, spacing, material, fixings and price before checkout.</p>
+              </details>
+              <details>
+                <summary>Delivery and turnaround</summary>
+                <p>UK mainland delivery is free. Standard orders are usually estimated at five working days after payment and proof approval. Some custom options take longer.</p>
+              </details>
+              <details>
+                <summary>Common questions</summary>
+                <p>The design is free and needs no account. You can keep editing before ordering, and unusual layouts can receive a human check.</p>
+                <a href="/faq">Read all FAQs</a>
+              </details>
+            </div>
+          </aside>
+          {designerGuideOpen && <button type="button" className="designer-guide-backdrop no-print" aria-label="Close plaque guide" onClick={() => setDesignerGuideOpen(false)} />}
+          </>
         )}
       </main>
 

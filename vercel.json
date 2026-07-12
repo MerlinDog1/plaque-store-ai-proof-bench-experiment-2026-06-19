@@ -26,6 +26,11 @@
       "permanent": false
     },
     {
+      "source": "/design",
+      "destination": "/",
+      "permanent": true
+    },
+    {
       "source": "/etchmaster/(.*)",
       "destination": "/",
       "permanent": false

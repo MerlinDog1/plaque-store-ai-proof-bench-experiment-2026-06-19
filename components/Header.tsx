@@ -15,7 +15,7 @@ export const Header: React.FC<Props> = ({ onNavigate, onStartDesign, currentView
   const isDesigner = currentView === 'plaque';
   const isAdmin = currentView === 'admin';
   const showDesignCta = !isDesigner && currentView !== 'checkout' && !isAdmin;
-  const showCheckoutCta = isDesigner && showPrice;
+  const showCheckoutCta = false;
 
   return (
     <header className={`proofbench-titlebar print:hidden ${currentView === 'home' ? 'is-home' : ''} ${isDesigner ? 'is-designer' : ''} ${isAdmin ? 'is-admin' : ''}`}>
