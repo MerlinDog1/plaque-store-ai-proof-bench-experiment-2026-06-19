@@ -25,7 +25,7 @@ window.requestAnimationFrame(() => {
     const loaderWindow = window as Window & { __instaplaqueLoaderStarted?: number };
     const elapsed = Date.now() - (loaderWindow.__instaplaqueLoaderStarted || Date.now());
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const minimumDisplayTime = reduceMotion ? 450 : 1950;
+    const minimumDisplayTime = reduceMotion ? 650 : 2950;
     window.setTimeout(() => {
       loader.classList.add('is-leaving');
       window.setTimeout(() => loader.remove(), 420);

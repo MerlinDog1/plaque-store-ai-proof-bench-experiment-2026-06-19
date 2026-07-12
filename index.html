@@ -2174,7 +2174,7 @@
     .instaplaque-loader__plaque {
       position: relative;
       display: grid;
-      width: min(276px, calc(100vw - 64px));
+      width: min(320px, calc(100vw - 48px));
       aspect-ratio: 2 / 1;
       place-items: center;
       overflow: hidden;
@@ -2235,20 +2235,31 @@
       animation-delay: 180ms;
     }
 
-    .instaplaque-loader__copy {
-      margin-top: 25px;
+    .instaplaque-loader__trust {
+      display: grid;
+      min-height: 52px;
+      gap: 8px;
+      margin-top: 24px;
+      place-items: center;
       color: #a8b6ae;
-      font: 850 11px/1.2 Inter, system-ui, sans-serif;
-      letter-spacing: 0.12em;
+      font: 800 11px/1.2 Inter, system-ui, sans-serif;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
-    .instaplaque-loader__dots::after {
-      display: inline-block;
-      width: 20px;
-      content: '';
-      animation: instaplaque-loader-dots 1.5s steps(4, end) infinite;
-      text-align: left;
+    .instaplaque-loader__trust span {
+      opacity: 0;
+      transform: translateY(5px);
+      animation: instaplaque-loader-trust 620ms ease-out 1 both;
+    }
+
+    .instaplaque-loader__trust span:first-child {
+      color: #e4c87d;
+      animation-delay: 1.35s;
+    }
+
+    .instaplaque-loader__trust span:last-child {
+      animation-delay: 1.95s;
     }
 
     @keyframes instaplaque-loader-border {
@@ -2271,11 +2282,8 @@
       50% { transform: translateY(-5px); }
     }
 
-    @keyframes instaplaque-loader-dots {
-      0% { content: ''; }
-      25% { content: '.'; }
-      50% { content: '..'; }
-      75%, 100% { content: '...'; }
+    @keyframes instaplaque-loader-trust {
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -2283,7 +2291,7 @@
       .instaplaque-loader__plaque::before,
       .instaplaque-loader__plaque::after,
       .instaplaque-loader__message span,
-      .instaplaque-loader__dots::after {
+      .instaplaque-loader__trust span {
         animation: none;
       }
 
@@ -2294,6 +2302,11 @@
       .instaplaque-loader__message span {
         opacity: 1;
         clip-path: none;
+      }
+
+      .instaplaque-loader__trust span {
+        opacity: 1;
+        transform: none;
       }
     }
   </style>
@@ -2372,7 +2385,10 @@
       <div class="instaplaque-loader__plaque" aria-hidden="true">
         <span class="instaplaque-loader__message"><span>Design your plaque</span><span>in minutes</span></span>
       </div>
-      <div class="instaplaque-loader__copy">Preparing your designer<span class="instaplaque-loader__dots"></span></div>
+      <div class="instaplaque-loader__trust">
+        <span>Free UK mainland delivery</span>
+        <span>Secure checkout powered by Stripe</span>
+      </div>
     </div>
   </div>
   <div id="root"></div>
