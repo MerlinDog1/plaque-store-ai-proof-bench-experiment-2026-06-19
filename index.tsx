@@ -17,3 +17,16 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+window.requestAnimationFrame(() => {
+  window.requestAnimationFrame(() => {
+    const loader = document.getElementById('instaplaque-loader');
+    if (!loader) return;
+    const loaderWindow = window as Window & { __instaplaqueLoaderStarted?: number };
+    const elapsed = Date.now() - (loaderWindow.__instaplaqueLoaderStarted || Date.now());
+    window.setTimeout(() => {
+      loader.classList.add('is-leaving');
+      window.setTimeout(() => loader.remove(), 420);
+    }, Math.max(0, 650 - elapsed));
+  });
+});
