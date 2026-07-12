@@ -1162,8 +1162,8 @@ const App: React.FC = () => {
       maximumFractionDigits: hasPence ? 2 : 0,
     });
   })();
-  const showProofPrice = currentView === 'plaque';
-  const showHeaderPrice = currentView === 'plaque';
+  const showProofPrice = currentView === 'plaque' && hasSelectedSize;
+  const showHeaderPrice = currentView === 'plaque' && hasSelectedSize;
   const proofSpecTrail = getPlaqueSummaryTitle(state);
   const dismissDesignerIntro = () => {
     setShowDesignerIntro(false);
@@ -1275,6 +1275,16 @@ const App: React.FC = () => {
                   </button>
                 ))}
               </div>
+              <button
+                type="button"
+                className="designer-guide-inline no-print md:hidden"
+                onClick={() => setDesignerGuideOpen(true)}
+                aria-expanded={designerGuideOpen}
+                aria-controls="designer-guide"
+              >
+                <span>?</span>
+                Plaque guide &amp; FAQs
+              </button>
               <div className="proofbench-sheet-handle md:hidden" />
               <div className="proofbench-control-scroll">
                 <Controls
@@ -1316,6 +1326,11 @@ const App: React.FC = () => {
                   onExportPdf={handleExportPdf}
                   onPrint={handleNativePrint}
                 />
+                <div className="proofbench-designer-trust no-print">
+                  <span>Secure checkout powered by Stripe</span>
+                  <i />
+                  <span>Free UK mainland delivery</span>
+                </div>
               </div>
             </aside>
 
@@ -1326,13 +1341,19 @@ const App: React.FC = () => {
                     <span className="brand-wordmark brand-wordmark--mobile-tool">
                       <span>Insta</span><span>Plaque</span>
                     </span>
-                    <small title={proofSpecTrail}>{proofSpecTrail}</small>
                   </button>
                   {isDesktopToolLayout ? (
-                    <p className="proofbench-mobile-title">Design your custom plaque</p>
+                    <p className="proofbench-mobile-title proofbench-mobile-promise">
+                      <span>Design your own plaque online</span>
+                      <span>Free UK mainland delivery</span>
+                    </p>
                   ) : (
-                    <h1 className="proofbench-mobile-title">Design your custom plaque</h1>
+                    <h1 className="proofbench-mobile-title proofbench-mobile-promise">
+                      <span>Design your own plaque online</span>
+                      <span>Free UK mainland delivery</span>
+                    </h1>
                   )}
+                  <small className="proofbench-mobile-spec" title={proofSpecTrail}>{proofSpecTrail}</small>
                 </div>
                 {showProofPrice && (
                   <button
