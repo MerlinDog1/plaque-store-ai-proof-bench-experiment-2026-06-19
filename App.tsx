@@ -280,7 +280,10 @@ const App: React.FC = () => {
     } catch {
       setMockOrders([]);
     }
+  }, []);
 
+  useEffect(() => {
+    if (currentView !== 'admin') return;
     let cancelled = false;
     const loadHubOrders = async () => {
       try {
@@ -300,7 +303,7 @@ const App: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [currentView]);
 
   useEffect(() => {
     const handlePopState = () => {
