@@ -1442,33 +1442,6 @@
   white-space: nowrap;
 }
 
-.designer-guide-inline {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: center;
-  width: calc(100% - 28px);
-  min-height: 34px;
-  margin: 8px 14px 0;
-  border: 1px solid rgba(226, 186, 96, 0.18);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.035);
-  color: #dce7df;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.designer-guide-inline span {
-  display: grid;
-  width: 20px;
-  height: 20px;
-  place-items: center;
-  border-radius: 50%;
-  background: #e1b85d;
-  color: #14231e;
-  font-size: 11px;
-}
-
 .proofbench-designer-trust {
   display: flex;
   flex-wrap: wrap;
@@ -2396,7 +2369,21 @@
   }
 
   .designer-guide-trigger {
-    display: none;
+    right: 12px;
+    bottom: 12px;
+    display: grid;
+    width: 44px;
+    min-height: 44px;
+    place-items: center;
+    overflow: hidden;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .designer-guide-trigger span {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
   }
 
   .designer-guide {

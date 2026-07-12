@@ -1275,16 +1275,6 @@ const App: React.FC = () => {
                   </button>
                 ))}
               </div>
-              <button
-                type="button"
-                className="designer-guide-inline no-print md:hidden"
-                onClick={() => setDesignerGuideOpen(true)}
-                aria-expanded={designerGuideOpen}
-                aria-controls="designer-guide"
-              >
-                <span>?</span>
-                Plaque guide &amp; FAQs
-              </button>
               <div className="proofbench-sheet-handle md:hidden" />
               <div className="proofbench-control-scroll">
                 <Controls
