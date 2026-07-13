@@ -3,7 +3,7 @@ import { Header } from './components/Header';
 import PlaquePreview from './components/PlaquePreview';
 import { Controls } from './components/Controls';
 import { RealisticPreviewModal } from './components/RealisticPreviewModal';
-import { SiteExperience } from './components/SiteExperience';
+import { SiteExperience, homeFaqs } from './components/SiteExperience';
 import { BorderStyle, DesignStyle, EtchmasterImageMode, EtchmasterShapeMask, Fixing, INITIAL_STATE, Material, MemorialImageMethod, MemorialImagePlacement, MemorialImageShape, PlaqueState, Shape, TextColor, TypographyEngine } from './types';
 import { generatePlaqueDesign, generateRealisticView, refinePlaqueWording, GenerationPhase } from './services/geminiService';
 import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
@@ -1589,13 +1589,18 @@ const App: React.FC = () => {
               {designerGuideTab === 'how' && (
                 <section className="designer-guide__panel designer-guide__panel--how" role="tabpanel" id="designer-guide-panel-how" aria-labelledby="designer-guide-tab-how">
                   <div className="designer-guide__intro">
-                    <p>From idea to approved proof</p>
+                    <p>Design now, decide later</p>
                     <h3>How the designer works</h3>
-                    <span>Work through seven simple steps. Your live plaque, specification and price stay together, and you can return to any step before checkout.</span>
+                    <span>Build the complete plaque in seven steps. You see the real proportions, specification and price as you work, and can change anything before ordering.</span>
                   </div>
                   <div className="designer-guide__assurance">
-                    <strong>Free to design</strong>
-                    <span>No account is needed. Nothing is manufactured until you have checked the proof and placed the order.</span>
+                    <strong>No account. No pressure.</strong>
+                    <span>Designing and revising are free. Nothing is manufactured until you approve the proof and pay.</span>
+                  </div>
+                  <div className="designer-guide__resume">
+                    <div><b>1</b><span><strong>Finish your proof</strong>Check the wording, material, size, fixings and price.</span></div>
+                    <div><b>2</b><span><strong>Download the PDF</strong>It includes the proof, a QR code and a secure return link.</span></div>
+                    <div><b>3</b><span><strong>Come back when ready</strong>Within 30 days, use the link on any device to restore the exact design, edit it or order—still without an account.</span></div>
                   </div>
                   <ol className="designer-guide__steps">
                     {DESIGNER_GUIDE_STEPS.map((step, index) => (
@@ -1606,16 +1611,6 @@ const App: React.FC = () => {
                           <p>{step.copy}</p>
                           <small><strong>Example:</strong> {step.example}</small>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveStep(index);
-                            setDesignerGuideOpen(false);
-                          }}
-                          aria-label={`Open designer step: ${step.title}`}
-                        >
-                          Open step <span aria-hidden="true">→</span>
-                        </button>
                       </li>
                     ))}
                   </ol>
@@ -1650,12 +1645,6 @@ const App: React.FC = () => {
                       </figure>
                     ))}
                   </div>
-                  <nav className="designer-guide__category-links" aria-label="Shop plaque types">
-                    <a href="/bench-plaques">Bench plaques</a>
-                    <a href="/memorial-plaques">Memorial plaques</a>
-                    <a href="/garden-plaques">Garden plaques</a>
-                    <a href="/custom-plaques">Custom plaques</a>
-                  </nav>
                 </section>
               )}
               {designerGuideTab === 'guide' && (
@@ -1700,27 +1689,12 @@ const App: React.FC = () => {
                     <h3>Frequently asked questions</h3>
                     <span>Quick answers without leaving your design.</span>
                   </div>
-                  <details open>
-                    <summary>Is it free to design a plaque?</summary>
-                    <p>Yes. You can create and revise your proof without an account and there is no charge until you approve it and choose to order.</p>
-                  </details>
-                  <details>
-                    <summary>Can I change the design before paying?</summary>
-                    <p>Yes. Move back through any designer step to change the size, material, wording, layout or fixings before checkout.</p>
-                  </details>
-                  <details>
-                    <summary>Can the plaque be used outdoors?</summary>
-                    <p>Yes. Brass and stainless steel plaques are suitable for outdoor use. The right fixing depends on whether it will be fitted to wood, masonry or another surface.</p>
-                  </details>
-                  <details>
-                    <summary>Will somebody check unusual designs?</summary>
-                    <p>Yes. Designs needing special production attention can receive a human artwork check before manufacture.</p>
-                  </details>
-                  <details>
-                    <summary>Is delivery included?</summary>
-                    <p>UK mainland delivery is included. Highlands, islands and non-UK destinations may need an additional delivery quote.</p>
-                  </details>
-                  <a className="designer-guide__all-faqs" href="/faq">Read all plaque FAQs →</a>
+                  {homeFaqs.map((faq, index) => (
+                    <details key={faq.question} open={index === 0}>
+                      <summary>{faq.question}</summary>
+                      <p>{faq.answer}</p>
+                    </details>
+                  ))}
                 </section>
               )}
             </div>

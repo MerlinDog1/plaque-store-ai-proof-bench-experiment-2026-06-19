@@ -543,7 +543,7 @@ const homeCarouselItems: HomeCarouselItem[] = [
 const siteBaseUrl = 'https://instaplaque.co.uk';
 const siteShareImage = `${siteBaseUrl}/site-images/home-realistic-proof-row.jpg`;
 
-const homeFaqs: FaqItem[] = [
+export const homeFaqs: FaqItem[] = [
   {
     question: 'Is my proof really free?',
     answer: 'Yes. Your proof is 100% free with no account, no sign up and no obligation to buy. If you need time to decide, download the proof PDF and use the link inside it to come back later.',
