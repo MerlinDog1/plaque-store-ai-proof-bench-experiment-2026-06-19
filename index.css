@@ -2360,16 +2360,177 @@
   font-size: 24px;
 }
 
+.designer-guide__tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 22px;
+}
+
+.designer-guide__tabs button {
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.designer-guide__tabs button:hover,
+.designer-guide__tabs button:focus-visible {
+  color: #fffaf0;
+}
+
+.designer-guide__tabs button.is-active {
+  border-color: rgba(226, 186, 96, 0.34);
+  background: rgba(226, 186, 96, 0.12);
+  color: #f1cd79;
+}
+
 .designer-guide__scroll {
-  height: calc(100% - 86px);
+  height: calc(100% - 147px);
   overflow-y: auto;
   padding: 20px 22px 60px;
 }
 
-.designer-guide__scroll > section,
+.designer-guide__panel,
 .designer-guide details {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 20px 0;
+}
+
+.designer-guide__panel {
+  border-bottom: 0;
+  padding-top: 4px;
+}
+
+.designer-guide__intro {
+  margin-bottom: 20px;
+}
+
+.designer-guide__intro > p {
+  margin-bottom: 5px;
+  color: #e1b85d;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.designer-guide__intro > span {
+  display: block;
+  margin-top: 7px;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.5;
+}
+
+.designer-guide__gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.designer-guide__gallery figure {
+  min-width: 0;
+  margin: 0;
+}
+
+.designer-guide__image-wrap {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 12px;
+  background: #22302b;
+}
+
+.designer-guide__image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 260ms ease;
+}
+
+.designer-guide__gallery figure:hover img {
+  transform: scale(1.035);
+}
+
+.designer-guide__image-wrap span {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(11, 22, 18, 0.84);
+  color: #f4d88f;
+  padding: 4px 7px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+.designer-guide__gallery figcaption {
+  padding: 8px 2px 2px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.designer-guide__category-links {
+  margin-top: 26px !important;
+}
+
+.designer-guide__material-compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.designer-guide__material-compare article {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 10px;
+}
+
+.designer-guide__material-compare img {
+  width: 76px;
+  height: 76px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.designer-guide__material-compare strong,
+.designer-guide__material-compare span {
+  display: block;
+}
+
+.designer-guide__material-compare strong {
+  color: #fffaf0;
+  font-size: 15px;
+}
+
+.designer-guide__material-compare span {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.designer-guide__all-faqs {
+  display: inline-flex;
+  margin-top: 22px;
+  border: 1px solid rgba(226, 186, 96, 0.3);
+  border-radius: 999px;
+  padding: 10px 14px;
 }
 
 .designer-guide h3 {
@@ -2475,15 +2636,8 @@
     transform: translateX(-105%);
   }
 
-  .designer-guide__scroll {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-content: start;
-    column-gap: 34px;
-  }
-
-  .designer-guide__scroll > section {
-    grid-column: 1 / -1;
+  .designer-guide__gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -2553,6 +2707,20 @@
 
   .designer-guide.is-open {
     transform: translateY(0);
+  }
+
+  .designer-guide__tabs {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .designer-guide__scroll {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .designer-guide__material-compare {
+    grid-template-columns: 1fr;
   }
 }
 

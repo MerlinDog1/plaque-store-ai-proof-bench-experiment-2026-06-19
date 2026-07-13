@@ -196,6 +196,7 @@ const App: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [hasSelectedSize, setHasSelectedSize] = useState(false);
   const [designerGuideOpen, setDesignerGuideOpen] = useState(false);
+  const [designerGuideTab, setDesignerGuideTab] = useState<'gallery' | 'guide' | 'faq'>('gallery');
   const [showDesignerIntro, setShowDesignerIntro] = useState(() => {
     if (typeof window === 'undefined') return true;
     try {
@@ -1475,42 +1476,130 @@ const App: React.FC = () => {
               </div>
               <button type="button" onClick={() => setDesignerGuideOpen(false)} aria-label="Close plaque guide">×</button>
             </header>
+            <div className="designer-guide__tabs" role="tablist" aria-label="Plaque guide sections">
+              {([
+                ['gallery', 'Gallery'],
+                ['guide', 'Buying guide'],
+                ['faq', 'FAQs'],
+              ] as const).map(([tab, label]) => (
+                <button
+                  key={tab}
+                  type="button"
+                  role="tab"
+                  id={`designer-guide-tab-${tab}`}
+                  aria-selected={designerGuideTab === tab}
+                  aria-controls={`designer-guide-panel-${tab}`}
+                  tabIndex={designerGuideTab === tab ? 0 : -1}
+                  className={designerGuideTab === tab ? 'is-active' : ''}
+                  onClick={() => setDesignerGuideTab(tab)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <div className="designer-guide__scroll">
-              <section>
-                <h3>Start with the setting</h3>
-                <p>Bench plaques suit short wording. A5 is a useful starting size for gardens and walls. Choose A4 when you need more room.</p>
-                <nav aria-label="Plaque type guides">
-                  <a href="/bench-plaques">Bench plaques</a>
-                  <a href="/memorial-plaques">Memorial plaques</a>
-                  <a href="/garden-plaques">Garden plaques</a>
-                  <a href="/custom-plaques">Custom plaques</a>
-                </nav>
-              </section>
-              <details open>
-                <summary>Sizes and starting prices</summary>
-                <dl>
-                  <div><dt>Bench · 150 × 50 mm</dt><dd>from £58.50</dd></div>
-                  <div><dt>A5 · 210 × 148 mm</dt><dd>from £95.50</dd></div>
-                  <div><dt>A4 · 297 × 210 mm</dt><dd>from £145</dd></div>
-                </dl>
-              </details>
-              <details>
-                <summary>Brass or stainless steel?</summary>
-                <p>Brass has a warmer, traditional appearance. Stainless steel has a cleaner silver appearance. Both can be used outdoors.</p>
-              </details>
-              <details>
-                <summary>How the free proof works</summary>
-                <p>Build the plaque, add your wording and generate the layout. Check the spelling, spacing, material, fixings and price before checkout.</p>
-              </details>
-              <details>
-                <summary>Delivery and turnaround</summary>
-                <p>UK mainland delivery is free. Standard orders are usually estimated at five working days after payment and proof approval. Some custom options take longer.</p>
-              </details>
-              <details>
-                <summary>Common questions</summary>
-                <p>The design is free and needs no account. You can keep editing before ordering, and unusual layouts can receive a human check.</p>
-                <a href="/faq">Read all FAQs</a>
-              </details>
+              {designerGuideTab === 'gallery' && (
+                <section className="designer-guide__panel designer-guide__panel--gallery" role="tabpanel" id="designer-guide-panel-gallery" aria-labelledby="designer-guide-tab-gallery">
+                  <div className="designer-guide__intro">
+                    <p>Real plaque inspiration</p>
+                    <h3>See what is possible</h3>
+                    <span>Explore finishes, settings and shapes while your own design stays exactly as you left it.</span>
+                  </div>
+                  <div className="designer-guide__gallery">
+                    {[
+                      ['/site-images/home-gallery-brass-bench.webp', 'Engraved polished brass memorial plaque fitted to a wooden park bench', 'Classic brass bench plaque', 'Bench'],
+                      ['/site-images/home-gallery-aged-brass-wood.webp', 'Aged brass memorial plaque mounted on a dark wooden backing board', 'Aged brass on wood', 'Memorial'],
+                      ['/site-images/home-gallery-oval-steel.webp', 'Oval stainless steel engraved wall plaque with a polished silver finish', 'Oval stainless steel', 'Custom'],
+                      ['/site-images/home-gallery-brass-community.webp', 'Large engraved brass community and commemorative wall plaque', 'Community plaque', 'Commemorative'],
+                      ['/site-images/home-carousel-garden-brass.webp', 'Small engraved brass plaque displayed outdoors in a garden setting', 'Garden brass plaque', 'Garden'],
+                      ['/site-images/home-carousel-steel-wall.webp', 'Brushed stainless steel engraved plaque fixed to an exterior wall', 'Steel wall plaque', 'House & wall'],
+                    ].map(([src, alt, title, type]) => (
+                      <figure key={src}>
+                        <div className="designer-guide__image-wrap">
+                          <img src={src} alt={alt} loading="lazy" decoding="async" />
+                          <span>{type}</span>
+                        </div>
+                        <figcaption>{title}</figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                  <nav className="designer-guide__category-links" aria-label="Shop plaque types">
+                    <a href="/bench-plaques">Bench plaques</a>
+                    <a href="/memorial-plaques">Memorial plaques</a>
+                    <a href="/garden-plaques">Garden plaques</a>
+                    <a href="/custom-plaques">Custom plaques</a>
+                  </nav>
+                </section>
+              )}
+              {designerGuideTab === 'guide' && (
+                <section className="designer-guide__panel designer-guide__panel--guide" role="tabpanel" id="designer-guide-panel-guide" aria-labelledby="designer-guide-tab-guide">
+                  <div className="designer-guide__intro">
+                    <p>Choose with confidence</p>
+                    <h3>A quick plaque buying guide</h3>
+                    <span>The essentials on size, finish, proofing and delivery.</span>
+                  </div>
+                  <div className="designer-guide__material-compare">
+                    <article>
+                      <img src="/materials/thumbs/brushed-brass.webp" alt="Close-up of warm brushed brass plaque material" loading="lazy" />
+                      <div><strong>Brass</strong><span>Warm, traditional and especially suited to memorials and heritage settings.</span></div>
+                    </article>
+                    <article>
+                      <img src="/materials/thumbs/brushed-stainless.webp" alt="Close-up of silver brushed stainless steel plaque material" loading="lazy" />
+                      <div><strong>Stainless steel</strong><span>Clean, contemporary and durable for indoor or outdoor use.</span></div>
+                    </article>
+                  </div>
+                  <details open>
+                    <summary>Sizes and starting prices</summary>
+                    <dl>
+                      <div><dt>Bench · 150 × 50 mm</dt><dd>from £58.50</dd></div>
+                      <div><dt>A5 · 210 × 148 mm</dt><dd>from £95.50</dd></div>
+                      <div><dt>A4 · 297 × 210 mm</dt><dd>from £145</dd></div>
+                    </dl>
+                  </details>
+                  <details>
+                    <summary>Which size should I choose?</summary>
+                    <p>Bench plaques suit shorter wording. A5 is a useful starting size for gardens and walls; choose A4 when the wording needs more room or greater visibility.</p>
+                  </details>
+                  <details>
+                    <summary>How the free proof works</summary>
+                    <p>Build the plaque, add your wording and generate the layout. Check the spelling, spacing, material, fixings and exact price before checkout.</p>
+                  </details>
+                  <details>
+                    <summary>Delivery and turnaround</summary>
+                    <p>UK mainland delivery is free. Standard orders are usually estimated at five working days after payment and proof approval. Some custom options take longer.</p>
+                  </details>
+                </section>
+              )}
+              {designerGuideTab === 'faq' && (
+                <section className="designer-guide__panel designer-guide__panel--faq" role="tabpanel" id="designer-guide-panel-faq" aria-labelledby="designer-guide-tab-faq">
+                  <div className="designer-guide__intro">
+                    <p>Good to know</p>
+                    <h3>Frequently asked questions</h3>
+                    <span>Quick answers without leaving your design.</span>
+                  </div>
+                  <details open>
+                    <summary>Is it free to design a plaque?</summary>
+                    <p>Yes. You can create and revise your proof without an account and there is no charge until you approve it and choose to order.</p>
+                  </details>
+                  <details>
+                    <summary>Can I change the design before paying?</summary>
+                    <p>Yes. Move back through any designer step to change the size, material, wording, layout or fixings before checkout.</p>
+                  </details>
+                  <details>
+                    <summary>Can the plaque be used outdoors?</summary>
+                    <p>Yes. Brass and stainless steel plaques are suitable for outdoor use. The right fixing depends on whether it will be fitted to wood, masonry or another surface.</p>
+                  </details>
+                  <details>
+                    <summary>Will somebody check unusual designs?</summary>
+                    <p>Yes. Designs needing special production attention can receive a human artwork check before manufacture.</p>
+                  </details>
+                  <details>
+                    <summary>Is delivery included?</summary>
+                    <p>UK mainland delivery is included. Highlands, islands and non-UK destinations may need an additional delivery quote.</p>
+                  </details>
+                  <a className="designer-guide__all-faqs" href="/faq">Read all plaque FAQs →</a>
+                </section>
+              )}
             </div>
           </aside>
           {designerGuideOpen && <button type="button" className="designer-guide-backdrop no-print" aria-label="Close plaque guide" onClick={() => setDesignerGuideOpen(false)} />}
