@@ -1,6 +1,7 @@
 import React, { RefObject, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { BorderStyle, Fixing, Material, PlaqueState, Shape } from '../types';
 import { outlinePreviewTextLayer } from '../services/exportService';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
@@ -483,16 +484,28 @@ function makeExtrudedMesh(
   bevelSize: number,
   bevelThickness: number,
   bevelEnabled = true,
+  curveSegments = 12,
+  smoothCurvedSides = false,
 ) {
-  const geometry = new THREE.ExtrudeGeometry(shape, {
+  const rawGeometry = new THREE.ExtrudeGeometry(shape, {
     depth,
     bevelEnabled,
     bevelThickness,
     bevelSize,
     bevelSegments: bevelEnabled ? 3 : 0,
+    curveSegments,
   });
+  const geometry = smoothCurvedSides
+    ? toCreasedNormals(rawGeometry, THREE.MathUtils.degToRad(30))
+    : rawGeometry;
   geometry.center();
   return new THREE.Mesh(geometry, material);
+}
+
+function getExtrusionCurveSegments(shape: Shape) {
+  if (shape === Shape.Oval || shape === Shape.Circle) return 96;
+  if (shape === Shape.Heart) return 64;
+  return 12;
 }
 
 function makeRaisedCapGeometry(radius: number, depth: number) {
@@ -588,7 +601,7 @@ function makeWoodFaceMesh(state: PlaqueState, dims: ReturnType<typeof getSceneDi
 
   const geometry = state.shape === Shape.Rect
     ? new THREE.PlaneGeometry(width, height)
-    : new THREE.ShapeGeometry(makeShape(state, width, height).shape, 48);
+    : new THREE.ShapeGeometry(makeShape(state, width, height).shape, getExtrusionCurveSegments(state.shape));
   const face = new THREE.Mesh(geometry, material);
   face.position.z = 0.003;
   face.renderOrder = 1;
@@ -762,6 +775,7 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
     }
 
     const tone = materialTone[state.material];
+    const curveSegments = getExtrusionCurveSegments(state.shape);
 
     const sideMaterial = new THREE.MeshStandardMaterial({
       color: tone.side,
@@ -776,6 +790,8 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
       sideMaterial,
       Math.max(0.004, dims.unitPerMm * 0.45),
       Math.max(0.003, dims.unitPerMm * 0.35),
+      true,
+      curveSegments,
     );
     metalBody.position.z = dims.metalDepth / 2;
     existingGroup.add(metalBody);
@@ -796,6 +812,8 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
             0,
             0,
             false,
+            curveSegments,
+            state.shape === Shape.Oval || state.shape === Shape.Circle || state.shape === Shape.Heart,
           );
       if (!(state.woodEdge === 'bevel' && state.shape === Shape.Rect)) {
         woodBody.position.z = -dims.woodDepth / 2;
