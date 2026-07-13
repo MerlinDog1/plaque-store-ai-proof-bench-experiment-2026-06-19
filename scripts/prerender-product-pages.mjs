@@ -251,6 +251,100 @@ const landingPages = [
   },
 ];
 
+const pageEnhancements = {
+  'memorial-plaques': {
+    sections: [
+      ['Choose by setting', 'Use the compact bench format for a name, dates and one short line. Choose A5 for most garden and wall memorials, or A4 when a longer family message needs room.'],
+      ['Brass or stainless steel', 'Brass gives a warm traditional appearance; aged brass is darker and less reflective. Brushed stainless steel gives a clean silver finish for contemporary settings.'],
+      ['Check the complete proof', 'Review spelling, dates, line breaks, border and visible fixing positions before payment. Wood backing can give larger wall plaques more presence.'],
+    ],
+    examples: [
+      ['/seo/realistic/memorial-plaques/brass-wood-backed-wall-plaque.webp', 'Brass memorial wall plaque mounted on dark wood', 'Brass wall memorial'],
+      ['/seo/realistic/memorial-plaques/stainless-steel-wood-backed-memorial-plaque.webp', 'Stainless steel memorial plaque with wooden backing', 'Stainless wall memorial'],
+      ['/seo/realistic/memorial-plaques/aged-brass-bench-memorial-plaque.webp', 'Aged brass memorial plaque fixed to an outdoor wooden bench', 'Aged brass bench memorial'],
+      ['/seo/realistic/memorial-plaques/stainless-steel-bench-plaque-wood-rail.webp', 'Stainless steel memorial plaque on a wooden bench rail', 'Stainless bench memorial'],
+    ],
+  },
+  'bench-plaques': {
+    sections: [
+      ['Keep the inscription concise', 'A name, dates and one short dedication read best on a 150 x 50 mm bench plaque. Move to a larger plaque rather than shrinking a poem or long message.'],
+      ['Check the bench owner’s rules', 'Councils, cemeteries, schools and clubs may specify the plaque size, material or fixing method. Confirm this before approving production.'],
+      ['Choose the outdoor finish', 'Brass is warm and traditional, aged brass is darker, and brushed stainless steel gives a clean silver appearance. The proof shows the visible screws and border.'],
+    ],
+    examples: [
+      ['/site-images/home-gallery-brass-bench.webp', 'Classic engraved brass plaque fixed to a wooden park bench', 'Classic brass bench plaque'],
+      ['/seo/realistic/memorial-plaques/aged-brass-bench-memorial-plaque.webp', 'Aged brass memorial bench plaque on weathered timber', 'Aged brass bench plaque'],
+      ['/seo/realistic/memorial-plaques/stainless-steel-bench-plaque-wood-rail.webp', 'Brushed stainless steel memorial plaque on a wooden bench rail', 'Stainless steel bench plaque'],
+      ['/seo/realistic/memorial-plaques/parents-brass-bench-memorial-plaque.webp', 'Brass bench plaque dedicated to beloved parents', 'Shared family dedication'],
+    ],
+  },
+  'brass-plaques': {
+    sections: [
+      ['Choose the brass finish', 'Brushed brass is warm and satin, polished brass is brighter and more reflective, and aged brass begins with a darker hand-patinated appearance.'],
+      ['Where brass works best', 'Brass suits memorials, benches, openings, donor recognition and presentation plaques where a traditional gold finish feels appropriate.'],
+      ['Understand outdoor ageing', 'Brass can be used outside but its surface naturally changes with exposure. Select the starting finish for the appearance you want as the plaque ages.'],
+    ],
+    examples: [
+      ['/site-images/home-gallery-brass-bench.webp', 'Brushed brass engraved plaque on an outdoor wooden bench', 'Brushed brass bench plaque'],
+      ['/site-images/home-gallery-brass-community.webp', 'Large engraved brass community centre plaque', 'Formal community plaque'],
+      ['/site-images/home-gallery-aged-brass-wood.webp', 'Aged brass memorial plaque mounted on dark wood', 'Aged brass on wood'],
+      ['/seo/realistic/memorial-plaques/brass-wood-backed-wall-plaque.webp', 'Engraved brass wall plaque with wooden backing', 'Brass wall plaque'],
+    ],
+  },
+  'stainless-steel-plaques': {
+    sections: [
+      ['Brushed or polished', 'Brushed stainless is restrained and usually easier to read. Polished stainless is brighter and more reflective, making it better suited to controlled indoor light.'],
+      ['Outdoor and contemporary settings', 'Stainless steel works well on benches, walls, schools, offices and modern memorials where a clean silver finish is preferred.'],
+      ['Design for legibility', 'Black-filled engraving and concise wording provide strong contrast. The proof lets you check the border, fixings and reading size before payment.'],
+    ],
+    examples: [
+      ['/site-images/home-gallery-oval-steel.webp', 'Oval brushed stainless steel engraved memorial plaque', 'Oval stainless plaque'],
+      ['/site-images/home-carousel-steel-wall.webp', 'Brushed stainless steel plaque mounted on an exterior wall', 'Stainless wall plaque'],
+      ['/seo/realistic/memorial-plaques/stainless-steel-bench-plaque-wood-rail.webp', 'Stainless steel memorial plaque fixed to outdoor timber', 'Stainless bench plaque'],
+      ['/seo/realistic/memorial-plaques/stainless-steel-wood-backed-memorial-plaque.webp', 'Stainless steel plaque mounted on a wooden backing board', 'Steel with wood backing'],
+    ],
+  },
+  'custom-plaques': {
+    sections: [
+      ['Custom shapes and dimensions', 'Start here for oval, circular or made-to-measure plaques and when A5 or A4 proportions do not suit the available space.'],
+      ['Build the layout before quoting', 'Create the wording, material and fixing layout first. Oversized plates, unusual mounting or specialist production can then be checked accurately.'],
+      ['Standard sizes remain available', 'The same designer includes compact bench, A5 and A4 starting sizes, so you can compare proportions before choosing a bespoke dimension.'],
+    ],
+    examples: [
+      ['/site-images/home-custom-oval-steel.webp', 'Custom oval stainless steel plaque with engraved wording', 'Custom oval plaque'],
+      ['/site-images/home-carousel-oval-wall.webp', 'Oval engraved plaque installed on an exterior wall', 'Oval wall plaque'],
+      ['/site-images/home-carousel-black-wall.webp', 'Dark made-to-measure wall plaque with contrasting lettering', 'Contemporary custom plaque'],
+      ['/site-images/home-carousel-reading-room.webp', 'Large formal presentation plaque with longer wording', 'Large presentation plaque'],
+    ],
+  },
+  'garden-plaques': {
+    sections: [
+      ['Choose for the viewing distance', 'A5 is a useful starting point for a name, dates and short message. Keep outdoor wording concise so it remains legible from a path or standing position.'],
+      ['Match material to the setting', 'Brass and aged brass sit naturally with timber, brick and planting. Stainless steel gives a cleaner silver finish for contemporary gardens.'],
+      ['Plan the mounting surface', 'Decide whether the plaque will be fitted to a wall, post, bench, planter or stone before choosing visible screws or caps.'],
+    ],
+    examples: [
+      ['/site-images/home-carousel-garden-brass.webp', 'Engraved brass memorial plaque displayed in a planted garden', 'Brass garden dedication'],
+      ['/seo/realistic/memorial-plaques/aged-brass-bench-memorial-plaque.webp', 'Aged brass garden plaque on outdoor timber', 'Aged brass outdoors'],
+      ['/seo/realistic/memorial-plaques/brass-bench-plaque-garden-rail.webp', 'Brass plaque fitted to a wooden garden rail', 'Garden rail plaque'],
+      ['/site-images/home-carousel-steel-wall.webp', 'Brushed stainless steel memorial plaque on an outdoor wall', 'Stainless garden wall plaque'],
+    ],
+  },
+  'opening-plaques': {
+    sections: [
+      ['Use a formal wording hierarchy', 'Start with the building, room or project name, followed by “Opened by”, the person and role, then the date.'],
+      ['Allow enough room', 'A4 is usually best for opening plaques. Long job titles, partner organisations or donor names may require a custom size.'],
+      ['Confirm details before approval', 'Check every name, title and ceremony date with the organiser, then use the proof to review line breaks and visual emphasis.'],
+    ],
+    examples: [
+      ['/site-images/home-gallery-brass-community.webp', 'Large engraved brass community centre opening plaque', 'Community opening plaque'],
+      ['/site-images/home-carousel-reading-room.webp', 'Formal engraved plaque for a reading room opening', 'Reading room dedication'],
+      ['/site-images/home-carousel-steel-wall.webp', 'Brushed stainless steel plaque on a modern building wall', 'Contemporary steel opening plaque'],
+      ['/site-images/home-carousel-brass-wall.webp', 'Traditional engraved brass plaque mounted on a wall', 'Traditional brass opening plaque'],
+    ],
+  },
+};
+
 const faqSchema = (faqs) => ({
   '@type': 'FAQPage',
   mainEntity: faqs.map(([question, answer]) => ({
@@ -429,6 +523,8 @@ const staticPageMarkup = ({
   faqs = [],
   price = null,
   relatedSearches = [],
+  sections = [],
+  examples = [],
   kind = 'page',
 }) => {
   const visibleHeading = heading || title.split('|')[0].trim();
@@ -440,7 +536,13 @@ const staticPageMarkup = ({
   const related = relatedSearches.length
     ? `<section aria-labelledby="prerender-related-heading"><h2 id="prerender-related-heading">Related plaque advice</h2><p>${relatedSearches.map(escapeHtml).join(', ')}.</p></section>`
     : '';
-  return `<div class="seo-prerendered-page" data-prerendered="true"><header>${staticNav()}</header><main><article><h1>${escapeHtml(visibleHeading)}</h1><p>${escapeHtml(description)}</p>${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(visibleHeading)} example" />` : ''}${details}${related}${staticFaqs(faqs)}</article></main><footer><nav aria-label="Legal"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/returns-cancellations">Returns and cancellations</a></nav></footer></div>`;
+  const exampleGallery = examples.length
+    ? `<section aria-labelledby="prerender-examples-heading"><h2 id="prerender-examples-heading">Real ${escapeHtml(visibleHeading.toLowerCase())} examples</h2><div>${examples.map(([src, alt, caption]) => `<figure><img src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" /><figcaption>${escapeHtml(caption)}</figcaption></figure>`).join('')}</div></section>`
+    : '';
+  const specificAdvice = sections.length
+    ? `<section aria-labelledby="prerender-advice-heading"><h2 id="prerender-advice-heading">What to know before ordering</h2>${sections.map(([sectionTitle, copy]) => `<article><h3>${escapeHtml(sectionTitle)}</h3><p>${escapeHtml(copy)}</p></article>`).join('')}</section>`
+    : '';
+  return `<div class="seo-prerendered-page" data-prerendered="true"><header>${staticNav()}</header><main><article><h1>${escapeHtml(visibleHeading)}</h1><p>${escapeHtml(description)}</p>${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(visibleHeading)} example" />` : ''}${exampleGallery}${specificAdvice}${details}${related}${staticFaqs(faqs)}</article></main><footer><nav aria-label="Legal"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/returns-cancellations">Returns and cancellations</a></nav></footer></div>`;
 };
 
 const replaceTag = (html, pattern, replacement) => html.replace(pattern, replacement);
@@ -460,6 +562,8 @@ const writePrerenderedPage = async ({
   faqs = [],
   price = null,
   relatedSearches = [],
+  sections = [],
+  examples = [],
   kind = 'page',
   robots = 'index,follow',
 }) => {
@@ -497,7 +601,7 @@ const writePrerenderedPage = async ({
   html = html.replace('</head>', `  <script type="application/ld+json" id="instaplaque-prerender-route-schema">${JSON.stringify(routeSchema)}</script>\n</head>`);
   html = html.replace(
     '<div id="root"></div>',
-    `<div id="root">${staticPageMarkup({ title, heading, description, image, faqs, price, relatedSearches, kind })}</div>`,
+    `<div id="root">${staticPageMarkup({ title, heading, description, image, faqs, price, relatedSearches, sections, examples, kind })}</div>`,
   );
 
   if (!slug) {
@@ -516,6 +620,7 @@ for (const page of routePages) {
 
 for (const page of pages) {
   const url = `${siteBaseUrl}/${page.slug}`;
+  const enhancement = pageEnhancements[page.slug] || {};
   await writePrerenderedPage({
     slug: page.slug,
     title: page.title,
@@ -548,6 +653,7 @@ for (const page of pages) {
     faqs: page.faqs,
     price: page.price,
     kind: 'product',
+    ...enhancement,
     schema: [
       {
         '@type': 'BreadcrumbList',
@@ -563,6 +669,7 @@ for (const page of pages) {
 
 for (const page of landingPages) {
   const url = `${siteBaseUrl}/${page.slug}`;
+  const enhancement = pageEnhancements[page.slug] || {};
   await writePrerenderedPage({
     slug: page.slug,
     title: page.title,
@@ -572,6 +679,7 @@ for (const page of landingPages) {
     faqs: page.faqs,
     relatedSearches: page.relatedSearches,
     kind: 'product',
+    ...enhancement,
     schema: [
       {
         '@type': 'CollectionPage',
@@ -604,7 +712,8 @@ const notFoundHtml = baseHtml
   );
 await writeFile(path.join(distDir, '404.html'), notFoundHtml);
 
-const merchantFeedPages = pages.filter((page) => page.slug !== 'custom-plaques');
+const merchantFeedSlugs = new Set(['memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques']);
+const merchantFeedPages = pages.filter((page) => merchantFeedSlugs.has(page.slug));
 
 const feedItems = merchantFeedPages.map((page) => {
   const url = `${siteBaseUrl}/${page.slug}`;

@@ -26,11 +26,6 @@
       "permanent": false
     },
     {
-      "source": "/design",
-      "destination": "/",
-      "permanent": true
-    },
-    {
       "source": "/etchmaster/(.*)",
       "destination": "/",
       "permanent": false
@@ -53,6 +48,66 @@
     {
       "source": "/returns-and-cancellations",
       "destination": "/returns-cancellations",
+      "permanent": true
+    },
+    {
+      "source": "/memorial-bench-plaques",
+      "destination": "/bench-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/brass-memorial-plaques",
+      "destination": "/memorial-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/wall-memorial-plaques",
+      "destination": "/memorial-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/ashes-scattering-plaques",
+      "destination": "/memorial-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/pet-memorial-plaques",
+      "destination": "/memorial-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/tree-plaques",
+      "destination": "/garden-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/school-opening-plaques",
+      "destination": "/opening-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/donor-plaques",
+      "destination": "/opening-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/commemorative-plaques",
+      "destination": "/opening-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/engraved-plaques",
+      "destination": "/custom-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/a5-plaques",
+      "destination": "/custom-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/a4-plaques",
+      "destination": "/custom-plaques",
       "permanent": true
     }
   ],

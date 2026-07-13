@@ -742,6 +742,7 @@ const breadcrumbSchema = (items: Array<{ name: string; url: string }>) => ({
 
 const homepageProductSlugs = ['bench-plaques', 'a5-plaques', 'a4-plaques', 'custom-plaques'];
 const homepageProducts = productFamilies.filter((product) => homepageProductSlugs.includes(product.slug));
+const consolidatedProductRoute = (slug: string) => ['a5-plaques', 'a4-plaques'].includes(slug) ? 'custom-plaques' : slug;
 
 const shopOfferFacts = [
   ['Bench plaques', '150 x 50 mm', 'from £58.50'],
@@ -799,36 +800,25 @@ const heroProofImages = [
 ];
 
 const highIntentLandingSlugs = [
-  'memorial-bench-plaques',
-  'brass-memorial-plaques',
-  'wall-memorial-plaques',
   'garden-plaques',
   'opening-plaques',
-  'engraved-plaques',
 ];
 
 const highIntentLandingPages = seoLandingPages.filter((page) => highIntentLandingSlugs.includes(page.slug));
 
 const productRelatedLandingSlugs: Record<string, string[]> = {
-  'bench-plaques': ['memorial-bench-plaques', 'brass-memorial-plaques', 'garden-plaques'],
-  'brass-plaques': ['brass-memorial-plaques', 'opening-plaques', 'donor-plaques'],
-  'stainless-steel-plaques': ['wall-memorial-plaques', 'opening-plaques', 'school-opening-plaques'],
-  'a5-plaques': ['garden-plaques', 'pet-memorial-plaques', 'tree-plaques'],
-  'a4-plaques': ['opening-plaques', 'donor-plaques', 'school-opening-plaques'],
-  'memorial-plaques': ['memorial-bench-plaques', 'wall-memorial-plaques', 'ashes-scattering-plaques'],
-  'custom-plaques': ['engraved-plaques', 'donor-plaques', 'commemorative-plaques'],
+  'bench-plaques': ['garden-plaques'],
+  'brass-plaques': ['garden-plaques', 'opening-plaques'],
+  'stainless-steel-plaques': ['garden-plaques', 'opening-plaques'],
+  'a5-plaques': ['garden-plaques'],
+  'a4-plaques': ['opening-plaques'],
+  'memorial-plaques': ['garden-plaques'],
+  'custom-plaques': ['garden-plaques', 'opening-plaques'],
 };
 
 const landingRelatedLandingSlugs: Record<string, string[]> = {
-  'garden-plaques': ['tree-plaques', 'pet-memorial-plaques', 'ashes-scattering-plaques'],
-  'opening-plaques': ['school-opening-plaques', 'donor-plaques', 'commemorative-plaques'],
-  'pet-memorial-plaques': ['garden-plaques', 'tree-plaques', 'ashes-scattering-plaques'],
-  'donor-plaques': ['opening-plaques', 'school-opening-plaques', 'commemorative-plaques'],
-  'memorial-bench-plaques': ['brass-memorial-plaques', 'garden-plaques', 'wall-memorial-plaques'],
-  'brass-memorial-plaques': ['memorial-bench-plaques', 'wall-memorial-plaques', 'garden-plaques'],
-  'wall-memorial-plaques': ['brass-memorial-plaques', 'ashes-scattering-plaques', 'memorial-bench-plaques'],
-  'ashes-scattering-plaques': ['garden-plaques', 'tree-plaques', 'wall-memorial-plaques'],
-  'school-opening-plaques': ['opening-plaques', 'donor-plaques', 'commemorative-plaques'],
+  'garden-plaques': ['opening-plaques'],
+  'opening-plaques': ['garden-plaques'],
 };
 
 const proofPromiseRows = [
@@ -1203,10 +1193,10 @@ function ProductGrid({ onStartDesign, onNavigate }: Pick<SiteProps, 'onStartDesi
             <div className="commerce-card-foot">
               <span>{product.startingFrom}</span>
               <a
-                href={`/${product.slug}`}
+                href={`/${consolidatedProductRoute(product.slug)}`}
                 onClick={(event) => {
                   event.preventDefault();
-                  onNavigate('product', product.slug);
+                  onNavigate('product', consolidatedProductRoute(product.slug));
                 }}
               >
                 View details
@@ -1245,9 +1235,9 @@ function SeoMerchandisePanel({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   return (
     <section className="commerce-section commerce-seo-merch">
       <div className="commerce-section__head">
-        <p className="commerce-eyebrow">High intent plaque pages</p>
-        <h2>Search pages that behave like shop departments.</h2>
-        <p>Use these routes when you already know the job: memorial bench, wall memorial, garden, opening, donor or engraved plaques.</p>
+        <p className="commerce-eyebrow">Purpose-led plaque guides</p>
+        <h2>Useful pages for two genuinely different jobs.</h2>
+        <p>Garden plaques need outdoor material and fitting advice. Opening plaques need formal wording, hierarchy and larger-size guidance.</p>
       </div>
       <div className="commerce-seo-merch__grid">
         {highIntentLandingPages.map((page, index) => (
@@ -1637,10 +1627,10 @@ function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLau
           {homepageProducts.map((product) => (
             <a
               key={product.slug}
-              href={`/${product.slug}`}
+              href={`/${consolidatedProductRoute(product.slug)}`}
               onClick={(event) => {
                 event.preventDefault();
-                props.onNavigate('product', product.slug);
+                props.onNavigate('product', consolidatedProductRoute(product.slug));
               }}
             >
               <img src={product.image} alt="" loading="lazy" />
@@ -1683,6 +1673,26 @@ function ProductPage({ selectedProduct, onStartDesign, onNavigate }: Pick<SitePr
         </div>
         <ProductMockup product={selectedProduct} />
       </section>
+      {selectedProduct.examples?.length ? (
+        <section className="commerce-section commerce-example-section commerce-example-section--radical commerce-example-section--product">
+          <div className="commerce-section__head">
+            <p className="commerce-eyebrow">Real plaque examples</p>
+            <h2>{selectedProduct.shortTitle} plaques in real settings.</h2>
+            <p>Use these examples to compare finish, scale and setting before you start your own proof.</p>
+          </div>
+          <div className="commerce-example-grid">
+            {selectedProduct.examples.map((example) => (
+              <article className="commerce-example-card" key={example.title}>
+                <img src={example.image} alt={example.alt} loading="lazy" decoding="async" />
+                <div>
+                  <h3>{example.title}</h3>
+                  <p>{example.copy}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
       {selectedProduct.seoSections?.length ? (
         <section className="commerce-section commerce-product-seo commerce-product-seo--radical">
           <div className="commerce-section__head">
@@ -1746,10 +1756,10 @@ function LandingShopPanel({
               <div className="commerce-landing-choice__actions">
                 <strong>{product.startingFrom}</strong>
                 <a
-                  href={`/${product.slug}`}
+                  href={`/${consolidatedProductRoute(product.slug)}`}
                   onClick={(event) => {
                     event.preventDefault();
-                    onNavigate('product', product.slug);
+                    onNavigate('product', consolidatedProductRoute(product.slug));
                   }}
                 >
                   View product

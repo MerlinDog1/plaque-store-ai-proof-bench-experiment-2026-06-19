@@ -1,266 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://instaplaque.co.uk/</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-realistic-proof-row.jpg</image:loc>
-      <image:title>Custom plaque proof examples</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-bench-steel.webp</image:loc>
-      <image:title>Bench plaque example</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-garden-brass.webp</image:loc>
-      <image:title>Garden brass plaque example</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-custom-oval-steel.webp</image:loc>
-      <image:title>Custom oval plaque example</image:title>
-    </image:image>
+    <lastmod>2026-07-13</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/home-realistic-proof-row.jpg</image:loc><image:title>Custom plaque examples</image:title></image:image>
+  </url>
+  <url><loc>https://instaplaque.co.uk/design</loc><lastmod>2026-07-13</lastmod></url>
+  <url>
+    <loc>https://instaplaque.co.uk/memorial-plaques</loc><lastmod>2026-07-13</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/brass-wood-backed-wall-plaque.webp</image:loc><image:title>Brass memorial wall plaque</image:title></image:image>
+    <image:image><image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/stainless-steel-bench-plaque-wood-rail.webp</image:loc><image:title>Stainless steel memorial bench plaque</image:title></image:image>
   </url>
   <url>
-    <loc>https://instaplaque.co.uk/design</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/product-images/instant-proof-hero.png</image:loc>
-      <image:title>Online plaque proof designer</image:title>
-    </image:image>
+    <loc>https://instaplaque.co.uk/bench-plaques</loc><lastmod>2026-07-13</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/home-gallery-brass-bench.webp</image:loc><image:title>Brass bench plaque</image:title></image:image>
+    <image:image><image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/aged-brass-bench-memorial-plaque.webp</image:loc><image:title>Aged brass memorial bench plaque</image:title></image:image>
   </url>
   <url>
-    <loc>https://instaplaque.co.uk/memorial-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/plaque-hero-memorial-wall-desktop.jpg</image:loc>
-      <image:title>Custom memorial plaque example</image:title>
-    </image:image>
+    <loc>https://instaplaque.co.uk/brass-plaques</loc><lastmod>2026-07-13</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/home-gallery-brass-community.webp</image:loc><image:title>Large engraved brass plaque</image:title></image:image>
   </url>
   <url>
-    <loc>https://instaplaque.co.uk/bench-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-bench-steel.webp</image:loc>
-      <image:title>Bench plaque example</image:title>
-    </image:image>
+    <loc>https://instaplaque.co.uk/stainless-steel-plaques</loc><lastmod>2026-07-13</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/home-gallery-oval-steel.webp</image:loc><image:title>Oval stainless steel plaque</image:title></image:image>
   </url>
   <url>
-    <loc>https://instaplaque.co.uk/brass-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-gallery-brass-bench.webp</image:loc>
-      <image:title>Brass plaque example</image:title>
-    </image:image>
+    <loc>https://instaplaque.co.uk/custom-plaques</loc><lastmod>2026-07-13</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/home-custom-oval-steel.webp</image:loc><image:title>Custom oval metal plaque</image:title></image:image>
   </url>
   <url>
-    <loc>https://instaplaque.co.uk/stainless-steel-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-steel-wall.webp</image:loc>
-      <image:title>Stainless steel plaque example</image:title>
-    </image:image>
+    <loc>https://instaplaque.co.uk/garden-plaques</loc><lastmod>2026-07-13</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/home-carousel-garden-brass.webp</image:loc><image:title>Brass garden memorial plaque</image:title></image:image>
   </url>
   <url>
-    <loc>https://instaplaque.co.uk/a5-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-garden-brass.webp</image:loc>
-      <image:title>A5 garden and memorial plaque example</image:title>
-    </image:image>
+    <loc>https://instaplaque.co.uk/opening-plaques</loc><lastmod>2026-07-13</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/home-gallery-brass-community.webp</image:loc><image:title>Community building opening plaque</image:title></image:image>
   </url>
-  <url>
-    <loc>https://instaplaque.co.uk/a4-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-reading-room.webp</image:loc>
-      <image:title>A4 presentation plaque example</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/custom-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-custom-oval-steel.webp</image:loc>
-      <image:title>Custom oval plaque example</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/garden-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-garden-brass.webp</image:loc>
-      <image:title>Garden memorial plaque example</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/opening-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-gallery-brass-community.webp</image:loc>
-      <image:title>Building opening plaque example</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/commemorative-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-reading-room.webp</image:loc>
-      <image:title>Commemorative plaque example</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/engraved-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-realistic-proof-row.jpg</image:loc>
-      <image:title>Custom engraved plaque proof examples</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/pet-memorial-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/plaque-hero-cat.png</image:loc>
-      <image:title>Pet memorial plaque example</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/tree-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-garden-brass.webp</image:loc>
-      <image:title>Tree dedication plaque example</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/donor-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-gallery-brass-community.webp</image:loc>
-      <image:title>Donor recognition plaque example</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/memorial-bench-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-bench-plaques/hero-16x9.jpg</image:loc>
-      <image:title>Memorial bench plaque example</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/aged-brass-bench-memorial-plaque.webp</image:loc>
-      <image:title>Aged brass memorial bench plaque on timber</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/parents-brass-bench-memorial-plaque.webp</image:loc>
-      <image:title>Parents brass memorial bench plaque close up</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/polished-brass-bench-memorial-plaque.webp</image:loc>
-      <image:title>Polished brass memorial bench plaque</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/brass-park-bench-memorial-plaque.webp</image:loc>
-      <image:title>Brass park bench memorial plaque</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/brass-memorial-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/brass-bench-plaque-garden-rail.webp</image:loc>
-      <image:title>Brass memorial plaque on garden bench</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/brass-wood-backed-wall-plaque.webp</image:loc>
-      <image:title>Brass wood-backed memorial wall plaque</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/bronze-wall-memorial-plaque.webp</image:loc>
-      <image:title>Bronze tone memorial wall plaque</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/wall-memorial-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/stainless-steel-wood-backed-memorial-plaque.webp</image:loc>
-      <image:title>Stainless steel wood-backed wall memorial plaque</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/brass-wood-backed-wall-plaque.webp</image:loc>
-      <image:title>Brass wall memorial plaque with wood backing</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/seo/realistic/memorial-plaques/bronze-wall-memorial-plaque.webp</image:loc>
-      <image:title>Bronze tone wall memorial plaque</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/ashes-scattering-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/plaque-hero-memorial-wall-desktop.jpg</image:loc>
-      <image:title>Ashes scattering remembrance plaque example</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/school-opening-plaques</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-carousel-reading-room.webp</image:loc>
-      <image:title>School opening plaque example</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/materials</loc>
-    <lastmod>2026-07-12</lastmod>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/proofbench-materials.png</image:loc>
-      <image:title>Brass stainless steel and wood plaque materials</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-gallery-aged-brass-wood.webp</image:loc>
-      <image:title>Aged brass plaque on wood backing</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://instaplaque.co.uk/site-images/home-gallery-brass-bench.webp</image:loc>
-      <image:title>Brass bench plaque close up</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/how-it-works</loc>
-    <lastmod>2026-07-12</lastmod>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/faq</loc>
-    <lastmod>2026-07-12</lastmod>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/quote</loc>
-    <lastmod>2026-07-12</lastmod>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/contact</loc>
-    <lastmod>2026-07-12</lastmod>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/terms</loc>
-    <lastmod>2026-07-12</lastmod>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/privacy</loc>
-    <lastmod>2026-07-12</lastmod>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/cookies</loc>
-    <lastmod>2026-07-12</lastmod>
-  </url>
-  <url>
-    <loc>https://instaplaque.co.uk/returns-cancellations</loc>
-    <lastmod>2026-07-12</lastmod>
-  </url>
+  <url><loc>https://instaplaque.co.uk/materials</loc><lastmod>2026-07-13</lastmod></url>
+  <url><loc>https://instaplaque.co.uk/how-it-works</loc><lastmod>2026-07-13</lastmod></url>
+  <url><loc>https://instaplaque.co.uk/faq</loc><lastmod>2026-07-13</lastmod></url>
+  <url><loc>https://instaplaque.co.uk/quote</loc><lastmod>2026-07-13</lastmod></url>
+  <url><loc>https://instaplaque.co.uk/contact</loc><lastmod>2026-07-13</lastmod></url>
+  <url><loc>https://instaplaque.co.uk/terms</loc><lastmod>2026-07-13</lastmod></url>
+  <url><loc>https://instaplaque.co.uk/privacy</loc><lastmod>2026-07-13</lastmod></url>
+  <url><loc>https://instaplaque.co.uk/cookies</loc><lastmod>2026-07-13</lastmod></url>
+  <url><loc>https://instaplaque.co.uk/returns-cancellations</loc><lastmod>2026-07-13</lastmod></url>
 </urlset>

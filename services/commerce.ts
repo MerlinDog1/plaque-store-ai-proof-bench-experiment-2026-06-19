@@ -40,6 +40,7 @@ export interface ProductFamily {
   seoDescription?: string;
   seoIntro?: string;
   seoSections?: Array<{ title: string; copy: string }>;
+  examples?: Array<{ title: string; copy: string; image: string; alt: string }>;
   relatedSearches?: string[];
   bestFor: string[];
   startingFrom: string;
@@ -203,6 +204,12 @@ export const productFamilies: ProductFamily[] = [
         copy: 'Brass gives the classic gold look. Stainless steel is silver and modern. Add wood backing if the plaque is going on a wall.',
       },
     ],
+    examples: [
+      { title: 'Brass memorial on timber', copy: 'A traditional warm finish for a bench or garden setting.', image: '/seo/realistic/memorial-plaques/aged-brass-bench-memorial-plaque.webp', alt: 'Aged brass memorial plaque fixed to a wooden garden bench' },
+      { title: 'Brass wall memorial', copy: 'Wood backing gives a larger memorial plaque more presence on a wall.', image: '/seo/realistic/memorial-plaques/brass-wood-backed-wall-plaque.webp', alt: 'Engraved brass memorial wall plaque mounted on dark wood' },
+      { title: 'Stainless wall memorial', copy: 'A clean silver finish for modern indoor or outdoor memorials.', image: '/seo/realistic/memorial-plaques/stainless-steel-wood-backed-memorial-plaque.webp', alt: 'Brushed stainless steel memorial plaque with wooden backing' },
+      { title: 'Short bench dedication', copy: 'A name, dates and one short line fit the compact bench format best.', image: '/seo/realistic/memorial-plaques/stainless-steel-bench-plaque-wood-rail.webp', alt: 'Stainless steel memorial plaque fixed to a wooden bench rail' },
+    ],
     relatedSearches: ['memorial plaques UK', 'brass memorial plaques', 'custom remembrance plaques', 'garden memorial plaques'],
     bestFor: ['A5 from £95.50', 'Brass or stainless steel', 'Free proof before payment', 'UK mainland delivery included'],
     proofPrompt: 'In loving memory of\nArthur James Williams\nA devoted husband, father and grandfather\n1938 - 2026',
@@ -261,6 +268,12 @@ export const productFamilies: ProductFamily[] = [
         title: 'Material choice',
         copy: 'Stainless steel gives a clean silver look for exposed benches. Brass is warmer and traditional, while aged brass is darker and less reflective.',
       },
+    ],
+    examples: [
+      { title: 'Classic brass bench plaque', copy: 'Warm brass with four visible screws on outdoor timber.', image: '/site-images/home-gallery-brass-bench.webp', alt: 'Engraved brass memorial plaque fitted to a wooden park bench' },
+      { title: 'Aged brass on timber', copy: 'A darker, less reflective finish that sits naturally against wood.', image: '/seo/realistic/memorial-plaques/aged-brass-bench-memorial-plaque.webp', alt: 'Aged brass memorial bench plaque on weathered timber' },
+      { title: 'Brushed stainless bench plaque', copy: 'A restrained silver finish with strong black-filled lettering.', image: '/seo/realistic/memorial-plaques/stainless-steel-bench-plaque-wood-rail.webp', alt: 'Brushed stainless steel memorial bench plaque on a wooden rail' },
+      { title: 'Shared family dedication', copy: 'Two names and one concise family line remain readable at bench size.', image: '/seo/realistic/memorial-plaques/parents-brass-bench-memorial-plaque.webp', alt: 'Brass memorial bench plaque dedicated to beloved parents' },
     ],
     relatedSearches: ['bench plaques UK', 'memorial bench plaques', 'engraved bench plaques', 'brass bench plaques'],
     bestFor: ['150 x 50 mm from £58.50', 'Brass or stainless steel', 'Visible screw fixing', 'Free proof before payment'],
@@ -324,6 +337,12 @@ export const productFamilies: ProductFamily[] = [
         copy: 'The proof shows text, border, fixing holes and finish before checkout, so you can avoid cramped wording or fixings too close to the inscription.',
       },
     ],
+    examples: [
+      { title: 'Brass bench plaque', copy: 'Brushed brass is warm, legible and traditional outdoors.', image: '/site-images/home-gallery-brass-bench.webp', alt: 'Brushed brass engraved plaque fixed to an outdoor wooden bench' },
+      { title: 'Formal community plaque', copy: 'A larger brass plaque gives names and ceremonial wording room to breathe.', image: '/site-images/home-gallery-brass-community.webp', alt: 'Large engraved brass community centre commemorative plaque' },
+      { title: 'Aged brass memorial', copy: 'A hand-aged finish offers a softer, darker appearance.', image: '/site-images/home-gallery-aged-brass-wood.webp', alt: 'Aged brass memorial plaque mounted on dark wood' },
+      { title: 'Brass wall plaque', copy: 'Wood backing frames the metal and separates it from brick or stone.', image: '/seo/realistic/memorial-plaques/brass-wood-backed-wall-plaque.webp', alt: 'Engraved brass wall plaque mounted on a wooden backing board' },
+    ],
     relatedSearches: ['brass plaques UK', 'engraved brass plaques', 'custom brass plaques', 'brass memorial plaques'],
     bestFor: ['A5 from £105.50', 'Bench plaques from £58.50', 'Brushed, polished or aged brass', 'Free proof before payment'],
     proofPrompt: 'Presented to\nDavid Morgan\nIn recognition of 25 years of service\n2026',
@@ -386,6 +405,12 @@ export const productFamilies: ProductFamily[] = [
         title: 'Price before payment',
         copy: 'Choose size, material and fixings. Standard pricing includes engraving, standard fixings and UK mainland delivery, with extras shown before checkout.',
       },
+    ],
+    examples: [
+      { title: 'Oval stainless plaque', copy: 'A custom oval creates a softer memorial or house-plaque shape.', image: '/site-images/home-gallery-oval-steel.webp', alt: 'Oval brushed stainless steel engraved memorial plaque' },
+      { title: 'Stainless wall plaque', copy: 'Brushed steel and black lettering stay crisp in a modern setting.', image: '/site-images/home-carousel-steel-wall.webp', alt: 'Brushed stainless steel engraved plaque mounted on an exterior wall' },
+      { title: 'Stainless bench plaque', copy: 'A compact silver plaque suited to exposed outdoor timber.', image: '/seo/realistic/memorial-plaques/stainless-steel-bench-plaque-wood-rail.webp', alt: 'Stainless steel memorial plaque fixed to an outdoor wooden bench' },
+      { title: 'Steel with wood backing', copy: 'A timber surround adds warmth to a contemporary silver face.', image: '/seo/realistic/memorial-plaques/stainless-steel-wood-backed-memorial-plaque.webp', alt: 'Stainless steel memorial wall plaque mounted on wood' },
     ],
     relatedSearches: ['stainless steel plaques UK', 'outdoor metal plaques', 'engraved stainless steel plaques', 'custom steel plaques'],
     bestFor: ['A5 from £95.50', 'Brushed or polished stainless', 'Outdoor and wall plaques', 'UK mainland delivery included'],
@@ -567,6 +592,12 @@ export const productFamilies: ProductFamily[] = [
         copy: 'Create the layout first. Oversized plaques, unusual shapes and supplied artwork may need a manual price check.',
       },
     ],
+    examples: [
+      { title: 'Oval stainless plaque', copy: 'Custom shape, fixing positions and border shown before ordering.', image: '/site-images/home-custom-oval-steel.webp', alt: 'Custom oval stainless steel plaque with engraved lettering' },
+      { title: 'Oval wall plaque', copy: 'An oval format works well where a standard rectangle feels too formal.', image: '/site-images/home-carousel-oval-wall.webp', alt: 'Custom oval engraved plaque installed on an exterior wall' },
+      { title: 'Dark contemporary plaque', copy: 'Non-standard finishes and mounting requests can be checked from a proof.', image: '/site-images/home-carousel-black-wall.webp', alt: 'Dark custom engraved wall plaque with contrasting lettering' },
+      { title: 'Large presentation plaque', copy: 'Longer wording and formal hierarchy need a larger made-to-measure plate.', image: '/site-images/home-carousel-reading-room.webp', alt: 'Large engraved presentation plaque with formal opening wording' },
+    ],
     relatedSearches: ['custom plaques UK', 'bespoke plaques', 'oval plaques', 'made to measure plaques'],
     bestFor: ['Up to 600 mm long', 'Oval or circular plaques', 'Made-to-measure sizes', 'Quote check before order'],
     proofPrompt: 'The Old Mill\nRestored 2026\nIn honour of everyone who brought this place back to life',
@@ -634,6 +665,12 @@ export const seoLandingPages: SeoLandingPage[] = [
       { title: 'Check the proof', copy: 'Use the proof to check line breaks, border, fixing positions and whether the chosen size makes the inscription easy to read.' },
       { title: 'Durability', copy: 'Metal plaques can be used outside, but all outdoor finishes will weather over time. Choose the finish for the look you want as it ages.' },
     ],
+    examples: [
+      { title: 'Brass garden dedication', copy: 'Warm brass against brick and planting for a traditional outdoor setting.', image: '/site-images/home-carousel-garden-brass.webp', alt: 'Engraved brass memorial plaque displayed in a planted garden' },
+      { title: 'Aged brass on wood', copy: 'A darker finish that works naturally beside timber and foliage.', image: '/seo/realistic/memorial-plaques/aged-brass-bench-memorial-plaque.webp', alt: 'Aged brass garden memorial plaque mounted on outdoor timber' },
+      { title: 'Brass plaque on a garden rail', copy: 'Short wording remains clear when the plaque is read from a path.', image: '/seo/realistic/memorial-plaques/brass-bench-plaque-garden-rail.webp', alt: 'Brass memorial plaque fitted to a wooden rail in a garden' },
+      { title: 'Stainless outdoor memorial', copy: 'A clean silver option for contemporary gardens and walls.', image: '/site-images/home-carousel-steel-wall.webp', alt: 'Brushed stainless steel memorial plaque on an outdoor wall' },
+    ],
     faqs: [
       { question: 'Will brass weather outside?', answer: 'Yes. Brass is suitable outside, but it naturally changes over time. Choose aged brass if you prefer a darker, less shiny look from the start.' },
       { question: 'What size is best for a garden plaque?', answer: 'A5 is a good starting point for names, dates and a short message. Bench plaque sizes work better for very short wording.' },
@@ -651,7 +688,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     seoDescription: 'Order custom opening plaques in the UK with a free online proof. Brass and stainless steel plaques for building openings, unveilings, presentations and formal ceremonies.',
     heroCopy: 'Opening plaques for buildings, rooms, gardens and ceremonies. A4 is usually best for formal wording.',
     image: '/site-images/home-gallery-brass-community.webp',
-    relatedProductSlug: 'a4-plaques',
+    relatedProductSlug: 'custom-plaques',
     proofCta: 'Start an opening plaque proof',
     sections: [
       {
@@ -675,6 +712,12 @@ export const seoLandingPages: SeoLandingPage[] = [
       { title: 'Wording example', copy: 'Opened by Jane Smith, Chair of Trustees, on 18 June 2026. Add the project or room name above it.' },
       { title: 'What to avoid', copy: 'Avoid squeezing several organisations, donor lists and long titles into A5. Use A4 or donor plaque layouts for multiple names.' },
       { title: 'Before production', copy: 'Confirm names, titles and dates with the organiser before approving the proof, as formal plaques are difficult to correct later.' },
+    ],
+    examples: [
+      { title: 'Community opening plaque', copy: 'A large brass layout with a clear organisation name, opening wording and date.', image: '/site-images/home-gallery-brass-community.webp', alt: 'Large engraved brass community centre opening plaque' },
+      { title: 'Reading room dedication', copy: 'Formal wording arranged with enough space for a room name and ceremony details.', image: '/site-images/home-carousel-reading-room.webp', alt: 'Large formal engraved plaque for a reading room opening' },
+      { title: 'Contemporary steel wall plaque', copy: 'Brushed stainless steel suits modern schools, offices and community buildings.', image: '/site-images/home-carousel-steel-wall.webp', alt: 'Brushed stainless steel opening plaque installed on a modern wall' },
+      { title: 'Traditional brass wall plaque', copy: 'A warm gold finish for ceremonial openings and heritage interiors.', image: '/site-images/home-carousel-brass-wall.webp', alt: 'Traditional engraved brass opening plaque mounted on a wall' },
     ],
     faqs: [
       { question: 'Can I include the person opening the building?', answer: 'Yes. Add the person, role, date and venue wording, then check the hierarchy in the proof before checkout.' },
