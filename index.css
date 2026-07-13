@@ -3950,6 +3950,102 @@
   transform: translateY(-50%) scale(1.06);
 }
 
+/* The designer guide reuses the homepage material carousel as a compact,
+   self-contained comparison tool inside the dark help drawer. */
+.designer-guide .commerce-material-showcase--compact {
+  overflow: hidden;
+  margin: 2px 0 14px;
+  border: 1px solid rgba(226, 186, 96, 0.2);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 75% 18%, rgba(226, 186, 96, 0.1), transparent 42%),
+    rgba(255, 255, 255, 0.025);
+  padding: 16px;
+}
+
+.designer-guide .commerce-material-showcase--compact .commerce-material-slider {
+  grid-template-columns: minmax(190px, 0.72fr) minmax(330px, 1.28fr);
+  gap: 16px;
+}
+
+.designer-guide .commerce-material-showcase--compact .commerce-eyebrow {
+  color: #e2ba60;
+}
+
+.designer-guide .commerce-material-showcase--compact .commerce-material-atelier__copy h2 {
+  margin: 4px 0 8px;
+  color: #fffaf0;
+  font-size: clamp(21px, 2vw, 28px);
+}
+
+.designer-guide .commerce-material-showcase--compact .commerce-material-atelier__copy > p:not(.commerce-eyebrow),
+.designer-guide .commerce-material-showcase--compact .commerce-material-atelier__meta p {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+}
+
+.designer-guide .commerce-material-showcase--compact .commerce-material-atelier__meta {
+  margin-top: 12px;
+  border-left-color: #e2ba60;
+}
+
+.designer-guide .commerce-material-showcase--compact .commerce-material-atelier__meta span,
+.designer-guide .commerce-material-showcase--compact .commerce-material-atelier__meta em {
+  color: #e2ba60;
+}
+
+.designer-guide .commerce-material-showcase--compact .commerce-material-atelier__meta strong {
+  color: #fffaf0;
+  font-size: 20px;
+}
+
+.designer-guide .commerce-material-showcase--compact .commerce-material-carousel {
+  height: 300px;
+}
+
+.designer-guide .commerce-material-showcase--compact .commerce-material-slide {
+  width: min(32vw, 210px);
+}
+
+.designer-guide .commerce-material-showcase--compact .commerce-material-controls > button {
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+}
+
+@media (max-width: 700px) {
+  .designer-guide .commerce-material-showcase--compact {
+    padding: 14px 10px 12px;
+  }
+
+  .designer-guide .commerce-material-showcase--compact .commerce-material-slider {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0;
+  }
+
+  .designer-guide .commerce-material-showcase--compact .commerce-material-carousel-wrap {
+    width: 100%;
+  }
+
+  .designer-guide .commerce-material-showcase--compact .commerce-material-carousel {
+    height: 255px;
+  }
+
+  .designer-guide .commerce-material-showcase--compact .commerce-material-slide {
+    width: min(43vw, 170px);
+  }
+
+  .designer-guide .commerce-material-showcase--compact .commerce-material-atelier__copy {
+    width: 100%;
+    padding: 0 4px 2px;
+  }
+
+  .designer-guide .commerce-material-showcase--compact .commerce-material-atelier__copy > p:not(.commerce-eyebrow) {
+    margin-bottom: 0;
+  }
+}
+
 .commerce-material-card,
 .commerce-faq-card,
 .commerce-admin-card,

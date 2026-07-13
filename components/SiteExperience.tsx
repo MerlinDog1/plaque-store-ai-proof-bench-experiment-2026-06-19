@@ -1309,7 +1309,7 @@ function ExpandableFaqList({ faqs, defaultOpenIndex = null }: { faqs: FaqItem[];
   );
 }
 
-function HomeMaterialPanels() {
+export function HomeMaterialPanels({ compact = false }: { compact?: boolean }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const activeMaterial = materialStories[activeIndex] ?? materialStories[0];
@@ -1330,13 +1330,15 @@ function HomeMaterialPanels() {
   };
 
   return (
-    <section className="commerce-section commerce-material-showcase">
+    <section className={`commerce-section commerce-material-showcase${compact ? ' commerce-material-showcase--compact' : ''}`}>
       <div className="commerce-material-slider">
         <div className="commerce-material-atelier__copy">
           <p className="commerce-eyebrow">Materials</p>
-          <h2>Spin through the finishes.</h2>
+          <h2>{compact ? 'Swipe through the finishes.' : 'Spin through the finishes.'}</h2>
           <p>
-            {USE_CUSTOMER_COPY_PASS
+            {compact
+              ? 'Compare real brass, stainless steel and wood finishes. Swipe the samples or use the arrow buttons.'
+              : USE_CUSTOMER_COPY_PASS
               ? 'Compare brass, stainless steel and wood finishes before you choose. Each material is shown clearly so you can feel confident about the look of your plaque.'
               : 'Real brass, stainless steel and wood scans, staged as lightweight WebP previews so the finish feels tangible without making the homepage carry production-sized textures.'}
           </p>

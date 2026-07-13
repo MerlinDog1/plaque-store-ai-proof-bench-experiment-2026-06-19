@@ -3,7 +3,7 @@ import { Header } from './components/Header';
 import PlaquePreview from './components/PlaquePreview';
 import { Controls } from './components/Controls';
 import { RealisticPreviewModal } from './components/RealisticPreviewModal';
-import { SiteExperience, homeFaqs } from './components/SiteExperience';
+import { HomeMaterialPanels, SiteExperience, homeFaqs } from './components/SiteExperience';
 import { BorderStyle, DesignStyle, EtchmasterImageMode, EtchmasterShapeMask, Fixing, INITIAL_STATE, Material, MemorialImageMethod, MemorialImagePlacement, MemorialImageShape, PlaqueState, Shape, TextColor, TypographyEngine } from './types';
 import { generatePlaqueDesign, generateRealisticView, refinePlaqueWording, GenerationPhase } from './services/geminiService';
 import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
@@ -1654,16 +1654,7 @@ const App: React.FC = () => {
                     <h3>A quick plaque buying guide</h3>
                     <span>The essentials on size, finish, proofing and delivery.</span>
                   </div>
-                  <div className="designer-guide__material-compare">
-                    <article>
-                      <img src="/materials/thumbs/brushed-brass.webp" alt="Close-up of warm brushed brass plaque material" loading="lazy" />
-                      <div><strong>Brass</strong><span>Warm, traditional and especially suited to memorials and heritage settings.</span></div>
-                    </article>
-                    <article>
-                      <img src="/materials/thumbs/brushed-stainless.webp" alt="Close-up of silver brushed stainless steel plaque material" loading="lazy" />
-                      <div><strong>Stainless steel</strong><span>Clean, contemporary and durable for indoor or outdoor use.</span></div>
-                    </article>
-                  </div>
+                  <HomeMaterialPanels compact />
                   <details open>
                     <summary>Sizes and starting prices</summary>
                     <dl>
