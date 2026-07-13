@@ -1504,8 +1504,15 @@
     position: relative;
   }
 
+  .proofbench-customiser-head {
+    height: 102px;
+    min-height: 102px;
+    align-items: flex-start;
+    padding: 12px 18px;
+  }
+
   .proofbench-control-scroll {
-    height: calc(100% - 148px);
+    height: calc(100% - 176px);
   }
 
   .proofbench-designer-footer--mobile {
