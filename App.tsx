@@ -21,6 +21,89 @@ const ThreePlaquePreview = lazy(async () => {
 const SUPPORTED_MEMORIAL_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/avif'];
 const DELIVERY_HELP = 'UK mainland only. Highlands, islands and non-UK delivery may incur extra charges.';
 
+const DESIGNER_GUIDE_GALLERY = [
+  {
+    src: '/site-images/home-gallery-brass-bench.webp',
+    alt: 'Engraved polished brass memorial plaque fitted to a wooden park bench',
+    title: 'Classic brass bench plaque',
+    type: 'Bench',
+    note: 'A compact 150 × 50 mm format with four screw fixings and concise memorial wording.',
+  },
+  {
+    src: '/site-images/home-gallery-aged-brass-wood.webp',
+    alt: 'Aged brass memorial plaque mounted on a dark wooden backing board',
+    title: 'Aged brass on wood',
+    type: 'Memorial',
+    note: 'A warm aged-brass finish paired with a shaped timber backing for a more substantial display.',
+  },
+  {
+    src: '/site-images/home-gallery-oval-steel.webp',
+    alt: 'Oval stainless steel engraved wall plaque with a polished silver finish',
+    title: 'Oval stainless steel',
+    type: 'Custom',
+    note: 'An oval silver plaque with a restrained border, corner-free shape and centred inscription.',
+  },
+  {
+    src: '/site-images/home-gallery-brass-community.webp',
+    alt: 'Large engraved brass community and commemorative wall plaque',
+    title: 'Community plaque',
+    type: 'Commemorative',
+    note: 'A larger plaque gives names, roles, dates and a dedication enough room to remain legible.',
+  },
+  {
+    src: '/site-images/home-carousel-garden-brass.webp',
+    alt: 'Small engraved brass plaque displayed outdoors in a garden setting',
+    title: 'Garden brass plaque',
+    type: 'Garden',
+    note: 'Brass provides a traditional outdoor finish; choose fixings to suit timber, masonry or a post.',
+  },
+  {
+    src: '/site-images/home-carousel-steel-wall.webp',
+    alt: 'Brushed stainless steel engraved plaque fixed to an exterior wall',
+    title: 'Steel wall plaque',
+    type: 'House & wall',
+    note: 'Brushed stainless steel creates a clean contemporary look and is suitable for exterior use.',
+  },
+] as const;
+
+const DESIGNER_GUIDE_STEPS = [
+  {
+    title: 'Choose a size and shape',
+    copy: 'Start with where the plaque will be fitted and how much wording it needs. The proof always keeps the real plaque proportions.',
+    example: 'A short bench dedication usually suits 150 × 50 mm; a longer opening inscription often needs A4.',
+  },
+  {
+    title: 'Choose the material',
+    copy: 'Pick warm traditional brass, aged brass, or contemporary stainless steel. The preview and price update with your choice.',
+    example: 'Brass is popular on timber benches; brushed steel works well on modern walls and signs.',
+  },
+  {
+    title: 'Set the engraving colour',
+    copy: 'Choose the colour used in the engraved areas so the wording has the contrast and character you want.',
+    example: 'Black gives crisp contrast on brass and steel; softer colours can suit decorative or commemorative designs.',
+  },
+  {
+    title: 'Add fixings and a border',
+    copy: 'Select holes, decorative caps or no visible fixings, then add a border if it helps frame the inscription.',
+    example: 'A bench plaque normally uses four holes; an indoor presentation plaque may use hidden mounting instead.',
+  },
+  {
+    title: 'Add a wood backing if needed',
+    copy: 'A shaped timber backing is optional. You can compare the plaque alone with the complete mounted appearance.',
+    example: 'Aged brass on dark wood creates a traditional memorial display; a bench plaque normally needs no backing.',
+  },
+  {
+    title: 'Enter the wording and create the layout',
+    copy: 'Type the exact inscription and add any layout guidance. The designer arranges the hierarchy, spacing and line breaks for the chosen size.',
+    example: 'Try: “In loving memory of / Jane Smith / 1948–2025 / Forever in our hearts”. Always check names and dates carefully.',
+  },
+  {
+    title: 'Review the proof and price',
+    copy: 'Inspect the finished 2D proof, use 3D to check thickness and materials, then revise any earlier step before ordering.',
+    example: 'Nothing goes to manufacture until you approve the design and complete checkout. Designing and revising are free.',
+  },
+] as const;
+
 const PROOF_BENCH_INITIAL_STATE: PlaqueState = {
   ...INITIAL_STATE,
   width: 297,
@@ -196,7 +279,8 @@ const App: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [hasSelectedSize, setHasSelectedSize] = useState(false);
   const [designerGuideOpen, setDesignerGuideOpen] = useState(false);
-  const [designerGuideTab, setDesignerGuideTab] = useState<'gallery' | 'guide' | 'faq'>('gallery');
+  const [designerGuideTab, setDesignerGuideTab] = useState<'how' | 'gallery' | 'guide'>('how');
+  const [expandedGuideImage, setExpandedGuideImage] = useState<number | null>(null);
   const [showDesignerIntro, setShowDesignerIntro] = useState(() => {
     if (typeof window === 'undefined') return true;
     try {
@@ -1478,13 +1562,13 @@ const App: React.FC = () => {
                 <p>Help while you design</p>
                 <h2>Plaque guide</h2>
               </div>
-              <button type="button" onClick={() => setDesignerGuideOpen(false)} aria-label="Close plaque guide">×</button>
+              <button type="button" onClick={() => { setExpandedGuideImage(null); setDesignerGuideOpen(false); }} aria-label="Close plaque guide">×</button>
             </header>
             <div className="designer-guide__tabs" role="tablist" aria-label="Plaque guide sections">
               {([
+                ['how', 'How it works'],
                 ['gallery', 'Gallery'],
-                ['guide', 'Buying guide'],
-                ['faq', 'FAQs'],
+                ['guide', 'Guide & FAQs'],
               ] as const).map(([tab, label]) => (
                 <button
                   key={tab}
@@ -1495,13 +1579,56 @@ const App: React.FC = () => {
                   aria-controls={`designer-guide-panel-${tab}`}
                   tabIndex={designerGuideTab === tab ? 0 : -1}
                   className={designerGuideTab === tab ? 'is-active' : ''}
-                  onClick={() => setDesignerGuideTab(tab)}
+                  onClick={() => { setExpandedGuideImage(null); setDesignerGuideTab(tab); }}
                 >
                   {label}
                 </button>
               ))}
             </div>
             <div className="designer-guide__scroll">
+              {designerGuideTab === 'how' && (
+                <section className="designer-guide__panel designer-guide__panel--how" role="tabpanel" id="designer-guide-panel-how" aria-labelledby="designer-guide-tab-how">
+                  <div className="designer-guide__intro">
+                    <p>From idea to approved proof</p>
+                    <h3>How the designer works</h3>
+                    <span>Work through seven simple steps. Your live plaque, specification and price stay together, and you can return to any step before checkout.</span>
+                  </div>
+                  <div className="designer-guide__assurance">
+                    <strong>Free to design</strong>
+                    <span>No account is needed. Nothing is manufactured until you have checked the proof and placed the order.</span>
+                  </div>
+                  <ol className="designer-guide__steps">
+                    {DESIGNER_GUIDE_STEPS.map((step, index) => (
+                      <li key={step.title}>
+                        <span className="designer-guide__step-number">{String(index + 1).padStart(2, '0')}</span>
+                        <div>
+                          <h4>{step.title}</h4>
+                          <p>{step.copy}</p>
+                          <small><strong>Example:</strong> {step.example}</small>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveStep(index);
+                            setDesignerGuideOpen(false);
+                          }}
+                          aria-label={`Open designer step: ${step.title}`}
+                        >
+                          Open step <span aria-hidden="true">→</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ol>
+                  <div className="designer-guide__examples">
+                    <p>Useful starting points</p>
+                    <div>
+                      <article><strong>Bench memorial</strong><span>150 × 50 mm · brass or steel · four holes · name, dates and one short line</span></article>
+                      <article><strong>Garden memorial</strong><span>A5 · aged brass or steel · suitable outdoor fixings · short dedication</span></article>
+                      <article><strong>Opening plaque</strong><span>A4 · brass or steel · venue, opened by, role and date</span></article>
+                    </div>
+                  </div>
+                </section>
+              )}
               {designerGuideTab === 'gallery' && (
                 <section className="designer-guide__panel designer-guide__panel--gallery" role="tabpanel" id="designer-guide-panel-gallery" aria-labelledby="designer-guide-tab-gallery">
                   <div className="designer-guide__intro">
@@ -1510,20 +1637,16 @@ const App: React.FC = () => {
                     <span>Explore finishes, settings and shapes while your own design stays exactly as you left it.</span>
                   </div>
                   <div className="designer-guide__gallery">
-                    {[
-                      ['/site-images/home-gallery-brass-bench.webp', 'Engraved polished brass memorial plaque fitted to a wooden park bench', 'Classic brass bench plaque', 'Bench'],
-                      ['/site-images/home-gallery-aged-brass-wood.webp', 'Aged brass memorial plaque mounted on a dark wooden backing board', 'Aged brass on wood', 'Memorial'],
-                      ['/site-images/home-gallery-oval-steel.webp', 'Oval stainless steel engraved wall plaque with a polished silver finish', 'Oval stainless steel', 'Custom'],
-                      ['/site-images/home-gallery-brass-community.webp', 'Large engraved brass community and commemorative wall plaque', 'Community plaque', 'Commemorative'],
-                      ['/site-images/home-carousel-garden-brass.webp', 'Small engraved brass plaque displayed outdoors in a garden setting', 'Garden brass plaque', 'Garden'],
-                      ['/site-images/home-carousel-steel-wall.webp', 'Brushed stainless steel engraved plaque fixed to an exterior wall', 'Steel wall plaque', 'House & wall'],
-                    ].map(([src, alt, title, type]) => (
-                      <figure key={src}>
-                        <div className="designer-guide__image-wrap">
-                          <img src={src} alt={alt} loading="lazy" decoding="async" />
-                          <span>{type}</span>
-                        </div>
-                        <figcaption>{title}</figcaption>
+                    {DESIGNER_GUIDE_GALLERY.map((item, index) => (
+                      <figure key={item.src}>
+                        <button type="button" onClick={() => setExpandedGuideImage(index)} aria-label={`Expand ${item.title}`}>
+                          <div className="designer-guide__image-wrap">
+                            <img src={item.src} alt={item.alt} loading="lazy" decoding="async" />
+                            <span>{item.type}</span>
+                            <b aria-hidden="true">↗</b>
+                          </div>
+                          <figcaption>{item.title}</figcaption>
+                        </button>
                       </figure>
                     ))}
                   </div>
@@ -1572,10 +1695,6 @@ const App: React.FC = () => {
                     <summary>Delivery and turnaround</summary>
                     <p>UK mainland delivery is free. Standard orders are usually estimated at five working days after payment and proof approval. Some custom options take longer.</p>
                   </details>
-                </section>
-              )}
-              {designerGuideTab === 'faq' && (
-                <section className="designer-guide__panel designer-guide__panel--faq" role="tabpanel" id="designer-guide-panel-faq" aria-labelledby="designer-guide-tab-faq">
                   <div className="designer-guide__intro">
                     <p>Good to know</p>
                     <h3>Frequently asked questions</h3>
@@ -1605,8 +1724,39 @@ const App: React.FC = () => {
                 </section>
               )}
             </div>
+            {expandedGuideImage !== null && (
+              <section className="designer-gallery-viewer" role="dialog" aria-modal="true" aria-labelledby="designer-gallery-viewer-title">
+                <header className="designer-gallery-viewer__toolbar">
+                  <button type="button" onClick={() => setExpandedGuideImage(null)} aria-label="Return to gallery">← <span>Gallery</span></button>
+                  <div>
+                    <strong id="designer-gallery-viewer-title">{DESIGNER_GUIDE_GALLERY[expandedGuideImage].title}</strong>
+                    <span>{expandedGuideImage + 1} / {DESIGNER_GUIDE_GALLERY.length}</span>
+                  </div>
+                  <button type="button" onClick={() => setExpandedGuideImage(null)} aria-label="Close expanded image">×</button>
+                </header>
+                <div className="designer-gallery-viewer__stage">
+                  <button
+                    type="button"
+                    className="designer-gallery-viewer__previous"
+                    onClick={() => setExpandedGuideImage((expandedGuideImage - 1 + DESIGNER_GUIDE_GALLERY.length) % DESIGNER_GUIDE_GALLERY.length)}
+                    aria-label="Previous gallery image"
+                  >‹</button>
+                  <img src={DESIGNER_GUIDE_GALLERY[expandedGuideImage].src} alt={DESIGNER_GUIDE_GALLERY[expandedGuideImage].alt} />
+                  <button
+                    type="button"
+                    className="designer-gallery-viewer__next"
+                    onClick={() => setExpandedGuideImage((expandedGuideImage + 1) % DESIGNER_GUIDE_GALLERY.length)}
+                    aria-label="Next gallery image"
+                  >›</button>
+                </div>
+                <footer>
+                  <span>{DESIGNER_GUIDE_GALLERY[expandedGuideImage].type}</span>
+                  <div><strong>{DESIGNER_GUIDE_GALLERY[expandedGuideImage].title}</strong><p>{DESIGNER_GUIDE_GALLERY[expandedGuideImage].note}</p></div>
+                </footer>
+              </section>
+            )}
           </aside>
-          {designerGuideOpen && <button type="button" className="designer-guide-backdrop no-print" aria-label="Close plaque guide" onClick={() => setDesignerGuideOpen(false)} />}
+          {designerGuideOpen && <button type="button" className="designer-guide-backdrop no-print" aria-label="Close plaque guide" onClick={() => { setExpandedGuideImage(null); setDesignerGuideOpen(false); }} />}
           </>
         )}
       </main>
