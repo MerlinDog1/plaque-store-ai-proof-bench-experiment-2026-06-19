@@ -1428,7 +1428,7 @@ const App: React.FC = () => {
                 {isProofExpanded ? (
                   <><span aria-hidden="true">←</span><strong>2D proof</strong></>
                 ) : (
-                  <span aria-hidden="true">⛶</span>
+                  <><span aria-hidden="true">◇</span><strong>3D view</strong></>
                 )}
               </button>
             </section>

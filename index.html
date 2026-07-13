@@ -1942,12 +1942,9 @@
       }
 
       .proofbench-stage.is-expanded {
-        position: fixed;
-        inset: 0;
-        z-index: 90;
-        background:
-          radial-gradient(circle at 50% 18%, rgba(219, 189, 121, 0.18), transparent 38%),
-          linear-gradient(180deg, #f7f3e8, #e8dfcf);
+        position: relative;
+        inset: auto;
+        z-index: auto;
       }
 
       .proofbench-mobile-top {
@@ -1982,7 +1979,7 @@
       }
 
       .proofbench-stage.is-expanded .proofbench-proof-pad {
-        inset: 66px 10px 10px;
+        inset: 66px 14px 20px;
       }
 
       .proofbench-proof-pad .proof-preview-scale {
@@ -1992,18 +1989,35 @@
       .proofbench-expand-button {
         right: 14px;
         bottom: 14px;
-        width: 36px;
+        display: inline-flex;
+        width: auto;
+        min-width: 92px;
         height: 36px;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border-color: rgba(245, 210, 123, 0.3);
+        border-radius: 999px;
+        background: rgba(12, 22, 19, 0.88);
+        color: #fffaf0;
+        padding: 0 12px;
+        font-size: 11px;
+        font-weight: 900;
+        backdrop-filter: blur(10px);
+      }
+
+      .proofbench-expand-button strong {
+        display: inline;
       }
 
       .proofbench-stage.is-expanded .proofbench-expand-button {
-        top: 76px;
-        right: 16px;
-        bottom: auto;
+        top: auto;
+        right: 14px;
+        bottom: 14px;
         width: auto;
-        min-width: 104px;
-        height: 42px;
-        font-size: 12px;
+        min-width: 96px;
+        height: 36px;
+        font-size: 11px;
       }
 
       .proofbench-customiser {
