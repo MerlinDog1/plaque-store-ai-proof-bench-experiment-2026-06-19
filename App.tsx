@@ -281,7 +281,14 @@ const App: React.FC = () => {
   const [designerGuideOpen, setDesignerGuideOpen] = useState(false);
   const [designerGuideTab, setDesignerGuideTab] = useState<'how' | 'gallery' | 'guide'>('how');
   const [expandedGuideImage, setExpandedGuideImage] = useState<number | null>(null);
-  const [showDesignerIntro, setShowDesignerIntro] = useState(true);
+  const [showDesignerIntro, setShowDesignerIntro] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      return localStorage.getItem('instaplaque-designer-intro-seen') !== '1';
+    } catch {
+      return true;
+    }
+  });
 
   const [state, setState] = useState<PlaqueState>(PROOF_BENCH_INITIAL_STATE);
   const [inscriptionPrompt, setInscriptionPrompt] = useState('');
@@ -1243,7 +1250,14 @@ const App: React.FC = () => {
   const showProofPrice = currentView === 'plaque' && hasSelectedSize;
   const showHeaderPrice = currentView === 'plaque' && hasSelectedSize;
   const proofSpecTrail = getPlaqueSummaryTitle(state);
-  const dismissDesignerIntro = () => setShowDesignerIntro(false);
+  const dismissDesignerIntro = () => {
+    setShowDesignerIntro(false);
+    try {
+      localStorage.setItem('instaplaque-designer-intro-seen', '1');
+    } catch {
+      // The guide can still be dismissed when storage is unavailable.
+    }
+  };
 
   return (
     <div className={`studio-app-shell proofbench-app flex flex-col bg-transparent text-[#eef4ee] ${currentView !== 'plaque' ? 'commerce-mode' : ''}`}>

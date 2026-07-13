@@ -22,7 +22,7 @@ window.requestAnimationFrame(() => {
   window.requestAnimationFrame(() => {
     const loader = document.getElementById('instaplaque-loader');
     if (!loader) return;
-    if (window.location.pathname !== '/') {
+    if (window.location.pathname !== '/' && window.location.pathname !== '/design') {
       loader.remove();
       return;
     }
