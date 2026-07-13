@@ -1652,29 +1652,9 @@ const App: React.FC = () => {
                   <div className="designer-guide__intro">
                     <p>Choose with confidence</p>
                     <h3>A quick plaque buying guide</h3>
-                    <span>The essentials on size, finish, proofing and delivery.</span>
+                    <span>Compare the finishes, then find practical answers below.</span>
                   </div>
                   <HomeMaterialPanels compact />
-                  <details open>
-                    <summary>Sizes and starting prices</summary>
-                    <dl>
-                      <div><dt>Bench · 150 × 50 mm</dt><dd>from £58.50</dd></div>
-                      <div><dt>A5 · 210 × 148 mm</dt><dd>from £95.50</dd></div>
-                      <div><dt>A4 · 297 × 210 mm</dt><dd>from £145</dd></div>
-                    </dl>
-                  </details>
-                  <details>
-                    <summary>Which size should I choose?</summary>
-                    <p>Bench plaques suit shorter wording. A5 is a useful starting size for gardens and walls; choose A4 when the wording needs more room or greater visibility.</p>
-                  </details>
-                  <details>
-                    <summary>How the free proof works</summary>
-                    <p>Build the plaque, add your wording and generate the layout. Check the spelling, spacing, material, fixings and exact price before checkout.</p>
-                  </details>
-                  <details>
-                    <summary>Delivery and turnaround</summary>
-                    <p>UK mainland delivery is free. Standard orders are usually estimated at five working days after payment and proof approval. Some custom options take longer.</p>
-                  </details>
                   <div className="designer-guide__intro">
                     <p>Good to know</p>
                     <h3>Frequently asked questions</h3>
