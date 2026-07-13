@@ -2290,6 +2290,45 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    @media (min-width: 768px) {
+      .instaplaque-loader__inner {
+        width: min(760px, calc(100vw - 96px));
+      }
+
+      .instaplaque-loader__brand {
+        margin-bottom: 34px;
+        font-size: 32px;
+      }
+
+      .instaplaque-loader__plaque {
+        width: min(620px, 62vw);
+        border-radius: 10px;
+        box-shadow: 0 32px 86px rgba(0, 0, 0, 0.48);
+      }
+
+      .instaplaque-loader__plaque::before {
+        inset: 14px;
+        border-width: 2px;
+      }
+
+      .instaplaque-loader__message {
+        gap: 11px;
+        font-size: 28px;
+        letter-spacing: 0.085em;
+      }
+
+      .instaplaque-loader__message span:nth-child(2) {
+        font-size: 20px;
+      }
+
+      .instaplaque-loader__trust {
+        min-height: 62px;
+        gap: 10px;
+        margin-top: 30px;
+        font-size: 13px;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .instaplaque-loader__plaque,
       .instaplaque-loader__plaque::before,

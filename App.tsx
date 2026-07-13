@@ -1316,12 +1316,28 @@ const App: React.FC = () => {
                   onExportPdf={handleExportPdf}
                   onPrint={handleNativePrint}
                 />
-                <div className="proofbench-designer-trust no-print">
+                <div className="proofbench-designer-footer proofbench-designer-footer--mobile no-print">
+                  <div className="proofbench-designer-trust">
+                    <span>Secure checkout powered by Stripe</span>
+                    <i />
+                    <span>Free UK mainland delivery</span>
+                  </div>
+                  <nav className="proofbench-designer-legal" aria-label="Legal and support">
+                    <a href="/terms">Terms</a>
+                    <a href="/privacy">Privacy</a>
+                    <a href="/cookies">Cookies</a>
+                    <a href="/returns-cancellations">Returns</a>
+                    <a href="/contact">Contact</a>
+                  </nav>
+                </div>
+              </div>
+              <div className="proofbench-designer-footer proofbench-designer-footer--desktop no-print">
+                <div className="proofbench-designer-trust">
                   <span>Secure checkout powered by Stripe</span>
                   <i />
                   <span>Free UK mainland delivery</span>
                 </div>
-                <nav className="proofbench-designer-legal no-print" aria-label="Legal and support">
+                <nav className="proofbench-designer-legal" aria-label="Legal and support">
                   <a href="/terms">Terms</a>
                   <a href="/privacy">Privacy</a>
                   <a href="/cookies">Cookies</a>
@@ -1444,7 +1460,7 @@ const App: React.FC = () => {
             aria-expanded={designerGuideOpen}
             aria-controls="designer-guide"
           >
-            <span>?</span> Plaque guide
+            <span>?</span><strong>Plaque guide</strong>
           </button>
 
           <aside
