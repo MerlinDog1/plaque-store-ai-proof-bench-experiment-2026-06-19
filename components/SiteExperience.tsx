@@ -1139,7 +1139,7 @@ function SiteHero({ onStartDesign, onNavigate }: Pick<SiteProps, 'onStartDesign'
           Choose the plaque, proof the wording before payment, and see standard prices with UK mainland delivery included.
         </p>
         <div className="commerce-actions">
-          <button type="button" className="commerce-primary" onClick={onStartDesign}>
+          <button type="button" className="commerce-primary" onClick={() => onStartDesign()}>
             Start a free proof
           </button>
           <a className="commerce-secondary" href="#products">Compare plaque sizes</a>
@@ -1201,7 +1201,7 @@ function ProductGrid({ onStartDesign, onNavigate }: Pick<SiteProps, 'onStartDesi
               >
                 View details
               </a>
-              <button type="button" className="commerce-link-button" onClick={onStartDesign}>Start proof</button>
+              <button type="button" className="commerce-link-button" onClick={() => onStartDesign()}>Start proof</button>
             </div>
           </article>
         ))}
@@ -1226,7 +1226,7 @@ function TrustBeforeCheckout({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>
           </article>
         ))}
       </div>
-      <button type="button" className="commerce-primary" onClick={onStartDesign}>Start a free proof</button>
+      <button type="button" className="commerce-primary" onClick={() => onStartDesign()}>Start a free proof</button>
     </section>
   );
 }
@@ -1280,7 +1280,7 @@ function BuyingEvidenceStrip({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>
           </article>
         ))}
       </div>
-      <button type="button" className="commerce-primary" onClick={onStartDesign}>Build a plaque proof</button>
+      <button type="button" className="commerce-primary" onClick={() => onStartDesign()}>Build a plaque proof</button>
     </section>
   );
 }
@@ -1477,7 +1477,7 @@ function ShopProcessStrip({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
           </div>
         ))}
       </div>
-      <button type="button" className="commerce-primary" onClick={onStartDesign}>Start your proof</button>
+      <button type="button" className="commerce-primary" onClick={() => onStartDesign()}>Start your proof</button>
     </section>
   );
 }
@@ -1537,7 +1537,7 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
         <p>
           Standard prices include engraving, standard fixings and UK mainland delivery. Extras show before checkout.
         </p>
-        <button type="button" className="commerce-primary" onClick={onStartDesign}>
+          <button type="button" className="commerce-primary" onClick={() => onStartDesign()}>
           Start your free proof
         </button>
         <small>Your InstaPlaque proof is 100% free. Need time to decide? Download the PDF proof and use the link inside to continue or checkout later. No account needed.</small>
@@ -1654,7 +1654,7 @@ function ProductPage({ selectedProduct, onStartDesign, onNavigate }: Pick<SitePr
           <h1>{selectedProduct.title}</h1>
           <p className="commerce-lede">{selectedProduct.seoIntro || selectedProduct.description}</p>
           <div className="commerce-actions">
-            <button type="button" className="commerce-primary" onClick={onStartDesign}>
+          <button type="button" className="commerce-primary" onClick={() => onStartDesign()}>
               Start your proof
             </button>
             <a className="commerce-secondary" href="#products">Compare sizes</a>
@@ -1779,7 +1779,7 @@ function LandingShopPanel({
               </div>
             ))}
           </div>
-          <button type="button" className="commerce-primary" onClick={onStartDesign}>
+          <button type="button" className="commerce-primary" onClick={() => onStartDesign()}>
             Start free proof
           </button>
         </aside>
@@ -1803,7 +1803,7 @@ function LandingPage({
           <h1>{selectedLanding.title}</h1>
           <p className="commerce-lede">{selectedLanding.heroCopy}</p>
           <div className="commerce-actions">
-            <button type="button" className="commerce-primary" onClick={onStartDesign}>
+          <button type="button" className="commerce-primary" onClick={() => onStartDesign()}>
               {selectedLanding.proofCta}
             </button>
             <a
@@ -1988,7 +1988,7 @@ function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
               : 'Customers should not hit a dead-end when a plaque is unusual. They can still create a proof, then the system flags custom sizes, ovals, circles or longer-turnaround work for manual confirmation.'}
           </p>
           <div className="commerce-actions">
-            <button type="button" className="commerce-primary" onClick={onStartDesign}>
+          <button type="button" className="commerce-primary" onClick={() => onStartDesign()}>
               Start bespoke proof
             </button>
           </div>

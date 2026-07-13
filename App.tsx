@@ -1425,7 +1425,11 @@ const App: React.FC = () => {
                 aria-label={isProofExpanded ? 'Close expanded 3D proof' : 'Expand proof into 3D preview'}
                 aria-pressed={isProofExpanded}
               >
-                {isProofExpanded ? '×' : '⛶'}
+                {isProofExpanded ? (
+                  <><span aria-hidden="true">←</span><strong>2D proof</strong></>
+                ) : (
+                  <span aria-hidden="true">⛶</span>
+                )}
               </button>
             </section>
 

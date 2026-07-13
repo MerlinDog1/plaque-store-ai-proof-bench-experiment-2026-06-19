@@ -691,6 +691,7 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
 
     const group = new THREE.Group();
     scene.add(group);
+    const benchFormat = isBenchPlaqueFormat(state.width, state.height, state.shape);
     const threeHost = host as ThreeHost;
     threeHost.__scene = scene;
     threeHost.__plaqueGroup = group;
@@ -717,8 +718,8 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
     let frame = 0;
     const animate = () => {
       frame = requestAnimationFrame(animate);
-      group.rotation.x = THREE.MathUtils.lerp(group.rotation.x, -0.18, 0.04);
-      group.rotation.z = THREE.MathUtils.lerp(group.rotation.z, 0.015, 0.04);
+      group.rotation.x = THREE.MathUtils.lerp(group.rotation.x, benchFormat ? -0.075 : -0.18, 0.04);
+      group.rotation.z = THREE.MathUtils.lerp(group.rotation.z, benchFormat ? 0.004 : 0.015, 0.04);
       controls.update();
       renderer.render(scene, camera);
     };
@@ -776,6 +777,7 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
 
     const tone = materialTone[state.material];
     const curveSegments = getExtrusionCurveSegments(state.shape);
+    const benchFormat = isBenchPlaqueFormat(state.width, state.height, state.shape);
 
     const sideMaterial = new THREE.MeshStandardMaterial({
       color: tone.side,
@@ -788,9 +790,9 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
       metalShape,
       dims.metalDepth,
       sideMaterial,
-      Math.max(0.004, dims.unitPerMm * 0.45),
-      Math.max(0.003, dims.unitPerMm * 0.35),
-      true,
+      benchFormat ? 0 : Math.max(0.004, dims.unitPerMm * 0.45),
+      benchFormat ? 0 : Math.max(0.003, dims.unitPerMm * 0.35),
+      !benchFormat,
       curveSegments,
     );
     metalBody.position.z = dims.metalDepth / 2;
@@ -940,6 +942,7 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
       host.dataset.faceTextureCache = texture.userData.cacheHit ? 'hit' : 'miss';
       host.dataset.fontsOutlined = texture.userData.fontsOutlined ? 'true' : 'false';
       host.dataset.metalThicknessMm = String(METAL_THICKNESS_MM);
+      host.dataset.metalEdge = benchFormat ? 'square' : 'micro-bevel';
       host.dataset.woodThicknessMm = state.wood ? String(WOOD_BACKING_THICKNESS_MM) : '0';
       host.dataset.woodOverhangMm = state.wood ? String(WOOD_BACKING_OVERHANG_MM) : '0';
       host.dataset.woodEdge = state.wood ? state.woodEdge : 'none';
