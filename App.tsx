@@ -1183,8 +1183,8 @@ const App: React.FC = () => {
             },
             proofPackage: {
               ...order.proofPackage,
-              productionSvg: null,
-              visualProofSvg: null,
+              productionSvg: order.proofPackage.productionSvg,
+              visualProofSvg: order.proofPackage.visualProofSvg,
               visualProofPng: null,
             },
           },
@@ -1211,8 +1211,8 @@ const App: React.FC = () => {
           state: order.state,
           proofPackage: {
             ...(serverOrder?.proofPackage || {}),
-            productionSvg: null,
-            visualProofSvg: null,
+            productionSvg: serverOrder?.proofPackage?.productionSvg || order.proofPackage.productionSvg,
+            visualProofSvg: serverOrder?.proofPackage?.visualProofSvg || order.proofPackage.visualProofSvg,
             visualProofPng: null,
             productionFilename: `${serverOrderId}-production-proof.svg`,
             visualFilename: `${serverOrderId}-visual-proof.svg`,

@@ -367,6 +367,19 @@ const downloadOrderProofPng = async (order: PaidOrder) => {
   URL.revokeObjectURL(url);
 };
 
+const downloadOrderApprovedProof = async (order: PaidOrder) => {
+  if (order.proofPackage?.visualProofPng) {
+    await downloadOrderProofPng(order);
+    return;
+  }
+  const storedSvg = storedProofSvgForOrder(order);
+  if (!storedSvg) {
+    throw new Error('The approved proof is not available for download.');
+  }
+  const filename = (order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`).replace(/\.[^.]+$/, '.svg');
+  downloadSvgFile(filename, storedSvg, order.plaqueState);
+};
+
 type AdminDetailBoundaryProps = {
   resetKey: string;
   children: React.ReactNode;
@@ -2474,9 +2487,9 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
           <button
             type="button"
             className="commerce-secondary"
-            onClick={() => downloadOrderProofPng(order).catch((downloadError) => {
-              console.error('Proof PNG download failed.', downloadError);
-              window.alert('The approved proof image is still being prepared. Please try again in a few seconds.');
+            onClick={() => downloadOrderApprovedProof(order).catch((downloadError) => {
+              console.error('Approved proof download failed.', downloadError);
+              window.alert('The approved proof is not available for download yet.');
             })}
           >
             <DownloadIcon />
@@ -2911,9 +2924,9 @@ function AdminPage() {
                       <button
                         type="button"
                         disabled={!selectedOrder}
-                        onClick={() => downloadOrderProofPng(selectedOrder).catch((downloadError) => {
-                          console.error('Approved proof PNG download failed.', downloadError);
-                          window.alert('The approved proof image is not available yet. Please try again in a few seconds.');
+                        onClick={() => downloadOrderApprovedProof(selectedOrder).catch((downloadError) => {
+                          console.error('Approved proof download failed.', downloadError);
+                          window.alert('The approved proof is not available for download yet.');
                         })}
                       >
                         <DownloadIcon />
@@ -3032,9 +3045,9 @@ function AdminPage() {
                 <button
                   type="button"
                   disabled={!selectedOrder}
-                  onClick={() => downloadOrderProofPng(selectedOrder).catch((downloadError) => {
-                    console.error('Approved proof PNG download failed.', downloadError);
-                    window.alert('The approved proof image is not available yet. Please try again in a few seconds.');
+                  onClick={() => downloadOrderApprovedProof(selectedOrder).catch((downloadError) => {
+                    console.error('Approved proof download failed.', downloadError);
+                    window.alert('The approved proof is not available for download yet.');
                   })}
                 >
                   <DownloadIcon />

@@ -45,7 +45,20 @@ export const createCheckoutRecoveryToken = () => randomBytes(32).toString("base6
 
 export const resolveCheckoutOrigin = (requestedOrigin = "", env = process.env) => {
   const configuredOrigin = String(env.PUBLIC_SITE_URL || "").trim();
-  const candidate = configuredOrigin || String(requestedOrigin || "").trim() || CANONICAL_SITE_URL;
+  const requested = String(requestedOrigin || "").trim();
+  const requestedIsVercelPreview = (() => {
+    if (!requested) return false;
+    try {
+      const requestedUrl = new URL(requested);
+      return requestedUrl.protocol === "https:"
+        && /^instaplaque(?:-[^.]+)?\.vercel\.app$/i.test(requestedUrl.hostname);
+    } catch {
+      return false;
+    }
+  })();
+  const candidate = requestedIsVercelPreview
+    ? requested
+    : configuredOrigin || requested || CANONICAL_SITE_URL;
   let url;
   try {
     url = new URL(candidate);
@@ -66,7 +79,6 @@ export const resolveCheckoutOrigin = (requestedOrigin = "", env = process.env) =
   if (!isAllowedLocal && !isCanonical && !isVercelPreview && !isTrustedConfiguredOrigin) {
     throw new CheckoutRequestError("Unsupported checkout origin.");
   }
-  if (isVercelPreview) return CANONICAL_SITE_URL;
   return url.origin;
 };
 

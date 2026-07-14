@@ -191,6 +191,14 @@ assert.equal(
   resolveCheckoutOrigin("http://localhost:4179", { ALLOW_LOCAL_CHECKOUT_ORIGIN: "true" }),
   "http://localhost:4179",
 );
+assert.equal(
+  resolveCheckoutOrigin("https://instaplaque-previewfix.vercel.app", {
+    PUBLIC_SITE_URL: "https://instaplaque.co.uk",
+    VERCEL: "1",
+  }),
+  "https://instaplaque-previewfix.vercel.app",
+  "Preview checkout must return to the deployment that created the order.",
+);
 assert.throws(
   () => resolveCheckoutOrigin("http://localhost:4179", {
     ALLOW_LOCAL_CHECKOUT_ORIGIN: "true",
