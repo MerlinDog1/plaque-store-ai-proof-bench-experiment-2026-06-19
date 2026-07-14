@@ -65,6 +65,7 @@ const {
   createExternalOrder,
   createPendingOrder,
   getOrderById,
+  isLocalOrderJsonStoreEnabled,
   isPaidCompleteStripeSession,
   listOrders,
   markOrderPaidFromSession,
@@ -808,7 +809,10 @@ export const handleRequest = async (req, res) => {
 export default handleRequest;
 
 const reviewFollowUpIntervalMs = Number(process.env.REVIEW_FOLLOWUP_CHECK_INTERVAL_MS || 6 * 60 * 60 * 1000);
+const canRunReviewFollowUpSweep = () => getSupabaseConfig().configured || isLocalOrderJsonStoreEnabled(process.env);
 const runReviewFollowUpSweep = () => {
+  if (!canRunReviewFollowUpSweep()) return;
+
   processReviewFollowUps()
     .then((result) => {
       if (result.sent) console.log(`Review follow-up emails sent: ${result.sent}`);
