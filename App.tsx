@@ -327,13 +327,6 @@ const App: React.FC = () => {
     document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute('content', 'Use the InstaPlaque online plaque designer to create a free proof for a custom brass, stainless steel, bench or memorial plaque before checkout.');
     document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.setAttribute('content', 'index,follow');
     document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute('href', 'https://instaplaque.co.uk/design');
-    if (!document.getElementById('instaplaque-designer-fonts')) {
-      const link = document.createElement('link');
-      link.id = 'instaplaque-designer-fonts';
-      link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alex+Brush&family=Allura&family=Bebas+Neue&family=Bitter:wght@400;700&family=Caveat:wght@400;700&family=Cinzel:wght@400;700;900&family=Dancing+Script:wght@400;700&family=EB+Garamond:wght@400;600;700&family=Great+Vibes&family=Lato:wght@300;400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Open+Sans:wght@300;400;600;700&family=Oswald:wght@400;600;700&family=Pacifico&family=Pinyon+Script&family=Raleway:wght@300;400;500;700&family=Roboto+Slab:wght@300;500;700&family=Satisfy&display=swap';
-      document.head.appendChild(link);
-    }
   }, [currentView]);
 
   const svgRef = useRef<SVGSVGElement>(null);

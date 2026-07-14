@@ -367,9 +367,21 @@ const downloadOrderProofPng = async (order: PaidOrder) => {
   URL.revokeObjectURL(url);
 };
 
-const downloadOrderApprovedProof = async (order: PaidOrder) => {
+const downloadOrderApprovedProof = async (order: PaidOrder, sourceSvg?: SVGSVGElement | null) => {
   if (order.proofPackage?.visualProofPng) {
     await downloadOrderProofPng(order);
+    return;
+  }
+  if (sourceSvg) {
+    await document.fonts?.ready;
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    const proofImageBase64 = await svgToProofPngBase64(sourceSvg);
+    const anchor = document.createElement('a');
+    anchor.href = `data:image/png;base64,${proofImageBase64}`;
+    anchor.download = (order.proofPackage?.visualFilename || `${order.id}-approved-proof.svg`).replace(/\.[^.]+$/, '.png');
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
     return;
   }
   const storedSvg = storedProofSvgForOrder(order);
@@ -2487,7 +2499,10 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
           <button
             type="button"
             className="commerce-secondary"
-            onClick={() => downloadOrderApprovedProof(order).catch((downloadError) => {
+            onClick={() => downloadOrderApprovedProof(
+              order,
+              storedProofSvgRef.current || proofRenderSvgRef.current,
+            ).catch((downloadError) => {
               console.error('Approved proof download failed.', downloadError);
               window.alert('The approved proof is not available for download yet.');
             })}
@@ -2924,7 +2939,10 @@ function AdminPage() {
                       <button
                         type="button"
                         disabled={!selectedOrder}
-                        onClick={() => downloadOrderApprovedProof(selectedOrder).catch((downloadError) => {
+                        onClick={() => downloadOrderApprovedProof(
+                          selectedOrder,
+                          adminStoredProofSvgRef.current || adminProofSvgRef.current,
+                        ).catch((downloadError) => {
                           console.error('Approved proof download failed.', downloadError);
                           window.alert('The approved proof is not available for download yet.');
                         })}
@@ -3045,7 +3063,10 @@ function AdminPage() {
                 <button
                   type="button"
                   disabled={!selectedOrder}
-                  onClick={() => downloadOrderApprovedProof(selectedOrder).catch((downloadError) => {
+                  onClick={() => downloadOrderApprovedProof(
+                    selectedOrder,
+                    adminStoredProofSvgRef.current || adminProofSvgRef.current,
+                  ).catch((downloadError) => {
                     console.error('Approved proof download failed.', downloadError);
                     window.alert('The approved proof is not available for download yet.');
                   })}

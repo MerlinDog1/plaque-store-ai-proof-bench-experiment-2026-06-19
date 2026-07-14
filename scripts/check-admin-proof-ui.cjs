@@ -79,15 +79,15 @@ const order = {
   const approvedProofDownloadPromise = page.waitForEvent('download', { timeout: 15000 });
   await page.getByRole('button', { name: /Download approved proof/i }).click();
   const approvedProofDownload = await approvedProofDownloadPromise;
-  if (!approvedProofDownload.suggestedFilename().endsWith('.svg')) {
-    throw new Error(`Stored approved proof was not exported as SVG: ${approvedProofDownload.suggestedFilename()}`);
+  if (!approvedProofDownload.suggestedFilename().endsWith('.png')) {
+    throw new Error(`Stored approved proof was not exported as PNG: ${approvedProofDownload.suggestedFilename()}`);
   }
 
   console.log(JSON.stringify({
     exactCustomerProofPreview: 'passed',
     exactCustomerProofExportSource: 'passed',
     productionPdf: download.suggestedFilename(),
-    approvedProofSvg: approvedProofDownload.suggestedFilename(),
+    approvedProofPng: approvedProofDownload.suggestedFilename(),
   }));
   await browser.close();
 })().catch((error) => {

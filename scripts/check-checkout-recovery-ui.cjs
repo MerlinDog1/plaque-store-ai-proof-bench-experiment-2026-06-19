@@ -4,6 +4,7 @@ const appUrl = process.env.APP_URL || 'http://127.0.0.1:4178';
 const orderId = process.env.ORDER_ID;
 const proofToken = process.env.PROOF_TOKEN;
 const expectedProofText = process.env.EXPECTED_PROOF_TEXT || 'TRANSACTION TEST';
+const expectedPrice = process.env.EXPECTED_PRICE || '£58.50';
 
 if (!orderId || !proofToken) {
   throw new Error('ORDER_ID and PROOF_TOKEN are required.');
@@ -31,16 +32,22 @@ if (!orderId || !proofToken) {
   if (!proofText.includes(expectedProofText)) {
     throw new Error(`Stored approved SVG was not rendered after cross-device recovery: ${proofText}`);
   }
+  await page.evaluate(() => document.fonts.ready);
+  const engravingFontLoaded = await page.evaluate(() => document.fonts.check('16px "EB Garamond"'));
+  if (!engravingFontLoaded) {
+    throw new Error('Recovered checkout did not load the engraving font used by the approved SVG.');
+  }
   if (await page.getByText('Finish your proof before checkout.').count()) {
     throw new Error('Recovered checkout was incorrectly treated as an unfinished proof.');
   }
-  await page.getByText('£58.50').first().waitFor();
+  await page.getByText(expectedPrice).first().waitFor();
 
   console.log(JSON.stringify({
     loadingGuard: 'passed',
     storedApprovedSvg: 'passed',
+    engravingFont: 'EB Garamond',
     recoveredCheckoutAction: 'passed',
-    canonicalPrice: '£58.50',
+    canonicalPrice: expectedPrice,
   }));
   await browser.close();
 })().catch((error) => {
