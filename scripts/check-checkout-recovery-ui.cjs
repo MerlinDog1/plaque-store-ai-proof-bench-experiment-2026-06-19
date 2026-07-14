@@ -3,6 +3,7 @@ const { chromium } = require('playwright');
 const appUrl = process.env.APP_URL || 'http://127.0.0.1:4178';
 const orderId = process.env.ORDER_ID;
 const proofToken = process.env.PROOF_TOKEN;
+const expectedProofText = process.env.EXPECTED_PROOF_TEXT || 'TRANSACTION TEST';
 
 if (!orderId || !proofToken) {
   throw new Error('ORDER_ID and PROOF_TOKEN are required.');
@@ -27,7 +28,7 @@ if (!orderId || !proofToken) {
 
   await page.getByRole('button', { name: 'Continue to secure Stripe checkout' }).waitFor({ timeout: 15000 });
   const proofText = (await page.locator('.commerce-checkout-preview svg').allTextContents()).join(' ');
-  if (!proofText.includes('TRANSACTION TEST')) {
+  if (!proofText.includes(expectedProofText)) {
     throw new Error(`Stored approved SVG was not rendered after cross-device recovery: ${proofText}`);
   }
   if (await page.getByText('Finish your proof before checkout.').count()) {
