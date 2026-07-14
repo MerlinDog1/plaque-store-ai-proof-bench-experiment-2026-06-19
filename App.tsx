@@ -532,9 +532,17 @@ const App: React.FC = () => {
           // The protected server snapshot remains available when local recovery data is unavailable.
         }
 
+        const storedApprovedSvg = order.proofPackage?.visualProofSvg
+          || order.proofPackage?.productionSvg
+          || null;
         const restoredState: PlaqueState = {
           ...PROOF_BENCH_INITIAL_STATE,
           ...(locallySavedOrder?.state || order.plaqueState || order.state || {}),
+          generatedSvgContent: locallySavedOrder?.state?.generatedSvgContent
+            || storedApprovedSvg
+            || order.plaqueState?.generatedSvgContent
+            || order.state?.generatedSvgContent
+            || null,
         };
         const restoredWording = order.inscription || '';
         setState(restoredState);
