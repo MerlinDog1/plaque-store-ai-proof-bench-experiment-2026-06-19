@@ -900,7 +900,11 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       );
 
       if (options.continueUrl) {
-        const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 260, errorCorrectionLevel: "M" });
+        const qrDataUrl = await QRCode.toDataURL(options.continueUrl, {
+          margin: 1,
+          width: 260,
+          errorCorrectionLevel: options.continueUrl.length > 1_900 ? "L" : "M",
+        });
         doc.addImage(qrDataUrl, "PNG", panelX + panelW - 35, panelY + 108, 28, 28);
         doc.setFillColor(237, 190, 82);
         doc.roundedRect(panelX + 7, panelY + 126, 54, 11, 5.5, 5.5, "F");
@@ -1011,7 +1015,11 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
     );
 
     if (options.continueUrl) {
-      const qrDataUrl = await QRCode.toDataURL(options.continueUrl, { margin: 1, width: 260, errorCorrectionLevel: "M" });
+      const qrDataUrl = await QRCode.toDataURL(options.continueUrl, {
+        margin: 1,
+        width: 260,
+        errorCorrectionLevel: options.continueUrl.length > 1_900 ? "L" : "M",
+      });
       doc.addImage(qrDataUrl, "PNG", panelX + 7, 169, 19, 19);
       doc.setFillColor(237, 190, 82);
       doc.roundedRect(panelX + 30, 173, 26, 9.5, 4.75, 4.75, "F");

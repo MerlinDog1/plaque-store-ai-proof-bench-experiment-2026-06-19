@@ -12,6 +12,11 @@ import { estimatePlaquePrice } from './services/pricing';
 import { DEFAULT_PRODUCT_SLUG, DeliveryAddress, MockOrder, ProductFamily, SiteView, getLandingPageBySlug, getPlaqueSummaryTitle, getProductBySlug, makeMockOrder, productFamilies, seoLandingPages } from './services/commerce';
 import { isBenchPlaqueFormat } from './services/plaqueRules';
 import { BENCH_SAFE_MARGIN_PERCENT } from './services/safeMargin';
+import {
+  createInlineProofResumeUrl,
+  decodeInlineProofResumeToken,
+  getInlineProofResumeToken,
+} from './services/proofResume';
 
 const ThreePlaquePreview = lazy(async () => {
   const module = await import('./components/ThreePlaquePreview');
@@ -185,6 +190,8 @@ const getProofFrame = (proofState: Pick<PlaqueState, 'width' | 'height'>): Gener
 
 const sanitizeProofStateForRemoteSave = (proofState: PlaqueState): PlaqueState => ({
   ...proofState,
+  generatedSvgContent: null,
+  aiReasoning: null,
   conceptImageUrl: null,
   memorialImageSourceUrl: null,
   memorialImagePreviewUrl: null,
@@ -336,17 +343,32 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get('proof');
+    const inlineToken = getInlineProofResumeToken();
     const orderId = new URLSearchParams(window.location.search).get('order');
     if (window.location.pathname === '/checkout' && orderId) return;
-    if (!token) return;
+    if (!token && !inlineToken) return;
 
     let cancelled = false;
     const loadProofSession = async () => {
       try {
-        const response = await fetch(`/api/proof-sessions/${encodeURIComponent(token)}`);
-        if (!response.ok) throw new Error(`Could not load proof session (${response.status})`);
-        const payload = await response.json();
-        const proofSession = payload.proofSession;
+        let proofSession;
+        if (inlineToken) {
+          const inlineProof = await decodeInlineProofResumeToken(inlineToken);
+          proofSession = {
+            plaque_state: inlineProof.plaqueState,
+            wording: inlineProof.wording,
+            generated_svg: inlineProof.generatedSvg,
+            ai_reasoning: null,
+            metadata: {
+              inscriptionGuidance: inlineProof.inscriptionGuidance,
+            },
+          };
+        } else {
+          const response = await fetch(`/api/proof-sessions/${encodeURIComponent(token || '')}`);
+          if (!response.ok) throw new Error(`Could not load proof session (${response.status})`);
+          const payload = await response.json();
+          proofSession = payload.proofSession;
+        }
         if (!proofSession || cancelled) return;
 
         const restoredState: PlaqueState = {
@@ -878,7 +900,25 @@ const App: React.FC = () => {
         continueUrl = `${window.location.origin}/design?proof=${encodeURIComponent(token)}`;
       }
     } catch (error) {
-      console.warn('PDF resume link was not added.', error);
+      console.warn('Remote PDF resume link could not be created; using a compact self-contained link.', error);
+    }
+    if (!continueUrl) {
+      try {
+        continueUrl = await createInlineProofResumeUrl({
+          plaqueState: sanitizeProofStateForRemoteSave(state),
+          wording: inscriptionPrompt,
+          generatedSvg: state.generatedSvgContent,
+          inscriptionGuidance,
+        });
+      } catch (error) {
+        console.error('PDF resume link could not be created.', error);
+        window.alert(
+          `The proof PDF was not downloaded because a working return link could not be created. ${
+            error instanceof Error ? error.message : 'Please try again.'
+          }`
+        );
+        return;
+      }
     }
     const proofImageBase64 = generatedImage || await svgToProofPngBase64(svgRef.current);
     await downloadPdf(svgRef.current, state, {
