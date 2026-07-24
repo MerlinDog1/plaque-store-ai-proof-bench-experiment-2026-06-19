@@ -35,7 +35,7 @@
   ],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/admin",
       "headers": [
         {
           "key": "Cache-Control",
@@ -49,6 +49,10 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.mjs"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

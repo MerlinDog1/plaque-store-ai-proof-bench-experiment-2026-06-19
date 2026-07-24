@@ -5,9 +5,16 @@ import App from './App';
 import './index.css';
 import { redactAnalyticsEvent } from './services/analyticsPrivacy.mjs';
 
-inject({
-  beforeSend: redactAnalyticsEvent,
-});
+const analyticsHosts = new Set([
+  'instaplaque.co.uk',
+  'www.instaplaque.co.uk',
+]);
+
+if (analyticsHosts.has(window.location.hostname) || window.location.hostname.endsWith('.vercel.app')) {
+  inject({
+    beforeSend: redactAnalyticsEvent,
+  });
+}
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
