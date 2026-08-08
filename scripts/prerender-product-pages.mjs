@@ -225,6 +225,19 @@ const landingPages = [
   },
 ];
 
+// Keep Google's index focused on the strongest, genuinely distinct buying
+// journeys. The retired variants permanently redirect to one of these pages.
+const indexableProductSlugs = new Set([
+  'memorial-plaques',
+  'bench-plaques',
+  'brass-plaques',
+  'stainless-steel-plaques',
+  'custom-plaques',
+]);
+const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques']);
+const indexablePages = pages.filter((page) => indexableProductSlugs.has(page.slug));
+const indexableLandingPages = landingPages.filter((page) => indexableLandingSlugs.has(page.slug));
+
 const faqSchema = (faqs) => ({
   '@type': 'FAQPage',
   mainEntity: faqs.map(([question, answer]) => ({
@@ -237,7 +250,7 @@ const faqSchema = (faqs) => ({
 const productListSchema = () => ({
   '@type': 'ItemList',
   name: 'Custom plaque formats',
-  itemListElement: pages.map((page, index) => ({
+  itemListElement: indexablePages.map((page, index) => ({
     '@type': 'ListItem',
     position: index + 1,
     item: {
@@ -347,6 +360,43 @@ const escapeAttr = (value) => value
   .replace(/</g, '&lt;')
   .replace(/>/g, '&gt;');
 
+const escapeHtml = escapeAttr;
+
+const primaryNav = [
+  ['Custom plaques', '/custom-plaques'],
+  ['Memorial plaques', '/memorial-plaques'],
+  ['Bench plaques', '/bench-plaques'],
+  ['Brass plaques', '/brass-plaques'],
+  ['Stainless steel plaques', '/stainless-steel-plaques'],
+  ['Garden plaques', '/garden-plaques'],
+  ['Opening plaques', '/opening-plaques'],
+  ['Plaque materials', '/materials'],
+  ['How it works', '/how-it-works'],
+  ['FAQs', '/faq'],
+  ['Contact', '/contact'],
+];
+
+const staticNav = () => `<nav aria-label="Primary navigation"><a href="/">InstaPlaque home</a>${primaryNav
+  .map(([label, href]) => `<a href="${href}">${escapeHtml(label)}</a>`)
+  .join('')}</nav>`;
+
+const staticFaqs = (faqs = []) => faqs.length
+  ? `<section aria-labelledby="prerender-faq-heading"><h2 id="prerender-faq-heading">Questions and answers</h2>${faqs
+      .map(([question, answer]) => `<article><h3>${escapeHtml(question)}</h3><p>${escapeHtml(answer)}</p></article>`)
+      .join('')}</section>`
+  : '';
+
+const staticPageMarkup = ({ title, heading, description, image, faqs = [], price = null, kind = 'page' }) => {
+  const visibleHeading = heading || title.split('|')[0].trim();
+  const details = kind === 'product'
+    ? `<section aria-labelledby="prerender-buy-heading"><h2 id="prerender-buy-heading">Design and order online</h2><p>Choose the plaque size, material, finish and fixings, then add your wording and check the exact proof before payment.${price ? ` Standard prices start from £${Number(price).toFixed(2).replace(/\.00$/, '')}.` : ''} Standard fixings and UK mainland delivery are included on eligible standard plaques.</p><p>Brass gives a warm, traditional finish. Stainless steel gives a clean, contemporary finish and is well suited to outdoor use.</p><a href="/design">Create your free plaque proof</a></section>`
+    : kind === 'home'
+      ? `<section aria-labelledby="prerender-shop-heading"><h2 id="prerender-shop-heading">Popular custom plaque formats</h2><ul>${indexablePages.map((page) => `<li><a href="/${page.slug}">${escapeHtml(page.productType)}</a> from £${page.price.toFixed(2).replace(/\.00$/, '')}</li>`).join('')}</ul><p>Choose brass or stainless steel, enter the wording and review a free online proof before checkout. Standard plaque prices include engraving, standard fixings and UK mainland delivery.</p><a href="/design">Start a free proof</a></section>`
+      : `<section aria-labelledby="prerender-process-heading"><h2 id="prerender-process-heading">Proof your plaque before payment</h2><p>Choose the format, add the wording and review the layout online. Standard prices are shown before checkout, with UK mainland delivery included on eligible standard plaques.</p><a href="/design">Create your free plaque proof</a></section>`;
+
+  return `<div class="seo-prerendered-page" data-prerendered="true"><header>${staticNav()}</header><main><article><h1>${escapeHtml(visibleHeading)}</h1><p>${escapeHtml(description)}</p>${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(visibleHeading)} example" />` : ''}${details}${staticFaqs(faqs)}</article></main><footer><nav aria-label="Legal"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/returns-and-cancellations">Returns and cancellations</a></nav></footer></div>`;
+};
+
 const replaceTag = (html, pattern, replacement) => html.replace(pattern, replacement);
 
 const distDir = path.resolve('dist');
@@ -357,8 +407,13 @@ const writePrerenderedPage = async ({
   slug,
   title,
   description,
+  image = '',
   schema = [],
   productSchema = null,
+  heading = '',
+  faqs = [],
+  price = null,
+  kind = 'page',
 }) => {
   const pathPart = slug ? `/${slug}` : '/';
   const url = `${siteBaseUrl}${pathPart}`;
@@ -366,6 +421,8 @@ const writePrerenderedPage = async ({
   html = replaceTag(html, /<title>.*?<\/title>/, `<title>${escapeAttr(title)}</title>`);
   html = replaceTag(html, /<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${escapeAttr(description)}" />`);
   html = replaceTag(html, /<link rel="canonical" href="[^"]*" \/>/, `<link rel="canonical" href="${url}" />`);
+  html = html.replaceAll('hreflang="en-GB" href="https://instaplaque.co.uk/"', `hreflang="en-GB" href="${url}"`);
+  html = html.replaceAll('hreflang="x-default" href="https://instaplaque.co.uk/"', `hreflang="x-default" href="${url}"`);
   html = replaceTag(html, /<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${escapeAttr(description)}" />`);
   html = replaceTag(html, /<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`);
@@ -390,6 +447,10 @@ const writePrerenderedPage = async ({
     ],
   };
   html = html.replace('</head>', `  <script type="application/ld+json" id="instaplaque-prerender-route-schema">${JSON.stringify(routeSchema)}</script>\n</head>`);
+  html = html.replace(
+    '<div id="root"></div>',
+    `<div id="root">${staticPageMarkup({ title, heading, description, image, faqs, price, kind })}</div>`,
+  );
 
   if (!slug) {
     await writeFile(indexPath, html);
@@ -402,15 +463,16 @@ const writePrerenderedPage = async ({
 };
 
 for (const page of routePages) {
-  await writePrerenderedPage(page);
+  await writePrerenderedPage({ ...page, kind: page.slug === '' ? 'home' : 'page' });
 }
 
-for (const page of pages) {
+for (const page of indexablePages) {
   const url = `${siteBaseUrl}/${page.slug}`;
   await writePrerenderedPage({
     slug: page.slug,
     title: page.title,
     description: page.description,
+    image: page.image,
     productSchema: {
       '@type': 'Product',
       '@id': `${url}#product`,
@@ -444,15 +506,20 @@ for (const page of pages) {
       },
       faqSchema(page.faqs),
     ],
+    heading: page.productType,
+    faqs: page.faqs,
+    price: page.price,
+    kind: 'product',
   });
 }
 
-for (const page of landingPages) {
+for (const page of indexableLandingPages) {
   const url = `${siteBaseUrl}/${page.slug}`;
   await writePrerenderedPage({
     slug: page.slug,
     title: page.title,
     description: page.description,
+    image: page.image,
     schema: [
       {
         '@type': 'CollectionPage',
@@ -471,6 +538,9 @@ for (const page of landingPages) {
       },
       faqSchema(page.faqs),
     ],
+    heading: page.pageName,
+    faqs: page.faqs,
+    kind: 'product',
   });
 }
 

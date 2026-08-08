@@ -3247,7 +3247,7 @@
 }
 
 .commerce-premium-hero__image {
-  background-image: url('/site-images/plaque-hero-memorial-wall-desktop-4k.jpg?v=20260620-compressed');
+  background-image: url('/site-images/plaque-hero-memorial-wall-desktop.webp?v=20260808');
   background-position: center;
   background-size: cover;
   transform: scale(1.01);
@@ -3846,7 +3846,7 @@
     inset: 0;
     width: auto;
     aspect-ratio: auto;
-    background-image: url('/site-images/plaque-hero-memorial-wall-mobile.jpg?v=20260620-compressed');
+    background-image: url('/site-images/plaque-hero-memorial-wall-mobile.webp?v=20260808');
     background-position: center top;
     transform: none;
   }

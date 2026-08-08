@@ -1,12 +1,25 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "cleanUrls": false,
+  "trailingSlash": false,
   "functions": {
     "api/index.mjs": {
       "maxDuration": 30
     }
   },
   "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.instaplaque.co.uk"
+        }
+      ],
+      "destination": "https://instaplaque.co.uk/:path*",
+      "permanent": true
+    },
     {
       "source": "/etchmaster",
       "destination": "/",
@@ -31,11 +44,92 @@
       "source": "/stainless-steel-signs",
       "destination": "/stainless-steel-plaques",
       "permanent": true
+    },
+    {
+      "source": "/returns",
+      "destination": "/returns-and-cancellations",
+      "permanent": true
+    },
+    {
+      "source": "/memorial-bench-plaques",
+      "destination": "/bench-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/ashes-scattering-plaques",
+      "destination": "/memorial-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/pet-memorial-plaques",
+      "destination": "/memorial-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/tree-plaques",
+      "destination": "/garden-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/school-opening-plaques",
+      "destination": "/opening-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/donor-plaques",
+      "destination": "/opening-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/commemorative-plaques",
+      "destination": "/opening-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/engraved-plaques",
+      "destination": "/custom-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/a5-plaques",
+      "destination": "/custom-plaques",
+      "permanent": true
+    },
+    {
+      "source": "/a4-plaques",
+      "destination": "/custom-plaques",
+      "permanent": true
     }
   ],
   "headers": [
     {
       "source": "/admin",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/checkout",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/order-confirmed",
       "headers": [
         {
           "key": "Cache-Control",
@@ -54,7 +148,15 @@
       "destination": "/api/index.mjs"
     },
     {
-      "source": "/(.*)",
+      "source": "/admin",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/checkout",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/order-confirmed",
       "destination": "/index.html"
     }
   ]

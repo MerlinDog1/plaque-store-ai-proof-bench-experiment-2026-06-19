@@ -18,6 +18,7 @@
     "check:gemini": "node scripts/check-gemini-authored.cjs",
     "check:public-input-security": "node scripts/check-public-input-security.mjs",
     "check:pricing": "node scripts/check-pricing.cjs",
+    "check:live-seo": "node scripts/check-live-seo.mjs",
     "check:security": "node scripts/check-fail-closed-security.mjs",
     "check:server-checkout": "node scripts/check-server-checkout.mjs",
     "check:symbols": "node scripts/check-symbol-ornaments.cjs",
