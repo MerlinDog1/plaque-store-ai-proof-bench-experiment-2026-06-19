@@ -3,6 +3,7 @@ import PlaquePreview from './PlaquePreview';
 import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies, seoLandingPages } from '../services/commerce';
 import { PlaqueState } from '../types';
 import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
+import { SeoRankTracker } from './SeoRankTracker';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -2013,6 +2014,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 }
 
 function AdminPage() {
+  const [adminSection, setAdminSection] = useState<'orders' | 'search'>('orders');
   const [orders, setOrders] = useState<PaidOrder[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedOrderDetail, setSelectedOrderDetail] = useState<PaidOrder | null>(null);
@@ -2252,11 +2254,11 @@ function AdminPage() {
       <section className="admin-console__shell">
         <div className="admin-console__head">
           <div>
-            <p>Operations</p>
-            <h1>Orders</h1>
+            <p>{adminSection === 'orders' ? 'Operations' : 'Organic search'}</p>
+            <h1>{adminSection === 'orders' ? 'Orders' : 'Search position'}</h1>
           </div>
           <div className="admin-console__head-actions">
-            <span>{orders.length} orders</span>
+            <span>{adminSection === 'orders' ? `${orders.length} orders` : '25 searches'}</span>
             {authConfig?.operational && authConfig.authRequired && adminAuthenticated && (
               <button type="button" className="admin-console__ghost-button" onClick={logoutAdmin}>
                 Lock
@@ -2285,6 +2287,16 @@ function AdminPage() {
         {adminError && <div className="commerce-warning">{adminError}</div>}
         {loading && <div className="commerce-success">Loading orders...</div>}
         {authConfig?.operational === false || (authConfig?.authRequired && !adminAuthenticated) ? null : (
+          <>
+        <nav className="admin-console__section-tabs" aria-label="Admin sections">
+          <button type="button" className={adminSection === 'orders' ? 'is-active' : ''} onClick={() => setAdminSection('orders')}>
+            Orders
+          </button>
+          <button type="button" className={adminSection === 'search' ? 'is-active' : ''} onClick={() => setAdminSection('search')}>
+            Search position
+          </button>
+        </nav>
+        {adminSection === 'search' ? <SeoRankTracker /> : (
           <>
         <div className="admin-console__stats">
           <div><span>Sold today</span><strong>{todayOrders.length}</strong><small>{formatPence(counts.todayRevenue)}</small></div>
@@ -2622,6 +2634,8 @@ function AdminPage() {
           <div className="admin-console__export-source" aria-hidden="true">
             <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
           </div>
+        )}
+          </>
         )}
           </>
         )}

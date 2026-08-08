@@ -19,6 +19,8 @@
     "check:public-input-security": "node scripts/check-public-input-security.mjs",
     "check:pricing": "node scripts/check-pricing.cjs",
     "check:live-seo": "node scripts/check-live-seo.mjs",
+    "check:seo-rank-tracker": "node scripts/check-seo-rank-tracker.mjs",
+    "check:seo-rank-tracker-ui": "node scripts/check-seo-rank-tracker-ui.mjs",
     "check:security": "node scripts/check-fail-closed-security.mjs",
     "check:server-checkout": "node scripts/check-server-checkout.mjs",
     "check:symbols": "node scripts/check-symbol-ornaments.cjs",
