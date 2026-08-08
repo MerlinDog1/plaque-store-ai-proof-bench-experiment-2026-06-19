@@ -10,6 +10,17 @@
   },
   "redirects": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.instaplaque.co.uk"
+        }
+      ],
+      "destination": "https://instaplaque.co.uk/",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "has": [
         {

@@ -37,6 +37,10 @@ const wwwRedirect = vercel.redirects?.find((redirect) =>
   redirect.source === '/:path*'
   && redirect.has?.some((entry) => entry.type === 'host' && entry.value === 'www.instaplaque.co.uk'));
 assert(wwwRedirect?.permanent === true, 'Missing permanent www-to-apex redirect');
+const wwwRootRedirect = vercel.redirects?.find((redirect) =>
+  redirect.source === '/'
+  && redirect.has?.some((entry) => entry.type === 'host' && entry.value === 'www.instaplaque.co.uk'));
+assert(wwwRootRedirect?.destination === 'https://instaplaque.co.uk/' && wwwRootRedirect.permanent === true, 'Missing permanent www root redirect');
 for (const source of redirectedPaths) {
   assert(vercel.redirects?.some((redirect) => redirect.source === source && redirect.permanent === true), `Missing permanent consolidation redirect: ${source}`);
 }
