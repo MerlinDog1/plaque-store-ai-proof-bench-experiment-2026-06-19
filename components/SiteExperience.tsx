@@ -928,7 +928,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
     };
   }
   return {
-    title: 'Custom Plaques Made Simple | Brass, Stainless Steel & Bench Plaques UK',
+    title: 'Custom Brass & Stainless Steel Plaques UK | InstaPlaque',
     description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK mainland delivery before you order.',
     path: '/',
     schema: [productListSchema(), faqSchema(homeFaqs)],
