@@ -1,6 +1,6 @@
 # InstaPlaque storefront and typography review
 
-Prepared 8 September 2026 from `seo/live-google-2026-08-08` (`2bcaee0`). Changes are local; no production deployment has been made.
+Prepared 8 September 2026 from `seo/live-google-2026-08-08` (`2bcaee0`). Deployment history and runtime requirements are recorded below.
 
 ## Customer experience
 
@@ -65,4 +65,12 @@ The expanded browser check is available as `npm run check:deployment` after buil
 
 Read-only production health checks report Gemini enabled, Supabase configured, and matching live Stripe keys plus a webhook secret. Those configuration checks do not prove an end-to-end paid order, delivery email or webhook event. The local preview has no Stripe/Supabase credentials and was tested using intercepted requests and the self-contained PDF return link.
 
-Deployment remains pending. The remote `seo/live-google-2026-08-08` branch is still at `2bcaee0`; these changes are on local `codex/seo-review`. Use the Vercel project/source serving the live storefront, retaining its existing production environment. Do not publish the older default `main` branch. The large designer bundle warning remains a performance follow-up rather than a build failure.
+The reviewed release was pushed to `codex/seo-review` and `seo/live-google-2026-08-08`. Vercel treats these branches as previews because the production branch is still `main`; promote the reviewed SEO deployment using its existing production environment. Do not publish the older default `main` branch. The large designer bundle warning remains a performance follow-up rather than a build failure.
+
+## Vercel runtime compatibility
+
+The first promotion of `22428ae` passed the Vercel build but failed the live API checks with `ERR_REQUIRE_ESM`: sanitize-html 2.17.7 requires the ESM htmlparser2 package. Vercel disables Node's require(ESM) support by default, unlike the local Node 22 runtime. The previous production deployment was immediately restored and all three API health endpoints returned HTTP 200 again.
+
+Keep Node on the tested 22 release line (`>=22.12.0 <23`) and explicitly enable `NODE_OPTIONS=--experimental-require-module` for Vercel functions. The non-secret runtime flag is versioned in `vercel.json` so preview and production use the same setting. This is Vercel's documented compatibility option: https://vercel.com/docs/functions/runtimes/node-js/advanced-node-configuration#experimental-nodejs-require-of-es-module
+
+`npm run build` now first runs `check:vercel-runtime`, which loads the actual API entry point under the Vercel default plus the configured override, checks SVG sanitization, and requests all three health endpoints on a temporary local server. Before promoting any follow-up release, verify the actual Vercel preview API as well. The dependency security patches and original PDF exporter remain intact.

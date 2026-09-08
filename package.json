@@ -4,9 +4,13 @@
   "version": "0.0.0",
   "packageManager": "npm@10.8.3",
   "type": "module",
+  "engines": {
+    "node": ">=22.12.0 <23"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "npm exec -- vite build && node scripts/prerender-product-pages.mjs",
+    "build": "node scripts/check-vercel-runtime.mjs && npm exec -- vite build && node scripts/prerender-product-pages.mjs",
+    "check:vercel-runtime": "node scripts/check-vercel-runtime.mjs",
     "typecheck": "tsc --noEmit",
     "check:analytics-redaction": "node scripts/check-analytics-redaction.mjs",
     "check:bold-toggle": "node scripts/check-bold-toggle.cjs",
