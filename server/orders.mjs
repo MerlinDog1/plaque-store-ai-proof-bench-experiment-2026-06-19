@@ -61,6 +61,11 @@ const shouldUseLocalFallback = (error) => {
   return message.includes("42p01") || message.includes("pgrst205") || message.includes("storefront_orders");
 };
 
+const isSupabaseUnavailable = (error) => {
+  const diagnostic = `${error?.message || ""} ${error?.details || ""}`.toLowerCase();
+  return diagnostic.includes("fetch failed") || diagnostic.includes("enotfound");
+};
+
 const isMissingProofClaimFunction = (error) => ["42883", "PGRST202"].includes(String(error?.code || "").toUpperCase());
 
 const toRow = (input) => {
@@ -471,6 +476,7 @@ const insertNewOrder = async (order) => {
       .select("*")
       .single();
     if (error && isUniqueViolation(error)) throw new OrderIdCollisionError(next.id);
+    if (error && isSupabaseUnavailable(error)) throw new DurableOrderStorageError();
     if (error && !shouldUseLocalFallback(error)) throw error;
     if (error && shouldUseLocalFallback(error)) {
       try {

@@ -44,9 +44,25 @@ try {
     checkoutPayload = route.request().postDataJSON();
     await route.fulfill({ status: 400, json: { error: 'Deployment check: checkout submission intercepted.' } });
   });
-  await context.route('**/api/proof-sessions', async route => {
-    savedProof = route.request().postDataJSON();
-    await route.fulfill({ status: 503, json: { error: 'Exercise the self-contained return link.' } });
+  await context.route('**/api/proof-sessions**', async route => {
+    if (route.request().method() === 'POST') {
+      savedProof = route.request().postDataJSON();
+      await route.fulfill({ status: 201, json: { ok: true, proofSession: { public_token: 'deployment-proof-token' } } });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      json: {
+        ok: true,
+        proofSession: {
+          plaque_state: savedProof.plaqueState,
+          wording: savedProof.wording,
+          generated_svg: savedProof.generatedSvg,
+          ai_reasoning: savedProof.aiReasoning,
+          metadata: savedProof.metadata,
+        },
+      },
+    });
   });
   await context.route('**/api/gemini/generate-content', async route => {
     const request = route.request().postDataJSON();
@@ -95,7 +111,7 @@ try {
     assert(bytes.toString('ascii', 0, 5) === '%PDF-', 'A real PDF must be downloaded.');
     assert(bytes.includes(Buffer.from('/Subtype /Image')), 'The original textured proof image must be embedded.');
     const url = bytes.toString('latin1').match(/\/URI\s*\((https?:\/\/[^)]+)\)/)?.[1];
-    assert(url?.includes('/design#proof='), 'The PDF needs a working self-contained return link.');
+    assert(url?.includes('/design?proof=deployment-proof-token'), 'The PDF needs a short saved-proof return link.');
     return url;
   }
   const validUrl = await downloadProof('original-desktop');

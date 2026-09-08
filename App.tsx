@@ -13,7 +13,6 @@ import { DEFAULT_PRODUCT_SLUG, DeliveryAddress, MockOrder, ProductFamily, SiteVi
 import { isBenchPlaqueFormat } from './services/plaqueRules';
 import { BENCH_SAFE_MARGIN_PERCENT } from './services/safeMargin';
 import {
-  createInlineProofResumeUrl,
   decodeInlineProofResumeToken,
   getInlineProofResumeToken,
 } from './services/proofResume';
@@ -905,26 +904,13 @@ const App: React.FC = () => {
         continueUrl = `${window.location.origin}/design?proof=${encodeURIComponent(token)}`;
       }
     } catch (error) {
-      console.warn('Remote PDF resume link could not be created; using a compact self-contained link.', error);
+      console.error('Remote PDF resume link could not be created.', error);
+      window.alert('The proof PDF could not be saved right now. Please try again shortly so its QR code can open a reliable saved proof.');
+      return;
     }
     if (!continueUrl) {
-      try {
-        continueUrl = await createInlineProofResumeUrl({
-          plaqueState: sanitizeProofStateForRemoteSave(state),
-          wording: inscriptionPrompt,
-          generatedSvg: state.generatedSvgContent,
-          inscriptionGuidance,
-          layoutIsCurrent: hasCurrentLayout,
-        });
-      } catch (error) {
-        console.error('PDF resume link could not be created.', error);
-        window.alert(
-          `The proof PDF was not downloaded because a working return link could not be created. ${
-            error instanceof Error ? error.message : 'Please try again.'
-          }`
-        );
-        return;
-      }
+      window.alert('The proof PDF could not be saved right now. Please try again shortly.');
+      return;
     }
     const proofImageBase64 = generatedImage || await svgToProofPngBase64(svgRef.current);
     await downloadPdf(svgRef.current, state, {

@@ -8,6 +8,13 @@ interface PdfExportOptions {
   price?: number;
 }
 
+const createProofQrDataUrl = (continueUrl: string) => QRCode.toDataURL(continueUrl, {
+  color: { dark: "#000000", light: "#ffffff" },
+  margin: 4,
+  width: 512,
+  errorCorrectionLevel: "Q",
+});
+
 // Type definitions for external libraries loaded via CDN
 declare global {
   interface Window {
@@ -900,11 +907,7 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       );
 
       if (options.continueUrl) {
-        const qrDataUrl = await QRCode.toDataURL(options.continueUrl, {
-          margin: 1,
-          width: 260,
-          errorCorrectionLevel: options.continueUrl.length > 1_900 ? "L" : "M",
-        });
+        const qrDataUrl = await createProofQrDataUrl(options.continueUrl);
         doc.addImage(qrDataUrl, "PNG", panelX + panelW - 35, panelY + 108, 28, 28);
         doc.setFillColor(237, 190, 82);
         doc.roundedRect(panelX + 7, panelY + 126, 54, 11, 5.5, 5.5, "F");
@@ -1015,18 +1018,14 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
     );
 
     if (options.continueUrl) {
-      const qrDataUrl = await QRCode.toDataURL(options.continueUrl, {
-        margin: 1,
-        width: 260,
-        errorCorrectionLevel: options.continueUrl.length > 1_900 ? "L" : "M",
-      });
-      doc.addImage(qrDataUrl, "PNG", panelX + 7, 169, 19, 19);
+      const qrDataUrl = await createProofQrDataUrl(options.continueUrl);
+      doc.addImage(qrDataUrl, "PNG", panelX + 7, 165, 28, 28);
       doc.setFillColor(237, 190, 82);
-      doc.roundedRect(panelX + 30, 173, 26, 9.5, 4.75, 4.75, "F");
+      doc.roundedRect(panelX + 40, 173, 29, 9.5, 4.75, 4.75, "F");
       doc.setTextColor(23, 32, 29);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(6.8);
-      doc.textWithLink("Open proof", panelX + 43, 179.3, { url: options.continueUrl, align: "center" });
+      doc.textWithLink("Open proof", panelX + 54.5, 179.3, { url: options.continueUrl, align: "center" });
     }
 
     doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);

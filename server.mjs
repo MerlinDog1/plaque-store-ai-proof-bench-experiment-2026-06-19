@@ -522,6 +522,13 @@ export const handleRequest = async (req, res) => {
       sendJson(res, 201, { ok: true, session: publicSession, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create Stripe checkout session.";
+      console.error("Checkout session creation failed.", {
+        name: error?.name || "Error",
+        code: error?.code || "checkout_failed",
+        message: error?.message || message,
+        details: error?.details || "",
+        hint: error?.hint || "",
+      });
       sendJson(res, error.statusCode || 500, { error: message, code: error.code || "checkout_failed" });
     }
     return;
@@ -715,7 +722,17 @@ export const handleRequest = async (req, res) => {
       sendJson(res, 201, { ok: true, proofSession });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create proof session.";
-      sendJson(res, message.includes("not configured") ? 501 : 500, { error: message });
+      console.error("Proof session creation failed.", {
+        name: error?.name || "Error",
+        code: error?.code || "proof_session_failed",
+        message: error?.message || message,
+        details: error?.details || "",
+        hint: error?.hint || "",
+      });
+      sendJson(res, error.statusCode || (message.includes("not configured") ? 501 : 500), {
+        error: message,
+        ...(error.code ? { code: error.code } : {}),
+      });
     }
     return;
   }
