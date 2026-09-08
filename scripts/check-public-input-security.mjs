@@ -54,7 +54,7 @@ const structured = validateGeminiGenerateContentRequest({
 });
 
 assert.equal(structured.operation, "structured-content");
-assert.equal(structured.request.model, "gemini-3.5-flash");
+assert.equal(structured.request.model, "gemini-3.8-flash", 'Cached 3.5 clients should use the current server model');
 assert.equal(structured.request.config.maxOutputTokens, 8_192);
 assert.equal(structured.request.config.httpOptions, undefined, "client HTTP options must not reach the upstream SDK");
 assert.deepEqual(structured.request.contents.parts[1], {

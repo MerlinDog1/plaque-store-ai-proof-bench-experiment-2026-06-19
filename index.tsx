@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { inject } from '@vercel/analytics';
 import App from './App';
 import './index.css';
+import './shopfront.css';
+import './designer.css';
 import { redactAnalyticsEvent } from './services/analyticsPrivacy.mjs';
 
 const analyticsHosts = new Set([

@@ -3,9 +3,9 @@ import { Header } from './components/Header';
 import PlaquePreview from './components/PlaquePreview';
 import { Controls } from './components/Controls';
 import { RealisticPreviewModal } from './components/RealisticPreviewModal';
-import { SiteExperience } from './components/SiteExperience';
+import { SiteExperience, useSeoMeta } from './components/SiteExperience';
 import { BorderStyle, DesignStyle, EtchmasterImageMode, EtchmasterShapeMask, Fixing, INITIAL_STATE, Material, MemorialImageMethod, MemorialImagePlacement, MemorialImageShape, PlaqueState, Shape, TextColor, TypographyEngine } from './types';
-import { generatePlaqueDesign, generateRealisticView, refinePlaqueWording, GenerationPhase } from './services/geminiService';
+import { generatePlaqueDesign, generateRealisticView, GenerationPhase } from './services/geminiService';
 import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
@@ -24,7 +24,6 @@ const ThreePlaquePreview = lazy(async () => {
 });
 
 const SUPPORTED_MEMORIAL_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/avif'];
-const DELIVERY_HELP = 'UK mainland only. Highlands, islands and non-UK delivery may incur extra charges.';
 
 const PROOF_BENCH_INITIAL_STATE: PlaqueState = {
   ...INITIAL_STATE,
@@ -231,8 +230,11 @@ const App: React.FC = () => {
   const [basketAdded, setBasketAdded] = useState(false);
 
   const svgRef = useRef<SVGSVGElement>(null);
+  const controlsScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { controlsScrollRef.current?.scrollTo({ top: 0 }); }, [activeStep]);
   const selectedProduct = getProductBySlug(selectedProductSlug);
   const selectedLanding = getLandingPageBySlug(selectedLandingSlug);
+  useSeoMeta(currentView, selectedProduct, selectedLanding);
 
   // --- Auth & Startup Logic ---
   useEffect(() => {
@@ -361,6 +363,7 @@ const App: React.FC = () => {
             ai_reasoning: null,
             metadata: {
               inscriptionGuidance: inlineProof.inscriptionGuidance,
+              layoutIsCurrent: inlineProof.layoutIsCurrent,
             },
           };
         } else {
@@ -384,7 +387,7 @@ const App: React.FC = () => {
         setInscriptionPrompt(restoredWording);
         setInscriptionGuidance(restoredGuidance);
         setGeneratedLayoutSignature(
-          restoredState.generatedSvgContent
+          restoredState.generatedSvgContent && proofSession.metadata?.layoutIsCurrent !== false
             ? makeLayoutSignature(restoredWording, restoredState, restoredGuidance)
             : null
         );
@@ -692,12 +695,8 @@ const App: React.FC = () => {
     setIsGeneratingLayout(true);
     setGenerationPhase(null);
     try {
-      let effectivePrompt = prompt;
-      setGenerationPhase('concept');
-      effectivePrompt = await refinePlaqueWording(prompt);
-      if (effectivePrompt !== prompt) {
-        setInscriptionPrompt(effectivePrompt);
-      }
+      // Layout must never silently rewrite the customer's approved wording.
+      const effectivePrompt = prompt;
 
       const inscriptionBox = getInscriptionLayout(state, effectivePrompt);
       const result = await generatePlaqueDesign(
@@ -720,9 +719,7 @@ const App: React.FC = () => {
           ...prev,
           generatedSvgContent: result.svgContent,
           conceptImageUrl: result.conceptImageUrl,
-          aiReasoning: effectivePrompt !== prompt
-            ? `The typesetter corrected the inscription wording before layout. ${result.reasoning}`
-            : result.reasoning
+          aiReasoning: result.reasoning
         }));
         setActiveStep(5);
       }
@@ -788,10 +785,15 @@ const App: React.FC = () => {
     setIsProofExpanded(prev => !prev);
   };
 
+  const hasCurrentLayout = !!state.generatedSvgContent
+    && generatedLayoutSignature === getLayoutSignature(inscriptionPrompt);
   const readinessWarnings = React.useMemo(() => {
     const warnings: string[] = [];
     if (!state.generatedSvgContent) {
       warnings.push('Generate your inscription layout. The preview is still showing guide text.');
+    }
+    if (state.generatedSvgContent && !hasCurrentLayout) {
+      warnings.push('Your wording or layout options have changed. Generate a fresh proof before ordering.');
     }
     if (state.memorialImageEnabled && state.memorialImageMethod === MemorialImageMethod.Engraved && !state.memorialImageSvg) {
       warnings.push('Generate the engraved artwork.');
@@ -800,7 +802,7 @@ const App: React.FC = () => {
       warnings.push('Upload the full-colour artwork.');
     }
     return warnings;
-  }, [generatedLayoutSignature, inscriptionGuidance, inscriptionPrompt, state.designStyle, state.generatedSvgContent, state.height, state.memorialImageEnabled, state.memorialImageMethod, state.memorialImagePlacement, state.memorialImagePreviewUrl, state.memorialImageScale, state.memorialImageShape, state.memorialImageSourceUrl, state.memorialImageSvg, state.shape, state.typographyEngine, state.width]);
+  }, [hasCurrentLayout, state.generatedSvgContent, state.memorialImageEnabled, state.memorialImageMethod, state.memorialImagePreviewUrl, state.memorialImageSourceUrl, state.memorialImageSvg]);
 
   const layoutRegenNotice = React.useMemo(() => {
     if (!state.generatedSvgContent || !generatedProofFrame) return null;
@@ -808,13 +810,13 @@ const App: React.FC = () => {
     if (generatedProofFrame.orientation !== currentFrame.orientation) {
       return {
         tone: 'orientation' as const,
-        message: `You switched from ${generatedProofFrame.orientation} to ${currentFrame.orientation}. The text may still work, but regenerate it if the layout looks off.`,
+        message: `You switched from ${generatedProofFrame.orientation} to ${currentFrame.orientation}. Regenerate your layout to fit the new shape before ordering.`,
       };
     }
     if (generatedProofFrame.width !== currentFrame.width || generatedProofFrame.height !== currentFrame.height) {
       return {
         tone: 'size' as const,
-        message: 'Size changed since the text was generated. If the proof still looks good, you can continue; regenerate text if it needs rebalancing.',
+        message: 'Size changed since the text was generated. Regenerate your layout to fit the new size before ordering.',
       };
     }
     return null;
@@ -834,10 +836,12 @@ const App: React.FC = () => {
   const isProductionReady = readinessWarnings.length === 0;
   const readinessItems = [
     {
-      label: state.generatedSvgContent
+      label: hasCurrentLayout
         ? 'Inscription layout is generated'
-        : 'Generate your inscription layout',
-      ready: !!state.generatedSvgContent,
+        : state.generatedSvgContent
+          ? 'Regenerate your inscription layout'
+          : 'Generate your inscription layout',
+      ready: hasCurrentLayout,
       step: 5,
     },
     {
@@ -889,6 +893,7 @@ const App: React.FC = () => {
           currency: 'gbp',
           metadata: {
             inscriptionGuidance,
+            layoutIsCurrent: hasCurrentLayout,
             source: 'pdf-resume-link-trial',
           },
         }),
@@ -909,6 +914,7 @@ const App: React.FC = () => {
           wording: inscriptionPrompt,
           generatedSvg: state.generatedSvgContent,
           inscriptionGuidance,
+          layoutIsCurrent: hasCurrentLayout,
         });
       } catch (error) {
         console.error('PDF resume link could not be created.', error);
@@ -969,6 +975,10 @@ const App: React.FC = () => {
   };
 
   const handleNavigate = (view: SiteView, productSlug?: string) => {
+    if (view === 'checkout' && currentView === 'plaque') {
+      goToProof();
+      return;
+    }
     if (view === 'product' && productSlug) {
       setSelectedProductSlug(productSlug);
     }
@@ -1007,7 +1017,7 @@ const App: React.FC = () => {
     setHasSelectedSize(true);
     setState(prev => {
       const next = {
-        ...prev,
+        ...PROOF_BENCH_INITIAL_STATE,
         ...product.preset,
         generatedSvgContent: null,
         aiReasoning: null,
@@ -1020,13 +1030,18 @@ const App: React.FC = () => {
       }
       return next;
     });
-    setInscriptionPrompt(product.proofPrompt);
+    setInscriptionPrompt('');
+    setInscriptionGuidance('');
+    setGeneratedImage(null);
+    setRealisticReferenceImage(null);
+    setMemorialSourceImage(null);
+    setMemorialStatus(null);
     setGeneratedLayoutSignature(null);
     setGeneratedProofFrame(null);
     setProofSaved(false);
     setBasketAdded(false);
     setCurrentView('plaque');
-    setActiveStep(0);
+    setActiveStep(5);
     if (window.location.pathname !== '/design') {
       window.history.pushState({}, '', '/design');
     }
@@ -1158,8 +1173,9 @@ const App: React.FC = () => {
 
   // --- Render ---
   const steps = ['Size/Shape', 'Material', 'Colour', 'Fixings and border', 'Wood', 'Text', 'Proof'];
-  const stepShortLabels = ['Size', 'Material', 'Colour', 'Fixings', 'Wood', 'Text', 'Proof'];
-  const progress = ((activeStep + 1) / steps.length) * 100;
+  const stepShortLabels = ['Size', 'Material', 'Colour', 'Fixings', 'Backing', 'Wording', 'Review'];
+  const stepTitles = ['Choose your size', 'Find your finish', 'Make it stand out', 'The finishing touches', 'Add a wood backing', 'Words that matter', 'Your final review'];
+  const stepDescriptions = ['A little dedication or a larger tribute. Find the right fit.', 'Explore brass and stainless steel finishes.', 'Choose the colour of your engraved wording.', 'Choose a border and how your plaque will be mounted.', 'An optional frame for your words.', 'Add your inscription, then create a layout.', 'Check every detail before placing your order.'];
   const canGoBack = activeStep > 0;
   const canGoNext = activeStep < steps.length - 1;
   const showMaterialPrices = hasSelectedSize && selectedProduct.slug !== 'custom-plaques';
@@ -1220,7 +1236,6 @@ const App: React.FC = () => {
     );
   }
 
-  const stepIcons = ['◉', '▦', '●', '⌁', '▥', 'T', '✓'];
   const formattedPrice = (() => {
     const hasPence = Math.round(price * 100) % 100 !== 0;
     return price.toLocaleString('en-GB', {
@@ -1230,12 +1245,11 @@ const App: React.FC = () => {
       maximumFractionDigits: hasPence ? 2 : 0,
     });
   })();
-  const showProofPrice = currentView === 'plaque';
   const showHeaderPrice = currentView === 'plaque';
-  const proofSpecTrail = getPlaqueSummaryTitle(state);
+  const proofSpecTrail = getPlaqueSummaryTitle({ material: state.material });
 
   return (
-    <div className={`studio-app-shell proofbench-app flex flex-col bg-transparent text-[#eef4ee] ${currentView !== 'plaque' ? 'commerce-mode' : ''}`}>
+    <div className={`studio-app-shell proofbench-app flex flex-col bg-transparent text-[#eef4ee] ${currentView !== 'plaque' ? 'commerce-mode' : 'designer-mode'}`}>
       <Header
         onNavigate={handleNavigate}
         onStartDesign={handleStartDesign}
@@ -1288,46 +1302,31 @@ const App: React.FC = () => {
             onCreateMockOrder={handleCreateMockOrder}
           />
         ) : (
-          <div className="app-fade-in proofbench-board grid h-full min-h-0 w-full grid-rows-[minmax(0,46%)_minmax(0,54%)] gap-0 p-0 md:grid-cols-[82px_358px_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)] md:gap-0 md:px-8 md:pb-7 md:pt-4 xl:grid-cols-[88px_390px_minmax(0,1fr)]">
-            <nav className="proofbench-rail no-print hidden min-h-0 flex-col items-center justify-center py-4 md:flex">
-              <div className="flex w-full flex-col items-center gap-3">
+          <div className="app-fade-in proofbench-board">
+            <nav className="designer-steps no-print" aria-label="Plaque design steps">
+              <div className="designer-steps-list">
                 {steps.map((label, index) => (
                   <button
                     key={label}
                     onClick={() => setActiveStep(index)}
                     aria-label={`Go to ${label}`}
                     aria-current={index === activeStep ? 'step' : undefined}
-                    className={`proofbench-step-button ${index === activeStep ? 'is-active' : ''} ${index < activeStep ? 'is-complete' : ''}`}
-                    data-icon={stepIcons[index]}
-                    data-short={stepShortLabels[index]}
+                    className={`designer-step ${index === activeStep ? 'is-active' : ''}`}
                   >
-                    {index + 1} {label}
+                    <span className="designer-step-number">{index + 1}</span>
+                    <span>{stepShortLabels[index]}</span>
                   </button>
                 ))}
               </div>
             </nav>
 
-            <aside className="proofbench-customiser no-print row-start-2 min-h-0 min-w-0 overflow-hidden md:col-start-2 md:row-start-1">
-              <div className="proofbench-customiser-head hidden md:flex">
-                <div>
-                  <h2 className="text-base font-black text-[#f7f1e3]">{steps[activeStep]}</h2>
-                </div>
+            <aside className="proofbench-customiser no-print" aria-label="Plaque options">
+              <div className="proofbench-customiser-head">
+                <p className="designer-eyebrow">Make it yours <span>Step {activeStep + 1} of 7</span></p>
+                <h1>{stepTitles[activeStep]}</h1>
+                <p>{stepDescriptions[activeStep]}</p>
               </div>
-              <div className="proofbench-mobile-tabs md:hidden">
-                {steps.map((label, index) => (
-                  <button
-                    key={label}
-                    onClick={() => setActiveStep(index)}
-                    className={index === activeStep ? 'is-active' : ''}
-                    aria-label={`Go to ${label}`}
-                  >
-                    <span>{stepIcons[index]}</span>
-                    <small>{stepShortLabels[index]}</small>
-                  </button>
-                ))}
-              </div>
-              <div className="proofbench-sheet-handle md:hidden" />
-              <div className="proofbench-control-scroll">
+              <div className="proofbench-control-scroll" ref={controlsScrollRef}>
                 <Controls
                   state={state}
                   onChange={handleStateChange}
@@ -1367,50 +1366,20 @@ const App: React.FC = () => {
                   onPrint={handleNativePrint}
                 />
               </div>
+              <div className="designer-step-footer">
+                <button type="button" onClick={goBack} disabled={!canGoBack} className="designer-back">← Back</button>
+                {canGoNext ? (
+                  <button type="button" onClick={goNext} className="designer-continue">Continue to {stepShortLabels[activeStep + 1].toLowerCase()} <span aria-hidden="true">→</span></button>
+                ) : <span className="designer-review-note">Made to your design</span>}
+              </div>
             </aside>
 
-            <section className={`proofbench-stage relative row-start-1 min-h-0 min-w-0 overflow-hidden md:col-start-3 md:row-start-1 ${isProofExpanded ? 'is-expanded' : ''}`}>
-              <div className="proofbench-mobile-top no-print md:hidden">
-                <button type="button" className="proofbench-mobile-brand" onClick={() => handleNavigate('home')}>
-                  <span className="brand-wordmark brand-wordmark--mobile-tool">
-                    <span>Insta</span><span>Plaque</span>
-                  </span>
-                  <small title={proofSpecTrail}>{proofSpecTrail}</small>
-                </button>
-                {showProofPrice && (
-                  <button
-                    type="button"
-                    className="proofbench-mobile-price"
-                    aria-label={
-                      isProductionReady
-                        ? `Checkout with current price ${formattedPrice} including UK delivery`
-                        : `Review proof before checkout. Current price ${formattedPrice} including UK delivery`
-                    }
-                    onClick={() => {
-                      void handleAddToBasket().catch((error) => {
-                        alert(error instanceof Error ? error.message : 'Secure checkout could not be opened.');
-                      });
-                    }}
-                  >
-                    <span className="proofbench-delivery-label">
-                      Inc UK delivery
-                      <span className="proofbench-info-dot" aria-label={DELIVERY_HELP} title={DELIVERY_HELP}>
-                        i
-                      </span>
-                    </span>
-                    <strong>
-                      <svg className="proofbench-price-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M6.4 8.5h11.2l-.8 10.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6.4 8.5Z" />
-                        <path d="M9 8.5V7a3 3 0 0 1 6 0v1.5" />
-                      </svg>
-                      {formattedPrice}
-                    </strong>
-                  </button>
-                )}
+            <section className={`proofbench-stage relative min-h-0 min-w-0 overflow-hidden ${isProofExpanded ? 'is-expanded' : ''}`} aria-label="Your plaque preview">
+              <div className="designer-stage-heading no-print">
+                <div><span className="designer-eyebrow">Your creation</span><h2>Your plaque, taking shape.</h2></div>
+                <span className="designer-live-indicator">Live preview</span>
               </div>
-
-              <div className="proofbench-dimension-top hidden md:block">{state.width} mm</div>
-              <div className="proofbench-dimension-left hidden md:block">{state.height} mm</div>
+              <div className="designer-stage-caption no-print"><strong>{state.width} × {state.height} mm</strong><span>{proofSpecTrail}</span></div>
               <div className="proofbench-proof-pad">
                 <div className="proofbench-svg-preview">
                   <PlaquePreview ref={svgRef} state={state} activeStep={activeStep} inscription={inscriptionPrompt} />

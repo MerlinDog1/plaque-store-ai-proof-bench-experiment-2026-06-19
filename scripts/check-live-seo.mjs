@@ -46,11 +46,12 @@ for (const source of redirectedPaths) {
 }
 
 assert(home.includes('data-prerendered="true"'), 'Homepage is missing crawlable prerendered content');
-assert(home.includes('<h1>Custom Plaques Made Simple</h1>'), 'Homepage prerendered H1 is missing');
+assert(home.includes('<h1>Some words<br/>deserve to <em>stay.</em></h1>'), 'Homepage must render the visible shop heading');
+assert(home.includes('Find your plaque.') && home.includes('Your words. Your approval.'), 'Homepage is missing visible catalogue or buying guidance');
+assert(home.includes('from £58.50'), 'Homepage is missing its visible starting price');
 assert(home.includes('rel="canonical" href="https://instaplaque.co.uk/"'), 'Homepage canonical is missing');
 assert(home.includes('hreflang="en-GB" href="https://instaplaque.co.uk/"'), 'Homepage en-GB alternate is missing');
-assert(home.includes('plaque-hero-memorial-wall-mobile.webp'), 'Mobile LCP image preload is missing');
-assert(home.includes('plaque-hero-memorial-wall-desktop.webp'), 'Desktop LCP image preload is missing');
+assert(home.includes('home-gallery-brass-bench.webp'), 'Shop hero image is missing');
 assert(robots.includes('Sitemap: https://instaplaque.co.uk/sitemap.xml'), 'robots.txt sitemap declaration is missing');
 
 for (const route of ['memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques', 'garden-plaques', 'opening-plaques']) {

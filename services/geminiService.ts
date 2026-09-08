@@ -2,6 +2,8 @@ import { Type } from "@google/genai";
 import { AVAILABLE_FONTS, PlaqueState, Shape, Material, Fixing, MemorialImageMethod, DesignStyle, STYLE_FONT_PALETTES, FontPalette, TypographyEngine, TextColor } from "../types";
 import { composeEditorialTypography } from "./editorialComposer";
 import { getGeminiClient } from "./geminiClient";
+import { PLAQUE_TEXT_MODEL } from './aiModels.mjs';
+import { buildTypographyPrompt } from './typographyPrompt';
 
 const getAIClient = getGeminiClient;
 
@@ -569,6 +571,27 @@ function getTypographyLines(text: Element) {
 }
 
 function validateTypographyComposition(texts: Element[], inscription: string, box: InscriptionBox) {
+  const occupiedLines: Array<{ left: number; right: number; top: number; bottom: number }> = [];
+  for (const text of texts) {
+    let baseline = Number(text.getAttribute('y'));
+    const runs = text.children.length ? Array.from(text.children) : [text];
+    for (const run of runs) {
+      if (run !== text) {
+        if (run.hasAttribute('y') || run.hasAttribute('dx')) throw new Error('Wrapped lines must use x and dy coordinates only');
+        baseline += Number(run.getAttribute('dy') || 0);
+      }
+      const size = Number(run.getAttribute('font-size') || text.getAttribute('font-size'));
+      const x = Number(run.getAttribute('x') || text.getAttribute('x') || 0);
+      const anchor = run.getAttribute('text-anchor') || text.getAttribute('text-anchor') || 'middle';
+      const width = estimateTextWidth(run.textContent || '', size, parseLetterSpacing(run.getAttribute('letter-spacing') || text.getAttribute('letter-spacing')));
+      const left = anchor === 'start' ? x : anchor === 'end' ? x - width : x - width / 2;
+      const line = { left, right: left + width, top: baseline - size * .8, bottom: baseline + size * .2 };
+      if (occupiedLines.some(other => line.left < other.right && line.right > other.left && line.top < other.bottom - .1 && line.bottom > other.top + .1)) {
+        throw new Error('Inscription lines overlap; increase baseline spacing and rebalance the text');
+      }
+      occupiedLines.push(line);
+    }
+  }
   const typographyNodes = texts.flatMap((text) => [text, ...Array.from(text.querySelectorAll("tspan"))]);
   const fontFamilies = new Set(typographyNodes.map((node) => node.getAttribute("font-family")).filter(Boolean));
   const scriptFamilies = Array.from(fontFamilies).filter((font) => SCRIPT_FONT_FAMILIES.has(font));
@@ -670,6 +693,7 @@ export function validateAuthoredTypographySvg(rawSvg: string, inscription: strin
   texts.forEach((text) => {
     if (text.tagName.toLowerCase() !== "text") throw new Error(`Unsafe SVG element: ${text.tagName}`);
     validateTypographyAttributes(text);
+    if (text.hasAttribute('dx') || text.hasAttribute('dy')) throw new Error('Text blocks must use explicit x and y coordinates');
     if (!text.getAttribute("font-family")
       || !text.getAttribute("font-size")
       || !text.getAttribute("y")
@@ -888,106 +912,36 @@ async function generateAuthoredTypographySvg(
   context?: InscriptionContext
 ): Promise<AuthoredTypographySvg> {
   const ai = getAIClient();
-  const styleDescription = ARCHETYPE_DESCRIPTIONS[designStyle === DesignStyle.Auto ? pickRandomArchetype() : designStyle];
-  const width = Number(box.width.toFixed(2));
-  const height = Number(box.height.toFixed(2));
-  const denseCopy = normalizeSpace(inscription).length > 180;
-  const denseReadableFloor = clamp(Math.min(width, height) * 0.044, 8, 10);
   const guidanceRules = buildComposerGuidanceRules(context?.layoutGuidance);
+  const prompt = buildTypographyPrompt(inscription, plaqueWidth, plaqueHeight, shape, designStyle, box, context);
 
-  const prompt = `
-Act as an expert plaque typographer and SVG front-end developer. Code one polished, production-suitable SVG typography layout. Solve the layout directly rather than describing it.
-
-PHYSICAL PLAQUE: ${plaqueWidth}mm wide x ${plaqueHeight}mm high, shape ${shape}.
-ACTUAL AVAILABLE INSCRIPTION BOX: ${width} units wide x ${height} units high, aspect ratio ${(width / height).toFixed(4)}.
-The box is already reduced for margins and any portrait artwork. Design for this exact box.
-PLAQUE PURPOSE: ${context?.purpose || "commemorative"}.
-PORTRAIT RELATIONSHIP: ${context?.portraitRelationship || "No portrait artwork is present. The inscription is the primary composition."}
-${guidanceRules.promptBlock}
-STYLE INTENT: ${styleDescription}
-
-Return JSON only with "reasoning" and "svgContent". svgContent must be a complete parseable SVG:
-<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${-width / 2} ${-height / 2} ${width} ${height}">...</svg>
-
-TEXT HANDLING:
-- The user composer guidance is layout/style direction only. It is not plaque wording. Never add it to the inscription text.
-- Correct only clear spelling mistakes or obvious typos when the intended word is unambiguous, for example "freind" to "friend". Do not rewrite style, meaning, names, dates, grammar, sentiment, or wording just because it could be phrased better.
-- If a possible issue is ambiguous, leave it unchanged and mention it briefly in reasoning as "Possible typo left unchanged: ...".
-- If you correct a spelling mistake, list it briefly in reasoning as "Spelling corrected: old -> new".
-- Preserve user line breaks as layout intent: each input line should become a visual line or block lower down on the plaque. Blank input lines mean deliberate extra vertical spacing.
-- Do not invent ornaments or extra words.
-- Never use star glyphs, sparkle glyphs, rosettes, fleurons, bullets, dots, diamonds, decorative Unicode symbols, or repeated ornamental marks. If a visual separator is truly needed, rely on whitespace here; the product renderer may add at most one simple plain horizontal rule.
-
-STRICT SVG RULES:
-- Use 1-12 <text> elements and optional direct-child <tspan> elements only. No other SVG elements.
-- If a <text> element uses any <tspan>, every visible line in that <text> must be inside a <tspan>. Do not mix direct text content with tspan children.
-- Do not use scripts, styles, classes, ids, transforms, event attributes, hrefs, URLs, external references, paths, shapes, groups or decorative elements.
-- Use only these attributes: x, y, dx, dy, text-anchor, font-family, font-size, font-weight, letter-spacing, fill. Do not use font-style.
-- Use fill="currentColor". Use plain finite numeric coordinates and font sizes.
-- Center headings and dates with x="0" text-anchor="middle". For dense prose, prefer a deliberate editorial paragraph block using text-anchor="start" and a negative x coordinate near the left edge of the box. Keep every line inside the measured width.
-- Every font-size must be 5 or larger. There is deliberately NO upper font-size limit: use large headings when the copy and containment allow it. Never use font-size below 5 to force dense copy to fit.
-- font-weight may be normal, bold, or a numeric hundred from 300 to 900.
-- letter-spacing must be a plain number or em value between -0.05 and 0.4. Never exceed 0.4em.
-- Use letter-spacing only for short uppercase display headings or dates. Never track normal sentence-case tribute copy: multi-word lowercase lines must use natural spacing, no more than 0.04em.
-- Never use script/cursive fonts in generated production typography: Great Vibes, Pinyon Script, Alex Brush, Allura, Dancing Script, Pacifico, Satisfy, or Caveat.
-- Never use font-style="italic" on any generated text; italic outlines do not export reliably. Use normal-style serif, sans, or display families for emphasis instead.
-- Choose fonts only from: ${AVAILABLE_FONTS.join(", ")}.
-- Keep every line inside the viewBox. Make hierarchy, spacing and line breaks do the design work.
-- Do not change casing for style. If the inscription casing is imperfect, preserve it.
-- Use a restrained font system: one primary family plus at most one accent family. Do not give each phrase a different font.
-- Treat the inscription as a composed block, not a stack of unrelated lines. Keep short phrases together whenever they fit.
-- If a visual line starts with a short attribution such as "by" followed by a name, put "by" on its own small line and the name on the next line. Do not put "by" on the same visual line as the name.
-- Never leave short words such as "of", "guy", "day", "and", or "the" stranded on their own line. Avoid single-word final lines by balancing the wrap.
-- Do not use script or cursive fonts. A memorial plaque should feel calm, deliberate, and legible with upright serif/sans/display typography.
-- Make useful use of the available box. Prefer a compact, confident composition over excessive gaps and tiny supporting lines.
-- For short memorial wording like "In loving memory of [Name] ... forever in our hearts ... 2014-2026": use a calm compact hierarchy. The name may be the large focal point in an upright serif/display family; keep ordinary supporting copy upright and readable; reserve one normal-style serif/display accent for the emotional phrase only; classify year ranges as dates; avoid a large empty gap between the name and supporting line.
-- For dense copy, use fewer text elements with direct-child tspans, compact dy spacing, moderate hierarchy, and the full available width. Do not solve density with unreadably small type.
-${denseCopy ? `- THIS IS DENSE COPY: every prose line with four or more words MUST use font-size ${denseReadableFloor.toFixed(1)} or larger. This is a hard validation rule. Headings have no upper size limit: make them as strong as the remaining space permits after the readable prose is solved.` : ""}
-${guidanceRules.strictRules}
-
-COMPOSITION METHOD:
-1. Read the wording and identify title, date, and prose groups.
-2. Apply USER COMPOSER GUIDANCE before style defaults. If guidance conflicts with the archetype style, the user guidance wins.
-3. Allocate the full box deliberately. Use confident headings and readable prose, not a narrow miniature column.
-4. For multi-line prose, use one <text> block with direct-child <tspan x="..."> lines where practical. Keep the same measured left edge across prose lines when using text-anchor="start".
-5. Check the longest line against the available width and check the first and last baselines against the available height.
-6. Return the final SVG only after balancing the vertical rhythm.
-
-INSCRIPTION, between delimiters:
----BEGIN INSCRIPTION---
-${inscription}
----END INSCRIPTION---
-`;
-
-  const response = await retryWrapper(async () => ai.models.generateContent({
-    model: "gemini-3.5-flash",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          reasoning: { type: Type.STRING },
-          svgContent: { type: Type.STRING },
+  let repair = '';
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const response = await retryWrapper(async () => ai.models.generateContent({
+      model: PLAQUE_TEXT_MODEL,
+      contents: prompt + repair,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: { reasoning: { type: Type.STRING }, svgContent: { type: Type.STRING } },
+          required: ['reasoning', 'svgContent'],
         },
-        required: ["reasoning", "svgContent"],
       },
-    },
-  }));
-
-  if (!response.text) throw new Error("No authored typography SVG returned from Gemini");
-  const parsed = JSON.parse(response.text);
-  const extractedSvg = extractTypographyFromAuthoredSvg(String(parsed.svgContent || ""), box);
-  const guidedSvg = splitShortLeadInNameLines(
-    removeStandaloneDecorativeSymbolText(applyComposerGuidancePostProcess(extractedSvg, guidanceRules))
-  );
-  return {
-    reasoning: normalizeSpace([
-      String(parsed.reasoning || "Model-authored SVG typography layout accepted without proof gates."),
-      guidanceRules.reasoningSuffix,
-    ].filter(Boolean).join(" ")),
-    svgContent: guidedSvg,
-  };
+    }), 1, 750);
+    try {
+      if (!response.text) throw new Error('No typography was returned.');
+      const parsed = JSON.parse(response.text);
+      const checked = validateAuthoredTypographySvg(String(parsed.svgContent || ''), inscription, box);
+      const guided = applyComposerGuidancePostProcess(checked, guidanceRules);
+      const svgContent = proveRenderedTypographySvg(guided, inscription, box);
+      return { svgContent, reasoning: normalizeSpace([String(parsed.reasoning || 'Balanced inscription layout.'), guidanceRules.reasoningSuffix].filter(Boolean).join(' ')) };
+    } catch (error) {
+      if (attempt === 1) throw error;
+      repair = `\n\nThe first composition failed a layout check: ${String((error as Error).message)}. Recompose from the original inscription. Fix this issue without changing any wording.`;
+    }
+  }
+  throw new Error('The inscription could not be composed.');
 }
 
 function renderStructuredLayoutToSvg(layout: StructuredTextLayout, width: number, height: number, shape: Shape, style: DesignStyle): string {
@@ -1135,7 +1089,7 @@ ${promptText}
 `;
 
   const response = await retryWrapper(async () => ai.models.generateContent({
-    model: "gemini-3.5-flash",
+    model: PLAQUE_TEXT_MODEL,
     contents: prompt,
     config: {
       responseMimeType: "application/json",
@@ -1251,7 +1205,7 @@ ${source}
 `;
 
   const response = await retryWrapper(async () => ai.models.generateContent({
-    model: "gemini-3.5-flash",
+    model: PLAQUE_TEXT_MODEL,
     contents: prompt,
     config: {
       responseMimeType: "application/json",
@@ -1462,7 +1416,7 @@ Faithfully transcribe this exact typographic design into clean SVG code followin
   try {
     const response = await retryWrapper(async () => {
       return await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: PLAQUE_TEXT_MODEL,
         contents: {
           parts: [
             { text: userPrompt },
@@ -1552,7 +1506,7 @@ Apply the requested changes to the design. Preserve the overall structure but ma
   try {
     const response = await retryWrapper(async () => {
       return await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: PLAQUE_TEXT_MODEL,
         contents: userContent,
         config: {
           systemInstruction: systemPrompt,
@@ -1582,7 +1536,7 @@ Apply the requested changes to the design. Preserve the overall structure but ma
 
 // ─── Main Pipeline: generatePlaqueDesign ─────────────────────────
 // This is the single entry point for all layout generation.
-// - Current internal mode: accept first-pass typography quickly and let the user regenerate visually
+// - Model-authored SVG: preserve wording, check geometry, and allow one repair
 // - Fallback only: image concept → SVG transcription, still sanitized
 // - Edit existing: Direct SVG modification, then sanitized
 export const generatePlaqueDesign = async (
@@ -1621,7 +1575,7 @@ export const generatePlaqueDesign = async (
   if (semanticLayoutExperimentEnabled()) {
     try {
       onPhaseChange?.('transcribe');
-      console.log("Generating semantic inscription plan with gemini-3.5-flash...");
+      console.log("Generating semantic inscription plan with gemini-3.8-flash...");
       const semanticPlan = preserveExactStructuredWording(
         await generateStructuredTextLayout(
           promptText,
@@ -1671,8 +1625,8 @@ export const generatePlaqueDesign = async (
       const composition = composeEditorialTypography(promptText, textBox, shape, resolvedStyle);
       onPhaseChange?.(null);
       return {
-        svgContent: splitShortLeadInNameLines(composition.svgContent),
-        reasoning: `Composer Lab accepted without proof gates: ${composition.reasoning}`,
+        svgContent: proveRenderedTypographySvg(composition.svgContent, promptText, textBox),
+        reasoning: composition.reasoning,
         conceptImageUrl: null,
       };
     } catch (error) {
@@ -1683,7 +1637,7 @@ export const generatePlaqueDesign = async (
   // ── CURRENT FALLBACK: Gemini owns the composition; local code only proves it is safe and exact. ──
   try {
     onPhaseChange?.('transcribe');
-    console.log("Generating model-authored inscription SVG with gemini-3.5-flash...");
+    console.log("Generating model-authored inscription SVG with gemini-3.8-flash...");
     const authoredTypography = await generateAuthoredTypographySvg(
       promptText,
       width,
@@ -1696,7 +1650,7 @@ export const generatePlaqueDesign = async (
     onPhaseChange?.(null);
     return {
       svgContent: authoredTypography.svgContent,
-      reasoning: `Model-authored typography accepted without proof gates: ${authoredTypography.reasoning}`,
+      reasoning: authoredTypography.reasoning,
       conceptImageUrl: null,
     };
   } catch (error) {
@@ -1706,11 +1660,11 @@ export const generatePlaqueDesign = async (
   // ── LOCAL FALLBACK: Fast context-aware renderer against the same real text box. ──
   try {
     const structuredLayout = inferLocalStructuredLayout(promptText);
-    const svgContent = splitShortLeadInNameLines(renderStructuredLayoutToSvg(structuredLayout, textBox.width, textBox.height, shape, resolvedStyle));
+    const svgContent = proveRenderedTypographySvg(renderStructuredLayoutToSvg(structuredLayout, textBox.width, textBox.height, shape, resolvedStyle), promptText, textBox);
     onPhaseChange?.(null);
     return {
       svgContent,
-      reasoning: `Local layout accepted without proof gates: ${structuredLayout.reasoning}`,
+      reasoning: `A simple layout was used because the AI layout was unavailable. Check the proof before ordering. ${structuredLayout.reasoning}`,
       conceptImageUrl: null,
     };
   } catch (error) {
@@ -1718,11 +1672,17 @@ export const generatePlaqueDesign = async (
   }
 
   const fallbackLayout = fallbackStructuredLayout(promptText);
-  const svgContent = splitShortLeadInNameLines(renderStructuredLayoutToSvg(fallbackLayout, textBox.width, textBox.height, shape, resolvedStyle));
+  let svgContent: string;
+  try {
+    svgContent = proveRenderedTypographySvg(renderStructuredLayoutToSvg(fallbackLayout, textBox.width, textBox.height, shape, resolvedStyle), promptText, textBox);
+  } catch {
+    onPhaseChange?.(null);
+    throw new Error('We could not fit this wording into a clear, readable proof. Try a larger plaque, reduce the wording or contact us for help.');
+  }
   onPhaseChange?.(null);
   return {
     svgContent,
-    reasoning: "Minimal deterministic fallback accepted without proof gates.",
+    reasoning: 'A simple layout was used because the AI layout was unavailable. Check the proof before ordering.',
     conceptImageUrl: null,
   };
 };

@@ -1,4 +1,5 @@
 const { chromium } = require("playwright");
+const { enterProofBench, clickJourney } = require("./designer-test-helpers.cjs");
 
 const APP_URL = process.env.APP_URL || "http://127.0.0.1:4179/";
 
@@ -6,28 +7,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function clickJourney(page, label) {
-  await page.evaluate((stepLabel) => {
-    const button = Array.from(document.querySelectorAll("button")).find((candidate) =>
-      new RegExp(`^\\d+\\s*${stepLabel}$`, "i").test((candidate.textContent || "").trim().replace(/\s+/g, "")),
-    );
-    if (!button) throw new Error(`${stepLabel} journey button was not found`);
-    button.click();
-  }, label.replace(/\s+/g, "\\s*"));
-}
 
-async function enterProofBench(page) {
-  if (await page.locator(".proofbench-board").count()) return;
-  await page.evaluate(() => {
-    const button = Array.from(document.querySelectorAll("button")).find((candidate) => {
-      const text = (candidate.textContent || "").trim().replace(/\s+/g, " ");
-      return text === "Design" || text === "Design now" || text === "Design a plaque";
-    });
-    if (!button) throw new Error("Design entry button was not found");
-    button.click();
-  });
-  await page.waitForSelector(".proofbench-board", { timeout: 5000 });
-}
 
 async function configureOvalScallop(page) {
   await clickJourney(page, "Size\\/Shape");
@@ -36,10 +16,7 @@ async function configureOvalScallop(page) {
   await clickJourney(page, "Fixings and border");
   await page.getByRole("button", { name: /Decorative caps/i }).click();
   await page.getByRole("button", { name: /^Border$/i }).click();
-  const borderToggle = page.getByRole("button", { name: /^Border (on|off)$/i });
-  if (/off/i.test(await borderToggle.textContent())) {
-    await borderToggle.click();
-  }
+  await page.getByRole("button", { name: /^Single\s/i }).click();
   await page.getByRole("button", { name: /^Scalloped/i }).click();
   await page.waitForFunction(() => !!document.querySelector("#border-layer .engraved-border"), null, { timeout: 5000 });
 }
@@ -54,10 +31,7 @@ async function configureOvalScallop(page) {
 
   await clickJourney(desktop, "Fixings and border");
   await desktop.getByRole("button", { name: /^Border$/i }).click();
-  const borderToggle = desktop.getByRole("button", { name: /^Border (on|off)$/i });
-  if (/off/i.test(await borderToggle.textContent())) {
-    await borderToggle.click();
-  }
+  await desktop.getByRole("button", { name: /^Single\s/i }).click();
   const desktopGeometry = await desktop.evaluate(() => {
     const plateGroup = document.querySelector("#plate-group");
     const firstPlateChild = plateGroup?.firstElementChild;

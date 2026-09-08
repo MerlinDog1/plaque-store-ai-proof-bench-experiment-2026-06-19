@@ -4,6 +4,7 @@ import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTit
 import { PlaqueState } from '../types';
 import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
 import { SeoRankTracker } from './SeoRankTracker';
+import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, shopFaqs } from './Shopfront';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -828,7 +829,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
       title: 'Custom Plaque FAQs UK | InstaPlaque',
       description: 'Answers about custom plaque prices, materials, proofing, UK delivery, fixings, aged brass and bespoke plaque orders.',
       path: routePath,
-      schema: [faqSchema(homeFaqs)],
+      schema: [faqSchema(shopFaqs)],
     };
   }
   if (view === 'quote') {
@@ -908,7 +909,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
           { name: 'Home', url: siteBaseUrl },
           { name: selectedProduct.title, url: `${siteBaseUrl}/${selectedProduct.slug}` },
         ]),
-        faqSchema(selectedProduct.faqs),
+        faqSchema(mergeFaqs(selectedProduct.faqs, shopFaqs).slice(0, 6)),
       ],
     };
   }
@@ -923,7 +924,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
           { name: 'Home', url: siteBaseUrl },
           { name: selectedLanding.title, url: `${siteBaseUrl}/${selectedLanding.slug}` },
         ]),
-        faqSchema(selectedLanding.faqs),
+        faqSchema(mergeFaqs(selectedLanding.faqs, shopFaqs).slice(0, 6)),
       ],
     };
   }
@@ -931,11 +932,11 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
     title: 'Custom Brass & Stainless Steel Plaques UK | InstaPlaque',
     description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK mainland delivery before you order.',
     path: '/',
-    schema: [productListSchema(), faqSchema(homeFaqs)],
+    schema: [productListSchema(), faqSchema(shopFaqs)],
   };
 };
 
-const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLanding: SeoLandingPage) => {
+export const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLanding: SeoLandingPage) => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const config = seoConfigForView(view, selectedProduct, selectedLanding);
@@ -976,6 +977,7 @@ const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLand
       document.head.appendChild(schemaElement);
     }
     schemaElement.textContent = JSON.stringify(routeSchema);
+    document.getElementById('instaplaque-prerender-route-schema')?.remove();
   }, [view, selectedProduct, selectedLanding]);
 };
 
@@ -1306,16 +1308,7 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
 }
 
 function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLaunchProduct'>) {
-  return (
-    <div className="commerce-page">
-      <SiteHero onStartDesign={props.onStartDesign} />
-      <ProofStorySection onStartDesign={props.onStartDesign} />
-      <ProductGrid onStartDesign={props.onStartDesign} />
-      <SeoLandingLinks onNavigate={props.onNavigate} />
-      <HomeMaterialPanels />
-      <HomeFaq />
-    </div>
-  );
+  return <ShopHome onStartDesign={props.onStartDesign} />;
 }
 
 function ProductPage({ selectedProduct, onStartDesign, onNavigate }: Pick<SiteProps, 'selectedProduct' | 'onStartDesign' | 'onNavigate'>) {
@@ -2704,9 +2697,9 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
         />
         <nav className="commerce-footer-legal" aria-label="Legal pages">
           {footerLinks.map((link) => (
-            <button key={link.view} type="button" onClick={() => onNavigate(link.view)}>
+            <a key={link.view} href={link.view === 'returns' ? '/returns-and-cancellations' : `/${link.view}`}>
               {link.label}
-            </button>
+            </a>
           ))}
         </nav>
       </div>
@@ -2715,8 +2708,6 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 }
 
 export function SiteExperience(props: SiteProps) {
-  useSeoMeta(props.view, props.selectedProduct, props.selectedLanding);
-
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     document.querySelector('main')?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -2725,15 +2716,15 @@ export function SiteExperience(props: SiteProps) {
   let page: React.ReactNode;
 
   if (props.view === 'product') {
-    page = <ProductPage selectedProduct={props.selectedProduct} onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />;
+    page = <ShopProduct product={props.selectedProduct} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
   } else if (props.view === 'landing') {
-    page = <LandingPage selectedLanding={props.selectedLanding} onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />;
+    page = <ShopLanding landing={props.selectedLanding} onLaunch={() => props.onLaunchProduct(productFamilies.find(product => product.slug === props.selectedLanding.relatedProductSlug) || productFamilies[0])} />;
   } else if (props.view === 'materials') {
-    page = <MaterialsPage />;
+    page = <ShopMaterials />;
   } else if (props.view === 'how') {
-    page = <HowItWorksPage />;
+    page = <ShopHelp />;
   } else if (props.view === 'faq') {
-    page = <FaqPage />;
+    page = <ShopHelp faq />;
   } else if (props.view === 'quote') {
     page = <QuotePage onStartDesign={props.onStartDesign} />;
   } else if (props.view === 'checkout') {
@@ -2765,7 +2756,7 @@ export function SiteExperience(props: SiteProps) {
   return (
     <>
       {page}
-      <CommerceFooter onNavigate={props.onNavigate} />
+      <ShopFooter />
     </>
   );
 }

@@ -1,5 +1,20 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { createServer } from 'vite';
+
+// Render the same shop components used in the browser, rather than a second
+// abbreviated version of the catalogue that drifts away from the visible page.
+const renderer = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom' });
+let shop, catalogue, ShopHeader;
+try {
+  shop = await renderer.ssrLoadModule('/components/Shopfront.tsx');
+  catalogue = await renderer.ssrLoadModule('/services/commerce.ts');
+  ShopHeader = (await renderer.ssrLoadModule('/components/Header.tsx')).Header;
+} finally {
+  await renderer.close();
+}
 
 const siteBaseUrl = 'https://instaplaque.co.uk';
 const shareImage = `${siteBaseUrl}/site-images/home-realistic-proof-row.jpg`;
@@ -417,6 +432,15 @@ const writePrerenderedPage = async ({
 }) => {
   const pathPart = slug ? `/${slug}` : '/';
   const url = `${siteBaseUrl}${pathPart}`;
+  const product = catalogue.productFamilies.find(item => item.slug === slug);
+  const landing = catalogue.seoLandingPages.find(item => item.slug === slug);
+  const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
+  if (contentComponent) {
+    const visibleFaqs = !(product || landing) ? shop.shopFaqs : [...(product || landing).faqs, ...shop.shopFaqs]
+      .filter((item, index, list) => list.findIndex(other => other.question === item.question) === index).slice(0, 6);
+    schema = schema.filter(item => item['@type'] !== 'FAQPage');
+    schema.push(faqSchema(visibleFaqs.map(item => [item.question, item.answer])));
+  }
   let html = baseHtml;
   html = replaceTag(html, /<title>.*?<\/title>/, `<title>${escapeAttr(title)}</title>`);
   html = replaceTag(html, /<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${escapeAttr(description)}" />`);
@@ -447,9 +471,15 @@ const writePrerenderedPage = async ({
     ],
   };
   html = html.replace('</head>', `  <script type="application/ld+json" id="instaplaque-prerender-route-schema">${JSON.stringify(routeSchema)}</script>\n</head>`);
+  const publicContent = contentComponent
+    ? renderToStaticMarkup(React.createElement(React.Fragment, null,
+      React.createElement(ShopHeader, { currentView: !slug ? 'home' : 'product', showPrice: false, priceLabel: '' }),
+      React.createElement('main', null, React.createElement(contentComponent, { product, landing, faq: slug === 'faq' })),
+      React.createElement(shop.ShopFooter)))
+    : staticPageMarkup({ title, heading, description, image, faqs, price, kind });
   html = html.replace(
     '<div id="root"></div>',
-    `<div id="root">${staticPageMarkup({ title, heading, description, image, faqs, price, kind })}</div>`,
+    `<div id="root">${publicContent}</div>`,
   );
 
   if (!slug) {
@@ -544,7 +574,7 @@ for (const page of indexableLandingPages) {
   });
 }
 
-const merchantFeedPages = pages.filter((page) => page.slug !== 'custom-plaques');
+const merchantFeedPages = indexablePages.filter((page) => page.slug !== 'custom-plaques');
 
 const feedItems = merchantFeedPages.map((page) => {
   const url = `${siteBaseUrl}/${page.slug}`;

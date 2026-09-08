@@ -12,6 +12,7 @@ interface InlineProofPayload {
   w: string;
   g: string | null;
   i: string;
+  c?: boolean;
 }
 
 export interface ResumableProofSnapshot {
@@ -19,6 +20,7 @@ export interface ResumableProofSnapshot {
   wording: string;
   generatedSvg: string | null;
   inscriptionGuidance: string;
+  layoutIsCurrent?: boolean;
 }
 
 const bytesToBase64Url = (bytes: Uint8Array) => {
@@ -81,6 +83,7 @@ export const createInlineProofResumeUrl = async (
     w: snapshot.wording,
     g: snapshot.generatedSvg,
     i: snapshot.inscriptionGuidance,
+    c: snapshot.layoutIsCurrent,
   };
   const encoded = bytesToBase64Url(await gzipText(JSON.stringify(payload)));
   const url = `${origin}/design#proof=${encoded}`;
@@ -118,5 +121,6 @@ export const decodeInlineProofResumeToken = async (
     wording: typeof payload.w === "string" ? payload.w : "",
     generatedSvg,
     inscriptionGuidance: typeof payload.i === "string" ? payload.i : "",
+    layoutIsCurrent: typeof payload.c === "boolean" ? payload.c : undefined,
   };
 };

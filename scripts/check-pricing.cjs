@@ -8,6 +8,11 @@ function assert(condition, message) {
 
 async function enterProofBench(page) {
   if (await page.locator(".proofbench-board").count()) return;
+  if (await page.locator('a.shop-header-cta').count()) {
+    await page.locator('a.shop-header-cta').click();
+    await page.waitForSelector('.proofbench-board');
+    return;
+  }
   await page.evaluate(() => {
     const button = Array.from(document.querySelectorAll("button")).find((candidate) => {
       const text = (candidate.textContent || "").trim().replace(/\s+/g, " ");
@@ -20,14 +25,8 @@ async function enterProofBench(page) {
 }
 
 async function clickJourneyStep(page, compactLabel) {
-  await page.evaluate((label) => {
-    const normalizedLabel = label.replace(/\s+/g, "");
-    const button = Array.from(document.querySelectorAll("button")).find((candidate) =>
-      (candidate.textContent || "").trim().replace(/\s+/g, "").includes(normalizedLabel),
-    );
-    if (!button) throw new Error(`${label} journey button was not found`);
-    button.click();
-  }, compactLabel);
+  const label = compactLabel.replace(/^\d+/, '');
+  await page.getByRole('button', { name: `Go to ${label === 'Size' ? 'Size/Shape' : label}`, exact: true }).click();
 }
 
 (async () => {
@@ -36,7 +35,7 @@ async function clickJourneyStep(page, compactLabel) {
 
   await page.goto(APP_URL, { waitUntil: "domcontentloaded", timeout: 60000 });
   await page.waitForFunction(
-    () => Array.from(document.querySelectorAll("button")).some((candidate) => {
+    () => Boolean(document.querySelector('a.shop-header-cta')) || Array.from(document.querySelectorAll("button")).some((candidate) => {
       const text = (candidate.textContent || "").trim().replace(/\s+/g, " ");
       return text === "Design" || text === "Design now" || text === "Design a plaque";
     }),
@@ -45,7 +44,7 @@ async function clickJourneyStep(page, compactLabel) {
   );
   await enterProofBench(page);
 
-  await page.waitForFunction(() => /1\s*Size\/Shape/.test(document.body.innerText) && /2\s*Material/.test(document.body.innerText), null, { timeout: 5000 });
+  await page.getByRole('navigation', { name: 'Plaque design steps' }).waitFor();
   await clickJourneyStep(page, "1Size");
   await page.waitForFunction(() => /A4 landscape[\s\S]*from £145/.test(document.body.innerText), null, { timeout: 5000 });
   await page.waitForFunction(() => /Bench plaque[\s\S]*from £58\.50/.test(document.body.innerText), null, { timeout: 5000 });

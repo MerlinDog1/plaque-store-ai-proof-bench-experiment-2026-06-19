@@ -1,4 +1,5 @@
 import { isIP } from "node:net";
+import { PLAQUE_TEXT_MODEL, LEGACY_PLAQUE_TEXT_MODEL } from '../services/aiModels.mjs';
 
 export const MAX_GEMINI_REQUEST_BYTES = 10 * 1024 * 1024;
 
@@ -10,7 +11,7 @@ const MAX_PARTS = 4;
 const MAX_SCHEMA_DEPTH = 7;
 const MAX_SCHEMA_NODES = 128;
 
-const STRUCTURED_TEXT_MODEL = "gemini-3.5-flash";
+const STRUCTURED_TEXT_MODELS = new Set([PLAQUE_TEXT_MODEL, LEGACY_PLAQUE_TEXT_MODEL]);
 const PROMPT_ENHANCEMENT_MODEL = "gemini-3-flash-preview";
 const IMAGE_MIME_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 const STANDARD_IMAGE_ASPECT_RATIOS = new Set([
@@ -290,7 +291,7 @@ const canonicalizeStructuredText = (payload, config) => {
     operation: "structured-content",
     cost: 1,
     request: {
-      model: payload.model,
+      model: PLAQUE_TEXT_MODEL,
       contents,
       config: nextConfig,
     },
@@ -390,7 +391,7 @@ export const validateGeminiGenerateContentRequest = (value) => {
   if (typeof payload.model !== "string") fail("Gemini request model must be a string.");
   const config = assertRecord(payload.config, "config");
 
-  if (payload.model === STRUCTURED_TEXT_MODEL) return canonicalizeStructuredText(payload, config);
+  if (STRUCTURED_TEXT_MODELS.has(payload.model)) return canonicalizeStructuredText(payload, config);
   if (payload.model === PROMPT_ENHANCEMENT_MODEL) return canonicalizePromptEnhancement(payload, config);
   const imageProfile = IMAGE_MODEL_PROFILES.get(payload.model);
   if (imageProfile) return canonicalizeImageGeneration(payload, config, imageProfile);

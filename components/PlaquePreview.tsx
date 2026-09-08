@@ -585,8 +585,8 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     </g>
   `;
   const promptContentByStep: Record<number, string> = {
-    0: materialPromptContent,
-    1: sizePromptContent,
+    0: sizePromptContent,
+    1: materialPromptContent,
     2: colourPromptContent,
     3: fixingsPromptContent,
     4: woodPromptContent,
@@ -619,7 +619,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
       {/* Background grid pattern */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(#d9b45f 1px, transparent 1px), linear-gradient(90deg, #d9b45f 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
 
-      <div className="no-print absolute right-3 top-3 z-20 hidden flex-wrap items-center justify-end gap-1 text-[11px] font-black text-[#9a6a16] md:flex">
+      <div className="designer-preview-tools no-print absolute right-3 top-3 z-20 hidden flex-wrap items-center justify-end gap-1 text-[11px] font-black text-[#9a6a16] md:flex">
         <button
           type="button"
           onClick={() => updatePreviewZoom(previewZoom - 25)}

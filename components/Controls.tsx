@@ -545,7 +545,7 @@ export const Controls: React.FC<Props> = ({
     const textarea = inscriptionTextareaRef.current;
     if (!textarea) return;
     textarea.style.height = 'auto';
-    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 240), 360);
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 150), 300);
     textarea.style.height = `${nextHeight}px`;
     textarea.style.overflowY = textarea.scrollHeight > nextHeight ? 'auto' : 'hidden';
   };
@@ -970,7 +970,7 @@ export const Controls: React.FC<Props> = ({
               </span>
             )}
           </span>
-          <span className="mt-1 block text-[11px] font-bold opacity-70">{preset.note}</span>
+          <span className="mt-1 block text-[11px] font-bold opacity-70">{preset.note.replace(/^\d+\s*x\s*\d+\s*mm\s*·\s*/i, '')}</span>
         </span>
         <span className="flex flex-col items-end gap-1">
           <span className="size-dims rounded-full px-2 py-1 text-[10px] font-black">{preset.width} x {preset.height}</span>
@@ -1031,14 +1031,7 @@ export const Controls: React.FC<Props> = ({
             </div>
 
             {sizeMode === 'standard' && (
-              <div className="flex items-start justify-between gap-3">
-                <div className="mt-4">
-                  <div className="text-sm font-black">Standard size presets</div>
-                  <div className="text-xs leading-5 text-[#6a746d]">
-                    Choose a common production size. Prices update from your selected material.
-                  </div>
-                </div>
-              </div>
+              <p className="mt-4 text-xs leading-5 text-[#6a746d]">Sizes in millimetres. Prices update with your finish.</p>
             )}
 
             {sizeMode === 'standard' ? (
@@ -1881,13 +1874,10 @@ export const Controls: React.FC<Props> = ({
               </div>
               <div className="min-w-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f2d688]">
-                  Intelligent typesetter
+                  Your inscription
                 </p>
-                <h3 className="mt-1 text-lg font-black leading-tight text-[#edf3ef]">
-                  Enter your text below and our typesetter will lay it out.
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-[#aab8b0]">
-                  It corrects spelling and grammar, chooses the line breaks, hierarchy, spacing, and font balance for the plaque size you have selected.
+                <p className="mt-2 text-xs leading-5 text-[#aab8b0]">
+                  Type your wording exactly as it should appear. We’ll arrange the layout for you.
                 </p>
               </div>
             </div>
@@ -1924,7 +1914,7 @@ export const Controls: React.FC<Props> = ({
                   requestAnimationFrame(resizeInscriptionTextarea);
                 }}
                 placeholder="Type the words you want on the plaque..."
-                className={`${fieldClass} mt-1 min-h-[240px] max-h-[360px] resize-none overflow-hidden normal-case leading-6 tracking-normal`}
+                className={`${fieldClass} mt-1 min-h-[150px] max-h-[300px] resize-none overflow-auto normal-case leading-6 tracking-normal`}
               />
             </div>
           </div>
