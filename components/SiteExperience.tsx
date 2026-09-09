@@ -5,6 +5,7 @@ import { PlaqueState } from '../types';
 import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
 import { SeoRankTracker } from './SeoRankTracker';
 import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, shopFaqs } from './Shopfront';
+import { ShopAbout, aboutPage } from './ShopGuides';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -637,6 +638,7 @@ const homeFaqs: FaqItem[] = [
 const routePathForView = (view: SiteView) => {
   const paths: Partial<Record<SiteView, string>> = {
     home: '/',
+    about: '/about',
     materials: '/materials',
     how: '/how-it-works',
     faq: '/faq',
@@ -781,6 +783,9 @@ const homepageProducts = productFamilies.filter((product) => homepageProductSlug
 
 const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, selectedLanding: SeoLandingPage): SeoMetaConfig => {
   const routePath = routePathForView(view);
+  if (view === 'about') {
+    return { ...aboutPage, path: routePath, schema: [{ '@type': 'AboutPage', name: 'About InstaPlaque', url: 'https://instaplaque.co.uk/about' }] };
+  }
   if (view === 'plaque') {
     return {
       title: 'Design a Custom Plaque Online | Free InstaPlaque Proof',
@@ -2715,7 +2720,9 @@ export function SiteExperience(props: SiteProps) {
 
   let page: React.ReactNode;
 
-  if (props.view === 'product') {
+  if (props.view === 'about') {
+    page = <ShopAbout />;
+  } else if (props.view === 'product') {
     page = <ShopProduct product={props.selectedProduct} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
   } else if (props.view === 'landing') {
     page = <ShopLanding landing={props.selectedLanding} onLaunch={() => props.onLaunchProduct(productFamilies.find(product => product.slug === props.selectedLanding.relatedProductSlug) || productFamilies[0])} />;

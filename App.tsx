@@ -44,6 +44,7 @@ const PROOF_BENCH_INITIAL_STATE: PlaqueState = {
 
 const routeViews: Partial<Record<string, SiteView>> = {
   '/': 'home',
+  '/about': 'about',
   '/materials': 'materials',
   '/how-it-works': 'how',
   '/faq': 'faq',
@@ -62,6 +63,7 @@ const routeViews: Partial<Record<string, SiteView>> = {
 
 const viewRoutes: Partial<Record<SiteView, string>> = {
   home: '/',
+  about: '/about',
   materials: '/materials',
   how: '/how-it-works',
   faq: '/faq',

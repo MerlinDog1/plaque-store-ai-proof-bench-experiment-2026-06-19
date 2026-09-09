@@ -18,6 +18,7 @@ export const DEFAULT_PRODUCT_SLUG = 'bench-plaques';
 
 export type SiteView =
   | 'home'
+  | 'about'
   | 'product'
   | 'landing'
   | 'materials'
@@ -549,20 +550,24 @@ export const seoLandingPages: SeoLandingPage[] = [
     shortTitle: 'Garden',
     eyebrow: 'Outdoor dedication plaques',
     description: 'Custom garden plaques for memorial corners, trees, benches, walls and planted spaces.',
-    seoTitle: 'Garden Plaques UK | Custom Memorial Garden Plaques',
-    seoDescription: 'Garden plaques for memorial corners, trees, benches, planted areas, walls and family gardens. Choose brass or stainless steel and check a proof before ordering.',
-    heroCopy: 'Garden plaques need to feel personal but stay readable outdoors. They are used for memorial corners, trees, benches, planted areas, walls and family gardens.',
+    seoTitle: 'Garden Memorial Plaques UK | Free Online Proof | InstaPlaque',
+    seoDescription: 'Personalise a brass or stainless steel garden plaque for a tree, bench or memorial corner. Compare sizes and fixings, then check a free proof before you buy.',
+    heroCopy: 'Mark a favourite spot, a memorial tree or a garden bench with words of your own. Choose brass or stainless steel, leave the inscription room to breathe, and check a free online proof before you order.',
     image: '/site-images/home-carousel-garden-brass.webp',
     relatedProductSlug: 'memorial-plaques',
     proofCta: 'Start a garden plaque proof',
     sections: [
       {
-        title: 'Keep the wording simple',
-        copy: 'Names, dates and a short dedication usually work best outside. The proof helps stop the inscription becoming too small or crowded.',
+        title: 'Choose a size for the whole inscription',
+        copy: 'A 150 × 50 mm bench plaque suits a name, dates and a short dedication. A5 (210 × 148 mm) gives a longer tribute more room. A4 (297 × 210 mm) suits a shared garden dedication or a message with several names. Measure the available mounting surface before choosing.',
       },
       {
         title: 'Choose the finish by setting',
-        copy: 'Stainless steel suits clean modern gardens. Brass and aged brass sit well with planting, stone, timber and more traditional spaces.',
+        copy: 'Brass gives a warm contrast against timber and stone. Aged brass is hand-patinated and sealed for a softer appearance. Stainless steel has a silver finish that suits a simple, contemporary garden. Brushed and polished brass naturally change over time; choose with that changing appearance in mind.',
+      },
+      {
+        title: 'Give every line enough space',
+        copy: 'Make the name or dedication the clearest part of the layout, then place dates and the personal message beneath it. Keep lettering clear of the border and fixing holes. View the proof at the intended plaque size: if it feels crowded, shorten the message or choose a larger plaque.',
       },
     ],
     faqs: [

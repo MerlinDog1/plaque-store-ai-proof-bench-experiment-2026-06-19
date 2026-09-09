@@ -28,7 +28,7 @@ const redirectedPaths = new Set([
   '/tree-plaques',
 ]);
 
-assert(sitemapUrls.length === 18, `Expected 18 focused sitemap URLs, found ${sitemapUrls.length}`);
+assert(sitemapUrls.length === 19, `Expected 19 focused sitemap URLs, found ${sitemapUrls.length}`);
 for (const url of sitemapUrls) {
   assert(!redirectedPaths.has(new URL(url).pathname), `Redirected URL remains in sitemap: ${url}`);
 }
@@ -54,7 +54,7 @@ assert(home.includes('hreflang="en-GB" href="https://instaplaque.co.uk/"'), 'Hom
 assert(home.includes('home-gallery-brass-bench.webp'), 'Shop hero image is missing');
 assert(robots.includes('Sitemap: https://instaplaque.co.uk/sitemap.xml'), 'robots.txt sitemap declaration is missing');
 
-for (const route of ['memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques', 'garden-plaques', 'opening-plaques']) {
+for (const route of ['about', 'memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques', 'garden-plaques', 'opening-plaques']) {
   const routeHtml = await read(`dist/${route}/index.html`);
   assert(routeHtml.includes('data-prerendered="true"'), `Missing crawlable HTML for /${route}`);
   assert(routeHtml.includes(`rel="canonical" href="https://instaplaque.co.uk/${route}"`), `Bad canonical for /${route}`);
@@ -71,4 +71,4 @@ for (const route of redirectedPaths) {
   assert(!exists, `Redirected route was still prerendered: ${route}`);
 }
 
-console.log('Live SEO checks passed: 18 sitemap URLs, focused redirects, static route HTML, canonicals and LCP preloads.');
+console.log('Live SEO checks passed: 19 sitemap URLs, focused redirects, static route HTML, canonicals and LCP preloads.');

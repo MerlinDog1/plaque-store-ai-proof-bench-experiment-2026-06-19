@@ -1,4 +1,5 @@
 import React from "react";
+import { GardenAdvice, CollectionLinks } from './ShopGuides';
 import {
   productFamilies,
   ProductFamily,
@@ -408,6 +409,8 @@ export function ShopProduct({
         </div>
       </section>
       <ShopProcess />
+      {product.slug === 'garden-plaques' && <GardenAdvice />}
+      <CollectionLinks slug={product.slug} />
       <ShopFaq faqs={faqs} />
       <section className="shop-closing">
         <h2>Put your words in place.</h2>
@@ -460,6 +463,11 @@ export function ShopMaterials() {
           Compare the colour and character of each finish. Start with brass or
           stainless steel, then choose a surface and optional backing in the
           designer.
+        </p>
+        <p className="shop-material-uses">
+          Choosing for a particular place? See how to plan a{' '}
+          <a href="/garden-plaques">garden memorial plaque</a> or arrange a{' '}
+          <a href="/opening-plaques">building opening inscription</a>.
         </p>
         <div className="shop-collections">
           {materialStories.map((material) => (
@@ -539,6 +547,7 @@ export function ShopFooter() {
         <a href="/custom-plaques">Custom plaques</a>
       </nav>
       <nav aria-label="Help and information">
+        <a href="/about">About InstaPlaque</a>
         <a href="/materials">Materials</a>
         <a href="/how-it-works">How it works</a>
         <a href="/faq">Questions & answers</a>
