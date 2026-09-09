@@ -7,9 +7,10 @@ import { createServer } from 'vite';
 // Render the same shop components used in the browser, rather than a second
 // abbreviated version of the catalogue that drifts away from the visible page.
 const renderer = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom' });
-let shop, catalogue, ShopHeader;
+let shop, catalogue, ShopHeader, guides;
 try {
   shop = await renderer.ssrLoadModule('/components/Shopfront.tsx');
+  guides = await renderer.ssrLoadModule('/components/ShopGuides.tsx');
   catalogue = await renderer.ssrLoadModule('/services/commerce.ts');
   ShopHeader = (await renderer.ssrLoadModule('/components/Header.tsx')).Header;
 } finally {
@@ -251,7 +252,10 @@ const indexableProductSlugs = new Set([
 ]);
 const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques']);
 const indexablePages = pages.filter((page) => indexableProductSlugs.has(page.slug));
-const indexableLandingPages = landingPages.filter((page) => indexableLandingSlugs.has(page.slug));
+const indexableLandingPages = landingPages.filter((page) => indexableLandingSlugs.has(page.slug)).map(page => {
+  const visiblePage = catalogue.seoLandingPages.find(item => item.slug === page.slug);
+  return { ...page, title: visiblePage.seoTitle, description: visiblePage.seoDescription };
+});
 
 const faqSchema = (faqs) => ({
   '@type': 'FAQPage',
@@ -286,6 +290,11 @@ const productListSchema = () => ({
 });
 
 const routePages = [
+  {
+    slug: 'about',
+    ...guides.aboutPage,
+    schema: [{ '@type': 'AboutPage', name: 'About InstaPlaque', url: `${siteBaseUrl}/about` }],
+  },
   {
     slug: '',
     title: 'Custom Brass & Stainless Steel Plaques UK | InstaPlaque',
@@ -389,6 +398,7 @@ const primaryNav = [
   ['How it works', '/how-it-works'],
   ['FAQs', '/faq'],
   ['Contact', '/contact'],
+  ['About InstaPlaque', '/about'],
 ];
 
 const staticNav = () => `<nav aria-label="Primary navigation"><a href="/">InstaPlaque home</a>${primaryNav
@@ -434,8 +444,8 @@ const writePrerenderedPage = async ({
   const url = `${siteBaseUrl}${pathPart}`;
   const product = catalogue.productFamilies.find(item => item.slug === slug);
   const landing = catalogue.seoLandingPages.find(item => item.slug === slug);
-  const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
-  if (contentComponent) {
+  const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : slug === 'about' ? guides.ShopAbout : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
+  if (contentComponent && slug !== 'about') {
     const visibleFaqs = !(product || landing) ? shop.shopFaqs : [...(product || landing).faqs, ...shop.shopFaqs]
       .filter((item, index, list) => list.findIndex(other => other.question === item.question) === index).slice(0, 6);
     schema = schema.filter(item => item['@type'] !== 'FAQPage');
