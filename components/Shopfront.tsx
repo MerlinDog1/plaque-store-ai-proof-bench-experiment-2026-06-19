@@ -1,22 +1,28 @@
 import React from "react";
-import { GardenAdvice, CollectionLinks } from './ShopGuides';
+import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
+import { businessContact, productionTiming } from '../services/shopInformation';
 import {
   productFamilies,
   ProductFamily,
   materialStories,
   SeoLandingPage,
+  seoLandingPages,
 } from "../services/commerce";
 
 export const shopFaqs = [
   {
     question: "Can I see my plaque before I pay?",
     answer:
-      "Yes. Enter your wording and create a free online proof. Check names, dates, line breaks and fixings, and make changes before you order. You can download your proof and return to it later.",
+      "Yes. Create your layout in the online designer, with no account or payment needed. Check names, dates, line breaks and fixing positions, then download your proof PDF if you need time to decide. The PDF includes a link to return to your design. The proof is for approving wording and layout; screen colours and texture previews are illustrative.",
   },
   {
     question: "What is included in the price?",
     answer:
       "Standard plaque prices include engraving, standard fixings and UK mainland delivery. Wood backing, special finishes and other extras are priced in the designer before checkout.",
+  },
+  {
+    question: "How long will my plaque take?",
+    answer: productionTiming.faq,
   },
   {
     question: "Which material should I choose for outdoors?",
@@ -49,18 +55,23 @@ const collections = [
     detail: "Personal tributes for gardens, walls and quiet corners.",
   },
   {
-    slug: "brass-plaques",
-    image: "/site-images/home-gallery-brass-community.webp",
-    note: "Warm metal. A timeless finish.",
-    detail: "Traditional brass for dedications and building openings.",
+    slug: "garden-plaques",
+    image: "/site-images/home-carousel-garden-brass.webp",
+    note: "A dedication for a favourite place.",
+    detail: "Dedications for trees, planted spaces and garden walls.",
   },
   {
-    slug: "stainless-steel-plaques",
-    image: "/site-images/home-gallery-oval-steel.webp",
-    note: "Simple, contemporary and personal.",
-    detail: "Silver-toned plaques for modern spaces and outdoor use.",
+    slug: "opening-plaques",
+    image: "/site-images/home-gallery-brass-community.webp",
+    note: "Mark the occasion clearly.",
+    detail: "Formal inscriptions for buildings, schools and community spaces.",
   },
 ];
+
+const materialProductImages: Record<string, string> = {
+  'brass-plaques': '/site-images/home-gallery-brass-community.webp',
+  'stainless-steel-plaques': '/site-images/home-gallery-oval-steel.webp',
+};
 
 function DesignLink({
   onStart,
@@ -103,36 +114,38 @@ export function ShopCollections() {
     <section className="shop-section" id="products">
       <div className="shop-section-heading">
         <div>
-          <p className="shop-kicker">Made for your words</p>
+          <p className="shop-kicker">Choose by occasion</p>
           <h2>Find your plaque.</h2>
         </div>
         <p>
-          A person, a place, a moment. <br />
-          Start with what you want to mark.
+          Start with where your plaque will go. <br />
+          Choose brass or stainless steel in the designer.
         </p>
       </div>
       <div className="shop-collections">
         {collections.map((collection) => {
+          const landing = seoLandingPages.find((item) => item.slug === collection.slug);
           const product = productFamilies.find(
-            (item) => item.slug === collection.slug,
+            (item) => item.slug === (landing?.relatedProductSlug || collection.slug),
           )!;
+          const title = landing?.title || product.title;
           return (
             <a
               className="shop-collection"
-              href={`/${product.slug}`}
-              key={product.slug}
+              href={`/${collection.slug}`}
+              key={collection.slug}
             >
               <div className="shop-collection-image">
                 <img
                   src={collection.image}
-                  alt={`${product.title} design example`}
+                  alt={`${title} design example`}
                   width="1200"
                   height="1200"
                   loading="lazy"
                 />
               </div>
               <div className="shop-collection-title">
-                <h3>{product.title}</h3>
+                <h3>{title}</h3>
                 <span aria-hidden="true">↗</span>
               </div>
               <p>{collection.detail}</p>
@@ -142,12 +155,13 @@ export function ShopCollections() {
         })}
       </div>
       <p className="shop-smallprint">
-        Starting prices include engraving, standard fixings and UK mainland
-        delivery. Examples may show optional finishes or backing.
+        Starting prices are for stainless steel without wood backing, including
+        engraving, standard fixings and UK mainland delivery. Examples may show
+        brass, optional finishes or backing. Your selected options are priced in the designer.
       </p>
-      <nav className="shop-related" aria-label="More plaque collections">
-        <a href="/garden-plaques">Garden plaques ↗</a>
-        <a href="/opening-plaques">Opening plaques ↗</a>
+      <nav className="shop-related" aria-label="Materials and custom options">
+        <a href="/brass-plaques">Browse brass plaques ↗</a>
+        <a href="/stainless-steel-plaques">Browse stainless steel plaques ↗</a>
         <a href="/custom-plaques">Custom sizes & shapes ↗</a>
       </nav>
     </section>
@@ -160,7 +174,7 @@ export function ShopProcess() {
       <div className="shop-section">
         <div className="shop-section-heading">
           <div>
-            <p className="shop-kicker">See it before you order</p>
+            <p className="shop-kicker">Design online, at your own pace</p>
             <h2>Your words. Your approval.</h2>
           </div>
           <a className="shop-text-link" href="/how-it-works">
@@ -171,15 +185,15 @@ export function ShopProcess() {
           {[
             [
               "Choose your plaque",
-              "Pick a size and a metal finish. The price updates as you choose your options.",
+              "Choose the size, metal finish and fixings. See the price update as you change your options, including engraving and UK mainland delivery.",
             ],
             [
-              "Make it personal",
-              "Add your exact wording. Create a layout, then adjust the text and spacing until it feels right.",
+              "Create your layout online",
+              "Enter your wording and create a layout in the designer. Adjust the text and spacing, and download the proof PDF to review or share before paying.",
             ],
             [
               "Check, then order",
-              "Review the spelling, dates, layout and fixings. Approve your proof before your plaque is made.",
+              "Check every name, date and fixing position. Approve the layout, check the production estimate and pay securely. Production starts after approval and payment.",
             ],
           ].map(([title, copy], index) => (
             <article key={title}>
@@ -198,11 +212,8 @@ export function ShopFaq({ faqs = shopFaqs }: { faqs?: typeof shopFaqs }) {
   return (
     <section className="shop-section shop-faq">
       <div>
-        <p className="shop-kicker">A little help choosing</p>
-        <h2>
-          Before you <br />
-          make it yours.
-        </h2>
+        <p className="shop-kicker">Help before you order</p>
+        <h2>Your questions, answered.</h2>
         <p>Have something else in mind?</p>
         <a className="shop-text-link" href="/contact">
           Talk to us ↗
@@ -235,13 +246,14 @@ export function ShopHome({ onStartDesign }: { onStartDesign?: () => void }) {
             deserve to <em>stay.</em>
           </h1>
           <p className="shop-intro">
-            Remember someone. Celebrate a place. Mark a moment. Create a
-            personal engraved plaque, and see your design before you order.
+            Design your brass or stainless steel plaque online. See the price
+            as you choose, then check the wording and layout before you pay.
           </p>
           <DesignLink onStart={onStartDesign} />
           <p className="shop-hero-note">
-            Free online proof · No account needed
+            Free online designer & proof · No account needed
           </p>
+          <a className="shop-text-link shop-hero-how" href="#how-it-works">See how the designer works</a>
           <div className="shop-hero-price">
             <span>Bench plaques</span>
             <strong>
@@ -253,6 +265,7 @@ export function ShopHome({ onStartDesign }: { onStartDesign?: () => void }) {
             </strong>
             <span>with UK mainland delivery</span>
           </div>
+          <ProductionNote />
         </div>
         <figure className="shop-hero-image">
           <img
@@ -279,15 +292,13 @@ export function ShopHome({ onStartDesign }: { onStartDesign?: () => void }) {
           03 <strong>UK mainland delivery included</strong>
         </span>
       </div>
-      <ShopCollections />
       <ShopProcess />
+      <ShopCollections />
       <section className="shop-section shop-materials">
         <div>
-          <p className="shop-kicker">The finishing touch</p>
+          <p className="shop-kicker">Choose your material</p>
           <h2>
-            Warm brass.
-            <br />
-            Quietly striking steel.
+            Brass or stainless steel?
           </h2>
           <p>
             Choose the warmth of brass or the clean silver tone of stainless
@@ -325,7 +336,7 @@ export function ShopHome({ onStartDesign }: { onStartDesign?: () => void }) {
       <section className="shop-closing">
         <p className="shop-kicker">Start with a few words</p>
         <h2>Make something meaningful.</h2>
-        <p>Your proof is free. Take your time getting it right.</p>
+        <p>See the layout and price online. Save your free proof when you need more time.</p>
         <DesignLink onStart={onStartDesign} className="shop-button-light" />
       </section>
     </div>
@@ -356,7 +367,7 @@ export function ShopProduct({
       <section className="shop-product-hero">
         <figure>
           <img
-            src={collection?.image || product.image}
+            src={collection?.image || materialProductImages[product.slug] || product.image}
             alt={`${product.title} design example`}
             width="1200"
             height="1200"
@@ -382,8 +393,9 @@ export function ShopProduct({
             Design {product.shortTitle.toLowerCase()} plaque
           </DesignLink>
           <p className="shop-hero-note">
-            Free proof. Check every detail before you pay.
+            Create your free proof online. No account needed.
           </p>
+          <ProductionNote />
           <ul className="shop-product-benefits">
             {product.bestFor.map((item) => (
               <li key={item}>{item}</li>
@@ -393,8 +405,8 @@ export function ShopProduct({
       </section>
       <section className="shop-section shop-buying-guide">
         <div>
-          <p className="shop-kicker">A considered choice</p>
-          <h2>Getting the details right.</h2>
+          <p className="shop-kicker">Size, wording and fitting</p>
+          <h2>Plan your {product.shortTitle.toLowerCase()} plaque.</h2>
           <a className="shop-text-link" href="/materials">
             Explore the finishes ↗
           </a>
@@ -408,13 +420,14 @@ export function ShopProduct({
           ))}
         </div>
       </section>
-      <ShopProcess />
+      {['bench-plaques', 'opening-plaques'].includes(product.slug) && <PlaqueWordingExamples slug={product.slug} />}
+      {!['bench-plaques', 'opening-plaques'].includes(product.slug) && <ShopProcess />}
       {product.slug === 'garden-plaques' && <GardenAdvice />}
       <CollectionLinks slug={product.slug} />
       <ShopFaq faqs={faqs} />
       <section className="shop-closing">
         <h2>Put your words in place.</h2>
-        <p>Build a free proof and see how your plaque could look.</p>
+        <p>Create your layout and see the price before you pay.</p>
         <DesignLink onStart={onLaunch} className="shop-button-light" />
       </section>
     </div>
@@ -488,6 +501,11 @@ export function ShopMaterials() {
             </article>
           ))}
         </div>
+        <nav className="shop-related" aria-label="Plaques by material">
+          <a href="/brass-plaques">Brass plaque sizes and options ↗</a>
+          <a href="/stainless-steel-plaques">Stainless steel plaque sizes and options ↗</a>
+        </nav>
+        <p className="shop-smallprint">Texture previews are illustrative. Your proof confirms wording, layout and selected options; colour and grain can look different on screen.</p>
       </section>
       <ShopFaq />
       <section className="shop-closing">
@@ -509,7 +527,7 @@ export function ShopHelp({ faq = false }: { faq?: boolean }) {
         <h1>
           {faq
             ? "Your questions, answered."
-            : "Make it personal. Get it right."}
+            : "Design, approve, then order."}
         </h1>
         <p className="shop-intro">
           Choose your plaque, add your exact wording and check the design before
@@ -518,6 +536,7 @@ export function ShopHelp({ faq = false }: { faq?: boolean }) {
         <DesignLink />
       </section>
       {!faq && <ShopProcess />}
+      {!faq && <ShopTurnaround />}
       <ShopFaq />
     </div>
   );
@@ -531,10 +550,9 @@ export function ShopFooter() {
           Insta<span>Plaque</span>
         </a>
         <p>Personal words, made lasting.</p>
-        <a href="mailto:hello@instaplaque.co.uk">hello@instaplaque.co.uk</a>
+        <a href={`mailto:${businessContact.email}`}>{businessContact.email}</a>
         <p className="shop-footer-address">
-          UK sole trader · 4 Dunkirk Avenue, Kettering, NN14 2PL, United
-          Kingdom. Not VAT registered.
+          UK sole trader · {businessContact.address}. Not VAT registered.
         </p>
       </div>
       <nav aria-label="Browse plaques">

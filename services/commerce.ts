@@ -248,15 +248,23 @@ export const productFamilies: ProductFamily[] = [
     description: 'Compact plaques for benches, seats and short outdoor dedications where the wording needs to stay crisp.',
     seoTitle: 'Bench Plaques UK | Custom Brass & Stainless Steel Bench Plaques',
     seoDescription: 'Order custom bench plaques in brass or stainless steel. Build a proof online, check the inscription and see live pricing before payment.',
-    seoIntro: 'Bench plaques are small, so the wording has to work hard. Start with a compact bench size, keep the inscription readable, and use the proof to check text, border and screw positions before ordering.',
+    seoIntro: 'Design a brass or stainless steel plaque for a bench or seat, starting at 150 × 50 mm. Measure the available space, add your dedication and check the layout and price online before you pay.',
     seoSections: [
       {
-        title: 'Outdoor bench plaques for short dedications',
-        copy: 'A bench plaque usually suits a name, dates and one short message. If the wording turns into a paragraph, move up a size rather than squeezing the text.',
+        title: 'Measure the flat area of the bench',
+        copy: 'Measure the usable width and height of the slat or rail, allowing room around its edges and any existing bolts. The compact starting size is 150 × 50 mm. The designer also offers sizes such as 150 × 75 mm and 200 × 50 mm. Compare those dimensions with the actual bench before choosing a size; a deeper plaque will not suit every slat.',
       },
       {
         title: 'Brass or stainless steel bench plaques',
-        copy: 'Brushed stainless steel gives a clean silver finish. Brass gives the traditional bench plaque look. Standard visible screw fixings are shown in the proof so the whole plaque can be checked before payment.',
+        copy: 'Stainless steel gives a silver finish; brass gives a warmer, traditional appearance. Choose brushed or polished options in the designer and compare the price. Care depends on the finish: ask about your location if the bench is particularly exposed or near the sea, and check care instructions before using polish or abrasive cleaners.',
+      },
+      {
+        title: 'Leave room for the inscription and fixings',
+        copy: 'A name, dates and a short dedication are a useful starting point. Long names and several lines need more space, so check the proof at the chosen dimensions. Standard screw fixings are shown in the preview. Keep wording clear of the fixing positions and confirm the mounting arrangement if you are replacing an existing plaque.',
+      },
+      {
+        title: 'Check permission for a public or managed bench',
+        copy: 'If the bench belongs to a park, council, cemetery or another organisation, check its plaque rules before ordering. Ask for the permitted dimensions, wording and fitting method. If existing holes must be reused, contact us with their positions and measurements before approving a design.',
       },
     ],
     relatedSearches: ['bench plaques UK', 'memorial bench plaques', 'engraved bench plaques', 'brass bench plaques'],
@@ -278,12 +286,16 @@ export const productFamilies: ProductFamily[] = [
     },
     faqs: [
       {
-        question: 'Is the small size enough for a memorial?',
-        answer: 'Yes, for short wording. If the inscription has several lines, start with the medium plaque instead.',
+        question: 'What size plaque will fit my bench?',
+        answer: 'Measure the flat part of the bench where it will be fitted. Our compact starting size is 150 × 50 mm, with other bench sizes in the designer. Leave clearance around edges and existing fixings. For a replacement plaque, check the old hole positions as well as the outside dimensions.',
       },
       {
-        question: 'Can this be used outside?',
-        answer: 'Yes. Choose stainless steel or brass with standard screw fixings for outdoor use.',
+        question: 'How much wording fits on a bench plaque?',
+        answer: 'Start with a name, dates and one short dedication. There is no useful fixed word count: long names, the font and fixing positions all affect the space. Check the proof at your selected size, and shorten the wording or choose a larger plaque if it looks crowded.',
+      },
+      {
+        question: 'Can I match the fixing holes of an old plaque?',
+        answer: 'Contact us before ordering with the existing plaque dimensions and hole positions. The standard preview does not automatically match holes already in your bench, so the fitting arrangement needs checking before approval.',
       },
     ],
   },
@@ -584,23 +596,32 @@ export const seoLandingPages: SeoLandingPage[] = [
     description: 'Custom opening plaques for buildings, rooms, community spaces and formal unveilings, with an online proof before payment.',
     seoTitle: 'Opening Plaques UK | Custom Building Opening Plaques',
     seoDescription: 'Order custom opening plaques in the UK with a free online proof. Brass and stainless steel plaques for building openings, unveilings, presentations and formal ceremonies.',
-    heroCopy: 'Opening plaques need clear formal hierarchy: the place, the person opening it, the date and the occasion. A4 is usually the strongest starting point.',
+    heroCopy: 'Create an opening plaque for a school, building or community space. Arrange the venue name, opening person and date in a free online proof, with the price shown before payment. Start with A4 for formal wording and check any fixed ceremony deadline with us before ordering.',
     image: '/site-images/home-gallery-brass-community.webp',
     relatedProductSlug: 'a4-plaques',
     proofCta: 'Start an opening plaque proof',
     sections: [
       {
-        title: 'For buildings, rooms and ceremonies',
-        copy: 'Suitable for schools, offices, community centres, gardens, libraries, halls and funded spaces.',
+        title: 'Agree the names, titles and date first',
+        copy: 'Gather the official venue name, the opening person’s full name and title, the ceremony date and any required acknowledgement. For schools, community centres and funded projects, check contributor names with the people responsible before creating the final proof.',
       },
       {
-        title: 'Make the wording easy to follow',
-        copy: 'The proof should make the main subject obvious first, then the opening person and date. Brass gives a ceremonial feel; stainless steel suits modern buildings.',
+        title: 'Choose a size for the inscription and location',
+        copy: 'A4 (297 × 210 mm) provides space for a heading, name, role and date. A5 (210 × 148 mm) can work for a shorter inscription in a smaller space. Measure the wall or presentation area, consider how close visitors will stand and use the proof to check that every line has enough room.',
+      },
+      {
+        title: 'Plan the finish and mounting',
+        copy: 'Brass has a warm, traditional appearance; stainless steel has a silver finish suited to modern settings. Optional wood backing is available for suitable plaques and adds to the price and production time. Check the fixing options against the intended wall or support before approval.',
+      },
+      {
+        title: 'Leave time for approval and the ceremony',
+        copy: 'Download the proof PDF to share with colleagues and agree one final version before paying. Production begins after approval and payment, with delivery time additional. If your plaque is needed for an unveiling, contact us with the required arrival date and postcode before placing the order. For logos or supplied artwork, ask us to confirm what is possible before relying on it in your design.',
       },
     ],
     faqs: [
-      { question: 'Can I include the person opening the building?', answer: 'Yes. Add the person, role, date and venue wording, then check the hierarchy in the proof before checkout.' },
-      { question: 'Which size suits an opening plaque?', answer: 'A4 is usually best for formal opening wording. A5 can work for shorter inscriptions or smaller rooms.' },
+      { question: 'Can colleagues check the opening plaque before we order?', answer: 'Yes. Download the proof PDF and share it for review. It includes a link back to the design. Agree the exact spelling, titles, date and acknowledgement wording before one person approves the final layout and places the order.' },
+      { question: 'Can you meet our opening ceremony date?', answer: 'Contact us before ordering with the required arrival date, delivery postcode and plaque options. Production estimates start after proof approval and payment, and delivery takes additional time. Please have the date confirmed before depending on the plaque for an event.' },
+      { question: 'Can the plaque include a school crest or organisation logo?', answer: 'The online designer is set up for inscription layouts. For a crest, logo or supplied artwork, contact us before ordering so we can confirm whether your requirements can be accommodated and how they affect the proof, price and timing.' },
     ],
     relatedSearches: ['opening plaques UK', 'building opening plaques', 'unveiling plaques', 'presentation plaques'],
   },

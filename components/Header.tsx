@@ -98,9 +98,9 @@ export const Header: React.FC<Props> = ({
           Insta<span>Plaque</span>
         </a>
         <nav aria-label="Main navigation">
-          <a href="/memorial-plaques">Memorial plaques</a>
-          <a href="/bench-plaques">Bench plaques</a>
-          <a href="/brass-plaques">Brass & steel</a>
+          <a href="/memorial-plaques">Memorial</a>
+          <a href="/bench-plaques">Bench</a>
+          <a href="/opening-plaques">Openings</a>
           <a href="/materials">Materials</a>
           <a href="/contact">Get in touch</a>
         </nav>

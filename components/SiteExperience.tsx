@@ -5,7 +5,8 @@ import { PlaqueState } from '../types';
 import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
 import { SeoRankTracker } from './SeoRankTracker';
 import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, shopFaqs } from './Shopfront';
-import { ShopAbout, aboutPage } from './ShopGuides';
+import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
+import { businessContact } from '../services/shopInformation';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -466,16 +467,6 @@ type LegalPage = {
   title: string;
   intro: string;
   sections: Array<{ title: string; copy: string }>;
-};
-
-const businessContact = {
-  tradingName: 'InstaPlaque',
-  legalForm: 'UK sole trader',
-  email: 'hello@instaplaque.co.uk',
-  phone: '07903 379839',
-  address: '4 Dunkirk Avenue, Kettering, NN14 2PL, United Kingdom',
-  updated: '28 June 2026',
-  privacyUpdated: '10 July 2026',
 };
 
 const legalPages: Partial<Record<SiteView, LegalPage>> = {
@@ -2714,6 +2705,11 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 
 export function SiteExperience(props: SiteProps) {
   useEffect(() => {
+    const anchor = document.getElementById(window.location.hash.slice(1));
+    if (anchor) {
+      anchor.scrollIntoView({ behavior: 'auto', block: 'start' });
+      return;
+    }
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     document.querySelector('main')?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [props.view, props.selectedProduct.slug]);
@@ -2722,6 +2718,8 @@ export function SiteExperience(props: SiteProps) {
 
   if (props.view === 'about') {
     page = <ShopAbout />;
+  } else if (props.view === 'contact') {
+    page = <ShopContact />;
   } else if (props.view === 'product') {
     page = <ShopProduct product={props.selectedProduct} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
   } else if (props.view === 'landing') {
