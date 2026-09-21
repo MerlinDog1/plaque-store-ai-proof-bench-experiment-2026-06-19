@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { storeArtwork, loadArtwork } from "./artwork-storage.mjs";
 import {
   sanitizeProofSessionRecord,
   sanitizeProofSessionSvgFields,
@@ -100,9 +101,10 @@ export const createProofSession = async (payload) => {
     expires_at: payload.expiresAt || payload.expires_at || expiresAt.toISOString(),
   };
 
+  const storedRow = await storeArtwork(row, `proof:${row.public_token}`);
   const { data, error } = await supabase
     .from("proof_sessions")
-    .insert(row)
+    .insert(storedRow)
     .select("id, public_token, status, expires_at, created_at")
     .single();
 
@@ -125,5 +127,7 @@ export const getProofSessionByToken = async (publicToken) => {
     .maybeSingle();
 
   if (error) throw normalizeSupabaseError(error, "Saved proofs are temporarily unavailable. Please try again shortly.");
-  return sanitizeProofSessionRecord(data);
+  const scope = data?.metadata?.kind === "storefront_order"
+    ? `order:${data.metadata.order?.id}` : `proof:${publicToken}`;
+  return sanitizeProofSessionRecord(await loadArtwork(data, scope));
 };

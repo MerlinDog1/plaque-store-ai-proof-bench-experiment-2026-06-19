@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getSupabaseServiceClient } from "./supabase.mjs";
+import { storeArtwork, loadArtwork } from "./artwork-storage.mjs";
 import { getInternalProductionEmails, sendEmail } from "./email.mjs";
 import {
   sanitizeOrderSvgFields,
@@ -68,9 +69,9 @@ const isSupabaseUnavailable = (error) => {
 
 const isMissingProofClaimFunction = (error) => ["42883", "PGRST202"].includes(String(error?.code || "").toUpperCase());
 
-const toRow = (input) => {
+const toRow = async (input) => {
   const order = sanitizeOrderSvgFields(input);
-  return {
+  return storeArtwork({
     id: order.id,
     stripe_checkout_session_id: order.stripeCheckoutSessionId || null,
     stripe_payment_intent_id: order.stripePaymentIntentId || null,
@@ -94,7 +95,7 @@ const toRow = (input) => {
     approved_at: order.approvedAt || null,
     paid_at: order.paidAt || null,
     updated_at: nowIso(),
-  };
+  }, `order:${order.id}`);
 };
 
 const listOrderColumns = [
@@ -122,38 +123,42 @@ const listOrderColumns = [
   "updated_at",
 ].join(",");
 
-const fromRow = (row) => row && sanitizeOrderSvgFields({
-  id: row.id,
-  stripeCheckoutSessionId: row.stripe_checkout_session_id,
-  stripePaymentIntentId: row.stripe_payment_intent_id,
-  customerEmail: row.customer_email,
-  customerName: row.customer_name,
-  status: row.status,
-  paymentStatus: row.payment_status,
-  fulfilmentStatus: row.fulfilment_status,
-  totalPence: row.total_pence,
-  currency: row.currency,
-  productTitle: row.product_title,
-  inscription: row.inscription,
-  plaqueState: row.plaque_state || {},
-  priceBreakdown: row.price_breakdown || {},
-  proofPackage: row.proof_package || {},
-  shippingAddress: row.shipping_address || {},
-  stripeSession: row.stripe_session || {},
-  emailEvents: row.email_events || [],
-  events: row.events || [],
-  metadata: row.metadata || {},
-  approvedAt: row.approved_at,
-  paidAt: row.paid_at,
-  createdAt: row.created_at,
-  updatedAt: row.updated_at,
-});
+const fromRow = async (storedRow) => {
+  if (!storedRow) return storedRow;
+  const row = await loadArtwork(storedRow, `order:${storedRow.id}`);
+  return sanitizeOrderSvgFields({
+    id: row.id,
+    stripeCheckoutSessionId: row.stripe_checkout_session_id,
+    stripePaymentIntentId: row.stripe_payment_intent_id,
+    customerEmail: row.customer_email,
+    customerName: row.customer_name,
+    status: row.status,
+    paymentStatus: row.payment_status,
+    fulfilmentStatus: row.fulfilment_status,
+    totalPence: row.total_pence,
+    currency: row.currency,
+    productTitle: row.product_title,
+    inscription: row.inscription,
+    plaqueState: row.plaque_state || {},
+    priceBreakdown: row.price_breakdown || {},
+    proofPackage: row.proof_package || {},
+    shippingAddress: row.shipping_address || {},
+    stripeSession: row.stripe_session || {},
+    emailEvents: row.email_events || [],
+    events: row.events || [],
+    metadata: row.metadata || {},
+    approvedAt: row.approved_at,
+    paidAt: row.paid_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  });
+};
 
 const orderProofSessionToken = (orderId) => `storefront-order-${orderId}`;
 
-const toProofSessionOrderRow = (input) => {
+const toProofSessionOrderRow = async (input) => {
   const order = sanitizeOrderSvgFields(input);
-  return {
+  return storeArtwork({
     public_token: orderProofSessionToken(order.id),
     email: order.customerEmail || null,
     status: "converted",
@@ -168,10 +173,12 @@ const toProofSessionOrderRow = (input) => {
       order,
     },
     expires_at: null,
-  };
+  }, `order:${order.id}`);
 };
 
-const fromProofSessionOrderRow = (row) => {
+const fromProofSessionOrderRow = async (storedRow) => {
+  if (!storedRow?.metadata?.order) return null;
+  const row = await loadArtwork(storedRow, `order:${storedRow.metadata.order.id}`);
   const order = row?.metadata?.order;
   if (!order) return null;
   return sanitizeOrderSvgFields({
@@ -238,21 +245,21 @@ const shippingFromPaymentIntent = (paymentIntent) => {
 const saveOrderToProofSessions = async (supabase, order) => {
   const { data, error } = await supabase
     .from("proof_sessions")
-    .upsert(toProofSessionOrderRow(order), { onConflict: "public_token" })
+    .upsert(await toProofSessionOrderRow(order), { onConflict: "public_token" })
     .select("email, wording, plaque_state, price_estimate_pence, currency, metadata, created_at, updated_at")
     .single();
   if (error) throw error;
-  return fromProofSessionOrderRow(data) || order;
+  return (await fromProofSessionOrderRow(data)) || order;
 };
 
 const insertOrderToProofSessions = async (supabase, order) => {
   const { data, error } = await supabase
     .from("proof_sessions")
-    .insert(toProofSessionOrderRow(order))
+    .insert(await toProofSessionOrderRow(order))
     .select("email, wording, plaque_state, price_estimate_pence, currency, metadata, created_at, updated_at")
     .single();
   if (error) throw error;
-  return fromProofSessionOrderRow(data) || order;
+  return (await fromProofSessionOrderRow(data)) || order;
 };
 
 const getProofSessionOrderById = async (supabase, orderId) => {
@@ -295,7 +302,9 @@ const listProofSessionOrders = async (supabase) => {
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw error;
-  return data.map((row) => {
+  const hydratedRows = [];
+  for (const row of data) hydratedRows.push(await loadArtwork(row, `order:${row.order_id}`));
+  return hydratedRows.map((row) => {
     const shippingAddress = row.shipping_address && Object.keys(row.shipping_address).length
       ? row.shipping_address
       : shippingFromPaymentIntent(row.stripe_payment_intent_id);
@@ -430,7 +439,7 @@ const saveOrder = async (order) => {
   if (supabase) {
     const { data, error } = await supabase
       .from("storefront_orders")
-      .upsert(toRow(next), { onConflict: "id" })
+      .upsert(await toRow(next), { onConflict: "id" })
       .select("*")
       .single();
     if (error && !shouldUseLocalFallback(error)) throw error;
@@ -472,7 +481,7 @@ const insertNewOrder = async (order) => {
   if (supabase) {
     const { data, error } = await supabase
       .from("storefront_orders")
-      .insert(toRow(next))
+      .insert(await toRow(next))
       .select("*")
       .single();
     if (error && isUniqueViolation(error)) throw new OrderIdCollisionError(next.id);
@@ -618,7 +627,7 @@ const claimVisualProofInStorefrontOrders = async (originalOrder, preparedOrder) 
   const { data, error } = await supabase.rpc("claim_storefront_order_proof", {
     p_order_id: originalOrder.id,
     p_stripe_checkout_session_id: originalOrder.stripeCheckoutSessionId,
-    p_proof_package: preparedOrder.proofPackage,
+    p_proof_package: await storeArtwork(preparedOrder.proofPackage, `order:${originalOrder.id}`),
     p_event: preparedOrder.events[0],
   });
   if (error) {
@@ -627,7 +636,7 @@ const claimVisualProofInStorefrontOrders = async (originalOrder, preparedOrder) 
   }
 
   const claimedRow = Array.isArray(data) ? data[0] : data;
-  if (claimedRow) return { attached: true, order: fromRow(claimedRow) };
+  if (claimedRow) return { attached: true, order: await fromRow(claimedRow) };
 
   const storedOrder = await getOrderById(originalOrder.id);
   if (
@@ -726,7 +735,8 @@ export const listOrders = async () => {
         return readLocalOrders();
       }
     }
-    const storefrontOrders = data.map(fromRow);
+    const storefrontOrders = [];
+    for (const row of data) storefrontOrders.push(await fromRow(row));
     if (storefrontOrders.length) return storefrontOrders;
     try {
       const fallbackOrders = await listProofSessionOrders(supabase);
