@@ -1,5 +1,7 @@
 # Deployment Preview
 
+**Production update, 21 September 2026:** https://instaplaque.co.uk runs on Vercel with the new Supabase/R2 backend. Read [the deployed version, configuration, validation and rollback handover](docs/supabase-r2-handover-2026-09-21.md) first. The tunnel instructions below describe the earlier prototype preview.
+
 ## Managed Preview Services
 
 The current local/public preview is managed by user systemd services:
