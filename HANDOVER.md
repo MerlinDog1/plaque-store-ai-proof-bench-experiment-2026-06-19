@@ -50,3 +50,11 @@ Work continues on `codex/design-routes-instructions`, not the production branch.
 See `docs/design-routes-2026-09-26.md` for routes, instruction-based editing,
 manual safeguards, checks and limits. Changes are review-only, not deployed.
 Fetch that branch to continue; do not assume this older baseline contains it.
+
+## Production release 26 September 2026, 17:32 UTC
+Owner authorised release of `codex/design-routes-instructions` at
+`3e800129b255c024563bbbac6916e28ad53b813a`. Live canonical/www aliases verified on
+`dpl_EG7t1wV91VTJJHeHUqWuDvmDET2A`; see the latest release section in
+`docs/design-routes-2026-09-26.md` for live checks and remaining inbox-confirmation
+limit. Earlier production identifiers above are the previous release, not current.
+Retains existing Supabase/R2 configuration; no database or payment change.

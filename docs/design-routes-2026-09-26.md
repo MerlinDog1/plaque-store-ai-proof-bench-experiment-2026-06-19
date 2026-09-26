@@ -215,3 +215,30 @@ not a simulated success. Proof preparation, sending the proof and supplying the
 payment link remain manual team responsibilities; the three-hour text is the
 owner's turnaround promise, not an automated scheduler. This section supersedes
 earlier statements describing the implementation itself as a review-only form.
+
+## Authorised production release — 26 September 2026, 17:32 UTC
+
+Owner requested deployment and a quick live check. Deployed source
+`3e800129b255c024563bbbac6916e28ad53b813a` to the existing InstaPlaque project:
+`dpl_EG7t1wV91VTJJHeHUqWuDvmDET2A`. Vercel reported READY; independent inspection
+confirmed https://instaplaque.co.uk and www aliases on this deployment.
+Previous compatible release: `dpl_Etuo1oBDAerk7nFgXVa4qfCona2h` (R2-aware).
+No environment changes, migration, payment changes or sibling-site deployment.
+
+Hosted checks passed: real AI generation and instruction edit (two successful
+model calls), exact wording and Undo; 3D font outlining at 390/1440; request UI
+failure/retry/receipt at both widths with mocked responses; public Supabase and
+Gemini configuration health. A real mobile homepage-to-form submission with a
+labelled synthetic brief and PNG returned HTTP201/provider acceptance and receipt
+`IP-DESIGN-42796306-3ba4-465a-b046-79d3f6c9fcfe-51ddb953`.
+It explicitly says no design or reply required. Recipient inbox arrival has NOT
+been independently confirmed; acceptance is not proof of delivery.
+
+Hosted checkout UI regression passed product preset/pricing, manual bold,
+approval gate/payload, PDF download, restored/stale-proof gating and mobile
+containment. Model, checkout and saved-proof APIs were intercepted for that test;
+no order, charge or stored proof was created. The harness needed its local asset
+check to recognise /design-request as an index.html rewrite (not a static folder),
+and the installed Chrome executable. Test copies/results are ignored under output.
+19 prerendered pages passed local metadata/link checks. No full paid purchase.
+Production is now changed; earlier undeployed statements above are historical.
