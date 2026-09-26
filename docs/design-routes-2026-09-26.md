@@ -111,3 +111,41 @@ The successful run made two model requests, both HTTP 200. Checkout/proof-sessio
 admin paths returned 503; cross-site AI returned 403; malformed AI returned 400.
 This proves a real generation/edit flow, not every instruction or image feature.
 Production code/configuration unchanged; no order/database/email operations.
+
+## Revised presentation: human design service preview
+
+26 September owner clarification supersedes the original three-card UI above:
+“Have us design it” means a human prepares a proof later, not a third AI mode.
+The homepage retains its primary designer CTA and adds a secondary service
+section. `/design-request` is an independent form, not a designer step. Product
+pages and the designer have secondary handoff links. The designer now has two
+methods: AI-assisted and manual; initial AI guidance and Apply/Undo remain.
+
+The human form collects size/shape/material/wood/fixings, exact wording, separate
+notes, optional local image and contact details. It ends at a local Review request
+summary with explicit “not sent” text. No endpoint/email/payment integration was
+added. Current designer wording/options seed the first brief; product links seed
+product presets. The independent draft stays in memory across SPA navigation;
+an existing draft wins over later seeds so it is not overwritten. The preview
+explains this. Refresh clears the draft and local reference image. Images are
+limited to JPEG/PNG/WebP and 5 MB and are never uploaded.
+
+This is a presentation/brief-flow preview, not the complete service. Owner inbox,
+proof preparation/delivery, revision/approval and payment-link integration remain
+to implement before launch. A fully featured manual text-block canvas also remains
+future work; the existing line editor has not been represented as that full editor.
+
+Preview response headers disable indexing and external script/connect traffic so
+production advertising tags do not receive review traffic. Production HTML and
+hosting settings are not changed. Stop only the temporary preview/tunnel processes
+to remove the preview. `scripts/check-design-request.cjs` checks the human flow
+without any submissions; `check-design-routes.cjs` retains mocked AI/manual checks.
+
+Follow-up verification: TypeScript and build passed. Local 390/1440 human-flow
+checks passed (required inputs, local image removal, escaped exact wording,
+review/edit, draft navigation, direct route refresh, no form submissions,
+no JS errors/overflow); designer handoff preserved A4 dimensions and wording,
+and browser Back retained the original designer. Existing mocked AI/manual
+regression checks passed after renaming methods. Mobile homepage service section
+and form summary screenshots inspected. No new paid-model call was needed for
+this presentation-only change; the AI connection remains enabled.

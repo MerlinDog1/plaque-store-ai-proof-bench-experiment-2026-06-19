@@ -628,6 +628,7 @@ const homeFaqs: FaqItem[] = [
 
 const routePathForView = (view: SiteView) => {
   const paths: Partial<Record<SiteView, string>> = {
+    'design-request': '/design-request',
     home: '/',
     about: '/about',
     materials: '/materials',
@@ -774,6 +775,7 @@ const homepageProducts = productFamilies.filter((product) => homepageProductSlug
 
 const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, selectedLanding: SeoLandingPage): SeoMetaConfig => {
   const routePath = routePathForView(view);
+  if (view === 'design-request') return { title: 'Have Us Design Your Plaque | InstaPlaque', description: 'Tell us your wording and plaque preferences. Review a personally prepared proof before payment.', path: '/design-request', schema: [] };
   if (view === 'about') {
     return { ...aboutPage, path: routePath, schema: [{ '@type': 'AboutPage', name: 'About InstaPlaque', url: 'https://instaplaque.co.uk/about' }] };
   }
@@ -1304,7 +1306,7 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
 }
 
 function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLaunchProduct'>) {
-  return <ShopHome onStartDesign={props.onStartDesign} />;
+  return <ShopHome onStartDesign={props.onStartDesign} onRequestDesign={() => props.onNavigate('design-request')} />;
 }
 
 function ProductPage({ selectedProduct, onStartDesign, onNavigate }: Pick<SiteProps, 'selectedProduct' | 'onStartDesign' | 'onNavigate'>) {
@@ -2721,7 +2723,7 @@ export function SiteExperience(props: SiteProps) {
   } else if (props.view === 'contact') {
     page = <ShopContact />;
   } else if (props.view === 'product') {
-    page = <ShopProduct product={props.selectedProduct} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
+    page = <ShopProduct product={props.selectedProduct} onRequestDesign={() => props.onNavigate('design-request', props.selectedProduct.slug)} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
   } else if (props.view === 'landing') {
     page = <ShopLanding landing={props.selectedLanding} onLaunch={() => props.onLaunchProduct(productFamilies.find(product => product.slug === props.selectedLanding.relatedProductSlug) || productFamilies[0])} />;
   } else if (props.view === 'materials') {

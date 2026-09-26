@@ -889,3 +889,48 @@
     grid-column: 1/-1;
   }
 }
+
+/* Done-for-you design request preview, separate from the proof designer. */
+.shop-design-service { display:grid;grid-template-columns:1.1fr 1fr;gap:60px;background:#e9eadf;align-items:center; }
+.shop-design-service h2 { max-width:580px; }
+.shop-design-service .shop-button { margin:18px 0 8px; }
+.design-service-steps { list-style:none;padding:0;margin:0;display:grid;gap:28px; }
+.design-service-steps li { display:flex;gap:18px;align-items:flex-start; }
+.design-service-steps li > span { color:#8a6232;font:italic 28px Georgia,serif; }
+.design-service-steps strong { font-size:17px;color:#20382e; }
+.design-service-steps p { margin:7px 0 0;line-height:1.6;font-size:14px; }
+.design-request-page { padding:0 5vw 70px;color:#24382f;background:#faf8f1; }
+.request-preview-note { border:1px solid #d1b578;background:#fff4d9;padding:14px 18px;font-size:14px;line-height:1.6;border-radius:8px; }
+.request-heading { max-width:780px;margin:48px 0 36px; }
+.request-heading h1 { font:clamp(36px,5vw,62px)/1.1 Georgia,serif;letter-spacing:-1.5px;margin:14px 0 20px; }
+.request-heading > p:last-child { font-size:18px;line-height:1.65;max-width:680px; }
+.request-layout { display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:40px;align-items:start; }
+.request-card { min-width:0;background:#fffdf8;border:1px solid #d8d9cc;border-radius:12px;padding:32px; }
+.request-card fieldset { border:0;padding:0;margin:0 0 35px;min-width:0; }
+.request-card legend { font:25px Georgia,serif;margin-bottom:16px; }
+.request-card label { display:block;font-size:14px;font-weight:700;margin:15px 0; }
+.request-card label span { font-weight:400; }
+.request-card input,.request-card textarea,.request-card select { display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;margin-top:8px;border:1px solid #babfb4;border-radius:5px;background:white;color:#24382f;padding:12px;font:16px/1.45 Arial,sans-serif; }
+.request-card textarea { resize:vertical; }
+.request-card input:focus,.request-card textarea:focus,.request-card select:focus { outline:2px solid #8b6b30;outline-offset:2px; }
+.request-card p { line-height:1.6;font-size:14px; }
+.request-fields { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 18px; }
+.request-aside { background:#e9eadf;padding:30px;border-radius:12px; }
+.request-aside h2 { font:30px Georgia,serif;margin:12px 0 30px; }
+.request-aside .shop-smallprint { margin-top:30px; }
+.request-image { display:block;max-width:100%;max-height:200px;border-radius:5px;object-fit:contain;margin:15px 0; }
+.request-summary h2 { font:28px Georgia,serif;margin:0 0 20px; }
+.request-summary dl { margin:0; }
+.request-summary dl > div { display:grid;grid-template-columns:140px minmax(0,1fr);gap:15px;padding:10px 0;border-bottom:1px solid #e1e1d5; }
+.request-summary dt { font-weight:700; }
+.request-summary dd { margin:0;overflow-wrap:anywhere; }
+.request-exact { white-space:pre-wrap;overflow-wrap:anywhere;background:#f2f2e9;padding:18px;border-radius:6px; }
+.request-summary .shop-button { margin-top:24px; }
+@media(max-width:760px) {
+ .shop-design-service,.request-layout { grid-template-columns:minmax(0,1fr);gap:30px; }
+ .design-request-page { padding:0 18px 45px; }
+ .request-card,.request-aside { padding:22px 18px; }
+ .request-fields { grid-template-columns:minmax(0,1fr); }
+ .request-heading { margin:32px 0; }
+ .request-summary dl > div { grid-template-columns:100px minmax(0,1fr); }
+}

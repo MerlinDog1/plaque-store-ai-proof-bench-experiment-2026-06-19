@@ -17,6 +17,7 @@ import { BENCH_SAFE_MARGIN_PERCENT } from './safeMargin';
 export const DEFAULT_PRODUCT_SLUG = 'bench-plaques';
 
 export type SiteView =
+  | 'design-request'
   | 'home'
   | 'about'
   | 'product'

@@ -225,6 +225,7 @@ interface Props {
   state: PlaqueState;
   onChange: (newState: Partial<PlaqueState>) => void;
   onGenerate: (text: string) => void;
+  onRequestDesign: () => void;
   onCreateManualLayout: () => void;
   onApplyLayoutInstruction: (instruction: string) => void;
   onUndoLayout: () => void;
@@ -473,7 +474,7 @@ export const Controls: React.FC<Props> = ({
   state,
   onChange,
   onGenerate,
-  onCreateManualLayout, onApplyLayoutInstruction, onUndoLayout, canUndoLayout, layoutMessage,
+  onRequestDesign, onCreateManualLayout, onApplyLayoutInstruction, onUndoLayout, canUndoLayout, layoutMessage,
   onClear,
   prompt,
   onPromptChange,
@@ -523,7 +524,7 @@ export const Controls: React.FC<Props> = ({
   const [customHeightInput, setCustomHeightInput] = useState(String(state.height));
   const [fixingsBorderMode, setFixingsBorderMode] = useState<'fixings' | 'border'>('fixings');
   const [manualTextOpen, setManualTextOpen] = useState(false);
-  const [designMethod, setDesignMethod] = useState<'quick' | 'manual' | 'assisted'>('quick');
+  const [designMethod, setDesignMethod] = useState<'quick' | 'manual'>('quick');
   const [layoutInstruction, setLayoutInstruction] = useState('');
   const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
@@ -1890,9 +1891,8 @@ export const Controls: React.FC<Props> = ({
           <fieldset className="space-y-2" disabled={isGenerating}>
             <legend className="mb-2 text-sm font-black">How would you like to design?</legend>
             {([
-              ['quick', 'Quick design', 'Add your words. Get an automatically arranged proof.'],
-              ['manual', 'Arrange it myself', 'Start with editable lines. Choose the type and sizes yourself.'],
-              ['assisted', 'Design it for me', 'Give AI a design brief. Review the layout it creates.'],
+              ['quick', 'AI-assisted design', 'Generate a layout, then refine it with instructions or manual tweaks.'],
+              ['manual', 'Manual design', 'Arrange editable text lines yourself. No AI needed.'],
             ] as const).map(([value, title, description]) => (
               <button key={value} type="button" aria-pressed={designMethod === value}
                 onClick={() => { setDesignMethod(value); setManualTextOpen(value === 'manual'); }}
@@ -1903,6 +1903,7 @@ export const Controls: React.FC<Props> = ({
             ))}
             <p className="text-xs leading-5 text-[#59675d]">You can switch at any time. Your wording, plaque options and current proof stay here.</p>
           </fieldset>
+          <button type="button" onClick={onRequestDesign} className="text-sm underline underline-offset-4">Prefer us to design it? Send us a brief</button>
           <div className="ai-typesetter-panel rounded-lg border border-[#d7b66a]/35 bg-[#151f1b] p-4">
             <div className="flex items-start gap-3">
               <div className={`ai-typesetter-orb ${isGenerating ? 'is-working' : ''}`} aria-hidden="true">
@@ -1955,11 +1956,11 @@ export const Controls: React.FC<Props> = ({
             </div>
           </div>
 
-          {guidance.trim() && designMethod !== 'assisted' && <p className="text-xs leading-5 text-[#59675d]">Your saved design instructions still apply to AI generation. Choose Design it for me to review or clear them.</p>}
-          {designMethod === 'assisted' && (
+          {guidance.trim() && designMethod === 'manual' && <p className="text-xs leading-5 text-[#59675d]">Your saved design instructions still apply to AI generation. Switch to AI-assisted design to review or clear them.</p>}
+          {designMethod === 'quick' && (
             <div className="rounded-lg border border-[#c6c8bd] bg-[#fffaf0] p-3">
               <label htmlFor="design-brief" className="block text-sm font-black">Design instructions <span className="font-normal">(optional)</span></label>
-              <p className="my-2 text-xs leading-5 text-[#59675d]">For a new layout: describe the hierarchy, font style and spacing. AI arranges your exact wording; this is not a request sent to a human designer.</p>
+              <p className="my-2 text-xs leading-5 text-[#59675d]">Describe the hierarchy, font style and spacing for a new layout. AI will keep your wording unchanged.</p>
               <textarea id="design-brief" value={guidance} maxLength={1200} disabled={isGenerating}
                 onChange={event => onGuidanceChange(event.target.value)}
                 placeholder="Make the name the focus, use a traditional serif font and keep the dates together."
@@ -1994,7 +1995,7 @@ export const Controls: React.FC<Props> = ({
                     : 'Working...'
                 : isIterating
                   ? 'Regenerate'
-                  : designMethod === 'assisted' ? 'Create my design' : 'Generate layout'}
+                  : 'Generate layout'}
             </button>
           </div>
           )}
@@ -2038,7 +2039,7 @@ export const Controls: React.FC<Props> = ({
                   disabled={isGenerating || !prompt.trim()}
                   className="min-h-[48px] rounded-lg border border-[#f2d688]/55 bg-[#f2d688] px-4 py-3 text-sm font-black text-[#13201c] transition disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {designMethod === 'assisted' ? 'Create from design instructions' : 'Try another layout'}
+                  {guidance.trim() ? 'Create from design instructions' : 'Try another layout'}
                 </button>}
                 <button
                   type="button"

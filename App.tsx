@@ -1,3 +1,4 @@
+import { DesignRequest } from './components/DesignRequest';
 import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
 import PlaquePreview from './components/PlaquePreview';
@@ -44,6 +45,7 @@ const PROOF_BENCH_INITIAL_STATE: PlaqueState = {
 };
 
 const routeViews: Partial<Record<string, SiteView>> = {
+  '/design-request': 'design-request',
   '/': 'home',
   '/about': 'about',
   '/materials': 'materials',
@@ -63,6 +65,7 @@ const routeViews: Partial<Record<string, SiteView>> = {
 };
 
 const viewRoutes: Partial<Record<SiteView, string>> = {
+  'design-request': '/design-request',
   home: '/',
   about: '/about',
   materials: '/materials',
@@ -211,6 +214,14 @@ const App: React.FC = () => {
 
   const [state, setState] = useState<PlaqueState>(PROOF_BENCH_INITIAL_STATE);
   const [inscriptionPrompt, setInscriptionPrompt] = useState('');
+  const [requestSeed, setRequestSeed] = useState<{ state: PlaqueState; wording: string; notes: string } | null>(null);
+  useEffect(() => {
+    if (currentView === 'design-request') {
+      setRequestSeed(previous => previous || { state, wording: inscriptionPrompt, notes: '' });
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      document.querySelector('main')?.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [currentView]);
   const [inscriptionGuidance, setInscriptionGuidance] = useState('');
   const [generatedLayoutSignature, setGeneratedLayoutSignature] = useState<string | null>(null);
   const [generatedProofFrame, setGeneratedProofFrame] = useState<GeneratedProofFrame | null>(null);
@@ -1057,6 +1068,10 @@ const App: React.FC = () => {
   };
 
   const handleNavigate = (view: SiteView, productSlug?: string) => {
+    if (view === 'design-request') {
+      const preset = productSlug ? productFamilies.find(product => product.slug === productSlug)?.preset : undefined;
+      setRequestSeed(previous => previous || { state: { ...state, ...preset }, wording: inscriptionPrompt, notes: inscriptionGuidance });
+    }
     if (view === 'checkout' && currentView === 'plaque') {
       goToProof();
       return;
@@ -1367,7 +1382,10 @@ const App: React.FC = () => {
 
       <main className={`min-h-0 w-full flex-1 ${currentView === 'plaque' ? 'overflow-hidden' : 'overflow-auto'}`}>
 
-        {currentView !== 'plaque' ? (
+        {(requestSeed || currentView === 'design-request') && <div hidden={currentView !== 'design-request'}>
+          <DesignRequest initialState={requestSeed?.state || state} initialWording={requestSeed?.wording || ''} initialNotes={requestSeed?.notes || ''} onBack={() => handleNavigate('home')} />
+        </div>}
+        {currentView === 'design-request' ? null : currentView !== 'plaque' ? (
           <SiteExperience
             view={currentView}
             selectedProduct={selectedProduct}
@@ -1410,6 +1428,7 @@ const App: React.FC = () => {
               </div>
               <div className="proofbench-control-scroll" ref={controlsScrollRef}>
                 <Controls
+                  onRequestDesign={() => handleNavigate('design-request')}
                   state={state}
                   onChange={handleStateChange}
                   onGenerate={handleGenerateLayout}

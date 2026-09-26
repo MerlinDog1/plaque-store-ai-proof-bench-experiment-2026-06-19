@@ -27,6 +27,9 @@ await preview({
     name: 'ai-only-review',
     configurePreviewServer(server) {
       server.middlewares.use(async (req, res, next) => {
+        res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+        // Review traffic must not reach the production advertising/analytics tags.
+        res.setHeader('Content-Security-Policy', "script-src 'self' 'unsafe-inline'; connect-src 'self'");
         const pathname = new URL(req.url, 'http://localhost').pathname;
         if (!pathname.startsWith('/api/')) return next();
         const health = pathname === '/api/gemini/health' && req.method === 'GET';
