@@ -1,7 +1,7 @@
 const {chromium}=require('@playwright/test');
 const fs=require('node:fs');
 const path=require('node:path');
-const cases=[
+const cases=process.env.QA_CASE_FILE ? JSON.parse(fs.readFileSync(process.env.QA_CASE_FILE,'utf8')) : [
 {id:'01-bench-name-caps',width:150,height:50,fixing:'caps',capSize:15,material:'polished-brass',text:'IN CHERISHED MEMORY OF\nPETER JOHN WILSON\n1939–2021'},
 {id:'02-bench-long-name',width:150,height:50,fixing:'screws',fixingHoleCount:2,text:'In loving memory of\nElizabeth Alexandra Montgomery\n1942–2025\nAlways in our hearts'},
 {id:'03-slim-donation',width:200,height:25,fixing:'screws',fixingHoleCount:2,text:'This bench was donated by\nThe Friends of St Mary’s Park\nJune 2026'},

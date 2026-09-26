@@ -1,0 +1,10 @@
+[
+{"id":"21-small-name","width":100,"height":25,"fixing":"screws","fixingHoleCount":2,"text":"In loving memory of\nALAN REED\n1941–2025"},
+{"id":"22-narrow-gift","width":150,"height":25,"fixing":"vhb","material":"polished-brass","text":"A quiet place to remember\nDONATED BY THE WILSON FAMILY"},
+{"id":"23-bench-poem","width":200,"height":50,"fixing":"screws","fixingHoleCount":2,"text":"In memory of\nMARGARET JEAN ANDERSON\n1938–2024\nThose we love never truly leave us"},
+{"id":"24-double-memorial","width":150,"height":75,"fixing":"caps","capSize":10,"material":"brushed-brass","text":"TOGETHER ALWAYS\nArthur & Dorothy Mitchell\n1929–2018 • 1932–2025\nLoved and remembered by all the family"},
+{"id":"25-office-sign","width":200,"height":100,"fixing":"caps","capSize":15,"designStyle":"modern-minimal","text":"RIVERSIDE DENTAL\nReception →\nPlease ring the bell for assistance"},
+{"id":"26-a5-award","width":148,"height":210,"fixing":"screws","fixingHoleCount":4,"border":true,"material":"polished-brass","text":"COMMUNITY SERVICE AWARD\nPresented to\nDr Catherine Louise Bennett\nIn recognition of twenty-five years\nof dedication to the people of Oakfield\nSeptember 2026"},
+{"id":"27-a4-history","width":297,"height":210,"fixing":"caps","capSize":15,"border":true,"material":"brushed-brass","text":"OAKFIELD RAILWAY STATION\nOpened 14 June 1862\nFor over a century this station connected the village with the wider world. Its restoration celebrates the railway workers, travellers and local families whose lives shaped this place.\nRestored by the Oakfield Heritage Trust\n2026"},
+{"id":"28-large-dedication","width":400,"height":300,"fixing":"screws","fixingHoleCount":4,"border":true,"text":"THE WILLOW GARDEN\nA place of peace, friendship and remembrance\nDedicated to the volunteers who gave their time,\nskill and kindness to bring this garden to life.\nOpened by the people of Millbrook\n26 September 2026"}
+]
