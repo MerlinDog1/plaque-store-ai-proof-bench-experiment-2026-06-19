@@ -234,7 +234,7 @@ export function ShopFaq({ faqs = shopFaqs }: { faqs?: typeof shopFaqs }) {
   );
 }
 
-export function ShopHome({ onStartDesign }: { onStartDesign?: () => void }) {
+export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: () => void; onRequestDesign?: () => void }) {
   return (
     <div className="shopfront" data-prerendered="true">
       <section className="shop-hero">
@@ -294,6 +294,21 @@ export function ShopHome({ onStartDesign }: { onStartDesign?: () => void }) {
       </div>
       <ShopProcess />
       <ShopCollections />
+      <section className="shop-section shop-design-service" aria-labelledby="design-service-heading">
+        <div>
+          <p className="shop-kicker">A little help, from real people</p>
+          <h2 id="design-service-heading">Want us to take care of the design?</h2>
+          <p>Choose your plaque and tell us what you’d like. We’ll design it for you and email your proof within 3 hours, for you to review before you pay.</p>
+          <a href="/design-request" className="shop-button" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Have us design it</a>
+          <p className="shop-smallprint">No layout tools to learn. Review your proof, request changes, then approve and pay.</p>
+        </div>
+        <ol className="design-service-steps">
+          <li><span>01</span><div><strong>Tell us your idea</strong><p>Your wording, plaque preferences and any special details.</p></div></li>
+          <li><span>02</span><div><strong>We arrange the design</strong><p>Your proof emailed within 3 hours, ready for you to review.</p></div></li>
+          <li><span>03</span><div><strong>Approve before you pay</strong><p>Happy with the proof? Follow your payment link.</p></div></li>
+        </ol>
+      </section>
+
       <section className="shop-section shop-materials">
         <div>
           <p className="shop-kicker">Choose your material</p>
@@ -346,9 +361,11 @@ export function ShopHome({ onStartDesign }: { onStartDesign?: () => void }) {
 export function ShopProduct({
   product,
   onLaunch,
+  onRequestDesign,
 }: {
   product: ProductFamily;
   onLaunch?: () => void;
+  onRequestDesign?: () => void;
 }) {
   const collection = collections.find((item) => item.slug === product.slug);
   const faqs = [...product.faqs, ...shopFaqs]
@@ -392,6 +409,7 @@ export function ShopProduct({
           <DesignLink onStart={onLaunch}>
             Design {product.shortTitle.toLowerCase()} plaque
           </DesignLink>
+          <p><a className="shop-text-link" href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Prefer us to design it? ↗</a></p>
           <p className="shop-hero-note">
             Create your free proof online. No account needed.
           </p>

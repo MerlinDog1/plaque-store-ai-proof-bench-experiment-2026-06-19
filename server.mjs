@@ -1,3 +1,4 @@
+import { submitDesignRequest, MAX_DESIGN_REQUEST_BYTES } from "./server/designRequests.mjs";
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
@@ -341,8 +342,26 @@ const serveStatic = (req, res) => {
   fs.createReadStream(filePath).pipe(res);
 };
 
+const designRequestLimiter = createGeminiRateLimiter({ limit: 5, windowMs: 15 * 60_000 });
 export const handleRequest = async (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+
+  if (url.pathname === "/api/design-requests") {
+    if (req.method !== "POST") { sendJson(res, 405, {error:"Use POST to submit a request."}); return; }
+    if (!hasAllowedGeminiBrowserHeaders(req, {deployed: deployedGeminiEnvironment}) || !String(req.headers["content-type"] || "").toLowerCase().startsWith("application/json")) {
+      sendJson(res, 403, {error:"Please submit the form from this website."}); return;
+    }
+    const identity = getGeminiClientIdentity(req);
+    if (!identity || !designRequestLimiter.consume(identity).ok) { sendJson(res, 429, {error:"Too many requests. Please wait 15 minutes before trying again."}); return; }
+    try {
+      const payload = JSON.parse(await readBody(req, MAX_DESIGN_REQUEST_BYTES));
+      const result = await submitDesignRequest(payload, {recipients:getInternalProductionEmails()});
+      sendJson(res, 201, result);
+    } catch (error) {
+      sendJson(res, error instanceof SyntaxError ? 400 : error.statusCode || 500, {error:error instanceof SyntaxError ? "Invalid request." : error.statusCode ? error.message : "Unable to submit your request. Please try again."});
+    }
+    return;
+  }
 
   if (req.method === "GET" && url.pathname === "/api/gemini/health") {
     sendJson(res, 200, { ok: true, enabled: geminiPublicProxyEnabled, hasKey: Boolean(apiKey) });

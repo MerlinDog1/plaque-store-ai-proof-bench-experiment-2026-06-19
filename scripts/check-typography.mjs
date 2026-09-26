@@ -17,7 +17,7 @@ const renderer = await createServer({
   appType: "custom",
 });
 try {
-  const { validateAuthoredTypographySvg, generatePlaqueDesign } =
+  const { validateAuthoredTypographySvg, generatePlaqueDesign, editPlaqueTypography } =
     await renderer.ssrLoadModule("/services/geminiService.ts");
   const { Shape, DesignStyle, TypographyEngine } =
     await renderer.ssrLoadModule("/types.ts");
@@ -169,13 +169,79 @@ try {
     globalThis.fetch = originalFetch;
   }
 
+  // Instruction edits retain exact wording, use the artwork/hardware-adjusted
+  // text box, and fail closed after one repair. No network/model calls occur.
+  const editCalls = [];
+  let editResponses = [];
+  globalThis.fetch = async (url, options) => {
+    assert.equal(url, '/api/gemini/generate-content');
+    editCalls.push(JSON.parse(options.body));
+    assert.ok(editResponses.length, 'Unexpected extra model request');
+    return new Response(JSON.stringify({ text: JSON.stringify({
+      reasoning: 'Applied the appearance adjustment.', svgContent: editResponses.shift(),
+    }) }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+  const editOptions = {
+    inscription: source,
+    instruction: 'Make the name bolder and keep the dates together.',
+    currentSvgContent: validateAuthoredTypographySvg(good, source, box),
+    width: 300,
+    height: 200,
+    shape: Shape.Rect,
+    designStyle: DesignStyle.ClassicalFormal,
+    inscriptionBox: box,
+    inscriptionContext: { purpose: 'memorial', portraitRelationship: 'Portrait on the left; this box excludes it.' },
+  };
+  const resetEditMock = (...responses) => { editCalls.length = 0; editResponses = responses; };
+  try {
+    resetEditMock(good.replace('font-weight="600"', 'font-weight="700"'));
+    const edited = await editPlaqueTypography(editOptions);
+    assert.equal(editCalls.length, 1);
+    assert.equal(edited.conceptImageUrl, null);
+    assert.ok(edited.svgContent.includes('font-weight="700"'));
+    const editPrompt = editCalls[0].contents;
+    assert.ok(editPrompt.includes(`---BEGIN INSCRIPTION---\n${source}\n---END INSCRIPTION---`));
+    assert.ok(editPrompt.includes(`CUSTOMER APPEARANCE ADJUSTMENT: ${JSON.stringify(editOptions.instruction)}`));
+    const sentCurrentSvg = JSON.parse(editPrompt.split('CURRENT LAYOUT DATA: ')[1].split('\nCUSTOMER APPEARANCE ADJUSTMENT: ')[0]);
+    assert.equal(validateAuthoredTypographySvg(wrap(sentCurrentSvg), source, box), editOptions.currentSvgContent);
+    assert.ok(editPrompt.includes('Available text box: 170 × 105'));
+    assert.ok(editPrompt.includes('Portrait on the left'));
+    assert.ok(!edited.svgContent.includes(editOptions.instruction));
+
+    resetEditMock(good.replace('1938–2026', '1938–2025'), good);
+    await editPlaqueTypography({ ...editOptions, instruction: 'Change the dates to 1938–2025 and centre them.' });
+    assert.equal(editCalls.length, 2, 'A wording-changing request must not bypass the exact wording check');
+    assert.ok(editCalls[1].contents.includes('failed a layout check'));
+
+    for (const [invalidSvg, reason] of [
+      [good.replace('Élodie', 'Elodie'), /wording/],
+      [good.replace('</svg>', '<script>alert(1)</script></svg>'), /Unsafe/],
+      [wrap(text('In loving memory of', -27, 8) + text('Élodie O’Neill', -4, 17, 600)
+        + text('1938–2026', 14, 8) + text('Always in our hearts', 34, 9), { width: 300, height: 200 }), /dimensions/],
+      [good.replace('y="14"', 'y="0"'), /overlap/],
+    ]) {
+      resetEditMock(invalidSvg, invalidSvg);
+      await assert.rejects(() => editPlaqueTypography(editOptions), reason);
+      assert.equal(editCalls.length, 2, 'An invalid edit gets exactly one repair and no fallback');
+    }
+
+    resetEditMock();
+    await assert.rejects(() => editPlaqueTypography({ ...editOptions, instruction: ' ' }), /adjustment/);
+    await assert.rejects(() => editPlaqueTypography({ ...editOptions, instruction: 'x'.repeat(2001) }), /2,000/);
+    await assert.rejects(() => editPlaqueTypography({ ...editOptions, inscriptionBox: { width: NaN, height: 105 } }), /area/);
+    await assert.rejects(() => editPlaqueTypography({ ...editOptions, currentSvgContent: editOptions.currentSvgContent.replace('Élodie', 'Elodie') }), /match/);
+    assert.equal(editCalls.length, 0, 'Invalid inputs must not call the model');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
   await mkdir("output", { recursive: true });
   await writeFile(
     "output/typography-fixtures.html",
     `<!doctype html><html lang="en"><meta charset="utf-8"><title>Typography verification fixtures</title><style>body{font:16px Arial;background:#f8f6ef;color:#203b32;margin:40px}section{margin:40px 0;max-width:900px}svg{width:100%;height:auto;background:#d7b970;border:16px solid #c4a254;box-sizing:border-box}h1{font-weight:400}p{max-width:700px;line-height:1.6}</style><h1>Typography verification fixtures</h1><p>Known layouts used to test exact wording, bounds and overlap checks. These are test fixtures, not live Gemini generations.</p><section><h2>A5 memorial · accents, names and dates</h2>${good}</section><section><h2>Compact bench · 150 × 50 mm plaque</h2>${bench}</section></html>`,
   );
   console.log(
-    "Typography checks passed: wording, dates, Unicode, overlap, overflow, safe SVG, compact bench, model migration and one repair.",
+    "Typography checks passed: wording, dates, Unicode, overlap, overflow, safe SVG, compact bench, model migration, one repair and mocked instruction-only edits.",
   );
 } finally {
   await renderer.close();

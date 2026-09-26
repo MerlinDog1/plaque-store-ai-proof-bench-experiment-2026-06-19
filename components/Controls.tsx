@@ -225,12 +225,18 @@ interface Props {
   state: PlaqueState;
   onChange: (newState: Partial<PlaqueState>) => void;
   onGenerate: (text: string) => void;
+  onRequestDesign: () => void;
+  onCreateManualLayout: () => void;
+  onApplyLayoutInstruction: (instruction: string) => void;
+  onUndoLayout: () => void;
+  canUndoLayout: boolean;
+  layoutMessage: string;
   onClear: () => void;
   prompt: string;
   onPromptChange: (prompt: string) => void;
   guidance: string;
   onGuidanceChange: (guidance: string) => void;
-  onGeneratedSvgContentChange: (svgContent: string) => void;
+  onGeneratedSvgContentChange: (svgContent: string, style?: DesignStyle) => boolean;
   isGenerating: boolean;
   generationPhase: GenerationPhase;
   onMemorialImageUpload: (file: File) => void;
@@ -292,6 +298,7 @@ interface GeneratedTextControl {
   fontFamily: string;
   fontSize: number;
   fontWeight: string;
+  y: number;
 }
 
 const fieldClass =
@@ -467,6 +474,7 @@ export const Controls: React.FC<Props> = ({
   state,
   onChange,
   onGenerate,
+  onRequestDesign, onCreateManualLayout, onApplyLayoutInstruction, onUndoLayout, canUndoLayout, layoutMessage,
   onClear,
   prompt,
   onPromptChange,
@@ -516,6 +524,7 @@ export const Controls: React.FC<Props> = ({
   const [customHeightInput, setCustomHeightInput] = useState(String(state.height));
   const [fixingsBorderMode, setFixingsBorderMode] = useState<'fixings' | 'border'>('fixings');
   const [manualTextOpen, setManualTextOpen] = useState(false);
+  const [layoutInstruction, setLayoutInstruction] = useState('');
   const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
   const [instantStyleVariant, setInstantStyleVariant] = useState(1);
@@ -569,10 +578,11 @@ export const Controls: React.FC<Props> = ({
         return {
           index,
           label: (text.textContent || `Line ${index + 1}`).replace(/\s+/g, ' ').trim() || `Line ${index + 1}`,
-          text: text.textContent || '',
+          text: text.querySelector('tspan') ? Array.from(text.querySelectorAll('tspan')).map(span => span.textContent || '').join('\n') : text.textContent || '',
           fontFamily: AVAILABLE_FONTS.includes(fontFamily) ? fontFamily : 'Lato',
           fontSize: Number.isFinite(fontSize) ? fontSize : 12,
           fontWeight,
+          y: Number(text.getAttribute('y') || 0),
         };
       });
     } catch {
@@ -784,10 +794,9 @@ export const Controls: React.FC<Props> = ({
     if (style === null) {
       if (baseGeneratedSvgContent) {
         instantStyleApplyingRef.current = true;
-        onGeneratedSvgContentChange(baseGeneratedSvgContent);
+        if (!onGeneratedSvgContentChange(baseGeneratedSvgContent, DesignStyle.Auto)) { instantStyleApplyingRef.current = false; return; }
       }
       setInstantStyleVariant(1);
-      onChange({ designStyle: DesignStyle.Auto });
       return;
     }
 
@@ -835,9 +844,8 @@ export const Controls: React.FC<Props> = ({
         .map(node => new XMLSerializer().serializeToString(node).replace(/\sxmlns="http:\/\/www\.w3\.org\/2000\/svg"/g, ''))
         .join('\n');
       instantStyleApplyingRef.current = true;
-      onGeneratedSvgContentChange(nextSvg);
+      if (!onGeneratedSvgContentChange(nextSvg, style)) { instantStyleApplyingRef.current = false; return; }
       setInstantStyleVariant(variant);
-      onChange({ designStyle: style });
     } catch (error) {
       console.warn('Instant style change failed.', error);
     }
@@ -894,7 +902,9 @@ export const Controls: React.FC<Props> = ({
     if (!isProductionReady && proofApproved) setProofApproved(false);
   }, [isProductionReady, proofApproved]);
 
-  const updateGeneratedTextLine = (lineIndex: number, changes: Partial<Pick<GeneratedTextControl, 'text' | 'fontFamily' | 'fontSize' | 'fontWeight'>>) => {
+  useEffect(() => { setProofApproved(false); }, [state, prompt]);
+
+  const updateGeneratedTextLine = (lineIndex: number, changes: Partial<Pick<GeneratedTextControl, 'text' | 'fontFamily' | 'fontSize' | 'fontWeight' | 'y'>>) => {
     if (!state.generatedSvgContent || typeof DOMParser === 'undefined') return;
     try {
       const doc = new DOMParser().parseFromString(
@@ -907,13 +917,23 @@ export const Controls: React.FC<Props> = ({
 
       if (typeof changes.text === 'string') {
         const tspans = Array.from(text.querySelectorAll('tspan'));
-        if (tspans.length) {
-          tspans[0].textContent = changes.text;
-          tspans.slice(1).forEach(tspan => tspan.remove());
+        const lines = changes.text.split('\n');
+        if (tspans.length || lines.length > 1) {
+          const fontSize = Number(text.getAttribute('font-size') || 12);
+          const template = tspans[0]?.cloneNode(false) as Element | undefined;
+          text.textContent = '';
+          lines.forEach((line, index) => {
+            const span = template ? template.cloneNode(false) as Element : doc.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+            span.removeAttribute('y'); span.removeAttribute('dx');
+            span.setAttribute('x', text.getAttribute('x') || '0');
+            span.setAttribute('dy', index === 0 ? '0' : String(fontSize * 1.3));
+            span.textContent = line; text.appendChild(span);
+          });
         } else {
           text.textContent = changes.text;
         }
       }
+      if (typeof changes.y === 'number' && Number.isFinite(changes.y)) text.setAttribute('y', changes.y.toFixed(2));
       if (changes.fontFamily) {
         text.setAttribute('font-family', changes.fontFamily);
         text.querySelectorAll('tspan').forEach(tspan => tspan.setAttribute('font-family', changes.fontFamily!));
@@ -2080,11 +2100,29 @@ export const Controls: React.FC<Props> = ({
                 </div>
                 </div>
               )}
+              <div className="rounded-lg border border-[#c6c8bd] bg-[#fffaf0] p-3">
+                <label htmlFor="layout-instruction" className="block text-sm font-black">Adjust with AI</label>
+                <p className="my-2 text-xs leading-5 text-[#59675d]">Give one set of layout instructions. Your wording stays unchanged; edit the wording field or manual lines to change the words.</p>
+                <textarea id="layout-instruction" value={layoutInstruction} maxLength={1200} disabled={isGenerating}
+                  onChange={event => setLayoutInstruction(event.target.value)}
+                  placeholder="Make the name larger and the dates smaller. Keep everything else as it is."
+                  className={`${fieldClass} min-h-[100px] normal-case leading-6 tracking-normal`} />
+                <div className="my-2 flex flex-wrap gap-2">
+                  {['Make the name larger', 'Bring the lines closer together', 'Use one font throughout', 'Make the dates smaller'].map(example => (
+                    <button key={example} type="button" disabled={isGenerating} onClick={() => setLayoutInstruction(example)}
+                      className="rounded-full border border-[#c6c8bd] px-3 py-2 text-xs">{example}</button>
+                  ))}
+                </div>
+                <button type="button" disabled={isGenerating || !layoutInstruction.trim()} onClick={() => onApplyLayoutInstruction(layoutInstruction)}
+                  className="min-h-[48px] w-full rounded-lg bg-[#f2d688] p-3 text-sm font-black text-[#13201c] disabled:opacity-50">{isGenerating ? 'Working…' : 'Apply changes'}</button>
+              </div>
               <button onClick={onClear} className="min-h-[48px] w-full rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 py-3 text-sm font-black text-[#ff9b7c]">
                 Clear inscription layout
               </button>
             </div>
           )}
+          {layoutMessage && <p role="status" aria-live="polite" className="rounded-lg border border-[#c6c8bd] bg-[#fffaf0] p-3 text-sm leading-6">{layoutMessage}</p>}
+          {canUndoLayout && <button type="button" disabled={isGenerating} onClick={onUndoLayout} className="min-h-[44px] w-full rounded-lg border border-[#b98235] p-3 text-sm font-black">Undo last change</button>}
         </section>
       )}
 

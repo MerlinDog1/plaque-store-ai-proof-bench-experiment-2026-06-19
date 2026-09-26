@@ -172,6 +172,10 @@
     {
       "source": "/order-confirmed",
       "destination": "/index.html"
+    },
+    {
+      "source": "/design-request",
+      "destination": "/index.html"
     }
   ],
   "git": {
