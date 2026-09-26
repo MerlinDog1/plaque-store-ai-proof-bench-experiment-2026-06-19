@@ -177,3 +177,41 @@ Checks: typecheck, build, typography safety/instruction tests; updated mocked br
 
 ## 3D preview font correction
 Owner screenshots exposed serif-to-sans fallback in the temporary preview. Reproduced at390px: fontsOutlined=false and opentype.js blocked by review CSP. Corrected review-only CSP to allow the exact opentype.js1.3.4 script and Fontsource font fetch path; advertising scripts stay blocked. No designer/production renderer changes or rebuild required. Restarted only cody-current-preview. New scripts/check-preview-fonts.cjs fails before fix and passes on the public tunnel at390/1440 with fontsOutlined=true/no font failures; inspected mobile screenshot showing original serif title in3D. Existing production unchanged.
+
+## Human design request submission — recovered checkpoint, 26 September
+
+The form now reviews then POSTs `/api/design-requests`. The production server
+validates bounded fields and an optional JPG/PNG/WebP attachment (2 MiB decoded,
+3 MiB request-body cap), checks same-site JSON requests, applies the existing
+per-instance IP limiter (5 attempts / 15 minutes), and rejects the honeypot.
+Image signatures are checked; this is not a malware scanner or full image decode.
+
+The endpoint sends a plain-text brief and optional attachment through Resend to
+the same internal recipients as existing production order notifications, using
+`getInternalProductionEmails()`. Customer email is Reply-to, never a selectable
+recipient. It reuses `RESEND_API_KEY` and `ORDER_EMAIL_FROM`; those and
+`ORDER_ADMIN_EMAIL` are present in Production metadata (values not retrieved).
+No database migration, order, payment, upload bucket or customer email is created.
+The inbox is the request record; there is no new admin queue or durable outbox.
+
+Success requires the provider's successful response and message ID. Network or
+provider errors retain the brief and attachment for retry. Stable request UUID
+plus canonical payload digest supplies the Resend idempotency key (provider's
+24-hour window); edited payloads are distinct. This is not indefinite duplicate
+protection, and refreshing starts a new draft/UUID. In-memory rate limits are
+per server instance, not a global distributed quota. No automatic retry job.
+
+Checks: server validator/provider fixtures and actual HTTP routing/origin/body/
+rate/method tests; TypeScript; build/runtime boot; 390/1440 browser tests with
+mocked mail responses for review, attachment, sending, failure, unchanged retry
+and receipt; existing server checkout regression. All passed. Build retains the
+existing large-chunk warning. No live email was sent and no inbox delivery was
+proved. Real Resend delivery must be checked after an authorised deployment;
+provider acceptance alone cannot prove inbox delivery.
+
+Production is unchanged and Git auto-deployment remains disabled. The existing
+Cloudflare preview is still AI-only: its request-send endpoint returns 503,
+not a simulated success. Proof preparation, sending the proof and supplying the
+payment link remain manual team responsibilities; the three-hour text is the
+owner's turnaround promise, not an automated scheduler. This section supersedes
+earlier statements describing the implementation itself as a review-only form.

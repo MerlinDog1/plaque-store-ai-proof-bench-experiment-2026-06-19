@@ -36,7 +36,9 @@
     "preview": "node server.mjs",
     "serve": "node server.mjs",
     "check:manual-typography": "node scripts/check-manual-typography.mjs",
-    "check:design-routes": "node scripts/check-design-routes.cjs"
+    "check:design-routes": "node scripts/check-design-routes.cjs",
+    "check:design-requests": "node scripts/check-design-requests.mjs",
+    "check:design-request-ui": "node scripts/check-design-request-ui.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1136.0",
