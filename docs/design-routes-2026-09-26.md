@@ -149,3 +149,21 @@ and browser Back retained the original designer. Existing mocked AI/manual
 regression checks passed after renaming methods. Mobile homepage service section
 and form summary screenshots inspected. No new paid-model call was needed for
 this presentation-only change; the AI connection remains enabled.
+
+## Historical designer-only comparison previews
+
+Owner requested the old designer-only experiment. Two plausible saved versions
+were recovered without modifying their application sources:
+
+- `MerlinDog1/plaque-store-ai-consumer` at `42bd86af2718f94fd2b15f75fb09f58edcb13758`: original designer-only proof bench.
+- `MerlinDog1/plaque-store-ai-proof-bench-yuji-2026-06-18` at `ec5f9f8e5e6d9977836a4284f58d390de704ae86`: experimental creative-director brief cards.
+
+Both passed independent npm ci/build and mobile initial-screen checks with no
+page JS errors. These are candidates for the remembered version, not a claimed
+identification. The shared review launcher accepts `REVIEW_BUILD_ROOT` for an
+independent checkout's compiled dist and `PORT` for a separate loopback listener.
+No credentials are read from that checkout; API-only forwarding/disabled checkout
+and preview policies stay the same. Current AI upstream is not a historical
+reproduction of their old model runtime. AI health was checked; generation in
+these historical builds was not live-tested. Original sources remain on GitHub
+unchanged. No site deployment, alias reassignment or database change.

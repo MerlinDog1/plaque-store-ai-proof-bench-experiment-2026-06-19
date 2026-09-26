@@ -21,7 +21,7 @@ const send = (res, status, body) => {
 
 await preview({
   configFile: false,
-  root: fileURLToPath(new URL('../', import.meta.url)),
+  root: process.env.REVIEW_BUILD_ROOT || fileURLToPath(new URL('../', import.meta.url)),
   preview: { host: '127.0.0.1', port: Number(process.env.PORT || 4196), strictPort: true, allowedHosts: ['.trycloudflare.com'] },
   plugins: [{
     name: 'ai-only-review',
