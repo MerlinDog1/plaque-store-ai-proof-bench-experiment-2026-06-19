@@ -1,6 +1,5 @@
 import { BorderStyle, Fixing, MemorialImagePlacement, PlaqueState, Shape } from "../types";
 import { getFixingGeometry } from "./fixingGeometry";
-import { isBenchPlaqueFormat } from "./plaqueRules";
 import { getSafeMarginsMm } from "./safeMargin";
 
 export interface InscriptionLayout {
@@ -112,11 +111,10 @@ export function getInscriptionLayout(
   });
   // Reserve a full-height side band so no line can meet a cap or screw,
   // including existing layouts, four-hole variants and side-by-side artwork.
-  if (isBenchPlaqueFormat(state.width, state.height, state.shape)
-    && (state.fixing === Fixing.Caps || state.fixing === Fixing.Screws)) {
+  if (state.shape !== Shape.Heart && (state.fixing === Fixing.Caps || state.fixing === Fixing.Screws)) {
     const hardware = getFixingGeometry(state);
     const clearance = hardware.holeInset + hardware.fixingRadius + 3;
-    const cornerFixings = state.fixing === Fixing.Caps ? state.height >= 80 : state.fixingHoleCount === 4;
+    const cornerFixings = state.shape === Shape.Rect && (state.fixing === Fixing.Caps ? state.height >= 80 : state.fixingHoleCount === 4);
     if (state.height > state.width && cornerFixings) safeMargin.y = Math.max(safeMargin.y, clearance);
     else safeMargin.x = Math.max(safeMargin.x, clearance);
   }
@@ -126,6 +124,13 @@ export function getInscriptionLayout(
   const safeH = Math.max(10, state.height - safeMargin.y * 2);
 
   if (!state.memorialImageEnabled) {
+    // A centred rectangular box crosses a heart's notch and tapered shoulders.
+    // This rectangle sits below the notch, wholly within the production path.
+    if (state.shape === Shape.Heart) return {
+      textCx: cx, textCy: offset + state.height * 0.54,
+      textW: Math.min(safeW, state.width * 0.52), textH: Math.min(safeH, state.height * 0.28),
+      artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only",
+    };
     return applyHardwareTextClearance(state, { textCx: cx, textCy: cy, textW: safeW, textH: safeH, artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only" });
   }
 
@@ -141,13 +146,13 @@ export function getInscriptionLayout(
     const baseArtW = Math.min(state.width * 0.46, safeW);
     const artH = options.unrestrictedArtwork ? baseArtH * portraitScale : Math.max(12, state.height * 0.34 * portraitScale);
     const artW = options.unrestrictedArtwork ? baseArtW * portraitScale : Math.min(state.width * 0.46 * portraitScale, safeW);
-    const textH = Math.max(18, state.height * 0.24);
+    const textH = state.height * 0.18;
     const artCx = cx;
     const artCy = offset + state.height * 0.20 + baseArtH / 2;
     return applyHardwareTextClearance(state, {
       textCx: cx,
-      textCy: offset + state.height * 0.71,
-      textW: state.width * 0.50,
+      textCy: offset + state.height * 0.68,
+      textW: state.width * 0.34,
       textH,
       artX: artCx - artW / 2,
       artY: artCy - artH / 2,

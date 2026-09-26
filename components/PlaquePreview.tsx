@@ -282,13 +282,14 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     state.fixing,
     state.fixingHoleCount,
   ]);
-  const fittedTextScale = isBenchPlaque
+  const constrainTextFit = isBenchPlaque || hasVisibleFixings || state.shape !== Shape.Rect;
+  const fittedTextScale = constrainTextFit
     ? Math.min(1, Math.max(0.1, state.inscriptionScale))
     : Math.max(0.1, state.inscriptionScale);
-  const fittedOffsetX = isBenchPlaque
+  const fittedOffsetX = constrainTextFit
     ? Math.max(-layout.textW * (1 - fittedTextScale) / 2, Math.min(layout.textW * (1 - fittedTextScale) / 2, state.inscriptionOffsetX))
     : state.inscriptionOffsetX;
-  const fittedOffsetY = isBenchPlaque
+  const fittedOffsetY = constrainTextFit
     ? Math.max(-layout.textH * (1 - fittedTextScale) / 2, Math.min(layout.textH * (1 - fittedTextScale) / 2, state.inscriptionOffsetY))
     : state.inscriptionOffsetY;
   const artworkX = layout.artX + state.memorialImageOffsetX;
@@ -892,7 +893,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
           )}
 
           {/* Texture Overlay */}
-          {((state.material.includes('brushed') && state.material !== Material.BrushedSteel) || state.material.includes('aged')) && (
+          {!state.reverseEtch && ((state.material.includes('brushed') && state.material !== Material.BrushedSteel) || state.material.includes('aged')) && (
             state.shape === Shape.Rect ? (
               <rect x={offset} y={offset} width={state.width} height={state.height} rx={cornerR} fill="transparent" filter="url(#noise)" className="visual-effect" />
             ) : state.shape === Shape.Heart ? (
@@ -902,7 +903,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             )
           )}
 
-          {textureUrl && (
+          {!state.reverseEtch && textureUrl && (
             state.shape === Shape.Rect ? (
               <rect
                 x={offset} y={offset} width={state.width} height={state.height} rx={cornerR}
@@ -924,7 +925,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             )
           )}
 
-          {state.material === Material.BrushedBrass && (
+          {!state.reverseEtch && state.material === Material.BrushedBrass && (
             <g className="visual-effect" style={{ mixBlendMode: 'soft-light' }}>
               {state.shape === Shape.Rect ? (
                 <>
@@ -954,7 +955,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             </g>
           )}
 
-          {state.material === Material.PolishedSteel && (
+          {!state.reverseEtch && state.material === Material.PolishedSteel && (
             state.shape === Shape.Rect ? (
               <rect
                 x={offset} y={offset} width={state.width} height={state.height} rx={cornerR}
@@ -977,7 +978,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
           )}
 
           {/* Aged Patina Overlay */}
-          {state.material === Material.AgedBrass && (
+          {!state.reverseEtch && state.material === Material.AgedBrass && (
             state.shape === Shape.Rect ? (
               <rect
                 x={offset} y={offset} width={state.width} height={state.height} rx={cornerR}

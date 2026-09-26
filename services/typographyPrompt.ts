@@ -46,6 +46,7 @@ COMPOSITION
 - Identify the subject, not merely the first line. On a memorial, the person's name is the focal point; “In loving memory of” is a smaller lead-in. On an opening plaque, give the building or event a clear place in the hierarchy. Keep names and dates together where they fit.
 - Use one upright serif family for a traditional plaque, or one upright sans-serif family for a modern plaque. At most two families. Use weight, line breaks and space to establish hierarchy.
 - A short name or heading is normally 1.5–2 times the supporting copy, never so large that the message becomes tiny. For dense wording, reduce that contrast. Do not use script or italic text.
+- If a long name cannot remain clearly larger than the supporting copy on one line, wrap it into two balanced name lines instead of making the whole inscription tiny. Preserve all words and their reading order.
 - Centre short dedications. For longer passages, use balanced centred lines or a consistently left-aligned paragraph, with one alignment per group.
 - Keep related lines close: baseline distance about 1.3–1.5 times their font size. Leave about half a body line of extra space between groups. Balance the whole block vertically. No overlaps or oversized empty gaps.
 - Keep “by” with the name that follows it, and “of”, “and” or “the” with the rest of their phrase. Do not strand a word on a line unless it is an intentional name or a date.

@@ -608,6 +608,7 @@ export const Controls: React.FC<Props> = ({
   const clampDimension = (value: number) => Math.min(MAX_CUSTOM_DIMENSION_MM, Math.max(MIN_CUSTOM_DIMENSION_MM, Number.isFinite(value) ? value : MIN_CUSTOM_DIMENSION_MM));
   const isHeartPlaque = state.shape === Shape.Heart;
   const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
+  const constrainTextFit = isBenchPlaque || state.shape !== Shape.Rect || state.fixing === Fixing.Caps || state.fixing === Fixing.Screws;
   const activeBenchSize = hasSelectedSize ? BENCH_SIZE_PRESETS.find((preset) => (
     state.shape === preset.shape && state.width === preset.width && state.height === preset.height
   )) : undefined;
@@ -2271,10 +2272,10 @@ export const Controls: React.FC<Props> = ({
               />
               <FineTuneControl
                 label="Text scale"
-                valueLabel={`${Math.round(Math.min(isBenchPlaque ? 1 : 2.5, state.inscriptionScale) * 100)}%`}
-                value={Math.round(Math.min(isBenchPlaque ? 1 : 2.5, state.inscriptionScale) * 100)}
+                valueLabel={`${Math.round(Math.min(constrainTextFit ? 1 : 2.5, state.inscriptionScale) * 100)}%`}
+                value={Math.round(Math.min(constrainTextFit ? 1 : 2.5, state.inscriptionScale) * 100)}
                 min={40}
-                max={isBenchPlaque ? 100 : 250}
+                max={constrainTextFit ? 100 : 250}
                 step={5}
                 locked={!fineTuneUnlocked}
                 onChange={(value) => onChange({ inscriptionScale: value / 100 })}

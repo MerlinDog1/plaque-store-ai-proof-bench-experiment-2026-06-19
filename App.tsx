@@ -755,7 +755,7 @@ const App: React.FC = () => {
         setActiveStep(5);
       }
     } catch (error) {
-      handleApiError(error);
+      setLayoutMessage(error instanceof Error ? error.message : 'We could not create a readable layout. Try a larger plaque, less wording or contact us for help.');
     } finally {
       setIsGeneratingLayout(false);
       setGenerationPhase(null);

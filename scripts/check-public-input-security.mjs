@@ -56,6 +56,7 @@ const structured = validateGeminiGenerateContentRequest({
 assert.equal(structured.operation, "structured-content");
 assert.equal(structured.request.model, "gemini-3.8-flash", 'Cached 3.5 clients should use the current server model');
 assert.equal(structured.request.config.maxOutputTokens, 8_192);
+assert.deepEqual(structured.request.config.thinkingConfig, { thinkingLevel: "LOW" });
 assert.equal(structured.request.config.httpOptions, undefined, "client HTTP options must not reach the upstream SDK");
 assert.deepEqual(structured.request.contents.parts[1], {
   inlineData: { mimeType: "image/png", data: tinyPng },
@@ -581,7 +582,7 @@ await new Promise((resolve) => svgRouteProbeServer.listen(0, "127.0.0.1", resolv
 const svgRouteAddress = svgRouteProbeServer.address();
 assert.ok(svgRouteAddress && typeof svgRouteAddress === "object");
 
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, ...(process.env.CHROMIUM_EXECUTABLE ? { executablePath: process.env.CHROMIUM_EXECUTABLE } : {}) });
 try {
   const page = await browser.newPage();
   const escapedUrlRequests = [];
