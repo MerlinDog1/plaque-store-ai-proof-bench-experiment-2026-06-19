@@ -173,5 +173,8 @@
       "source": "/order-confirmed",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }
