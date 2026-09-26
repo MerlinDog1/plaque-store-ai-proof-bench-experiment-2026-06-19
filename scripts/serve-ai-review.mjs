@@ -28,8 +28,9 @@ await preview({
     configurePreviewServer(server) {
       server.middlewares.use(async (req, res, next) => {
         res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-        // Review traffic must not reach the production advertising/analytics tags.
-        res.setHeader('Content-Security-Policy', "script-src 'self' 'unsafe-inline'; connect-src 'self'");
+        // Block advertising/analytics, but preserve the live designer font outlining.
+        // 3D rasterization needs opentype.js plus the exact Fontsource font bytes.
+        res.setHeader('Content-Security-Policy', "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js; connect-src 'self' https://cdn.jsdelivr.net/npm/@fontsource/");
         const pathname = new URL(req.url, 'http://localhost').pathname;
         if (!pathname.startsWith('/api/')) return next();
         const health = pathname === '/api/gemini/health' && req.method === 'GET';

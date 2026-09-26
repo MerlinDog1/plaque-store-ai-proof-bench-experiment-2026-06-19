@@ -174,3 +174,6 @@ Owner chose the current live designer UI plus instruction-based adjustments, not
 Homepage human-design section and separate preview form now explicitly promise an emailed proof within 3 hours, as requested. Submission remains preview-only: no email, order, payment or database write. Production unchanged; automatic Git deployment guard retained.
 
 Checks: typecheck, build, typography safety/instruction tests; updated mocked browser regression passes 390/1440 widths (original generation path, manual wording sync, approval reset, failed/successful/stale AI responses, undo, no JS errors/overflow). Public tunnel homepage/form checked at both widths; AI health enabled. No new real model generation in this revision.
+
+## 3D preview font correction
+Owner screenshots exposed serif-to-sans fallback in the temporary preview. Reproduced at390px: fontsOutlined=false and opentype.js blocked by review CSP. Corrected review-only CSP to allow the exact opentype.js1.3.4 script and Fontsource font fetch path; advertising scripts stay blocked. No designer/production renderer changes or rebuild required. Restarted only cody-current-preview. New scripts/check-preview-fonts.cjs fails before fix and passes on the public tunnel at390/1440 with fontsOutlined=true/no font failures; inspected mobile screenshot showing original serif title in3D. Existing production unchanged.
