@@ -67,3 +67,14 @@ independently verified. Supersedes the 17:32 release above. Hosted390/1440 bench
 fixing changes and3Doutlining passed;400localgeometry cases/typecheck/build pass.
 No live AI generation, email, database writes or payments during this correction.
 Rollback compatible previous release: `dpl_EG7t1wV91VTJJHeHUqWuDvmDET2A`.
+
+## Visual quality review release — 26 September 2026, 18:29 UTC
+Current live application source is `7af33c155dd4d969e91be2ff08f59bd4a1e91161`,
+branch `codex/layout-quality-review`, worktree `projects/instaplaque-layout-quality`.
+Deployment `dpl_HSwvSSUVEhDvmfj7kD7c4vPQyrRW` promoted after 10 fresh successful
+AI cases; canonical and www independently resolve to this READY deployment.
+16 baseline cases visually reviewed, 14 successful layouts replayed; 20 local
+and hosted visual regressions pass, plus persistent failure-state check.
+400 geometry cases, typography/security checks, typecheck/build passed.
+See `docs/layout-quality-review-2026-09-26.md` for results, limitations and rollback.
+No customer email, order, payment or database write by this review.

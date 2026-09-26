@@ -41,8 +41,20 @@ fs.mkdirSync(out,{recursive:true});
  if(u.pathname==='/api/gemini/generate-content'){
  if(process.env.LIVE_LAYOUT_QA!=='true')throw Error('Unexpected generation in replay');
  const payload=route.request().postDataJSON();console.log(c.id,'model request',record.calls.length+1);
- const res=await fetch(upstream+u.pathname,{method:'POST',headers:{'Content-Type':'application/json',Origin:upstream,'Sec-Fetch-Site':'same-origin'},body:JSON.stringify(payload),signal:AbortSignal.timeout(90000)});const responseText=await res.text();let responseBody;try{responseBody=JSON.parse(responseText)}catch{responseBody={error:`Model endpoint returned HTTP ${res.status}: ${responseText.slice(0,150)}`}};
- record.calls.push({status:res.status,request:payload,response:responseBody});fs.writeFileSync(path.join(out,c.id+'-responses.json'),JSON.stringify(record.calls,null,2));return route.fulfill({status:res.status,json:responseBody});}
+ let status,responseText;
+ if(process.env.QA_PROTECTED==='true') {
+   const inputFile=path.resolve(out,c.id+'-request.json');fs.writeFileSync(inputFile,JSON.stringify(payload));
+   const {stdout}=await require('node:util').promisify(require('node:child_process').execFile)('vercel',[
+     'curl',u.pathname,'--deployment',upstream,'--scope','dullaghan31-3959s-projects','--',
+     '--silent','--show-error','--request','POST','--header','Content-Type: application/json',
+     '--header','Origin: '+upstream,'--header','Sec-Fetch-Site: same-origin','--data-binary','@'+inputFile,'--write-out','\n%{http_code}'
+   ],{env:{...process.env,VERCEL_ORG_ID:'team_ixtKhYUPfpSnMuyaBrzYUQQe',VERCEL_PROJECT_ID:'prj_e0enz36tdUE3mI8q3tKKG9YR5CLD'},timeout:100000,maxBuffer:8*1024*1024});
+   const split=stdout.lastIndexOf('\n');status=Number(stdout.slice(split+1));responseText=stdout.slice(0,split);
+ }else{
+   const res=await fetch(upstream+u.pathname,{method:'POST',headers:{'Content-Type':'application/json',Origin:upstream,'Sec-Fetch-Site':'same-origin'},body:JSON.stringify(payload),signal:AbortSignal.timeout(90000)});status=res.status;responseText=await res.text();
+ }
+ let responseBody;try{responseBody=JSON.parse(responseText)}catch{responseBody={error:`Model endpoint returned HTTP ${status}: ${responseText.slice(0,150)}`}};
+ record.calls.push({status,request:payload,response:responseBody});fs.writeFileSync(path.join(out,c.id+'-responses.json'),JSON.stringify(record.calls,null,2));return route.fulfill({status,json:responseBody});}
  if(u.pathname==='/api/gemini/health')return route.fulfill({json:{ok:true,enabled:true,hasKey:true}});
  return route.fulfill({status:503,json:{error:'Disabled in layout visual QA'}});
  });
