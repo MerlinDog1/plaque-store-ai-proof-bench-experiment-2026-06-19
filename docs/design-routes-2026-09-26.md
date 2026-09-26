@@ -264,3 +264,8 @@ and390/1440 browser checks using synthetic generation, rendered millimetre bound
 for none/two/four screws/10mm/15mmcaps/adhesive, live fixing changes with no further
 AI calls, preserved wording and no horizontal overflow. Measurements allow0.05mm
 for browser glyph/transform rounding. No payment, email or database action.
+
+Deployed correction source1cc8f618d28c2fd7244025b04040506d4ea3f722 at17:58UTC,
+Vercel dpl_2w9RiMretPaTdbxjCqGHFyTeBaCe. Canonical/www independently verified.
+Hosted390/1440 same fixing-switch/bounds tests passed, plus bench15mmcap3Dfont
+outlining. No new live model calls; generation mocked for repeatable regression.

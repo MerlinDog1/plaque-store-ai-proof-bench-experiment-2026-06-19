@@ -58,3 +58,12 @@ Owner authorised release of `codex/design-routes-instructions` at
 `docs/design-routes-2026-09-26.md` for live checks and remaining inbox-confirmation
 limit. Earlier production identifiers above are the previous release, not current.
 Retains existing Supabase/R2 configuration; no database or payment change.
+
+## Bench clearance production correction — 26 September 2026, 17:58 UTC
+Current live source is `1cc8f618d28c2fd7244025b04040506d4ea3f722`, branch
+`codex/bench-fixing-clearance`, worktree `projects/instaplaque-bench-clearance`.
+Production `dpl_2w9RiMretPaTdbxjCqGHFyTeBaCe` READY and canonical/www aliases
+independently verified. Supersedes the 17:32 release above. Hosted390/1440 bench
+fixing changes and3Doutlining passed;400localgeometry cases/typecheck/build pass.
+No live AI generation, email, database writes or payments during this correction.
+Rollback compatible previous release: `dpl_EG7t1wV91VTJJHeHUqWuDvmDET2A`.
