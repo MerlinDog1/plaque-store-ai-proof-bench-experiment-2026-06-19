@@ -2271,10 +2271,10 @@ export const Controls: React.FC<Props> = ({
               />
               <FineTuneControl
                 label="Text scale"
-                valueLabel={`${Math.round(state.inscriptionScale * 100)}%`}
-                value={Math.round(state.inscriptionScale * 100)}
+                valueLabel={`${Math.round(Math.min(isBenchPlaque ? 1 : 2.5, state.inscriptionScale) * 100)}%`}
+                value={Math.round(Math.min(isBenchPlaque ? 1 : 2.5, state.inscriptionScale) * 100)}
                 min={40}
-                max={250}
+                max={isBenchPlaque ? 100 : 250}
                 step={5}
                 locked={!fineTuneUnlocked}
                 onChange={(value) => onChange({ inscriptionScale: value / 100 })}

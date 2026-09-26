@@ -242,3 +242,25 @@ check to recognise /design-request as an index.html rewrite (not a static folder
 and the installed Chrome executable. Test copies/results are ignored under output.
 19 prerendered pages passed local metadata/link checks. No full paid purchase.
 Production is now changed; earlier undeployed statements above are historical.
+
+## Bench fixing clearance correction — 26 September 2026
+
+Owner's live screenshots showed lettering tight against screws and covered by
+caps on 150x50 bench plaques. Shared hardware geometry now supplies the renderer
+and inscription box. Bench long-axis margins increase from 6.5% to 10%; visible
+hardware reserves its centre inset + radius + 3mm text gap. The existing rendered
+layout refits automatically on fixing/cap changes, without generating new text.
+On 150x50: side inset15mm without hardware/screws,18mm with10mm caps,22.5mm
+with15mm caps. Four-screw layouts use the same conservative side band. Portrait
+corner hardware uses top/bottom clearance. Non-bench dimensions remain unchanged.
+
+Bench manual scale is bounded to the safe box; manual offsets cannot move text
+outside it. The effective scale is also exposed to the existing export fitter,
+so 3D/PDF outlining does not reintroduce unsafe manual enlargement. Source wording,
+font proportions and generated SVG are retained. Existing approval resets remain.
+
+Checks: TypeScript/build/runtime boot,400 layout/hardware/border/artwork cases,
+and390/1440 browser checks using synthetic generation, rendered millimetre bounds
+for none/two/four screws/10mm/15mmcaps/adhesive, live fixing changes with no further
+AI calls, preserved wording and no horizontal overflow. Measurements allow0.05mm
+for browser glyph/transform rounding. No payment, email or database action.

@@ -1,4 +1,6 @@
 import { BorderStyle, Fixing, MemorialImagePlacement, PlaqueState, Shape } from "../types";
+import { getFixingGeometry } from "./fixingGeometry";
+import { isBenchPlaqueFormat } from "./plaqueRules";
 import { getSafeMarginsMm } from "./safeMargin";
 
 export interface InscriptionLayout {
@@ -108,6 +110,16 @@ export function getInscriptionLayout(
     shape: state.shape,
     safeMargin: state.safeMargin,
   });
+  // Reserve a full-height side band so no line can meet a cap or screw,
+  // including existing layouts, four-hole variants and side-by-side artwork.
+  if (isBenchPlaqueFormat(state.width, state.height, state.shape)
+    && (state.fixing === Fixing.Caps || state.fixing === Fixing.Screws)) {
+    const hardware = getFixingGeometry(state);
+    const clearance = hardware.holeInset + hardware.fixingRadius + 3;
+    const cornerFixings = state.fixing === Fixing.Caps ? state.height >= 80 : state.fixingHoleCount === 4;
+    if (state.height > state.width && cornerFixings) safeMargin.y = Math.max(safeMargin.y, clearance);
+    else safeMargin.x = Math.max(safeMargin.x, clearance);
+  }
   const safeX = offset + safeMargin.x;
   const safeY = offset + safeMargin.y;
   const safeW = Math.max(10, state.width - safeMargin.x * 2);
