@@ -78,3 +78,6 @@ and hosted visual regressions pass, plus persistent failure-state check.
 400 geometry cases, typography/security checks, typecheck/build passed.
 See `docs/layout-quality-review-2026-09-26.md` for results, limitations and rollback.
 No customer email, order, payment or database write by this review.
+
+## Initial-layout experiment — 26 September 2026
+Experiment only on codex/layout-approach-experiment, projects/instaplaque-layout-approaches. No app changes or deployment.12cases/20realAPIcalls compare baseline vs readability-first vs softproportiontargets. Neither alternative merits promotion; see docs/layout-approach-experiment-2026-09-26.md. Production stays7af33c1/dpl_HSwvSSUVEhDvmfj7kD7c4vPQyrRW. Next improvement should investigate measured rendered typography, not assume more instructions help.

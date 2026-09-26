@@ -40,7 +40,14 @@ fs.mkdirSync(out,{recursive:true});
  if(u.pathname.startsWith('/api/proof-sessions/'))return route.fulfill({json:{proofSession:{plaque_state:fixture,wording:c.text,generated_svg:fixture.generatedSvgContent,metadata:{layoutIsCurrent:true}}}});
  if(u.pathname==='/api/gemini/generate-content'){
  if(process.env.LIVE_LAYOUT_QA!=='true')throw Error('Unexpected generation in replay');
- const payload=route.request().postDataJSON();console.log(c.id,'model request',record.calls.length+1);
+ const payload=route.request().postDataJSON();
+ const variant=process.env.QA_APPROACH;
+ if(variant && variant!=='baseline' && typeof payload.contents==='string' && payload.contents.includes('OUTPUT CONTRACT')) {
+ const guidance=require('./fixtures/layout-approaches.cjs')[variant];
+ if(!guidance) throw Error('Unknown QA_APPROACH');
+ payload.contents=payload.contents.replace('OUTPUT CONTRACT',guidance+'\nOUTPUT CONTRACT');
+ }
+ console.log(c.id,'model request',record.calls.length+1);
  let status,responseText;
  if(process.env.QA_PROTECTED==='true') {
    const inputFile=path.resolve(out,c.id+'-request.json');fs.writeFileSync(inputFile,JSON.stringify(payload));
