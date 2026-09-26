@@ -74,3 +74,40 @@ paid generation. Tests used Node 24 (installed host runtime); package pins Node
 probe, purchase journey or deployment. Review the real AI behaviour in an
 explicitly authorised preview before publishing. Local screenshots are ignored
 under output/playwright; browser executable can be set with CHROMIUM_EXECUTABLE.
+
+## Owner-requested live AI tunnel review
+
+26 September follow-up: owner requested working AI in the Cloudflare preview.
+`scripts/serve-ai-review.mjs` serves the existing compiled `dist` on loopback
+4196 and forwards only Gemini health/generate-content to the existing
+InstaPlaque API. It does not download keys or enable order, proof-session,
+admin, payment, email or storage endpoints. Non-AI API paths return 503.
+The upstream site keeps its existing model configuration and rate limits;
+the review adds same-origin checks, request validation/size limits and a
+shared 20-unit/minute limit. It forwards validated browser payloads, not
+SDK-normalized payloads, because the upstream canonicalizes independently.
+
+Start after building with `npm run build`:
+
+```sh
+ENABLE_LIVE_AI_REVIEW=true node scripts/serve-ai-review.mjs
+```
+
+Point an owner-requested Cloudflare tunnel to `http://127.0.0.1:4196`.
+This is a temporary public review URL, not a production release or private login.
+Only start it for an explicitly requested live review; stop the preview and
+tunnel processes when finished. Real requests use the site's existing AI quota.
+
+The opt-in real browser check is:
+
+```sh
+ENABLE_LIVE_AI_REVIEW=true AI_REVIEW_URL=https://YOUR-TUNNEL.trycloudflare.com node scripts/check-ai-review-live.cjs
+```
+
+Verified through the actual tunnel at mobile width: a two-line demonstration
+plaque generated through AI without local fallback; a subsequent instruction
+edit was accepted, exact wording preserved and Undo restored the original.
+The successful run made two model requests, both HTTP 200. Checkout/proof-session/
+admin paths returned 503; cross-site AI returned 403; malformed AI returned 400.
+This proves a real generation/edit flow, not every instruction or image feature.
+Production code/configuration unchanged; no order/database/email operations.
