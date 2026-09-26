@@ -44,7 +44,7 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
       <header className="request-heading">
         <p className="shop-kicker">Your words. Our care and attention.</p>
         <h1 ref={heading} tabIndex={-1}>{review ? 'Your design brief, ready to review.' : 'Leave the layout to us.'}</h1>
-        <p>{review ? 'Here’s what you would send to our design team. Check the details or go back to make changes.' : 'Tell us about your plaque. We’ll arrange the design and email a proof for you to review, with a payment link when you’re happy to proceed.'}</p>
+        <p>{review ? 'Here’s what you would send to our design team. Check the details or go back to make changes.' : 'Tell us about your plaque. We’ll arrange the design and email your proof within 3 hours for you to review, with a payment link when you’re happy to proceed.'}</p>
       </header>
       <div className="request-layout">
         {review ? <section className="request-card request-summary" aria-label="Request summary">

@@ -167,3 +167,10 @@ and preview policies stay the same. Current AI upstream is not a historical
 reproduction of their old model runtime. AI health was checked; generation in
 these historical builds was not live-tested. Original sources remain on GitHub
 unchanged. No site deployment, alias reassignment or database change.
+
+## Simplified direction — 26 September, 16:32 UTC
+Owner chose the current live designer UI plus instruction-based adjustments, not a new DIY route or the July showroom. Removed the experimental route selector, separate initial brief field and added 1mm nudge controls; restored original wording helper and Generate/Regenerate labels. Retained original manual tweaks and the correctness fixes (wording synchronisation, fit validation, approval reset), plus Adjust with AI and Undo.
+
+Homepage human-design section and separate preview form now explicitly promise an emailed proof within 3 hours, as requested. Submission remains preview-only: no email, order, payment or database write. Production unchanged; automatic Git deployment guard retained.
+
+Checks: typecheck, build, typography safety/instruction tests; updated mocked browser regression passes 390/1440 widths (original generation path, manual wording sync, approval reset, failed/successful/stale AI responses, undo, no JS errors/overflow). Public tunnel homepage/form checked at both widths; AI health enabled. No new real model generation in this revision.

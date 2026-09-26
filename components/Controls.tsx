@@ -524,7 +524,6 @@ export const Controls: React.FC<Props> = ({
   const [customHeightInput, setCustomHeightInput] = useState(String(state.height));
   const [fixingsBorderMode, setFixingsBorderMode] = useState<'fixings' | 'border'>('fixings');
   const [manualTextOpen, setManualTextOpen] = useState(false);
-  const [designMethod, setDesignMethod] = useState<'quick' | 'manual'>('quick');
   const [layoutInstruction, setLayoutInstruction] = useState('');
   const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
@@ -1888,22 +1887,6 @@ export const Controls: React.FC<Props> = ({
 
       {activeStep === 5 && (
         <section className="space-y-4">
-          <fieldset className="space-y-2" disabled={isGenerating}>
-            <legend className="mb-2 text-sm font-black">How would you like to design?</legend>
-            {([
-              ['quick', 'AI-assisted design', 'Generate a layout, then refine it with instructions or manual tweaks.'],
-              ['manual', 'Manual design', 'Arrange editable text lines yourself. No AI needed.'],
-            ] as const).map(([value, title, description]) => (
-              <button key={value} type="button" aria-pressed={designMethod === value}
-                onClick={() => { setDesignMethod(value); setManualTextOpen(value === 'manual'); }}
-                className={`w-full rounded-lg border p-3 text-left transition ${designMethod === value ? 'border-[#b98235] bg-[#f2d688]/25' : 'border-[#c6c8bd] bg-[#fffaf0]'}`}>
-                <span className="block text-sm font-black">{title}{value === 'quick' ? ' · Start here' : ''}</span>
-                <span className="mt-1 block text-xs leading-5 text-[#59675d]">{description}</span>
-              </button>
-            ))}
-            <p className="text-xs leading-5 text-[#59675d]">You can switch at any time. Your wording, plaque options and current proof stay here.</p>
-          </fieldset>
-          <button type="button" onClick={onRequestDesign} className="text-sm underline underline-offset-4">Prefer us to design it? Send us a brief</button>
           <div className="ai-typesetter-panel rounded-lg border border-[#d7b66a]/35 bg-[#151f1b] p-4">
             <div className="flex items-start gap-3">
               <div className={`ai-typesetter-orb ${isGenerating ? 'is-working' : ''}`} aria-hidden="true">
@@ -1914,7 +1897,7 @@ export const Controls: React.FC<Props> = ({
                   Your inscription
                 </p>
                 <p className="mt-2 text-xs leading-5 text-[#aab8b0]">
-                  Type only the words to appear on your plaque. Keep design instructions in the separate box below.
+                  Type your wording exactly as it should appear. We’ll arrange the layout for you.
                 </p>
               </div>
             </div>
@@ -1956,28 +1939,7 @@ export const Controls: React.FC<Props> = ({
             </div>
           </div>
 
-          {guidance.trim() && designMethod === 'manual' && <p className="text-xs leading-5 text-[#59675d]">Your saved design instructions still apply to AI generation. Switch to AI-assisted design to review or clear them.</p>}
-          {designMethod === 'quick' && (
-            <div className="rounded-lg border border-[#c6c8bd] bg-[#fffaf0] p-3">
-              <label htmlFor="design-brief" className="block text-sm font-black">Design instructions <span className="font-normal">(optional)</span></label>
-              <p className="my-2 text-xs leading-5 text-[#59675d]">Describe the hierarchy, font style and spacing for a new layout. AI will keep your wording unchanged.</p>
-              <textarea id="design-brief" value={guidance} maxLength={1200} disabled={isGenerating}
-                onChange={event => onGuidanceChange(event.target.value)}
-                placeholder="Make the name the focus, use a traditional serif font and keep the dates together."
-                className={`${fieldClass} min-h-[105px] normal-case leading-6 tracking-normal`} />
-            </div>
-          )}
-          {designMethod === 'manual' && (
-            <div className="space-y-2">
-              <p className="text-xs leading-5 text-[#59675d]">One line per line of wording. This creates a simple editable layout locally, without AI.{isIterating ? ' Creating again replaces the current layout; you can undo it.' : ''}</p>
-              <button type="button" disabled={isGenerating || !prompt.trim()}
-                onClick={() => { onCreateManualLayout(); setManualTextOpen(true); }}
-                className="min-h-[48px] w-full rounded-lg bg-[#f2d688] p-3 text-sm font-black text-[#13201c] disabled:opacity-50">
-                {isIterating ? 'Rebuild editable layout' : 'Create editable layout'}
-              </button>
-            </div>
-          )}
-          {!isIterating && designMethod !== 'manual' && (
+          {!isIterating && (
           <div className="grid gap-2">
             <button
               onClick={() => {
@@ -2030,7 +1992,7 @@ export const Controls: React.FC<Props> = ({
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {designMethod !== 'manual' && <button
+                <button
                   type="button"
                   onClick={() => {
                     setManualTextOpen(false);
@@ -2039,8 +2001,8 @@ export const Controls: React.FC<Props> = ({
                   disabled={isGenerating || !prompt.trim()}
                   className="min-h-[48px] rounded-lg border border-[#f2d688]/55 bg-[#f2d688] px-4 py-3 text-sm font-black text-[#13201c] transition disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {guidance.trim() ? 'Create from design instructions' : 'Try another layout'}
-                </button>}
+                  Regenerate
+                </button>
                 <button
                   type="button"
                   onClick={() => setManualTextOpen((open) => !open)}
@@ -2074,8 +2036,6 @@ export const Controls: React.FC<Props> = ({
                           Line {line.index + 1}
                         </label>
                         <div className="flex flex-wrap items-center gap-2">
-                          <button type="button" aria-label={`Move line ${line.index + 1} up`} onClick={() => updateGeneratedTextLine(line.index, { y: line.y - 1 })} className="min-h-[38px] rounded-lg border border-[#edf3ef]/18 px-3 text-xs text-[#edf3ef]">↑ 1mm</button>
-                          <button type="button" aria-label={`Move line ${line.index + 1} down`} onClick={() => updateGeneratedTextLine(line.index, { y: line.y + 1 })} className="min-h-[38px] rounded-lg border border-[#edf3ef]/18 px-3 text-xs text-[#edf3ef]">↓ 1mm</button>
                           <button
                             type="button"
                             onClick={() => updateGeneratedTextLine(line.index, { fontWeight: line.fontWeight === '700' || line.fontWeight === 'bold' ? '400' : '700' })}
