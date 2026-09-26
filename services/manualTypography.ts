@@ -58,7 +58,7 @@ export function createManualTypography(inscription: string, box: ManualTypograph
     throw new Error('The inscription contains unsupported control characters.');
   }
   const lines = inscription.replace(/\r\n?/g, '\n').split('\n').map(line => line.trim());
-  if (lines.length > 40) throw new Error('Use at most 40 lines for a manual layout.');
+  if (lines.length > 12) throw new Error('Use at most 12 lines for a manual layout.');
   const measure = getMeasurer();
   // Keep a little breathing room INSIDE the real inscription box. Do not add
   // whole-plaque margins again: the caller has already reserved artwork space.

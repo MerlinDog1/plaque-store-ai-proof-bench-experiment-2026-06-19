@@ -225,12 +225,17 @@ interface Props {
   state: PlaqueState;
   onChange: (newState: Partial<PlaqueState>) => void;
   onGenerate: (text: string) => void;
+  onCreateManualLayout: () => void;
+  onApplyLayoutInstruction: (instruction: string) => void;
+  onUndoLayout: () => void;
+  canUndoLayout: boolean;
+  layoutMessage: string;
   onClear: () => void;
   prompt: string;
   onPromptChange: (prompt: string) => void;
   guidance: string;
   onGuidanceChange: (guidance: string) => void;
-  onGeneratedSvgContentChange: (svgContent: string) => void;
+  onGeneratedSvgContentChange: (svgContent: string, style?: DesignStyle) => boolean;
   isGenerating: boolean;
   generationPhase: GenerationPhase;
   onMemorialImageUpload: (file: File) => void;
@@ -292,6 +297,7 @@ interface GeneratedTextControl {
   fontFamily: string;
   fontSize: number;
   fontWeight: string;
+  y: number;
 }
 
 const fieldClass =
@@ -467,6 +473,7 @@ export const Controls: React.FC<Props> = ({
   state,
   onChange,
   onGenerate,
+  onCreateManualLayout, onApplyLayoutInstruction, onUndoLayout, canUndoLayout, layoutMessage,
   onClear,
   prompt,
   onPromptChange,
@@ -516,6 +523,8 @@ export const Controls: React.FC<Props> = ({
   const [customHeightInput, setCustomHeightInput] = useState(String(state.height));
   const [fixingsBorderMode, setFixingsBorderMode] = useState<'fixings' | 'border'>('fixings');
   const [manualTextOpen, setManualTextOpen] = useState(false);
+  const [designMethod, setDesignMethod] = useState<'quick' | 'manual' | 'assisted'>('quick');
+  const [layoutInstruction, setLayoutInstruction] = useState('');
   const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
   const [instantStyleVariant, setInstantStyleVariant] = useState(1);
@@ -569,10 +578,11 @@ export const Controls: React.FC<Props> = ({
         return {
           index,
           label: (text.textContent || `Line ${index + 1}`).replace(/\s+/g, ' ').trim() || `Line ${index + 1}`,
-          text: text.textContent || '',
+          text: text.querySelector('tspan') ? Array.from(text.querySelectorAll('tspan')).map(span => span.textContent || '').join('\n') : text.textContent || '',
           fontFamily: AVAILABLE_FONTS.includes(fontFamily) ? fontFamily : 'Lato',
           fontSize: Number.isFinite(fontSize) ? fontSize : 12,
           fontWeight,
+          y: Number(text.getAttribute('y') || 0),
         };
       });
     } catch {
@@ -784,10 +794,9 @@ export const Controls: React.FC<Props> = ({
     if (style === null) {
       if (baseGeneratedSvgContent) {
         instantStyleApplyingRef.current = true;
-        onGeneratedSvgContentChange(baseGeneratedSvgContent);
+        if (!onGeneratedSvgContentChange(baseGeneratedSvgContent, DesignStyle.Auto)) { instantStyleApplyingRef.current = false; return; }
       }
       setInstantStyleVariant(1);
-      onChange({ designStyle: DesignStyle.Auto });
       return;
     }
 
@@ -835,9 +844,8 @@ export const Controls: React.FC<Props> = ({
         .map(node => new XMLSerializer().serializeToString(node).replace(/\sxmlns="http:\/\/www\.w3\.org\/2000\/svg"/g, ''))
         .join('\n');
       instantStyleApplyingRef.current = true;
-      onGeneratedSvgContentChange(nextSvg);
+      if (!onGeneratedSvgContentChange(nextSvg, style)) { instantStyleApplyingRef.current = false; return; }
       setInstantStyleVariant(variant);
-      onChange({ designStyle: style });
     } catch (error) {
       console.warn('Instant style change failed.', error);
     }
@@ -894,7 +902,9 @@ export const Controls: React.FC<Props> = ({
     if (!isProductionReady && proofApproved) setProofApproved(false);
   }, [isProductionReady, proofApproved]);
 
-  const updateGeneratedTextLine = (lineIndex: number, changes: Partial<Pick<GeneratedTextControl, 'text' | 'fontFamily' | 'fontSize' | 'fontWeight'>>) => {
+  useEffect(() => { setProofApproved(false); }, [state, prompt]);
+
+  const updateGeneratedTextLine = (lineIndex: number, changes: Partial<Pick<GeneratedTextControl, 'text' | 'fontFamily' | 'fontSize' | 'fontWeight' | 'y'>>) => {
     if (!state.generatedSvgContent || typeof DOMParser === 'undefined') return;
     try {
       const doc = new DOMParser().parseFromString(
@@ -907,13 +917,23 @@ export const Controls: React.FC<Props> = ({
 
       if (typeof changes.text === 'string') {
         const tspans = Array.from(text.querySelectorAll('tspan'));
-        if (tspans.length) {
-          tspans[0].textContent = changes.text;
-          tspans.slice(1).forEach(tspan => tspan.remove());
+        const lines = changes.text.split('\n');
+        if (tspans.length || lines.length > 1) {
+          const fontSize = Number(text.getAttribute('font-size') || 12);
+          const template = tspans[0]?.cloneNode(false) as Element | undefined;
+          text.textContent = '';
+          lines.forEach((line, index) => {
+            const span = template ? template.cloneNode(false) as Element : doc.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+            span.removeAttribute('y'); span.removeAttribute('dx');
+            span.setAttribute('x', text.getAttribute('x') || '0');
+            span.setAttribute('dy', index === 0 ? '0' : String(fontSize * 1.3));
+            span.textContent = line; text.appendChild(span);
+          });
         } else {
           text.textContent = changes.text;
         }
       }
+      if (typeof changes.y === 'number' && Number.isFinite(changes.y)) text.setAttribute('y', changes.y.toFixed(2));
       if (changes.fontFamily) {
         text.setAttribute('font-family', changes.fontFamily);
         text.querySelectorAll('tspan').forEach(tspan => tspan.setAttribute('font-family', changes.fontFamily!));
@@ -1867,6 +1887,22 @@ export const Controls: React.FC<Props> = ({
 
       {activeStep === 5 && (
         <section className="space-y-4">
+          <fieldset className="space-y-2" disabled={isGenerating}>
+            <legend className="mb-2 text-sm font-black">How would you like to design?</legend>
+            {([
+              ['quick', 'Quick design', 'Add your words. Get an automatically arranged proof.'],
+              ['manual', 'Arrange it myself', 'Start with editable lines. Choose the type and sizes yourself.'],
+              ['assisted', 'Design it for me', 'Give AI a design brief. Review the layout it creates.'],
+            ] as const).map(([value, title, description]) => (
+              <button key={value} type="button" aria-pressed={designMethod === value}
+                onClick={() => { setDesignMethod(value); setManualTextOpen(value === 'manual'); }}
+                className={`w-full rounded-lg border p-3 text-left transition ${designMethod === value ? 'border-[#b98235] bg-[#f2d688]/25' : 'border-[#c6c8bd] bg-[#fffaf0]'}`}>
+                <span className="block text-sm font-black">{title}{value === 'quick' ? ' · Start here' : ''}</span>
+                <span className="mt-1 block text-xs leading-5 text-[#59675d]">{description}</span>
+              </button>
+            ))}
+            <p className="text-xs leading-5 text-[#59675d]">You can switch at any time. Your wording, plaque options and current proof stay here.</p>
+          </fieldset>
           <div className="ai-typesetter-panel rounded-lg border border-[#d7b66a]/35 bg-[#151f1b] p-4">
             <div className="flex items-start gap-3">
               <div className={`ai-typesetter-orb ${isGenerating ? 'is-working' : ''}`} aria-hidden="true">
@@ -1877,7 +1913,7 @@ export const Controls: React.FC<Props> = ({
                   Your inscription
                 </p>
                 <p className="mt-2 text-xs leading-5 text-[#aab8b0]">
-                  Type your wording exactly as it should appear. We’ll arrange the layout for you.
+                  Type only the words to appear on your plaque. Keep design instructions in the separate box below.
                 </p>
               </div>
             </div>
@@ -1919,7 +1955,28 @@ export const Controls: React.FC<Props> = ({
             </div>
           </div>
 
-          {!isIterating && (
+          {guidance.trim() && designMethod !== 'assisted' && <p className="text-xs leading-5 text-[#59675d]">Your saved design instructions still apply to AI generation. Choose Design it for me to review or clear them.</p>}
+          {designMethod === 'assisted' && (
+            <div className="rounded-lg border border-[#c6c8bd] bg-[#fffaf0] p-3">
+              <label htmlFor="design-brief" className="block text-sm font-black">Design instructions <span className="font-normal">(optional)</span></label>
+              <p className="my-2 text-xs leading-5 text-[#59675d]">For a new layout: describe the hierarchy, font style and spacing. AI arranges your exact wording; this is not a request sent to a human designer.</p>
+              <textarea id="design-brief" value={guidance} maxLength={1200} disabled={isGenerating}
+                onChange={event => onGuidanceChange(event.target.value)}
+                placeholder="Make the name the focus, use a traditional serif font and keep the dates together."
+                className={`${fieldClass} min-h-[105px] normal-case leading-6 tracking-normal`} />
+            </div>
+          )}
+          {designMethod === 'manual' && (
+            <div className="space-y-2">
+              <p className="text-xs leading-5 text-[#59675d]">One line per line of wording. This creates a simple editable layout locally, without AI.{isIterating ? ' Creating again replaces the current layout; you can undo it.' : ''}</p>
+              <button type="button" disabled={isGenerating || !prompt.trim()}
+                onClick={() => { onCreateManualLayout(); setManualTextOpen(true); }}
+                className="min-h-[48px] w-full rounded-lg bg-[#f2d688] p-3 text-sm font-black text-[#13201c] disabled:opacity-50">
+                {isIterating ? 'Rebuild editable layout' : 'Create editable layout'}
+              </button>
+            </div>
+          )}
+          {!isIterating && designMethod !== 'manual' && (
           <div className="grid gap-2">
             <button
               onClick={() => {
@@ -1937,7 +1994,7 @@ export const Controls: React.FC<Props> = ({
                     : 'Working...'
                 : isIterating
                   ? 'Regenerate'
-                  : 'Generate layout'}
+                  : designMethod === 'assisted' ? 'Create my design' : 'Generate layout'}
             </button>
           </div>
           )}
@@ -1972,7 +2029,7 @@ export const Controls: React.FC<Props> = ({
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <button
+                {designMethod !== 'manual' && <button
                   type="button"
                   onClick={() => {
                     setManualTextOpen(false);
@@ -1981,8 +2038,8 @@ export const Controls: React.FC<Props> = ({
                   disabled={isGenerating || !prompt.trim()}
                   className="min-h-[48px] rounded-lg border border-[#f2d688]/55 bg-[#f2d688] px-4 py-3 text-sm font-black text-[#13201c] transition disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Regenerate
-                </button>
+                  {designMethod === 'assisted' ? 'Create from design instructions' : 'Try another layout'}
+                </button>}
                 <button
                   type="button"
                   onClick={() => setManualTextOpen((open) => !open)}
@@ -2016,6 +2073,8 @@ export const Controls: React.FC<Props> = ({
                           Line {line.index + 1}
                         </label>
                         <div className="flex flex-wrap items-center gap-2">
+                          <button type="button" aria-label={`Move line ${line.index + 1} up`} onClick={() => updateGeneratedTextLine(line.index, { y: line.y - 1 })} className="min-h-[38px] rounded-lg border border-[#edf3ef]/18 px-3 text-xs text-[#edf3ef]">↑ 1mm</button>
+                          <button type="button" aria-label={`Move line ${line.index + 1} down`} onClick={() => updateGeneratedTextLine(line.index, { y: line.y + 1 })} className="min-h-[38px] rounded-lg border border-[#edf3ef]/18 px-3 text-xs text-[#edf3ef]">↓ 1mm</button>
                           <button
                             type="button"
                             onClick={() => updateGeneratedTextLine(line.index, { fontWeight: line.fontWeight === '700' || line.fontWeight === 'bold' ? '400' : '700' })}
@@ -2080,11 +2139,29 @@ export const Controls: React.FC<Props> = ({
                 </div>
                 </div>
               )}
+              <div className="rounded-lg border border-[#c6c8bd] bg-[#fffaf0] p-3">
+                <label htmlFor="layout-instruction" className="block text-sm font-black">Adjust with AI</label>
+                <p className="my-2 text-xs leading-5 text-[#59675d]">Give one set of layout instructions. Your wording stays unchanged; edit the wording field or manual lines to change the words.</p>
+                <textarea id="layout-instruction" value={layoutInstruction} maxLength={1200} disabled={isGenerating}
+                  onChange={event => setLayoutInstruction(event.target.value)}
+                  placeholder="Make the name larger and the dates smaller. Keep everything else as it is."
+                  className={`${fieldClass} min-h-[100px] normal-case leading-6 tracking-normal`} />
+                <div className="my-2 flex flex-wrap gap-2">
+                  {['Make the name larger', 'Bring the lines closer together', 'Use one font throughout', 'Make the dates smaller'].map(example => (
+                    <button key={example} type="button" disabled={isGenerating} onClick={() => setLayoutInstruction(example)}
+                      className="rounded-full border border-[#c6c8bd] px-3 py-2 text-xs">{example}</button>
+                  ))}
+                </div>
+                <button type="button" disabled={isGenerating || !layoutInstruction.trim()} onClick={() => onApplyLayoutInstruction(layoutInstruction)}
+                  className="min-h-[48px] w-full rounded-lg bg-[#f2d688] p-3 text-sm font-black text-[#13201c] disabled:opacity-50">{isGenerating ? 'Working…' : 'Apply changes'}</button>
+              </div>
               <button onClick={onClear} className="min-h-[48px] w-full rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 py-3 text-sm font-black text-[#ff9b7c]">
                 Clear inscription layout
               </button>
             </div>
           )}
+          {layoutMessage && <p role="status" aria-live="polite" className="rounded-lg border border-[#c6c8bd] bg-[#fffaf0] p-3 text-sm leading-6">{layoutMessage}</p>}
+          {canUndoLayout && <button type="button" disabled={isGenerating} onClick={onUndoLayout} className="min-h-[44px] w-full rounded-lg border border-[#b98235] p-3 text-sm font-black">Undo last change</button>}
         </section>
       )}
 

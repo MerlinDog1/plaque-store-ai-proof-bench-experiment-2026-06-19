@@ -5,8 +5,9 @@ import { Controls } from './components/Controls';
 import { RealisticPreviewModal } from './components/RealisticPreviewModal';
 import { SiteExperience, useSeoMeta } from './components/SiteExperience';
 import { BorderStyle, DesignStyle, EtchmasterImageMode, EtchmasterShapeMask, Fixing, INITIAL_STATE, Material, MemorialImageMethod, MemorialImagePlacement, MemorialImageShape, PlaqueState, Shape, TextColor, TypographyEngine } from './types';
-import { generatePlaqueDesign, generateRealisticView, GenerationPhase } from './services/geminiService';
+import { generatePlaqueDesign, generateRealisticView, editPlaqueTypography, validateAuthoredTypographySvg, GenerationPhase } from './services/geminiService';
 import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
+import { createManualTypography, readSvgInscription } from './services/manualTypography';
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
 import { DEFAULT_PRODUCT_SLUG, DeliveryAddress, MockOrder, ProductFamily, SiteView, getLandingPageBySlug, getPlaqueSummaryTitle, getProductBySlug, makeMockOrder, productFamilies, seoLandingPages } from './services/commerce';
@@ -213,6 +214,14 @@ const App: React.FC = () => {
   const [inscriptionGuidance, setInscriptionGuidance] = useState('');
   const [generatedLayoutSignature, setGeneratedLayoutSignature] = useState<string | null>(null);
   const [generatedProofFrame, setGeneratedProofFrame] = useState<GeneratedProofFrame | null>(null);
+  const [layoutMessage, setLayoutMessage] = useState('');
+  const [layoutUndo, setLayoutUndo] = useState<{
+    state: PlaqueState; prompt: string; guidance: string; signature: string | null;
+    frame: GeneratedProofFrame | null; afterState: PlaqueState; afterPrompt: string; afterGuidance: string;
+  } | null>(null);
+  const currentLayoutRef = useRef({ state, prompt: inscriptionPrompt, guidance: inscriptionGuidance });
+  currentLayoutRef.current = { state, prompt: inscriptionPrompt, guidance: inscriptionGuidance };
+
   const [checkoutRecoveryLoading, setCheckoutRecoveryLoading] = useState(isCheckoutRecoveryRoute);
   const [isGeneratingLayout, setIsGeneratingLayout] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -693,6 +702,8 @@ const App: React.FC = () => {
   };
 
   const handleGenerateLayout = async (prompt: string) => {
+    const snapshot = currentLayoutRef.current;
+    setLayoutMessage('');
     setIsGeneratingLayout(true);
     setGenerationPhase(null);
     try {
@@ -714,6 +725,14 @@ const App: React.FC = () => {
       );
 
       if (result) {
+        const latest = currentLayoutRef.current;
+        if (latest.state !== snapshot.state || latest.prompt !== snapshot.prompt || latest.guidance !== snapshot.guidance) {
+          setLayoutMessage('The design changed while AI was working. Nothing was replaced; create your layout again.');
+          return;
+        }
+        setLayoutUndo(null);
+        setProofSaved(false);
+        setBasketAdded(false);
         setGeneratedLayoutSignature(getLayoutSignature(effectivePrompt));
         setGeneratedProofFrame(getProofFrame(state));
         setState(prev => ({
@@ -744,14 +763,89 @@ const App: React.FC = () => {
     setBasketAdded(false);
   };
 
-  const handleGeneratedSvgContentChange = (svgContent: string) => {
+  // Commit wording and layout together; manual edits must not resurrect old wording.
+  const acceptLayout = (svgContent: string, wording: string, reasoning: string, style = state.designStyle, fresh = false) => {
+    const next = { ...state, generatedSvgContent: svgContent, aiReasoning: reasoning, conceptImageUrl: null, designStyle: style };
+    setLayoutUndo({ state, prompt: inscriptionPrompt, guidance: inscriptionGuidance,
+      signature: generatedLayoutSignature, frame: generatedProofFrame,
+      afterState: next, afterPrompt: wording, afterGuidance: inscriptionGuidance });
     setProofSaved(false);
     setBasketAdded(false);
-    setState(prev => ({
-      ...prev,
-      generatedSvgContent: svgContent,
-      aiReasoning: 'Manual typography edits applied to the generated layout.',
-    }));
+    setInscriptionPrompt(wording);
+    setState(next);
+    // Do not make a stale proof current merely by changing a font.
+    if (fresh || generatedLayoutSignature === getLayoutSignature(inscriptionPrompt)) {
+      setGeneratedLayoutSignature(makeLayoutSignature(wording, next, inscriptionGuidance));
+      setGeneratedProofFrame(getProofFrame(next));
+    }
+  };
+
+  const handleGeneratedSvgContentChange = (svgContent: string, style?: DesignStyle) => {
+    if (generatedLayoutSignature !== getLayoutSignature(inscriptionPrompt)) {
+      setLayoutMessage('Your wording or plaque options have changed. Create or rebuild the layout before editing its lines.');
+      return false;
+    }
+    try {
+      const wording = readSvgInscription(svgContent);
+      const box = getInscriptionLayout(state, wording);
+      validateAuthoredTypographySvg(`<svg xmlns="http://www.w3.org/2000/svg" width="${box.textW}" height="${box.textH}" viewBox="${-box.textW / 2} ${-box.textH / 2} ${box.textW} ${box.textH}">${svgContent}</svg>`, wording, {width: box.textW, height: box.textH});
+      acceptLayout(svgContent, wording, 'Manual typography edits applied.', style);
+      setLayoutMessage('Manual changes applied. Check the proof before approving.');
+      return true;
+    } catch (error) {
+      setLayoutMessage(`Change not applied. ${error instanceof Error ? error.message : 'This layout does not fit.'}`);
+      return false;
+    }
+  };
+
+  const handleCreateManualLayout = async () => {
+    const snapshot = currentLayoutRef.current;
+    try {
+      await document.fonts?.load('400 16px Lato');
+      if (currentLayoutRef.current.state !== snapshot.state || currentLayoutRef.current.prompt !== snapshot.prompt) return;
+      const box = getInscriptionLayout(state, inscriptionPrompt);
+      const svg = createManualTypography(inscriptionPrompt, { width: box.textW, height: box.textH });
+      acceptLayout(svg.svgContent, inscriptionPrompt, 'Locally arranged editable inscription.', state.designStyle, true);
+      setLayoutMessage('Editable layout ready. No AI was used.');
+    } catch (error) { setLayoutMessage(error instanceof Error ? error.message : 'Could not fit this wording.'); }
+  };
+
+  const handleApplyLayoutInstruction = async (instruction: string) => {
+    if (!state.generatedSvgContent || !instruction.trim() || isGeneratingLayout) return;
+    if (generatedLayoutSignature !== getLayoutSignature(inscriptionPrompt)) {
+      setLayoutMessage('Your wording or plaque options have changed. Create a fresh layout first.');
+      return;
+    }
+    const snapshot = currentLayoutRef.current;
+    setIsGeneratingLayout(true);
+    setLayoutMessage('Applying your layout instructions…');
+    try {
+      const box = getInscriptionLayout(state, inscriptionPrompt);
+      const result = await editPlaqueTypography({
+        inscription: inscriptionPrompt, instruction: instruction.trim(), currentSvgContent: state.generatedSvgContent,
+        width: state.width, height: state.height, shape: state.shape, designStyle: state.designStyle,
+        inscriptionBox: { width: box.textW, height: box.textH }, inscriptionContext: getInscriptionContext(inscriptionPrompt),
+      });
+      const latest = currentLayoutRef.current;
+      if (latest.state !== snapshot.state || latest.prompt !== snapshot.prompt || latest.guidance !== snapshot.guidance) {
+        setLayoutMessage('The proof changed while AI was working. Nothing was replaced; apply your instruction again.');
+        return;
+      }
+      acceptLayout(result.svgContent, inscriptionPrompt, result.reasoning);
+      setLayoutMessage('Layout updated. Your wording is unchanged. Check the proof or undo this change.');
+    } catch (error) {
+      setLayoutMessage(`Your previous proof is unchanged. ${error instanceof Error ? error.message : 'Please try again.'}`);
+    } finally { setIsGeneratingLayout(false); }
+  };
+
+  const canUndoLayout = !!layoutUndo && layoutUndo.afterState === state
+    && layoutUndo.afterPrompt === inscriptionPrompt && layoutUndo.afterGuidance === inscriptionGuidance;
+  const handleUndoLayout = () => {
+    if (!layoutUndo || !canUndoLayout) return;
+    setState(layoutUndo.state); setInscriptionPrompt(layoutUndo.prompt); setInscriptionGuidance(layoutUndo.guidance);
+    setGeneratedLayoutSignature(layoutUndo.signature); setGeneratedProofFrame(layoutUndo.frame);
+    setProofSaved(false); setBasketAdded(false); setLayoutUndo(null);
+    setLayoutMessage('Previous layout restored. Check it before approving.');
   };
 
   const handleRealPreview = async () => {
@@ -1319,6 +1413,11 @@ const App: React.FC = () => {
                   state={state}
                   onChange={handleStateChange}
                   onGenerate={handleGenerateLayout}
+                  onCreateManualLayout={handleCreateManualLayout}
+                  onApplyLayoutInstruction={handleApplyLayoutInstruction}
+                  onUndoLayout={handleUndoLayout}
+                  canUndoLayout={canUndoLayout}
+                  layoutMessage={layoutMessage}
                   onClear={handleClearDesign}
                   prompt={inscriptionPrompt}
                   onPromptChange={handlePromptChange}

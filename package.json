@@ -34,7 +34,9 @@
     "experiment:layout-harness": "node scripts/layout-experiment-harness.cjs",
     "test:export-fidelity": "node scripts/validate-export-fidelity.mjs",
     "preview": "node server.mjs",
-    "serve": "node server.mjs"
+    "serve": "node server.mjs",
+    "check:manual-typography": "node scripts/check-manual-typography.mjs",
+    "check:design-routes": "node scripts/check-design-routes.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1136.0",
