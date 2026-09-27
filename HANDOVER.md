@@ -87,3 +87,6 @@ EXPERIMENT ONLY: projects/instaplaque-thinking-ab, codex/thinking-budget-ab.32co
 
 ## Wider MEDIUM coverage — 27 September 2026
 Branch codex/medium-size-text-review in projects/instaplaque-thinking-ab. 16 rectangular etched cases / 13 sizes; 15 ordinary cases first-pass AI, one deliberately overloaded tiny case timed out twice and safely rejected. All outputs visually reviewed; generated face bounds/mobile overflow checks pass. No app change or promotion. See docs/medium-size-text-review-2026-09-27.md; inherited experimental 120s config must not be promoted wholesale.
+
+## Sol/Luna comparison — 27 September 2026
+User-requested native model comparison on codex/sol-luna-layout-comparison in projects/instaplaque-thinking-ab. Four identical prompts: live LOW first-pass2/4, eventual3/4; Sol medium4/4first-pass; Luna medium2/4first-pass,3/4afteronecorrection. All displays inspected; Sol award hierarchy visibly stronger, history prose judgement mixed. No app change/deploy. Saved raw synthetic agent files in sibling instaplaque-model-comparison; ignored output/sol-luna contains exact evaluated snapshots. See docs/sol-luna-layout-comparison-2026-09-27.md for limits and reproduction.
