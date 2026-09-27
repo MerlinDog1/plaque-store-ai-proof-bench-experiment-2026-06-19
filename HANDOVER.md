@@ -86,3 +86,8 @@ Canonical/www independently READY at `dpl_sM6tNv6rC2ouab27KDUzypd6P8qL`.
 Server structured-content now MEDIUM/16,384; existing30s timeout, prompt and renderer unchanged.
 Typecheck/build/security pass; fresh candidate2successful/1failed AI cases, public1first-pass success;4hosted mobile/desktop geometry checks pass. Dense portrait failure and browser interruption retained in release report.
 See docs/medium-release-2026-09-27.md for scope, verification limits and rollback. No DB/order/email/payment change.
+
+## Remove length-only quote gate — 27 September 2026
+Current app source `e73db85e1e0993569be44aa55bfb33c21843da55`, branch `codex/remove-length-gate`, worktree `projects/instaplaque-remove-length-gate`.
+Canonical/www READY at `dpl_MKer6sXvFh1U6HBNLKCAZgZdDAn7`. Removed only >360-character manual-quote condition from shared checkout policy; other quote rules, approval, pricing, MEDIUM and typography limits unchanged.
+Server-checkout/typecheck/build pass; local+hosted390/1440 long-proof checkout interception passes. Live API deliberately unapproved long inscription passes quote gate then rejects before persistence. No orders/payments/DBwrites/email. See docs/remove-length-gate-2026-09-27.md.
