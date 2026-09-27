@@ -7,11 +7,12 @@ import { createServer } from 'vite';
 // Render the same shop components used in the browser, rather than a second
 // abbreviated version of the catalogue that drifts away from the visible page.
 const renderer = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom' });
-let shop, catalogue, ShopHeader, guides;
+let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage;
 try {
   shop = await renderer.ssrLoadModule('/components/Shopfront.tsx');
   guides = await renderer.ssrLoadModule('/components/ShopGuides.tsx');
   catalogue = await renderer.ssrLoadModule('/services/commerce.ts');
+  LegalPlaceholderPage = (await renderer.ssrLoadModule('/components/SiteExperience.tsx')).LegalPlaceholderPage;
   ShopHeader = (await renderer.ssrLoadModule('/components/Header.tsx')).Header;
 } finally {
   await renderer.close();
@@ -444,8 +445,8 @@ const writePrerenderedPage = async ({
   const url = `${siteBaseUrl}${pathPart}`;
   const product = catalogue.productFamilies.find(item => item.slug === slug);
   const landing = catalogue.seoLandingPages.find(item => item.slug === slug);
-  const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : slug === 'about' ? guides.ShopAbout : slug === 'contact' ? guides.ShopContact : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
-  if (contentComponent && !['about', 'contact'].includes(slug)) {
+  const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : slug === 'returns-and-cancellations' ? LegalPlaceholderPage : slug === 'about' ? guides.ShopAbout : slug === 'contact' ? guides.ShopContact : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
+  if (contentComponent && !['about', 'contact', 'returns-and-cancellations'].includes(slug)) {
     const visibleFaqs = !(product || landing) ? shop.shopFaqs : [...(product || landing).faqs, ...shop.shopFaqs]
       .filter((item, index, list) => list.findIndex(other => other.question === item.question) === index).slice(0, 6);
     schema = schema.filter(item => item['@type'] !== 'FAQPage');
@@ -484,7 +485,7 @@ const writePrerenderedPage = async ({
   const publicContent = contentComponent
     ? renderToStaticMarkup(React.createElement(React.Fragment, null,
       React.createElement(ShopHeader, { currentView: !slug ? 'home' : 'product', showPrice: false, priceLabel: '' }),
-      React.createElement('main', null, React.createElement(contentComponent, { product, landing, faq: slug === 'faq' })),
+      React.createElement('main', null, React.createElement(contentComponent, { product, landing, faq: slug === 'faq', view: slug === 'returns-and-cancellations' ? 'returns' : undefined })),
       React.createElement(shop.ShopFooter)))
     : staticPageMarkup({ title, heading, description, image, faqs, price, kind });
   html = html.replace(

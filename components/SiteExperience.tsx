@@ -526,7 +526,8 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
       { title: 'Personalised plaques', copy: 'Because plaques are made to your specification, change-of-mind cancellation normally cannot be accepted once you have approved the proof and production has started.' },
       { title: 'Before production', copy: `If you need to change or cancel an order, email ${businessContact.email} immediately. We will help where possible if production has not started.` },
       { title: 'Faulty or damaged goods', copy: 'Your statutory rights are not affected. If your plaque arrives damaged, faulty, not as described or not made with reasonable care, contact us promptly with photos and your order number.' },
-      { title: 'Returns process', copy: 'Do not return an item without contacting us first. We will confirm the best next step, which may be a remake, repair, refund or return depending on the issue.' },
+      { title: 'Returns process', copy: 'You do not need to post a faulty or damaged plaque back to us. Contact us with photos and your order number so we can assess the issue and arrange the appropriate remedy, such as a remake or refund. Your statutory rights are not affected.' },
+      { title: 'Agreed refunds', copy: 'We issue agreed refunds through Stripe to the original payment method within 2 working days. Your bank or card provider may take additional time to show the credit. This does not affect your statutory rights.' },
     ],
   },
 };
@@ -2635,7 +2636,7 @@ function AdminPage() {
   );
 }
 
-function LegalPlaceholderPage({ view }: { view: SiteView }) {
+export function LegalPlaceholderPage({ view }: { view: SiteView }) {
   const page = legalPages[view] ?? legalPages.contact;
   if (!page) return null;
 
