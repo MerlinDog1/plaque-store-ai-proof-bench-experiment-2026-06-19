@@ -348,6 +348,12 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
         </div>
       </section>
       <ShopFaq />
+      <section className="shop-section" aria-labelledby="sister-site-heading">
+        <p className="shop-kicker">Our sister site</p>
+        <h2 id="sister-site-heading">Want a portrait on your plaque?</h2>
+        <p>Explore portrait plaque design examples at Portraits in Metal, our sister site for people and pets.</p>
+        <a className="shop-text-link" href="https://portraitsinmetal.com/gallery">Explore Portraits in Metal ↗</a>
+      </section>
       <section className="shop-closing">
         <p className="shop-kicker">Start with a few words</p>
         <h2>Make something meaningful.</h2>
