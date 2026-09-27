@@ -116,3 +116,7 @@ Current application d10c7a3, codex/merchant-free-listings, projects/instaplaque-
 
 ## Full standard Merchant catalogue — 27 September 2026
 Current application49cf41a, codex/merchant-free-listings, projects/instaplaque-merchant. LIVE dpl_4FynpLKygsk16TD1BcAu77v2SqWB canonical/www independentlyREADY.175 exact configurations with matched illustrations, prices, presets and production times. Typecheck/build/catalogue/feed checks pass;210local+22hosted browser checks; all175publicpages/images verified. Google corrected import SUCCEEDED175/noimportissues,101new+74previouslyaccepted. Initial import's overlengthIDs corrected preserving acceptedIDs. Google image crawl/policy review still pending; nonblocking unit-pricing-measure notices observed. No paid ads/orders/refunds/DBwrites. See docs/merchant-catalogue-expansion-2026-09-27.md. Rollback prior2offer dpl_AY8iSJ4VovByE6KLztq9TPYL9DyG and refetch same datasource10749182094.
+
+## Homepage sister links — 27 September 2026
+
+Current task worktree `projects/instaplaque-sister-links`, branch `codex/homepage-sister-links`, deployed `dpl_8JunknXiRQUxDcmur3WxgNrPyv8r`. See docs/homepage-sister-links-2026-09-27.md for checks and rollback.
