@@ -96,3 +96,6 @@ Server-checkout/typecheck/build pass; local+hosted390/1440 long-proof checkout i
 Current application source `c4e88cdfcc7e8dcf241f2303bb8da8a44d94f4c1`, branch `codex/layout-progress`, worktree `projects/instaplaque-layout-progress`.
 Canonical/www independently READY at `dpl_3RyiPdtffNRKuy7vZT9p8WbCDapr`. Removed authored5-unit and dense8–10-unit floors, orphan aesthetic rejections and post-fit5.2 clamps; manual minimum now serialization precision0.01. Word preservation, overlap/containment, font export restrictions/security retained.
 Always-visible generation card shows elapsed time and real retries/checks; MEDIUM16k and timeouts unchanged. Two fresh real-model long-text cases first-pass; visual/bounds/mobile checks pass. Hosted replay of both results and390/1440 progress tests passed. Typography/manual/typecheck/build pass. See docs/layout-progress-and-size-limits-2026-09-27.md. No orders/payments/DBwrites/email.
+
+## Manual decimal entry correction — 27 September 2026
+Current app cfbf876, branch codex/manual-input, worktree projects/instaplaque-manual-input. Canonical/www READY at dpl_5Ym9b3aPCaWcm8j234cMFJedHw4E. Decimal typing fix; typecheck/build and local+hosted390/1440 manual controls pass. All prior MEDIUM, relaxed limits and progress changes retained. See docs/manual-controls-2026-09-27.md.

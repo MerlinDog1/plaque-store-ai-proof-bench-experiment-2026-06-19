@@ -7,3 +7,5 @@ New FontSizeInput retains incomplete local text and commits a positive finite va
 Local390/1440 checks passed: actual sequential decimal typing6.5, empty draft leaves proof untouched,3.5 accepted,+/−, oversized edit rejected with actual value restored, invalid draft reset, bold, text-to-wording synchronization, Undo and proof-approval invalidation. Zero AI calls; all APIs intercepted; no orders or writes. scripts/check-manual-controls.cjs is the repeatable test. Existing design-route regression updated to blur before expecting size application.
 
 Typecheck/build and hosted verification recorded at release. No per-line position or font-picker feature was added: this correction covers the currently exposed text/size/bold controls. Previous compatible deployment dpl_3RyiPdtffNRKuy7vZT9p8WbCDapr retains the typing bug.
+
+Release: app cfbf876 deployed to dpl_5Ym9b3aPCaWcm8j234cMFJedHw4E. Canonical/www independently READY. Typecheck/build passed. Full390/1440 manual-control test repeated on public site passed; no model calls or writes.
