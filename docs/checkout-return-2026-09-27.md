@@ -9,3 +9,5 @@ No pricing, payment completion, approval, model, lettering or database changes. 
 Checks: typecheck, build, server-checkout contract; browser cancellation via both routes at390/1440, exact lettering restoration, final review/PDF button, refresh, actual PDF download, no overflow/JS errors; unauthorized recovery fails closed.
 
 Base ba80243 (app cfbf876), previous live dpl_5Ym9b3aPCaWcm8j234cMFJedHw4E is the compatible rollback. Task branch codex/checkout-return.
+
+Released app12bdb2c to dpl_8PHYTHFtkg7Q555qMJq78nB6ipJw; canonical/www independently READY. Full browser suite passed on public canonical site at390/1440 with synthetic API interception, including actual PDF downloads. No real Stripe checkout was created/cancelled during verification. Source pushed to GitHub. Local dev first run raced a concurrent rebuild/reload; isolated repeat and hosted suite passed.

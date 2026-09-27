@@ -99,3 +99,6 @@ Always-visible generation card shows elapsed time and real retries/checks; MEDIU
 
 ## Manual decimal entry correction — 27 September 2026
 Current app cfbf876, branch codex/manual-input, worktree projects/instaplaque-manual-input. Canonical/www READY at dpl_5Ym9b3aPCaWcm8j234cMFJedHw4E. Decimal typing fix; typecheck/build and local+hosted390/1440 manual controls pass. All prior MEDIUM, relaxed limits and progress changes retained. See docs/manual-controls-2026-09-27.md.
+
+## Checkout return — 27 September 2026
+App12bdb2cc3c6279c4a1d36435052a116e114da964, branch codex/checkout-return, worktree projects/instaplaque-checkout-return. Canonical/www independently READY at dpl_8PHYTHFtkg7Q555qMJq78nB6ipJw. Stripe cancellation now returns to designer final review/PDF; legacy checkout return links also restored. Uses existing protected order lookup/local artwork snapshot; missing local artwork fails with PDF-link recovery guidance. No payment completion/pricing/DB changes. See docs/checkout-return-2026-09-27.md. Previous compatible deployment dpl_5Ym9b3aPCaWcm8j234cMFJedHw4E.
