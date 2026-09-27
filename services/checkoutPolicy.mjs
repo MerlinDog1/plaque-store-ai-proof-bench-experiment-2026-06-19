@@ -161,9 +161,6 @@ export const getCheckoutQuoteReasons = (state, inscription = "") => {
   if (state.memorialImageEnabled) {
     reasons.push("image/artwork check required");
   }
-  if (String(inscription).trim().length > 360) {
-    reasons.push("long inscription needs readability review");
-  }
   if (state.shape === "heart") {
     reasons.push("special shape production check");
   }

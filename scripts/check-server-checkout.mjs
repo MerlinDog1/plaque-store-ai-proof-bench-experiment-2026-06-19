@@ -221,6 +221,18 @@ assert.throws(
   /Durable Supabase order storage is required/,
 );
 
+// Length alone must not block an approved proof at either checkout policy layer.
+for (const length of [360, 361, 650, 4000]) {
+  const payload = basePayload();
+  payload.orderSnapshot.inscription = "A".repeat(length);
+  assert.equal(getCheckoutPriceBreakdown(baseState, payload.orderSnapshot.inscription).quoteRequired, false);
+  const order = buildServerCheckoutOrder(payload, { orderId: firstServerId, now: fixedNow });
+  assert.doesNotThrow(() => buildStripeCheckoutParams(order));
+}
+for (const stateChange of [{ memorialImageEnabled: true }, { shape: "heart" }, { width: 500 }]) {
+  assert.equal(getCheckoutPriceBreakdown({ ...baseState, ...stateChange }, "A".repeat(650)).quoteRequired, true);
+}
+
 const manualQuotePayload = basePayload();
 manualQuotePayload.orderSnapshot.state.width = 500;
 assert.throws(
