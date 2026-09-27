@@ -84,3 +84,6 @@ Experiment only on codex/layout-approach-experiment, projects/instaplaque-layout
 
 ## Thinking budget experiment — 27 September 2026
 EXPERIMENT ONLY: projects/instaplaque-thinking-ab, codex/thinking-budget-ab.32comparisons/42recordedAPIresponses plusoneinterruptedrequestunknown. LOW8:7/8AI, LOW16:8/8withrepairs, MEDIUM16:8/8firstpass, HIGH32at30s:0/4AI(3fallback/1fail), HIGH32at120s:4/4AI. MEDIUMmostpromisingforreliability; noconclusiveaestheticgainfromHIGH. All32visuallyinspected; no promotion. Canonicalstill7af33c1/dpl_HSwvSSUVEhDvmfj7kD7c4vPQyrRW. Thisbranchcontains120sQAconfiguration; DO NOT promote wholesale. See docs/thinking-budget-ab-2026-09-27.md for method/deployments/timinglimitations and nextstep.
+
+## Wider MEDIUM coverage — 27 September 2026
+Branch codex/medium-size-text-review in projects/instaplaque-thinking-ab. 16 rectangular etched cases / 13 sizes; 15 ordinary cases first-pass AI, one deliberately overloaded tiny case timed out twice and safely rejected. All outputs visually reviewed; generated face bounds/mobile overflow checks pass. No app change or promotion. See docs/medium-size-text-review-2026-09-27.md; inherited experimental 120s config must not be promoted wholesale.
