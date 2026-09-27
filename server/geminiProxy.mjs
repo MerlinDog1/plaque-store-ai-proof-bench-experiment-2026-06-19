@@ -269,10 +269,10 @@ const canonicalizeStructuredText = (payload, config) => {
   );
   if (config.responseMimeType !== "application/json") fail("Structured output must use application/json.");
   const nextConfig = {
-    maxOutputTokens: 8_192,
-    // Layout JSON must not be starved by dynamic reasoning consuming the cap.
+    maxOutputTokens: 16_384,
+    // MEDIUM/16k passed the wider layout review; retain room for layout JSON.
     // Server-owned: callers cannot raise the budget or reasoning level.
-    thinkingConfig: { thinkingLevel: "LOW" },
+    thinkingConfig: { thinkingLevel: "MEDIUM" },
     responseMimeType: "application/json",
     responseSchema: canonicalizeSchema(config.responseSchema),
   };
