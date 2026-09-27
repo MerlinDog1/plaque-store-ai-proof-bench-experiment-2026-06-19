@@ -1,3 +1,4 @@
+import { FontSizeInput } from './FontSizeInput';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   DesignStyle,
@@ -2037,18 +2038,11 @@ export const Controls: React.FC<Props> = ({
                           </button>
                           <label className="flex min-w-[176px] items-center gap-2 text-xs font-black text-[#aab8b0]">
                             <span>Size</span>
-                            <input
-                              type="text"
-                              inputMode="decimal"
-                              value={Number.isInteger(line.fontSize) ? String(line.fontSize) : line.fontSize.toFixed(1)}
-                              onChange={(event) => {
-                                const nextValue = Number(event.target.value);
-                                if (Number.isFinite(nextValue)) {
-                                  updateGeneratedTextLine(line.index, { fontSize: nextValue });
-                                }
-                              }}
+                            <FontSizeInput
+                              value={line.fontSize}
+                              label={`Font size for ${line.label}`}
+                              onCommit={fontSize => updateGeneratedTextLine(line.index, { fontSize })}
                               className="h-[38px] w-[58px] rounded-lg border border-[#edf3ef]/18 bg-[#0f1817] px-2 text-sm font-black text-[#edf3ef] outline-none transition focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20"
-                              aria-label={`Font size for ${line.label}`}
                             />
                             <NumberStepper
                               value={line.fontSize}

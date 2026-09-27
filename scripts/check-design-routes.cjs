@@ -47,6 +47,7 @@ const fs = require('node:fs/promises');
    await page.locator('#inscription-wording-input').fill('THE OLD MILL\nRESTORED 2026');
    const beforeOversize = await page.locator('#ai-text-layer').innerHTML();
    await page.getByRole('textbox',{name:'Font size for THE OLD MILL',exact:true}).fill('120');
+   await page.getByRole('textbox',{name:'Font size for THE OLD MILL',exact:true}).blur();
    await page.getByText(/Change not applied/).waitFor();
    assert.equal(await page.locator('#ai-text-layer').innerHTML(),beforeOversize,'Unsafe size rejected');
    const svg=await page.locator('#ai-text-layer').innerHTML();

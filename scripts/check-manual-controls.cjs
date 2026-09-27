@@ -1,0 +1,23 @@
+const {chromium}=require('@playwright/test');const assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:'/opt/google/chrome/chrome'});try{for(const width of [390,1440]){
+const page=await browser.newPage({viewport:{width,height:950}});let modelCalls=0;const errors=[];page.on('pageerror',e=>errors.push(e.message));
+const svg='<text x="0" y="-20" text-anchor="middle" font-family="Lato" font-size="18" fill="currentColor">THE OLD MILL</text><text x="0" y="20" text-anchor="middle" font-family="Lato" font-size="14" fill="currentColor">RESTORED 2026</text>';
+await page.route(/googletagmanager|google-analytics|googleadservices/,r=>r.abort());
+await page.route('**/api/**',route=>{if(route.request().url().includes('/gemini/generate-content'))modelCalls++;return route.fulfill({json:{proofSession:{plaque_state:{width:297,height:210,shape:'rect',material:'polished-brass',fixing:'screws',fixingHoleCount:4,wood:false},wording:'THE OLD MILL\nRESTORED 2026',generated_svg:svg,metadata:{layoutIsCurrent:true}}}})});
+await page.goto((process.env.APP_URL||'http://127.0.0.1:4207')+'/design?proof=manual-qa');
+await page.getByRole('button',{name:'Go to Proof',exact:true}).click();await page.getByRole('checkbox',{name:/I have checked the wording/}).check();
+await page.getByRole('button',{name:'Go to Text',exact:true}).click();await page.getByRole('button',{name:'Tweak manually',exact:true}).click();
+const input=page.getByRole('textbox',{name:'Font size for THE OLD MILL',exact:true});const size=()=>page.locator('#ai-text-layer text').first().getAttribute('font-size');
+await input.fill('');assert.equal(Number(await size()),18,'Clearing a draft must not shrink text');await input.pressSequentially('6.5');assert.equal(await input.inputValue(),'6.5');await input.press('Enter');assert.equal(Number(await size()),6.5);
+await input.fill('3.5');await input.blur();assert.equal(Number(await size()),3.5);
+await page.getByRole('button',{name:'Increase font size for THE OLD MILL',exact:true}).click();assert.equal(Number(await size()),4);
+await page.getByRole('button',{name:'Decrease font size for THE OLD MILL',exact:true}).click();assert.equal(Number(await size()),3.5);
+await input.fill('120');await input.blur();await page.getByText(/Change not applied/).waitFor();assert.equal(Number(await size()),3.5);assert.equal(await input.inputValue(),'3.5');
+await input.fill('bad');await input.blur();assert.equal(await input.inputValue(),'3.5');
+await page.getByRole('button',{name:'Toggle bold for THE OLD MILL',exact:true}).click();assert.equal(await page.locator('#ai-text-layer text').first().getAttribute('font-weight'),'700');
+await page.locator('#generated-text-line-0').fill('THE NEW MILL');assert.ok((await page.locator('#inscription-wording-input').inputValue()).includes('THE NEW MILL'));
+await page.getByRole('button',{name:'Undo last change',exact:true}).click();assert.ok((await page.locator('#inscription-wording-input').inputValue()).includes('THE OLD MILL'));
+await page.getByRole('button',{name:'Go to Proof',exact:true}).click();assert.equal(await page.getByRole('checkbox',{name:/I have checked the wording/}).isChecked(),false);
+assert.equal(modelCalls,0);assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+console.log(width,'decimal typing, small sizes, +/−, rejected-edit reset, bold, wording sync, Undo and approval invalidation pass; zero AI calls');await page.close();
+}}finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
