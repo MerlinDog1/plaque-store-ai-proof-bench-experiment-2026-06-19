@@ -252,7 +252,8 @@ const indexableProductSlugs = new Set([
   'custom-plaques',
 ]);
 const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques']);
-const indexablePages = pages.filter((page) => indexableProductSlugs.has(page.slug));
+const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.title, description: product.description, price: product.schemaStartingPrice, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
+const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)), ...merchantPages];
 const indexableLandingPages = landingPages.filter((page) => indexableLandingSlugs.has(page.slug)).map(page => {
   const visiblePage = catalogue.seoLandingPages.find(item => item.slug === page.slug);
   return { ...page, title: visiblePage.seoTitle, description: visiblePage.seoDescription };
@@ -585,15 +586,17 @@ for (const page of indexableLandingPages) {
   });
 }
 
-const merchantFeedPages = indexablePages.filter((page) => page.slug !== 'custom-plaques');
+const merchantFeedPages = merchantPages;
 
 const feedItems = merchantFeedPages.map((page) => {
   const url = `${siteBaseUrl}/${page.slug}`;
   const imageUrl = `${siteBaseUrl}${page.image}`;
   return `    <item>
       <g:id>instaplaque-${page.slug}</g:id>
-      <g:title>${escapeAttr(page.title.replace(' UK | Free Online Plaque Proof', ''))}</g:title>
-      <g:description>${escapeAttr(page.description)}</g:description>
+      <g:structured_title><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.title)}</g:content></g:structured_title>
+      <g:structured_description><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.description)}</g:content></g:structured_description>
+      <g:excluded_destination>Shopping_ads</g:excluded_destination>
+      <g:excluded_destination>Display_ads</g:excluded_destination>
       <g:link>${url}</g:link>
       <g:image_link>${imageUrl}</g:image_link>
       <g:brand>InstaPlaque</g:brand>

@@ -391,7 +391,7 @@ export function ShopProduct({
             fetchPriority="high"
           />
           <figcaption>
-            Design example. Finish and optional backing affect the final price.
+            {product.merchantOffer ? "AI-generated design illustration. Your wording replaces the example inscription; surroundings are not included." : "Design example. Finish and optional backing affect the final price."}
           </figcaption>
         </figure>
         <div>

@@ -50,6 +50,7 @@ export interface ProductFamily {
   bestFor: string[];
   startingFrom: string;
   schemaStartingPrice?: number;
+  merchantOffer?: boolean;
   materialCue: 'brass' | 'stainless' | 'wood' | 'aged';
   image: string;
   proofPrompt: string;
@@ -973,6 +974,17 @@ export const materialStories = [
     copy: 'A lighter backing option for softer contrast behind brass or stainless plates.',
   },
 ];
+
+export const merchantProducts: ProductFamily[] = [
+  { slug: 'a5-brushed-steel-personalised-plaque', title: 'A5 personalised brushed stainless steel plaque', shortTitle: 'Stainless', materialCue: 'stainless', image: '/site-images/merchant-steel-a5.webp', width: 210, height: 148, material: Material.BrushedSteel, fixing: Fixing.Caps, borderStyle: BorderStyle.Double },
+  { slug: 'polished-brass-bench-plaque-200x100', title: 'Personalised polished brass bench plaque 200 × 100 mm', shortTitle: 'Brass', materialCue: 'brass', image: '/site-images/merchant-brass-bench.webp', width: 200, height: 100, material: Material.PolishedBrass, fixing: Fixing.Screws, borderStyle: BorderStyle.Single },
+].map(item => {
+  const preset = { width: item.width, height: item.height, material: item.material, shape: Shape.Rect, fixing: item.fixing, fixingHoleCount: 4 as const, border: true, borderStyle: item.borderStyle, wood: false, designStyle: DesignStyle.Auto, textColor: TextColor.Black, cornerRadius: 0 };
+  const price = estimatePlaquePrice(preset as PlaqueState);
+  const details = `${item.width} × ${item.height} mm rectangular metal plaque, ${item.fixing === Fixing.Caps ? 'four decorative fixing caps' : 'four screw fixings'}, black paint-filled etched lettering and no wood backing. Personalise the wording and approve your proof before payment. UK delivery included.`;
+  return { slug: item.slug, title: item.title, shortTitle: item.shortTitle, eyebrow: 'Made to order', materialCue: item.materialCue as 'brass' | 'stainless', image: item.image, merchantOffer: true, description: details, seoIntro: details, seoTitle: `${item.title} | InstaPlaque`, startingFrom: formatRetailPrice(price), schemaStartingPrice: price, bestFor: ['Your own wording', 'Proof approval before payment', 'UK delivery included'], proofPrompt: 'In loving memory of\nALEX MORGAN\nForever in our hearts', preset, faqs: [{question: 'Is this the price for the pictured configuration?', answer: 'Yes. The stated price includes the specified size, finish, fixings and personalised wording. The image is an AI-generated design illustration, not a completed customer order. Surroundings are not included. Your approved proof confirms the final layout. Changing the configuration can change the price.'}] };
+});
+productFamilies.push(...merchantProducts);
 
 export function getProductBySlug(slug: string | null | undefined) {
   return productFamilies.find((product) => product.slug === slug)
