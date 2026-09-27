@@ -13,3 +13,8 @@ Product feed is not yet connected: existing four entries are broad from-price fa
 Base:8a2844b; previous production dpl_8PHYTHFtkg7Q555qMJq78nB6ipJw. Branch codex/merchant-free-listings. Cloud rollback: saved private before-state for shipping; delete only this created return policy if necessary; website rollback to previous compatible deployment.
 
 Released c9e5e808df07c08332cd12231e8159ac5fa262e0 to dpl_8bykWxCwvMaK7hutvS74t6PK5TbZ. Canonical/www independently READY. Hosted initial HTML and hydrated390/1440 checks passed: refund turnaround, no physical returns, statutory protection, no overflow/JS errors. Source pushed. Merchant returns read-back matches created policy. Feed submission remains pending accurate product images/configurations and owner confirmation of mainland versus all-UK shipping coverage.
+
+
+## Whole-UK delivery — 27 September 2026
+Owner confirmed delivery included throughout UK and will absorb regional costs. Updated customer copy, SEO/static HTML, PDF estimate, dispatch-email wording, feed service label and Stripe checkout label. Existing Stripe GB/zero shipping rate unchanged; Merchant independently read as free GB with no regional exclusion. No prices, production times or payment operations changed.
+App5a86813 deployed to dpl_2P4ZCVFVDLfQ9tuEJwwPJV7P6gTt; canonical/www READY. Typecheck/build/server-checkout pass; all generated HTML scanned free of mainland restrictions; hosted home/how-it-works390/1440 wording/no-overflow/no-JS-error checks pass. Initial browser assertion incorrectly expected regional text on homepage rather than how-it-works; corrected route passed. Rollback dpl_8bykWxCwvMaK7hutvS74t6PK5TbZ. Product feed submission still pending image/configuration alignment, not shipping clarification.
