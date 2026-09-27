@@ -5,7 +5,7 @@ import {merchantOffers} from '../services/merchantCatalogue.mjs';
 const doc=new JSDOM(fs.readFileSync('dist/google-merchant-feed.xml','utf8'),{contentType:'application/xml'}).window.document;
 const items=[...doc.querySelectorAll('item')];assert.equal(items.length,merchantOffers.length);
 for(const offer of merchantOffers){
- const item=items.find(el=>el.getElementsByTagName('g:id')[0].textContent==='instaplaque-'+offer.slug);assert(item);
+ const item=items.find(el=>el.getElementsByTagName('g:id')[0].textContent===offer.offerId);assert(item);
  const get=tag=>item.getElementsByTagName('g:'+tag)[0]?.textContent;
  assert.equal(Number(get('price').split(' ')[0]),offer.price);assert.equal(get('image_link'),'https://instaplaque.co.uk'+offer.image);
  assert.equal(Number(get('max_handling_time')),offer.productionDays);assert.equal(get('material'),offer.label);

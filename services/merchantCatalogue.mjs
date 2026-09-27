@@ -57,4 +57,10 @@ add('polished-brass', 'Polished brass', 'brass', 'gold', 200, 100, 'Bench');
 const legacy = entries[entries.length - 1];
 Object.assign(legacy, {slug: 'polished-brass-bench-plaque-200x100', image: '/site-images/merchant-brass-bench.webp', imageKind: 'ai', productionDays: 15});
 legacy.description = legacy.description.replace('production 5 working', 'production 15 working');
+const shortMaterials = { 'brushed-stainless': 'bs', 'polished-stainless': 'ps', 'brushed-brass': 'bb', 'polished-brass': 'pb', 'orbital-brass-matt-lacquer': 'ob', 'aged-brass': 'ab' };
+for (const entry of entries) {
+  const originalId = `instaplaque-${entry.slug}`;
+  const p = entry.preset;
+  entry.offerId = originalId.length <= 50 ? originalId : `ip-${shortMaterials[p.material]}-${p.width}x${p.height}-${p.shape}-${p.wood ? p.woodTone : 'metal'}`;
+}
 export const merchantOffers = entries;

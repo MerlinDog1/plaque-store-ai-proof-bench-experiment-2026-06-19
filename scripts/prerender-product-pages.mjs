@@ -594,7 +594,7 @@ const feedItems = merchantFeedPages.map((page) => {
   const imageUrl = `${siteBaseUrl}${page.image}`;
   const offer = merchantOffers.find(item => item.slug === page.slug);
   return `    <item>
-      <g:id>instaplaque-${page.slug}</g:id>
+      <g:id>${offer.offerId}</g:id>
       <g:structured_title><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.title)}</g:content></g:structured_title>
       <g:structured_description><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.description)}</g:content></g:structured_description>
 

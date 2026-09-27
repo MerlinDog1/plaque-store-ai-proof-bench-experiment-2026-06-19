@@ -4,7 +4,8 @@ import { merchantOffers, merchantFinishes, merchantFormats } from '../services/m
 import { estimatePlaquePrice, getCheckoutQuoteReasons } from '../services/checkoutPolicy.mjs';
 const ids = new Set(), configurations = new Set();
 for (const offer of merchantOffers) {
-  assert(!ids.has(offer.slug), `Duplicate ID ${offer.slug}`);ids.add(offer.slug);
+  assert(offer.offerId.length <= 50, 'ID too long '+offer.offerId);
+  assert(!ids.has(offer.offerId), `Duplicate ID ${offer.offerId}`);ids.add(offer.offerId);
   const config = JSON.stringify(offer.preset); assert(!configurations.has(config), `Duplicate configuration ${offer.slug}`); configurations.add(config);
   assert.equal(offer.price, estimatePlaquePrice(offer.preset));assert.deepEqual(getCheckoutQuoteReasons(offer.preset),[]);
   assert(fs.existsSync('public'+offer.image),'Missing image '+offer.slug);
