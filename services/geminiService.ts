@@ -514,7 +514,7 @@ function validateTypographyAttributes(element: Element) {
   const fontSize = element.getAttribute("font-size");
   if (fontSize) {
     const size = parseFiniteNumber(fontSize, "font-size");
-    if (size < 5) throw new Error("font-size is below the readable minimum");
+    if (size <= 0) throw new Error("font-size must be positive");
   }
 
   ["x", "y", "dx", "dy"].forEach((name) => {
@@ -615,44 +615,9 @@ function validateTypographyComposition(texts: Element[], inscription: string, bo
     }
   });
 
-  const sourceSingleWordLines = new Set(
-    inscription.split(/\n+/).map(normalizeSpace).filter((line) => line.split(" ").length === 1)
-  );
-  const lines = texts.flatMap(getTypographyLines);
-  lines.forEach((line) => {
-    const words = line.split(" ");
-    if (words.length !== 1 || sourceSingleWordLines.has(line)) return;
-    if (line.length <= 4) {
-      throw new Error("Authored SVG contains a weak short orphan line");
-    }
-  });
+  // Line-break preferences and lettering size guide composition, not proof eligibility.
+  // Exact wording, positive sizes, containment and non-overlap are still required.
 
-  texts.forEach((text) => {
-    const linesInBlock = getTypographyLines(text);
-    if (linesInBlock.length < 2) return;
-    const finalLine = linesInBlock[linesInBlock.length - 1];
-    const previousLine = linesInBlock[linesInBlock.length - 2];
-    if (finalLine.split(" ").length === 1 && previousLine.split(" ").length > 2) {
-      throw new Error("Authored SVG contains an avoidable orphaned final word");
-    }
-  });
-
-  if (normalizeSpace(inscription).length > 180) {
-    const proseLines = texts
-      .flatMap((text) => {
-        const inheritedSize = parseFiniteNumber(text.getAttribute("font-size") || "", "text font-size");
-        return (Array.from(text.children).length ? Array.from(text.children) : [text])
-          .map((line) => ({
-            text: normalizeSpace(line.textContent || ""),
-            size: parseFiniteNumber(line.getAttribute("font-size") || String(inheritedSize), "line font-size"),
-          }));
-      })
-      .filter((line) => line.text.split(" ").length >= 4);
-    const readableFloor = clamp(Math.min(box.width, box.height) * 0.044, 8, 10);
-    if (proseLines.some((line) => line.size < readableFloor)) {
-      throw new Error(`Dense prose is too small; use at least ${readableFloor.toFixed(1)} for body copy and rebalance the composition`);
-    }
-  }
 }
 
 export function validateAuthoredTypographySvg(rawSvg: string, inscription: string, box: InscriptionBox): string {
@@ -895,7 +860,7 @@ function renderBenchStripLayoutToSvg(layout: StructuredTextLayout, width: number
   let cursor = -(naturalHeight * fitScale) / 2;
 
   return lines.map((line) => {
-    const fontSize = Math.max(5.2, line.size * fitScale);
+    const fontSize = line.size * fitScale;
     const baseline = cursor + fontSize * 0.82;
     cursor += fontSize + lineGap * fitScale;
     return `<text y="${baseline.toFixed(2)}" text-anchor="middle" font-family="${escapeXml(line.family)}" font-weight="${line.weight}" font-size="${fontSize.toFixed(2)}" letter-spacing="${line.letterSpacing}" fill="currentColor"><tspan x="0">${escapeXml(line.text)}</tspan></text>`;
@@ -909,15 +874,19 @@ async function generateAuthoredTypographySvg(
   shape: Shape,
   designStyle: DesignStyle,
   box: InscriptionBox,
-  context?: InscriptionContext
+  context?: InscriptionContext,
+  onPhaseChange?: (phase: GenerationPhase) => void
 ): Promise<AuthoredTypographySvg> {
   const ai = getAIClient();
   const guidanceRules = buildComposerGuidanceRules(context?.layoutGuidance);
   const prompt = buildTypographyPrompt(inscription, plaqueWidth, plaqueHeight, shape, designStyle, box, context);
 
   let repair = '';
+  let requestCount = 0;
   for (let attempt = 0; attempt < 2; attempt += 1) {
-    const response = await retryWrapper(async () => ai.models.generateContent({
+    const response = await retryWrapper(async () => {
+      onPhaseChange?.(requestCount++ ? 'retrying' : 'composing');
+      return ai.models.generateContent({
       model: PLAQUE_TEXT_MODEL,
       contents: prompt + repair,
       config: {
@@ -928,7 +897,9 @@ async function generateAuthoredTypographySvg(
           required: ['reasoning', 'svgContent'],
         },
       },
-    }), 1, 750);
+      });
+    }, 1, 750);
+    onPhaseChange?.('checking');
     try {
       if (!response.text) throw new Error('No typography was returned.');
       const parsed = JSON.parse(response.text);
@@ -1032,7 +1003,7 @@ function renderStructuredLayoutToSvg(layout: StructuredTextLayout, width: number
   let cursor = -(naturalHeight * fitScale) / 2;
 
   return prepared.map((block) => {
-    const fontSize = Math.max(5.2, block.size * fitScale);
+    const fontSize = block.size * fitScale;
     const firstBaseline = cursor + fontSize * 0.82;
     cursor += block.blockHeight * fitScale + gapBase * fitScale;
     const tspans = block.lines.map((line, lineIndex) =>
@@ -1175,7 +1146,7 @@ export function cleanSvgContent(svg: string): string {
 }
 
 // ─── Generation Phase Callback Type ──────────────────────────────
-export type GenerationPhase = 'concept' | 'transcribe' | null;
+export type GenerationPhase = 'concept' | 'transcribe' | 'composing' | 'checking' | 'retrying' | 'fallback' | 'editing' | null;
 
 export const refinePlaqueWording = async (rawText: string): Promise<string> => {
   const source = rawText.trim();
@@ -1464,6 +1435,7 @@ export interface PlaqueTypographyEditOptions {
   designStyle?: DesignStyle;
   inscriptionBox: InscriptionBox;
   inscriptionContext?: InscriptionContext;
+  onPhaseChange?: (phase: GenerationPhase) => void;
 }
 
 /** Apply one appearance instruction to an existing proof, never to its wording.
@@ -1479,6 +1451,7 @@ export const editPlaqueTypography = async ({
   designStyle = DesignStyle.Auto,
   inscriptionBox,
   inscriptionContext,
+  onPhaseChange,
 }: PlaqueTypographyEditOptions): Promise<{ svgContent: string; reasoning: string; conceptImageUrl: null }> => {
   if (!inscription.trim()) throw new Error('Enter the inscription before adjusting its layout.');
   if (!instruction.trim()) throw new Error('Describe the layout adjustment first.');
@@ -1506,6 +1479,7 @@ export const editPlaqueTypography = async ({
   const ai = getAIClient();
   let repair = '';
   for (let attempt = 0; attempt < 2; attempt += 1) {
+    onPhaseChange?.(attempt ? 'retrying' : 'editing');
     // One request plus at most one validation repair. No fallback can silently
     // replace the customer's current proof with an unrelated composition.
     const response = await ai.models.generateContent({
@@ -1520,6 +1494,7 @@ export const editPlaqueTypography = async ({
         },
       },
     });
+    onPhaseChange?.('checking');
     try {
       if (!response.text) throw new Error('No adjusted typography was returned.');
       const parsed = JSON.parse(response.text);
@@ -1728,7 +1703,8 @@ export const generatePlaqueDesign = async (
       shape,
       resolvedStyle,
       textBox,
-      inscriptionContext
+      inscriptionContext,
+      onPhaseChange
     );
     onPhaseChange?.(null);
     return {
@@ -1741,6 +1717,7 @@ export const generatePlaqueDesign = async (
   }
 
   // ── LOCAL FALLBACK: Fast context-aware renderer against the same real text box. ──
+  onPhaseChange?.('fallback');
   try {
     const structuredLayout = inferLocalStructuredLayout(promptText);
     const svgContent = proveRenderedTypographySvg(renderStructuredLayoutToSvg(structuredLayout, textBox.width, textBox.height, shape, resolvedStyle), promptText, textBox);

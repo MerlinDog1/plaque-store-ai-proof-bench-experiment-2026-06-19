@@ -53,7 +53,7 @@ COMPOSITION
 - Use natural letter spacing. Sentence case prose: 0. Uppercase headings: 0 to 0.04em. Do not stretch letters to fill a line.
 - Estimate line width before positioning it: uppercase letters average about 0.66 × font size; lowercase about 0.54; spaces about 0.30. Leave room for wider glyphs. Wrap at word boundaries and balance the final two lines.
 - ${compact ? "This is a wide, shallow plaque: use the width. Prefer a compact 2–4 line composition with a modest heading. Do not imitate the tall stack of a wall memorial." : "This is a wall/presentation proportion: form a coherent block with a distinct heading, message and date where present."}
-- Font size must be at least 5 units. Never squeeze unreadable text into a small plaque. For dense inscriptions over 180 characters, prose lines with four or more words need at least ${Math.min(10, Math.max(8, Math.min(w, h) * 0.044)).toFixed(1)} units.
+- There is no minimum font size or character-count-based size floor. Fit all supplied wording within the available text box, using smaller lettering when needed. Prefer the largest balanced, non-overlapping lettering that fits; do not omit text or refuse a long inscription. Readability and hierarchy remain design goals, not reasons to reject the wording.
 
 OUTPUT CONTRACT
 Return JSON with "reasoning" (one short practical layout explanation) and "svgContent".

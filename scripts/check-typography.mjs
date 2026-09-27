@@ -99,6 +99,16 @@ try {
   );
   assert.ok(validateAuthoredTypographySvg(bench, benchText, benchBox));
 
+  // Small lettering and long prose are legitimate customer choices, not errors.
+  assert.ok(validateAuthoredTypographySvg(wrap(text("Small lettering", 0, 2)), "Small lettering", box));
+  const denseLines = Array(8).fill("A much loved friend remembered with affection.");
+  const denseSvg = wrap(denseLines.map((line, index) => text(line, -28 + index * 8, 3)).join(""));
+  assert.ok(validateAuthoredTypographySvg(denseSvg, denseLines.join("\n"), box));
+  assert.ok(validateAuthoredTypographySvg(wrap(text("Always remembered by", -8, 4) + text("us", 4, 4)), "Always remembered by us", box));
+  for (const size of [0, -1]) {
+    assert.throws(() => validateAuthoredTypographySvg(wrap(text("Invalid size", 0, size)), "Invalid size", box), /positive/);
+  }
+
   const config = {
     responseMimeType: "application/json",
     responseSchema: {

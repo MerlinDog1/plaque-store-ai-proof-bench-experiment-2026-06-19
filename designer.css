@@ -960,3 +960,20 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Visible beside the action on desktop and above the mobile navigation. */
+.layout-progress-card {
+  position: fixed; z-index: 90; right: 20px; bottom: 24px;
+  width: min(420px, calc(100vw - 32px)); padding: 16px;
+  border: 1px solid #d7b66a; border-radius: 14px;
+  background: #15271f; color: #fff9e9;
+  box-shadow: 0 8px 32px #0004;
+}
+.layout-progress-heading { display: flex; align-items: flex-start; gap: 12px; }
+.layout-progress-heading strong { display: block; font-size: 15px; line-height: 1.4; }
+.layout-progress-heading p { margin: 5px 0 0; font-size: 13px; line-height: 1.5; color: #e1e9e3; }
+.layout-progress-spinner { flex: none; width: 22px; height: 22px; margin-top: 2px; border: 3px solid #ffffff35; border-top-color: #f2d688; border-radius: 50%; animation: layout-progress-spin 1s linear infinite; }
+.layout-progress-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 5px 12px; margin-top: 12px; font-size: 12px; line-height: 1.4; color: #e1e9e3; }
+@keyframes layout-progress-spin { to { transform: rotate(360deg); } }
+@media (max-width: 767px) { .layout-progress-card { right: 16px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); } }
+@media (prefers-reduced-motion: reduce) { .layout-progress-spinner { animation: none; } }

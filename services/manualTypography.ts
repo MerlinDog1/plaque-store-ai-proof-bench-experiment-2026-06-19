@@ -4,7 +4,8 @@ export interface ManualTypographyBox {
   height: number;
 }
 
-const MIN_FONT_SIZE = 4;
+// Two-decimal SVG precision, not a readability threshold.
+const MIN_FONT_SIZE = 0.01;
 const MAX_FONT_SIZE = 32;
 const escapeXml = (value: string) => value.replace(/&/g, '&amp;')
   .replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -70,10 +71,10 @@ export function createManualTypography(inscription: string, box: ManualTypograph
   size = Math.floor(size * 100) / 100;
   // Re-measure at the actual size: browser hinting is not necessarily linear.
   while (size >= MIN_FONT_SIZE && lines.some(line => measure(line, size) > usableWidth)) {
-    size = Math.round((size - 0.1) * 100) / 100;
+    size = Math.round((size - 0.01) * 100) / 100;
   }
   if (size < MIN_FONT_SIZE) {
-    throw new Error('Your wording will not fit at a readable size. Add line breaks, shorten it, or choose a larger plaque.');
+    throw new Error('The lettering could not be represented in this text area. Try adding line breaks.');
   }
   const lineHeight = size * 1.4;
   const top = -(lineHeight * lines.length) / 2;

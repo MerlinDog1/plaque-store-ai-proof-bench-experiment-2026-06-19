@@ -1,3 +1,4 @@
+import { LayoutProgress } from './components/LayoutProgress';
 import { DesignRequest } from './components/DesignRequest';
 import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
@@ -713,6 +714,7 @@ const App: React.FC = () => {
   };
 
   const handleGenerateLayout = async (prompt: string) => {
+    if (isGeneratingLayout) return;
     const snapshot = currentLayoutRef.current;
     setLayoutMessage('');
     setIsGeneratingLayout(true);
@@ -829,13 +831,15 @@ const App: React.FC = () => {
     }
     const snapshot = currentLayoutRef.current;
     setIsGeneratingLayout(true);
-    setLayoutMessage('Applying your layout instructions…');
+    setGenerationPhase('editing');
+    setLayoutMessage('');
     try {
       const box = getInscriptionLayout(state, inscriptionPrompt);
       const result = await editPlaqueTypography({
         inscription: inscriptionPrompt, instruction: instruction.trim(), currentSvgContent: state.generatedSvgContent,
         width: state.width, height: state.height, shape: state.shape, designStyle: state.designStyle,
         inscriptionBox: { width: box.textW, height: box.textH }, inscriptionContext: getInscriptionContext(inscriptionPrompt),
+        onPhaseChange: setGenerationPhase,
       });
       const latest = currentLayoutRef.current;
       if (latest.state !== snapshot.state || latest.prompt !== snapshot.prompt || latest.guidance !== snapshot.guidance) {
@@ -846,7 +850,7 @@ const App: React.FC = () => {
       setLayoutMessage('Layout updated. Your wording is unchanged. Check the proof or undo this change.');
     } catch (error) {
       setLayoutMessage(`Your previous proof is unchanged. ${error instanceof Error ? error.message : 'Please try again.'}`);
-    } finally { setIsGeneratingLayout(false); }
+    } finally { setIsGeneratingLayout(false); setGenerationPhase(null); }
   };
 
   const canUndoLayout = !!layoutUndo && layoutUndo.afterState === state
@@ -1525,6 +1529,7 @@ const App: React.FC = () => {
         )}
       </main>
 
+      {isGeneratingLayout && <LayoutProgress phase={generationPhase} />}
       <div className="no-print">
         <RealisticPreviewModal
           isOpen={modalOpen}

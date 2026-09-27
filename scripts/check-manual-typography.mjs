@@ -41,12 +41,12 @@ try {
     assert.throws(() => createManualTypography('Name', box), /dimensions/);
   }
   assert.throws(() => createManualTypography(' ', { width: 100, height: 100 }), /inscription first/);
-  assert.throws(() => createManualTypography('A'.repeat(200), { width: 30, height: 20 }), /will not fit/);
-  assert.throws(() => createManualTypography('Name\nDates', { width: 100, height: 5 }), /will not fit/);
+  assert.ok(createManualTypography('A'.repeat(200), { width: 30, height: 20 }).svgContent);
+  assert.ok(createManualTypography('Name\nDates', { width: 100, height: 5 }).svgContent);
   assert.throws(() => createManualTypography('Bad\u0000text', { width: 100, height: 100 }), /control/);
   assert.equal(readSvgInscription(createManualTypography('First\r\nSecond', { width: 100, height: 60 }).svgContent), 'First\nSecond');
 
-  // Loaded-font canvas path: intentionally wide metrics must shrink/reject,
+  // Loaded-font canvas path: intentionally wide metrics must shrink,
   // rather than fit using the fallback estimate or whole-plaque dimensions.
   let calls = 0;
   globalThis.document = {
@@ -59,9 +59,11 @@ try {
       },
     }) }),
   };
-  assert.throws(() => createManualTypography('1234567890', { width: 40, height: 100 }), /will not fit/);
+  const small = createManualTypography('1234567890', { width: 40, height: 100 });
+  const smallSize = Number(small.svgContent.match(/font-size="([^"]+)"/)[1]);
+  assert.ok(smallSize > 0 && smallSize < 4 && smallSize * 20 <= 40 * .92);
   assert.ok(calls > 0, 'Loaded-font canvas measurement is used');
-  console.log('Manual typography: exact wording, escapes, line breaks, fit rejection, and canvas checks passed.');
+  console.log('Manual typography: exact wording, escapes, line breaks, small-text fitting, and canvas checks passed.');
 } finally {
   await renderer.close();
   dom.window.close();

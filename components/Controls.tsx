@@ -940,7 +940,7 @@ export const Controls: React.FC<Props> = ({
         text.querySelectorAll('tspan').forEach(tspan => tspan.setAttribute('font-family', changes.fontFamily!));
       }
       if (typeof changes.fontSize === 'number' && Number.isFinite(changes.fontSize)) {
-        const nextSize = Math.min(120, Math.max(4, changes.fontSize));
+        const nextSize = Math.min(120, Math.max(0.01, changes.fontSize));
         text.setAttribute('font-size', nextSize.toFixed(2));
         text.querySelectorAll('tspan').forEach(tspan => tspan.setAttribute('font-size', nextSize.toFixed(2)));
       }
@@ -1902,23 +1902,7 @@ export const Controls: React.FC<Props> = ({
                 </p>
               </div>
             </div>
-            {isGenerating && (
-              <div className="mt-4 rounded-lg border border-[#f2d688]/25 bg-[#f2d688]/10 p-3" role="status" aria-live="polite">
-                <div className="flex items-center justify-between gap-3 text-xs font-black uppercase tracking-[0.14em] text-[#f7d98b]">
-                  <span>
-                    {generationPhase === 'concept'
-                      ? 'Reading the wording'
-                      : generationPhase === 'transcribe'
-                        ? 'Setting the plaque type'
-                        : 'Layout in progress'}
-                  </span>
-                  <span className="ai-typesetter-dots" aria-hidden="true"><i /><i /><i /></span>
-                </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#edf3ef]/10">
-                  <div className="ai-typesetter-progress h-full rounded-full bg-[#f2d688]" />
-                </div>
-              </div>
-            )}
+
           </div>
 
           <div className="grid gap-3">
@@ -2068,7 +2052,7 @@ export const Controls: React.FC<Props> = ({
                             />
                             <NumberStepper
                               value={line.fontSize}
-                              min={4}
+                              min={0.01}
                               max={120}
                               step={0.5}
                               label={`font size for ${line.label}`}
