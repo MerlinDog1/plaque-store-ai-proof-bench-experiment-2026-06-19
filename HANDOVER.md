@@ -78,3 +78,11 @@ and hosted visual regressions pass, plus persistent failure-state check.
 400 geometry cases, typography/security checks, typecheck/build passed.
 See `docs/layout-quality-review-2026-09-26.md` for results, limitations and rollback.
 No customer email, order, payment or database write by this review.
+
+## MEDIUM release — 27 September 2026
+Owner requested promotion. Current app source `730f7489e4454122853db478e7f37491dd787970`,
+branch `codex/medium-live`, worktree `projects/instaplaque-medium-live`.
+Canonical/www independently READY at `dpl_sM6tNv6rC2ouab27KDUzypd6P8qL`.
+Server structured-content now MEDIUM/16,384; existing30s timeout, prompt and renderer unchanged.
+Typecheck/build/security pass; fresh candidate2successful/1failed AI cases, public1first-pass success;4hosted mobile/desktop geometry checks pass. Dense portrait failure and browser interruption retained in release report.
+See docs/medium-release-2026-09-27.md for scope, verification limits and rollback. No DB/order/email/payment change.
