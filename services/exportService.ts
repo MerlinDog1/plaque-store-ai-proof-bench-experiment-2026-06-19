@@ -813,7 +813,7 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       ["Fixing", state.fixing === Fixing.None ? "No fixings" : labelFromSlug(state.fixing)],
       ["Border", state.border ? labelFromSlug(state.borderStyle) : "No border"],
       ["Wood backing", state.wood ? `${labelFromSlug(state.woodTone)} wood, ${state.woodEdge} edge` : "No backing"],
-      ["Estimate", `${formatPrice(options.price)} inc. UK mainland delivery`],
+      ["Estimate", `${formatPrice(options.price)} inc. UK delivery`],
     ];
 
     if (isPortraitPdf) {

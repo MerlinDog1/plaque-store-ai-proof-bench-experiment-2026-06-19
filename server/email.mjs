@@ -460,7 +460,7 @@ export const buildEmail = (template, order, extra = {}) => {
       panelTitle: "Delivery",
       panelCopy: extra.trackingReference || order.metadata?.trackingReference
         ? "Use the tracking or delivery reference below to follow the parcel where the carrier supports tracking."
-        : "Most UK mainland orders arrive soon after dispatch. Please keep an eye out for the delivery.",
+        : "Most UK orders arrive soon after dispatch. Please keep an eye out for the delivery.",
       orderLink,
       title,
       trackingReference: extra.trackingReference,

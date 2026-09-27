@@ -10,7 +10,7 @@ interface Props {
 }
 
 const DELIVERY_HELP =
-  "UK mainland only. Highlands, islands and non-UK delivery may incur extra charges.";
+  "Delivery included throughout the UK, including Northern Ireland, the Highlands and islands.";
 
 export const Header: React.FC<Props> = ({
   onNavigate,

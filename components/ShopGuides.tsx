@@ -28,7 +28,7 @@ export function ShopTurnaround() {
           <div><dt>Custom sizes and other wood-backed plaques</dt><dd>Estimated 15 working days</dd></div>
         </dl>
         <p>The designer shows the estimate for your selected combination before checkout. These are production estimates; delivery time is additional.</p>
-        <article><h3>UK mainland delivery is included</h3><p>Standard plaque prices include engraving, standard fixings and UK mainland delivery. Highlands, islands and non-UK destinations may incur extra charges; contact us with your postcode before ordering.</p></article>
+        <article><h3>UK delivery is included</h3><p>Standard plaque prices include engraving, standard fixings and UK delivery. This includes Northern Ireland, the Highlands and islands, with no regional postage surcharge. Contact us before ordering for delivery outside the UK.</p></article>
         <article><h3>Ordering for an opening or ceremony?</h3><p>Send your required arrival date, delivery postcode, size and wording before placing the order. Allow time for everyone involved to approve the proof. A production estimate is not a guaranteed event delivery date.</p></article>
       </div>
     </section>
@@ -104,7 +104,7 @@ export function ShopAbout() {
         </div>
         <div>
           <article><h3>Check the details before production</h3><p>Use the designer to choose a size and finish, add your wording and see the price. Review names, dates, spacing and fixings in the proof before approving your order. For unusual sizes or mounting, <a href="/contact">contact us</a> first.</p></article>
-          <article><h3>Know the price and production estimate</h3><p>Standard prices include engraving, standard fixings and UK mainland delivery. Selected finishes and backing are priced before checkout, alongside the production estimate. You can download your proof PDF and use its return link when you are ready.</p></article>
+          <article><h3>Know the price and production estimate</h3><p>Standard prices include engraving, standard fixings and UK delivery. Selected finishes and backing are priced before checkout, alongside the production estimate. You can download your proof PDF and use its return link when you are ready.</p></article>
           <article><h3>What the example images show</h3><p>Our images are illustrative design examples, including AI-generated visualisations. They show possible layouts and settings; they are not photographs of completed customer orders. Finishes and optional backing are confirmed through your proof and order.</p></article>
         </div>
       </section>

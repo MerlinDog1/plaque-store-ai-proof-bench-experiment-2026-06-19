@@ -487,7 +487,7 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     intro: `These terms apply to orders placed with ${businessContact.tradingName}. Last updated ${businessContact.updated}.`,
     sections: [
       { title: 'Orders and proofs', copy: 'You create and approve a digital proof before payment. By approving the proof, you confirm that the wording, layout, material, size, fixings and any wood backing are correct for production.' },
-      { title: 'Prices and payment', copy: 'Prices are shown in pounds sterling. Payment is taken securely by Stripe. UK mainland delivery is included unless stated otherwise before checkout. We are not VAT registered.' },
+      { title: 'Prices and payment', copy: 'Prices are shown in pounds sterling. Payment is taken securely by Stripe. UK delivery is included unless stated otherwise before checkout. We are not VAT registered.' },
       { title: 'Production and delivery', copy: 'Estimated production times are shown before checkout and run from proof approval and payment. Standard orders are usually estimated at 5 working days; aged brass, custom sizes and wood-backed plaques may take longer.' },
       { title: 'Customer details', copy: 'You must provide accurate contact and delivery details at checkout. We may contact you if an order detail needs checking before production or dispatch.' },
       { title: 'Faults and support', copy: 'Your statutory rights are not affected. If goods are faulty, damaged, not as described or not made with reasonable care, contact us as soon as possible so we can put things right.' },
@@ -579,7 +579,7 @@ const homeFaqs: FaqItem[] = [
   },
   {
     question: 'How much does a custom plaque cost?',
-    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK mainland delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.',
+    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.',
   },
   {
     question: 'Can I preview my plaque before ordering?',
@@ -603,7 +603,7 @@ const homeFaqs: FaqItem[] = [
   },
   {
     question: 'Is UK delivery included?',
-    answer: 'UK mainland delivery is included in standard pricing. For delivery outside UK mainland, create or email the proof first and we will confirm delivery cost before sending a payment link.',
+    answer: 'Delivery throughout the UK is included in standard pricing, including Northern Ireland, the Highlands and islands. For delivery outside the UK, contact us before ordering.',
   },
   {
     question: 'Can I save the proof and come back later?',
@@ -929,7 +929,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
   }
   return {
     title: 'Custom Brass & Stainless Steel Plaques UK | InstaPlaque',
-    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK mainland delivery before you order.',
+    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK delivery before you order.',
     path: '/',
     schema: [productListSchema(), faqSchema(shopFaqs)],
   };
@@ -1033,7 +1033,7 @@ function ProductGrid({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
         <p>
           InstaPlaque is for one-off engraved plaques where the wording matters: memorial plaques, bench dedications,
           garden plaques, opening plaques, donor plaques and custom metal signs. Prices update as you build, with
-          engraving, standard fixings and UK mainland delivery included on standard orders.
+          engraving, standard fixings and UK delivery included on standard orders.
         </p>
       </div>
       <div className="commerce-product-grid">
@@ -1279,7 +1279,7 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
             : 'Create a production-style plaque proof from your wording, check the layout before payment, then receive a plaque engraved with care using the finest materials.'}
         </p>
         <p>
-          No guesswork and no hidden costs: engraving, standard fixings and UK mainland delivery are
+          No guesswork and no hidden costs: engraving, standard fixings and UK delivery are
           included, with optional extras shown clearly before checkout.
         </p>
         <button type="button" className="commerce-primary" onClick={onStartDesign}>
@@ -1551,7 +1551,7 @@ function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
             <li>Oval plaques and circular plaques</li>
             <li>Custom sizes up to our maximum production size</li>
             <li>Longer-turnaround finishes or wood-backed plaques</li>
-            <li>Delivery outside UK mainland</li>
+            <li>Delivery outside the UK</li>
           </ul>
           <div className="commerce-warning">
             Send the proof through and we will confirm anything unusual before payment.
@@ -1657,7 +1657,7 @@ function CheckoutPage({
                 <span><strong>{getPlaqueSummaryTitle(state, selectedProduct.title)}</strong></span>
                 <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
                 {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
-                <span>UK mainland delivery <strong>Included</strong></span>
+                <span>UK delivery <strong>Included</strong></span>
                 <span className="commerce-summary-total">Total <strong>{formatPrice(breakdown.total)}</strong></span>
               </div>
               <button type="button" className="commerce-secondary" onClick={() => onNavigate('plaque')}>

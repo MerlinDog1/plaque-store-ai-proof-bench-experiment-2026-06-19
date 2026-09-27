@@ -2318,7 +2318,7 @@ export const Controls: React.FC<Props> = ({
                 </div>
               )}
               <div className="flex items-center justify-between gap-3 border-b border-[rgba(84,72,52,0.12)] pb-2">
-                <span>UK mainland delivery</span>
+                <span>UK delivery</span>
                 <strong>Included</strong>
               </div>
               <div className="flex items-center justify-between gap-3 pt-1 text-lg text-[#17231f]">
@@ -2327,7 +2327,7 @@ export const Controls: React.FC<Props> = ({
               </div>
             </div>
             <p className="mt-3 text-xs font-bold leading-5 text-[#6a746d]">
-              UK mainland delivery included. Highlands, islands and non-UK delivery can be worked out at checkout.
+              UK delivery included. Includes Northern Ireland, the Highlands and islands. Contact us for delivery outside the UK.
             </p>
             <div className="proof-turnaround mt-3 rounded-lg p-3">
               <div className="proof-turnaround-header">

@@ -57,7 +57,7 @@ export const buildStripeCheckoutParams = (order, options = {}) => {
   params.set("shipping_options[0][shipping_rate_data][type]", "fixed_amount");
   params.set("shipping_options[0][shipping_rate_data][fixed_amount][amount]", "0");
   params.set("shipping_options[0][shipping_rate_data][fixed_amount][currency]", currency);
-  params.set("shipping_options[0][shipping_rate_data][display_name]", "UK mainland delivery included");
+  params.set("shipping_options[0][shipping_rate_data][display_name]", "UK delivery included");
   params.set("shipping_options[0][shipping_rate_data][delivery_estimate][minimum][unit]", "business_day");
   params.set("shipping_options[0][shipping_rate_data][delivery_estimate][minimum][value]", "5");
   params.set("shipping_options[0][shipping_rate_data][delivery_estimate][maximum][unit]", "business_day");

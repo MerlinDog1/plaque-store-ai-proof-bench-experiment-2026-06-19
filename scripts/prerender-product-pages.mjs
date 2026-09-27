@@ -23,7 +23,7 @@ const shareImage = `${siteBaseUrl}/site-images/home-realistic-proof-row.jpg`;
 
 const homeFaqs = [
   ['Is my proof really free?', 'Yes. Your proof is 100% free with no account, no sign up and no obligation to buy. If you need time to decide, download the proof PDF and use the link inside it to come back later.'],
-  ['How much does a custom plaque cost?', 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK mainland delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.'],
+  ['How much does a custom plaque cost?', 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.'],
   ['Can I preview my plaque before ordering?', 'Yes. Add your wording, choose the material and size, then review a free proof before you pay. You can keep editing until the layout, wording and finish look right.'],
   ['What size is a bench plaque?', 'The compact bench plaque format starts at 150 x 50 mm for short inscriptions. Larger standard bench plaques are available, and custom sizes, oval plaques and circular plaques can be made up to our maximum size.'],
   ['Which material is best for an outdoor plaque?', 'Brushed stainless steel is clean and restrained for exposed outdoor settings. Brass gives a warmer traditional look, and aged brass is hand-patinated for more character.'],
@@ -162,7 +162,7 @@ const landingPages = [
     pageName: 'Engraved plaques',
     faqs: [
       ['Can I order one engraved plaque?', 'Yes. InstaPlaque is set up for single custom plaque orders as well as bespoke requests.'],
-      ['Do engraved plaques include delivery?', 'UK mainland delivery is included for standard plaques. Unusual sizes or non-mainland delivery may need confirmation before payment.'],
+      ['Do engraved plaques include delivery?', 'UK delivery is included for standard plaques. Delivery is included throughout the UK, including Northern Ireland, the Highlands and islands. Unusual plaque sizes may need confirmation before payment.'],
     ],
     relatedSearches: ['engraved plaques UK', 'custom engraved plaques', 'engraved brass plaques', 'engraved metal plaques'],
   },
@@ -299,7 +299,7 @@ const routePages = [
   {
     slug: '',
     title: 'Custom Brass & Stainless Steel Plaques UK | InstaPlaque',
-    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK mainland delivery before you order.',
+    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK delivery before you order.',
     schema: [productListSchema(), faqSchema(homeFaqs)],
   },
   {
@@ -415,10 +415,10 @@ const staticFaqs = (faqs = []) => faqs.length
 const staticPageMarkup = ({ title, heading, description, image, faqs = [], price = null, kind = 'page' }) => {
   const visibleHeading = heading || title.split('|')[0].trim();
   const details = kind === 'product'
-    ? `<section aria-labelledby="prerender-buy-heading"><h2 id="prerender-buy-heading">Design and order online</h2><p>Choose the plaque size, material, finish and fixings, then add your wording and check the exact proof before payment.${price ? ` Standard prices start from £${Number(price).toFixed(2).replace(/\.00$/, '')}.` : ''} Standard fixings and UK mainland delivery are included on eligible standard plaques.</p><p>Brass gives a warm, traditional finish. Stainless steel gives a clean, contemporary finish and is well suited to outdoor use.</p><a href="/design">Create your free plaque proof</a></section>`
+    ? `<section aria-labelledby="prerender-buy-heading"><h2 id="prerender-buy-heading">Design and order online</h2><p>Choose the plaque size, material, finish and fixings, then add your wording and check the exact proof before payment.${price ? ` Standard prices start from £${Number(price).toFixed(2).replace(/\.00$/, '')}.` : ''} Standard fixings and UK delivery are included on eligible standard plaques.</p><p>Brass gives a warm, traditional finish. Stainless steel gives a clean, contemporary finish and is well suited to outdoor use.</p><a href="/design">Create your free plaque proof</a></section>`
     : kind === 'home'
-      ? `<section aria-labelledby="prerender-shop-heading"><h2 id="prerender-shop-heading">Popular custom plaque formats</h2><ul>${indexablePages.map((page) => `<li><a href="/${page.slug}">${escapeHtml(page.productType)}</a> from £${page.price.toFixed(2).replace(/\.00$/, '')}</li>`).join('')}</ul><p>Choose brass or stainless steel, enter the wording and review a free online proof before checkout. Standard plaque prices include engraving, standard fixings and UK mainland delivery.</p><a href="/design">Start a free proof</a></section>`
-      : `<section aria-labelledby="prerender-process-heading"><h2 id="prerender-process-heading">Proof your plaque before payment</h2><p>Choose the format, add the wording and review the layout online. Standard prices are shown before checkout, with UK mainland delivery included on eligible standard plaques.</p><a href="/design">Create your free plaque proof</a></section>`;
+      ? `<section aria-labelledby="prerender-shop-heading"><h2 id="prerender-shop-heading">Popular custom plaque formats</h2><ul>${indexablePages.map((page) => `<li><a href="/${page.slug}">${escapeHtml(page.productType)}</a> from £${page.price.toFixed(2).replace(/\.00$/, '')}</li>`).join('')}</ul><p>Choose brass or stainless steel, enter the wording and review a free online proof before checkout. Standard plaque prices include engraving, standard fixings and UK delivery.</p><a href="/design">Start a free proof</a></section>`
+      : `<section aria-labelledby="prerender-process-heading"><h2 id="prerender-process-heading">Proof your plaque before payment</h2><p>Choose the format, add the wording and review the layout online. Standard prices are shown before checkout, with UK delivery included on eligible standard plaques.</p><a href="/design">Create your free plaque proof</a></section>`;
 
   return `<div class="seo-prerendered-page" data-prerendered="true"><header>${staticNav()}</header><main><article><h1>${escapeHtml(visibleHeading)}</h1><p>${escapeHtml(description)}</p>${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(visibleHeading)} example" />` : ''}${details}${staticFaqs(faqs)}</article></main><footer><nav aria-label="Legal"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/returns-and-cancellations">Returns and cancellations</a></nav></footer></div>`;
 };
@@ -606,7 +606,7 @@ const feedItems = merchantFeedPages.map((page) => {
       <g:adult>no</g:adult>
       <g:shipping>
         <g:country>GB</g:country>
-        <g:service>UK mainland standard delivery</g:service>
+        <g:service>UK delivery</g:service>
         <g:price>0.00 GBP</g:price>
       </g:shipping>
     </item>`;

@@ -370,7 +370,7 @@ export const productFamilies: ProductFamily[] = [
       },
       {
         title: 'Clear proofing and live pricing',
-        copy: 'Add your wording, choose the size and fixings, then check the proof before checkout. Standard pricing includes engraving, standard fixings and UK mainland delivery.',
+        copy: 'Add your wording, choose the size and fixings, then check the proof before checkout. Standard pricing includes engraving, standard fixings and UK delivery.',
       },
     ],
     relatedSearches: ['stainless steel plaques UK', 'outdoor metal plaques', 'engraved stainless steel plaques', 'custom steel plaques'],
@@ -659,7 +659,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     title: 'Engraved plaques',
     shortTitle: 'Engraved',
     eyebrow: 'Custom engraved metal plaques',
-    description: 'Custom engraved plaques in brass and stainless steel with live pricing, free online proofing and UK mainland delivery included.',
+    description: 'Custom engraved plaques in brass and stainless steel with live pricing, free online proofing and UK delivery included.',
     seoTitle: 'Engraved Plaques UK | Custom Brass & Stainless Steel Plaques',
     seoDescription: 'Order custom engraved plaques online in the UK. Create a free proof for brass, stainless steel, memorial, bench, wall and presentation plaques before payment.',
     heroCopy: 'If you know you need an engraved plaque but not the exact category, start here. Choose the size, material and wording, then check the proof before ordering.',
@@ -673,12 +673,12 @@ export const seoLandingPages: SeoLandingPage[] = [
       },
       {
         title: 'What is included',
-        copy: 'Standard prices include engraving, standard fixings and UK mainland delivery, with extras shown before checkout.',
+        copy: 'Standard prices include engraving, standard fixings and UK delivery, with extras shown before checkout.',
       },
     ],
     faqs: [
       { question: 'Can I order one engraved plaque?', answer: 'Yes. InstaPlaque is set up for single custom plaque orders as well as bespoke requests.' },
-      { question: 'Do engraved plaques include delivery?', answer: 'UK mainland delivery is included for standard plaques. Unusual sizes or non-mainland delivery may need confirmation before payment.' },
+      { question: 'Do engraved plaques include delivery?', answer: 'UK delivery is included for standard plaques. Delivery is included throughout the UK, including Northern Ireland, the Highlands and islands. Unusual plaque sizes may need confirmation before payment.' },
     ],
     relatedSearches: ['engraved plaques UK', 'custom engraved plaques', 'engraved brass plaques', 'engraved metal plaques'],
   },

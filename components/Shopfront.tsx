@@ -18,7 +18,7 @@ export const shopFaqs = [
   {
     question: "What is included in the price?",
     answer:
-      "Standard plaque prices include engraving, standard fixings and UK mainland delivery. Wood backing, special finishes and other extras are priced in the designer before checkout.",
+      "Standard plaque prices include engraving, standard fixings and UK delivery. Wood backing, special finishes and other extras are priced in the designer before checkout.",
   },
   {
     question: "How long will my plaque take?",
@@ -156,7 +156,7 @@ export function ShopCollections() {
       </div>
       <p className="shop-smallprint">
         Starting prices are for stainless steel without wood backing, including
-        engraving, standard fixings and UK mainland delivery. Examples may show
+        engraving, standard fixings and UK delivery. Examples may show
         brass, optional finishes or backing. Your selected options are priced in the designer.
       </p>
       <nav className="shop-related" aria-label="Materials and custom options">
@@ -185,7 +185,7 @@ export function ShopProcess() {
           {[
             [
               "Choose your plaque",
-              "Choose the size, metal finish and fixings. See the price update as you change your options, including engraving and UK mainland delivery.",
+              "Choose the size, metal finish and fixings. See the price update as you change your options, including engraving and UK delivery.",
             ],
             [
               "Create your layout online",
@@ -263,7 +263,7 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
                 )!.startingFrom
               }
             </strong>
-            <span>with UK mainland delivery</span>
+            <span>with UK delivery</span>
           </div>
           <ProductionNote />
         </div>
@@ -289,7 +289,7 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           02 <strong>Approve before production</strong>
         </span>
         <span>
-          03 <strong>UK mainland delivery included</strong>
+          03 <strong>UK delivery included</strong>
         </span>
       </div>
       <ShopProcess />
@@ -403,7 +403,7 @@ export function ShopProduct({
           <p>{product.seoIntro || product.description}</p>
           <strong className="shop-product-price">{product.startingFrom}</strong>
           <p className="shop-smallprint">
-            Standard engraving, fixings and UK mainland delivery included.
+            Standard engraving, fixings and UK delivery included.
             Extras are shown before checkout.
           </p>
           <DesignLink onStart={onLaunch}>
