@@ -91,3 +91,8 @@ See docs/medium-release-2026-09-27.md for scope, verification limits and rollbac
 Current app source `e73db85e1e0993569be44aa55bfb33c21843da55`, branch `codex/remove-length-gate`, worktree `projects/instaplaque-remove-length-gate`.
 Canonical/www READY at `dpl_MKer6sXvFh1U6HBNLKCAZgZdDAn7`. Removed only >360-character manual-quote condition from shared checkout policy; other quote rules, approval, pricing, MEDIUM and typography limits unchanged.
 Server-checkout/typecheck/build pass; local+hosted390/1440 long-proof checkout interception passes. Live API deliberately unapproved long inscription passes quote gate then rejects before persistence. No orders/payments/DBwrites/email. See docs/remove-length-gate-2026-09-27.md.
+
+## Progress and lettering limits — 27 September 2026
+Current application source `c4e88cdfcc7e8dcf241f2303bb8da8a44d94f4c1`, branch `codex/layout-progress`, worktree `projects/instaplaque-layout-progress`.
+Canonical/www independently READY at `dpl_3RyiPdtffNRKuy7vZT9p8WbCDapr`. Removed authored5-unit and dense8–10-unit floors, orphan aesthetic rejections and post-fit5.2 clamps; manual minimum now serialization precision0.01. Word preservation, overlap/containment, font export restrictions/security retained.
+Always-visible generation card shows elapsed time and real retries/checks; MEDIUM16k and timeouts unchanged. Two fresh real-model long-text cases first-pass; visual/bounds/mobile checks pass. Hosted replay of both results and390/1440 progress tests passed. Typography/manual/typecheck/build pass. See docs/layout-progress-and-size-limits-2026-09-27.md. No orders/payments/DBwrites/email.
