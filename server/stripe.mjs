@@ -41,7 +41,7 @@ export const buildStripeCheckoutParams = (order, options = {}) => {
     params.set("return_url", `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
   } else {
     params.set("success_url", `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
-    params.set("cancel_url", `${origin}/checkout?stripe=cancelled&order=${encodeURIComponent(orderId)}&proof=${encodeURIComponent(recoveryToken)}`);
+    params.set("cancel_url", `${origin}/design?stripe=cancelled&order=${encodeURIComponent(orderId)}&proof=${encodeURIComponent(recoveryToken)}`);
   }
   params.set("payment_method_types[0]", "card");
   if (customerEmail.includes("@")) {

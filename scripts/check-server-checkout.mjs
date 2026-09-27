@@ -180,6 +180,7 @@ assert.equal(stripeParams.get("line_items[0][price_data][product_data][name]"), 
 assert.equal(stripeCheckout.idempotencyKey, firstServerId);
 assert.equal(buildStripeRequestHeaders(stripeCheckout.idempotencyKey, "sk_test_example")["Idempotency-Key"], firstServerId);
 const cancelUrl = new URL(stripeParams.get("cancel_url"));
+assert.equal(cancelUrl.pathname, "/design");
 assert.equal(cancelUrl.searchParams.get("order"), firstServerId);
 assert.equal(cancelUrl.searchParams.get("proof"), canonicalOrder.metadata.checkoutRecoveryToken);
 

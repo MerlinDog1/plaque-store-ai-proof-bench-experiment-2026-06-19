@@ -117,7 +117,7 @@ const getInitialLandingSlug = () => {
 const isCheckoutRecoveryRoute = () => {
   if (typeof window === 'undefined') return false;
   const params = new URLSearchParams(window.location.search);
-  return window.location.pathname === '/checkout' && Boolean(params.get('order'));
+  return ['/checkout', '/design'].includes(window.location.pathname) && Boolean(params.get('order'));
 };
 
 const readFileAsDataUrl = (file: File): Promise<string> => new Promise((resolve, reject) => {
@@ -235,6 +235,7 @@ const App: React.FC = () => {
   currentLayoutRef.current = { state, prompt: inscriptionPrompt, guidance: inscriptionGuidance };
 
   const [checkoutRecoveryLoading, setCheckoutRecoveryLoading] = useState(isCheckoutRecoveryRoute);
+  const [checkoutRecoveryError, setCheckoutRecoveryError] = useState('');
   const [isGeneratingLayout, setIsGeneratingLayout] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [realisticPreviewPrompt, setRealisticPreviewPrompt] = useState('');
@@ -368,8 +369,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get('proof');
     const inlineToken = getInlineProofResumeToken();
-    const orderId = new URLSearchParams(window.location.search).get('order');
-    if (window.location.pathname === '/checkout' && orderId) return;
+    if (isCheckoutRecoveryRoute()) return;
     if (!token && !inlineToken) return;
 
     let cancelled = false;
@@ -431,7 +431,7 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (window.location.pathname !== '/checkout') return;
+    if (!isCheckoutRecoveryRoute()) return;
     const checkoutParams = new URLSearchParams(window.location.search);
     const orderId = checkoutParams.get('order');
     const recoveryToken = checkoutParams.get('proof');
@@ -449,7 +449,8 @@ const App: React.FC = () => {
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.error || `Could not load order (${response.status})`);
         const order = payload.order;
-        if (!order || cancelled) return;
+        if (cancelled) return;
+        if (!order) throw new Error('Could not find your saved design. Please reopen the return link in your proof PDF.');
 
         let locallySavedOrder: MockOrder | undefined;
         try {
@@ -463,6 +464,9 @@ const App: React.FC = () => {
           ...PROOF_BENCH_INITIAL_STATE,
           ...(locallySavedOrder?.state || order.plaqueState || order.state || {}),
         };
+        if (!restoredState.generatedSvgContent) {
+          throw new Error('Your saved design is not available in this browser. Please reopen the return link in your proof PDF.');
+        }
         const restoredWording = order.inscription || '';
         setState(restoredState);
         setInscriptionPrompt(restoredWording);
@@ -477,12 +481,16 @@ const App: React.FC = () => {
         setActiveStep(steps.length - 1);
         setProofSaved(true);
         setBasketAdded(true);
+        setCurrentView('plaque');
+        // Keep the protected recovery parameters so refresh restores the same proof.
+        window.history.replaceState({}, '', `/design${window.location.search}`);
         setMockOrders(prev => {
           if (prev.some(savedOrder => savedOrder.id === order.id)) return prev;
           return [order, ...prev];
         });
       } catch (error) {
         console.warn('Could not restore cancelled checkout order.', error);
+        if (!cancelled) setCheckoutRecoveryError(error instanceof Error ? error.message : 'Could not restore your design. Please reopen the return link in your proof PDF.');
       } finally {
         if (!cancelled) setCheckoutRecoveryLoading(false);
       }
@@ -1287,6 +1295,16 @@ const App: React.FC = () => {
     setCurrentView('plaque');
     setActiveStep(steps.length - 1);
   };
+
+  if (checkoutRecoveryLoading || checkoutRecoveryError) {
+    return <main className="min-h-screen bg-[#faf8f2] flex items-center justify-center p-6">
+      <section className="max-w-lg text-center" role={checkoutRecoveryError ? 'alert' : 'status'}>
+        <h1 className="text-2xl font-semibold mb-4">{checkoutRecoveryError ? 'Return to your design' : 'Restoring your design…'}</h1>
+        <p>{checkoutRecoveryError || 'Taking you back to your saved proof and PDF download.'}</p>
+        {checkoutRecoveryError && <button className="mt-6 underline" onClick={() => window.location.reload()}>Try again</button>}
+      </section>
+    </main>;
+  }
 
   if (isCheckingAccess) {
     return (
