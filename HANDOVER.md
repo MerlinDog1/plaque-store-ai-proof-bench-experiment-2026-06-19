@@ -81,3 +81,6 @@ No customer email, order, payment or database write by this review.
 
 ## Initial-layout experiment — 26 September 2026
 Experiment only on codex/layout-approach-experiment, projects/instaplaque-layout-approaches. No app changes or deployment.12cases/20realAPIcalls compare baseline vs readability-first vs softproportiontargets. Neither alternative merits promotion; see docs/layout-approach-experiment-2026-09-26.md. Production stays7af33c1/dpl_HSwvSSUVEhDvmfj7kD7c4vPQyrRW. Next improvement should investigate measured rendered typography, not assume more instructions help.
+
+## Thinking budget experiment — 27 September 2026
+EXPERIMENT ONLY: projects/instaplaque-thinking-ab, codex/thinking-budget-ab.32comparisons/42recordedAPIresponses plusoneinterruptedrequestunknown. LOW8:7/8AI, LOW16:8/8withrepairs, MEDIUM16:8/8firstpass, HIGH32at30s:0/4AI(3fallback/1fail), HIGH32at120s:4/4AI. MEDIUMmostpromisingforreliability; noconclusiveaestheticgainfromHIGH. All32visuallyinspected; no promotion. Canonicalstill7af33c1/dpl_HSwvSSUVEhDvmfj7kD7c4vPQyrRW. Thisbranchcontains120sQAconfiguration; DO NOT promote wholesale. See docs/thinking-budget-ab-2026-09-27.md for method/deployments/timinglimitations and nextstep.

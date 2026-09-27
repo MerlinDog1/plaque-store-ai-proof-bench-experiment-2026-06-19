@@ -41,6 +41,13 @@ fs.mkdirSync(out,{recursive:true});
  if(u.pathname==='/api/gemini/generate-content'){
  if(process.env.LIVE_LAYOUT_QA!=='true')throw Error('Unexpected generation in replay');
  const payload=route.request().postDataJSON();
+ if(process.env.QA_REPLAY_RESPONSES) {
+ const saved=JSON.parse(fs.readFileSync(path.join(process.env.QA_REPLAY_RESPONSES,c.id+'-responses.json')));
+ const call=saved[record.calls.length];
+ if(!call) return route.fulfill({status:503,json:{error:'No further recorded response; no live call made'}});
+ record.calls.push(call);return route.fulfill({status:call.status,json:call.response});
+ }
+
  const variant=process.env.QA_APPROACH;
  if(variant && variant!=='baseline' && typeof payload.contents==='string' && payload.contents.includes('OUTPUT CONTRACT')) {
  const guidance=require('./fixtures/layout-approaches.cjs')[variant];
@@ -56,7 +63,7 @@ fs.mkdirSync(out,{recursive:true});
      'curl',u.pathname,'--deployment',upstream,'--scope','dullaghan31-3959s-projects','--',
      '--silent','--show-error','--request','POST','--header','Content-Type: application/json',
      '--header','Origin: '+upstream,'--header','Sec-Fetch-Site: same-origin','--data-binary','@'+inputFile,'--write-out','\n%{http_code}'
-   ],{env:{...process.env,VERCEL_ORG_ID:'team_ixtKhYUPfpSnMuyaBrzYUQQe',VERCEL_PROJECT_ID:'prj_e0enz36tdUE3mI8q3tKKG9YR5CLD'},timeout:100000,maxBuffer:8*1024*1024});
+   ],{env:{...process.env,VERCEL_ORG_ID:'team_ixtKhYUPfpSnMuyaBrzYUQQe',VERCEL_PROJECT_ID:'prj_e0enz36tdUE3mI8q3tKKG9YR5CLD'},timeout:160000,maxBuffer:8*1024*1024});
    const split=stdout.lastIndexOf('\n');status=Number(stdout.slice(split+1));responseText=stdout.slice(0,split);
  }else{
    const res=await fetch(upstream+u.pathname,{method:'POST',headers:{'Content-Type':'application/json',Origin:upstream,'Sec-Fetch-Site':'same-origin'},body:JSON.stringify(payload),signal:AbortSignal.timeout(90000)});status=res.status;responseText=await res.text();
@@ -73,7 +80,7 @@ fs.mkdirSync(out,{recursive:true});
  await page.getByRole('button',{name:'Go to Text',exact:true}).click();
  await page.waitForFunction(text=>document.querySelector('#inscription-wording-input')?.value===text,c.text);
  if(!replay){await page.getByRole('button',{name:'Generate layout',exact:true}).click();
- await page.waitForFunction(()=>!document.querySelector('#inscription-wording-input')?.disabled && [...document.querySelectorAll('button')].some(b=>b.textContent==='Regenerate' || b.textContent==='Generate layout'),{}, {timeout:180000});}
+ await page.waitForFunction(()=>!document.querySelector('#inscription-wording-input')?.disabled && [...document.querySelectorAll('button')].some(b=>b.textContent==='Regenerate' || b.textContent==='Generate layout'),{}, {timeout:360000});}
  await page.evaluate(()=>document.fonts.ready);await page.waitForTimeout(1100);
  record.svg=await page.locator('#ai-text-layer').innerHTML();
  record.measurements=await page.locator('#ai-text-layer').evaluate(el=>{
