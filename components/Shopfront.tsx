@@ -391,7 +391,7 @@ export function ShopProduct({
             fetchPriority="high"
           />
           <figcaption>
-            {product.merchantOffer ? "AI-generated design illustration. Your wording replaces the example inscription; surroundings are not included." : "Design example. Finish and optional backing affect the final price."}
+            {product.merchantOffer ? `${product.imageKind === "ai" ? "AI-generated" : "Digitally rendered"} design illustration. Your wording replaces the example inscription; surroundings are not included.` : "Design example. Finish and optional backing affect the final price."}
           </figcaption>
         </figure>
         <div>
@@ -413,7 +413,7 @@ export function ShopProduct({
           <p className="shop-hero-note">
             Create your free proof online. No account needed.
           </p>
-          <ProductionNote />
+          {product.productionDays ? <aside className="shop-production-note"><strong>Estimated production: {product.productionDays} working days</strong><p>After proof approval and payment. Delivery time is additional; UK delivery is included.</p><a href="/how-it-works">Production and delivery details</a></aside> : <ProductionNote />}
           <ul className="shop-product-benefits">
             {product.bestFor.map((item) => (
               <li key={item}>{item}</li>

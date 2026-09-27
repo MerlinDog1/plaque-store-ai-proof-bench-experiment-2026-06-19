@@ -728,7 +728,7 @@ const productSchema = (product: ProductFamily) => {
       name: 'InstaPlaque',
     },
     category: 'Custom engraved plaques',
-    material: 'Brass or stainless steel',
+    material: product.merchantMaterial || 'Brass or stainless steel',
     offers: price ? {
       '@type': 'Offer',
       priceCurrency: 'GBP',

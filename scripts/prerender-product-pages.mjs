@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import React from 'react';
+import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 
@@ -523,7 +524,7 @@ for (const page of indexablePages) {
       image: `${siteBaseUrl}${page.image}`,
       brand: { '@type': 'Brand', name: 'InstaPlaque' },
       category: 'Custom engraved plaques',
-      material: 'Brass or stainless steel',
+      material: merchantOffers.find(item => item.slug === page.slug)?.label || 'Brass or stainless steel',
       offers: {
         '@type': 'Offer',
         priceCurrency: 'GBP',
@@ -591,15 +592,21 @@ const merchantFeedPages = merchantPages;
 const feedItems = merchantFeedPages.map((page) => {
   const url = `${siteBaseUrl}/${page.slug}`;
   const imageUrl = `${siteBaseUrl}${page.image}`;
+  const offer = merchantOffers.find(item => item.slug === page.slug);
   return `    <item>
       <g:id>instaplaque-${page.slug}</g:id>
       <g:structured_title><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.title)}</g:content></g:structured_title>
       <g:structured_description><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.description)}</g:content></g:structured_description>
-      <g:excluded_destination>Shopping_ads</g:excluded_destination>
-      <g:excluded_destination>Display_ads</g:excluded_destination>
+
       <g:link>${url}</g:link>
       <g:image_link>${imageUrl}</g:image_link>
       <g:brand>InstaPlaque</g:brand>
+      <g:material>${escapeAttr(offer.label)}</g:material>
+      <g:color>${escapeAttr(offer.colour)}</g:color>
+      <g:size>${escapeAttr(offer.size)}</g:size>
+      <g:item_group_id>${offer.groupId}</g:item_group_id>
+      <g:min_handling_time>${offer.productionDays}</g:min_handling_time>
+      <g:max_handling_time>${offer.productionDays}</g:max_handling_time>
       <g:condition>new</g:condition>
       <g:availability>in_stock</g:availability>
       <g:price>${page.price.toFixed(2)} GBP</g:price>

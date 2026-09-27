@@ -12,6 +12,7 @@ import {
   getCheckoutPriceBreakdown,
   getCheckoutQuoteReasons,
 } from './checkoutPolicy.mjs';
+import { merchantOffers } from './merchantCatalogue.mjs';
 import { BENCH_SAFE_MARGIN_PERCENT } from './safeMargin';
 
 export const DEFAULT_PRODUCT_SLUG = 'bench-plaques';
@@ -51,6 +52,9 @@ export interface ProductFamily {
   startingFrom: string;
   schemaStartingPrice?: number;
   merchantOffer?: boolean;
+  imageKind?: 'ai' | 'render';
+  productionDays?: number;
+  merchantMaterial?: string;
   materialCue: 'brass' | 'stainless' | 'wood' | 'aged';
   image: string;
   proofPrompt: string;
@@ -975,15 +979,19 @@ export const materialStories = [
   },
 ];
 
-export const merchantProducts: ProductFamily[] = [
-  { slug: 'a5-brushed-steel-personalised-plaque', title: 'A5 personalised brushed stainless steel plaque', shortTitle: 'Stainless', materialCue: 'stainless', image: '/site-images/merchant-steel-a5.webp', width: 210, height: 148, material: Material.BrushedSteel, fixing: Fixing.Caps, borderStyle: BorderStyle.Double },
-  { slug: 'polished-brass-bench-plaque-200x100', title: 'Personalised polished brass bench plaque 200 × 100 mm', shortTitle: 'Brass', materialCue: 'brass', image: '/site-images/merchant-brass-bench.webp', width: 200, height: 100, material: Material.PolishedBrass, fixing: Fixing.Screws, borderStyle: BorderStyle.Single },
-].map(item => {
-  const preset = { width: item.width, height: item.height, material: item.material, shape: Shape.Rect, fixing: item.fixing, fixingHoleCount: 4 as const, border: true, borderStyle: item.borderStyle, wood: false, designStyle: DesignStyle.Auto, textColor: TextColor.Black, cornerRadius: 0 };
-  const price = estimatePlaquePrice(preset as PlaqueState);
-  const details = `${item.width} × ${item.height} mm rectangular metal plaque, ${item.fixing === Fixing.Caps ? 'four decorative fixing caps' : 'four screw fixings'}, black paint-filled etched lettering and no wood backing. Personalise the wording and approve your proof before payment. UK delivery included.`;
-  return { slug: item.slug, title: item.title, shortTitle: item.shortTitle, eyebrow: 'Made to order', materialCue: item.materialCue as 'brass' | 'stainless', image: item.image, merchantOffer: true, description: details, seoIntro: details, seoTitle: `${item.title} | InstaPlaque`, startingFrom: formatRetailPrice(price), schemaStartingPrice: price, bestFor: ['Your own wording', 'Proof approval before payment', 'UK delivery included'], proofPrompt: 'In loving memory of\nALEX MORGAN\nForever in our hearts', preset, faqs: [{question: 'Is this the price for the pictured configuration?', answer: 'Yes. The stated price includes the specified size, finish, fixings and personalised wording. The image is an AI-generated design illustration, not a completed customer order. Surroundings are not included. Your approved proof confirms the final layout. Changing the configuration can change the price.'}] };
-});
+export const merchantProducts: ProductFamily[] = merchantOffers.map(item => ({
+  slug: item.slug, title: item.title, shortTitle: item.materialCue === 'stainless' ? 'Stainless' : 'Brass',
+  eyebrow: 'Made to order', materialCue: item.materialCue as ProductFamily['materialCue'],
+  image: item.image, imageKind: item.imageKind as 'ai' | 'render', merchantOffer: true,
+  merchantMaterial: item.label, productionDays: item.productionDays,
+  description: item.description, seoIntro: item.description, seoTitle: `${item.title} | InstaPlaque`,
+  startingFrom: formatRetailPrice(item.price), schemaStartingPrice: item.price,
+  bestFor: ['Your own wording', 'Proof approval before payment', 'UK delivery included'],
+  proofPrompt: 'In loving memory of\nALEX MORGAN\nForever in our hearts',
+  preset: item.preset as Partial<PlaqueState>,
+  faqs: [{ question: 'Is this the price for the pictured configuration?',
+    answer: 'Yes. The stated price includes the specified size, finish, fixings and personalised wording. The image is a digital design illustration, not a photograph of a completed customer order. Your approved proof confirms the final layout. Changing the configuration can change the price.' }],
+}));
 productFamilies.push(...merchantProducts);
 
 export function getProductBySlug(slug: string | null | undefined) {
