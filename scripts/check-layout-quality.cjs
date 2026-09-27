@@ -48,6 +48,7 @@ fs.mkdirSync(out,{recursive:true});
  payload.contents=payload.contents.replace('OUTPUT CONTRACT',guidance+'\nOUTPUT CONTRACT');
  }
  console.log(c.id,'model request',record.calls.length+1);
+ const requestStarted=Date.now();
  let status,responseText;
  if(process.env.QA_PROTECTED==='true') {
    const inputFile=path.resolve(out,c.id+'-request.json');fs.writeFileSync(inputFile,JSON.stringify(payload));
@@ -61,7 +62,7 @@ fs.mkdirSync(out,{recursive:true});
    const res=await fetch(upstream+u.pathname,{method:'POST',headers:{'Content-Type':'application/json',Origin:upstream,'Sec-Fetch-Site':'same-origin'},body:JSON.stringify(payload),signal:AbortSignal.timeout(90000)});status=res.status;responseText=await res.text();
  }
  let responseBody;try{responseBody=JSON.parse(responseText)}catch{responseBody={error:`Model endpoint returned HTTP ${status}: ${responseText.slice(0,150)}`}};
- record.calls.push({status,request:payload,response:responseBody});fs.writeFileSync(path.join(out,c.id+'-responses.json'),JSON.stringify(record.calls,null,2));return route.fulfill({status,json:responseBody});}
+ record.calls.push({status,elapsedMs:Date.now()-requestStarted,request:payload,response:responseBody});fs.writeFileSync(path.join(out,c.id+'-responses.json'),JSON.stringify(record.calls,null,2));return route.fulfill({status,json:responseBody});}
  if(u.pathname==='/api/gemini/health')return route.fulfill({json:{ok:true,enabled:true,hasKey:true}});
  return route.fulfill({status:503,json:{error:'Disabled in layout visual QA'}});
  });

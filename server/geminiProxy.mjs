@@ -268,11 +268,18 @@ const canonicalizeStructuredText = (payload, config) => {
     "config",
   );
   if (config.responseMimeType !== "application/json") fail("Structured output must use application/json.");
+  // Isolated QA deployment setting only; never caller-controlled. Default unchanged.
+  const qaProfiles = {
+    LOW16: { thinkingLevel: "LOW", maxOutputTokens: 16_384 },
+    MEDIUM16: { thinkingLevel: "MEDIUM", maxOutputTokens: 16_384 },
+    HIGH32: { thinkingLevel: "HIGH", maxOutputTokens: 32_768 },
+  };
+  const qa = qaProfiles[process.env.PLAQUE_LAYOUT_QA_PROFILE];
   const nextConfig = {
-    maxOutputTokens: 8_192,
+    maxOutputTokens: qa?.maxOutputTokens ?? 8_192,
     // Layout JSON must not be starved by dynamic reasoning consuming the cap.
     // Server-owned: callers cannot raise the budget or reasoning level.
-    thinkingConfig: { thinkingLevel: "LOW" },
+    thinkingConfig: { thinkingLevel: qa?.thinkingLevel ?? "LOW" },
     responseMimeType: "application/json",
     responseSchema: canonicalizeSchema(config.responseSchema),
   };
