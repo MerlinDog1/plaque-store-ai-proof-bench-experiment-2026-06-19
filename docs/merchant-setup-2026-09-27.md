@@ -11,3 +11,5 @@ Website adds approved wording and renders the complete returns page into initial
 Product feed is not yet connected: existing four entries are broad from-price families; image/variant consistency and mainland shipping coverage must be addressed before submission. Free-listings enabled is not product approval or proof of search visibility.
 
 Base:8a2844b; previous production dpl_8PHYTHFtkg7Q555qMJq78nB6ipJw. Branch codex/merchant-free-listings. Cloud rollback: saved private before-state for shipping; delete only this created return policy if necessary; website rollback to previous compatible deployment.
+
+Released c9e5e808df07c08332cd12231e8159ac5fa262e0 to dpl_8bykWxCwvMaK7hutvS74t6PK5TbZ. Canonical/www independently READY. Hosted initial HTML and hydrated390/1440 checks passed: refund turnaround, no physical returns, statutory protection, no overflow/JS errors. Source pushed. Merchant returns read-back matches created policy. Feed submission remains pending accurate product images/configurations and owner confirmation of mainland versus all-UK shipping coverage.
