@@ -73,4 +73,3 @@ All sixteen first-attempt displays and the five repaired-case displays were visu
 - Git deployment guard remains false, sole workflow targets main/PR; safe codex task branch only. No deployment command issued.
 - Local preview shut down after tests. Raw outputs/screenshots remain ignored on VPS; comparison sheets distinguish model layouts, local fallbacks and no-proof placeholders.
 - Next step: choose whether to test measured typography improvements; do not promote inherited experimental timeout settings wholesale.
-
