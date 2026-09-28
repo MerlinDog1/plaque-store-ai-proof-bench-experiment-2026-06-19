@@ -120,3 +120,7 @@ Current application49cf41a, codex/merchant-free-listings, projects/instaplaque-m
 ## Homepage sister links — 27 September 2026
 
 Current task worktree `projects/instaplaque-sister-links`, branch `codex/homepage-sister-links`, deployed `dpl_8JunknXiRQUxDcmur3WxgNrPyv8r`. See docs/homepage-sister-links-2026-09-27.md for checks and rollback.
+
+## Wording proofreading — 28 September 2026
+Task branch codex/wording-proofreading, app c0c4ae1, projects/instaplaque-sister-links. Live dpl_J7N13RYDfRXiY1k7VpfLRyZC7JL1 / https://instaplaque.co.uk. Generation now runs conservative spelling/capitalisation proofreading before exact-copy SVG composition, commits corrected editor text and proof together, and retains stale-result guards. Rejects empty/invalid responses and changed digit sequences. No proofreading on manual typography edits.
+Checks: browser mocked success/date-change rejection/concurrent-edit preservation passed. Full tsc hit inherited512MB heap limit; narrowed tsconfig including changed App/services/Controls and imported app dependencies passed (temporary config removed). Cloud production build passed. Actual hosted mobile model flow: “in loving memory / Alex McDonald / 1950–2026 / forevr remebered” corrected to “In loving memory / Alex McDonald / 1950–2026 / Forever remembered”; both model requests200, corrected textarea matched, no overflow, screenshot checked. Synthetic wording only, no order/payment/email/customer save. Rollback prechange dpl_8JunknXiRQUxDcmur3WxgNrPyv8r.
