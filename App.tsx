@@ -7,7 +7,7 @@ import { Controls } from './components/Controls';
 import { RealisticPreviewModal } from './components/RealisticPreviewModal';
 import { SiteExperience, useSeoMeta } from './components/SiteExperience';
 import { BorderStyle, DesignStyle, EtchmasterImageMode, EtchmasterShapeMask, Fixing, INITIAL_STATE, Material, MemorialImageMethod, MemorialImagePlacement, MemorialImageShape, PlaqueState, Shape, TextColor, TypographyEngine } from './types';
-import { generatePlaqueDesign, generateRealisticView, editPlaqueTypography, validateAuthoredTypographySvg, GenerationPhase } from './services/geminiService';
+import { refinePlaqueWording, generatePlaqueDesign, generateRealisticView, editPlaqueTypography, validateAuthoredTypographySvg, GenerationPhase } from './services/geminiService';
 import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
 import { createManualTypography, readSvgInscription } from './services/manualTypography';
 import { getInscriptionLayout } from './services/inscriptionLayout';
@@ -728,8 +728,14 @@ const App: React.FC = () => {
     setIsGeneratingLayout(true);
     setGenerationPhase(null);
     try {
-      // Layout must never silently rewrite the customer's approved wording.
-      const effectivePrompt = prompt;
+      // Proofread before composition; the SVG must preserve the corrected copy.
+      setGenerationPhase('concept');
+      const effectivePrompt = await refinePlaqueWording(prompt);
+      const afterProofreading = currentLayoutRef.current;
+      if (afterProofreading.state !== snapshot.state || afterProofreading.prompt !== snapshot.prompt || afterProofreading.guidance !== snapshot.guidance) {
+        setLayoutMessage('The design changed while AI was working. Nothing was replaced; create your layout again.');
+        return;
+      }
 
       const inscriptionBox = getInscriptionLayout(state, effectivePrompt);
       const result = await generatePlaqueDesign(
@@ -750,6 +756,10 @@ const App: React.FC = () => {
         if (latest.state !== snapshot.state || latest.prompt !== snapshot.prompt || latest.guidance !== snapshot.guidance) {
           setLayoutMessage('The design changed while AI was working. Nothing was replaced; create your layout again.');
           return;
+        }
+        setInscriptionPrompt(effectivePrompt);
+        if (effectivePrompt !== prompt.trim()) {
+          setLayoutMessage('Spelling and capitalisation checked. Your corrected wording is shown in the editor and proof. Please check names and dates before ordering.');
         }
         setLayoutUndo(null);
         setProofSaved(false);

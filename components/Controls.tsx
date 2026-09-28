@@ -1919,6 +1919,8 @@ export const Controls: React.FC<Props> = ({
                   onPromptChange(e.target.value);
                   requestAnimationFrame(resizeInscriptionTextarea);
                 }}
+                spellCheck
+                aria-describedby="inscription-proofreading-note"
                 placeholder="Type the words you want on the plaque..."
                 className={`${fieldClass} mt-1 min-h-[150px] max-h-[300px] resize-none overflow-auto normal-case leading-6 tracking-normal`}
               />
@@ -1927,6 +1929,7 @@ export const Controls: React.FC<Props> = ({
 
           {!isIterating && (
           <div className="grid gap-2">
+            <p id="inscription-proofreading-note" className="text-xs leading-5 text-[#6a746d]">We check spelling and capitalisation when you generate. Review the corrected wording, especially names and dates, before ordering.</p>
             <button
               onClick={() => {
                 setManualTextOpen(false);
