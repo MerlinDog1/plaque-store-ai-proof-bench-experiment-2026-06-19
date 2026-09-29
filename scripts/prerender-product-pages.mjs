@@ -254,7 +254,13 @@ const indexableProductSlugs = new Set([
 ]);
 const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques']);
 const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.title, description: product.description, price: product.schemaStartingPrice, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
-const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)), ...merchantPages];
+const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)).map(page => {
+  // Keep the revised memorial search metadata and illustration identical to
+  // the hydrated page; the catalogue is the source for both representations.
+  if (page.slug !== 'memorial-plaques') return page;
+  const product = catalogue.productFamilies.find(item => item.slug === page.slug);
+  return { ...page, title: product.seoTitle, description: product.seoDescription, image: product.image };
+}), ...merchantPages];
 const indexableLandingPages = landingPages.filter((page) => indexableLandingSlugs.has(page.slug)).map(page => {
   const visiblePage = catalogue.seoLandingPages.find(item => item.slug === page.slug);
   return { ...page, title: visiblePage.seoTitle, description: visiblePage.seoDescription };

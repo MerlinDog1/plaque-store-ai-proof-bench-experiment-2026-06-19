@@ -13,6 +13,7 @@ import {
   getCheckoutQuoteReasons,
 } from './checkoutPolicy.mjs';
 import { merchantOffers } from './merchantCatalogue.mjs';
+import { productionTiming } from './shopInformation';
 import { BENCH_SAFE_MARGIN_PERCENT } from './safeMargin';
 
 export const DEFAULT_PRODUCT_SLUG = 'bench-plaques';
@@ -199,19 +200,27 @@ export const productFamilies: ProductFamily[] = [
     eyebrow: 'Custom remembrance plaques',
     startingFrom: startingFromFor({ width: 210, height: 148, material: Material.BrushedSteel, shape: Shape.Rect }),
     materialCue: 'brass',
-    image: '/site-images/plaque-hero-memorial-wall-desktop.jpg',
+    image: '/site-images/home-gallery-aged-brass-wood.webp',
     description: 'Custom memorial plaques for graves, gardens, benches and remembrance walls, checked in a proof before production.',
-    seoTitle: 'Memorial Plaques UK | Brass & Stainless Steel Remembrance Plaques',
-    seoDescription: 'Create a custom memorial plaque for a grave, garden, bench or remembrance wall. Choose brass or stainless steel and approve a proof before ordering.',
-    seoIntro: 'A memorial plaque needs to be clear, respectful and correct before anything is made. Add the name, dates and tribute wording, choose the material, then review the proof carefully before checkout.',
+    seoTitle: 'Memorial Plaques UK | Brass & Stainless Steel | InstaPlaque',
+    seoDescription: 'Personalised memorial plaques in brass or stainless steel for walls, gardens and graves. Check your wording with a free online proof. UK delivery included.',
+    seoIntro: 'Create a personalised memorial plaque with a name, dates and a tribute in your own words. Choose brass or stainless steel for a remembrance wall, garden or graveside setting, then check the layout in a free online proof before you pay.',
     seoSections: [
       {
-        title: 'Memorial plaques made from your wording',
-        copy: 'Use memorial plaques for family gardens, benches, walls, graveside settings, scattering areas and quiet remembrance corners. The proof helps you catch wording, spacing and line breaks before production.',
+        title: 'Brass memorial plaques',
+        copy: 'Brass has a warm, gold-toned appearance for traditional remembrance settings. Choose brushed, polished, orbital or aged brass in the designer. The finish affects the appearance, price and care, so check the selected option before ordering. Aged brass takes additional finishing time.',
       },
       {
-        title: 'Brass, stainless steel and wood-backed options',
-        copy: 'Brass gives a warm traditional memorial look. Stainless steel feels cleaner and more modern. Aged brass works well in gardens and natural settings, while wood backing suits indoor or sheltered presentation plaques.',
+        title: 'Stainless steel memorial plaques',
+        copy: 'Stainless steel gives a silver finish, with brushed and polished options. It suits both contemporary wall memorials and outdoor remembrance plaques. Choose the finish for the setting and keep the inscription readable at the distance people will view it. Ask us about particularly exposed or coastal locations before ordering.',
+      },
+      {
+        title: 'Memorial wall plaques and fitting',
+        copy: 'Measure the available wall space and decide the fixing position before designing. Check the selected holes or decorative caps in the proof, leaving the inscription clear of them. Optional wood backing suits indoor or sheltered displays and changes the price and production time. If you are replacing an old plaque, send its dimensions and hole positions before ordering.',
+      },
+      {
+        title: 'Garden, grave and cemetery settings',
+        copy: 'For a garden, choose a position where planting will not cover the inscription and where it can be read and cleaned. For a cemetery, churchyard, public bench or managed remembrance space, check the permitted material, dimensions, wording and fitting method with the site manager before ordering. Approval of our design proof does not replace permission from the site.',
       },
     ],
     relatedSearches: ['memorial plaques UK', 'brass memorial plaques', 'custom remembrance plaques', 'garden memorial plaques'],
@@ -234,12 +243,28 @@ export const productFamilies: ProductFamily[] = [
     },
     faqs: [
       {
-        question: 'Can I check a memorial plaque before ordering?',
-        answer: 'Yes. Enter the wording and review a free online proof before approving the plaque for checkout.',
+        question: 'How much does a memorial plaque cost?',
+        answer: `A5 stainless steel memorial plaques without wood backing are available ${startingFromFor({ width: 210, height: 148, material: Material.BrushedSteel, shape: Shape.Rect })}. Engraving, standard fixings and UK delivery are included. Brass, selected finishes, larger sizes and wood backing can change the price; the designer shows the total before checkout. Compact bench plaques are a smaller option for short inscriptions.`,
       },
       {
-        question: 'Which material is best for a memorial plaque?',
-        answer: 'Brass gives a traditional warm finish, while stainless steel is a clean outdoor option. Wood backing can be added for wall and presentation plaques.',
+        question: 'What should I write on a memorial plaque?',
+        answer: 'A name, dates and a short personal dedication are a useful starting point. You can include a relationship, nickname or a few words about what made the person special. Use the sample inscriptions on this page as starting points, then review every name, date and line break in your proof.',
+      },
+      {
+        question: 'Can brass and stainless steel memorial plaques go outside?',
+        answer: 'Both metals can be used outdoors with suitable fixings. Choose the finish for the setting and follow its care instructions; do not assume every surface should be polished. Ask us about very exposed or coastal locations. Wood backing is better suited to indoor or sheltered displays.',
+      },
+      {
+        question: 'Can I put a memorial plaque on a grave or cemetery wall?',
+        answer: 'Check with the cemetery, churchyard or site manager before ordering. Requirements for dimensions, materials, wording and installation vary by location. Once you know what is permitted, choose the plaque options and approve the wording and layout in the proof.',
+      },
+      {
+        question: 'Can my family check the wording before I pay?',
+        answer: 'Yes. Create a free online proof with no account needed, then download the proof PDF to share with your family. It includes a link back to the design. Agree one final version and check the spelling, dates, line breaks and fixing positions before approval and payment. The proof confirms wording and layout; finish textures on screen are illustrative.',
+      },
+      {
+        question: 'How long does a memorial plaque take to make?',
+        answer: productionTiming.faq,
       },
     ],
   },

@@ -1,4 +1,5 @@
 import React from "react";
+import { MemorialSizes, MemorialWording, MemorialMaterialLinks } from './MemorialGuide';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
 import {
@@ -374,6 +375,7 @@ export function ShopProduct({
   onRequestDesign?: () => void;
 }) {
   const collection = collections.find((item) => item.slug === product.slug);
+  const isMemorial = product.slug === 'memorial-plaques';
   const faqs = [...product.faqs, ...shopFaqs]
     .filter(
       (item, index, list) =>
@@ -391,7 +393,7 @@ export function ShopProduct({
         <figure>
           <img
             src={collection?.image || materialProductImages[product.slug] || product.image}
-            alt={`${product.title} design example`}
+            alt={isMemorial ? 'Illustrative aged brass memorial plaque with a family inscription and dark wood backing' : `${product.title} design example`}
             width="1200"
             height="1200"
             fetchPriority="high"
@@ -409,6 +411,7 @@ export function ShopProduct({
           <p>{product.seoIntro || product.description}</p>
           <strong className="shop-product-price">{product.startingFrom}</strong>
           <p className="shop-smallprint">
+            {isMemorial && <>Starting price for A5 stainless steel without wood backing. </>}
             Standard engraving, fixings and UK delivery included.
             Extras are shown before checkout.
           </p>
@@ -427,10 +430,19 @@ export function ShopProduct({
           </ul>
         </div>
       </section>
-      <section className="shop-section shop-buying-guide">
+      {isMemorial && <>
+        <nav className="shop-section memorial-jump-links" aria-label="Memorial plaque buying guide">
+          <a href="#memorial-sizes">Sizes & prices</a>
+          <a href="#memorial-materials">Materials & fitting</a>
+          <a href="#memorial-wording">Wording examples</a>
+          <a href="#memorial-questions">Questions & answers</a>
+        </nav>
+        <MemorialSizes />
+      </>}
+      <section className="shop-section shop-buying-guide" id={isMemorial ? 'memorial-materials' : undefined}>
         <div>
           <p className="shop-kicker">Size, wording and fitting</p>
-          <h2>Plan your {product.shortTitle.toLowerCase()} plaque.</h2>
+          <h2>{isMemorial ? 'Choose the metal and the setting.' : `Plan your ${product.shortTitle.toLowerCase()} plaque.`}</h2>
           <a className="shop-text-link" href="/materials">
             Explore the finishes ↗
           </a>
@@ -442,13 +454,15 @@ export function ShopProduct({
               <p>{section.copy}</p>
             </article>
           ))}
+          {isMemorial && <MemorialMaterialLinks />}
         </div>
       </section>
       {['bench-plaques', 'opening-plaques'].includes(product.slug) && <PlaqueWordingExamples slug={product.slug} />}
-      {!['bench-plaques', 'opening-plaques'].includes(product.slug) && <ShopProcess />}
+      {isMemorial && <MemorialWording />}
+      {!['bench-plaques', 'opening-plaques', 'memorial-plaques'].includes(product.slug) && <ShopProcess />}
       {product.slug === 'garden-plaques' && <GardenAdvice />}
       <CollectionLinks slug={product.slug} />
-      <ShopFaq faqs={faqs} />
+      <div id={isMemorial ? 'memorial-questions' : undefined}><ShopFaq faqs={faqs} /></div>
       <section className="shop-closing">
         <h2>Put your words in place.</h2>
         <p>Create your layout and see the price before you pay.</p>
@@ -503,6 +517,7 @@ export function ShopMaterials() {
         </p>
         <p className="shop-material-uses">
           Choosing for a particular place? See how to plan a{' '}
+          <a href="/memorial-plaques">memorial plaque for a wall or grave</a>, plan a{' '}
           <a href="/garden-plaques">garden memorial plaque</a> or arrange a{' '}
           <a href="/opening-plaques">building opening inscription</a>.
         </p>

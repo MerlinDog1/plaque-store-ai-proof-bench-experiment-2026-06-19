@@ -154,7 +154,8 @@ export function CollectionLinks({ slug }: { slug: string }) {
   return (
     <section className="shop-section shop-collection-advice">
       <h2>A little help choosing.</h2>
-      <p>Compare the <a href="/materials">brass and stainless steel finishes</a> before choosing a material. {slug === 'opening-plaques' ? <>Once the inscription is agreed, <a href="/how-it-works">check how the free proof and approval process works</a> before arranging your ceremony.</> : <>For a ceremony, building dedication or a list of contributors, see <a href="/opening-plaques">opening plaques and formal inscriptions</a>.</>}</p>
+      <p>Compare the <a href="/materials">brass and stainless steel finishes</a> before choosing a material. {slug === 'memorial-plaques' ? <>For a narrow fixing area, see <a href="/bench-plaques">memorial bench sizes and fitting advice</a>. For a planted remembrance space, see our <a href="/garden-plaques">garden plaque guide</a>.</> : slug === 'opening-plaques' ? <>Once the inscription is agreed, <a href="/how-it-works">check how the free proof and approval process works</a> before arranging your ceremony.</> : <>For a ceremony, building dedication or a list of contributors, see <a href="/opening-plaques">opening plaques and formal inscriptions</a>.</>}</p>
+      {['bench-plaques', 'garden-plaques', 'brass-plaques', 'stainless-steel-plaques'].includes(slug) && <p>Remembering someone? Compare <a href="/memorial-plaques">personalised memorial plaques in brass and stainless steel</a>, with <a href="/memorial-plaques#memorial-wording">memorial inscription examples</a> to help you find the words.</p>}
       {['memorial-plaques', 'garden-plaques'].includes(slug) && <p>Looking for a portrait made from a favourite photograph? <a href="https://portraitsinmetal.com/gallery">Explore the portrait plaque examples at Portraits in Metal</a>, our sister brand. Its portrait service is currently in preview.</p>}
     </section>
   );
