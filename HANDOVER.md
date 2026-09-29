@@ -124,3 +124,17 @@ Current task worktree `projects/instaplaque-sister-links`, branch `codex/homepag
 ## Wording proofreading — 28 September 2026
 Task branch codex/wording-proofreading, app c0c4ae1, projects/instaplaque-sister-links. Live dpl_J7N13RYDfRXiY1k7VpfLRyZC7JL1 / https://instaplaque.co.uk. Generation now runs conservative spelling/capitalisation proofreading before exact-copy SVG composition, commits corrected editor text and proof together, and retains stale-result guards. Rejects empty/invalid responses and changed digit sequences. No proofreading on manual typography edits.
 Checks: browser mocked success/date-change rejection/concurrent-edit preservation passed. Full tsc hit inherited512MB heap limit; narrowed tsconfig including changed App/services/Controls and imported app dependencies passed (temporary config removed). Cloud production build passed. Actual hosted mobile model flow: “in loving memory / Alex McDonald / 1950–2026 / forevr remebered” corrected to “In loving memory / Alex McDonald / 1950–2026 / Forever remembered”; both model requests200, corrected textarea matched, no overflow, screenshot checked. Synthetic wording only, no order/payment/email/customer save. Rollback prechange dpl_8JunknXiRQUxDcmur3WxgNrPyv8r.
+
+## Memorial search page — 29 September 2026 (not deployed)
+
+Task branch `codex/memorial-search-2026-09-29`, application change
+`285213a5907bf0ad3f224152a8aebcb6d337330c`, based on the latest proofreading
+release and its handover. Adds memorial buying guidance, wording examples,
+catalogue-derived prices, contextual links and consistent search metadata.
+Full typecheck, build, SEO/static-output checks and local 390/1440 browser review
+passed. Merchant feed matches production byte-for-byte. No backend, PDF,
+generation, payment or price change. See
+[the task handover](docs/memorial-search-2026-09-29.md) for coverage and limitations.
+Next: explicit owner deployment request, reconcile any newer production changes,
+verify hosted release, then request a fresh Google crawl. Current production
+remains the proofreading release above; no deployment or indexing request made.
