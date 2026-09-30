@@ -206,3 +206,16 @@ and hosted synthetic proof save/read passed; synthetic DB/R2 fixtures cleaned.
 Supersedes the review-only oval entries above. Existing inscriptions need
 Regenerate for new wrapping. See docs/oval-plaques-2026-09-30.md for release
 checks, the recovered local CLI memory failure, remaining coverage and rollback.
+
+## Social sharing image — 30 September 2026 (not deployed)
+
+Branch `codex/social-share-image`, application/asset
+`85b76a45331b63428786abe3ce3158c1672d2fd0`, replaces the default sharing
+image with a branded 1200 × 630 homepage-based card. Base HTML, SPA and
+prerendered metadata include the new image; dimensions and alt text added.
+Build, all 194 generated page checks, image/feed comparison and local home-to-
+memorial browser metadata check passed. See
+[the image handover and final prompt](docs/social-share-image-2026-09-30.md).
+The verified oval release remains live. Next: explicit publication request,
+reconcile newer source, deploy and check aliases/image/metadata. No backend or
+purchase changes; preserve the migrated Supabase/private R2 configuration.
