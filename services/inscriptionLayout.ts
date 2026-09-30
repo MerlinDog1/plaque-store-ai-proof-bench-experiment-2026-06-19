@@ -110,10 +110,10 @@ export function getInscriptionLayout(
     shape: state.shape,
     safeMargin: state.safeMargin,
   });
-  const circularText = state.shape === Shape.Circle && !state.memorialImageEnabled;
-  if (circularText) {
-    // The preview now fits individual lines to a circular boundary, so there is
-    // no need to squeeze every line into the old 68%-wide inscribed square.
+  const ellipticalText = (state.shape === Shape.Circle || state.shape === Shape.Oval) && !state.memorialImageEnabled;
+  if (ellipticalText) {
+    // Individual lines follow the inner ellipse instead of a rectangular box.
+    // Keep a physical inset on both axes, including wide and upright ovals.
     const radialMargin = Math.min(state.width, state.height) * getSafeMarginPercent(state.safeMargin) / 100;
     safeMargin.x = radialMargin;
     safeMargin.y = radialMargin;
@@ -140,7 +140,7 @@ export function getInscriptionLayout(
       textW: Math.min(safeW, state.width * 0.52), textH: Math.min(safeH, state.height * 0.28),
       artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only",
     };
-    return applyHardwareTextClearance(state, { textCx: cx, textCy: cy, textW: safeW, textH: safeH, artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only", textEllipse: circularText });
+    return applyHardwareTextClearance(state, { textCx: cx, textCy: cy, textW: safeW, textH: safeH, artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only", textEllipse: ellipticalText });
   }
 
   const ratio = state.width / Math.max(1, state.height);

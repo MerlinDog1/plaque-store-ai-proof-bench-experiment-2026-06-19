@@ -1,6 +1,6 @@
 export interface TextBounds { x: number; y: number; width: number; height: number }
 
-/** Fit each rendered line to the circle rather than its enclosing rectangle.
+/** Fit each rendered line to the circle or oval rather than its enclosing rectangle.
  * Real glyph bounds keep accents/descenders inside the reserved ellipse, while
  * short outer lines let wider middle lines use more of the plaque.
  */

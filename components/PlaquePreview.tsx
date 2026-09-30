@@ -274,7 +274,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     ? Math.max(-layout.textH * (1 - fittedTextScale) / 2, Math.min(layout.textH * (1 - fittedTextScale) / 2, state.inscriptionOffsetY))
     : state.inscriptionOffsetY;
   // Constrain diagonal dragging as well as each axis; a rectangular clamp can
-  // move a small inscription's centre outside the circle and hide every line.
+  // move a small inscription's centre outside the ellipse and hide every line.
   const offsetRadius = Math.hypot(requestedOffsetX / (layout.textW / 2), requestedOffsetY / (layout.textH / 2));
   const offsetScale = layout.textEllipse && offsetRadius > 0
     ? Math.min(1, (1 - fittedTextScale) / offsetRadius) : 1;

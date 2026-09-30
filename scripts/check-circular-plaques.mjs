@@ -43,5 +43,41 @@ try {
   const prompt=buildTypographyPrompt('A sample memorial',210,210,Shape.Circle,DesignStyle.Auto,{width:168,height:168,ellipse:true});
   assert(prompt.includes('CIRCULAR WRAPPING'));
   assert(!buildTypographyPrompt('Sample',210,148,Shape.Rect,DesignStyle.Auto,{width:168,height:108}).includes('CIRCULAR WRAPPING'));
-  console.log(`${cases} round hardware cases, legacy fixing correction, rectangle preservation, curved text containment and larger usable layout passed.`);
+  let ovalCases = 0;
+  for (const [width,height] of [[300,200],[200,300],[300,100],[100,300]])
+  for (const wood of [false,true]) for (const fixing of [Fixing.None,Fixing.Screws,Fixing.Caps]) {
+    const oval = {...state,shape:Shape.Oval,width,height,wood,fixing};
+    const area = getInscriptionLayout(oval);
+    const inset = Math.min(width,height)*0.1;
+    assert.equal(area.textEllipse,true,'Text-only ovals must fit against an ellipse');
+    assert.equal(area.textCx,width/2+(wood?12.5:0));
+    assert.equal(area.textCy,height/2+(wood?12.5:0));
+    assert.equal(area.textH,height-2*inset);
+    const hardware=getFixingGeometry(oval);
+    const hardwareInset=fixing===Fixing.None?0:hardware.holeInset+hardware.fixingRadius+3;
+    const oldWidth=width-2*Math.max(Math.min(width,height)*0.16,hardwareInset);
+    assert(area.textW>=oldWidth,'Oval text retains any width needed for hardware clearance');
+    assert(area.textH>height-2*Math.min(width,height)*0.16,'Oval text gains height over the old reserved box');
+    assert.equal(getInscriptionLayout({...oval,memorialImageEnabled:true}).textEllipse,undefined,'Oval artwork keeps its reserved layout');
+    const ovalPrompt=buildTypographyPrompt('Sample',width,height,Shape.Oval,DesignStyle.Auto,{width:area.textW,height:area.textH,ellipse:true});
+    assert(ovalPrompt.includes('OVAL WRAPPING'));
+    assert(ovalPrompt.includes(width>height?'landscape oval':'upright oval'));
+    assert(!ovalPrompt.includes('centre of the circle'));
+    for (const [offsetX,offsetY] of [[0,0],[area.textW*0.1,area.textH*0.1],[-area.textW*0.1,-area.textH*0.1]]) {
+      const s=fitTextToEllipse(lines,bounds,area.textW,area.textH,3,offsetX,offsetY);
+      assert(s>0,'Wide and upright oval text must remain visible');
+      for(const b of lines) for(const x of [b.x,b.x+b.width]) for(const y of [b.y,b.y+b.height]) {
+        const px=x*s+offsetX, py=(y-1.5)*s+offsetY;
+        assert(px**2/(area.textW/2)**2+py**2/(area.textH/2)**2<=1.00000001,'Every oval line corner clears the inner ellipse');
+        assert(px**2/(width/2)**2+py**2/(height/2)**2<1,'Every oval line corner stays on the metal');
+        for (const hole of getFixingPositions(oval)) {
+          const distance=Math.hypot(px+area.textCx-hole.x,py+area.textCy-hole.y);
+          assert(distance>=getFixingGeometry(oval).fixingRadius+3-0.00001,'Oval text clears the side hardware');
+        }
+      }
+    }
+    ovalCases++;
+  }
+  assert.equal(getInscriptionLayout({...state,shape:Shape.Rect}).textEllipse,false);
+  console.log(`${cases} round hardware cases and ${ovalCases} wide/upright oval layouts passed, including curved containment, offsets, hardware clearance and prompt scope.`);
 } finally {await renderer.close();}
