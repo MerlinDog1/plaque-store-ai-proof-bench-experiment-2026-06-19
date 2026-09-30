@@ -158,3 +158,15 @@ one fresh model composition and local desktop/mobile/3D review passed.
 See docs/circle-plaques-2026-09-30.md for scope, limitations and release next step.
 The memorial page is live; Search Console accepted its fresh indexing request.
 The circle correction awaits explicit publication approval.
+
+## Circular plaque release — 30 September 2026
+
+Owner explicitly requested publication. Branch `codex/circle-plaque-fixes`,
+deployed source `f7edbf8b15cfce428e2ad6f0d995b5505e7d34d8`, is live at
+`dpl_AJCwLEfhRCrqzeygG5D9Dd5a2ykr`; canonical and www independently READY.
+Cloud build, authenticated candidate/public assets, live circle/3D review and
+hosted synthetic proof save/read through target Supabase/private R2 passed;
+fixtures cleaned up. Supersedes the review-only status above. Existing wording
+needs Regenerate for new wrapping; legacy round fixings correct automatically.
+See docs/circle-plaques-2026-09-30.md for coverage and rollback. No order,
+payment or email was created; full purchase/PDF browser coverage remains open.
