@@ -170,3 +170,16 @@ fixtures cleaned up. Supersedes the review-only status above. Existing wording
 needs Regenerate for new wrapping; legacy round fixings correct automatically.
 See docs/circle-plaques-2026-09-30.md for coverage and rollback. No order,
 payment or email was created; full purchase/PDF browser coverage remains open.
+
+## Oval inscription layout — 30 September 2026 (not deployed)
+
+Branch `codex/oval-plaque-layout`, application
+`bc50c16274b2b8cc49a02e44eccc1facb2d68033`, extends per-line ellipse fitting
+and curved wrapping to text-only ovals, with wide/upright composition guidance.
+The published smooth rim and two side fixings already cover ovals. Full
+typecheck/build, typography regressions, 160 hardware/24 oval geometry cases,
+two fresh model compositions and local desktop/3D review passed. Mobile DOM
+geometry passed; mobile screenshot capture failed. See
+docs/oval-plaques-2026-09-30.md for coverage and limits. No deployment made;
+next step is explicit publish approval followed by live reconciliation and
+hosted proof verification. Preserve the migrated Supabase/private R2 setup.
