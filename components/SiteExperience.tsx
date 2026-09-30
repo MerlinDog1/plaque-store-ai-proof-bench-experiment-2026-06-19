@@ -570,7 +570,7 @@ const homeCarouselItems: HomeCarouselItem[] = [
 ];
 
 const siteBaseUrl = 'https://instaplaque.co.uk';
-const siteShareImage = `${siteBaseUrl}/site-images/home-realistic-proof-row.jpg`;
+const siteShareImage = `${siteBaseUrl}/site-images/instaplaque-social-v2.jpg`;
 
 const homeFaqs: FaqItem[] = [
   {
