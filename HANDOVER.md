@@ -147,3 +147,14 @@ www independently verified. Cloud build, public content/hashes and hosted
 synthetic proof save/read through the target DB/private R2 passed; fixtures
 cleaned up. See docs/memorial-search-2026-09-29.md. Supersedes the review-only
 status above. No email, generation, order or payment by this release check.
+
+## Circular plaque review — 30 September 2026 (not deployed)
+
+Branch `codex/circle-plaque-fixes`, app `6cbac3678afeda7d2fd465ba8fc57237c5a77784`.
+Two side fixings for round plaques including restored designs; smooth 3D rim
+and matching face geometry; circular text area and generation guidance.
+Typecheck/build, 160 geometry combinations, typography/checkout regressions,
+one fresh model composition and local desktop/mobile/3D review passed.
+See docs/circle-plaques-2026-09-30.md for scope, limitations and release next step.
+The memorial page is live; Search Console accepted its fresh indexing request.
+The circle correction awaits explicit publication approval.
