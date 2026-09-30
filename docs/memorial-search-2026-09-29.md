@@ -1,6 +1,6 @@
 # Memorial page search improvements — 29 September 2026
 
-Status: reviewed and tested source; not deployed. No Search Console indexing request has been submitted for this revision.
+Status: deployed on 30 September 2026 after the owner's explicit request. The verification and release notes below supersede the original review-only status.
 
 ## Source and production baseline
 
@@ -37,3 +37,9 @@ Deploy only after an explicit owner request, as required by AGENTS.md. Before re
 After the revised page is verified live, request indexing for `https://instaplaque.co.uk/memorial-plaques` in the existing Search Console property. Keep the URL and canonical stable. Compare subsequent page/query performance over comparable periods after recrawling; no ranking outcome is promised.
 
 Git publishing review: the inherited `git.deploymentEnabled=false` guard is retained, the sole GitHub workflow performs typecheck/build only, and the repository hooks list was empty. This task branch can be pushed without publishing the site. No merge or default-branch change is part of this task.
+
+## Release — 30 September 2026
+
+Deployed source `febbedd49335a5625930099c7c0557e0d95461ec`, Vercel `dpl_2nWrgrqHCDEMkhAe1HRTpVnDRJyg`. Built as a production candidate, inspected its HTML through authenticated Vercel curl, then promoted. Canonical and www aliases independently resolve to that READY deployment and source. Public memorial HTML contains the new wording section and the expected JS/CSS build hashes. Cloud build passed.
+
+Hosted synthetic proof save/read confirmed target Supabase and private R2 storage with restored SVG content. The initial assertion compared unnormalised SVG whitespace; corrected comparison passed. Both synthetic fixtures and their scoped artwork were removed. No emails, generation, order or payment. Previous compatible deployment: `dpl_J7N13RYDfRXiY1k7VpfLRyZC7JL1`.

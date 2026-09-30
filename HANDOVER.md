@@ -138,3 +138,12 @@ generation, payment or price change. See
 Next: explicit owner deployment request, reconcile any newer production changes,
 verify hosted release, then request a fresh Google crawl. Current production
 remains the proofreading release above; no deployment or indexing request made.
+
+## Memorial page release — 30 September 2026
+
+Owner authorised deployment. Source `febbedd49335a5625930099c7c0557e0d95461ec`
+is live at READY deployment `dpl_2nWrgrqHCDEMkhAe1HRTpVnDRJyg`; canonical and
+www independently verified. Cloud build, public content/hashes and hosted
+synthetic proof save/read through the target DB/private R2 passed; fixtures
+cleaned up. See docs/memorial-search-2026-09-29.md. Supersedes the review-only
+status above. No email, generation, order or payment by this release check.
