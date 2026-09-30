@@ -183,3 +183,15 @@ geometry passed; mobile screenshot capture failed. See
 docs/oval-plaques-2026-09-30.md for coverage and limits. No deployment made;
 next step is explicit publish approval followed by live reconciliation and
 hosted proof verification. Preserve the migrated Supabase/private R2 setup.
+
+## Oval fixing follow-up — 30 September 2026 (not deployed)
+
+Same branch `codex/oval-plaque-layout`, application
+`7d23d6364b4259237eab2b88cad5be8480516c49`, includes the oval text improvements.
+Extreme shallow ovals could let 15mm caps cross the edge; ellipse-aware insets
+now keep the whole fixing plus 2mm clearance on the metal. Two side fixings,
+legacy state normalisation and shared SVG/3D positioning are retained.
+640 additional oval hardware cases, existing 160 hardware/24 layout cases,
+typecheck/build and a local restored-proof/cap-to-screw browser check passed.
+See docs/oval-plaques-2026-09-30.md. Pushed for review; publication approval
+and hosted release verification remain the next step.
