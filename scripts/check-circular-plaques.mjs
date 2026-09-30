@@ -25,6 +25,26 @@ try {
   }
   assert.equal(getFixingPositions({...INITIAL_STATE,shape:Shape.Rect,width:210,height:148,fixing:Fixing.Screws,fixingHoleCount:4}).length,4);
   assert.equal(getFixingPositions({...INITIAL_STATE,shape:Shape.Heart,fixing:Fixing.Screws}).length,0);
+  let ovalHardwareCases=0;
+  for (const [width,height] of [[50,600],[600,50],[100,300],[300,100],[148,210],[210,148],[200,300],[300,200]])
+  for (const fixing of [Fixing.Screws,Fixing.Caps]) for (const capSize of [10,15])
+  for (const border of [false,true]) for (const borderStyle of Object.values(BorderStyle))
+  for (const wood of [false,true]) {
+    const oval={...INITIAL_STATE,shape:Shape.Oval,width,height,fixing,capSize,border,borderStyle,wood,fixingHoleCount:4};
+    const hardware=getFixingGeometry(oval), holes=getFixingPositions(oval), offset=wood?12.5:0;
+    assert.equal(normalizeCurvedFixings(oval).fixingHoleCount,2);
+    assert.equal(holes.length,2,'Every oval, including a restored four-hole proof, has two fixings');
+    assert.equal(holes[0].y,offset+height/2);
+    assert.equal(holes[1].y,offset+height/2);
+    assert(Math.abs(holes[0].x+holes[1].x-width-offset*2)<0.000001,'Oval fixings stay symmetric');
+    for (const hole of holes) for(let degrees=0;degrees<360;degrees++) {
+      const angle=degrees*Math.PI/180;
+      const x=(hole.x+(hardware.fixingRadius+2)*Math.cos(angle)-offset-width/2)/(width/2);
+      const y=(hole.y+(hardware.fixingRadius+2)*Math.sin(angle)-offset-height/2)/(height/2);
+      assert(x*x+y*y<=1.00000001,'The entire oval fixing plus 2mm clearance must remain on the metal');
+    }
+    ovalHardwareCases++;
+  }
   const state={...INITIAL_STATE,shape:Shape.Circle,width:210,height:210,safeMargin:10,memorialImageEnabled:false,fixing:Fixing.Screws};
   const layout=getInscriptionLayout(state);
   assert.equal(layout.textEllipse,true);
@@ -79,5 +99,5 @@ try {
     ovalCases++;
   }
   assert.equal(getInscriptionLayout({...state,shape:Shape.Rect}).textEllipse,false);
-  console.log(`${cases} round hardware cases and ${ovalCases} wide/upright oval layouts passed, including curved containment, offsets, hardware clearance and prompt scope.`);
+  console.log(`${cases} round hardware cases, ${ovalHardwareCases} oval fixing/clearance cases and ${ovalCases} wide/upright oval layouts passed.`);
 } finally {await renderer.close();}

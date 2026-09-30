@@ -36,8 +36,20 @@ export function getFixingGeometry(state: PlaqueState) {
   const borderedFixingInset = state.fixing === Fixing.Caps
     ? borderedCapInset
     : screwBorderInset + fixingRadius + fixingBorderClearance;
-  const holeInset = state.border
+  let holeInset = state.border
     ? borderedFixingInset
     : state.fixing === Fixing.Screws ? 7 : 10 + (state.capSize === 15 ? 2 : 0);
+  if (state.shape === Shape.Oval && (state.fixing === Fixing.Caps || state.fixing === Fixing.Screws)) {
+    // At a shallow oval's pointed ends, clearing the horizontal edge alone
+    // does not keep a round cap on the metal. Fit its full disc plus 2mm of
+    // edge clearance; the limiting point can be above/below the centreline.
+    const rx = state.width / 2;
+    const ry = state.height / 2;
+    const radius = fixingRadius + 2;
+    const curvedInset = rx > ry && radius > ry * ry / rx
+      ? rx - Math.sqrt(Math.max(0, (rx * rx - ry * ry) * (1 - radius * radius / (ry * ry))))
+      : radius;
+    holeInset = Math.max(holeInset, curvedInset);
+  }
   return { isScallopedBorder, borderOuterInset, borderInnerInset, borderStrokeScale, fixingBorderClearance, screwRadius, capRadius, fixingRadius, holeInset };
 }
