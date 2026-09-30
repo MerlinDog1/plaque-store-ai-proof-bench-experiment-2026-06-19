@@ -719,7 +719,7 @@ export const Controls: React.FC<Props> = ({
     if (key === 'fixing' && value === Fixing.Screws) {
       onChange({
         fixing: value,
-        fixingHoleCount: state.fixing === Fixing.Screws ? state.fixingHoleCount : isBenchPlaque ? 2 : 4,
+        fixingHoleCount: state.shape !== Shape.Rect ? 2 : state.fixing === Fixing.Screws ? state.fixingHoleCount : isBenchPlaque ? 2 : 4,
       });
       return;
     }
@@ -1369,8 +1369,8 @@ export const Controls: React.FC<Props> = ({
                             {isBenchPlaque ? 'Bench plaque' : 'Visible screws'}
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          {[2, 4].map((count) => (
+                        <div className={`grid ${state.shape === Shape.Rect ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                          {(state.shape === Shape.Rect ? [2, 4] : [2]).map((count) => (
                             <button
                               key={count}
                               onClick={() => update('fixingHoleCount', count)}
@@ -1381,7 +1381,7 @@ export const Controls: React.FC<Props> = ({
                           ))}
                         </div>
                         <div className="mt-2 text-xs font-bold leading-5 text-[#6a746d]">
-                          Choose two end holes or four corner screws. Production artwork marks 3mm drill holes; the proof shows the 5mm domed screw heads.
+                          {state.shape === Shape.Rect ? 'Choose two end holes or four corner screws.' : 'Round plaques have two screws, one on each side.'} Production artwork marks 3mm drill holes; the proof shows the 5mm domed screw heads.
                         </div>
                       </div>
                     )}

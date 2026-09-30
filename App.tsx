@@ -13,7 +13,7 @@ import { createManualTypography, readSvgInscription } from './services/manualTyp
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
 import { DEFAULT_PRODUCT_SLUG, DeliveryAddress, MockOrder, ProductFamily, SiteView, getLandingPageBySlug, getPlaqueSummaryTitle, getProductBySlug, makeMockOrder, productFamilies, seoLandingPages } from './services/commerce';
-import { isBenchPlaqueFormat } from './services/plaqueRules';
+import { isBenchPlaqueFormat, normalizeCurvedFixings } from './services/plaqueRules';
 import { BENCH_SAFE_MARGIN_PERCENT } from './services/safeMargin';
 import {
   decodeInlineProofResumeToken,
@@ -405,6 +405,7 @@ const App: React.FC = () => {
         const restoredWording = proofSession.wording || '';
         const restoredGuidance = proofSession.metadata?.inscriptionGuidance || '';
 
+        Object.assign(restoredState, normalizeCurvedFixings(restoredState));
         setState(restoredState);
         setInscriptionPrompt(restoredWording);
         setInscriptionGuidance(restoredGuidance);
@@ -468,6 +469,7 @@ const App: React.FC = () => {
           throw new Error('Your saved design is not available in this browser. Please reopen the return link in your proof PDF.');
         }
         const restoredWording = order.inscription || '';
+        Object.assign(restoredState, normalizeCurvedFixings(restoredState));
         setState(restoredState);
         setInscriptionPrompt(restoredWording);
         setInscriptionGuidance('');
@@ -529,7 +531,7 @@ const App: React.FC = () => {
     setProofSaved(false);
     setBasketAdded(false);
     setState(prev => {
-      const next = { ...prev, ...changes };
+      const next = normalizeCurvedFixings({ ...prev, ...changes });
       if (changes.wood === true) {
         next.woodEdge = 'bevel';
       }
@@ -746,7 +748,7 @@ const App: React.FC = () => {
         state.designStyle,
         null,
         (phase) => setGenerationPhase(phase),
-        { width: inscriptionBox.textW, height: inscriptionBox.textH },
+        { width: inscriptionBox.textW, height: inscriptionBox.textH, ellipse: inscriptionBox.textEllipse },
         getInscriptionContext(effectivePrompt),
         TypographyEngine.GeminiAuthored
       );
@@ -856,7 +858,7 @@ const App: React.FC = () => {
       const result = await editPlaqueTypography({
         inscription: inscriptionPrompt, instruction: instruction.trim(), currentSvgContent: state.generatedSvgContent,
         width: state.width, height: state.height, shape: state.shape, designStyle: state.designStyle,
-        inscriptionBox: { width: box.textW, height: box.textH }, inscriptionContext: getInscriptionContext(inscriptionPrompt),
+        inscriptionBox: { width: box.textW, height: box.textH, ellipse: box.textEllipse }, inscriptionContext: getInscriptionContext(inscriptionPrompt),
         onPhaseChange: setGenerationPhase,
       });
       const latest = currentLayoutRef.current;
@@ -1137,7 +1139,7 @@ const App: React.FC = () => {
     setState(prev => {
       const next = {
         ...PROOF_BENCH_INITIAL_STATE,
-        ...product.preset,
+        ...normalizeCurvedFixings(product.preset),
         generatedSvgContent: null,
         aiReasoning: null,
         conceptImageUrl: null,

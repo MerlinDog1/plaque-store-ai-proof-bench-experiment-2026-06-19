@@ -17,6 +17,7 @@
     "check:fixings-border-ui": "node scripts/check-fixings-border-ui.cjs",
     "check:curved-scallop-border": "node scripts/check-curved-scallop-border.cjs",
     "check:preview-geometry": "node scripts/check-preview-geometry.cjs",
+    "check:circle-plaques": "node scripts/check-circular-plaques.mjs",
     "check:small-border-stroke": "node scripts/check-small-border-stroke.cjs",
     "check:small-fixings": "node scripts/check-small-fixings.cjs",
     "check:gemini": "node scripts/check-gemini-authored.cjs",

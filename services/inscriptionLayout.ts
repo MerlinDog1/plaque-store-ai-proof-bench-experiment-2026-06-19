@@ -1,6 +1,6 @@
 import { BorderStyle, Fixing, MemorialImagePlacement, PlaqueState, Shape } from "../types";
 import { getFixingGeometry } from "./fixingGeometry";
-import { getSafeMarginsMm } from "./safeMargin";
+import { getSafeMarginsMm, getSafeMarginPercent } from "./safeMargin";
 
 export interface InscriptionLayout {
   textCx: number;
@@ -12,6 +12,7 @@ export interface InscriptionLayout {
   artW: number;
   artH: number;
   profile: "text-only" | "balanced" | "text-heavy" | "art-focus";
+  textEllipse?: boolean;
 }
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -109,6 +110,14 @@ export function getInscriptionLayout(
     shape: state.shape,
     safeMargin: state.safeMargin,
   });
+  const circularText = state.shape === Shape.Circle && !state.memorialImageEnabled;
+  if (circularText) {
+    // The preview now fits individual lines to a circular boundary, so there is
+    // no need to squeeze every line into the old 68%-wide inscribed square.
+    const radialMargin = Math.min(state.width, state.height) * getSafeMarginPercent(state.safeMargin) / 100;
+    safeMargin.x = radialMargin;
+    safeMargin.y = radialMargin;
+  }
   // Reserve a full-height side band so no line can meet a cap or screw,
   // including existing layouts, four-hole variants and side-by-side artwork.
   if (state.shape !== Shape.Heart && (state.fixing === Fixing.Caps || state.fixing === Fixing.Screws)) {
@@ -131,7 +140,7 @@ export function getInscriptionLayout(
       textW: Math.min(safeW, state.width * 0.52), textH: Math.min(safeH, state.height * 0.28),
       artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only",
     };
-    return applyHardwareTextClearance(state, { textCx: cx, textCy: cy, textW: safeW, textH: safeH, artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only" });
+    return applyHardwareTextClearance(state, { textCx: cx, textCy: cy, textW: safeW, textH: safeH, artX: 0, artY: 0, artW: 0, artH: 0, profile: "text-only", textEllipse: circularText });
   }
 
   const ratio = state.width / Math.max(1, state.height);

@@ -1,4 +1,20 @@
-import { BorderStyle, Fixing, PlaqueState } from "../types";
+import { BorderStyle, Fixing, PlaqueState, Shape } from "../types";
+import { isBenchPlaqueFormat } from './plaqueRules';
+
+// Shared by the SVG proof/export and 3D preview, including restored old proofs.
+export function getFixingPositions(state: PlaqueState) {
+  if (state.shape === Shape.Heart || ![Fixing.Screws, Fixing.Caps].includes(state.fixing)) return [];
+  const { holeInset } = getFixingGeometry(state);
+  const offset = state.wood ? 12.5 : 0;
+  const count = state.fixingHoleCount ?? (isBenchPlaqueFormat(state.width, state.height, state.shape) ? 2 : 4);
+  const corners = state.shape === Shape.Rect && (state.fixing === Fixing.Screws ? count === 4 : state.height >= 80);
+  const left = offset + holeInset;
+  const right = offset + state.width - holeInset;
+  if (!corners) return [{ x: left, y: offset + state.height / 2 }, { x: right, y: offset + state.height / 2 }];
+  const top = offset + holeInset;
+  const bottom = offset + state.height - holeInset;
+  return [{ x: left, y: top }, { x: right, y: top }, { x: right, y: bottom }, { x: left, y: bottom }];
+}
 
 // Shared by the visible hardware and inscription clearance, in millimetres.
 export function getFixingGeometry(state: PlaqueState) {

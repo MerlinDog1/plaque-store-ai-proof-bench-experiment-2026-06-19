@@ -1,7 +1,8 @@
 import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { BorderStyle, PlaqueState, Shape, Fixing, Material, TEXT_COLOR_VALUES, MemorialImageMethod, DesignStyle, MemorialImageShape } from '../types';
-import { getFixingGeometry } from '../services/fixingGeometry';
+import { getFixingGeometry, getFixingPositions } from '../services/fixingGeometry';
 import { getInscriptionLayout } from '../services/inscriptionLayout';
+import { fitTextToEllipse } from '../services/circularTextFit';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { sanitizeSvgMarkup } from '../services/svgSanitizer.mjs';
 
@@ -214,31 +215,11 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const plateFill = state.reverseEtch ? engravedFill : fillUrl;
 
   // Calculations for holes/caps
-  const { isScallopedBorder, borderOuterInset, borderInnerInset, borderStrokeScale, fixingBorderClearance, screwRadius, capRadius, fixingRadius, holeInset } = getFixingGeometry(state);
-  const sideMountedFixings = state.shape !== Shape.Rect || state.height < 80;
+  const { isScallopedBorder, borderOuterInset, borderInnerInset, borderStrokeScale, fixingBorderClearance, screwRadius, capRadius, fixingRadius } = getFixingGeometry(state);
   const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
-  const requestedHoleCount = state.fixing === Fixing.Screws
-    ? state.fixingHoleCount ?? (isBenchPlaque ? 2 : 4)
-    : 2;
-
-  let holes: { x: number, y: number }[] = [];
+  const holes = getFixingPositions(state);
   const cx = offset + state.width / 2;
   const cy = offset + state.height / 2;
-
-  // Calculate fixing positions
-  if (hasVisibleFixings && !isHeartPlaque) {
-    const useCornerFixings = requestedHoleCount === 4 || (state.fixing === Fixing.Caps && !sideMountedFixings);
-    if (useCornerFixings) {
-      const x1 = offset + holeInset;
-      const x2 = offset + state.width - holeInset;
-      const y1 = offset + holeInset;
-      const y2 = offset + state.height - holeInset;
-      holes = [{ x: x1, y: y1 }, { x: x2, y: y1 }, { x: x2, y: y2 }, { x: x1, y: y2 }];
-    } else {
-      const xOffset = state.width / 2 - holeInset;
-      holes = [{ x: cx - xOffset, y: cy }, { x: cx + xOffset, y: cy }];
-    }
-  }
 
   // --- Auto-Scaling Text Logic ---
   const textGroupRef = useRef<SVGGElement>(null);
@@ -286,12 +267,19 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const fittedTextScale = constrainTextFit
     ? Math.min(1, Math.max(0.1, state.inscriptionScale))
     : Math.max(0.1, state.inscriptionScale);
-  const fittedOffsetX = constrainTextFit
+  const requestedOffsetX = constrainTextFit
     ? Math.max(-layout.textW * (1 - fittedTextScale) / 2, Math.min(layout.textW * (1 - fittedTextScale) / 2, state.inscriptionOffsetX))
     : state.inscriptionOffsetX;
-  const fittedOffsetY = constrainTextFit
+  const requestedOffsetY = constrainTextFit
     ? Math.max(-layout.textH * (1 - fittedTextScale) / 2, Math.min(layout.textH * (1 - fittedTextScale) / 2, state.inscriptionOffsetY))
     : state.inscriptionOffsetY;
+  // Constrain diagonal dragging as well as each axis; a rectangular clamp can
+  // move a small inscription's centre outside the circle and hide every line.
+  const offsetRadius = Math.hypot(requestedOffsetX / (layout.textW / 2), requestedOffsetY / (layout.textH / 2));
+  const offsetScale = layout.textEllipse && offsetRadius > 0
+    ? Math.min(1, (1 - fittedTextScale) / offsetRadius) : 1;
+  const fittedOffsetX = requestedOffsetX * offsetScale;
+  const fittedOffsetY = requestedOffsetY * offsetScale;
   const artworkX = layout.artX + state.memorialImageOffsetX;
   const artworkY = layout.artY + state.memorialImageOffsetY;
 
@@ -304,7 +292,14 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             // Preserve glyph proportions while filling the inscription box.
             const scaleX = layout.textW / bbox.width;
             const scaleY = layout.textH / bbox.height;
-            const scale = Math.min(scaleX, scaleY, 3.0) * fittedTextScale;
+            let scale = Math.min(scaleX, scaleY, 3.0) * fittedTextScale;
+            if (layout.textEllipse) {
+              const lines = Array.from(textGroupRef.current.querySelectorAll('text')).flatMap(text => {
+                const spans = Array.from(text.querySelectorAll('tspan'));
+                return (spans.length ? spans : [text]).map(line => line.getBBox());
+              });
+              scale = fitTextToEllipse(lines, bbox, layout.textW, layout.textH, scale, fittedOffsetX, fittedOffsetY);
+            }
 
             // Center the text block
             const centerOffsetX = -(bbox.x + bbox.width / 2);
@@ -341,7 +336,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [activeStep, state.designStyle, state.generatedSvgContent, state.width, state.height, state.shape, state.safeMargin, state.memorialImageMethod, state.memorialImagePreviewUrl, state.memorialImageSourceUrl, state.memorialImageSvg, state.inscriptionScale, fittedTextScale, layout.textW, layout.textH]);
+  }, [activeStep, state.designStyle, state.generatedSvgContent, state.width, state.height, state.shape, state.safeMargin, state.memorialImageMethod, state.memorialImagePreviewUrl, state.memorialImageSourceUrl, state.memorialImageSvg, state.inscriptionScale, fittedTextScale, fittedOffsetX, fittedOffsetY, layout.textW, layout.textH, layout.textEllipse]);
 
 
   // --- Border Path Logic ---

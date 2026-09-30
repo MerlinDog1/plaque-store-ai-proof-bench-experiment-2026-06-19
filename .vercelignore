@@ -6,6 +6,7 @@ dist/
 data/
 logs/
 output/
+tmp/
 test-results/
 playwright-report/
 *.log

@@ -418,6 +418,7 @@ function preserveExactStructuredWording(layout: StructuredTextLayout, inscriptio
 export interface InscriptionBox {
   width: number;
   height: number;
+  ellipse?: boolean;
 }
 
 export interface InscriptionContext {

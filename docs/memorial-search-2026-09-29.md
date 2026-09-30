@@ -43,3 +43,5 @@ Git publishing review: the inherited `git.deploymentEnabled=false` guard is reta
 Deployed source `febbedd49335a5625930099c7c0557e0d95461ec`, Vercel `dpl_2nWrgrqHCDEMkhAe1HRTpVnDRJyg`. Built as a production candidate, inspected its HTML through authenticated Vercel curl, then promoted. Canonical and www aliases independently resolve to that READY deployment and source. Public memorial HTML contains the new wording section and the expected JS/CSS build hashes. Cloud build passed.
 
 Hosted synthetic proof save/read confirmed target Supabase and private R2 storage with restored SVG content. The initial assertion compared unnormalised SVG whitespace; corrected comparison passed. Both synthetic fixtures and their scoped artwork were removed. No emails, generation, order or payment. Previous compatible deployment: `dpl_J7N13RYDfRXiY1k7VpfLRyZC7JL1`.
+
+Search Console accepted the memorial URL's indexing request on 30 September and confirmed that it entered the priority crawl queue. This is a submission confirmation, not a ranking or completed-recrawl claim.
