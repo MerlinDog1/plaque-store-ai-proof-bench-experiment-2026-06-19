@@ -3,7 +3,9 @@
 Branch: `codex/oval-plaque-layout`.
 Application commit: `7d23d6364b4259237eab2b88cad5be8480516c49` (includes the original oval text change `bc50c16274b2b8cc49a02e44eccc1facb2d68033`).
 Based on the published circle fixes and release handover `e6fe2337c2f4744987a751b5ea7eab400033936f`.
-Status: implemented and checked locally; not deployed.
+Status: live on 30 September 2026 following the owner's explicit “publish” instruction.
+Deployed source: `9f8e5d923e0793e7f0344455b7a54cab8c33605b`.
+Production deployment: `dpl_8eteXnsXvozn6fbmfswmpjd2dTHh`.
 
 ## Changes
 
@@ -29,8 +31,18 @@ The previous circle release already gave ovals two side fixings, legacy four-hol
 
 No order, payment, email or saved customer proof was created. This pass does not claim a full checkout or PDF-download rehearsal.
 
-## Release next step
+## Production verification
 
-Request explicit publication approval under AGENTS.md after showing the completed oval preview. Before deployment, fetch/reconcile any newer work and independently inspect the live aliases. The last verified production release is the circle deployment `dpl_AJCwLEfhRCrqzeygG5D9Dd5a2ykr`, source `f7edbf8b15cfce428e2ad6f0d995b5505e7d34d8`.
+- Fetched remote branches, confirmed a clean pushed worktree and independently checked the circle release was still live before publishing. No newer production work was displaced.
+- Vercel cloud build and API boot checks passed. Authenticated candidate content/assets passed before promotion. A local CLI request initially failed to start because of Windows virtual-memory pressure; rerunning with a 256MB heap and 4MB semi-space succeeded. This did not affect the cloud build or require a production configuration change.
+- Canonical and www independently resolve to the READY deployment and source SHA above. Public memorial HTML retains its content and references `index-DWladSuR.js` / `index-B3iHDJ2L.css`; the 3D build asset is `ThreePlaquePreview-BU77qS-a.js`.
+- Hosted synthetic proof save/read passed through Supabase `fygweiynqkglmjwqlouc` and private R2. The stored record held an R2 reference, and its public API restored the SVG. The synthetic record and scoped artwork were cleaned up.
+- Public browser: a restored legacy four-hole 600 × 50mm oval rendered two 15mm caps with centres inset 23.469mm, matching the corrected geometry. The 300 × 200mm proof rendered ten text lines with maximum normalised corner radius 0.811 and no horizontal overflow. Only the two-hole screw option was offered.
+- Live 3D preview loaded its SVG texture with outlined fonts and was visually checked. No console errors observed. Published screenshots are retained outside Git at `../oval-published.png` and `../oval-shallow-published.png`.
+- No additional model call, order, payment or email was made during publication. Production environment and disabled Git auto-deployment were preserved. Full checkout/PDF browser coverage remains outside this release check.
 
-Retain the migrated Supabase/private R2 environment. On release, verify hosted proof save/read and public aliases/assets. Keep Git auto-deployment disabled; a push to this task branch does not publish it.
+## Rollback and follow-up
+
+The previous compatible production release is circle deployment `dpl_AJCwLEfhRCrqzeygG5D9Dd5a2ykr`, source `f7edbf8b15cfce428e2ad6f0d995b5505e7d34d8`. Retain the migrated Supabase/private R2 environment and compatible artwork readers if reverting application code. Do not deploy the old original checkout.
+
+Existing inscriptions need Regenerate for the revised oval line wrapping; legacy fixing counts and the physical cap clearance are corrected automatically.

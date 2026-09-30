@@ -195,3 +195,14 @@ legacy state normalisation and shared SVG/3D positioning are retained.
 typecheck/build and a local restored-proof/cap-to-screw browser check passed.
 See docs/oval-plaques-2026-09-30.md. Pushed for review; publication approval
 and hosted release verification remain the next step.
+
+## Oval release — 30 September 2026
+
+Owner explicitly requested publication. Branch `codex/oval-plaque-layout`,
+deployed source `9f8e5d923e0793e7f0344455b7a54cab8c33605b`, is live at
+`dpl_8eteXnsXvozn6fbmfswmpjd2dTHh`; canonical and www independently READY.
+Cloud build, authenticated candidate/public assets, live oval text/fixings/3D
+and hosted synthetic proof save/read passed; synthetic DB/R2 fixtures cleaned.
+Supersedes the review-only oval entries above. Existing inscriptions need
+Regenerate for new wrapping. See docs/oval-plaques-2026-09-30.md for release
+checks, the recovered local CLI memory failure, remaining coverage and rollback.
