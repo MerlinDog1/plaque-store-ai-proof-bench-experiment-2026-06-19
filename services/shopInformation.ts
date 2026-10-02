@@ -6,7 +6,7 @@ export const businessContact = {
   phoneHref: 'tel:+447903379839',
   address: '4 Dunkirk Avenue, Kettering, NN14 2PL, United Kingdom',
   updated: '28 June 2026',
-  privacyUpdated: '10 July 2026',
+  privacyUpdated: '2 October 2026',
 };
 
 export const productionTiming = {

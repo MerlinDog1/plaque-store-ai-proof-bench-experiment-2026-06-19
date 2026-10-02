@@ -502,7 +502,7 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
       { title: 'Data collected', copy: 'Customer name, contact details, delivery details, plaque wording, proof details and order history may be collected to fulfil orders. Cookieless analytics may also process the visit time, redacted page URL, referrer, coarse location, device type, browser and operating system.' },
       { title: 'Why it is used', copy: 'Data is used to create and save plaque proofs, take payment, send order emails, prepare production files, arrange delivery, provide customer support, understand aggregate page usage, and keep accounting and legal records.' },
       { title: 'Service providers', copy: 'We use trusted providers to run the service, including Stripe for payments, Vercel for hosting and cookieless web analytics, Supabase for order storage, Resend for transactional email, and delivery providers where needed.' },
-      { title: 'Web analytics', copy: 'We use Vercel Web Analytics to understand aggregated page usage. Proof tokens, order identifiers and Stripe session identifiers are removed from analytics URLs before events are sent.' },
+      { title: 'Web analytics', copy: 'We use Vercel Web Analytics and Google Analytics to understand visits to our public pages. Google Analytics may use cookies and process information about your browser, device and visits. Our Google Analytics setup excludes private proof/order links and admin pages at page load. Proof tokens, order identifiers and Stripe session identifiers are removed from Vercel analytics URLs before events are sent.' },
       { title: 'How long data is kept', copy: 'Order information is kept for as long as needed for production, support, accounting and legal record keeping. Proof artwork may be retained so we can remake or support the order.' },
       { title: 'Customer rights', copy: `You can ask to access, correct or delete personal data where the law allows by emailing ${businessContact.email}.` },
     ],
@@ -514,7 +514,7 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     sections: [
       { title: 'Essential storage', copy: 'The site may use cookies or local storage to remember proof progress, admin access and checkout state. These are needed for the service to work properly.' },
       { title: 'Payments', copy: 'Stripe may use cookies and similar technologies when processing secure checkout and fraud prevention.' },
-      { title: 'Analytics and marketing', copy: 'Vercel Web Analytics is cookieless. We will not add non-essential analytics or advertising cookies without the appropriate consent controls.' },
+      { title: 'Analytics and marketing', copy: 'Vercel Web Analytics is cookieless. Google Analytics and Google Ads may use cookies and similar technologies to measure website visits and advertising performance. You can manage cookies through your browser settings.' },
       { title: 'Managing cookies', copy: 'You can block or delete cookies in your browser settings, but some proof, checkout or admin features may stop working correctly.' },
     ],
   },

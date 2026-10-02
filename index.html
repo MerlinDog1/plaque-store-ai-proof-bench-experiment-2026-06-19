@@ -2064,6 +2064,23 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'AW-18288208905');
+    // Keep private proof/order links and admin pages out of GA4.
+    var analyticsUrl = new URL(window.location.href);
+    var privateAnalyticsPage = /^\/(admin|proof|order|checkout)(\/|$)/.test(analyticsUrl.pathname)
+      || ['proof', 'order', 'session_id'].some(function (key) { return analyticsUrl.searchParams.has(key); })
+      || ['admin', 'checkout', 'order'].includes(analyticsUrl.searchParams.get('view'));
+    if (!privateAnalyticsPage) {
+      analyticsUrl.hash = '';
+      Array.from(analyticsUrl.searchParams.keys()).forEach(function (key) {
+        if (!['view', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].includes(key)) {
+          analyticsUrl.searchParams.delete(key);
+        }
+      });
+      gtag('config', 'G-FKP17EXNBX', {
+        page_location: analyticsUrl.toString(),
+        page_referrer: document.referrer ? new URL(document.referrer).origin : ''
+      });
+    }
   </script>
 </head>
 
