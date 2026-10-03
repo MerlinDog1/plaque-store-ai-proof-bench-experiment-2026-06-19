@@ -1,3 +1,5 @@
+import { MetaConsent } from './components/MetaConsent';
+import { trackMetaCheckout } from './services/metaPixel';
 import { LayoutProgress } from './components/LayoutProgress';
 import { DesignRequest } from './components/DesignRequest';
 import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
@@ -1278,6 +1280,7 @@ const App: React.FC = () => {
           },
         };
         if (checkoutOrder.stripeSimulation.checkoutUrl && checkoutOrder.stripeSimulation.uiMode !== 'embedded') {
+          trackMetaCheckout(checkoutOrder);
           persistCheckoutOrder(checkoutOrder);
           return checkoutOrder;
         }
@@ -1288,6 +1291,7 @@ const App: React.FC = () => {
       console.error('Stripe checkout session could not be created.', error);
       throw error;
     }
+    trackMetaCheckout(checkoutOrder);
     persistCheckoutOrder(checkoutOrder);
     return checkoutOrder;
   };
@@ -1558,6 +1562,7 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+      {currentView !== 'admin' && <MetaConsent />}
 
       {isGeneratingLayout && <LayoutProgress phase={generationPhase} />}
       <div className="no-print">

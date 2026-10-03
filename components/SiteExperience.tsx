@@ -515,6 +515,7 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
       { title: 'Essential storage', copy: 'The site may use cookies or local storage to remember proof progress, admin access and checkout state. These are needed for the service to work properly.' },
       { title: 'Payments', copy: 'Stripe may use cookies and similar technologies when processing secure checkout and fraud prevention.' },
       { title: 'Analytics and marketing', copy: 'Vercel Web Analytics is cookieless. Google Analytics and Google Ads may use cookies and similar technologies to measure website visits and advertising performance. You can manage cookies through your browser settings.' },
+      { title: 'Facebook advertising', copy: 'With your permission, Meta Pixel measures public-page visits and successful starts of live Stripe checkout. We send checkout value and currency, not your inscription, name, email or proof. Meta may process browser and device information. Use Facebook cookie preferences at the foot of the page to allow or withdraw consent. Private proof and order links are excluded.' },
       { title: 'Managing cookies', copy: 'You can block or delete cookies in your browser settings, but some proof, checkout or admin features may stop working correctly.' },
     ],
   },
