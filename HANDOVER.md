@@ -195,3 +195,6 @@ legacy state normalisation and shared SVG/3D positioning are retained.
 typecheck/build and a local restored-proof/cap-to-screw browser check passed.
 See docs/oval-plaques-2026-09-30.md. Pushed for review; publication approval
 and hosted release verification remain the next step.
+
+## Generic cookie popup — 4 October 2026
+Owner requested generic popup disappearing after selection. Source 75a8cab on codex/generic-cookie-popup deployed READY dpl_G6u7WTKDbg4SadWj9vJ4S77M4w9Q to instaplaque.co.uk. Accept/Reject remove popup entirely; existing consent storage preserved. Cookie settings available on /cookies, policy instructions updated. Meta consent/checkout regression and local/cloud builds passed; local and public mobile-browser checks proved accept/reject dismissal, reload persistence and reopen/revoke. No order/payment/email. Other analytics unchanged. Prior deployment dpl_Fpfz2aemHnvnxT7CTEogF3eC9STK is code rollback.
