@@ -2,7 +2,10 @@
 
 ## Status
 
-Prepared and verified locally on `codex/layout-api-timeout`. **Not deployed.**
+**Deployed and live-verified after the owner's explicit release request.**
+Branch `codex/layout-api-timeout`, deployed source
+`b50123bb95087e360ca8c66d03aa5cfc1c4c0e9f` (application `d22771b`).
+Deployment `dpl_FR2heHpEJmvjoS7eP4GwGAf5nRKC` is READY on canonical/www.
 Based on `b65f997` (the `75a8cab` live application plus its release notes).
 The separate `codex/admin-list-timeout` changes are not included.
 
@@ -62,13 +65,32 @@ Raw cloud logs remain private; no customer wording is included here.
 
 ## Release and rollback
 
-Owner must request the production release. Before releasing, reconcile the live
-alias again and preserve any later source changes. Do not accidentally include
-or discard the separately prepared admin fix. Deploy this reviewed source using
-the existing InstaPlaque project, then inspect the emitted function duration,
-canonical/www aliases and an actual hosted synthetic text-layout flow.
+Owner requested deployment on 7 October 2026. The live alias was reconciled with
+the reviewed base before release. The production candidate built successfully,
+was inspected and health-checked, then promoted. Independently verified canonical
+and www aliases point to READY deployment `dpl_FR2heHpEJmvjoS7eP4GwGAf5nRKC`.
+Vercel deployment metadata records the reviewed source SHA and the actual
+`api/index.mjs` function configuration with `maxDuration: 120`.
 
-No production deployment, database write/migration, order, payment, customer
-email or PIM change was made by this task. The compatible previous deployment is
+The real hosted browser test used only synthetic community-garden wording:
+
+- Three real model responses returned HTTP 200: proofreading 3.939s,
+  initial composition 35.625s, and the existing layout-check repair 24.275s.
+  This was not a first-pass layout acceptance; the repair succeeded. The
+  35.625-second request demonstrably survived the previous 30-second cutoff.
+- Finished eight-line proof preserved the editor's wording and original dates;
+  all lettering stayed inside the face. No local fallback was used.
+- Phone and desktop (390/1440px) checks passed without overflow or page errors;
+  the actual rendered proof was visually inspected. External analytics were
+  blocked during QA (one expected blocked-resource console warning).
+- No customer save, order, payment or email endpoint was attempted. Three model
+  calls were made through the existing service; no new provider/billing setting.
+- Public Gemini health passed and the hosted JavaScript matches the tested build
+  byte-for-byte. The subsequent continuation rechecked the completed results and
+  aliases, without a second deployment or another generation.
+
+All browser/test jobs closed. No database write/migration, order, payment,
+customer email or PIM change was made. The admin-list fix remains on its separate
+branch and is **not** included in this release. The compatible previous deployment is
 `dpl_G6u7WTKDbg4SadWj9vJ4S77M4w9Q`; code-only rollback would also restore the
 old 30-second limit. Keep existing Supabase/private R2 configuration unchanged.

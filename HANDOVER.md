@@ -213,3 +213,17 @@ reconciliation and hosted verification remain. The separately pushed
 `codex/admin-list-timeout` is NOT part of this branch and remains undeployed.
 
 Verified application/test/report commit: `d22771b35c64431e51549fa7927339addd463f5d`. All task test servers and browsers closed.
+
+## Text-layout timeout release — 7 October 2026
+
+Owner explicitly requested deployment. Source
+`b50123bb95087e360ca8c66d03aa5cfc1c4c0e9f` deployed and promoted to
+`dpl_FR2heHpEJmvjoS7eP4GwGAf5nRKC`; canonical/www independently READY. This
+supersedes the not-deployed status above. Cloud build/health passed and deployment
+metadata confirms 120-second function duration. Hosted synthetic proofreading
+and composition/repair returned 200 in 3.939s/35.625s/24.275s; final eight-line
+proof passed exact-wording/dates, face bounds and 390/1440px browser checks.
+One existing layout repair was required; no local fallback. Hosted JS hash matches
+the tested build. No customer/order/DB/payment/email/PIM change. All jobs closed.
+`codex/admin-list-timeout` remains separate and undeployed. See the
+[release report](docs/layout-api-timeout-2026-10-07.md) for rollback and evidence.
