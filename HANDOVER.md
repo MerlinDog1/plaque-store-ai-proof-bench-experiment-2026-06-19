@@ -1,5 +1,15 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Admin list incident — 7 October 2026 (not deployed)
+
+`codex/admin-list-timeout` fixes the confirmed order-list database timeout by
+reading lightweight summaries and loading exact artwork only via the existing
+single-order route. The primary records remain present. Read-only live summary
+query, synthetic API regression, mobile/desktop UI checks, changed-graph typecheck
+and build passed. Production is unchanged at `dpl_G6u7WTKDbg4SadWj9vJ4S77M4w9Q`.
+See [the incident report](docs/admin-order-list-timeout-2026-10-07.md) for evidence,
+scope and the remaining owner-authorised deployment step.
+
 26 September 2026; housekeeping only. No deployment, runtime restart, database/storage/payment change, customer message or paid generation performed.
 
 ## Verified sources

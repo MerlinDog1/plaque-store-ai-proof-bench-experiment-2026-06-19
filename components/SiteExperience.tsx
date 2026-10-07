@@ -2009,8 +2009,11 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 function AdminPage() {
   const [adminSection, setAdminSection] = useState<'orders' | 'search'>('orders');
   const [orders, setOrders] = useState<PaidOrder[]>([]);
+  const [ordersLoaded, setOrdersLoaded] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedOrderDetail, setSelectedOrderDetail] = useState<PaidOrder | null>(null);
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const [detailAttempt, setDetailAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [adminError, setAdminError] = useState<string | null>(null);
   const [authConfig, setAuthConfig] = useState<AdminAuthConfig | null>(null);
@@ -2023,7 +2026,7 @@ function AdminPage() {
   const adminProofSvgRef = useRef<SVGSVGElement | null>(null);
   const adminStoredProofSvgRef = useRef<SVGSVGElement | null>(null);
   const selectedSummaryOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
-  const selectedOrder = selectedOrderDetail?.id === selectedSummaryOrder?.id ? selectedOrderDetail : selectedSummaryOrder;
+  const selectedOrder = selectedOrderDetail?.id === selectedSummaryOrder?.id ? selectedOrderDetail : null;
   const canRenderSelectedProof = hasRenderablePlaqueState(selectedOrder?.plaqueState);
   const selectedStoredProofSvg = storedProofSvgForOrder(selectedOrder);
   const canDownloadSelectedProductionArtwork = Boolean(canRenderSelectedProof || selectedStoredProofSvg);
@@ -2080,6 +2083,7 @@ function AdminPage() {
       if (!response.ok) throw new Error(payload.error || `Could not load orders (${response.status}).`);
       const nextOrders = payload.orders || [];
       setOrders(nextOrders);
+      setOrdersLoaded(true);
       setSelectedId((current) => nextOrders.some((order: PaidOrder) => order.id === current)
         ? current
         : nextOrders[0]?.id || null);
@@ -2137,6 +2141,7 @@ function AdminPage() {
     }
     let cancelled = false;
     setSelectedOrderDetail(null);
+    setDetailError(null);
     const loadSelectedOrder = async () => {
       try {
         const response = await fetch(`/api/admin/orders/${encodeURIComponent(selectedId)}`, { credentials: 'same-origin' });
@@ -2144,14 +2149,14 @@ function AdminPage() {
         if (!response.ok) throw new Error(payload.error || `Could not load order detail (${response.status}).`);
         if (!cancelled) setSelectedOrderDetail(payload.order);
       } catch (error) {
-        console.warn('Admin order detail could not be loaded.', error);
+        if (!cancelled) setDetailError('Could not load this order’s artwork and details.');
       }
     };
     loadSelectedOrder();
     return () => {
       cancelled = true;
     };
-  }, [selectedId]);
+  }, [selectedId, detailAttempt]);
 
   const loginAdmin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -2179,6 +2184,7 @@ function AdminPage() {
     await fetch('/api/admin/session', { method: 'DELETE', credentials: 'same-origin' }).catch(() => null);
     setAdminAuthenticated(false);
     setOrders([]);
+    setOrdersLoaded(false);
     setSelectedId(null);
     setSelectedOrderDetail(null);
   };
@@ -2251,7 +2257,7 @@ function AdminPage() {
             <h1>{adminSection === 'orders' ? 'Orders' : 'Search position'}</h1>
           </div>
           <div className="admin-console__head-actions">
-            <span>{adminSection === 'orders' ? `${orders.length} orders` : '25 searches'}</span>
+            <span>{adminSection === 'orders' ? (ordersLoaded ? `${orders.length} orders` : loading ? 'Loading orders…' : 'Orders unavailable') : '25 searches'}</span>
             {authConfig?.operational && authConfig.authRequired && adminAuthenticated && (
               <button type="button" className="admin-console__ghost-button" onClick={logoutAdmin}>
                 Lock
@@ -2278,6 +2284,7 @@ function AdminPage() {
           </form>
         )}
         {adminError && <div className="commerce-warning">{adminError}</div>}
+        {adminError && adminAuthenticated && !loading && <button type="button" className="admin-console__ghost-button" onClick={loadOrders}>Retry loading orders</button>}
         {loading && <div className="commerce-success">Loading orders...</div>}
         {authConfig?.operational === false || (authConfig?.authRequired && !adminAuthenticated) ? null : (
           <>
@@ -2291,12 +2298,12 @@ function AdminPage() {
         </nav>
         {adminSection === 'search' ? <SeoRankTracker /> : (
           <>
-        <div className="admin-console__stats">
+        {ordersLoaded && <div className="admin-console__stats">
           <div><span>Sold today</span><strong>{todayOrders.length}</strong><small>{formatPence(counts.todayRevenue)}</small></div>
           <div><span>This month</span><strong>{monthOrders.length}</strong><small>{formatPence(counts.monthRevenue)}</small></div>
           <div><span>In production</span><strong>{counts.production}</strong><small>{counts.dispatched} dispatched</small></div>
           <div><span>Overdue</span><strong>{counts.overdue}</strong><small>{counts.emails} email events</small></div>
-        </div>
+        </div>}
         <div className="admin-console__filters">
           <input
             type="search"
@@ -2463,13 +2470,19 @@ function AdminPage() {
                 )}
               </React.Fragment>
             ))}
-            {!filteredOrders.length && !loading && (
+            {!filteredOrders.length && !loading && ordersLoaded && (
               <div className="admin-console__empty">
                 <strong>No matching orders.</strong>
                 <span>Adjust search, status or sort controls.</span>
               </div>
             )}
           </div>
+          {selectedSummaryOrder && !selectedOrder && (
+            <div className={detailError ? 'commerce-warning' : 'commerce-success'} role="status">
+              {detailError || 'Loading selected order details…'}
+              {detailError && <button type="button" className="admin-console__ghost-button" onClick={() => setDetailAttempt((attempt) => attempt + 1)}>Retry order details</button>}
+            </div>
+          )}
           {selectedOrder && (
             <AdminDetailBoundary resetKey={`desktop-${selectedOrder.id}-${selectedOrder.updatedAt || ''}`}>
             <article className="admin-console__detail admin-console__detail--desktop">

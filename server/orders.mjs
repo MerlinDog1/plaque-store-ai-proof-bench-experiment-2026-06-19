@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { getSupabaseServiceClient } from "./supabase.mjs";
 import { storeArtwork, loadArtwork } from "./artwork-storage.mjs";
+import { readOrderSummaries } from "./orderSummaries.mjs";
 import { getInternalProductionEmails, sendEmail } from "./email.mjs";
 import {
   sanitizeOrderSvgFields,
@@ -748,6 +749,20 @@ export const listOrders = async () => {
   }
 
   return readLocalOrders();
+};
+
+export const listOrderSummaries = async () => {
+  const supabase = getSupabaseServiceClient();
+  if (!supabase) return (await readLocalOrders()).map(lightweightFallbackOrder);
+  try {
+    const orders = await readOrderSummaries(supabase);
+    if (orders.length) return orders;
+    // Preserve the legacy read path without loading its artwork either.
+    return await readOrderSummaries(supabase, true);
+  } catch (error) {
+    if (!["42P01", "PGRST205"].includes(String(error?.code || "").toUpperCase())) throw error;
+    return readOrderSummaries(supabase, true);
+  }
 };
 
 export const addOrderEvent = async (orderId, event) => {

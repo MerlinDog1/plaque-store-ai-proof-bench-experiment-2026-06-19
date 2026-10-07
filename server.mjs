@@ -68,7 +68,7 @@ const {
   getOrderById,
   isLocalOrderJsonStoreEnabled,
   isPaidCompleteStripeSession,
-  listOrders,
+  listOrderSummaries,
   markOrderPaidFromSession,
   processReviewFollowUps,
   sendAndRecordOrderEmail,
@@ -606,11 +606,15 @@ export const handleRequest = async (req, res) => {
   if (req.method === "GET" && url.pathname === "/api/admin/orders") {
     if (!requireAdminRequest(req, res)) return;
     try {
-      const orders = await listOrders();
+      const orders = await listOrderSummaries();
       sendJson(res, 200, { ok: true, orders: stripHeavyProofPayloads(orders) });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not list orders.";
-      sendJson(res, 500, { error: message });
+      const timedOut = error?.code === "57014";
+      console.error("Admin order list failed", { code: /^[A-Z0-9_]{1,40}$/i.test(error?.code || "") ? error.code : "unknown" });
+      sendJson(res, timedOut ? 503 : 500, {
+        error: timedOut ? "The order list took too long to load. Please retry." : "Could not load orders. Please retry.",
+        code: timedOut ? "order_list_timeout" : "order_list_failed",
+      });
     }
     return;
   }
