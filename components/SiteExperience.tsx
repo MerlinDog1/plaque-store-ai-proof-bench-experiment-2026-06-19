@@ -2025,7 +2025,7 @@ function AdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const adminProofSvgRef = useRef<SVGSVGElement | null>(null);
   const adminStoredProofSvgRef = useRef<SVGSVGElement | null>(null);
-  const selectedSummaryOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
+  const selectedSummaryOrder = orders.find((order) => order.id === selectedId) || null;
   const selectedOrder = selectedOrderDetail?.id === selectedSummaryOrder?.id ? selectedOrderDetail : null;
   const canRenderSelectedProof = hasRenderablePlaqueState(selectedOrder?.plaqueState);
   const selectedStoredProofSvg = storedProofSvgForOrder(selectedOrder);
@@ -2086,7 +2086,7 @@ function AdminPage() {
       setOrdersLoaded(true);
       setSelectedId((current) => nextOrders.some((order: PaidOrder) => order.id === current)
         ? current
-        : nextOrders[0]?.id || null);
+        : null);
     } catch (error) {
       setAdminError(error instanceof Error ? error.message : 'Could not load orders.');
     } finally {
@@ -2135,16 +2135,18 @@ function AdminPage() {
   }, [authConfig, adminAuthenticated]);
 
   useEffect(() => {
-    if (!selectedId) {
+    if (!selectedId || !adminAuthenticated) {
       setSelectedOrderDetail(null);
+      setDetailError(null);
       return;
     }
     let cancelled = false;
+    const controller = new AbortController();
     setSelectedOrderDetail(null);
     setDetailError(null);
     const loadSelectedOrder = async () => {
       try {
-        const response = await fetch(`/api/admin/orders/${encodeURIComponent(selectedId)}`, { credentials: 'same-origin' });
+        const response = await fetch(`/api/admin/orders/${encodeURIComponent(selectedId)}`, { credentials: 'same-origin', signal: controller.signal });
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.error || `Could not load order detail (${response.status}).`);
         if (!cancelled) setSelectedOrderDetail(payload.order);
@@ -2155,8 +2157,9 @@ function AdminPage() {
     loadSelectedOrder();
     return () => {
       cancelled = true;
+      controller.abort();
     };
-  }, [selectedId, detailAttempt]);
+  }, [selectedId, detailAttempt, adminAuthenticated]);
 
   const loginAdmin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -2340,7 +2343,7 @@ function AdminPage() {
             </div>
             {filteredOrders.map((order) => (
               <React.Fragment key={order.id}>
-                <button className={`admin-console__order-row ${selectedOrder?.id === order.id ? 'is-active' : ''}`} onClick={() => setSelectedId(order.id)} role="listitem">
+                <button className={`admin-console__order-row ${selectedId === order.id ? 'is-active' : ''}`} onClick={() => setSelectedId(order.id)} role="listitem">
                   <span>
                     <strong>{order.id}</strong>
                     <small>{getPlaqueSummaryTitle(order.plaqueState, order.productTitle)}</small>
@@ -2477,6 +2480,9 @@ function AdminPage() {
               </div>
             )}
           </div>
+          {ordersLoaded && filteredOrders.length > 0 && !selectedSummaryOrder && (
+            <div className="admin-console__empty">Select an order to load its details and artwork.</div>
+          )}
           {selectedSummaryOrder && !selectedOrder && (
             <div className={detailError ? 'commerce-warning' : 'commerce-success'} role="status">
               {detailError || 'Loading selected order details…'}

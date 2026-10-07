@@ -24,7 +24,9 @@ const { chromium } = require('playwright');
       page.on('pageerror', error => errors.push(error.message));
       await page.addInitScript(() => localStorage.setItem('instaplaque-meta-consent', 'no'));
       let listAttempts = 0; let detailAttempts = 0;
+      const detailRequests = [];
       const order = { id: 'SYNTHETIC-1', customerName: 'Synthetic Customer', customerEmail: 'customer@example.test', status: 'paid', paymentStatus: 'paid', fulfilmentStatus: 'not_started', totalPence: 12345, currency: 'gbp', productTitle: 'Synthetic plaque', inscription: 'Exact synthetic proof', createdAt: '2026-10-07T00:00:00Z', plaqueState: { width: 148, height: 210, material: 'brushed-stainless' }, metadata: {}, emailEvents: [] };
+      const secondOrder = { ...order, id: 'SYNTHETIC-2', customerName: 'Second Customer', inscription: 'Exact second proof' };
       await page.route('**/*', async route => {
         const url = new URL(route.request().url());
         if (url.origin !== base) return route.abort();
@@ -34,10 +36,12 @@ const { chromium } = require('playwright');
         if (url.pathname === '/api/admin/auth-config') payload = { authRequired: true, configured: true, operational: true, status: 'configured' };
         else if (url.pathname === '/api/admin/orders') {
           if (++listAttempts === 1) { status = 503; payload = { error: 'The order list took too long to load. Please retry.' }; }
-          else payload = { ok: true, orders: [order] };
-        } else if (url.pathname === '/api/admin/orders/SYNTHETIC-1') {
+          else payload = { ok: true, orders: [order, secondOrder] };
+        } else if (url.pathname.startsWith('/api/admin/orders/')) {
+          const selected = url.pathname.endsWith('/SYNTHETIC-2') ? secondOrder : order;
+          detailRequests.push(selected.id);
           if (++detailAttempts === 1) { status = 500; payload = { error: 'Synthetic detail failure' }; }
-          else payload = { ok: true, order: { ...order, proofPackage: { visualProofSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 210"><text x="10" y="30">Exact synthetic proof</text></svg>' } } };
+          else payload = { ok: true, order: { ...selected, proofPackage: { visualProofSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 210"><text x="10" y="30">${selected.inscription}</text></svg>` } } };
         }
         return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(payload) });
       });
@@ -47,17 +51,37 @@ const { chromium } = require('playwright');
       assert.equal(await page.getByText('0 orders', { exact: true }).count(), 0);
       assert.equal(await page.getByText('No matching orders.', { exact: true }).count(), 0);
       await page.getByRole('button', { name: 'Retry loading orders' }).click();
-      await page.getByText('1 orders', { exact: true }).waitFor();
+      await page.getByText('2 orders', { exact: true }).waitFor();
+      await page.getByText('Select an order to load its details and artwork.', { exact: true }).waitFor();
+      await page.waitForLoadState('networkidle');
+      assert.equal(detailRequests.length, 0, 'Initial load must not open even the first order');
+      assert.equal(await page.locator('.admin-console__detail').count(), 0);
+      const search = page.getByPlaceholder('Search order, customer, email, postcode or wording');
+      await search.fill('Second Customer');
+      assert.equal(await page.locator('.admin-console__order-row').count(), 1);
+      await search.fill('');
+      await page.locator('.admin-console__filters select').last().selectOption('oldest');
+      await page.waitForLoadState('networkidle');
+      assert.equal(detailRequests.length, 0, 'Search and sorting must not fetch any artwork');
+      await page.locator('.admin-console__order-row').filter({ hasText: 'SYNTHETIC-1' }).click();
       await page.getByRole('button', { name: 'Retry order details' }).waitFor();
+      assert.deepEqual(detailRequests, ['SYNTHETIC-1']);
       assert.equal(await page.locator('.admin-console__detail').count(), 0, 'A summary must not be offered as approved production artwork');
       assert.equal(await page.locator('.admin-console__stats').count(), 1);
       await page.getByRole('button', { name: 'Retry order details' }).click();
       await page.locator('.admin-console__detail:visible').waitFor();
       assert.match(await page.locator('.admin-console__detail:visible').innerText(), /Exact synthetic proof/);
+      assert.deepEqual(detailRequests, ['SYNTHETIC-1', 'SYNTHETIC-1']);
+      await page.locator('.admin-console__order-row').filter({ hasText: 'SYNTHETIC-2' }).click();
+      await page.locator('.admin-console__detail:visible').filter({ hasText: 'Exact second proof' }).waitFor();
+      assert.deepEqual(detailRequests, ['SYNTHETIC-1', 'SYNTHETIC-1', 'SYNTHETIC-2']);
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.getByText('Select an order to load its details and artwork.', { exact: true }).waitFor();
+      assert.equal(detailRequests.length, 3, 'Reload must return to summaries without reopening an order');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
       assert.deepEqual(errors, []);
       await page.close();
-      console.log(`PASS ${width}px: failed list, honest counts, retry, isolated detail failure, exact proof, no overflow or JS errors`);
+      console.log(`PASS ${width}px: no automatic artwork load, search/sort/reload stay lightweight, clicked-order-only requests, retries, exact proofs, no overflow or JS errors`);
     }
   } finally {
     if (browser) await browser.close();
