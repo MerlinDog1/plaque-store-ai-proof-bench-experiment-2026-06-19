@@ -1,5 +1,6 @@
 import { isIP } from "node:net";
 import { PLAQUE_TEXT_MODEL, LEGACY_PLAQUE_TEXT_MODEL } from '../services/aiModels.mjs';
+import { TEXT_GENERATION_TIMEOUT_MS, GENERATION_TIMEOUT_MESSAGE } from '../services/geminiTiming.mjs';
 
 export const MAX_GEMINI_REQUEST_BYTES = 10 * 1024 * 1024;
 
@@ -409,7 +410,54 @@ export const parseGeminiRequestJson = (value) => {
   }
 };
 
+export class GeminiGenerationTimeoutError extends Error {
+  constructor() {
+    super(GENERATION_TIMEOUT_MESSAGE);
+    this.name = 'GeminiGenerationTimeoutError';
+  }
+}
+
+// The abort cancels the upstream HTTP request. The race also guarantees a
+// bounded response if a transport fails to honour cancellation. No retry or
+// model fallback is made here. Image operations retain their existing path.
+export const generateGeminiContent = async (ai, validated, { timeoutMs = TEXT_GENERATION_TIMEOUT_MS } = {}) => {
+  if (validated.operation !== 'structured-content') {
+    return ai.models.generateContent(validated.request);
+  }
+  const controller = new AbortController();
+  let timer;
+  const deadline = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new GeminiGenerationTimeoutError());
+      controller.abort();
+    }, timeoutMs);
+  });
+  try {
+    return await Promise.race([
+      ai.models.generateContent({
+        ...validated.request,
+        config: { ...validated.request.config, abortSignal: controller.signal },
+      }),
+      deadline,
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 export const formatGeminiProxyError = (error, requestId) => {
+  if (error instanceof GeminiGenerationTimeoutError) {
+    return {
+      statusCode: 504,
+      payload: {
+        error: GENERATION_TIMEOUT_MESSAGE,
+        code: 'generation_timeout',
+        retryable: false,
+        requestId,
+      },
+      shouldLog: true,
+    };
+  }
   if (error instanceof GeminiProxyRequestError) {
     return {
       statusCode: error.statusCode,

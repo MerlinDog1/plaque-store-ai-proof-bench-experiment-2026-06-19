@@ -25,6 +25,9 @@ const retryWrapper = async <T>(
   try {
     return await operation();
   } catch (error: any) {
+    // A complete text-generation deadline has already elapsed. Do not turn
+    // that into several more minutes of automatic retries; let the user retry.
+    if (error?.retryable === false) throw error;
     const message = String(error?.message || error || "").toLowerCase();
     const isRetryable =
       error.status === 503 ||

@@ -198,3 +198,16 @@ and hosted release verification remain the next step.
 
 ## Generic cookie popup — 4 October 2026
 Owner requested generic popup disappearing after selection. Source 75a8cab on codex/generic-cookie-popup deployed READY dpl_G6u7WTKDbg4SadWj9vJ4S77M4w9Q to instaplaque.co.uk. Accept/Reject remove popup entirely; existing consent storage preserved. Cookie settings available on /cookies, policy instructions updated. Meta consent/checkout regression and local/cloud builds passed; local and public mobile-browser checks proved accept/reject dismissal, reload persistence and reopen/revoke. No order/payment/email. Other analytics unchanged. Prior deployment dpl_Fpfz2aemHnvnxT7CTEogF3eC9STK is code rollback.
+
+## Text-layout API timeout — 7 October 2026 (not deployed)
+
+`codex/layout-api-timeout`, based on `b65f997`, fixes the explicit 30-second
+function ceiling observed in live 504 logs. Prepared 120-second ceiling,
+110-second cancellable structured-text deadline, safe errors and bounded browser
+waiting without repeated timeout calls. Model/MEDIUM/16k, layout safeguards and
+image budgets retained. Delayed actual-handler/SDK test, eight mobile/desktop
+timeout/success scenarios, input security, changed-app dependency typecheck and
+build passed. See [the report](docs/layout-api-timeout-2026-10-07.md).
+No hosted release or real model call made. Owner release instruction, live-source
+reconciliation and hosted verification remain. The separately pushed
+`codex/admin-list-timeout` is NOT part of this branch and remains undeployed.

@@ -11,6 +11,7 @@ import {
   MAX_GEMINI_REQUEST_BYTES,
   createGeminiRateLimiter,
   formatGeminiProxyError,
+  generateGeminiContent,
   getGeminiClientIdentity,
   hasAllowedGeminiBrowserHeaders,
   isDeployedGeminiEnvironment,
@@ -819,7 +820,7 @@ export const handleRequest = async (req, res) => {
         });
         return;
       }
-      const response = await ai.models.generateContent(validated.request);
+      const response = await generateGeminiContent(ai, validated);
       sendJsonWithHeaders(res, 200, addResponseText(response), rateHeaders);
     } catch (error) {
       const formatted = formatGeminiProxyError(error, requestId);
