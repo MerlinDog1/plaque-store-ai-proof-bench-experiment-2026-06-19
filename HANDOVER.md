@@ -10,6 +10,16 @@ and build passed. Production is unchanged at `dpl_G6u7WTKDbg4SadWj9vJ4S77M4w9Q`.
 See [the incident report](docs/admin-order-list-timeout-2026-10-07.md) for evidence,
 scope and the remaining owner-authorised deployment step.
 
+Owner follow-up: no initial auto-selection or artwork request. Details load only
+after an order-row click; searching, sorting and reloading stay summary-only.
+Switching rows cancels the previous in-flight detail request. Included on the same
+task branch; production deployment remains outstanding.
+Application commit: `eb54620ffee3d7be6c4c889e2feb57ea6b84d6b6` on
+`codex/admin-list-timeout`. Changed-component/dependency typecheck, production
+build and 390/1440 px request-count/retry/exact-proof browser checks passed.
+No known failure in this change; authenticated production verification remains
+pending an explicitly requested release.
+
 26 September 2026; housekeeping only. No deployment, runtime restart, database/storage/payment change, customer message or paid generation performed.
 
 ## Verified sources

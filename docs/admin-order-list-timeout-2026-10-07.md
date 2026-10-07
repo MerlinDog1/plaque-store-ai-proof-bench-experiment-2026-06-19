@@ -40,14 +40,27 @@ summary is never presented as a production proof: full details must load first,
 and a separate failed-detail retry leaves the usable list intact. Timeout API
 responses are explicit 503s; server logging records only the bounded error code.
 
+### Click-to-load follow-up
+
+The owner requested that artwork load only after clicking an order. The list
+therefore starts with no selected order: neither a successful list load nor a
+reload automatically opens the first record. Search and sorting use the summaries
+already loaded. Clicking a row loads only that order's detail; switching rows
+aborts the previous in-flight detail fetch. Full details are still required before
+showing production artwork or its download controls. This follow-up is also
+prepared only, not deployed.
+Application commit: `eb54620ffee3d7be6c4c889e2feb57ea6b84d6b6`.
+
 ## Checks
 
 - `npm run check:admin-orders`: synthetic auth denial, SQL projections, metadata
   preservation, no artwork hydration, empty/missing primary legacy fallback,
   timeout response and unchanged exact single-order proof retrieval passed.
 - `node scripts/check-admin-order-list-ui.cjs`: production-build browser checks
-  at 390 and 1440 px passed, covering failed-list honest counts, retry, isolated
-  detail failure/retry, exact proof, no overflow or JS errors. All API requests
+  at 390 and 1440 px passed, covering failed-list honest counts, retry, zero
+  detail requests before a click (including search, sorting and reload), only
+  the clicked order's requests, isolated detail failure/retry, exact proofs,
+  no overflow or JS errors. All API requests
   intercepted; no live customer actions.
 - Typecheck of `components/SiteExperience.tsx` and its dependency graph passed
   using a temporary config extending the normal tsconfig. Full-repository
