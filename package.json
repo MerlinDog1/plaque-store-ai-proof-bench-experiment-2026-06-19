@@ -13,6 +13,7 @@
     "postbuild": "node scripts/check-google-consent.mjs index.html dist/index.html dist/design/index.html dist/memorial-plaques/index.html && npm run check:live-seo && npm run check:designer-seo && npm run check:product-policies && node scripts/check-merchant-catalogue.mjs && node scripts/check-merchant-feed.mjs && node scripts/check-designer-seo-ci.mjs",
     "check:vercel-runtime": "node scripts/check-vercel-runtime.mjs",
     "typecheck": "tsc --noEmit",
+    "check:admin-orders": "node scripts/check-admin-order-list.mjs",
     "check:analytics-redaction": "node scripts/check-analytics-redaction.mjs",
     "check:posthog": "node scripts/check-posthog-analytics.cjs",
     "check:google-purchase": "node scripts/check-google-purchase.cjs",
