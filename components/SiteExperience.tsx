@@ -476,7 +476,6 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     intro: `For order questions, proof changes or delivery support, contact ${businessContact.tradingName} using the details below.`,
     sections: [
       { title: 'Trading identity', copy: `${businessContact.tradingName} is operated as a ${businessContact.legalForm}.` },
-      { title: 'Business address', copy: businessContact.address },
       { title: 'Email', copy: businessContact.email },
       { title: 'Phone', copy: businessContact.phone },
     ],
@@ -491,7 +490,7 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
       { title: 'Production and delivery', copy: 'Estimated production times are shown before checkout and run from proof approval and payment. Standard orders are usually estimated at 5 working days; aged brass, custom sizes and wood-backed plaques may take longer.' },
       { title: 'Customer details', copy: 'You must provide accurate contact and delivery details at checkout. We may contact you if an order detail needs checking before production or dispatch.' },
       { title: 'Faults and support', copy: 'Your statutory rights are not affected. If goods are faulty, damaged, not as described or not made with reasonable care, contact us as soon as possible so we can put things right.' },
-      { title: 'Contact', copy: `${businessContact.email}. ${businessContact.address}.` },
+      { title: 'Contact', copy: businessContact.email },
     ],
   },
   privacy: {
@@ -2679,7 +2678,8 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
         <strong className="brand-wordmark brand-wordmark--footer">
           <span>Insta</span><span>Plaque</span>
         </strong>
-        <p>{businessContact.tradingName} is operated as a UK sole trader. Business address: {businessContact.address}. Email: {businessContact.email}. Not VAT registered.</p>
+        <p>{businessContact.madeIn}</p>
+        <p><a href={`mailto:${businessContact.email}`}>{businessContact.email}</a></p>
       </div>
       <div className="commerce-footer__right">
         <div className="commerce-footer-socials" aria-label="Social links">

@@ -591,7 +591,7 @@ export function ShopFooter() {
         <p>Personal words, made lasting.</p>
         <a href={`mailto:${businessContact.email}`}>{businessContact.email}</a>
         <p className="shop-footer-address">
-          UK sole trader · {businessContact.address}. Not VAT registered.
+          {businessContact.madeIn}
         </p>
       </div>
       <nav aria-label="Browse plaques">

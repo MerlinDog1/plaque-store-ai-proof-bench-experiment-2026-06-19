@@ -46,7 +46,6 @@ export function ShopContact() {
           <dl className="shop-contact-details">
             <div><dt>Email</dt><dd><a href={`mailto:${businessContact.email}`}>{businessContact.email}</a></dd></div>
             <div><dt>Phone</dt><dd><a href={businessContact.phoneHref}>{businessContact.phone}</a></dd></div>
-            <div><dt>Business address</dt><dd><address>{businessContact.address}</address></dd></div>
           </dl>
         </div>
         <div className="shop-contact-help">
@@ -94,7 +93,7 @@ export function ShopAbout() {
       <section className="shop-section">
         <p className="shop-kicker">The business behind your plaque</p>
         <h1>Your plaque,<br />from words to order.</h1>
-        <p className="shop-intro">InstaPlaque is a UK sole-trader business based in Kettering. Design a brass or stainless steel inscription plaque online, with a free proof and a clear price before you pay.</p>
+        <p className="shop-intro">InstaPlaque is a UK sole-trader business. Design a brass or stainless steel inscription plaque online, with a free proof and a clear price before you pay.</p>
       </section>
       <section className="shop-section shop-buying-guide">
         <div>
@@ -113,7 +112,7 @@ export function ShopAbout() {
         <div>
           <p>InstaPlaque is for designing your own inscription plaque. <a href="https://portraitsinmetal.com/about">Portraits in Metal</a> focuses on portraits of people and pets, made from a photograph with a carefully arranged inscription.</p>
           <p>Portraits in Metal is currently a preview of the forthcoming service. You can <a href="https://portraitsinmetal.com/gallery">explore its portrait plaque design examples</a> while we prepare it for orders.</p>
-          <p>Both brands are operated by the same UK sole-trader business at 4 Dunkirk Avenue, Kettering, NN14 2PL, United Kingdom. We are not VAT registered.</p>
+          <p>Both brands are operated by the same UK sole-trader business. We are not VAT registered.</p>
           <a className="shop-text-link" href="/contact">Contact InstaPlaque ↗</a>
         </div>
       </section>
