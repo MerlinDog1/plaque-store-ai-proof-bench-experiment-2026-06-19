@@ -8,6 +8,10 @@ change payments/orders or deploy the site. See
 [the tracking report](docs/google-purchase-tracking-2026-10-09.md) for checks,
 scope, remaining account receipt verification and deployment approval.
 Live remains dpl_8AR2RibDg36LohHmwHa4qjiQmzrx at this checkpoint.
+Verified implementation/test commit: f78a935963e994e5e49776850701c9f4066b7edd.
+Focused TypeScript, purchase/Meta/redaction checks, production build and five
+real-Google-tag browser cases with collection intercepted passed. No known
+local check failure remains; live release and account receipt are unverified.
 
 26 September 2026; housekeeping only. No deployment, runtime restart, database/storage/payment change, customer message or paid generation performed.
 

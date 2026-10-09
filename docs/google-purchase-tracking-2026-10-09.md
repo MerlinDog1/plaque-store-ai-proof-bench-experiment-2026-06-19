@@ -5,6 +5,7 @@
 Prepared for review, **not deployed**. Branch:
 codex/instaplaque-purchase-tracking-20261009.
 Worktree: projects/instaplaque-purchase-tracking-20261009.
+Verified implementation/test commit: f78a935963e994e5e49776850701c9f4066b7edd.
 
 The owner's screenshots showed two Primary actions: Purchase (GA4, imported
 values) and Purchase (1) (Website, inactive, $1 setting). Owner said Done after
