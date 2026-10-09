@@ -227,3 +227,17 @@ One existing layout repair was required; no local fallback. Hosted JS hash match
 the tested build. No customer/order/DB/payment/email/PIM change. All jobs closed.
 `codex/admin-list-timeout` remains separate and undeployed. See the
 [release report](docs/layout-api-timeout-2026-10-07.md) for rollback and evidence.
+
+## Postal-address removal — 9 October 2026
+
+Owner requested live removal of the current business postal address from both
+brands, including outgoing emails, pending a replacement tomorrow. InstaPlaque
+app `48954736dbc179cc850957ec5d2bee1a625ad824`, branch
+`codex/remove-postal-address-20261009`, is live on canonical/www at READY
+`dpl_8AR2RibDg36LohHmwHa4qjiQmzrx`. All footer variants now say Made in the UK;
+Contact/About/Terms and structured data have no postal address. Customer email
+footers match; customer delivery addresses are retained. Eight offline email
+renders, focused UI typecheck, cloud build/runtime/prerender, 26 live routes and
+390/1440 browser checks passed. No customer mail, payment or DB mutation. PIM
+was separately released from its current source. Do not restore an old address
+from historical notes. See [the report](docs/postal-address-removal-2026-10-09.md).
