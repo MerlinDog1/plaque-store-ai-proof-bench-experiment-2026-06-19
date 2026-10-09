@@ -45,7 +45,7 @@ Do not claim the sandbox is connected until an actual Stripe session succeeds. P
 
 Before any test orders exist, rollback can promote the prior compatible deployment. **After test orders exist, do not roll back to code without the test-order email/production guards.** Disable the test key and redeploy guarded code instead, preserving records and isolation.
 
-## Deployment checkpoint — 9 October, 22:42–22:44 UTC
+## Deployment checkpoint — 9 October 2026
 
 Published source `740c388a7a95aad4c7e6a53b50f67eb3f64e4fb7` as Vercel **`dpl_4JT7pZiR1Whe55C6aW7mEhE9E2N8`**, URL `https://instaplaque-kq6u69v23-dullaghan31-3959s-projects.vercel.app`. Remote Node 22 build/runtime checks passed; deployment READY. Candidate files matched local bytes through authenticated Vercel curl and its app API returned 401. Verified the public site still had the expected preceding bundle before promotion; `vercel promote` succeeded. Independent canonical-domain inspect confirmed the new deployment.
 
