@@ -7,6 +7,7 @@ import { SeoRankTracker } from './SeoRankTracker';
 import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, shopFaqs } from './Shopfront';
 import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
 import { businessContact } from '../services/shopInformation';
+import { trackGooglePurchase, OPTIONAL_AD_CONSENT_CHANGED } from '../services/googlePurchase';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -96,7 +97,6 @@ declare global {
 
 const USE_CUSTOMER_COPY_PASS = true;
 const VISUAL_PROOF_RENDERER_VERSION = 2;
-const GOOGLE_ADS_PURCHASE_EVENT = 'ads_conversion_Purchase_1';
 
 const DownloadIcon = () => (
   <svg className="button-icon" aria-hidden="true" viewBox="0 0 20 20" focusable="false">
@@ -502,6 +502,7 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
       { title: 'Why it is used', copy: 'Data is used to create and save plaque proofs, take payment, send order emails, prepare production files, arrange delivery, provide customer support, understand aggregate page usage, and keep accounting and legal records.' },
       { title: 'Service providers', copy: 'We use trusted providers to run the service, including Stripe for payments, Vercel for hosting and cookieless web analytics, Supabase for order storage, Resend for transactional email, and delivery providers where needed.' },
       { title: 'Web analytics', copy: 'We use Vercel Web Analytics and Google Analytics to understand visits to our public pages. Google Analytics may use cookies and process information about your browser, device and visits. Our Google Analytics setup excludes private proof/order links and admin pages at page load. Proof tokens, order identifiers and Stripe session identifiers are removed from Vercel analytics URLs before events are sent.' },
+      { title: 'Purchase measurement', copy: 'If you accept optional advertising cookies, we report a confirmed purchase to Google Analytics with its value, currency and a pseudonymous transaction reference, to help measure advertising performance. This purchase event does not include your name, email, address, inscription, proof or private order link. You can change your choice using Cookie settings on our Cookie details page.' },
       { title: 'How long data is kept', copy: 'Order information is kept for as long as needed for production, support, accounting and legal record keeping. Proof artwork may be retained so we can remake or support the order.' },
       { title: 'Customer rights', copy: `You can ask to access, correct or delete personal data where the law allows by emailing ${businessContact.email}.` },
     ],
@@ -514,6 +515,7 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
       { title: 'Essential storage', copy: 'The site may use cookies or local storage to remember proof progress, admin access and checkout state. These are needed for the service to work properly.' },
       { title: 'Payments', copy: 'Stripe may use cookies and similar technologies when processing secure checkout and fraud prevention.' },
       { title: 'Analytics and marketing', copy: 'Vercel Web Analytics is cookieless. Google Analytics and Google Ads may use cookies and similar technologies to measure website visits and advertising performance. You can manage cookies through your browser settings.' },
+      { title: 'Purchase measurement', copy: 'With your permission, Google Analytics measures confirmed purchases using their value, currency and a pseudonymous transaction reference. We also store that reference locally to avoid reporting the same purchase again. Use Cookie settings on this page to allow or withdraw permission for this purchase measurement.' },
       { title: 'Facebook advertising', copy: 'With your permission, Meta Pixel measures public-page visits and successful starts of live Stripe checkout. We send checkout value and currency, not your inscription, name, email or proof. Meta may process browser and device information. Use Cookie settings on this Cookie details page to allow or withdraw consent. Private proof and order links are excluded.' },
       { title: 'Managing cookies', copy: 'You can block or delete cookies in your browser settings, but some proof, checkout or admin features may stop working correctly.' },
     ],
@@ -1854,16 +1856,12 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   }, [order?.id, order?.proofPackage?.visualProofPng, order?.proofPackage?.visualProofRendererVersion]);
 
   useEffect(() => {
-    if (!order || order.paymentStatus !== 'paid' || typeof window.gtag !== 'function') return;
-    const conversionKey = `google-ads-purchase-${order.id}`;
-    if (sessionStorage.getItem(conversionKey)) return;
-    window.gtag('event', GOOGLE_ADS_PURCHASE_EVENT, {
-      value: Math.max(0, (order.totalPence || 0) / 100),
-      currency: (order.currency || 'GBP').toUpperCase(),
-      transaction_id: order.id,
-    });
-    sessionStorage.setItem(conversionKey, 'sent');
-  }, [order?.id, order?.paymentStatus, order?.totalPence, order?.currency]);
+    if (!order) return;
+    const track = () => { void trackGooglePurchase(order); };
+    track();
+    window.addEventListener(OPTIONAL_AD_CONSENT_CHANGED, track);
+    return () => window.removeEventListener(OPTIONAL_AD_CONSENT_CHANGED, track);
+  }, [order?.id, order?.paymentStatus, order?.totalPence, order?.currency, order?.stripeCheckoutSessionId]);
 
   if (status === 'loading') {
     return (

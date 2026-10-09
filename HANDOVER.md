@@ -1,5 +1,14 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Latest review branch — 9 October 2026, purchase tracking (not deployed)
+
+Branch codex/instaplaque-purchase-tracking-20261009 prepares consented GA4 purchase
+measurement from the current address-free live source. It does not launch Ads,
+change payments/orders or deploy the site. See
+[the tracking report](docs/google-purchase-tracking-2026-10-09.md) for checks,
+scope, remaining account receipt verification and deployment approval.
+Live remains dpl_8AR2RibDg36LohHmwHa4qjiQmzrx at this checkpoint.
+
 26 September 2026; housekeeping only. No deployment, runtime restart, database/storage/payment change, customer message or paid generation performed.
 
 ## Verified sources

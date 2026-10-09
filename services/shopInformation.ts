@@ -6,7 +6,7 @@ export const businessContact = {
   phoneHref: 'tel:+447903379839',
   madeIn: 'Made in the UK',
   updated: '28 June 2026',
-  privacyUpdated: '2 October 2026',
+  privacyUpdated: '9 October 2026',
 };
 
 export const productionTiming = {

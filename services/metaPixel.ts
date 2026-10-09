@@ -1,5 +1,6 @@
 export const META_PIXEL_ID = '2766586460430567';
 export const META_CONSENT_KEY = 'instaplaque-meta-consent';
+export const OPTIONAL_AD_CONSENT_CHANGED = 'instaplaque:optional-ad-consent-changed';
 type Pixel = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; loaded: boolean; version: string; push?: Pixel };
 declare global { interface Window { fbq?: Pixel; _fbq?: Pixel } }
 let initialized = false;
@@ -35,6 +36,7 @@ export function enableMeta(): boolean {
 export function setMetaConsent(allow: boolean): void {
   try { localStorage.setItem(META_CONSENT_KEY, allow ? 'yes' : 'no'); } catch { /* Fail closed. */ }
   if (allow) enableMeta(); else { window.fbq?.('consent', 'revoke'); initialized = false; }
+  window.dispatchEvent?.(new Event(OPTIONAL_AD_CONSENT_CHANGED));
 }
 export function trackMetaCheckout(order: { total: number; stripeSimulation: { provider: string; mode: string; checkoutSessionId: string; checkoutUrl?: string; embeddedClientSecret?: string } }): boolean {
   const s = order.stripeSimulation;

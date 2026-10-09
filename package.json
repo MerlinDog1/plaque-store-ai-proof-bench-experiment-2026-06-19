@@ -13,6 +13,7 @@
     "check:vercel-runtime": "node scripts/check-vercel-runtime.mjs",
     "typecheck": "tsc --noEmit",
     "check:analytics-redaction": "node scripts/check-analytics-redaction.mjs",
+    "check:google-purchase": "node scripts/check-google-purchase.cjs",
     "check:bold-toggle": "node scripts/check-bold-toggle.cjs",
     "check:fixings-border-ui": "node scripts/check-fixings-border-ui.cjs",
     "check:curved-scallop-border": "node scripts/check-curved-scallop-border.cjs",

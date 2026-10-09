@@ -2035,18 +2035,18 @@
 }
   </script>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18288208905"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'AW-18288208905');
-    // Keep private proof/order links and admin pages out of GA4.
+    // Keep private proof/order links out of both normal Google destinations.
+    // Consented paid purchases use the separate event-only measurement frame.
     var analyticsUrl = new URL(window.location.href);
-    var privateAnalyticsPage = /^\/(admin|proof|order|checkout)(\/|$)/.test(analyticsUrl.pathname)
+    var privateAnalyticsPage = /^\/(admin|proof|order|order-confirmed|checkout)(\/|$)/.test(analyticsUrl.pathname)
       || ['proof', 'order', 'session_id'].some(function (key) { return analyticsUrl.searchParams.has(key); })
       || ['admin', 'checkout', 'order'].includes(analyticsUrl.searchParams.get('view'));
     if (!privateAnalyticsPage) {
+      gtag('js', new Date());
+      gtag('config', 'AW-18288208905');
       analyticsUrl.hash = '';
       Array.from(analyticsUrl.searchParams.keys()).forEach(function (key) {
         if (!['view', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].includes(key)) {
@@ -2057,6 +2057,10 @@
         page_location: analyticsUrl.toString(),
         page_referrer: document.referrer ? new URL(document.referrer).origin : ''
       });
+      var googleTagScript = document.createElement('script');
+      googleTagScript.async = true;
+      googleTagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-18288208905';
+      document.head.appendChild(googleTagScript);
     }
   </script>
 </head>
