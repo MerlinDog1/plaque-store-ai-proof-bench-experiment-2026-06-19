@@ -262,3 +262,9 @@ renders, focused UI typecheck, cloud build/runtime/prerender, 26 live routes and
 390/1440 browser checks passed. No customer mail, payment or DB mutation. PIM
 was separately released from its current source. Do not restore an old address
 from historical notes. See [the report](docs/postal-address-removal-2026-10-09.md).
+
+## 9 October 2026 — private exact-size £1 sandbox setup
+
+Owner 3860 requested a 123 × 456 mm £1 test, replying to the sandbox proposal. Prepared on `codex/instaplaque-pound-test-20261009` from the independently confirmed purchase-tracking production release plus docs-only checkpoint. Read [the scope, tests, missing test key and rollback limits](docs/one-pound-sandbox-2026-10-09.md).
+
+This is an owner-authenticated test route, not a public price change. No live key change, real payment, customer email, manufacture or Ads launch. **STRIPE_TEST_SECRET_KEY is missing**: the API fails before writing an order, and the page stays disabled. GA4/Ads receipt is not established by the mocked return checks. Deployment result is recorded below when verified.

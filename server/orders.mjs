@@ -3,6 +3,7 @@ import path from "node:path";
 import { getSupabaseServiceClient } from "./supabase.mjs";
 import { storeArtwork, loadArtwork } from "./artwork-storage.mjs";
 import { getInternalProductionEmails, sendEmail } from "./email.mjs";
+import { isOnePoundTestOrder, assertOnePoundTestSession } from "./onePoundTest.mjs";
 import {
   sanitizeOrderSvgFields,
   sanitizeProofPackageSvg,
@@ -117,6 +118,7 @@ const listOrderColumns = [
   "shipping_address",
   "email_events",
   "events",
+  "metadata",
   "approved_at",
   "paid_at",
   "created_at",
@@ -297,6 +299,7 @@ const listProofSessionOrders = async (supabase) => {
       "total_pence:metadata->order->totalPence",
       "paid_at:metadata->order->paidAt",
       "approved_at:metadata->order->approvedAt",
+      "order_metadata:metadata->order->metadata",
     ].join(","))
     .eq("metadata->>kind", "storefront_order")
     .order("created_at", { ascending: false })
@@ -328,7 +331,7 @@ const listProofSessionOrders = async (supabase) => {
       stripeSession: {},
       emailEvents: [],
       events: [],
-      metadata: {},
+      metadata: row.order_metadata || {},
       approvedAt: row.approved_at || row.created_at,
       paidAt: row.paid_at || row.created_at,
       createdAt: row.created_at,
@@ -513,7 +516,7 @@ export const createPendingOrder = async (payload, dependencies = {}) => {
   const maxAttempts = dependencies.maxAttempts || 5;
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    const order = buildServerCheckoutOrder(payload, { orderId: idFactory() });
+    const order = buildServerCheckoutOrder(payload, { orderId: idFactory(), sandboxTest: dependencies.sandboxTest === true });
     try {
       return await insertOrder(order);
     } catch (error) {
@@ -535,6 +538,7 @@ export const createExternalOrder = async (payload) => {
 export const attachStripeSessionToOrder = async (orderId, session) => {
   const order = await getOrderById(orderId);
   if (!order) throw new Error(`Order ${orderId} was not found.`);
+  assertOnePoundTestSession(order, session);
   if (order.stripeCheckoutSessionId && session?.id !== order.stripeCheckoutSessionId) {
     throw new StripePaymentVerificationError("Stripe session ID did not match the stored checkout session.");
   }
@@ -553,6 +557,9 @@ export const attachStripeSessionToOrder = async (orderId, session) => {
 };
 
 export const prepareVisualProofAttachment = (order, payload = {}) => {
+  if (isOnePoundTestOrder(order)) {
+    throw new CheckoutRequestError("Sandbox orders do not create production proof packs.", 409, "test_order_no_fulfilment");
+  }
   const sessionId = String(payload.stripeCheckoutSessionId || "").trim();
   const storedSessionId = String(order?.stripeCheckoutSessionId || "").trim();
   if (!storedSessionId || !sessionId || sessionId !== storedSessionId) {
@@ -771,6 +778,7 @@ export const isPaidCompleteStripeSession = (session) => (
 
 export const assertStripePaymentMatchesOrder = (order, session) => {
   if (!order) throw new StripePaymentVerificationError("Paid Stripe session could not be matched to an order.");
+  assertOnePoundTestSession(order, session);
   if (!session?.id || !order.stripeCheckoutSessionId || session.id !== order.stripeCheckoutSessionId) {
     throw new StripePaymentVerificationError("Stripe session ID did not match the stored checkout session.");
   }
@@ -824,9 +832,9 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
     ...order,
     customerEmail,
     customerName,
-    status: "paid",
+    status: isOnePoundTestOrder(order) ? "issue" : "paid",
     paymentStatus: "paid",
-    fulfilmentStatus: order.fulfilmentStatus || "not_started",
+    fulfilmentStatus: isOnePoundTestOrder(order) ? "issue" : order.fulfilmentStatus || "not_started",
     stripeCheckoutSessionId: sessionId || order.stripeCheckoutSessionId,
     stripePaymentIntentId: paymentIntentId(session.payment_intent) || order.stripePaymentIntentId,
     shippingAddress: shipping.address ? { name: shipping.name, phone: customer.phone || session.phone_number || "", ...shipping.address } : order.shippingAddress,
@@ -842,7 +850,7 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
     ],
   });
 
-  if (!wasAlreadyPaid) {
+  if (!wasAlreadyPaid && !isOnePoundTestOrder(next)) {
     await sendRecordedEmail(next, "customer-order-confirmation", customerEmail);
 
     if (next.proofPackage?.productionArtworkPdf) {
@@ -856,6 +864,8 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
 };
 
 export const sendAndRecordOrderEmail = async (order, template, recipient, extra = {}) => {
+  // Includes proof attachments, admin re-sends and delayed review requests.
+  if (isOnePoundTestOrder(order)) return order;
   const result = await sendEmail({ to: recipient, template, order, extra });
   const event = {
     id: `${order.id}-${template}-${Date.now()}`,
@@ -880,6 +890,9 @@ export const sendAndRecordOrderEmail = async (order, template, recipient, extra 
 export const updateOrderStatus = async (orderId, payload) => {
   const order = await getOrderById(orderId);
   if (!order) throw new Error(`Order ${orderId} was not found.`);
+  if (isOnePoundTestOrder(order)) {
+    throw new CheckoutRequestError("Sandbox orders cannot enter production or dispatch.", 409, "test_order_no_fulfilment");
+  }
   const status = payload.status || order.status;
   const fulfilmentStatus = payload.fulfilmentStatus || order.fulfilmentStatus;
   const event = {

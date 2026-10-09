@@ -1810,7 +1810,8 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   }, [order?.id]);
 
   useEffect(() => {
-    if (!order || order.proofPackage?.visualProofRendererVersion === VISUAL_PROOF_RENDERER_VERSION) return;
+    if (!order || order.metadata?.checkoutTestPolicy === '123x456-sandbox-v1'
+      || order.proofPackage?.visualProofRendererVersion === VISUAL_PROOF_RENDERER_VERSION) return;
 
     let cancelled = false;
     const attachRenderedProof = async () => {
@@ -1887,6 +1888,19 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   }
 
   const paid = order.paymentStatus === 'paid';
+  if (order.metadata?.checkoutTestPolicy === '123x456-sandbox-v1') {
+    return (
+      <div className="commerce-page">
+        <section className="commerce-section">
+          <p className="commerce-eyebrow">Private sandbox test</p>
+          <h1>{paid ? 'Your £1 test payment is confirmed.' : 'Your test payment is not complete.'}</h1>
+          <p>123 × 456 mm · {formatPence(order.totalPence, order.currency)}. No real money has been taken.</p>
+          <p>No plaque will be made or dispatched, and no order email is sent. This test is excluded from live Google purchase tracking.</p>
+          <p><a href="/checkout-test.html">Back to the private test</a></p>
+        </section>
+      </div>
+    );
+  }
   const address = order.shippingAddress || {};
   const fulfilmentStage = order.fulfilmentStatus || order.status;
   const currentStepIndex = fulfilmentStage === 'dispatched' || fulfilmentStage === 'ready_to_dispatch'
@@ -2222,7 +2236,7 @@ function AdminPage() {
       return orderDate(b) - orderDate(a);
     });
 
-  const paidOrders = orders.filter((order) => order.paymentStatus === 'paid');
+  const paidOrders = orders.filter((order) => order.paymentStatus === 'paid' && !order.metadata?.checkoutTestPolicy);
   const todayOrders = paidOrders.filter((order) => sameLocalDay(new Date(orderDate(order)), now));
   const monthOrders = paidOrders.filter((order) => sameLocalMonth(new Date(orderDate(order)), now));
   const overdueOrders = orders.filter((order) => {
@@ -2230,7 +2244,7 @@ function AdminPage() {
     return !['dispatched', 'archived', 'cancelled', 'refunded'].includes(status) && dueDateForOrder(order).getTime() < now.getTime();
   });
   const counts = {
-    paid: orders.filter((order) => order.paymentStatus === 'paid').length,
+    paid: paidOrders.length,
     production: orders.filter((order) => order.status === 'in_production').length,
     dispatched: orders.filter((order) => order.fulfilmentStatus === 'dispatched').length,
     emails: orders.reduce((total, order) => total + (order.emailEvents?.length || 0), 0),

@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { isOnePoundTestOrder, assertOnePoundTestSession } from "./onePoundTest.mjs";
 import {
   assertServerCheckoutOrderIsPayable,
   resolveCheckoutOrigin,
@@ -8,6 +9,20 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
 const stripePublishableKey = process.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
 const stripeWebhookToleranceSeconds = 5 * 60;
+
+export const getStripeTestConfig = () => ({
+  configured: /^sk_test_\S+$/.test(process.env.STRIPE_TEST_SECRET_KEY || ""),
+});
+
+export const requireStripeTestKey = () => {
+  if (!getStripeTestConfig().configured) {
+    const error = new Error("Sandbox checkout is not connected yet. Add STRIPE_TEST_SECRET_KEY in Vercel; leave the live Stripe keys unchanged.");
+    error.statusCode = 503;
+    error.code = "stripe_test_not_configured";
+    throw error;
+  }
+  return process.env.STRIPE_TEST_SECRET_KEY;
+};
 
 const getStripeKeyMode = (key) => {
   if (key.startsWith("sk_test_") || key.startsWith("pk_test_")) return "test";
@@ -66,6 +81,18 @@ export const buildStripeCheckoutParams = (order, options = {}) => {
   params.set("metadata[source]", "instaplaque");
   params.set("metadata[payload_version]", order.metadata.checkoutPolicyVersion);
 
+  if (isOnePoundTestOrder(order)) {
+    if (uiMode !== "hosted") throw new Error("The sandbox rehearsal uses hosted checkout.");
+    params.set("cancel_url", `${origin}/checkout-test.html`);
+    params.set("line_items[0][price_data][product_data][name]", `TEST ONLY — ${productTitle}`);
+    params.set("line_items[0][price_data][product_data][description]", "£1 sandbox rehearsal. No real payment, manufacture or delivery.");
+    params.set("shipping_options[0][shipping_rate_data][display_name]", "Test only — no delivery");
+    for (const key of [...params.keys()]) {
+      if (key.includes("delivery_estimate")) params.delete(key);
+    }
+    params.set("metadata[checkout_test_policy]", order.metadata.checkoutTestPolicy);
+  }
+
   return { idempotencyKey: orderId, params, uiMode };
 };
 
@@ -76,22 +103,26 @@ export const buildStripeRequestHeaders = (idempotencyKey, secretKey = stripeSecr
 });
 
 export const createStripeCheckoutSession = async (order, options = {}) => {
-  if (!stripeSecretKey) {
+  const sandboxTest = isOnePoundTestOrder(order);
+  // Never fall back to the live key when the private sandbox is unconfigured.
+  const selectedSecretKey = sandboxTest ? requireStripeTestKey() : stripeSecretKey;
+  const selectedPublishableKey = sandboxTest ? "" : stripePublishableKey;
+  if (!selectedSecretKey) {
     throw new Error("STRIPE_SECRET_KEY is not configured on the server.");
   }
-  if (!stripePublishableKey) {
+  if (!sandboxTest && !selectedPublishableKey) {
     throw new Error("VITE_STRIPE_PUBLISHABLE_KEY is not configured on the server.");
   }
 
-  const secretKeyMode = getStripeKeyMode(stripeSecretKey);
-  const publishableKeyMode = getStripeKeyMode(stripePublishableKey);
+  const secretKeyMode = getStripeKeyMode(selectedSecretKey);
+  const publishableKeyMode = getStripeKeyMode(selectedPublishableKey);
   if (!secretKeyMode) {
     throw new Error("STRIPE_SECRET_KEY must be a Stripe test or live secret key.");
   }
-  if (!publishableKeyMode) {
+  if (!sandboxTest && !publishableKeyMode) {
     throw new Error("VITE_STRIPE_PUBLISHABLE_KEY must be a Stripe test or live publishable key.");
   }
-  if (secretKeyMode !== publishableKeyMode) {
+  if (!sandboxTest && secretKeyMode !== publishableKeyMode) {
     throw new Error("Stripe secret and publishable keys must both be test keys or both be live keys.");
   }
 
@@ -103,7 +134,7 @@ export const createStripeCheckoutSession = async (order, options = {}) => {
   try {
     response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
-      headers: buildStripeRequestHeaders(idempotencyKey),
+      headers: buildStripeRequestHeaders(idempotencyKey, selectedSecretKey),
       body: params,
       signal: controller.signal,
     });
@@ -121,12 +152,13 @@ export const createStripeCheckoutSession = async (order, options = {}) => {
     const message = data?.error?.message || `Stripe checkout session failed (${response.status}).`;
     throw new Error(message);
   }
+  assertOnePoundTestSession(order, data);
 
   return {
     id: data.id,
     url: data.url,
     clientSecret: data.client_secret,
-    publishableKey: stripePublishableKey,
+    publishableKey: selectedPublishableKey,
     uiMode,
     mode: data.mode,
     paymentStatus: data.payment_status,
@@ -137,18 +169,21 @@ export const createStripeCheckoutSession = async (order, options = {}) => {
   };
 };
 
-export const retrieveStripeCheckoutSession = async (sessionId) => {
-  if (!stripeSecretKey) throw new Error("STRIPE_SECRET_KEY is not configured on the server.");
+export const retrieveStripeCheckoutSession = async (sessionId, order = null) => {
+  const selectedSecretKey = isOnePoundTestOrder(order) ? requireStripeTestKey() : stripeSecretKey;
+  if (!selectedSecretKey) throw new Error("STRIPE_SECRET_KEY is not configured on the server.");
   const url = new URL(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`);
   url.searchParams.set("expand[]", "payment_intent");
   url.searchParams.append("expand[]", "line_items");
   const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${stripeSecretKey}` },
+    headers: { Authorization: `Bearer ${selectedSecretKey}` },
+    signal: AbortSignal.timeout(15000),
   });
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data?.error?.message || `Could not retrieve Stripe checkout session (${response.status}).`);
   }
+  assertOnePoundTestSession(order, data);
   return data;
 };
 

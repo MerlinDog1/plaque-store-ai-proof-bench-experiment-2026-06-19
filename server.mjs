@@ -58,6 +58,8 @@ const {
 const {
   createStripeCheckoutSession,
   getStripeConfig,
+  getStripeTestConfig,
+  requireStripeTestKey,
   parseStripeWebhook,
   retrieveStripeCheckoutSession,
 } = await import("./server/stripe.mjs");
@@ -532,7 +534,14 @@ export const handleRequest = async (req, res) => {
   if (req.method === "POST" && url.pathname === "/api/stripe/checkout-session") {
     try {
       const payload = JSON.parse(await readBody(req));
-      const pendingOrder = await createPendingOrder(payload);
+      const sandboxTest = payload.sandboxTest === true;
+      if (sandboxTest) {
+        if (!requireAdminRequest(req, res)) return;
+        // Check availability before creating any persistent order/artwork.
+        requireStripeTestKey();
+        payload.uiMode = "hosted";
+      }
+      const pendingOrder = await createPendingOrder(payload, { sandboxTest });
       const session = await createStripeCheckoutSession(pendingOrder, {
         origin: payload.origin,
         uiMode: payload.uiMode,
@@ -551,6 +560,14 @@ export const handleRequest = async (req, res) => {
       });
       sendJson(res, error.statusCode || 500, { error: message, code: error.code || "checkout_failed" });
     }
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/admin/checkout-test") {
+    if (!requireAdminRequest(req, res)) return;
+    sendJsonWithHeaders(res, 200, {
+      ok: true, ...getStripeTestConfig(), width: 123, height: 456, totalPence: 100, currency: "GBP",
+    }, { "Cache-Control": "no-store" });
     return;
   }
 
@@ -655,7 +672,7 @@ export const handleRequest = async (req, res) => {
           ),
       );
       if (order && needsStripeRefresh) {
-        const stripeSession = await retrieveStripeCheckoutSession(sessionId || storedSessionId);
+        const stripeSession = await retrieveStripeCheckoutSession(sessionId || storedSessionId, order);
         if (isPaidCompleteStripeSession(stripeSession)) {
           order = await markOrderPaidFromSession(stripeSession);
         } else {

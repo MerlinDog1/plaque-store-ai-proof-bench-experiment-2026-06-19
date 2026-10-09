@@ -8,6 +8,7 @@ type PurchaseOrder = {
   totalPence: number;
   currency: string;
   stripeCheckoutSessionId?: string;
+  metadata?: Record<string, unknown>;
 };
 
 // These are measurement queues, not proof that Google received a conversion.
@@ -25,6 +26,7 @@ function validCheckoutReturn(order: PurchaseOrder): boolean {
     && url.searchParams.get('session_id') === order.stripeCheckoutSessionId
     && /^cs_live_[A-Za-z0-9]+$/.test(order.stripeCheckoutSessionId || '')
     && order.paymentStatus === 'paid'
+    && !order.metadata?.checkoutTestPolicy
     && typeof order.id === 'string' && order.id.length > 0 && order.id.length <= 200
     && Number.isSafeInteger(order.totalPence) && order.totalPence > 0
     && typeof order.currency === 'string' && order.currency.toUpperCase() === 'GBP';

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Private £1 checkout test — InstaPlaque</title>
+  <style>
+    body{font:17px/1.55 system-ui,sans-serif;color:#26342d;background:#f5f5f0;margin:0;padding:24px}
+    main{max-width:540px;margin:4vh auto;background:white;padding:28px;border:1px solid #cbd2cb;border-radius:16px}
+    h1{line-height:1.2;font-size:30px}label{display:block}input,button{font:inherit;box-sizing:border-box;width:100%;padding:12px;margin-top:8px;border:1px solid #728375;border-radius:8px}
+    button{color:white;background:#264c36;cursor:pointer}button:disabled{opacity:.55;cursor:default}small{display:block}a{color:#264c36}[hidden]{display:none!important}
+    .summary{background:#edf3ed;padding:16px;border-radius:8px}#status{white-space:pre-line}
+  </style>
+  <script src="/checkout-test.js" defer></script>
+</head>
+<body>
+  <main>
+    <p>InstaPlaque · private sandbox</p>
+    <h1>£1 plaque checkout test</h1>
+    <p class="summary"><strong>123 × 456 mm · £1.00 GBP</strong><br>Rectangular brushed-brass test plaque, no wood or artwork.</p>
+    <p>No real money is taken. No plaque will be made, dispatched or emailed. Normal shop prices are unchanged.</p>
+    <form id="login" hidden>
+      <label for="password">Existing InstaPlaque admin passcode</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button>Sign in</button>
+    </form>
+    <section id="checkout" hidden>
+      <p>The sample inscription is “CHECKOUT TEST — DO NOT MAKE”.</p>
+      <button id="start" type="button" disabled>Approve test plaque and open £1 sandbox checkout</button>
+      <p>In Stripe's test checkout use <strong>4242 4242 4242 4242</strong>, any future expiry and any three-digit CVC. Do not enter real card details.</p>
+    </section>
+    <p id="status" role="status">Checking owner access…</p>
+    <small>Sandbox purchases are excluded from live Google Analytics/Ads purchase reporting. This page does not prove that Google received a conversion.</small>
+    <p><a href="/">Back to the shop</a></p>
+  </main>
+</body>
+</html>

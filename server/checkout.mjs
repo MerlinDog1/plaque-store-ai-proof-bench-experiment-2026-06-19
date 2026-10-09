@@ -7,6 +7,7 @@ import {
   validateCheckoutPlaqueState,
 } from "../services/checkoutPolicy.mjs";
 import { sanitizeProofPackageSvg } from "../services/svgSanitizer.mjs";
+import { ONE_POUND_TEST_POLICY, isOnePoundTestOrder, getOnePoundTestPrice } from "./onePoundTest.mjs";
 
 const MAX_INSCRIPTION_LENGTH = 4_000;
 const MAX_EMAIL_LENGTH = 254;
@@ -215,6 +216,7 @@ export const buildServerCheckoutOrder = (
     orderId = createServerOrderId(),
     recoveryToken = createCheckoutRecoveryToken(),
     now = new Date(),
+    sandboxTest = false,
   } = {},
 ) => {
   if (!SERVER_ORDER_ID.test(orderId)) {
@@ -235,7 +237,9 @@ export const buildServerCheckoutOrder = (
   }
 
   const inscription = normaliseInscription(order.inscription ?? payload.inscription ?? "");
-  const priceBreakdown = getCheckoutPriceBreakdown(plaqueState, inscription);
+  const priceBreakdown = sandboxTest
+    ? getOnePoundTestPrice(plaqueState)
+    : getCheckoutPriceBreakdown(plaqueState, inscription);
   if (priceBreakdown.quoteRequired) {
     throw new ManualQuoteRequiredError(priceBreakdown.quoteReasons);
   }
@@ -266,7 +270,7 @@ export const buildServerCheckoutOrder = (
     customerName,
     status: "checkout_started",
     paymentStatus: "unpaid",
-    fulfilmentStatus: "not_started",
+    fulfilmentStatus: sandboxTest ? "issue" : "not_started",
     totalPence,
     currency: CHECKOUT_CURRENCY,
     productTitle,
@@ -286,6 +290,7 @@ export const buildServerCheckoutOrder = (
     ],
     metadata: {
       source: "instaplaque-checkout",
+      ...(sandboxTest ? { checkoutTestPolicy: ONE_POUND_TEST_POLICY, noFulfilment: true } : {}),
       pricingAuthority: "server",
       checkoutPolicyVersion: CHECKOUT_POLICY_VERSION,
       clientOrderId: safeClientOrderId(order.id || payload.orderId),
@@ -332,7 +337,9 @@ export const assertServerCheckoutOrderIsPayable = (order) => {
       "invalid_server_order",
     );
   }
-  const priceBreakdown = getCheckoutPriceBreakdown(plaqueState, order.inscription || "");
+  const priceBreakdown = isOnePoundTestOrder(order)
+    ? getOnePoundTestPrice(plaqueState)
+    : getCheckoutPriceBreakdown(plaqueState, order.inscription || "");
   if (priceBreakdown.quoteRequired) throw new ManualQuoteRequiredError(priceBreakdown.quoteReasons);
   const totalPence = Math.round(priceBreakdown.total * 100);
   if (!Number.isInteger(order.totalPence) || order.totalPence !== totalPence) {

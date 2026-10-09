@@ -116,6 +116,7 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
     { totalPence: -1 }, { totalPence: NaN }, { totalPence: 95.5 }, { currency: 'USD' },
     { currency: null }, { stripeCheckoutSessionId: 'cs_test_synthetic123' },
     { stripeCheckoutSessionId: undefined }, { id: 'different-order' },
+    { metadata: { checkoutTestPolicy: '123x456-sandbox-v1' } },
   ]) {
     h = mainHarness();
     assert.equal(await h.track({ ...order, ...edit }), false, JSON.stringify(edit));
