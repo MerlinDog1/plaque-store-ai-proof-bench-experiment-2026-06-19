@@ -66,8 +66,31 @@ paused. No synthetic Google sale is sent by the development checks.
   private-field exclusion and no production proof/JS errors passed. Screenshots
   were visually inspected. All external traffic was intercepted.
 
-Publication and account receipt are not implied by these checks. Append the
-confirmed release source/deployment IDs after the authorised deployment.
+## Published release
+
+- App source `5c84d666220c945d520d767ef6765732f416f231` on
+  `codex/instaplaque-live-pound-20261009`, reviewed and pushed to the private repo.
+- Vercel `instaplaque` / `prj_e0enz36tdUE3mI8q3tKKG9YR5CLD`:
+  READY `dpl_C2T7RfDVjnCyqNKituKMQxzXDx7X`,
+  `https://instaplaque-6u5q36l49-dullaghan31-3959s-projects.vercel.app`.
+- Built with production environment and `--skip-domain`; candidate HTML/JS
+  matched source and the owner API returned application 401. The preceding
+  canonical bundle was rechecked before promotion; no competing release found.
+- Promoted successfully. A separate canonical deployment inspection returned the
+  same READY deployment. Canonical and www serve `index-BCMhDUUS.js`; the hosted
+  main bundle, test HTML/JS and unchanged Google purchase frame files exactly
+  match the local tested build/source.
+- Both private HTML documents retain noindex, no-referrer and no-store headers.
+  Unauthenticated GET configuration and POST live-test creation both return 401.
+  Existing live Stripe modes/webhook presence and Supabase/Gemini health checks
+  passed. The health probe was corrected to use Gemini's existing `ok`/`hasKey`
+  response, rather than assuming the Supabase `configured` field.
+
+**No actual Stripe session, card charge, Google receipt, database/order write,
+application email, Ads activation or PIM change was made by this release task.**
+The owner's authenticated payment remains the next end-to-end check. No new
+Stripe key or environment change is needed. Google/Ads account-side receipt and
+the import/link remain unverified.
 
 ## Rollback
 
