@@ -44,3 +44,19 @@ Base: current verified production `dpl_D4AADmY5ReLfHXXNvYYKAdTt1y7Z`, app source
 Do not claim the sandbox is connected until an actual Stripe session succeeds. Publish the guarded page, verify hosted assets/401/health, then obtain the separate sandbox key through Vercel settings. A key addition requires redeployment to take effect.
 
 Before any test orders exist, rollback can promote the prior compatible deployment. **After test orders exist, do not roll back to code without the test-order email/production guards.** Disable the test key and redeploy guarded code instead, preserving records and isolation.
+
+## Deployment checkpoint — 9 October, 22:42–22:44 UTC
+
+Published source `740c388a7a95aad4c7e6a53b50f67eb3f64e4fb7` as Vercel **`dpl_4JT7pZiR1Whe55C6aW7mEhE9E2N8`**, URL `https://instaplaque-kq6u69v23-dullaghan31-3959s-projects.vercel.app`. Remote Node 22 build/runtime checks passed; deployment READY. Candidate files matched local bytes through authenticated Vercel curl and its app API returned 401. Verified the public site still had the expected preceding bundle before promotion; `vercel promote` succeeded. Independent canonical-domain inspect confirmed the new deployment.
+
+Hosted canonical/www checks passed:
+
+- `/checkout-test.html` 200, SHA256 `e2fa02fe25e7b189a3ebdc6303345f86109f4c758cd0d4da20f9d1cd67ef061b`, matching source. `noindex, nofollow`, `no-referrer`, `no-store` headers verified.
+- `/checkout-test.js` 200, SHA256 `0bcb9e8566f77161d041398267d19b694249b4d8699ee6aea570c64fe068315f`, matching source.
+- Main `index-CcFzqSZP.js` SHA256 `61cadd623fd0ddae8757e4cc55ea33d2c83d39c7c63098d99371ee339bacd3d3`, matching local built asset.
+- `/api/admin/checkout-test` 401 `ADMIN_AUTH_REQUIRED` without app credentials.
+- Stripe configuration 200: regular secret/publishable mode still **live**, webhook configured. Supabase health configured and Gemini health enabled. No existing environment value was edited.
+- `www.instaplaque.co.uk/checkout-test.html` redirects to the canonical test page.
+- Original pricing browser suite passed using system Chrome/local server with all nonlocal requests blocked; temporary server closed.
+
+**Activation remains blocked only on the separate Stripe sandbox secret.** Actual owner-authenticated hosted checkout and a real Stripe sandbox completion remain unverified. No production order/database write, Stripe session/payment, email, fake Google conversion, Ads launch or PIM change occurred in this task. Do not confuse a deployed guarded page with a connected sandbox. GA4 test property/import verification is also still outstanding, not silently supplied by this deployment.
