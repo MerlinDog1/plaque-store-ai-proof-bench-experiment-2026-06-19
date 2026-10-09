@@ -1,17 +1,25 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Latest review branch — 9 October 2026, purchase tracking (not deployed)
+## Latest production release — 9 October 2026, purchase tracking
 
-Branch codex/instaplaque-purchase-tracking-20261009 prepares consented GA4 purchase
-measurement from the current address-free live source. It does not launch Ads,
-change payments/orders or deploy the site. See
-[the tracking report](docs/google-purchase-tracking-2026-10-09.md) for checks,
-scope, remaining account receipt verification and deployment approval.
-Live remains dpl_8AR2RibDg36LohHmwHa4qjiQmzrx at this checkpoint.
-Verified implementation/test commit: f78a935963e994e5e49776850701c9f4066b7edd.
-Focused TypeScript, purchase/Meta/redaction checks, production build and five
-real-Google-tag browser cases with collection intercepted passed. No known
-local check failure remains; live release and account receipt are unverified.
+Owner explicitly requested Deploy after reviewing the prepared fix. Released
+source 3a39b2c7a1acf4eba56598db7229c8c0cd28c090 from branch
+codex/instaplaque-purchase-tracking-20261009 to the existing InstaPlaque project.
+Canonical/www independently resolve to READY dpl_D4AADmY5ReLfHXXNvYYKAdTt1y7Z.
+Main bundle index-0AfWYGxb.js and both purchase-frame files match the tested
+build/source; frame noindex/no-referrer/no-store headers passed.
+Implementation/test commit: f78a935963e994e5e49776850701c9f4066b7edd.
+Focused TypeScript, purchase/Meta/redaction checks, production builds and five
+real-Google-tag browser cases with collection intercepted passed. Four further
+mobile cases using the actual hosted compiled app passed with synthetic order
+responses and all collection blocked: paid one, unpaid/test/rejected zero;
+reload no duplicate, correct GBP/value/client ID and no private outbound values.
+No Ads enabling, payment/order/database mutation, customer message or artificial
+Google sale was performed. Ads account/property mapping and genuine receipt are
+still unverified; do not claim end-to-end credited sales. See
+[the tracking report](docs/google-purchase-tracking-2026-10-09.md).
+Compatible previous deployment: dpl_8AR2RibDg36LohHmwHa4qjiQmzrx. Both retain
+the address-free footer and current Supabase/R2 setup. PIM is unchanged.
 
 26 September 2026; housekeeping only. No deployment, runtime restart, database/storage/payment change, customer message or paid generation performed.
 

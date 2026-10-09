@@ -2,10 +2,13 @@
 
 ## Status and scope
 
-Prepared for review, **not deployed**. Branch:
+**Deployed at the owner's explicit request (message 3825, Deploy).** Branch:
 codex/instaplaque-purchase-tracking-20261009.
 Worktree: projects/instaplaque-purchase-tracking-20261009.
 Verified implementation/test commit: f78a935963e994e5e49776850701c9f4066b7edd.
+Deployed source: 3a39b2c7a1acf4eba56598db7229c8c0cd28c090.
+Production: dpl_D4AADmY5ReLfHXXNvYYKAdTt1y7Z, created 18:07:38 UTC,
+promoted and independently verified on canonical/www on 9 October 2026.
 
 The owner's screenshots showed two Primary actions: Purchase (GA4, imported
 values) and Purchase (1) (Website, inactive, $1 setting). Owner said Done after
@@ -16,13 +19,13 @@ installer rerun, conversion-action creation or account mutation.
 
 Started from 3863a0b9b040b018895cb30abcedda17e1d1823a, whose only changes after
 live application 48954736dbc179cc850957ec5d2bee1a625ad824 are release notes.
-Canonical Vercel inspection still identified READY
+Pre-release canonical Vercel inspection identified READY
 dpl_8AR2RibDg36LohHmwHa4qjiQmzrx. Fetch showed no newer remote production
 branch; the separate admin-list patch is not included.
 
 ## Findings and correction
 
-Deployed code sent ads_conversion_Purchase_1, not the standard GA4 purchase.
+The previous live code sent ads_conversion_Purchase_1, not the standard GA4 purchase.
 Public configuration for G-FKP17EXNBX marks purchase as a conversion and contained
 no matching custom-name mapping. This indicates a likely mapping gap, not access
 to private account processing rules or proof of past conversion receipt.
@@ -90,14 +93,49 @@ The test intercepts every request and never falls back to real delivery.
 Private evidence is in ignored output/purchase-tracking/, including the snapshot
 hash and structured browser results. No customer fixture or secret is committed.
 
-## Deployment and remaining proof
+## Authorised deployment and hosted checks
 
-AGENTS.md requires an explicit deployment request; none is inferred from Done
-confirming an Ads setting. Keep the campaign paused. On approval, recheck live
-source, deploy only to the existing InstaPlaque project and independently verify
-canonical/www and hosted assets. No new environment entry or secret is required.
+The earlier Done confirmed an Ads setting, not publication. The owner's later
+explicit Deploy authorised this release. Rechecked source/remote and live base;
+linked only the existing InstaPlaque project identifiers, without downloading
+environment files. Deployment inputs excluded environment files, dependencies,
+private output and data. Existing production environment was reused unchanged.
 
-Then verify the GA4 action's actual property/event mapping and end-to-end receipt
+Created a production candidate with automatic domain promotion disabled. Vercel
+API-runtime checks, Vite and prerender passed; only the known large-chunk advisory.
+The temporary URL was login-protected, so authenticated Vercel requests were used
+for pre-promotion verification. This was an access redirect, not an app failure.
+Candidate main JavaScript and frame HTML/JavaScript byte-matched the tested build
+and source. Verified the frame's noindex/no-referrer/no-store response headers,
+then promoted through Vercel. Both canonical and www were independently inspected
+and report the new READY deployment; www redirects to canonical as before.
+
+Public HTTP checks passed for home, Privacy, Cookies and the new frame/main assets.
+The three existing read-only API health/config routes returned HTTP200 and valid
+JSON; no live generation, database mutation or checkout was invoked.
+Four 390px Chrome scenarios used the actual hosted compiled application, not the
+helper fixture alone. Order API responses were synthetic and intercepted; every
+Google/third-party request was blocked or fulfilled locally. The public assets
+were fetched with clean, query-free static GETs only. Paid emitted one purchase;
+unpaid, test and rejected consent emitted none. Reload did not duplicate it.
+The encoded request retained the existing client ID and correct GBP76.40/digest
+ID, and exposed no private order/session/customer/reference values. No browser
+errors or unexpected API requests; mobile confirmation screenshot inspected.
+This is hosted client integration proof, not a real order/payment/GA4 receipt.
+
+Hosted file SHA-256 values:
+
+- /assets/index-0AfWYGxb.js: fd617378cc6b27b65c692374611f24ebbfdbff0046b69f037b5117b1af14c121
+- /google-purchase.html: dfba549816c39f7dd53c64c65a11a91d709353ce5858c715a5ca2e72bff117eb
+- /google-purchase.js: af2940c9f7ecbcd7833690b5d8e9bc2165706c63241ad515e8fc48d31d18680e
+
+Deployment/site evidence is saved in ignored output/purchase-tracking/. No ad
+account mutation, enabling/spend, real checkout/order creation, customer email,
+database write, provider generation, secret change or PIM deployment occurred.
+
+## Remaining account proof
+
+Keep the campaign paused. Verify the GA4 action's actual property/event mapping and end-to-end receipt
 using a controlled approved measurement check or an eligible genuine purchase.
 No synthetic production sale or real payment is authorised by these local tests.
 Ads attribution can require an eligible ad interaction and reporting delay.
@@ -108,6 +146,7 @@ cookies or blocking can prevent a signal. No server-side backfill is added.
 Pre-existing public-page Google consent is not comprehensively audited by this
 change; the new purchase event is gated on consent.
 
-After a future release, rollback only to the address-free starting deployment,
+If rollback is requested, use only the address-free starting deployment
+dpl_8AR2RibDg36LohHmwHa4qjiQmzrx,
 or revert these files forward on the then-current site. Never restore pre-R2
 code or the withdrawn address. No rollback/payment operation was performed here.
