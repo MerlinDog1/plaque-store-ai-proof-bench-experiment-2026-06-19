@@ -51,7 +51,8 @@ assert.equal((await invoke('POST', '/api/stripe/checkout-session', payload())).s
 const missing = await invoke('POST', '/api/stripe/checkout-session', payload(), true);
 assert.equal(missing.statusCode, 503);
 assert.equal(missing.body.code, 'stripe_test_not_configured');
-assert.equal((await invoke('GET', '/api/admin/checkout-test', null, true)).body.configured, false);
+assert.equal(stripe.getStripeTestConfig().configured, false);
+assert.equal((await invoke('GET', '/api/admin/checkout-test', null, true)).body.mode, 'live');
 await assert.rejects(stripe.createStripeCheckoutSession(order), /not connected/);
 process.env.STRIPE_TEST_SECRET_KEY = 'sk_live_not_allowed';
 await assert.rejects(stripe.createStripeCheckoutSession(order), /not connected/);
@@ -103,4 +104,44 @@ assert.equal(stored.events.filter(event => event.type === 'payment_received').le
 assert.equal(await orders.sendAndRecordOrderEmail(stored, 'customer-order-confirmation', 'test@example.invalid'), stored);
 assert.throws(() => orders.prepareVisualProofAttachment(stored), /do not create production/);
 console.log('PASS paid/repeated return, zero emails and no production proof generation');
-console.log('All £1 sandbox checks passed; no external request, payment or database write was made.');
+
+const livePayload = () => ({ ...payload(), sandboxTest: false, liveTest: true, confirmLivePayment: true });
+assert.equal((await invoke('POST', '/api/stripe/checkout-session', livePayload())).statusCode, 401);
+assert.equal((await invoke('POST', '/api/stripe/checkout-session', { ...livePayload(), confirmLivePayment: false }, true)).statusCode, 400);
+assert.equal((await invoke('POST', '/api/stripe/checkout-session', { ...livePayload(), sandboxTest: true }, true)).statusCode, 400);
+const wrongSizeLive = livePayload(); wrongSizeLive.orderSnapshot.state.width = 124;
+assert.equal((await invoke('POST', '/api/stripe/checkout-session', wrongSizeLive, true)).statusCode, 422);
+const liveOrder = await orders.createPendingOrder(livePayload(), { liveTest: true, insertOrder: async value => value });
+assert.equal(liveOrder.totalPence, 100);
+assert.equal(assertServerCheckoutOrderIsPayable(liveOrder).totalPence, 100);
+assert.equal(liveOrder.metadata.liveVerificationPolicy, '123x456-live-v1');
+assert.equal(liveOrder.metadata.checkoutTestPolicy, undefined);
+assert.throws(() => buildServerCheckoutOrder(livePayload()), /manual quote/);
+assert.throws(() => buildServerCheckoutOrder(livePayload(), { sandboxTest: true, liveTest: true }), /one payment mode/);
+const liveSession = { ...session, id: 'cs_live_synthetic123', livemode: true, client_reference_id: liveOrder.id, metadata: { order_id: liveOrder.id }, url: 'https://checkout.stripe.com/c/pay/cs_live_synthetic123' };
+delete process.env.STRIPE_TEST_SECRET_KEY;
+globalThis.fetch = async (url, options) => { requests.push({ url: String(url), options }); return { ok: true, json: async () => structuredClone(liveSession) }; };
+const liveCreated = await stripe.createStripeCheckoutSession(liveOrder, { uiMode: 'hosted' });
+assert.equal(liveCreated.livemode, true);
+assert.equal(requests.at(-1).options.headers.Authorization, 'Bearer sk_live_synthetic');
+assert.equal(requests.at(-1).options.body.get('line_items[0][price_data][unit_amount]'), '100');
+assert.match(requests.at(-1).options.body.get('line_items[0][price_data][product_data][description]'), /Real £1 payment/);
+assert.equal(requests.at(-1).options.body.get('metadata[live_verification_policy]'), '123x456-live-v1');
+assert.equal(requests.at(-1).options.body.has('metadata[checkout_test_policy]'), false);
+await stripe.retrieveStripeCheckoutSession(liveSession.id, liveOrder);
+assert.equal(requests.at(-1).options.headers.Authorization, 'Bearer sk_live_synthetic');
+stored = { ...liveOrder, stripeCheckoutSessionId: liveSession.id };
+await orders.markOrderPaidFromSession(liveSession, deps);
+await orders.markOrderPaidFromSession(liveSession, deps);
+assert.equal(stored.totalPence, 100);
+assert.equal(stored.paymentStatus, 'paid');
+assert.equal(stored.fulfilmentStatus, 'issue');
+assert.equal(emails, 0);
+assert.equal(stored.events.filter(event => event.type === 'payment_received').length, 1);
+assert.equal(await orders.sendAndRecordOrderEmail(stored, 'customer-order-confirmation', 'test@example.invalid'), stored);
+assert.throws(() => orders.prepareVisualProofAttachment(stored), /do not create production/);
+for (const change of [{ livemode: false }, { livemode: undefined }, { id: 'cs_test_synthetic123' }, { amount_total: 101 }, { currency: 'usd' }, { client_reference_id: 'other' }, { metadata: {} }, { payment_status: 'unpaid' }]) {
+  assert.throws(() => orders.assertStripePaymentMatchesOrder(stored, { ...liveSession, ...change }));
+}
+console.log('PASS owner-only live £1 checkout, explicit real-payment intent, live-key selection with no test key, repeated return and production/email hold');
+console.log('All £1 live/sandbox checks passed; no external request, payment or database write was made.');

@@ -4,6 +4,8 @@
   const checkout = document.getElementById('checkout');
   const start = document.getElementById('start');
   const status = document.getElementById('status');
+  const measurement = document.getElementById('measurement');
+  try { measurement.checked = localStorage.getItem('instaplaque-meta-consent') === 'yes'; } catch { /* Optional storage. */ }
   const check = async () => {
     const response = await fetch('/api/admin/checkout-test', { cache: 'no-store' });
     const data = await response.json();
@@ -17,10 +19,10 @@
     if (!response.ok) throw new Error(data.error || 'Could not check test access.');
     login.hidden = true;
     checkout.hidden = false;
-    start.disabled = !data.configured;
-    status.textContent = data.configured
-      ? 'Ready. Stripe will show a sandbox/test payment, not a real charge.'
-      : 'Prepared, but Stripe sandbox is not connected yet. Add STRIPE_TEST_SECRET_KEY to the InstaPlaque Vercel Production environment and redeploy. Leave the live Stripe keys unchanged.';
+    start.disabled = !data.configured || data.mode !== 'live';
+    status.textContent = !start.disabled
+      ? 'Ready for a real £1 GBP payment. No extra keys are needed.'
+      : 'Live checkout is not available. No payment can be started.';
   };
   login.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -40,12 +42,14 @@
   });
   start.addEventListener('click', async () => {
     start.disabled = true;
-    status.textContent = 'Opening the £1 sandbox checkout…';
+    status.textContent = 'Opening the real £1 checkout…';
     try {
+      try { localStorage.setItem('instaplaque-meta-consent', measurement.checked ? 'yes' : 'no'); }
+      catch { /* A storage restriction must not prevent payment; tracking may stay off. */ }
       const response = await fetch('/api/stripe/checkout-session', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sandboxTest: true, totalPence: 100, currency: 'gbp', origin: location.origin, uiMode: 'hosted',
+          liveTest: true, confirmLivePayment: true, totalPence: 100, currency: 'gbp', origin: location.origin, uiMode: 'hosted',
           orderSnapshot: {
             total: 1, currency: 'gbp', proofApproved: true,
             inscription: 'CHECKOUT TEST — DO NOT MAKE',
@@ -57,9 +61,9 @@
       if (!response.ok) throw new Error(data.error || 'Could not start the test checkout.');
       const session = data.session;
       const destination = new URL(session?.url || '');
-      if (session.livemode !== false || !/^cs_test_[A-Za-z0-9]+$/.test(session.id || '')
+      if (session.livemode !== true || !/^cs_live_[A-Za-z0-9]+$/.test(session.id || '')
         || destination.origin !== 'https://checkout.stripe.com') {
-        throw new Error('The returned checkout was not a Stripe sandbox session. No redirect was made.');
+        throw new Error('The returned checkout was not a live Stripe session. No redirect was made.');
       }
       location.assign(destination.href);
     } catch (error) {

@@ -7,7 +7,7 @@ import {
   validateCheckoutPlaqueState,
 } from "../services/checkoutPolicy.mjs";
 import { sanitizeProofPackageSvg } from "../services/svgSanitizer.mjs";
-import { ONE_POUND_TEST_POLICY, isOnePoundTestOrder, getOnePoundTestPrice } from "./onePoundTest.mjs";
+import { ONE_POUND_TEST_POLICY, ONE_POUND_LIVE_POLICY, isOnePoundTestOrder, getOnePoundTestPrice } from "./onePoundTest.mjs";
 
 const MAX_INSCRIPTION_LENGTH = 4_000;
 const MAX_EMAIL_LENGTH = 254;
@@ -217,8 +217,10 @@ export const buildServerCheckoutOrder = (
     recoveryToken = createCheckoutRecoveryToken(),
     now = new Date(),
     sandboxTest = false,
+    liveTest = false,
   } = {},
 ) => {
+  if (sandboxTest && liveTest) throw new CheckoutRequestError("Choose one payment mode.");
   if (!SERVER_ORDER_ID.test(orderId)) {
     throw new CheckoutRequestError("Invalid server order ID.", 500, "invalid_server_order");
   }
@@ -237,7 +239,7 @@ export const buildServerCheckoutOrder = (
   }
 
   const inscription = normaliseInscription(order.inscription ?? payload.inscription ?? "");
-  const priceBreakdown = sandboxTest
+  const priceBreakdown = (sandboxTest || liveTest)
     ? getOnePoundTestPrice(plaqueState)
     : getCheckoutPriceBreakdown(plaqueState, inscription);
   if (priceBreakdown.quoteRequired) {
@@ -270,7 +272,7 @@ export const buildServerCheckoutOrder = (
     customerName,
     status: "checkout_started",
     paymentStatus: "unpaid",
-    fulfilmentStatus: sandboxTest ? "issue" : "not_started",
+    fulfilmentStatus: (sandboxTest || liveTest) ? "issue" : "not_started",
     totalPence,
     currency: CHECKOUT_CURRENCY,
     productTitle,
@@ -291,6 +293,7 @@ export const buildServerCheckoutOrder = (
     metadata: {
       source: "instaplaque-checkout",
       ...(sandboxTest ? { checkoutTestPolicy: ONE_POUND_TEST_POLICY, noFulfilment: true } : {}),
+      ...(liveTest ? { liveVerificationPolicy: ONE_POUND_LIVE_POLICY, noFulfilment: true } : {}),
       pricingAuthority: "server",
       checkoutPolicyVersion: CHECKOUT_POLICY_VERSION,
       clientOrderId: safeClientOrderId(order.id || payload.orderId),

@@ -58,7 +58,8 @@ const {
 const {
   createStripeCheckoutSession,
   getStripeConfig,
-  getStripeTestConfig,
+  getLiveVerificationConfig,
+  requireLiveVerificationKeys,
   requireStripeTestKey,
   parseStripeWebhook,
   retrieveStripeCheckoutSession,
@@ -535,13 +536,18 @@ export const handleRequest = async (req, res) => {
     try {
       const payload = JSON.parse(await readBody(req));
       const sandboxTest = payload.sandboxTest === true;
-      if (sandboxTest) {
+      const liveTest = payload.liveTest === true;
+      if (sandboxTest || liveTest) {
         if (!requireAdminRequest(req, res)) return;
         // Check availability before creating any persistent order/artwork.
-        requireStripeTestKey();
+        if (sandboxTest && liveTest) { sendJson(res, 400, { error: "Choose one payment mode." }); return; }
+        if (liveTest) {
+          if (payload.confirmLivePayment !== true) { sendJson(res, 400, { error: "Confirm this is a real £1 payment." }); return; }
+          requireLiveVerificationKeys();
+        } else requireStripeTestKey();
         payload.uiMode = "hosted";
       }
-      const pendingOrder = await createPendingOrder(payload, { sandboxTest });
+      const pendingOrder = await createPendingOrder(payload, { sandboxTest, liveTest });
       const session = await createStripeCheckoutSession(pendingOrder, {
         origin: payload.origin,
         uiMode: payload.uiMode,
@@ -566,7 +572,7 @@ export const handleRequest = async (req, res) => {
   if (req.method === "GET" && url.pathname === "/api/admin/checkout-test") {
     if (!requireAdminRequest(req, res)) return;
     sendJsonWithHeaders(res, 200, {
-      ok: true, ...getStripeTestConfig(), width: 123, height: 456, totalPence: 100, currency: "GBP",
+      ok: true, ...getLiveVerificationConfig(), width: 123, height: 456, totalPence: 100, currency: "GBP",
     }, { "Cache-Control": "no-store" });
     return;
   }

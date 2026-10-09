@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { isOnePoundTestOrder, assertOnePoundTestSession } from "./onePoundTest.mjs";
+import { isOnePoundTestOrder, isOnePoundSandboxOrder, isOnePoundLiveOrder, assertOnePoundTestSession } from "./onePoundTest.mjs";
 import {
   assertServerCheckoutOrderIsPayable,
   resolveCheckoutOrigin,
@@ -39,6 +39,20 @@ export const getStripeConfig = () => ({
   hasWebhookSecret: Boolean(stripeWebhookSecret),
   configured: Boolean(stripeSecretKey && stripePublishableKey),
 });
+
+export const getLiveVerificationConfig = () => ({
+  configured: getStripeKeyMode(stripeSecretKey) === "live" && getStripeKeyMode(stripePublishableKey) === "live",
+  mode: "live",
+});
+
+export const requireLiveVerificationKeys = () => {
+  if (!getLiveVerificationConfig().configured) {
+    const error = new Error("Live checkout is not configured. No order or payment was created.");
+    error.statusCode = 503;
+    error.code = "live_checkout_not_configured";
+    throw error;
+  }
+};
 
 export const buildStripeCheckoutParams = (order, options = {}) => {
   const { currency, productTitle, totalPence } = assertServerCheckoutOrderIsPayable(order);
@@ -82,15 +96,19 @@ export const buildStripeCheckoutParams = (order, options = {}) => {
   params.set("metadata[payload_version]", order.metadata.checkoutPolicyVersion);
 
   if (isOnePoundTestOrder(order)) {
-    if (uiMode !== "hosted") throw new Error("The sandbox rehearsal uses hosted checkout.");
+    const live = isOnePoundLiveOrder(order);
+    if (uiMode !== "hosted") throw new Error("The verification payment uses hosted checkout.");
     params.set("cancel_url", `${origin}/checkout-test.html`);
-    params.set("line_items[0][price_data][product_data][name]", `TEST ONLY — ${productTitle}`);
-    params.set("line_items[0][price_data][product_data][description]", "£1 sandbox rehearsal. No real payment, manufacture or delivery.");
+    params.set("line_items[0][price_data][product_data][name]", `${live ? "£1 live verification" : "TEST ONLY"} — ${productTitle}`);
+    params.set("line_items[0][price_data][product_data][description]", live
+      ? "Real £1 payment authorised by the owner to verify checkout. No manufacture or delivery."
+      : "£1 sandbox rehearsal. No real payment, manufacture or delivery.");
     params.set("shipping_options[0][shipping_rate_data][display_name]", "Test only — no delivery");
     for (const key of [...params.keys()]) {
       if (key.includes("delivery_estimate")) params.delete(key);
     }
-    params.set("metadata[checkout_test_policy]", order.metadata.checkoutTestPolicy);
+    params.set(live ? "metadata[live_verification_policy]" : "metadata[checkout_test_policy]",
+      live ? order.metadata.liveVerificationPolicy : order.metadata.checkoutTestPolicy);
   }
 
   return { idempotencyKey: orderId, params, uiMode };
@@ -103,7 +121,8 @@ export const buildStripeRequestHeaders = (idempotencyKey, secretKey = stripeSecr
 });
 
 export const createStripeCheckoutSession = async (order, options = {}) => {
-  const sandboxTest = isOnePoundTestOrder(order);
+  const sandboxTest = isOnePoundSandboxOrder(order);
+  if (isOnePoundLiveOrder(order)) requireLiveVerificationKeys();
   // Never fall back to the live key when the private sandbox is unconfigured.
   const selectedSecretKey = sandboxTest ? requireStripeTestKey() : stripeSecretKey;
   const selectedPublishableKey = sandboxTest ? "" : stripePublishableKey;
@@ -170,7 +189,7 @@ export const createStripeCheckoutSession = async (order, options = {}) => {
 };
 
 export const retrieveStripeCheckoutSession = async (sessionId, order = null) => {
-  const selectedSecretKey = isOnePoundTestOrder(order) ? requireStripeTestKey() : stripeSecretKey;
+  const selectedSecretKey = isOnePoundSandboxOrder(order) ? requireStripeTestKey() : stripeSecretKey;
   if (!selectedSecretKey) throw new Error("STRIPE_SECRET_KEY is not configured on the server.");
   const url = new URL(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`);
   url.searchParams.set("expand[]", "payment_intent");

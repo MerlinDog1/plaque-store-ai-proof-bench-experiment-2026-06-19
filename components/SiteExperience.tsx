@@ -1811,6 +1811,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 
   useEffect(() => {
     if (!order || order.metadata?.checkoutTestPolicy === '123x456-sandbox-v1'
+      || order.metadata?.liveVerificationPolicy === '123x456-live-v1'
       || order.proofPackage?.visualProofRendererVersion === VISUAL_PROOF_RENDERER_VERSION) return;
 
     let cancelled = false;
@@ -1888,14 +1889,16 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   }
 
   const paid = order.paymentStatus === 'paid';
-  if (order.metadata?.checkoutTestPolicy === '123x456-sandbox-v1') {
+  if (order.metadata?.checkoutTestPolicy === '123x456-sandbox-v1'
+    || order.metadata?.liveVerificationPolicy === '123x456-live-v1') {
+    const live = order.metadata?.liveVerificationPolicy === '123x456-live-v1';
     return (
       <div className="commerce-page">
         <section className="commerce-section">
-          <p className="commerce-eyebrow">Private sandbox test</p>
-          <h1>{paid ? 'Your £1 test payment is confirmed.' : 'Your test payment is not complete.'}</h1>
-          <p>123 × 456 mm · {formatPence(order.totalPence, order.currency)}. No real money has been taken.</p>
-          <p>No plaque will be made or dispatched, and no order email is sent. This test is excluded from live Google purchase tracking.</p>
+          <p className="commerce-eyebrow">{live ? 'Private live-payment check' : 'Private sandbox test'}</p>
+          <h1>{paid ? (live ? 'Your £1 payment is confirmed.' : 'Your £1 test payment is confirmed.') : 'Your test payment is not complete.'}</h1>
+          <p>123 × 456 mm · {formatPence(order.totalPence, order.currency)}. {live ? 'This is a real payment.' : 'No real money has been taken.'}</p>
+          <p>No plaque will be made or dispatched, and no order email is sent. {live ? 'Google purchase measurement follows your cookie choice.' : 'This test is excluded from live Google purchase tracking.'}</p>
           <p><a href="/checkout-test.html">Back to the private test</a></p>
         </section>
       </div>

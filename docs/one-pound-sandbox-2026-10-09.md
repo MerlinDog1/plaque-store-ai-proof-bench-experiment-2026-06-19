@@ -1,5 +1,10 @@
 # Private 123 × 456 mm / £1 sandbox checkout
 
+**Superseded:** the owner subsequently requested a real £1 live payment
+(Telegram 3870). See [the live checkout correction](one-pound-live-2026-10-09.md).
+Do not follow the separate-test-key activation steps below for the current task.
+The remainder is the historical sandbox release record.
+
 Owner request, Telegram 3860, 9 October 2026: set up a 123 × 456 mm plaque at £1 for the test, replying to the proposed Stripe sandbox rehearsal. This is **not a live £1 promotion** or permission to charge a real card or enable Ads.
 
 ## Scope and access

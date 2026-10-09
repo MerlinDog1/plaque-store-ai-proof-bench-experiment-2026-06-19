@@ -1,5 +1,15 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Current task — 9 October 2026, owner-requested £1 live checkout
+
+Owner message 3870 explicitly corrected the sandbox setup to an actual £1 live
+payment. Work is isolated on `codex/instaplaque-live-pound-20261009`, based on the
+sandbox deployment and docs checkpoint `9825fae88536fceaff2de20b8b56d2217f0c6570`.
+See [the live checkout contract and release record](docs/one-pound-live-2026-10-09.md).
+The earlier request to add `STRIPE_TEST_SECRET_KEY` is obsolete for this task.
+Existing live keys are used; owner-auth/exact-size/production/email guards remain.
+The owner enters their own card on Stripe. No Ads enabling is authorised.
+
 ## Latest production release — 9 October 2026, purchase tracking
 
 Owner explicitly requested Deploy after reviewing the prepared fix. Released

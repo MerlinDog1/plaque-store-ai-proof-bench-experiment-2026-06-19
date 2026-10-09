@@ -111,6 +111,13 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
   assert.equal(await reloaded.track(order), false, 'Reload honours durable dedupe');
   console.log('PASS paid GBP amount, concurrent/reload dedupe, digest ID and private-field exclusion');
 
+  h = mainHarness();
+  assert.equal(await h.track({ ...order, totalPence: 100, metadata: { liveVerificationPolicy: '123x456-live-v1' } }), true);
+  assert.equal(h.messages[0].data.value, 1);
+  assert.equal(h.messages[0].data.currency, 'GBP');
+  assert.equal(await h.track({ ...order, totalPence: 100, metadata: { liveVerificationPolicy: '123x456-live-v1' } }), false);
+  console.log('PASS consented real £1 verification order reports GBP1 once through normal purchase path');
+
   for (const edit of [
     { paymentStatus: 'unpaid' }, { paymentStatus: 'refunded' }, { totalPence: 0 },
     { totalPence: -1 }, { totalPence: NaN }, { totalPence: 95.5 }, { currency: 'USD' },

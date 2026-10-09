@@ -516,7 +516,9 @@ export const createPendingOrder = async (payload, dependencies = {}) => {
   const maxAttempts = dependencies.maxAttempts || 5;
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    const order = buildServerCheckoutOrder(payload, { orderId: idFactory(), sandboxTest: dependencies.sandboxTest === true });
+    const order = buildServerCheckoutOrder(payload, {
+      orderId: idFactory(), sandboxTest: dependencies.sandboxTest === true, liveTest: dependencies.liveTest === true,
+    });
     try {
       return await insertOrder(order);
     } catch (error) {
@@ -558,7 +560,7 @@ export const attachStripeSessionToOrder = async (orderId, session) => {
 
 export const prepareVisualProofAttachment = (order, payload = {}) => {
   if (isOnePoundTestOrder(order)) {
-    throw new CheckoutRequestError("Sandbox orders do not create production proof packs.", 409, "test_order_no_fulfilment");
+    throw new CheckoutRequestError("Verification orders do not create production proof packs.", 409, "test_order_no_fulfilment");
   }
   const sessionId = String(payload.stripeCheckoutSessionId || "").trim();
   const storedSessionId = String(order?.stripeCheckoutSessionId || "").trim();
@@ -891,7 +893,7 @@ export const updateOrderStatus = async (orderId, payload) => {
   const order = await getOrderById(orderId);
   if (!order) throw new Error(`Order ${orderId} was not found.`);
   if (isOnePoundTestOrder(order)) {
-    throw new CheckoutRequestError("Sandbox orders cannot enter production or dispatch.", 409, "test_order_no_fulfilment");
+    throw new CheckoutRequestError("Verification orders cannot enter production or dispatch.", 409, "test_order_no_fulfilment");
   }
   const status = payload.status || order.status;
   const fulfilmentStatus = payload.fulfilmentStatus || order.fulfilmentStatus;
