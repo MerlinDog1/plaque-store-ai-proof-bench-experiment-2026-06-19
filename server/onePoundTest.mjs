@@ -1,5 +1,6 @@
 // The server route must authenticate the owner before requesting this policy.
 // A client-provided metadata flag never enables it.
+import { isOnePoundTestPlaque } from "../services/onePoundTestPlaque.mjs";
 export const ONE_POUND_TEST_POLICY = "123x456-sandbox-v1";
 export const ONE_POUND_LIVE_POLICY = "123x456-live-v1";
 
@@ -14,8 +15,7 @@ export const isOnePoundTestOrder = (order) => (
 );
 
 export const getOnePoundTestPrice = (state) => {
-  if (state?.width !== 123 || state?.height !== 456 || state.shape !== "rect"
-    || state.wood !== false || state.memorialImageEnabled !== false) {
+  if (!isOnePoundTestPlaque(state)) {
     const error = new Error("The £1 test requires a 123 × 456 mm rectangular plaque without wood or artwork.");
     error.statusCode = 422;
     error.code = "invalid_test_plaque";

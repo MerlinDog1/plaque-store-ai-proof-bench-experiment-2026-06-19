@@ -1,5 +1,15 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Current work — 10 October 2026, £1 test designer entry
+
+Owner message 3874 requested removal of the oversized quote obstacle for the
+123 × 456 mm live checkout test. Isolated branch
+`codex/instaplaque-test-designer-20261010` adds the exact-size designer/checkout
+link to the existing owner-authenticated test page. Server payment, quote,
+production and email guards remain. Unit/canonical checkout, TypeScript, build
+and both mobile fixture suites passed. Not yet deployed at this checkpoint.
+Read [the correction and release record](docs/one-pound-designer-2026-10-10.md).
+
 ## Latest production release — 9 October 2026, owner-requested £1 live checkout
 
 Owner message 3870 explicitly corrected the sandbox setup to an actual £1 live

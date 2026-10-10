@@ -8,6 +8,8 @@ import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter
 import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
 import { businessContact } from '../services/shopInformation';
 import { trackGooglePurchase, OPTIONAL_AD_CONSENT_CHANGED } from '../services/googlePurchase';
+import { isOnePoundTestPlaque } from '../services/onePoundTestPlaque.mjs';
+import { OwnerTestCheckout } from './OwnerTestCheckout';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -1642,6 +1644,10 @@ function CheckoutPage({
       if (embeddedMountRef.current) embeddedMountRef.current.replaceChildren();
     };
   }, [createdOrder, embeddedClientSecret, stripePublishableKey]);
+
+  if (!checkoutRecoveryLoading && isOnePoundTestPlaque(state)) {
+    return <div className="commerce-page"><section className="commerce-section"><OwnerTestCheckout /></section></div>;
+  }
 
   return (
     <div className="commerce-page">

@@ -23,6 +23,8 @@ import type { GenerationPhase } from '../services/geminiService';
 import { BENCH_SAFE_MARGIN_PERCENT, DEFAULT_SAFE_MARGIN_PERCENT, SAFE_MARGIN_PRESETS, getSafeMarginMm, getSafeMarginsMm, getSafeMarginPercent } from '../services/safeMargin';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { estimatePlaqueBasePrice, estimateWoodAddOn } from '../services/pricing';
+import { isOnePoundTestPlaque } from '../services/onePoundTestPlaque.mjs';
+import { OwnerTestCheckout } from './OwnerTestCheckout';
 
 const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
@@ -2307,6 +2309,7 @@ export const Controls: React.FC<Props> = ({
           </div>
           )}
 
+          {isOnePoundTestPlaque(state) ? <OwnerTestCheckout /> : (
           <div className="proof-checkout-panel rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Order summary</div>
             <div className="mt-3 space-y-2 text-sm font-bold text-[#2f3832]">
@@ -2439,6 +2442,7 @@ export const Controls: React.FC<Props> = ({
             </div>
           </div>
 
+          )}
           {showAdminProofTools && adminProofToolsOpen && (
           <details className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <summary className="cursor-pointer text-sm font-black text-[#6a746d]">Production file for our workshop</summary>
