@@ -1,5 +1,40 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Latest production release — 12 October 2026, consented PostHog analytics
+
+Application source `c02abb4ba1bea240741a9435da2d1362df9f00da`, branch
+`codex/instaplaque-posthog-20261012`, was reviewed, pushed, built as a protected
+production candidate, verified, then promoted to
+`dpl_6MFCt8yZsRfZvTrZ77MHhMKiTuQi`. Independent canonical inspection and both
+canonical/www HTML confirm `index-BNGuODZU.js`. Candidate asset bytes matched
+the tested build. Hosted synthetic proof save/read verified target Supabase
+`fygweiynqkglmjwqlouc` and private R2; only its own fixture/objects were removed.
+
+PostHog EU project 303026 now has an InstaPlaque-only dashboard 1017503 with
+14 tiles and daily subscription 51654 to sales@tradeetching.com at 08:00 UTC,
+starting 13 October. Ten exact rolling-24h charts, selected preceding-24h
+comparisons, no AI summary/replay/upgrades/action alerts. Existing Sample Studio
+subscription is untouched. Production QA ingestion (one visit, three pageviews,
+one product view, one designer start and three steps) reconciled with native
+charts and the event log; all nine events are unique and excluded from reports.
+Ordinary report counts were zero at initial verification; no history backfill.
+
+Typecheck, local/cloud builds, new analytics tests, Google purchase regression,
+design-request/checkout/input-security checks and intercepted browser fixtures
+passed. No real enquiry, payment, generation or customer notification was sent.
+The owner-authorised first report completed in PostHog at 15:12:35 UTC with all
+ten chart exports; per-recipient provider/inbox receipt is not exposed. See the
+detailed release document. Do not send another without checking
+the existing delivery history. Purchases require a consented paid return and
+are not the full accounting ledger. New analytics permission is required;
+legacy advertising acceptance alone does not activate PostHog.
+
+Read [tracking, verification and limitations](docs/posthog-analytics-2026-10-12.md)
+and [saved dashboard/subscription configuration](docs/posthog-dashboard-2026-10-12.json).
+No backend environment was changed. Code-only rollback to
+`dpl_6XcsgpUTxk5AG5uE9sG6xQg4Pf2H` retains migration/payment compatibility but
+removes the new tracking and restores the earlier consent behaviour.
+
 ## Latest production release — 10 October 2026, £1 test designer entry
 
 Owner message 3874 requested removal of the oversized quote obstacle for the
