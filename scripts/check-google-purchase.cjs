@@ -69,8 +69,8 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
 (async () => {
   for (const url of [returnUrl, origin + '/order-confirmed', origin + '/admin',
     origin + '/proof/private', origin + '/?proof=private', origin + '/?view=checkout']) {
-    const scripts = [], window = { location: new URL(url) };
-    const context = { window, URL, Date, document: { referrer: '', createElement: () => ({}),
+    const scripts = [], window = { location: new URL(url), addEventListener() {} };
+    const context = { window, location: window.location, localStorage: { getItem: () => 'yes' }, URL, Date, document: { referrer: '', createElement: () => ({}),
       head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
     vm.runInNewContext(bootstrap, context);
@@ -78,8 +78,8 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
     assert.equal(window.dataLayer.length, 0);
   }
   {
-    const scripts = [], window = { location: new URL(origin + '/brass-plaques?utm_source=ad&untrusted=private#secret') };
-    const context = { window, URL, Date, document: { referrer: origin + '/?proof=private',
+    const scripts = [], window = { location: new URL(origin + '/brass-plaques?utm_source=ad&untrusted=private#secret'), addEventListener() {} };
+    const context = { window, location: window.location, localStorage: { getItem: () => 'yes' }, URL, Date, document: { referrer: origin + '/?proof=private',
       createElement: () => ({}), head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
     vm.runInNewContext(bootstrap, context);
@@ -91,6 +91,14 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
     assert.equal(ga[2].page_referrer, origin);
   }
   console.log('PASS private Google bootstrap exclusions and unchanged public GA4 URL redaction');
+  for (const consent of [null, 'no']) {
+    const scripts = [], window = { location: new URL(origin), addEventListener() {} };
+    const context = { window, location: window.location, localStorage: { getItem: () => consent }, URL, Date,
+      document: { referrer: '', createElement: () => ({}), head: { appendChild: script => scripts.push(script) } } };
+    Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
+    vm.runInNewContext(bootstrap, context);
+    assert.equal(scripts.length, 0, 'No Google loader without analytics consent');
+  }
   let h = mainHarness();
   assert.deepEqual(await Promise.all([h.track(order), h.track(order)]), [true, true]);
   assert.equal(h.frames.length, 1, 'Concurrent React calls share one measurement');

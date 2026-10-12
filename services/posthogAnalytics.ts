@@ -1,0 +1,202 @@
+import { productFamilies, seoLandingPages } from './commerce';
+import { OPTIONAL_AD_CONSENT_CHANGED, metaConsent } from './metaPixel';
+
+// Public ingestion token, NOT a personal/API management credential.
+const projectToken = 'phc_txLFAUv88ttyLLTKgi3arQ7428Jy5XSQEtGFm6jYrYxJ';
+export const ANALYTICS_CONSENT_KEY = 'instaplaque-analytics-consent-v1';
+const sessionKey = 'instaplaque-analytics-session-v1';
+const purchasesKey = 'instaplaque-analytics-purchases-v1';
+const qaKey = 'instaplaque-analytics-qa';
+const hosts = new Set(['instaplaque.co.uk', 'www.instaplaque.co.uk']);
+const products = new Set(productFamilies.map(product => product.slug));
+const publicPaths = new Set(['/', '/design', '/design-request', '/about', '/materials', '/how-it-works', '/faq', '/quote', '/contact', '/terms', '/privacy', '/cookies', '/returns-and-cancellations',
+  ...productFamilies.map(product => `/${product.slug}`), ...seoLandingPages.map(page => `/${page.slug}`)]);
+const events = new Set(['visit', 'page_viewed', 'product_viewed', 'designer_started', 'designer_step_viewed', 'wording_started',
+  'layout_requested', 'layout_generated', 'layout_failed', 'proof_download_requested', 'proof_download_prepared', 'proof_download_failed',
+  'proof_saved', 'checkout_requested', 'checkout_started', 'checkout_failed', 'purchase_completed',
+  'enquiry_started', 'enquiry_reviewed', 'enquiry_submission_requested', 'enquiry_submitted', 'enquiry_failed', 'contact_clicked']);
+type Properties = Record<string, string | number | boolean>;
+type Session = { id: string; last: number; attribution: Properties; seen: string[]; isTest: boolean };
+let session: Session | undefined;
+let lastPage = '';
+let started = false;
+const pending = new Set<AbortController>();
+const pendingPurchases = new Set<string>();
+
+export function analyticsConsent(): string | null {
+  try { return localStorage.getItem(ANALYTICS_CONSENT_KEY) || (metaConsent() === 'no' ? 'no' : null); }
+  catch { return null; }
+}
+export function setAnalyticsConsent(allow: boolean): void {
+  try { localStorage.setItem(ANALYTICS_CONSENT_KEY, allow ? 'yes' : 'no'); } catch { /* Fail closed. */ }
+  consentChanged();
+}
+function allowed(): boolean {
+  return hosts.has(location.hostname) && location.protocol === 'https:' && analyticsConsent() === 'yes';
+}
+function pagePath(): string | null {
+  const path = location.pathname.replace(/\/$/, '') || '/';
+  // Private links never become pageviews, even if their path is normally public.
+  const params = new URL(location.href).searchParams;
+  if (['proof', 'order', 'session_id'].some(key => params.has(key))) return null;
+  if (/admin|checkout|order|proof/i.test(params.get('view') || '')) return null;
+  return publicPaths.has(path) ? path : null;
+}
+function campaignLabel(value: string | null): string {
+  // Campaign labels only, never click IDs, search terms, URLs or free-form text.
+  return value && /^[a-z][a-z0-9_-]{0,63}$/i.test(value) ? value.toLowerCase() : '';
+}
+function attribution(): Properties {
+  const url = new URL(location.href);
+  const source = campaignLabel(url.searchParams.get('utm_source'));
+  const medium = campaignLabel(url.searchParams.get('utm_medium'));
+  const campaign = campaignLabel(url.searchParams.get('utm_campaign'));
+  let referringDomain = '';
+  try {
+    const ref = new URL(document.referrer);
+    if (['http:', 'https:'].includes(ref.protocol) && !hosts.has(ref.hostname)) referringDomain = ref.hostname;
+  } catch { /* No usable referrer. */ }
+  const qr = medium === 'qr' || source === 'qr';
+  return { source: qr ? 'tagged QR' : source || referringDomain || 'direct/unknown',
+    medium: qr ? 'qr' : medium || (referringDomain ? 'referral' : 'direct/unknown'),
+    campaign: campaign || '(none)', traffic_type: qr ? 'tagged QR' : source || medium || campaign ? 'tagged campaign' : referringDomain ? 'referral' : 'direct/unknown' };
+}
+function persistSession(): void {
+  try { localStorage.setItem(sessionKey, JSON.stringify(session)); } catch { /* Memory only if storage is unavailable. */ }
+}
+function getSession(): Session {
+  const now = Date.now();
+  let isTest = false;
+  try { isTest = sessionStorage.getItem(qaKey) === 'yes'; } catch { /* Default to ordinary traffic. */ }
+  if (!session) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(sessionKey) || 'null');
+      if (saved && /^[a-f0-9-]{36}$/.test(saved.id) && Array.isArray(saved.seen) && typeof saved.last === 'number'
+        && saved.attribution && typeof saved.attribution === 'object') session = saved;
+    } catch { /* Ignore corrupt/old storage. */ }
+  }
+  if (!session || now - session.last > 30 * 60_000 || session.isTest !== isTest) {
+    session = { id: crypto.randomUUID(), last: now, attribution: attribution(), seen: [], isTest };
+    lastPage = '';
+  }
+  session.last = now;
+  persistSession();
+  return session;
+}
+function safeProperties(input: Properties): Properties {
+  const result: Properties = {};
+  const enums: Record<string, string[]> = {
+    step: ['size', 'material', 'colour', 'fixings', 'backing', 'wording', 'review'],
+    format: ['pdf', 'svg'], method: ['ai', 'manual'], channel: ['email', 'phone'],
+    shape: ['rect', 'oval', 'circle', 'heart'],
+    material: ['brushed-brass', 'orbital-brass-matt-lacquer', 'polished-brass', 'aged-brass', 'brushed-stainless', 'polished-stainless'],
+    outcome_source: ['design_request_api', 'stripe_session_api', 'paid_order_api', 'browser_download'],
+  };
+  for (const [key, choices] of Object.entries(enums)) {
+    if (typeof input[key] === 'string' && choices.includes(input[key] as string)) result[key] = input[key];
+  }
+  if (typeof input.product === 'string' && products.has(input.product)) result.product = input.product;
+  for (const key of ['width_mm', 'height_mm']) {
+    if (typeof input[key] === 'number' && Number.isFinite(input[key]) && input[key] > 0 && input[key] <= 3000) result[key] = input[key];
+  }
+  if (typeof input.value_gbp === 'number' && Number.isFinite(input.value_gbp) && input.value_gbp > 0 && input.value_gbp < 100_000) {
+    result.value_gbp = Math.round(input.value_gbp * 100) / 100; result.currency = 'GBP';
+  }
+  return result;
+}
+function device(): Properties {
+  const ua = navigator.userAgent;
+  const tablet = /iPad|Tablet/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+  return { device_type: tablet ? 'Tablet' : /Mobi|Android/i.test(ua) ? 'Mobile' : 'Desktop',
+    browser: /Edg\//.test(ua) ? 'Edge' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'Other' };
+}
+async function capture(event: string, properties: Properties, current: Session, uuid = crypto.randomUUID()): Promise<boolean> {
+  if (!allowed()) return false;
+  const controller = new AbortController(); pending.add(controller);
+  const timer = window.setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch('https://eu.i.posthog.com/i/v0/e/', {
+      method: 'POST', mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', keepalive: true,
+      headers: { 'Content-Type': 'text/plain' }, signal: controller.signal,
+      body: JSON.stringify({ api_key: projectToken, uuid, event: `ip_${event}`, distinct_id: current.id,
+        timestamp: new Date().toISOString(), properties: {
+          ...current.attribution, ...device(), ...properties, site_id: 'instaplaque', environment: 'production',
+          is_test: current.isTest, schema_version: 1, consent: true, event_id: uuid,
+          $session_id: current.id, $process_person_profile: false,
+        } }),
+    });
+    return response.ok;
+  } catch { return false; } // Measurement must never interrupt shopping; no retry/request storm.
+  finally { window.clearTimeout(timer); pending.delete(controller); }
+}
+function ensureVisit(current: Session, page = pagePath() || '/order-confirmed'): void {
+  if (current.seen.includes('visit')) return;
+  current.seen.push('visit'); persistSession();
+  void capture('visit', { page }, current);
+}
+export function trackSiteEvent(event: string, properties: Properties = {}, onceKey?: string): void {
+  // Checkout outcomes may originate on a private recovery URL. Only the fixed
+  // route label is emitted, never its parameters, order or payment references.
+  const page = pagePath() || (location.pathname === '/checkout' && ['checkout_requested', 'checkout_started', 'checkout_failed'].includes(event) ? '/checkout' : null);
+  if (!events.has(event) || !allowed() || !page) return;
+  const current = getSession(); ensureVisit(current, page);
+  if (onceKey && current.seen.includes(onceKey)) return;
+  if (onceKey) { current.seen = [...current.seen, onceKey].slice(-200); persistSession(); }
+  void capture(event, { ...safeProperties(properties), page }, current);
+}
+export function trackSitePage(): void {
+  const page = pagePath();
+  if (!allowed() || !page) return;
+  const current = getSession(); ensureVisit(current);
+  if (lastPage === page) return;
+  lastPage = page;
+  void capture('page_viewed', { page }, current);
+  const product = page.slice(1);
+  if (products.has(product)) void capture('product_viewed', { page, product }, current);
+}
+function consentChanged(): void {
+  if (analyticsConsent() === 'yes') { trackSitePage(); return; }
+  pending.forEach(controller => controller.abort()); pending.clear();
+  session = undefined; lastPage = '';
+  try { localStorage.removeItem(sessionKey); localStorage.removeItem(purchasesKey); } catch { /* No storage access. */ }
+}
+export function startSiteAnalytics(): void {
+  if (started) return;
+  started = true;
+  window.addEventListener(OPTIONAL_AD_CONSENT_CHANGED, consentChanged);
+  window.addEventListener('storage', event => {
+    if ([ANALYTICS_CONSENT_KEY, 'instaplaque-meta-consent', null].includes(event.key)) consentChanged();
+  });
+  document.addEventListener('click', event => {
+    const link = (event.target as Element)?.closest?.('a[href]');
+    const href = link?.getAttribute('href') || '';
+    if (/^(mailto:|tel:)/i.test(href)) trackSiteEvent('contact_clicked', { channel: href.toLowerCase().startsWith('tel:') ? 'phone' : 'email' });
+  });
+  trackSitePage();
+}
+
+type PaidOrder = { id: string; paymentStatus: string; totalPence: number; currency: string; stripeCheckoutSessionId?: string; metadata?: Record<string, unknown> };
+export async function trackPostHogPurchase(order: PaidOrder): Promise<boolean> {
+  const url = new URL(location.href);
+  if (!allowed() || url.pathname !== '/order-confirmed' || url.searchParams.get('order') !== order.id
+    || url.searchParams.get('session_id') !== order.stripeCheckoutSessionId || !/^cs_live_[A-Za-z0-9]+$/.test(order.stripeCheckoutSessionId || '')
+    || order.paymentStatus !== 'paid' || order.metadata?.checkoutTestPolicy || order.metadata?.liveVerificationPolicy
+    || !Number.isSafeInteger(order.totalPence) || order.totalPence <= 0 || order.currency?.toUpperCase() !== 'GBP') return false;
+  if (pendingPurchases.has(order.id)) return false;
+  pendingPurchases.add(order.id);
+  try {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`instaplaque:posthog:purchase:${order.id}`));
+    const key = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+    let paid: Record<string, number> = {};
+    try { paid = JSON.parse(localStorage.getItem(purchasesKey) || '{}') || {}; } catch { /* Ignore damaged storage. */ }
+    if (paid[key] || !allowed()) return false;
+    const current = getSession(); ensureVisit(current);
+    const accepted = await capture('purchase_completed', { page: '/order-confirmed', value_gbp: order.totalPence / 100, currency: 'GBP', outcome_source: 'paid_order_api', transaction_key: key }, current);
+    if (accepted && allowed()) {
+      paid[key] = Date.now();
+      try { localStorage.setItem(purchasesKey, JSON.stringify(Object.fromEntries(Object.entries(paid).filter(([, at]) => Date.now() - at < 90 * 86400_000).slice(-100)))); } catch { /* In-memory guard below. */ }
+    }
+    if (!accepted) pendingPurchases.delete(order.id);
+    return accepted;
+  } catch { pendingPurchases.delete(order.id); return false; }
+}

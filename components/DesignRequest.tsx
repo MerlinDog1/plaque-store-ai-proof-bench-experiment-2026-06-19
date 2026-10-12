@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Fixing, Material, PlaqueState, Shape } from '../types';
+import { trackSiteEvent } from '../services/posthogAnalytics';
 
 const materials: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass', [Material.OrbitalBrassMattLacquer]: 'Orbital brass',
@@ -27,6 +28,7 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
   const [website, setWebsite] = useState('');
   const sendRequest = async () => {
     if (sending || receipt) return;
+    trackSiteEvent('enquiry_submission_requested');
     setSending(true); setSubmissionError('');
     try {
       const attachment = file ? await new Promise<{type:string; content:string}>((resolve, reject) => {
@@ -42,7 +44,9 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
       const result = await response.json().catch(() => ({}));
       if (!response.ok || result.ok !== true || typeof result.reference !== 'string') throw new Error(result.error || 'We could not confirm receipt. Please retry without changing the brief, or contact us.');
       setReceipt(result.reference);
+      trackSiteEvent('enquiry_submitted', { outcome_source: 'design_request_api' }, `enquiry:${requestId}`);
     } catch (error) {
+      trackSiteEvent('enquiry_failed');
       setSubmissionError(error instanceof Error && error.name !== 'TimeoutError' ? error.message : 'We could not confirm receipt. Please retry without changing the brief, or contact us.');
     } finally { setSending(false); }
   };
@@ -83,7 +87,7 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
           {submissionError && <p role="alert">{submissionError} <a href="/contact">Contact us</a></p>}
           <button type="button" className="shop-button" disabled={sending} onClick={sendRequest}>{sending ? 'Sending request…' : 'Send my design request'}</button>
           <button type="button" className="shop-button" disabled={sending} onClick={() => setReview(false)}>Edit my request</button>
-        </section> : <form className="request-card" onSubmit={event => { event.preventDefault(); if (draft.wording.trim() && draft.name.trim()) setReview(true); }}>
+        </section> : <form className="request-card" onFocus={() => trackSiteEvent('enquiry_started', {}, 'enquiry_started')} onSubmit={event => { event.preventDefault(); if (draft.wording.trim() && draft.name.trim()) { setReview(true); trackSiteEvent('enquiry_reviewed', {}, `enquiry-review:${requestId}`); } }}>
           <label aria-hidden="true" style={{position:'absolute',left:'-10000px'}}>Website<input name="website" tabIndex={-1} autoComplete="off" value={website} onChange={event => setWebsite(event.target.value)} /></label>
           <fieldset><legend>1. Choose your plaque</legend><p>These are your preferences, not a final order. We’ll confirm suitability and the final price with your proof.</p>
             <label>Size<input pattern={'.*\\S.*'} title="Enter a size or ask us to advise" list="request-sizes" value={draft.size} required maxLength={100} onChange={event => update('size', event.target.value)} placeholder="e.g. 150 × 50 mm, or please advise" /></label>

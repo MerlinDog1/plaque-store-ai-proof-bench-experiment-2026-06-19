@@ -1,5 +1,7 @@
 import { MetaConsent } from './components/MetaConsent';
 import { trackMetaCheckout } from './services/metaPixel';
+import { OPTIONAL_AD_CONSENT_CHANGED } from './services/metaPixel';
+import { trackSiteEvent, trackSitePage } from './services/posthogAnalytics';
 import { LayoutProgress } from './components/LayoutProgress';
 import { DesignRequest } from './components/DesignRequest';
 import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
@@ -260,6 +262,18 @@ const App: React.FC = () => {
   const selectedProduct = getProductBySlug(selectedProductSlug);
   const selectedLanding = getLandingPageBySlug(selectedLandingSlug);
   useSeoMeta(currentView, selectedProduct, selectedLanding);
+
+  useEffect(() => { trackSitePage(); }, [currentView, selectedProductSlug, selectedLandingSlug]);
+  useEffect(() => {
+    const track = () => {
+      if (currentView !== 'plaque') return;
+      trackSiteEvent('designer_started', {}, 'designer_started');
+      trackSiteEvent('designer_step_viewed', { step: ['size', 'material', 'colour', 'fixings', 'backing', 'wording', 'review'][activeStep] }, `step:${activeStep}`);
+    };
+    track();
+    window.addEventListener(OPTIONAL_AD_CONSENT_CHANGED, track);
+    return () => window.removeEventListener(OPTIONAL_AD_CONSENT_CHANGED, track);
+  }, [currentView, activeStep]);
 
   // --- Auth & Startup Logic ---
   useEffect(() => {
@@ -727,6 +741,7 @@ const App: React.FC = () => {
 
   const handleGenerateLayout = async (prompt: string) => {
     if (isGeneratingLayout) return;
+    trackSiteEvent('layout_requested', { method: 'ai', shape: state.shape, material: state.material, width_mm: state.width, height_mm: state.height });
     const snapshot = currentLayoutRef.current;
     setLayoutMessage('');
     setIsGeneratingLayout(true);
@@ -777,8 +792,10 @@ const App: React.FC = () => {
           aiReasoning: result.reasoning
         }));
         setActiveStep(5);
+        trackSiteEvent('layout_generated', { method: 'ai', shape: state.shape, material: state.material });
       }
     } catch (error) {
+      trackSiteEvent('layout_failed', { method: 'ai' });
       setLayoutMessage(error instanceof Error ? error.message : 'We could not create a readable layout. Try a larger plaque, less wording or contact us for help.');
     } finally {
       setIsGeneratingLayout(false);
@@ -787,6 +804,7 @@ const App: React.FC = () => {
   };
 
   const handlePromptChange = (prompt: string) => {
+    if (prompt.trim()) trackSiteEvent('wording_started', {}, 'wording_started');
     setInscriptionPrompt(prompt);
     setProofSaved(false);
     setBasketAdded(false);
@@ -834,6 +852,7 @@ const App: React.FC = () => {
   };
 
   const handleCreateManualLayout = async () => {
+    trackSiteEvent('layout_requested', { method: 'manual', shape: state.shape, material: state.material });
     const snapshot = currentLayoutRef.current;
     try {
       await document.fonts?.load('400 16px Lato');
@@ -842,7 +861,8 @@ const App: React.FC = () => {
       const svg = createManualTypography(inscriptionPrompt, { width: box.textW, height: box.textH });
       acceptLayout(svg.svgContent, inscriptionPrompt, 'Locally arranged editable inscription.', state.designStyle, true);
       setLayoutMessage('Editable layout ready. No AI was used.');
-    } catch (error) { setLayoutMessage(error instanceof Error ? error.message : 'Could not fit this wording.'); }
+      trackSiteEvent('layout_generated', { method: 'manual', shape: state.shape, material: state.material });
+    } catch (error) { trackSiteEvent('layout_failed', { method: 'manual' }); setLayoutMessage(error instanceof Error ? error.message : 'Could not fit this wording.'); }
   };
 
   const handleApplyLayoutInstruction = async (instruction: string) => {
@@ -1004,12 +1024,15 @@ const App: React.FC = () => {
   const handleExportSvg = async () => {
     if (!svgRef.current) return;
     if (!confirmReadiness('Corel SVG export')) return;
+    trackSiteEvent('proof_download_requested', { format: 'svg' });
     await downloadCorelSvg(svgRef.current, state);
+    trackSiteEvent('proof_download_prepared', { format: 'svg', outcome_source: 'browser_download' });
   };
 
   const handleExportPdf = async () => {
     if (!svgRef.current) return;
     if (!confirmReadiness('PDF export')) return;
+    trackSiteEvent('proof_download_requested', { format: 'pdf' });
     let continueUrl: string | undefined;
     try {
       const response = await fetch('/api/proof-sessions', {
@@ -1038,10 +1061,12 @@ const App: React.FC = () => {
       }
     } catch (error) {
       console.error('Remote PDF resume link could not be created.', error);
+      trackSiteEvent('proof_download_failed', { format: 'pdf' });
       window.alert('The proof PDF could not be saved right now. Please try again shortly so its QR code can open a reliable saved proof.');
       return;
     }
     if (!continueUrl) {
+      trackSiteEvent('proof_download_failed', { format: 'pdf' });
       window.alert('The proof PDF could not be saved right now. Please try again shortly.');
       return;
     }
@@ -1052,6 +1077,7 @@ const App: React.FC = () => {
       wording: inscriptionPrompt,
       price,
     });
+    trackSiteEvent('proof_download_prepared', { format: 'pdf', outcome_source: 'browser_download' });
   };
 
   const handleNativePrint = () => {
@@ -1074,6 +1100,7 @@ const App: React.FC = () => {
     try {
       localStorage.setItem('plaques-ai-saved-proof', JSON.stringify(savedProof));
       setProofSaved(true);
+      trackSiteEvent('proof_saved');
     } catch {
       alert('This browser could not save the proof locally. Your current design is still open.');
     }
@@ -1203,6 +1230,7 @@ const App: React.FC = () => {
       visualProofPng: null,
     }, deliveryAddress);
     let checkoutOrder = order;
+    trackSiteEvent('checkout_requested', { product: selectedProductSlug, shape: state.shape, material: state.material });
     try {
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 12000);
@@ -1280,6 +1308,7 @@ const App: React.FC = () => {
           },
         };
         if (checkoutOrder.stripeSimulation.checkoutUrl && checkoutOrder.stripeSimulation.uiMode !== 'embedded') {
+          if (session.livemode) trackSiteEvent('checkout_started', { value_gbp: checkoutOrder.total, outcome_source: 'stripe_session_api' }, `checkout:${session.id}`);
           trackMetaCheckout(checkoutOrder);
           persistCheckoutOrder(checkoutOrder);
           return checkoutOrder;
@@ -1289,9 +1318,11 @@ const App: React.FC = () => {
       }
     } catch (error) {
       console.error('Stripe checkout session could not be created.', error);
+      trackSiteEvent('checkout_failed');
       throw error;
     }
     trackMetaCheckout(checkoutOrder);
+    if (checkoutOrder.stripeSimulation.mode === 'live') trackSiteEvent('checkout_started', { value_gbp: checkoutOrder.total, outcome_source: 'stripe_session_api' }, `checkout:${checkoutOrder.stripeSimulation.checkoutSessionId}`);
     persistCheckoutOrder(checkoutOrder);
     return checkoutOrder;
   };

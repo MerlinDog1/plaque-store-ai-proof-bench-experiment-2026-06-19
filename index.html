@@ -2044,7 +2044,19 @@
     var privateAnalyticsPage = /^\/(admin|proof|order|order-confirmed|checkout)(\/|$)/.test(analyticsUrl.pathname)
       || ['proof', 'order', 'session_id'].some(function (key) { return analyticsUrl.searchParams.has(key); })
       || ['admin', 'checkout', 'order'].includes(analyticsUrl.searchParams.get('view'));
-    if (!privateAnalyticsPage) {
+    var googleTagsStarted = false;
+    function updateGoogleConsent() {
+      var allowed = false;
+      try { allowed = localStorage.getItem('instaplaque-analytics-consent-v1') === 'yes'; } catch (_) {}
+      allowed = allowed && ['instaplaque.co.uk', 'www.instaplaque.co.uk'].includes(location.hostname);
+      window['ga-disable-G-FKP17EXNBX'] = !allowed;
+      if (!allowed) {
+        if (googleTagsStarted) gtag('consent', 'update', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+        return;
+      }
+      if (googleTagsStarted) { gtag('consent', 'update', { analytics_storage: 'granted', ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted' }); return; }
+      if (privateAnalyticsPage) return;
+      googleTagsStarted = true;
       gtag('js', new Date());
       gtag('config', 'AW-18288208905');
       analyticsUrl.hash = '';
@@ -2062,6 +2074,9 @@
       googleTagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-18288208905';
       document.head.appendChild(googleTagScript);
     }
+    updateGoogleConsent();
+    window.addEventListener('instaplaque:optional-ad-consent-changed', updateGoogleConsent);
+    window.addEventListener('storage', updateGoogleConsent);
   </script>
 </head>
 

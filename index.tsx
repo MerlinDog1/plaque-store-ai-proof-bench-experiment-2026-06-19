@@ -6,17 +6,23 @@ import './index.css';
 import './shopfront.css';
 import './designer.css';
 import { redactAnalyticsEvent } from './services/analyticsPrivacy.mjs';
+import { analyticsConsent, startSiteAnalytics } from './services/posthogAnalytics';
+import { OPTIONAL_AD_CONSENT_CHANGED } from './services/metaPixel';
 
 const analyticsHosts = new Set([
   'instaplaque.co.uk',
   'www.instaplaque.co.uk',
 ]);
 
-if (analyticsHosts.has(window.location.hostname) || window.location.hostname.endsWith('.vercel.app')) {
-  inject({
-    beforeSend: redactAnalyticsEvent,
-  });
-}
+let vercelAnalyticsStarted = false;
+const startVercelAnalytics = () => {
+  if (vercelAnalyticsStarted || !analyticsHosts.has(window.location.hostname) || analyticsConsent() !== 'yes') return;
+  vercelAnalyticsStarted = true;
+  inject({ beforeSend: event => analyticsConsent() === 'yes' ? redactAnalyticsEvent(event) : null });
+};
+startVercelAnalytics();
+window.addEventListener(OPTIONAL_AD_CONSENT_CHANGED, startVercelAnalytics);
+startSiteAnalytics();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

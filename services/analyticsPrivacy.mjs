@@ -10,9 +10,10 @@ const sensitiveQueryKeys = ['proof', 'order', 'session_id'];
 export const redactAnalyticsEvent = (event) => {
   try {
     const url = new URL(event.url);
-    for (const key of sensitiveQueryKeys) {
-      url.searchParams.delete(key);
-    }
+    if (/^\/(admin|proof|order|order-confirmed|checkout)(\/|$)/.test(url.pathname)
+      || sensitiveQueryKeys.some(key => url.searchParams.has(key))) return null;
+    url.search = '';
+    url.hash = '';
     return { ...event, url: url.toString() };
   } catch {
     return null;
