@@ -14,7 +14,7 @@ const browser = await chromium.launch({
 try {
   for (const saved of [null, 'no', 'yes']) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
-    const google = [], meta = [], errors = [];
+    const google = [], meta = [], errors = [], missingAssets = [];
     await context.route('**/*', async route => {
       const url = new URL(route.request().url());
       if (url.hostname === 'www.googletagmanager.com') {
@@ -26,6 +26,12 @@ try {
         return route.fulfill({ contentType: 'application/javascript', body: '/* locally intercepted Meta loader */' });
       }
       if (url.origin !== origin) return route.fulfill({ status: 204, body: '' });
+      // Vercel serves this at runtime; it is not a built local asset. Acceptance
+      // activates the unchanged Vercel analytics integration as well as Google.
+      if (url.pathname === '/_vercel/insights/script.js') {
+        return route.fulfill({ contentType: 'application/javascript', body: '/* locally intercepted Vercel analytics */' });
+      }
+      if (url.pathname.startsWith('/_vercel/insights/')) return route.fulfill({ status: 204, body: '' });
       if (url.pathname.startsWith('/api/') || route.request().method() !== 'GET') {
         return route.fulfill({ contentType: 'application/json', body: '{}' });
       }
@@ -34,7 +40,11 @@ try {
       try {
         if ((await stat(file)).isDirectory()) file = path.join(file, 'index.html');
         return await route.fulfill({ path: file });
-      } catch { return route.fulfill({ path: path.join(root, 'index.html') }); }
+      } catch {
+        if (route.request().isNavigationRequest()) return route.fulfill({ path: path.join(root, 'index.html') });
+        missingAssets.push(url.pathname);
+        return route.fulfill({ status: 404, body: 'Missing fixture asset' });
+      }
     });
     await context.addInitScript(value => {
       if (value !== null) {
@@ -43,7 +53,7 @@ try {
       }
     }, saved);
     const page = await context.newPage();
-    page.on('pageerror', error => errors.push(error.message));
+    page.on('pageerror', error => errors.push(error.stack || error.message));
     const consentState = () => page.evaluate(() => {
       const update = Array.from(window.dataLayer || []).filter(args => args[0] === 'consent' && args[1] === 'update').at(-1);
       return update ? Object.values(update[2]) : [];
@@ -73,6 +83,7 @@ try {
     assert.equal(google.length, 1, 'Banner changes must not reload Google');
     assert.equal(await page.evaluate(() => Object.hasOwn(window, 'ga-disable-G-FKP17EXNBX')), false);
     assert.deepEqual(errors, [], 'No React/banner JavaScript errors');
+    assert.deepEqual(missingAssets, [], 'Every non-navigation local asset is present or explicitly stubbed');
     console.log(`PASS built React banner: saved=${saved}, Google loads with correct consent, Accept/Reject update it, Meta remains opt-in`);
     await context.close();
   }
