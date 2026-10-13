@@ -1,5 +1,19 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Account corrections released — 13 October 2026, 14:56 UTC
+
+Owner accepted the audit's proposed fixes. The existing live Stripe webhook now
+has completed, expired and both asynchronous payment events, independently read
+back with all other endpoint settings preserved. Application
+`0937ccb67ba1410dea2b5a3b06f0f8e582606a5e` on
+`codex/instaplaque-account-fixes-20261013` excludes marked live/no-fulfilment tests
+from Google purchases and corrects private-test wording. CI38416357936 passed;
+canonical READY `dpl_FoYyYzAjsD959FFdzVcWPJUy3CG7`, 13 public hashes match the
+verified candidate. Ordinary purchases and Meta/consent behaviour are retained.
+Actual webhook/Google/email receipt remains unverified. Extra methods, old-order
+corrections, replacement address and campaign changes remain held. Read
+[the release and rollback record](docs/account-corrections-2026-10-13.md).
+
 ## Site audit fixes - 13 October 2026
 
 Owner authorised careful fixes and release. Task branch

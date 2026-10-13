@@ -29,13 +29,13 @@
     </form>
     <section id="checkout" hidden>
       <p>The sample inscription is “CHECKOUT TEST — DO NOT MAKE”.</p>
-      <label><input id="measurement" type="checkbox">Allow Google to measure this purchase with optional analytics/advertising cookies.</label>
-      <p>For the tracking check, allow measurement above and return to the confirmation page after paying.</p>
+      <label><input id="measurement" type="checkbox">Allow optional measurement for ordinary orders. This marked test payment is excluded.</label>
+      <p>Return to the confirmation page after paying to check payment handling. This test does not verify Google purchase tracking.</p>
       <button id="start" type="button" disabled>Continue to pay £1 with Stripe</button>
       <p>Use your normal payment card on Stripe's secure live checkout.</p>
     </section>
     <p id="status" role="status">Checking owner access…</p>
-    <small>The payment can appear as a £1 purchase in Google Analytics if you allow measurement. It does not by itself prove Google Ads attribution. <a href="/cookies">Cookie details</a></small>
+    <small>This marked £1 test is excluded from Google Analytics purchase reporting, even when optional measurement is allowed. It cannot verify Google Ads attribution. <a href="/cookies">Cookie details</a></small>
     <p><a href="/">Back to the shop</a></p>
   </main>
 </body>

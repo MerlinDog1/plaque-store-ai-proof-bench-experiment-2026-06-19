@@ -44,6 +44,13 @@ if (process.env.GITHUB_ACTIONS === 'true') {
         });
         if (network.error) console.error(network.error.message);
         process.exitCode = network.status === 0 ? 0 : 1;
+        if (network.status === 0) {
+          const markedTest = spawnSync(process.execPath, ['scripts/check-one-pound-test-browser.mjs'], {
+            stdio: 'inherit', timeout: 120_000,
+          });
+          if (markedTest.error) console.error(markedTest.error.message);
+          process.exitCode = markedTest.status === 0 ? 0 : 1;
+        }
       }
     }
   }
