@@ -127,4 +127,50 @@ selector was corrected to the real designer link. That is a fixture correction,
 not claimed as browser evidence of the navigation defect (the bare pushState
 source was the evidence). The subsequent run verifies the actual corrected flow.
 
-Final results are recorded below after CI completes.
+## Verified result
+
+Application/checkpoint `f9a459bd53faa4fc3aa6bff4eb435bf876c6289f` passed
+[CI38399150001](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/actions/runs/38399150001).
+The structured evidence is in the CI log as `CONSENT_NETWORK_RESULT`, with an
+ignored local copy at `output/consent-network/results-ci-38399150001.json`.
+
+| Requested check | Observed on prepared build with real Google JS |
+| --- | --- |
+| Fresh `/memorial-plaques?gclid=TEST123`, ignore banner | No `_ga*` or `_gcl*` cookies. GA4 page_view to `www.google-analytics.com` and Ads page_view to `pagead2.googlesyndication.com`, both `gcs=G100`; `gcd=13q3q3q3q5l1`. |
+| Follow a normal internal link before accepting | Cookies link carried `gclid=TEST123` and `_gl`; still no Google cookies. Google decorates on interaction, not necessarily all static hrefs in advance. |
+| React designer link before accepting | URL became `/design?gclid=TEST123`; after refresh and acceptance `_gcl_aw` still contains TEST123. |
+| Accept on the later Cookies page | Measurement changes to `G111`; `_gcl_aw`, `_gcl_au`, `_ga`, `_ga_FKP17EXNBX` appear. `_gcl_aw` contains the original TEST123, not a replacement. |
+| Change mind and reject | An intercepted measurement event has `G100` again. This does not assert automatic deletion of cookies created during earlier acceptance. |
+| Private initial documents with saved acceptance | `/proof`, `/order`, `/checkout`, `/order-confirmed`: zero normal Google loader requests. Eligible purchase uses only the separate frame. |
+| Confirmed paid fixture after landing/acceptance | Exactly one GA4 purchase: `G-FKP17EXNBX`, GBP76.40, expected digest; same GA client, unchanged `_gcl_aw`, `gcs=G111`, frame `gcd=13t3t3t3p7l1` (personalisation remains denied). No private page_view/referrer/order ID/session ID. Reload gives no duplicate. |
+| Real compiled banner | Fresh, saved yes, saved no; Accept, Reject, changing mind; no duplicate normal Google loader; Meta stays opt-in. |
+| Policies and regressions | New Privacy/Cookies content visible. TypeScript, build,181-page/175-item catalogue/feed policies, five-viewport/no-JS fixed designer tests all pass. |
+
+The Google loader is from `googletagmanager.com`; it is the measurement requests,
+not the script URL, that carry `gcs`. With Ads data redaction, the denied Ads
+endpoint uses `pagead2.googlesyndication.com`; absence of a `googleads` request
+alone would not mean the tag was blocked. See
+https://developers.google.com/tag-platform/security/guides/consent#redact_ads_data
+
+The purchase request itself does **not** contain TEST123 and does not address an
+`AW-.../label` destination. The observed cookie/client continuity must not be
+described as independent proof of Google Ads linking, import configuration or
+credited sales. No changes to the existing GA4 import route were justified by
+this audit, and no conversion label was invented.
+
+Focused Google purchase, Meta, PostHog, URL-redaction and new click-navigation
+checks also pass. `index.html`, `services/googlePurchase.ts`,
+`public/google-purchase.js`, `services/metaPixel.ts` and `components/MetaConsent.tsx`
+are byte-unchanged from the completed Task1 checkpoint. Public Google script
+snapshot SHA256s for this run:
+
+- AW: `089aaacb385ad2aec64b290bf2a10e5af69719285321dc3f1b501859c3143719`
+- GA4: `693aea2044a2e6a9b37785f371c7ec473093b0f57e89e858816994067f81c6fc`
+
+The live-baseline context still sees zero Google loaders/signals before consent;
+it is the old production implementation, not this prepared version. **Not
+deployed.** Publication remains a separate explicit owner action, as required
+by repository AGENTS. No Ads settings, payment/database writes, customer
+messages, real conversions or PIM changes occurred. All synthetic collection
+was intercepted locally on the runner; do not claim Google receipt or a full
+unintercepted live-site checklist.

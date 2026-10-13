@@ -1,5 +1,10 @@
 # Google Consent Mode v2 — 13 October 2026
 
+**Follow-up:** [Tasks2–4 audit, wording and real-tag checks](google-consent-audit-2026-10-13.md)
+now pass at application `f9a459b` / CI38399150001. The exact Task1 script below
+is unchanged. Added public React click-ID preservation and accurate policy text;
+purchase/Meta/banner code remains unchanged. Still not deployed.
+
 ## Scope and source
 
 Owner message4526 supplies an exact replacement for the public Google tag block
