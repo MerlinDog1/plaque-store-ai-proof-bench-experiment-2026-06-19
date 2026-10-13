@@ -51,7 +51,9 @@ try {
     for (const product of initial) {
       const client = live.find(item => item.offers.url === product.offers.url);
       assert.ok(client, `Client lost ${product.offers.url}`);
-      for (const key of ['price', 'priceCurrency', 'shippingDetails', 'hasMerchantReturnPolicy']) {
+      // JSON-LD accepts both "95.5" and "95.50" for the same GBP price.
+      assert.equal(Number(client.offers.price), Number(product.offers.price), `${slug}: server/client price`);
+      for (const key of ['priceCurrency', 'shippingDetails', 'hasMerchantReturnPolicy']) {
         assert.deepEqual(client.offers[key], product.offers[key], `${slug}: server/client ${key}`);
       }
     }
