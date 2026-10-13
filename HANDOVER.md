@@ -1,5 +1,14 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## In progress — 13 October 2026, product policy metadata
+
+Owner4516 requests fixing yellow shipping/returns/delivery warnings after the
+live SEO work. Branch `codex/instaplaque-product-policies-20261013` starts from
+the accepted FAQ-popup source. Merchant policies were freshly read, not changed.
+See [implementation and verification](docs/product-policies-2026-10-13.md).
+The popup deployment below remains production until a verified release record
+supersedes it. No designer scroll, price, checkout or feed changes are intended.
+
 ## Latest production release — 13 October 2026, designer FAQ pop-up
 
 Owner message 4495 corrected the published presentation: no added designer page

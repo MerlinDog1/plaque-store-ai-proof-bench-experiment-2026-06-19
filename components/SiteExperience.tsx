@@ -8,6 +8,7 @@ import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter
 import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
 import { designerPage } from './DesignerGuide';
 import { businessContact } from '../services/shopInformation';
+import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
 import { trackGooglePurchase, OPTIONAL_AD_CONSENT_CHANGED } from '../services/googlePurchase';
 import { trackPostHogPurchase } from '../services/posthogAnalytics';
 import { isOnePoundTestPlaque } from '../services/onePoundTestPlaque.mjs';
@@ -712,6 +713,7 @@ const productListSchema = () => ({
           price,
           availability: 'https://schema.org/InStock',
           url: `${siteBaseUrl}/${product.slug}`,
+          ...productOfferPolicies(product.productionDays),
         } : undefined,
       },
     };
@@ -742,18 +744,7 @@ const productSchema = (product: ProductFamily) => {
       availability: 'https://schema.org/InStock',
       itemCondition: 'https://schema.org/NewCondition',
       url: `${siteBaseUrl}/${product.slug}`,
-      shippingDetails: {
-        '@type': 'OfferShippingDetails',
-        shippingDestination: {
-          '@type': 'DefinedRegion',
-          addressCountry: 'GB',
-        },
-        shippingRate: {
-          '@type': 'MonetaryAmount',
-          value: 0,
-          currency: 'GBP',
-        },
-      },
+      ...productOfferPolicies(product.productionDays),
     } : undefined,
   };
 };
@@ -890,7 +881,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
         '@type': 'WebPage',
         name: 'InstaPlaque returns and cancellations',
         description: 'Returns and cancellation policy for personalised custom plaques.',
-      }],
+      }, merchantPolicyOrganization],
     };
   }
   if (view === 'product') {

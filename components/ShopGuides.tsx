@@ -1,5 +1,6 @@
 import React from 'react';
 import { businessContact, productionTiming } from '../services/shopInformation';
+import { deliveryServiceDescription } from '../services/merchantPolicies.mjs';
 
 export function ProductionNote() {
   return (
@@ -28,7 +29,7 @@ export function ShopTurnaround() {
           <div><dt>Custom sizes and other wood-backed plaques</dt><dd>Estimated 15 working days</dd></div>
         </dl>
         <p>The designer shows the estimate for your selected combination before checkout. These are production estimates; delivery time is additional.</p>
-        <article><h3>UK delivery is included</h3><p>Standard plaque prices include engraving, standard fixings and UK delivery. This includes Northern Ireland, the Highlands and islands, with no regional postage surcharge. Contact us before ordering for delivery outside the UK.</p></article>
+        <article><h3>UK delivery is included</h3><p>Standard plaque prices include engraving, standard fixings and UK delivery. This includes Northern Ireland, the Highlands and islands, with no regional postage surcharge. Contact us before ordering for delivery outside the UK.</p><p>{deliveryServiceDescription}</p></article>
         <article><h3>Ordering for an opening or ceremony?</h3><p>Send your required arrival date, delivery postcode, size and wording before placing the order. Allow time for everyone involved to approve the proof. A production estimate is not a guaranteed event delivery date.</p></article>
       </div>
     </section>

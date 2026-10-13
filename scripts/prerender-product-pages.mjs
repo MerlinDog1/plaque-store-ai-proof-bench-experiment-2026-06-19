@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import React from 'react';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
+import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 
@@ -254,7 +255,7 @@ const indexableProductSlugs = new Set([
   'custom-plaques',
 ]);
 const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques']);
-const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.title, description: product.description, price: product.schemaStartingPrice, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
+const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.title, description: product.description, price: product.schemaStartingPrice, productionDays: product.productionDays, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
 const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)).map(page => {
   // Keep the revised memorial search metadata and illustration identical to
   // the hydrated page; the catalogue is the source for both representations.
@@ -294,6 +295,7 @@ const productListSchema = () => ({
         price: page.price.toString(),
         availability: 'https://schema.org/InStock',
         url: `${siteBaseUrl}/${page.slug}`,
+        ...productOfferPolicies(page.productionDays),
       },
     },
   })),
@@ -377,6 +379,7 @@ const routePages = [
     slug: 'returns-and-cancellations',
     title: 'Returns and Cancellations | Custom Plaques UK | InstaPlaque',
     description: 'Returns, cancellation and faulty goods information for personalised InstaPlaque brass and stainless steel plaque orders.',
+    schema: [merchantPolicyOrganization],
   },
 ];
 
@@ -538,11 +541,7 @@ for (const page of indexablePages) {
         availability: 'https://schema.org/InStock',
         itemCondition: 'https://schema.org/NewCondition',
         url,
-        shippingDetails: {
-          '@type': 'OfferShippingDetails',
-          shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'GB' },
-          shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'GBP' },
-        },
+        ...productOfferPolicies(page.productionDays),
       },
     },
     schema: [

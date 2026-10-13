@@ -22,4 +22,11 @@ if (process.env.GITHUB_ACTIONS === 'true') {
   }
   if (result.error) console.error(result.error.message);
   process.exitCode = result.status === 0 ? 0 : 1;
+  if (result.status === 0) {
+    const policies = spawnSync(process.execPath, ['scripts/check-product-policies-browser.mjs'], {
+      stdio: 'inherit', timeout: 180_000,
+    });
+    if (policies.error) console.error(policies.error.message);
+    process.exitCode = policies.status === 0 ? 0 : 1;
+  }
 }
