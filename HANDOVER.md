@@ -1,6 +1,28 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Designer SEO review — 13 October 2026, not deployed
+## Latest production release — 13 October 2026, designer SEO
+
+Owner message 4488 explicitly requested publication. Application source
+`37c841974dc6b8fc33f6762d40be8d2896da6688` on
+`codex/instaplaque-design-seo-20261013` is deployed and promoted as
+`dpl_55MasQFh4ss1hW2kmJtTqvYVor51`:
+https://instaplaque-f2nyd823o-dullaghan31-3959s-projects.vercel.app.
+Independent canonical inspection confirms this READY deployment. At 09:48 UTC,
+canonical and www `/design` returned the verified candidate's identical HTML,
+`index-BjtrW2fO.js` and `index-DhjswPCu.css`; www redirects to the canonical host.
+All three guide images, sitemap, robots and backend health/config checks passed.
+
+The exact application revision had already passed full CI including mobile,
+tablet, desktop and no-JavaScript interaction checks. Vercel's cloud build and
+static SEO checks also passed. No additional local browser/build was started
+because account memory remained above 3 GiB; hosted verification used read-only
+HTTP checks and artifact hashes, not a fresh live-browser interaction run.
+No database writes, payments, analytics configuration, ads, PIM changes or Google
+indexing request occurred. Code-only rollback: promote the previous deployment
+`dpl_6MFCt8yZsRfZvTrZ77MHhMKiTuQi` through the existing InstaPlaque project.
+See [the release evidence](docs/designer-seo-2026-10-13.md).
+
+## Designer SEO preparation — 13 October 2026, before publication
 
 Owner requested improvements to `/design`. Work is on
 `codex/instaplaque-design-seo-20261013`, based on the verified live PostHog

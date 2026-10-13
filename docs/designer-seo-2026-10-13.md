@@ -4,8 +4,11 @@
 
 Improve the InstaPlaque `/design` page, not PIM, the ads campaign or the catalogue.
 Based on `8822391` (PostHog application `c02abb4` plus handover). Live canonical
-inspection on 13 October still identifies `dpl_6MFCt8yZsRfZvTrZ77MHhMKiTuQi`
-and `index-BNGuODZU.js`. This task branch is **not deployed**.
+inspection before publication identified `dpl_6MFCt8yZsRfZvTrZ77MHhMKiTuQi`
+and `index-BNGuODZU.js`. The owner explicitly requested publication in message
+4488. Application source `37c841974dc6b8fc33f6762d40be8d2896da6688` is now
+**deployed and independently verified live** at
+[the designer](https://instaplaque.co.uk/design).
 
 ## Changes
 
@@ -63,11 +66,48 @@ was started and no other services or resource safeguards were changed.
 
 ## Publication and indexing
 
-AGENTS.md requires an explicit deployment request. Once approved, recheck the
-live deployment for intervening changes, deploy using the existing InstaPlaque
-Vercel project/configuration, inspect the protected candidate, then verify the
-canonical `/design`, sitemap, designer interactions and source revision.
-No database, payment, tracking configuration or PIM change is required.
+The owner authorised deployment; a fresh remote fetch, clean source status and
+live deployment check confirmed no intervening change to the release baseline.
+The exact application SHA passed
+[CI run 38375894556](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/actions/runs/38375894556),
+including all browser interactions documented above.
+
+The existing `instaplaque` project (`prj_e0enz36tdUE3mI8q3tKKG9YR5CLD`) built a
+production candidate with `--skip-domain`. Its uploaded regular files were all
+tracked source; no environment secrets, dependencies or QA output were included.
+Two zero-byte directory entries in the upload manifest were not file contents.
+The Vercel cloud build passed runtime smoke and both static SEO checks.
+
+Candidate `dpl_55MasQFh4ss1hW2kmJtTqvYVor51` was verified at
+https://instaplaque-f2nyd823o-dullaghan31-3959s-projects.vercel.app before promotion.
+Vercel API metadata confirms its project and exact `codySourceCommit` above.
+Promotion succeeded, and independent inspection of `instaplaque.co.uk` confirms
+this READY deployment. Read-only HTTP verification at **09:48 UTC** confirmed:
+
+- Canonical and www `/design`: HTTP 200, identical candidate HTML; www resolves
+  to the canonical host. New title, sole H1, canonical, index/follow, five FAQ
+  answers and three guide images are present in the initial HTML.
+- Client JS `index-BjtrW2fO.js`, SHA-256
+  `a5d41d04975eedb1ea458d1274bdc9769b7d01d7a427ae32377e44eaf8dd8683`;
+  CSS `index-DhjswPCu.css`, SHA-256
+  `6c7ebab4530cad413c16679ae667693b8bb9610cf9d12b63273d809d5e666590`.
+  Both are byte-identical to the verified hosted candidate.
+- All three guide images and `sitemap.xml`: HTTP 200, identical to the source
+  public assets and candidate; robots still advertises the canonical sitemap.
+- Gemini and Supabase health and Stripe configuration: HTTP 200, unchanged
+  from the candidate; live payment configuration remains present. These were
+  read-only checks, not model generation, proof saves, orders or payments.
+
+Hosted HTTP/hash checks supplement the earlier CI browser checks; a new live
+browser interaction run was not performed because account memory remained over
+the 3 GiB headroom threshold. No local build/install or resource-limit change.
+Local ignored evidence is under `output/designer-seo-release/`. No database,
+payment, tracking configuration, ads or PIM changes were made.
+
+Rollback is code-only: promote the previous
+`dpl_6MFCt8yZsRfZvTrZ77MHhMKiTuQi` deployment using the same InstaPlaque project.
+This removes the new guide/SEO while retaining the earlier checkout and PostHog
+release; no data rollback or secret change is needed.
 
 The prior read-only Search Console inspection said `/design` was unknown to
 Google. Source changes do not prove indexing, rankings or image display.
