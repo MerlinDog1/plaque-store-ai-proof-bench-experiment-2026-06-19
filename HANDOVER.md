@@ -11,11 +11,16 @@ links and FAQs in both initial HTML and the interactive page, without displacing
 the full-height designer. Metadata and application/breadcrumb schema use one
 source. The sitemap entry records the content update and its example images.
 
-Verification is running through the existing pull-request CI runner because the
-VPS account is above its 3 GiB headroom threshold. No local heavy job, live AI
+Typecheck, production build, static SEO and browser checks passed on the existing
+pull-request CI runner, including 320/390/820/1440 widths and no-JavaScript
+reading. Initial/client content and metadata match; guide navigation retains
+wording and URL state. Screenshots were recovered and inspected; capture was
+then adjusted to finish the existing fade-in animation before saving the image.
+See [draft PR 15](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/pull/15).
+CI is used because the VPS account is above its 3 GiB headroom threshold. No local heavy job, live AI
 call, customer action, analytics event, deployment or indexing submission is
 part of the checks. Git deployment remains disabled. See
-`docs/designer-seo-2026-10-13.md` for final evidence and release next steps.
+`docs/designer-seo-2026-10-13.md` for evidence and release next steps.
 
 ## Latest production release — 12 October 2026, consented PostHog analytics
 

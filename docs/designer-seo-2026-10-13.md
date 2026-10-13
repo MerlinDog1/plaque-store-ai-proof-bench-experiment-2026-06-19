@@ -29,12 +29,27 @@ and `index-BNGuODZU.js`. This task branch is **not deployed**.
 
 ## Checks
 
-Source/script syntax and whitespace checks passed locally. Full typecheck,
-production build, crawlable route checks and intercepted browser fixtures are
-pending CI. Browser checks cover 320/390/820/1440 widths, raw/client content and
-schema parity, guide/FAQ interactions, retained wording and URL parameters,
-image loading, overflow and JavaScript-disabled reading. All requests are
-intercepted; no fixture sends production analytics or writes.
+Source/script syntax, staged secret/artifact scan and whitespace checks passed
+locally. [CI run 38375419307](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/actions/runs/38375419307)
+passed on implementation `276bbe4ad9dba0eeb1ea601e6c196613a6ad9173`:
+
+- Full TypeScript check, real API entry boot/sanitization/three synthetic health
+  routes and production Vite/prerender build (Vite build: 5.22 seconds).
+- Existing static SEO checks: all 19 sitemap URLs, focused redirects, route
+  HTML, canonicals and preloads preserved.
+- New designer checks: substantive initial HTML, complete FAQ answers,
+  resolvable internal destinations, all three images, canonical/metadata,
+  application/breadcrumb schema and image sitemap.
+- Browser checks at 320/390/820/1440 widths: raw/client content and schema parity,
+  guide/FAQ navigation, wording and URL-state retention, working images, no
+  horizontal overflow or browser errors. No-JavaScript mobile reading passed.
+
+All requests were intercepted; no fixture sent production analytics or writes.
+Mobile designer/guide and desktop guide screenshots were recovered from the CI
+log and visually inspected. The capture now finishes the existing fade-in
+animation before taking screenshots; it does not change the app animation.
+Latest branch checks and review are on
+[draft PR 15](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/pull/15).
 
 Use the existing CI workflow via a draft PR against the live source branch,
 not stale main. It uses the repository's pinned Node and lockfile. Static checks

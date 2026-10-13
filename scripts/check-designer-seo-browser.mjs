@@ -75,14 +75,14 @@ try {
     const overflow = () => page.evaluate(() => [...document.querySelectorAll('html, body, .designer-header, main, #plaque-design-guide')]
       .filter(el => el.scrollWidth > el.clientWidth + 2).map(el => el.tagName + '.' + el.className));
     assert.deepEqual(await overflow(), [], `${label} horizontal overflow`);
-    await page.screenshot({ path: `${output}/${label}-designer.png` });
+    await page.screenshot({ path: `${output}/${label}-designer.png`, animations: 'disabled' });
     // Preserve an in-progress inscription while opening and closing the guide.
     await page.getByRole('button', { name: 'Go to Text', exact: true }).click();
     await page.locator('#inscription-wording-input').fill('A PLACE TO REMEMBER');
     const guideLink = width <= 1000 ? '.designer-guide-mobile' : '.designer-header-label';
     await page.locator(guideLink).click();
     await expect(page.getByRole('heading', { level: 1 })).toBeInViewport();
-    await page.screenshot({ path: `${output}/${label}-guide.png` });
+    await page.screenshot({ path: `${output}/${label}-guide.png`, animations: 'disabled' });
     const question = page.locator('.designer-guide-faqs details').first();
     await question.locator('summary').click();
     await expect(question.locator('p')).toBeVisible();
@@ -115,7 +115,7 @@ try {
   const lastQuestion = page.locator('.designer-guide-faqs details').last();
   await lastQuestion.locator('summary').click();
   await expect(lastQuestion.locator('p')).toBeInViewport();
-  await page.screenshot({ path: `${output}/mobile-no-javascript.png` });
+  await page.screenshot({ path: `${output}/mobile-no-javascript.png`, animations: 'disabled' });
   results.push({ label: 'mobile without JavaScript', status: 'passed' });
   await context.close();
   await writeFile(`${output}/results.json`, JSON.stringify(results, null, 2) + '\n');
