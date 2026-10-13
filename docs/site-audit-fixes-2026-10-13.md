@@ -128,8 +128,12 @@ they have subsequently been enabled. Verified release identifiers follow below.
   functions independently checked: anon/authenticated false, service true.
 - No 5xx log entries returned for this deployment during the release checks.
 
-Separate existing admin compatibility finding: the database check constraints
-do not include `proof_check`, `ready_to_dispatch` or `archived`, although the
-older UI has these actions. They were not exercised against customer orders.
-Keep this as a follow-up schema/workflow reconciliation; do not silently
-relabel historical fulfilment records to make the audit counts look clean.
+The final schema check also found existing admin actions `proof_check`,
+`ready_to_dispatch` and `archived` were rejected by the database. Migration
+`20261013160000_order_workflow_statuses.sql` now allows these values, retaining
+every previous value. Tested all three transitions on a synthetic row inside a
+rolled-back transaction before applying; verified zero leftover test rows.
+Historical orders are unchanged, and the deployed payment guard still rejects
+unpaid production/dispatch. No application rebuild is needed for this additive
+database correction. Two earlier test-script attempts failed on SQL delimiter
+formatting and rolled back without applying changes; the corrected test passed.

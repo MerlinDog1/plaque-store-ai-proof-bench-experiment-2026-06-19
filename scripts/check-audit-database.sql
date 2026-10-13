@@ -23,5 +23,8 @@ begin
   update public.stripe_events set processed_at=now() where id='evt_audit_rollback';
   if public.claim_instaplaque_stripe_event('evt_audit_rollback','checkout.session.completed',false,'AUDIT-ROLLBACK-ONLY',token)<>'processed' then raise exception 'Duplicate event claimed'; end if;
   if not public.consume_instaplaque_limit('audit-rollback',2,60,1) or not public.consume_instaplaque_limit('audit-rollback',2,60,1) or public.consume_instaplaque_limit('audit-rollback',2,60,1) then raise exception 'Shared limit failed'; end if;
-  raise notice 'PASS atomic payment, late expiry, preserved fulfilment/artwork, email dedupe, event lease and durable rate limits';
+  update public.storefront_orders set status='proof_check',fulfilment_status='not_started' where id='AUDIT-ROLLBACK-ONLY';
+  update public.storefront_orders set status='ready_to_dispatch',fulfilment_status='ready_to_dispatch' where id='AUDIT-ROLLBACK-ONLY';
+  update public.storefront_orders set status='archived',fulfilment_status='archived' where id='AUDIT-ROLLBACK-ONLY';
+  raise notice 'PASS atomic payment, late expiry, preserved fulfilment/artwork, email dedupe, event lease, durable rate limits and admin workflow statuses';
 end $$;
