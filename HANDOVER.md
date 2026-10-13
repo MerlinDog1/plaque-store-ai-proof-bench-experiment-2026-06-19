@@ -7,7 +7,12 @@ Owner authorised careful fixes and release. Task branch
 and verified production source. Security/lifecycle/rate migrations already
 applied to the migrated Supabase project; both other-brand cron jobs retained.
 See [scope, tests, remaining account work and rollback](docs/site-audit-fixes-2026-10-13.md).
-Release SHA/deployment evidence will be appended after staged verification.
+Application `57e09c6ab7f5c572694e3eb2c051d5900c816f29` is live on canonical at
+READY `dpl_24YZazbstYN3S9EgkrtGhTdA6ZNZ`. PR18 / CI38407857350 pass (CI-only
+follow-up `1330232bd5fe035ca8160d72c0349c38fa060dc6` has identical application
+code). Hosted asset hash, health, route HTML, mobile proof form and private RPC
+permissions verified. See the report for account-access gaps, an existing admin
+status compatibility finding, and code-only rollback instructions.
 
 ## Consent follow-up Tasks2–4 — 13 October 2026
 

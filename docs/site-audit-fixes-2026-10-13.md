@@ -100,3 +100,36 @@ the same build. Project `prj_e0enz36tdUE3mI8q3tKKG9YR5CLD`, team
 **Keep additive migrations and revoked public grants**; never restore the old
 backend or reopen functions. Disable extra payment methods before rollback if
 they have subsequently been enabled. Verified release identifiers follow below.
+
+### Verified production release
+
+- Application: `57e09c6ab7f5c572694e3eb2c051d5900c816f29`.
+- Deployment: `dpl_24YZazbstYN3S9EgkrtGhTdA6ZNZ`, production/READY,
+  `https://instaplaque-87u1cwn13-dullaghan31-3959s-projects.vercel.app`.
+- Promoted to `https://instaplaque.co.uk` on 13 October 2026 around 13:50 UTC.
+  Independent canonical inspect confirms the deployment; www redirects 308.
+- [PR18](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/pull/18).
+  [CI38407857350](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/actions/runs/38407857350)
+  passed on `1330232bd5fe035ca8160d72c0349c38fa060dc6`. Its only difference
+  from the deployed source is CI configuration: use installed runner Chrome
+  and run PostHog/Google purchase unit checks. Initial CI failed because the
+  security browser check expected an uninstalled bundled Chrome, now corrected.
+- Candidate and public `index-iWn2fE4V.js` match the locally tested SHA256:
+  `7997a5aac09f4ab7a2541e3c6fe02dc7e138b4a2fc1c583ecbdd44339df28956`.
+  Hosted cache header is `public, max-age=31536000, immutable`.
+- Twelve public routes/health endpoints returned 200. Candidate invalid email
+  returned 400 before writes and unauthenticated admin access returned 401.
+  Email provider configuration is present; delivery was not exercised.
+- Live mobile A5/GBP95.50 and proof-email form inspected, no horizontal overflow.
+  Homepage loads only Montserrat and Playfair font families. Browser collection
+  and writes were blocked for this check; QA was labelled locally.
+- Service-role REST rate-limit RPC accepted one named synthetic request and
+  rejected its repeat, then removed its own fixture row. All seven relevant
+  functions independently checked: anon/authenticated false, service true.
+- No 5xx log entries returned for this deployment during the release checks.
+
+Separate existing admin compatibility finding: the database check constraints
+do not include `proof_check`, `ready_to_dispatch` or `archived`, although the
+older UI has these actions. They were not exercised against customer orders.
+Keep this as a follow-up schema/workflow reconciliation; do not silently
+relabel historical fulfilment records to make the audit counts look clean.
