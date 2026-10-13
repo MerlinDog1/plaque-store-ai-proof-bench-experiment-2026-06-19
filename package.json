@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/check-vercel-runtime.mjs && npm exec -- vite build && node scripts/prerender-product-pages.mjs",
+    "postbuild": "npm run check:live-seo && npm run check:designer-seo && node scripts/check-designer-seo-ci.mjs",
     "check:vercel-runtime": "node scripts/check-vercel-runtime.mjs",
     "typecheck": "tsc --noEmit",
     "check:analytics-redaction": "node scripts/check-analytics-redaction.mjs",
@@ -26,6 +27,8 @@
     "check:public-input-security": "node scripts/check-public-input-security.mjs",
     "check:pricing": "node scripts/check-pricing.cjs",
     "check:live-seo": "node scripts/check-live-seo.mjs",
+    "check:designer-seo": "node scripts/check-designer-seo.mjs",
+    "check:designer-seo-browser": "node scripts/check-designer-seo-browser.mjs",
     "check:deployment": "node scripts/check-deployment-readiness.mjs",
     "check:typography": "node scripts/check-typography.mjs",
     "check:typography:live": "node scripts/check-typography-live.mjs",

@@ -1,5 +1,22 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Designer SEO review — 13 October 2026, not deployed
+
+Owner requested improvements to `/design`. Work is on
+`codex/instaplaque-design-seo-20261013`, based on the verified live PostHog
+release and handover checkpoint `8822391`. Production was independently checked
+at `dpl_6MFCt8yZsRfZvTrZ77MHhMKiTuQi`, serving `index-BNGuODZU.js`.
+The shared guide includes useful instructions, illustrative examples, material
+links and FAQs in both initial HTML and the interactive page, without displacing
+the full-height designer. Metadata and application/breadcrumb schema use one
+source. The sitemap entry records the content update and its example images.
+
+Verification is running through the existing pull-request CI runner because the
+VPS account is above its 3 GiB headroom threshold. No local heavy job, live AI
+call, customer action, analytics event, deployment or indexing submission is
+part of the checks. Git deployment remains disabled. See
+`docs/designer-seo-2026-10-13.md` for final evidence and release next steps.
+
 ## Latest production release — 12 October 2026, consented PostHog analytics
 
 Application source `c02abb4ba1bea240741a9435da2d1362df9f00da`, branch

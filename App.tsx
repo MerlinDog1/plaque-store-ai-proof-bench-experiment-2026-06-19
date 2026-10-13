@@ -4,6 +4,7 @@ import { OPTIONAL_AD_CONSENT_CHANGED } from './services/metaPixel';
 import { trackSiteEvent, trackSitePage } from './services/posthogAnalytics';
 import { LayoutProgress } from './components/LayoutProgress';
 import { DesignRequest } from './components/DesignRequest';
+import { DesignerGuide } from './components/DesignerGuide';
 import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
 import PlaquePreview from './components/PlaquePreview';
@@ -1449,7 +1450,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <main className={`min-h-0 w-full flex-1 ${currentView === 'plaque' ? 'overflow-hidden' : 'overflow-auto'}`}>
+      <main className="min-h-0 w-full flex-1 overflow-auto">
 
         {(requestSeed || currentView === 'design-request') && <div hidden={currentView !== 'design-request'}>
           <DesignRequest initialState={requestSeed?.state || state} initialWording={requestSeed?.wording || ''} initialNotes={requestSeed?.notes || ''} onBack={() => handleNavigate('home')} />
@@ -1471,7 +1472,8 @@ const App: React.FC = () => {
             onCreateMockOrder={handleCreateMockOrder}
           />
         ) : (
-          <div className="app-fade-in proofbench-board">
+          <>
+          <div id="plaque-designer" tabIndex={-1} className="app-fade-in proofbench-board">
             <nav className="designer-steps no-print" aria-label="Plaque design steps">
               <div className="designer-steps-list">
                 {steps.map((label, index) => (
@@ -1492,7 +1494,7 @@ const App: React.FC = () => {
             <aside className="proofbench-customiser no-print" aria-label="Plaque options">
               <div className="proofbench-customiser-head">
                 <p className="designer-eyebrow">Make it yours <span>Step {activeStep + 1} of 7</span></p>
-                <h1>{stepTitles[activeStep]}</h1>
+                <h2>{stepTitles[activeStep]}</h2>
                 <p>{stepDescriptions[activeStep]}</p>
               </div>
               <div className="proofbench-control-scroll" ref={controlsScrollRef}>
@@ -1591,6 +1593,8 @@ const App: React.FC = () => {
             </section>
 
           </div>
+          <DesignerGuide interactive />
+          </>
         )}
       </main>
       {currentView !== 'admin' && <MetaConsent />}

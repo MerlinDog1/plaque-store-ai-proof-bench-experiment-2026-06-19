@@ -1,5 +1,6 @@
 import React from "react";
 import { SiteView } from "../services/commerce";
+import { scrollToDesignerSection } from "./DesignerGuide";
 
 interface Props {
   onNavigate: (view: SiteView) => void;
@@ -45,9 +46,10 @@ export const Header: React.FC<Props> = ({
             Insta<span>Plaque</span>
           </a>
           <span className="designer-header-divider" />
-          <span className="designer-header-label">Plaque designer</span>
+          <a className="designer-header-label" href="#plaque-design-guide" onClick={scrollToDesignerSection}>Design guide &amp; FAQs ↓</a>
         </div>
         <div className="designer-header-actions">
+          <a className="designer-guide-mobile" href="#plaque-design-guide" onClick={scrollToDesignerSection}>Guide &amp; FAQs</a>
           <a
             className="designer-help"
             href="/contact"
