@@ -105,24 +105,19 @@ try {
   await page.waitForURL('https://checkout.stripe.com/**');
   await page.goto(confirmedUrl);
   await page.getByRole('heading', { name: 'Your £1 payment is confirmed.' }).waitFor();
-  await page.waitForFunction(() => Object.keys(localStorage).some(key => key.startsWith('instaplaque-ga4-purchase-v1:')));
-  assert.equal(purchases.length, 1);
-  assert.equal(purchases[0].value, 1);
-  assert.equal(purchases[0].currency, 'GBP');
-  assert.equal(purchases[0].send_to, 'G-FKP17EXNBX');
-  assert.equal(purchases[0].page_location, origin + '/order-confirmed');
-  assert.match(purchases[0].transaction_id, /^ip_[a-f0-9]{64}$/);
-  assert.equal(JSON.stringify(purchases).includes(order.id), false);
-  assert.equal(JSON.stringify(purchases).includes(order.stripeCheckoutSessionId), false);
+  await page.waitForTimeout(500);
+  assert.equal(purchases.length, 0, 'A marked live test is excluded even with consent');
+  assert.equal(await page.evaluate(() => Object.keys(localStorage).some(key => key.startsWith('instaplaque-ga4-purchase-v1:'))), false,
+    'The excluded test must not write a queued-purchase marker');
   await page.screenshot({ path: 'output/pound-test-confirmed-mobile.png', fullPage: true });
   await page.reload();
   await page.getByRole('heading', { name: 'Your £1 payment is confirmed.' }).waitFor();
   await page.waitForTimeout(500);
   assert.equal(proofWrites, 0);
-  assert.equal(purchases.length, 1, 'Reload must not duplicate the purchase');
+  assert.equal(purchases.length, 0, 'Reload must not report the excluded test');
   assert.equal(await page.locator('iframe[title="Purchase measurement"]').count(), 0);
   assert.equal(blocked.some(url => /google-analytics|googletagmanager|googleadservices/.test(url)), false);
   assert.deepEqual(errors, []);
-  console.log('PASS built-app live order return, consent rejection/acceptance, GBP1 once, reload dedupe, no private event fields, no production proof or JS errors');
+  console.log('PASS built-app live test return with accepted/rejected consent and reload: zero purchases, queued markers or production proof writes; no JS errors');
   console.log('Browser/API/Google-tag fixtures only. All external network was intercepted; no real payment or Google event was sent.');
 } finally { await browser.close(); }

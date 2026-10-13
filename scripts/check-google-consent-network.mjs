@@ -187,7 +187,9 @@ try {
       id: 'PSAI-00000000-0000-4000-8000-000000000123', paymentStatus: 'paid', status: 'issue', fulfilmentStatus: 'issue',
       totalPence: 7640, currency: 'gbp', stripeCheckoutSessionId: 'cs_live_synthetic123',
       plaqueState: { width: 123, height: 456, shape: 'rect', material: 'brushed-brass', fixing: 'none', fixingHoleCount: 2, wood: false, memorialImageEnabled: false },
-      metadata: { liveVerificationPolicy: '123x456-live-v1', noFulfilment: true },
+      // Ordinary-sale fixture: every API and collection request is intercepted.
+      // Marked test orders are separately verified to emit no purchase at all.
+      metadata: {},
     };
     const h = await harness({ order });
     try {

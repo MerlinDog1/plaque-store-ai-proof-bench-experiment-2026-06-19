@@ -27,6 +27,8 @@ function validCheckoutReturn(order: PurchaseOrder): boolean {
     && /^cs_live_[A-Za-z0-9]+$/.test(order.stripeCheckoutSessionId || '')
     && order.paymentStatus === 'paid'
     && !order.metadata?.checkoutTestPolicy
+    && !order.metadata?.liveVerificationPolicy
+    && !order.metadata?.noFulfilment
     && typeof order.id === 'string' && order.id.length > 0 && order.id.length <= 200
     && Number.isSafeInteger(order.totalPence) && order.totalPence > 0
     && typeof order.currency === 'string' && order.currency.toUpperCase() === 'GBP';
