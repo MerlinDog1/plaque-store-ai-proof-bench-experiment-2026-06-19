@@ -34,6 +34,13 @@ if (process.env.GITHUB_ACTIONS === 'true') {
       });
       if (consent.error) console.error(consent.error.message);
       process.exitCode = consent.status === 0 ? 0 : 1;
+      if (consent.status === 0) {
+        const network = spawnSync(process.execPath, ['scripts/check-google-consent-network.mjs'], {
+          stdio: 'inherit', timeout: 180_000,
+        });
+        if (network.error) console.error(network.error.message);
+        process.exitCode = network.status === 0 ? 0 : 1;
+      }
     }
   }
 }
