@@ -187,6 +187,11 @@ try {
       id: 'PSAI-00000000-0000-4000-8000-000000000123', paymentStatus: 'paid', status: 'issue', fulfilmentStatus: 'issue',
       totalPence: 7640, currency: 'gbp', stripeCheckoutSessionId: 'cs_live_synthetic123',
       plaqueState: { width: 123, height: 456, shape: 'rect', material: 'brushed-brass', fixing: 'none', fixingHoleCount: 2, wood: false, memorialImageEnabled: false },
+      productTitle: 'Custom plaque', inscription: 'PRIVATE SYNTHETIC INSCRIPTION',
+      proofPackage: {
+        visualProofRendererVersion: 2,
+        visualProofSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 123 456"><rect width="123" height="456" fill="#ccc"/></svg>',
+      },
       // Ordinary-sale fixture: every API and collection request is intercepted.
       // Marked test orders are separately verified to emit no purchase at all.
       metadata: {},
@@ -202,6 +207,8 @@ try {
       assert(gaCookie);
       const offset = h.loads.length, hitOffset = h.hits.length, outOffset = h.outbound.length;
       await h.page.goto(origin + '/order-confirmed?order=' + order.id + '&session_id=' + order.stripeCheckoutSessionId);
+      await expect(h.page.getByRole('heading', { name: 'Your plaque order is confirmed.' })).toBeVisible();
+      assert.deepEqual(h.errors, [], 'Ordinary paid-order fixture must render before measurement');
       await expect.poll(() => h.hits.filter(hit => hit.en === 'purchase').length, { timeout: 15000 }).toBe(1);
       const purchase = h.hits.find(hit => hit.en === 'purchase');
       assert.equal(purchase.tid, 'G-FKP17EXNBX');
@@ -217,6 +224,7 @@ try {
       assert.equal(after.find(c => c.name === '_gcl_aw')?.value, before.find(c => c.name === '_gcl_aw')?.value);
       const traffic = h.outbound.slice(outOffset).join('\n');
       assert(!traffic.includes(order.id) && !traffic.includes(order.stripeCheckoutSessionId));
+      assert(!traffic.includes(order.inscription));
       assert(!h.hits.slice(hitOffset).some(hit => hit.en === 'page_view'), 'No private page_view');
       await expect.poll(() => h.page.locator('iframe[title="Purchase measurement"]').count()).toBe(0);
       await h.page.reload();
