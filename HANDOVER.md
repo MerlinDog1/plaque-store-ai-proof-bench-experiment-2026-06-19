@@ -1,6 +1,35 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Latest production release — 13 October 2026, designer SEO
+## Latest production release — 13 October 2026, designer FAQ pop-up
+
+Owner message 4495 corrected the published presentation: no added designer page
+scrolling; help should open on click in a pop-up/expander. Publication authority
+from message 4488 carries through this requested correction.
+Application `588afdb38957333c873a2acf3c4743c764111069` is deployed/promoted as
+`dpl_6o1LFnmir5w6VjKZdgqt5bRAotAu`:
+https://instaplaque-o99inec90-dullaghan31-3959s-projects.vercel.app.
+Canonical READY identity and candidate/public artifact equality were verified
+at 10:11 UTC. The live JS is `index-BGL2dIT7.js`, CSS `index-Bxw_YNF_.css`;
+both names match the exact-source browser-tested CI build.
+
+Guide & FAQs now opens a native modal, closed initially, with expandable FAQs
+first and a separate tips/examples disclosure. Close, Escape, backdrop and
+return actions restore focus and preserve the inscription, step and URL.
+The designer main is fixed; only the dialog's reading area and existing control
+panels scroll. Shared initial HTML and a readable no-JavaScript fallback retain
+the SEO content. CI run 38380879128 passed typecheck/build/SEO and browser checks
+at 320/390/820/1440 widths, short landscape and no-JavaScript. Mobile/desktop
+screenshots inspected. The checks caught and fixed keyboard-boundary behaviour;
+layout checks explicitly finish the pre-existing entrance animation.
+
+Vercel build/static checks, hosted assets/images/sitemap and read-only backend
+checks passed; no new live browser was launched on the memory-constrained VPS.
+No Ads, database, payment, analytics configuration, PIM or indexing changes.
+Immediate code rollback is prior `dpl_55MasQFh4ss1hW2kmJtTqvYVor51`, but that
+restores the scrollable guide the owner rejected. See
+[release evidence](docs/designer-seo-2026-10-13.md).
+
+## Earlier production release — 13 October 2026, initial designer SEO
 
 Owner message 4488 explicitly requested publication. Application source
 `37c841974dc6b8fc33f6762d40be8d2896da6688` on

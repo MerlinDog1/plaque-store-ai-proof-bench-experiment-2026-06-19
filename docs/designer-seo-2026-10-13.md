@@ -6,19 +6,23 @@ Improve the InstaPlaque `/design` page, not PIM, the ads campaign or the catalog
 Based on `8822391` (PostHog application `c02abb4` plus handover). Live canonical
 inspection before publication identified `dpl_6MFCt8yZsRfZvTrZ77MHhMKiTuQi`
 and `index-BNGuODZU.js`. The owner explicitly requested publication in message
-4488. Application source `37c841974dc6b8fc33f6762d40be8d2896da6688` is now
+4488 and requested the pop-up correction in message 4495. Current application
+source `588afdb38957333c873a2acf3c4743c764111069` is now
 **deployed and independently verified live** at
 [the designer](https://instaplaque.co.uk/design).
 
 ## Changes
 
-- A shared React guide is emitted in the initial HTML and remains below the
-  interactive workbench. Its stable H1, design process, three existing
-  illustrative examples, material/internal links and five FAQs are available
+- A shared React guide is emitted in the initial HTML and available from the
+  interactive workbench through an initially closed modal. Its stable H1, design
+  process, three existing illustrative examples, material/internal links and five FAQs are available
   without generating or saving a proof.
-- The workbench stays first and full-height. A header guide link and return link
-  scroll without reloading or replacing private saved-proof fragments, referral
-  parameters or the current inscription. FAQ disclosures also work without JS.
+- The workbench stays fixed and full-height, with no added page-level scrolling.
+  A header button opens the pop-up; close/return, Escape and backdrop dismissal
+  preserve focus, private saved-proof fragments, referral parameters, active step
+  and inscription. Expandable FAQs come first; longer tips/examples are a separate
+  disclosure. The pop-up reading area scrolls independently, while its close and
+  return buttons stay visible. A readable guide fallback remains without JS.
 - The title and description are specific to designing a plaque online. Metadata
   and WebApplication/BreadcrumbList schema are shared between static and client
   rendering. The zero-price offer describes **use of the designer and proof**,
@@ -64,11 +68,58 @@ unpublished change was removed. No new access, schedules or triggers added.
 The VPS account was above 3 GiB, so no local build/browser/dependency install
 was started and no other services or resource safeguards were changed.
 
-## Publication and indexing
+## Pop-up correction release — 13 October, 10:11 UTC
+
+Owner message 4495 explicitly rejected adding scrolling to the designer page.
+The correction uses a native modal dialog (initially closed), keyboard-boundary
+handling and background inertness. It does not change the designer's existing
+internal controls scroll or any shop-page scrolling.
+
+Exact source `588afdb38957333c873a2acf3c4743c764111069` passed
+[CI run 38380879128](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/actions/runs/38380879128):
+typecheck, build/runtime smoke, static SEO and browser checks at 390×844,
+320×740, 820×1000, 1440×1000 and 844×390, plus no-JavaScript reading. Browser
+checks verify zero page/main scroll, modal viewport bounds, focus containment
+and return, all four dismissal paths, expandable FAQs/tips, loaded images,
+retained wording/step/URL and initial/client content/metadata parity. They use
+only intercepted fixture requests and produce no production events or writes.
+Mobile/desktop screenshots were recovered from CI and visually inspected.
+
+The first test run measured the existing entrance animation's transient 6px
+translation; layout assertions now finish that animation. A subsequent check
+caught keyboard focus leaving the dialog boundary; explicit boundary wrapping
+was added. All checks then passed without removing those assertions.
+
+Production candidate `dpl_6o1LFnmir5w6VjKZdgqt5bRAotAu` was cloud-built and
+verified before promotion at
+https://instaplaque-o99inec90-dullaghan31-3959s-projects.vercel.app.
+Vercel metadata proves the existing InstaPlaque project and exact source SHA.
+Vercel build/runtime/static SEO checks passed; candidate entry assets match the
+content-hashed filenames from the browser-tested CI build. Promotion succeeded.
+Independent canonical inspection and public checks at **10:11 UTC** confirmed:
+
+- Canonical/www `/design` HTTP 200 and identical candidate HTML; correct title,
+  canonical/index-follow, five FAQ answers and separate tips disclosure.
+- JS `index-BGL2dIT7.js`, SHA-256
+  `1d571585011f8a6f6cb9cb9029ff602e160dd0976945167cebe404f052e42d76`.
+- CSS `index-Bxw_YNF_.css`, SHA-256
+  `76411f18b7354142b26195d3b7dd0ec571a237c47ea08448cb100acf966e9627`.
+- All three images, sitemap and read-only Gemini/Supabase/Stripe responses match
+  the verified candidate; robots remains unchanged.
+
+Evidence is in ignored `output/designer-modal-review/` and
+`output/designer-modal-release/`. No local heavy build/browser/install was run
+while account memory was above 3 GiB. Browser interaction proof is from CI;
+hosted proof is HTTP, deployment identity and artifact equality. No customer
+actions, Ads, database writes, payment/analytics settings, PIM changes or Google
+indexing submission occurred. Immediate code rollback is the previous
+`dpl_55MasQFh4ss1hW2kmJtTqvYVor51`; it restores the unwanted scrollable guide.
+
+## Initial publication and indexing — 13 October, 09:48 UTC
 
 The owner authorised deployment; a fresh remote fetch, clean source status and
 live deployment check confirmed no intervening change to the release baseline.
-The exact application SHA passed
+The initial application SHA `37c841974dc6b8fc33f6762d40be8d2896da6688` passed
 [CI run 38375894556](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/actions/runs/38375894556),
 including all browser interactions documented above.
 
@@ -80,7 +131,8 @@ The Vercel cloud build passed runtime smoke and both static SEO checks.
 
 Candidate `dpl_55MasQFh4ss1hW2kmJtTqvYVor51` was verified at
 https://instaplaque-f2nyd823o-dullaghan31-3959s-projects.vercel.app before promotion.
-Vercel API metadata confirms its project and exact `codySourceCommit` above.
+Vercel API metadata confirms its project and initial `codySourceCommit`
+`37c841974dc6b8fc33f6762d40be8d2896da6688`.
 Promotion succeeded, and independent inspection of `instaplaque.co.uk` confirms
 this READY deployment. Read-only HTTP verification at **09:48 UTC** confirmed:
 
