@@ -160,6 +160,21 @@ export function DesignerGuideDialog({ isOpen, onClose }: { isOpen: boolean; onCl
       className="designer-guide-dialog no-print"
       aria-labelledby="designer-guide-dialog-title"
       onClose={onClose}
+      onKeyDown={event => {
+        if (event.key !== 'Tab') return;
+        const stops = [...event.currentTarget.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], summary, [tabindex]:not([tabindex="-1"])',
+        )].filter(element => element.getClientRects().length > 0);
+        const first = stops[0];
+        const last = stops[stops.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus({ preventScroll: true });
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus({ preventScroll: true });
+        }
+      }}
       onPointerDown={event => { startedOnBackdrop.current = isBackdrop(event); }}
       onClick={event => {
         if (startedOnBackdrop.current && isBackdrop(event)) onClose();
