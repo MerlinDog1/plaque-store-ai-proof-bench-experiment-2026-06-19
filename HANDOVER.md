@@ -1,5 +1,20 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Google Consent Mode v2 preparation — 13 October 2026
+
+Owner4526 supplies the exact public Google tag replacement and asks for remaining
+React consent gates, explicitly retaining Meta opt-in. Work is on
+`codex/instaplaque-consent-v2-20261013`, based on product-policy docs checkpoint
+`2c5cd37` and independently verified live `dpl_g23QYg6DYBEnv8AhHpJRkhGNqa6b`.
+The exact block is first in head; public Google loading no longer waits for
+consent, while denied defaults, events, URL redaction and private exclusions
+remain. The sole ga-disable assignment is removed with the old block.
+
+**Prepared, not deployed; CI pending.** The separate Google purchase helper/frame
+still requires `instaplaque-meta-consent=yes` and is unchanged. This is not a full
+purchase-modelling or Ads-receipt fix. Meta/banner/PostHog and all checkout code
+are unchanged. See [scope, audit and checks](docs/google-consent-v2-2026-10-13.md).
+
 ## Latest production release — 13 October 2026, product policy metadata
 
 Owner4516 requested fixing the live site's yellow shipping/returns/delivery

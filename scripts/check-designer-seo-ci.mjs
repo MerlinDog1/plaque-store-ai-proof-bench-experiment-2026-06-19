@@ -28,5 +28,12 @@ if (process.env.GITHUB_ACTIONS === 'true') {
     });
     if (policies.error) console.error(policies.error.message);
     process.exitCode = policies.status === 0 ? 0 : 1;
+    if (policies.status === 0) {
+      const consent = spawnSync(process.execPath, ['scripts/check-google-consent-browser.mjs'], {
+        stdio: 'inherit', timeout: 120_000,
+      });
+      if (consent.error) console.error(consent.error.message);
+      process.exitCode = consent.status === 0 ? 0 : 1;
+    }
   }
 }
