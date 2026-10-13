@@ -961,8 +961,83 @@
   }
 }
 
-/* The guide sits below the full-height workbench; no controls are displaced. */
+/* Reading stays in a modal; the interactive workbench never gains page scroll. */
 @media screen {
+  .designer-guide-dialog {
+    width: min(880px, calc(100vw - 32px));
+    max-width: none;
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 0;
+    border: 1px solid #d7ddd2;
+    border-radius: 16px;
+    background: #f9f9f4;
+    color: #243d33;
+    overflow: hidden;
+    box-shadow: 0 20px 70px #10271a40;
+  }
+  .designer-guide-dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  .designer-guide-dialog::backdrop {
+    background: #15271fb3;
+  }
+  .designer-guide-dialog-header,
+  .designer-guide-dialog-footer {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 20px;
+    background: #fdfdf9;
+  }
+  .designer-guide-dialog-header {
+    border-bottom: 1px solid #d7ddd2;
+  }
+  .designer-guide-dialog-header h2 {
+    font-size: 16px;
+    font-weight: 650;
+  }
+  .designer-guide-dialog-header button {
+    min-height: 44px;
+    padding: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .designer-guide-dialog-header button span {
+    margin-left: 8px;
+    font-size: 24px;
+    line-height: 1;
+  }
+  .designer-guide-dialog-footer {
+    justify-content: flex-end;
+    border-top: 1px solid #d7ddd2;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .designer-guide-dialog-content {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .designer-guide-dialog .designer-guide {
+    padding: 24px;
+  }
+  .designer-guide-dialog .designer-guide h1 {
+    font-size: 28px;
+  }
+  .designer-guide-dialog .designer-guide-intro {
+    font-size: 16px;
+  }
+  .designer-guide-dialog .designer-guide section {
+    margin-top: 24px;
+  }
+  .designer-guide-dialog .designer-guide-breadcrumb {
+    margin-bottom: 16px;
+  }
   .designer-guide-prerender {
     height: 100%;
     overflow: auto;
@@ -1028,8 +1103,13 @@
   }
   .designer-guide-return {
     display: inline-block;
-    padding-block: 10px;
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #243d33;
+    color: #fffdf5;
     font-weight: 600;
+    cursor: pointer;
   }
   .designer-guide-steps {
     padding-left: 24px;
@@ -1063,18 +1143,26 @@
     border-top: 1px solid #d7ddd2;
     padding: 14px 0;
   }
-  .designer-guide-faqs summary {
+  .designer-guide-faqs summary,
+  .designer-guide-more > summary {
     min-height: 44px;
     cursor: pointer;
     font-weight: 600;
     padding-block: 8px;
   }
+  .designer-guide-more {
+    border-top: 1px solid #d7ddd2;
+    margin-top: 16px;
+    padding-top: 8px;
+  }
   .designer-header-brand > .designer-header-label {
+    min-height: 44px;
     font-size: 13px;
     letter-spacing: 0;
     color: #59634f;
     text-decoration: underline;
     text-underline-offset: 4px;
+    cursor: pointer;
   }
   .designer-guide-mobile {
     display: none;

@@ -17,8 +17,9 @@ assert.equal(document.querySelector('meta[property="og:title"]').content, docume
 assert.equal(document.querySelector('meta[name="twitter:title"]').content, document.title);
 assert.equal(document.querySelector('meta[property="og:description"]').content, document.querySelector('meta[name="description"]').content);
 assert.ok(guide.textContent.trim().split(/\s+/u).length > 400, 'Initial HTML must include the useful guidance, not just a placeholder');
-assert.equal(guide.querySelectorAll('details').length, 5);
-for (const details of guide.querySelectorAll('details')) {
+assert.equal(guide.querySelectorAll('.designer-guide-faqs details').length, 5);
+assert.ok(guide.querySelector('.designer-guide-more > summary'), 'The longer design tips must remain available as a disclosure');
+for (const details of guide.querySelectorAll('.designer-guide-faqs details')) {
   assert.ok(details.querySelector('summary').textContent.trim());
   assert.ok(details.querySelector('p').textContent.trim().length > 60, 'Answers must be present without expanding a client-only widget');
 }

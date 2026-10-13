@@ -45,7 +45,7 @@ const installRoutes = async context => {
   return writes;
 };
 try {
-  for (const [label, width, height] of [['mobile', 390, 844], ['small-phone', 320, 740], ['tablet', 820, 1000], ['desktop', 1440, 1000]]) {
+  for (const [label, width, height] of [['mobile', 390, 844], ['small-phone', 320, 740], ['tablet', 820, 1000], ['desktop', 1440, 1000], ['landscape', 844, 390]]) {
     const context = await browser.newContext({ viewport: { width, height }, serviceWorkers: 'block' });
     const writes = await installRoutes(context);
     await context.addInitScript(() => {
@@ -64,28 +64,46 @@ try {
     assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'), `${origin}/design`);
     assert.deepEqual(await page.locator('#instaplaque-route-schema').evaluate(el => JSON.parse(el.textContent)), initialGraph);
     assert.equal(await page.locator('#instaplaque-prerender-route-schema').count(), 0, 'Hydration should replace rather than duplicate route schema');
-    const hydratedText = await page.locator('#plaque-design-guide').evaluate(el => {
-      const copy = el.cloneNode(true);
-      copy.querySelector('.designer-guide-return')?.remove();
-      return copy.textContent;
-    });
+    const hydratedText = await page.locator('#plaque-design-guide').textContent();
     assert.equal(normalise(hydratedText), guideText, 'Initial and interactive guide content must match');
     const board = await page.locator('#plaque-designer').boundingBox();
     assert.ok(board.y < 100 && board.height > height * .75, 'Keep the workbench first and full-height');
     const overflow = () => page.evaluate(() => [...document.querySelectorAll('html, body, .designer-header, main, #plaque-design-guide')]
       .filter(el => el.scrollWidth > el.clientWidth + 2).map(el => el.tagName + '.' + el.className));
+    const fixedWorkbench = () => page.evaluate(() => {
+      const main = document.querySelector('.designer-mode > main');
+      return {
+        pageScroll: window.scrollY,
+        mainScroll: main.scrollTop,
+        excessHeight: main.scrollHeight - main.clientHeight,
+        overflow: getComputedStyle(main).overflowY,
+      };
+    });
+    const fixedState = { pageScroll: 0, mainScroll: 0, excessHeight: 0, overflow: 'hidden' };
+    assert.deepEqual(await fixedWorkbench(), fixedState, `${label}: no page-level scrolling`);
+    const dialog = page.locator('#designer-guide-dialog');
+    await expect(dialog).not.toBeVisible();
+    await expect(page.locator('#plaque-design-guide')).not.toBeVisible();
     assert.deepEqual(await overflow(), [], `${label} horizontal overflow`);
     await page.screenshot({ path: `${output}/${label}-designer.png`, animations: 'disabled' });
-    // Preserve an in-progress inscription while opening and closing the guide.
+    // The popup must preserve the active step, wording, URL and viewport.
     await page.getByRole('button', { name: 'Go to Text', exact: true }).click();
     await page.locator('#inscription-wording-input').fill('A PLACE TO REMEMBER');
     const guideLink = width <= 1000 ? '.designer-guide-mobile' : '.designer-header-label';
     await page.locator(guideLink).click();
-    await expect(page.getByRole('heading', { level: 1 })).toBeInViewport();
+    await expect(page.getByRole('dialog', { name: 'Guide & FAQs', exact: true })).toBeVisible();
+    assert.equal(await dialog.evaluate(el => el.matches(':modal')), true, 'Use the browser modal top layer and background inertness');
+    await expect(dialog.getByRole('button', { name: 'Close guide', exact: true })).toBeFocused();
+    await expect(page.locator('#designer-guide-heading')).toBeInViewport();
+    const dialogBox = await dialog.boundingBox();
+    assert.ok(dialogBox.x >= 0 && dialogBox.y >= 0 && dialogBox.x + dialogBox.width <= width && dialogBox.y + dialogBox.height <= height, `${label}: popup fits viewport`);
+    await expect(page.locator('.designer-guide-more')).not.toHaveAttribute('open');
     await page.screenshot({ path: `${output}/${label}-guide.png`, animations: 'disabled' });
     const question = page.locator('.designer-guide-faqs details').first();
     await question.locator('summary').click();
     await expect(question.locator('p')).toBeVisible();
+    await page.locator('.designer-guide-more > summary').click();
+    await expect(page.locator('.designer-guide-more')).toHaveAttribute('open');
     await page.locator('#plaque-design-guide img').last().scrollIntoViewIfNeeded();
     for (const img of await page.locator('#plaque-design-guide img').all()) {
       await img.scrollIntoViewIfNeeded();
@@ -93,14 +111,36 @@ try {
       assert.ok(await img.evaluate(el => el.naturalWidth > 0));
     }
     assert.deepEqual(await overflow(), [], `${label} guide overflow`);
+    assert.deepEqual(await fixedWorkbench(), fixedState, `${label}: reading scrolls only inside the popup`);
+    assert.ok(await page.locator('.designer-guide-dialog-content').evaluate(el => el.scrollTop > 0), 'Long guide scrolls inside the popup');
+    await expect(dialog.getByRole('button', { name: 'Close guide', exact: true })).toBeInViewport();
+    // Native dialog focus must stay inside, even at each keyboard boundary.
+    await dialog.getByRole('button', { name: 'Close guide', exact: true }).focus();
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('.designer-guide-return')).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(dialog.getByRole('button', { name: 'Close guide', exact: true })).toBeFocused();
     await page.locator('.designer-guide-return').click();
+    await expect(dialog).not.toBeVisible();
+    await expect(page.locator(guideLink)).toBeFocused();
     await expect(page.locator('#inscription-wording-input')).toHaveValue('A PLACE TO REMEMBER');
     await expect(page.locator('.proofbench-customiser-head h2')).toBeInViewport();
+    // Exercise Escape, backdrop and explicit-close paths without navigation.
+    for (const close of ['escape', 'backdrop', 'button']) {
+      await page.locator(guideLink).click();
+      await expect(dialog).toBeVisible();
+      if (close === 'escape') await page.keyboard.press('Escape');
+      else if (close === 'backdrop') await page.mouse.click(2, 2);
+      else await dialog.getByRole('button', { name: 'Close guide', exact: true }).click();
+      await expect(dialog).not.toBeVisible();
+      await expect(page.locator(guideLink)).toBeFocused();
+      await expect(page.locator('#inscription-wording-input')).toHaveValue('A PLACE TO REMEMBER');
+      assert.deepEqual(await fixedWorkbench(), fixedState);
+    }
     await page.getByRole('button', { name: 'Go to Material', exact: true }).click();
     await expect(page.locator('.proofbench-customiser-head h2')).toHaveText('Find your finish');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(initial.querySelector('h1').textContent);
-    // Private proof fragments already use #proof=...; plain guide anchors must
-    // leave the existing query-string handling and the active design alone.
+    await expect(page.locator('#designer-guide-heading')).toHaveText(initial.querySelector('h1').textContent);
+    // Modal navigation must not replace query parameters or saved-link fragments.
     assert.equal(page.url(), entryUrl, 'Guide navigation must not replace query parameters or saved-link fragments');
     assert.deepEqual(errors, []);
     assert.deepEqual(writes, []);
@@ -119,7 +159,7 @@ try {
   results.push({ label: 'mobile without JavaScript', status: 'passed' });
   await context.close();
   await writeFile(`${output}/results.json`, JSON.stringify(results, null, 2) + '\n');
-  console.log('PASS designer browser: mobile/small-phone/tablet/desktop, raw/rendered parity, stable metadata, images, FAQs, no-JS, guide navigation and retained inscription; no external traffic or writes');
+  console.log('PASS designer browser: mobile/small-phone/tablet/desktop/landscape, fixed non-scrolling workbench, modal keyboard/focus/dismissal, raw/rendered parity, metadata, images, FAQ/tips disclosures, no-JS and retained inscription/URL; no external traffic or writes');
 } finally {
   await browser.close();
 }

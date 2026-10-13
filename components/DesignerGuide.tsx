@@ -1,15 +1,4 @@
-import React from 'react';
-
-// Scroll without replacing a saved #proof=... fragment or referral parameters.
-// Keep real anchor destinations for keyboard/no-JS navigation.
-export function scrollToDesignerSection(event: React.MouseEvent<HTMLAnchorElement>) {
-  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
-  const target = document.getElementById(event.currentTarget.hash.slice(1));
-  if (!target) return;
-  event.preventDefault();
-  target.scrollIntoView({ block: 'start' });
-  target.focus({ preventScroll: true });
-}
+import React, { useEffect, useRef } from 'react';
 
 // Shared by the interactive page and its initial HTML, including metadata.
 export const designerPage = {
@@ -86,7 +75,7 @@ const questions = [
   },
 ];
 
-export function DesignerGuide({ interactive = false }: { interactive?: boolean }) {
+export function DesignerGuide() {
   return (
     <article id="plaque-design-guide" className="designer-guide no-print" aria-labelledby="designer-guide-heading" tabIndex={-1} data-prerendered="true">
       <nav className="designer-guide-breadcrumb" aria-label="Breadcrumb">
@@ -94,7 +83,17 @@ export function DesignerGuide({ interactive = false }: { interactive?: boolean }
       </nav>
       <h1 id="designer-guide-heading">{designerPage.heading}</h1>
       <p className="designer-guide-intro">Create a custom brass or stainless steel plaque with your own wording. Choose the size, finish and fixings, then review a free online proof before you order. No account or payment is needed to try a design.</p>
-      {interactive && <a className="designer-guide-return" href="#plaque-designer" onClick={scrollToDesignerSection}>Back to your design ↑</a>}
+
+      <section className="designer-guide-faqs" aria-labelledby="designer-faq-heading">
+        <h2 id="designer-faq-heading">Plaque designer questions</h2>
+        {questions.map(({ question, answer }) => (
+          <details key={question}><summary>{question}</summary><p>{answer}</p></details>
+        ))}
+      </section>
+
+      <details className="designer-guide-more">
+        <summary>Design tips and examples</summary>
+        <div>
 
       <section aria-labelledby="designer-how-heading">
         <h2 id="designer-how-heading">From your words to an approved proof</h2>
@@ -124,12 +123,61 @@ export function DesignerGuide({ interactive = false }: { interactive?: boolean }
         <p>For more layout ideas, explore <a href="/garden-plaques">garden plaques</a> or <a href="/opening-plaques">building opening plaques</a>. If you would prefer help arranging your wording, you can <a href="/design-request">ask us to design your plaque</a>.</p>
       </section>
 
-      <section className="designer-guide-faqs" aria-labelledby="designer-faq-heading">
-        <h2 id="designer-faq-heading">Plaque designer questions</h2>
-        {questions.map(({ question, answer }) => (
-          <details key={question}><summary>{question}</summary><p>{answer}</p></details>
-        ))}
-      </section>
+        </div>
+      </details>
     </article>
+  );
+}
+
+export function DesignerGuideDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const startedOnBackdrop = useRef(false);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (isOpen && !dialog.open) {
+      // Native modal semantics make the workbench inert and restore opener focus.
+      dialog.showModal();
+      if (contentRef.current) contentRef.current.scrollTop = 0;
+    } else if (!isOpen && dialog.open) {
+      dialog.close();
+    }
+  }, [isOpen]);
+
+  const isBackdrop = (event: React.MouseEvent<HTMLDialogElement>) => {
+    if (event.target !== event.currentTarget) return false;
+    const rect = event.currentTarget.getBoundingClientRect();
+    return event.clientX < rect.left || event.clientX > rect.right
+      || event.clientY < rect.top || event.clientY > rect.bottom;
+  };
+
+  return (
+    <dialog
+      ref={dialogRef}
+      id="designer-guide-dialog"
+      className="designer-guide-dialog no-print"
+      aria-labelledby="designer-guide-dialog-title"
+      onClose={onClose}
+      onPointerDown={event => { startedOnBackdrop.current = isBackdrop(event); }}
+      onClick={event => {
+        if (startedOnBackdrop.current && isBackdrop(event)) onClose();
+        startedOnBackdrop.current = false;
+      }}
+    >
+      <div className="designer-guide-dialog-header">
+        <h2 id="designer-guide-dialog-title">Guide &amp; FAQs</h2>
+        <button type="button" autoFocus onClick={onClose} aria-label="Close guide">
+          Close <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div ref={contentRef} className="designer-guide-dialog-content">
+        <DesignerGuide />
+      </div>
+      <div className="designer-guide-dialog-footer">
+        <button type="button" className="designer-guide-return" onClick={onClose}>Back to your design</button>
+      </div>
+    </dialog>
   );
 }

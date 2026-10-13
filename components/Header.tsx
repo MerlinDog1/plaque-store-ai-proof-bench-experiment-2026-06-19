@@ -1,6 +1,5 @@
 import React from "react";
 import { SiteView } from "../services/commerce";
-import { scrollToDesignerSection } from "./DesignerGuide";
 
 interface Props {
   onNavigate: (view: SiteView) => void;
@@ -8,6 +7,7 @@ interface Props {
   currentView: SiteView;
   priceLabel: string;
   showPrice: boolean;
+  onOpenGuide: () => void;
 }
 
 const DELIVERY_HELP =
@@ -19,6 +19,7 @@ export const Header: React.FC<Props> = ({
   currentView,
   priceLabel,
   showPrice,
+  onOpenGuide,
 }) => {
   const isDesigner = currentView === "plaque";
   const isAdmin = currentView === "admin";
@@ -46,10 +47,10 @@ export const Header: React.FC<Props> = ({
             Insta<span>Plaque</span>
           </a>
           <span className="designer-header-divider" />
-          <a className="designer-header-label" href="#plaque-design-guide" onClick={scrollToDesignerSection}>Design guide &amp; FAQs ↓</a>
+          <button type="button" className="designer-header-label" aria-haspopup="dialog" aria-controls="designer-guide-dialog" onClick={onOpenGuide}>Design guide &amp; FAQs</button>
         </div>
         <div className="designer-header-actions">
-          <a className="designer-guide-mobile" href="#plaque-design-guide" onClick={scrollToDesignerSection}>Guide &amp; FAQs</a>
+          <button type="button" className="designer-guide-mobile" aria-haspopup="dialog" aria-controls="designer-guide-dialog" onClick={onOpenGuide}>Guide &amp; FAQs</button>
           <a
             className="designer-help"
             href="/contact"

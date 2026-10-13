@@ -4,7 +4,7 @@ import { OPTIONAL_AD_CONSENT_CHANGED } from './services/metaPixel';
 import { trackSiteEvent, trackSitePage } from './services/posthogAnalytics';
 import { LayoutProgress } from './components/LayoutProgress';
 import { DesignRequest } from './components/DesignRequest';
-import { DesignerGuide } from './components/DesignerGuide';
+import { DesignerGuideDialog } from './components/DesignerGuide';
 import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
 import PlaquePreview from './components/PlaquePreview';
@@ -246,6 +246,10 @@ const App: React.FC = () => {
   const [realisticPreviewPrompt, setRealisticPreviewPrompt] = useState('');
   const [realisticPreviewAspectRatio, setRealisticPreviewAspectRatio] = useState('auto');
   const [modalOpen, setModalOpen] = useState(false);
+  const [isDesignerGuideOpen, setIsDesignerGuideOpen] = useState(false);
+  useEffect(() => {
+    if (currentView !== 'plaque') setIsDesignerGuideOpen(false);
+  }, [currentView]);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [realisticReferenceImage, setRealisticReferenceImage] = useState<string | null>(null);
   const [generationPhase, setGenerationPhase] = useState<GenerationPhase>(null);
@@ -1423,6 +1427,7 @@ const App: React.FC = () => {
         currentView={currentView}
         priceLabel={formattedPrice}
         showPrice={showHeaderPrice}
+        onOpenGuide={() => setIsDesignerGuideOpen(true)}
       />
 
       {layoutRegenNotice && showLayoutRegenToast && (
@@ -1450,7 +1455,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <main className="min-h-0 w-full flex-1 overflow-auto">
+      <main className={`min-h-0 w-full flex-1 ${currentView === 'plaque' ? 'overflow-hidden' : 'overflow-auto'}`}>
 
         {(requestSeed || currentView === 'design-request') && <div hidden={currentView !== 'design-request'}>
           <DesignRequest initialState={requestSeed?.state || state} initialWording={requestSeed?.wording || ''} initialNotes={requestSeed?.notes || ''} onBack={() => handleNavigate('home')} />
@@ -1593,10 +1598,10 @@ const App: React.FC = () => {
             </section>
 
           </div>
-          <DesignerGuide interactive />
           </>
         )}
       </main>
+      {currentView === 'plaque' && <DesignerGuideDialog isOpen={isDesignerGuideOpen} onClose={() => setIsDesignerGuideOpen(false)} />}
       {currentView !== 'admin' && <MetaConsent />}
 
       {isGeneratingLayout && <LayoutProgress phase={generationPhase} />}
