@@ -18,6 +18,8 @@ jobs:
     name: Typecheck and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      CHROMIUM_EXECUTABLE: /usr/bin/google-chrome
 
     steps:
       - name: Check out repository
@@ -43,6 +45,8 @@ jobs:
           npm run check:security
           npm run check:public-input-security
           npm run check:analytics-redaction
+          npm run check:posthog
+          npm run check:google-purchase
 
       - name: Build
         run: npm run build
