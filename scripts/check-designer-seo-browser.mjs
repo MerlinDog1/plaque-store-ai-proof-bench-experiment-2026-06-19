@@ -59,6 +59,10 @@ try {
     await page.goto(entryUrl);
     await expect(page.locator('#plaque-designer')).toBeVisible();
     await expect(page.locator('.proofbench-customiser-head h2')).toHaveText('Choose your size');
+    // Measure the settled layout, not the existing 10px entrance translation.
+    await page.locator('#plaque-designer').evaluate(el => {
+      for (const animation of el.getAnimations()) animation.finish();
+    });
     await expect(page).toHaveTitle(initial.title);
     assert.equal(await page.locator('h1').count(), 1);
     assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'), `${origin}/design`);
