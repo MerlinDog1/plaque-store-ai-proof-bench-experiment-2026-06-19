@@ -1,6 +1,33 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Latest production release — 13 October 2026, designer FAQ pop-up
+## Latest production release — 13 October 2026, product policy metadata
+
+Owner4516 requested fixing the live site's yellow shipping/returns/delivery
+warnings. Application `f7dcff058c885b3566e71b9e6b805f0f2bb6ebd6` on branch
+`codex/instaplaque-product-policies-20261013` is deployed/promoted as
+`dpl_g23QYg6DYBEnv8AhHpJRkhGNqa6b`:
+https://instaplaque-o8s9f1cn5-dullaghan31-3959s-projects.vercel.app.
+Canonical READY identity independently verified. At11:23UTC all22 public checks
+matched the protected candidate, including catalogue/policy HTML and
+`index-CpAc9MaU.js`/`index-Bxw_YNF_.css` matching exact-source CI.
+
+Existing Merchant policies were read, not changed: GB free shipping, weekday
+handling/transit, one-day transit, existing personalised-plaque returns policy.
+Initial/client physical-product data now consistently carries those policies,
+with exact variant production estimates and the5–15day family range. The
+existing delivery guide describes the already-approved carrier-service estimate.
+No pricing/feed/checkout/tracking or designer layout change. Returns wording and
+designer body match the predecessor; public feed is byte-identical.
+
+CI38389208807 passed full typecheck/build, all360 physical Offer occurrences
+across181 pages,175 catalogue/feed variants,11 hydrated product/catalogue routes
+plus policy/designer routes, and the existing five-viewport/no-JS popup checks.
+Vercel build and public read-only HTTP/hash checks passed. No fresh hosted browser
+on the memory-constrained VPS. Google warning clearance awaits its recrawl and
+owner's Validate fix; no Search Console submission was performed.
+See [release evidence and rollback](docs/product-policies-2026-10-13.md).
+
+## Previous production release — 13 October 2026, designer FAQ pop-up
 
 Owner message 4495 corrected the published presentation: no added designer page
 scrolling; help should open on click in a pop-up/expander. Publication authority
