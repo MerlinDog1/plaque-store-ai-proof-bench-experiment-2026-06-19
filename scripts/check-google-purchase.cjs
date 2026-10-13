@@ -75,7 +75,8 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
     vm.runInNewContext(bootstrap, context);
     assert.equal(scripts.length, 0, url + ' must not load Google on a private document');
-    assert.equal(window.dataLayer.length, 0);
+    assert.equal(window.dataLayer.some(args => ['js', 'config', 'event'].includes(args[0])), false,
+      'Private pages may queue consent settings but never configure a destination or send events');
   }
   {
     const scripts = [], window = { location: new URL(origin + '/brass-plaques?utm_source=ad&untrusted=private#secret'), addEventListener() {} };
@@ -97,7 +98,12 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
       document: { referrer: '', createElement: () => ({}), head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
     vm.runInNewContext(bootstrap, context);
-    assert.equal(scripts.length, 0, 'No Google loader without analytics consent');
+    assert.equal(scripts.length, 1, 'Advanced consent mode loads the public Google tag even without consent');
+    const update = window.dataLayer.find(args => args[0] === 'consent' && args[1] === 'update');
+    assert.equal(update[2].analytics_storage, 'denied');
+    assert.equal(update[2].ad_storage, 'denied');
+    assert.equal(update[2].ad_user_data, 'denied');
+    assert.equal(update[2].ad_personalization, 'denied');
   }
   let h = mainHarness();
   assert.deepEqual(await Promise.all([h.track(order), h.track(order)]), [true, true]);

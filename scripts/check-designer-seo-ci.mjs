@@ -28,5 +28,23 @@ if (process.env.GITHUB_ACTIONS === 'true') {
     });
     if (policies.error) console.error(policies.error.message);
     process.exitCode = policies.status === 0 ? 0 : 1;
+    if (policies.status === 0) {
+      const consent = spawnSync(process.execPath, ['scripts/check-google-consent-browser.mjs'], {
+        stdio: 'inherit', timeout: 120_000,
+      });
+      if (consent.error) console.error(consent.error.message);
+      process.exitCode = consent.status === 0 ? 0 : 1;
+      if (consent.status === 0) {
+        const navigation = spawnSync(process.execPath, ['scripts/check-google-click-navigation.cjs'], {
+          stdio: 'inherit', timeout: 30_000,
+        });
+        if (navigation.status !== 0) throw new Error('Google click navigation checks failed');
+        const network = spawnSync(process.execPath, ['scripts/check-google-consent-network.mjs'], {
+          stdio: 'inherit', timeout: 180_000,
+        });
+        if (network.error) console.error(network.error.message);
+        process.exitCode = network.status === 0 ? 0 : 1;
+      }
+    }
   }
 }

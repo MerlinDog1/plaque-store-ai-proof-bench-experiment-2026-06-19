@@ -1,5 +1,51 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Consent follow-up Tasks2–4 — 13 October 2026
+
+Owner4527 requests purchase audit, Cookies/Privacy wording and real consent
+checks. Application/checkpoint `f9a459bd53faa4fc3aa6bff4eb435bf876c6289f` on
+`codex/instaplaque-consent-v2-20261013` passes
+[CI38399150001](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/actions/runs/38399150001).
+**Prepared, not deployed.** Continue PR17; no new checkout/dependency copy.
+
+Real public Google JS with ALL collection intercepted verifies G100/no Google
+cookies, native-link gclid/_gl passthrough, later G111/cookies, withdrawal and
+private exclusions. Fixed bare public React pushState navigation dropping click
+IDs, with no storage/private reference copying; designer/refresh regression
+passes. Exact Task1 index block and Meta/banner/purchase code are unchanged.
+Policies now distinguish public cookieless Google measurement from optional
+cookies; PostHog/Vercel/Meta and the purchase event remain opt-in.
+
+Purchase actually sends GA4 `purchase` to `G-FKP17EXNBX`, not direct Ads
+`AW-18288208905/LABEL`. GBP paid amount, stable digest, original GA client and
+unchanged landing `_gcl_aw` are verified; reload dedupe passes. The purchase
+request itself does not contain TEST123. October9 notes describe a GA4-imported
+Ads action; no fresh import/account receipt is verified. Do not invent a label
+or claim rejected-consent purchases work. Live baseline still has old consent
+gate. See [exact audit, wording and evidence](docs/google-consent-audit-2026-10-13.md).
+
+## Google Consent Mode v2 preparation — 13 October 2026
+
+Owner4526 supplies the exact public Google tag replacement and asks for remaining
+React consent gates, explicitly retaining Meta opt-in. Work is on
+`codex/instaplaque-consent-v2-20261013`, based on product-policy docs checkpoint
+`2c5cd37` and independently verified live `dpl_g23QYg6DYBEnv8AhHpJRkhGNqa6b`.
+The exact block is first in head; public Google loading no longer waits for
+consent, while denied defaults, events, URL redaction and private exclusions
+remain. The sole ga-disable assignment is removed with the old block.
+
+**Prepared, pushed and tested; not deployed.** Application/checkpoint
+`d0891021c881e910c24da5128490fecdf370f665` passed
+[CI38397272755](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/actions/runs/38397272755):
+typecheck/build, exact source/generated script order, real built React banner
+Accept/Reject/saved choices, and catalogue/designer regressions. Google/Meta
+delivery was locally stubbed. [PR17](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/pull/17)
+targets the live-source product-policy branch. No new permission to publish was
+inferred from the code-only Task1 request. The separate Google purchase helper/frame
+still requires `instaplaque-meta-consent=yes` and is unchanged. This is not a full
+purchase-modelling or Ads-receipt fix. Meta/banner/PostHog and all checkout code
+are unchanged. See [scope, audit and checks](docs/google-consent-v2-2026-10-13.md).
+
 ## Latest production release — 13 October 2026, product policy metadata
 
 Owner4516 requested fixing the live site's yellow shipping/returns/delivery
