@@ -3,6 +3,63 @@
 
 <head>
   <meta charset="UTF-8" />
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+
+  gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    wait_for_update: 500
+  });
+  gtag('set', 'ads_data_redaction', true);
+  gtag('set', 'url_passthrough', true);
+
+  var analyticsUrl = new URL(window.location.href);
+  var privateAnalyticsPage = /^\/(admin|proof|order|order-confirmed|checkout)(\/|$)/.test(analyticsUrl.pathname)
+    || ['proof', 'order', 'session_id'].some(function (key) { return analyticsUrl.searchParams.has(key); })
+    || ['admin', 'checkout', 'order'].includes(analyticsUrl.searchParams.get('view'));
+  var onLiveSite = ['instaplaque.co.uk', 'www.instaplaque.co.uk'].includes(location.hostname);
+
+  function updateGoogleConsent() {
+    var allowed = false;
+    try { allowed = localStorage.getItem('instaplaque-analytics-consent-v1') === 'yes'; } catch (_) {}
+    var state = allowed && onLiveSite ? 'granted' : 'denied';
+    gtag('consent', 'update', {
+      ad_storage: state,
+      ad_user_data: state,
+      ad_personalization: state,
+      analytics_storage: state
+    });
+  }
+  updateGoogleConsent();
+  window.addEventListener('instaplaque:optional-ad-consent-changed', updateGoogleConsent);
+  window.addEventListener('storage', updateGoogleConsent);
+
+  if (onLiveSite && !privateAnalyticsPage) {
+    gtag('js', new Date());
+    gtag('config', 'AW-18288208905');
+
+    var cleanUrl = new URL(window.location.href);
+    cleanUrl.hash = '';
+    Array.from(cleanUrl.searchParams.keys()).forEach(function (key) {
+      if (!['view', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].includes(key)) {
+        cleanUrl.searchParams.delete(key);
+      }
+    });
+    gtag('config', 'G-FKP17EXNBX', {
+      page_location: cleanUrl.toString(),
+      page_referrer: document.referrer ? new URL(document.referrer).origin : ''
+    });
+
+    var googleTagScript = document.createElement('script');
+    googleTagScript.async = true;
+    googleTagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-18288208905';
+    document.head.appendChild(googleTagScript);
+  }
+</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Custom Brass &amp; Stainless Steel Plaques UK | InstaPlaque</title>
   <meta name="description" content="Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK delivery before you order." />
@@ -24,7 +81,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alex+Brush&family=Allura&family=Bebas+Neue&family=Bitter:wght@400;700&family=Caveat:wght@400;700&family=Cinzel:wght@400;700;900&family=Dancing+Script:wght@400;700&family=EB+Garamond:wght@400;600;700&family=Great+Vibes&family=Lato:wght@300;400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@300;400;600;700&family=Oswald:wght@400;600;700&family=Pacifico&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Raleway:wght@300;400;500;700&family=Roboto+Slab:wght@300;500;700&family=Satisfy&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap"
     rel="stylesheet" />
   <style>
     :root {
@@ -1999,16 +2056,6 @@
       fill: var(--metal-fill, url(#mirrorSteel)) !important;
     }
   </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0"
-  }
-}
-</script>
   <script type="application/ld+json" id="instaplaque-site-schema">
 {
   "@context": "https://schema.org",
@@ -2033,50 +2080,6 @@
     }
   ]
 }
-  </script>
-  <!-- Google tag (gtag.js) -->
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    // Keep private proof/order links out of both normal Google destinations.
-    // Consented paid purchases use the separate event-only measurement frame.
-    var analyticsUrl = new URL(window.location.href);
-    var privateAnalyticsPage = /^\/(admin|proof|order|order-confirmed|checkout)(\/|$)/.test(analyticsUrl.pathname)
-      || ['proof', 'order', 'session_id'].some(function (key) { return analyticsUrl.searchParams.has(key); })
-      || ['admin', 'checkout', 'order'].includes(analyticsUrl.searchParams.get('view'));
-    var googleTagsStarted = false;
-    function updateGoogleConsent() {
-      var allowed = false;
-      try { allowed = localStorage.getItem('instaplaque-analytics-consent-v1') === 'yes'; } catch (_) {}
-      allowed = allowed && ['instaplaque.co.uk', 'www.instaplaque.co.uk'].includes(location.hostname);
-      window['ga-disable-G-FKP17EXNBX'] = !allowed;
-      if (!allowed) {
-        if (googleTagsStarted) gtag('consent', 'update', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
-        return;
-      }
-      if (googleTagsStarted) { gtag('consent', 'update', { analytics_storage: 'granted', ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted' }); return; }
-      if (privateAnalyticsPage) return;
-      googleTagsStarted = true;
-      gtag('js', new Date());
-      gtag('config', 'AW-18288208905');
-      analyticsUrl.hash = '';
-      Array.from(analyticsUrl.searchParams.keys()).forEach(function (key) {
-        if (!['view', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].includes(key)) {
-          analyticsUrl.searchParams.delete(key);
-        }
-      });
-      gtag('config', 'G-FKP17EXNBX', {
-        page_location: analyticsUrl.toString(),
-        page_referrer: document.referrer ? new URL(document.referrer).origin : ''
-      });
-      var googleTagScript = document.createElement('script');
-      googleTagScript.async = true;
-      googleTagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-18288208905';
-      document.head.appendChild(googleTagScript);
-    }
-    updateGoogleConsent();
-    window.addEventListener('instaplaque:optional-ad-consent-changed', updateGoogleConsent);
-    window.addEventListener('storage', updateGoogleConsent);
   </script>
 </head>
 

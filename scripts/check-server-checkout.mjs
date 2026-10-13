@@ -173,6 +173,13 @@ assert.throws(
 
 const stripeCheckout = buildStripeCheckoutParams(canonicalOrder, { uiMode: "hosted" });
 const stripeParams = stripeCheckout.params;
+assert.equal(stripeParams.get('payment_method_types[0]'), 'card', 'Unverified delayed-payment configuration must remain disabled.');
+const previousDynamicMethods = process.env.STRIPE_DYNAMIC_PAYMENT_METHODS;
+process.env.STRIPE_DYNAMIC_PAYMENT_METHODS = 'true';
+assert.equal(buildStripeCheckoutParams(canonicalOrder).params.has('payment_method_types[0]'), false);
+if (previousDynamicMethods === undefined) delete process.env.STRIPE_DYNAMIC_PAYMENT_METHODS;
+else process.env.STRIPE_DYNAMIC_PAYMENT_METHODS = previousDynamicMethods;
+assert.equal(stripeParams.get('shipping_options[0][shipping_rate_data][delivery_estimate][minimum][value]'), '6');
 assert.equal(stripeParams.get("client_reference_id"), firstServerId);
 assert.equal(stripeParams.get("line_items[0][price_data][unit_amount]"), String(baseTotalPence));
 assert.equal(stripeParams.get("line_items[0][price_data][currency]"), "gbp");

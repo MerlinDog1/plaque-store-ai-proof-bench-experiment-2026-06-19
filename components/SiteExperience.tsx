@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import PlaquePreview from './PlaquePreview';
+import React, { lazy, useEffect, useRef, useState } from 'react';
+const PlaquePreview = lazy(() => import('./PlaquePreview'));
 import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies, seoLandingPages } from '../services/commerce';
 import { PlaqueState } from '../types';
-import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
+import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportActions';
 import { SeoRankTracker } from './SeoRankTracker';
 import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, shopFaqs } from './Shopfront';
 import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
@@ -506,7 +506,8 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
       { title: 'Data collected', copy: 'Customer name, contact details, delivery details, plaque wording, proof details and order history may be collected to fulfil orders. With analytics consent, we also measure visit time, public pages, traffic sources and campaigns, approximate location, device type and use of the designer.' },
       { title: 'Why it is used', copy: 'Data is used to create and save plaque proofs, take payment, send order emails, prepare production files, arrange delivery, provide customer support, understand aggregate page usage, and keep accounting and legal records.' },
       { title: 'Service providers', copy: 'We use trusted providers to run the service, including Stripe for payments, Vercel for hosting and web analytics, PostHog (EU hosting) and Google for analytics, Supabase for order storage, Resend for transactional email, and delivery providers where needed.' },
-      { title: 'Web analytics', copy: 'Optional analytics starts after you accept it in Cookie settings. PostHog measures public pages, campaign sources, anonymous browsing sessions, designer steps, prepared downloads and confirmed enquiry and purchase outcomes. It does not receive your name, email address, wording, uploaded artwork, payment details or private proof/order URLs. Session replay is disabled. Approximate location is inferred from the network connection, with IP anonymisation enabled. We also use Vercel Web Analytics and Google Analytics with your permission. You can withdraw permission on the Cookie details page.' },
+      { title: 'Web analytics', copy: 'PostHog and Vercel Web Analytics start after you accept optional analytics in Cookie settings. PostHog measures public pages, campaign sources, anonymous browsing sessions, designer steps, prepared downloads and confirmed enquiry and purchase outcomes. It does not receive your name, email address, wording, uploaded artwork, payment details or private proof/order URLs. Session replay is disabled. Approximate location is inferred from the network connection, with IP anonymisation enabled. You can withdraw permission on the Cookie details page.' },
+      { title: 'Google measurement', copy: 'Before you accept, or if you reject optional cookies, Google Analytics and Google Ads receive limited cookieless measurement signals on public pages to help us understand whether our ads work. Google does not store or read analytics or advertising cookies, or build an advertising profile from these signals. If you accept, Google can use analytics and advertising cookies to measure visits and advertising performance. You can change your choice in Cookie settings on the Cookie details page.' },
       { title: 'Purchase measurement', copy: 'If you accept optional advertising cookies, we report a confirmed purchase to Google Analytics with its value, currency and a pseudonymous transaction reference, to help measure advertising performance. This purchase event does not include your name, email, address, inscription, proof or private order link. You can change your choice using Cookie settings on our Cookie details page.' },
       { title: 'How long data is kept', copy: 'Order information is kept for as long as needed for production, support, accounting and legal record keeping. Proof artwork may be retained so we can remake or support the order.' },
       { title: 'Customer rights', copy: `You can ask to access, correct or delete personal data where the law allows by emailing ${businessContact.email}.` },
@@ -519,7 +520,8 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     sections: [
       { title: 'Essential storage', copy: 'The site may use cookies or local storage to remember proof progress, admin access and checkout state. These are needed for the service to work properly.' },
       { title: 'Payments', copy: 'Stripe may use cookies and similar technologies when processing secure checkout and fraud prevention.' },
-      { title: 'Analytics and marketing', copy: 'With your permission, PostHog, Vercel Web Analytics and Google Analytics measure visits and how the website is used. PostHog uses a random browsing identifier, renewed after 30 minutes of inactivity, stored in your browser. It does not record sessions, form contents or uploaded artwork. A hashed purchase reference is kept locally for up to 90 days to avoid counting the same purchase twice. Withdrawing analytics consent stops new events and removes this analytics storage. Google Analytics and Google Ads may use cookies and similar technologies. Your choice is remembered separately from your design and order details.' },
+      { title: 'Analytics and marketing', copy: 'Before you accept, or if you reject optional cookies, Google Analytics and Google Ads receive limited cookieless measurement signals on public pages to help us understand whether our ads work. Google does not store or read analytics or advertising cookies, or build an advertising profile from these signals. If you accept, Google can use analytics and advertising cookies to measure visits and advertising performance. Your choice is remembered separately from your design and order details.' },
+      { title: 'Other optional analytics', copy: 'With your permission, PostHog and Vercel Web Analytics measure visits and how the website is used. PostHog uses a random browsing identifier, renewed after 30 minutes of inactivity, stored in your browser. It does not record sessions, form contents or uploaded artwork. A hashed purchase reference is kept locally for up to 90 days to avoid counting the same purchase twice. Withdrawing analytics consent stops these services and removes PostHog analytics storage. Google returns to limited cookieless measurement.' },
       { title: 'Purchase measurement', copy: 'With your permission, Google Analytics measures confirmed purchases using their value, currency and a pseudonymous transaction reference. We also store that reference locally to avoid reporting the same purchase again. Use Cookie settings on this page to allow or withdraw permission for this purchase measurement.' },
       { title: 'Facebook advertising', copy: 'With your permission, Meta Pixel measures public-page visits and successful starts of live Stripe checkout. We send checkout value and currency, not your inscription, name, email or proof. Meta may process browser and device information. Use Cookie settings on this Cookie details page to allow or withdraw consent. Private proof and order links are excluded.' },
       { title: 'Managing cookies', copy: 'Use Cookie settings on this page to accept or reject optional analytics and advertising, including withdrawing an earlier choice. Rejecting optional tracking does not prevent designing or ordering a plaque. You can also block or delete cookies in your browser settings, although essential proof, checkout or admin storage is needed for those features.' },
@@ -932,10 +934,12 @@ export const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selec
     setMetaContent('meta[property="og:title"]', config.title);
     setMetaContent('meta[property="og:description"]', config.description);
     setMetaContent('meta[property="og:url"]', url);
-    setMetaContent('meta[property="og:image"]', siteShareImage);
+    const routeImage = view === 'product' ? selectedProduct.image : view === 'landing' ? selectedLanding.image : undefined;
+    const shareImage = routeImage ? new URL(routeImage, siteBaseUrl).href : siteShareImage;
+    setMetaContent('meta[property="og:image"]', shareImage);
     setMetaContent('meta[name="twitter:title"]', config.title);
     setMetaContent('meta[name="twitter:description"]', config.description);
-    setMetaContent('meta[name="twitter:image"]', siteShareImage);
+    setMetaContent('meta[name="twitter:image"]', shareImage);
     setCanonicalHref(url);
 
     const routeSchema = {
@@ -1513,7 +1517,7 @@ function FaqPage() {
   );
 }
 
-function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
+export function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
   return (
     <div className="commerce-page">
       <section className="commerce-product-detail">
@@ -1522,26 +1526,25 @@ function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
           <h1>{USE_CUSTOMER_COPY_PASS ? 'Need something made to measure?' : 'Start with an instant proof, then route complex work to quote.'}</h1>
           <p className="commerce-lede">
             {USE_CUSTOMER_COPY_PASS
-              ? 'Start with a proof and tell us what you need. We will confirm anything unusual, including custom sizes, oval plaques, circular plaques and longer-turnaround work, before payment.'
+              ? 'Tell us the size, wording, material and where your plaque will be fitted. We can help with oversized plaques, supplied artwork and unusual mounting, and confirm the design, price and production time before you pay.'
               : 'Customers should not hit a dead-end when a plaque is unusual. They can still create a proof, then the system flags custom sizes, ovals, circles or longer-turnaround work for manual confirmation.'}
           </p>
           <div className="commerce-actions">
-            <button type="button" className="commerce-primary" onClick={onStartDesign}>
-              Start bespoke proof
-            </button>
+            <a className="commerce-primary" href="/design-request">Ask us to design your plaque</a>
+            <a className="commerce-secondary" href="/design" onClick={event => { if (onStartDesign) { event.preventDefault(); onStartDesign(); } }}>Try the online designer</a>
           </div>
         </div>
         <div className="commerce-quote-panel">
           <p className="commerce-eyebrow">{USE_CUSTOMER_COPY_PASS ? 'We can quote for' : 'Quote triggers'}</p>
           <ul>
             <li>Oversized dimensions outside the standard production bed</li>
-            <li>Oval plaques and circular plaques</li>
+            <li>Supplied logos, images or specialist artwork</li>
             <li>Custom sizes up to our maximum production size</li>
             <li>Longer-turnaround finishes or wood-backed plaques</li>
             <li>Delivery outside the UK</li>
           </ul>
           <div className="commerce-warning">
-            Send the proof through and we will confirm anything unusual before payment.
+            Standard oval and circular plaques can be priced in the online designer. For a quote, include your approximate size, exact wording, fixing surface and any deadline. No payment is taken when you send a design request.
           </div>
         </div>
       </section>

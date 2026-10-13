@@ -575,7 +575,7 @@ export const buildEmail = (template, order, extra = {}) => {
   };
 };
 
-export const sendEmail = async ({ to, template, order, extra = {} }) => {
+export const sendEmail = async ({ to, template, order, extra = {}, idempotencyKey }) => {
   const message = buildEmail(template, order, extra);
   if (!to || !String(to).includes("@")) {
     return { status: "skipped", reason: "missing-recipient", message };
@@ -590,7 +590,9 @@ export const sendEmail = async ({ to, template, order, extra = {} }) => {
     headers: {
       Authorization: `Bearer ${resendApiKey}`,
       "Content-Type": "application/json",
+      ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
     },
+    signal: AbortSignal.timeout(15000),
     body: JSON.stringify({
       from: fromEmail,
       to,

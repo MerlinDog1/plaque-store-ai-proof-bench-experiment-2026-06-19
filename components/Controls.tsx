@@ -1,4 +1,6 @@
+import { getProductionEstimate } from '../services/productionTime.mjs';
 import { FontSizeInput } from './FontSizeInput';
+import { ProofEmailForm } from './ProofEmailForm';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   DesignStyle,
@@ -145,47 +147,6 @@ const fitsCustomFastTurnaround = (width: number, height: number) => {
   return longest <= CUSTOM_FAST_TURNAROUND_WIDTH_MM && shortest <= CUSTOM_FAST_TURNAROUND_HEIGHT_MM;
 };
 
-const sizeMatches = (width: number, height: number, targetWidth: number, targetHeight: number) => {
-  return Math.max(width, height) === Math.max(targetWidth, targetHeight)
-    && Math.min(width, height) === Math.min(targetWidth, targetHeight);
-};
-
-const isA4OrA5Size = (state: Pick<PlaqueState, 'width' | 'height'>) => {
-  return sizeMatches(state.width, state.height, 210, 148)
-    || sizeMatches(state.width, state.height, 297, 210);
-};
-
-const STANDARD_TURNAROUND_SIZES = [
-  ...SIZE_PRESETS,
-  ...BENCH_SIZE_PRESETS,
-  { width: 300, height: 200 },
-  { width: 400, height: 300 },
-];
-
-const isStandardTurnaroundSize = (state: Pick<PlaqueState, 'width' | 'height' | 'shape'>) => {
-  if (state.shape === Shape.Heart) return false;
-  if (!fitsCustomFastTurnaround(state.width, state.height)) return false;
-  return STANDARD_TURNAROUND_SIZES.some((preset) => sizeMatches(state.width, state.height, preset.width, preset.height));
-};
-
-const getTurnaroundEstimate = (state: PlaqueState) => {
-  if (state.wood) {
-    return isA4OrA5Size(state)
-      ? { days: 10, label: 'Estimated 10 working days after proof approval and payment', note: 'A4/A5 plaques with wood backing need extra workshop time.' }
-      : { days: 15, label: 'Estimated 15 working days after proof approval and payment', note: 'Custom or non-standard wood-backed plaques need a longer workshop slot.' };
-  }
-
-  if (!isStandardTurnaroundSize(state)) {
-    return { days: 15, label: 'Estimated 15 working days after proof approval and payment', note: 'Custom sizes and non-standard combinations need a longer workshop slot.' };
-  }
-
-  if (state.material === Material.AgedBrass) {
-    return { days: 7, label: 'Estimated 7 working days after proof approval and payment', note: 'Aged brass needs additional finishing time.' };
-  }
-
-  return { days: 5, label: 'Estimated 5 working days after proof approval and payment', note: 'Standard size, standard finish, fitting the 600 x 400mm production bed.' };
-};
-
 const STEP_COPY = [
   {
     eyebrow: 'Step 1 of 7',
@@ -266,6 +227,7 @@ interface Props {
   onRealisticPreviewAspectRatioChange: (aspectRatio: string) => void;
   onExportSvg: () => void;
   onExportPdf: () => void;
+  onEmailProof: (email: string, requestId: string, website: string) => Promise<void>;
   onPrint: () => void;
 }
 
@@ -510,6 +472,7 @@ export const Controls: React.FC<Props> = ({
   onRealisticPreviewAspectRatioChange,
   onExportSvg,
   onExportPdf,
+  onEmailProof,
   onPrint,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -623,9 +586,7 @@ export const Controls: React.FC<Props> = ({
   const shapeLabel = state.shape === Shape.Circle ? 'Circle' : state.shape === Shape.Oval ? 'Oval' : 'Rectangle';
   const customFastTurnaround = fitsCustomFastTurnaround(state.width, state.height) && !state.wood;
   const customLongTurnaround = !customFastTurnaround;
-  const customTurnaroundLabel = customFastTurnaround
-    ? 'Custom size: 5 working days'
-    : 'Custom size: 10 working days';
+  const customTurnaroundLabel = `Production: ${getProductionEstimate(state).days} working days`;
 
   useEffect(() => {
     setCustomWidthInput(String(state.width));
@@ -671,7 +632,7 @@ export const Controls: React.FC<Props> = ({
       return;
     }
     if (activeStep !== 0 || sizeMode !== 'custom' || !customLongTurnaround) return;
-    const message = '10 working days due to the custom size.';
+    const message = getProductionEstimate(state).label;
     setTurnaroundToast(message);
     const timer = window.setTimeout(() => setTurnaroundToast(null), 4200);
     return () => window.clearTimeout(timer);
@@ -879,7 +840,7 @@ export const Controls: React.FC<Props> = ({
   });
   const woodAddOnPrice = estimateWoodAddOn(state);
   const baseProofPrice = Math.max(0, price - (state.wood ? woodAddOnPrice : 0));
-  const turnaroundEstimate = getTurnaroundEstimate(state);
+  const turnaroundEstimate = getProductionEstimate(state);
   const checkoutReady = isProductionReady && proofApproved && !checkoutSubmitting;
 
   const handleProofCheckoutSubmit = async (event: React.FormEvent) => {
@@ -1050,7 +1011,7 @@ export const Controls: React.FC<Props> = ({
 
             <div className="mt-3 rounded-lg border border-[#d7b66a]/25 bg-[#1b231f] px-3 py-2 text-xs font-black text-[#f2d688]">
               {sizeMode === 'standard'
-                ? 'Standard sizes: 5 working days'
+                ? `Production: ${getProductionEstimate(state).days} working days`
                 : customTurnaroundLabel}
             </div>
 
@@ -2405,7 +2366,7 @@ export const Controls: React.FC<Props> = ({
                   {checkoutSubmitting ? 'Opening checkout...' : 'Continue to secure checkout'}
                 </button>
                 <div className="proof-stripe-note" aria-label={USE_CUSTOMER_COPY_PASS ? 'Secure checkout powered by Stripe' : 'Secure test checkout powered by Stripe'}>
-                  <span>Secure card checkout</span>
+                  <span>Secure checkout · available payment options shown next</span>
                   <img src="/site-images/powered-by-stripe-black.svg" alt="Powered by Stripe" loading="lazy" />
                 </div>
               </div>
@@ -2424,6 +2385,7 @@ export const Controls: React.FC<Props> = ({
                   Download proof PDF
                 </button>
               </div>
+              <ProofEmailForm onSend={onEmailProof} />
               {showAdminProofTools && adminProofToolsOpen && (
                 <button onClick={onSaveProof} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
                   Save proof locally

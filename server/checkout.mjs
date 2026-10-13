@@ -1,4 +1,5 @@
 import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
+import { getProductionEstimate } from '../services/productionTime.mjs';
 import {
   CHECKOUT_CURRENCY,
   CHECKOUT_POLICY_VERSION,
@@ -300,6 +301,7 @@ export const buildServerCheckoutOrder = (
       publicOrigin,
       checkoutRecoveryToken: recoveryToken,
       productionAuthority: "canonical_plaque_state",
+      turnaroundWorkingDays: getProductionEstimate(plaqueState).days,
       productionSpec: canonicalProductionSpec(plaqueState),
     },
     approvedAt: createdAt,

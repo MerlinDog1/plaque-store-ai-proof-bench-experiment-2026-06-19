@@ -28,7 +28,21 @@ const redirectedPaths = new Set([
   '/tree-plaques',
 ]);
 
-assert(sitemapUrls.length === 19, `Expected 19 focused sitemap URLs, found ${sitemapUrls.length}`);
+assert(sitemapUrls.length === 20 && sitemapUrls.includes('https://instaplaque.co.uk/design-request'), `Expected the public sitemap including design requests, found ${sitemapUrls.length}`);
+const productSitemap = await read('dist/sitemap-products.xml');
+const productUrls = [...productSitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
+const { merchantOffers } = await import('../services/merchantCatalogue.mjs');
+assert(productUrls.length === merchantOffers.length && new Set(productUrls).size === productUrls.length, 'Product sitemap must cover each exact catalogue URL once');
+for (const offer of merchantOffers) {
+  assert(productUrls.includes(`https://instaplaque.co.uk/${offer.slug}`), `Missing product sitemap URL ${offer.slug}`);
+  await access(path.join(root, 'dist', offer.slug, 'index.html'));
+}
+for (const slug of ['design-request', 'privacy', 'cookies']) {
+  const html = await read(`dist/${slug}/index.html`);
+  assert(html.includes(`rel="canonical" href="https://instaplaque.co.uk/${slug}"`), `Wrong ${slug} canonical`);
+  assert(slug === 'design-request' ? html.includes('Leave the layout to us.') : html.includes('PostHog'), `Missing full ${slug} page content`);
+}
+assert(robots.includes('sitemap-products.xml'), 'Product sitemap must be advertised in robots.txt');
 for (const url of sitemapUrls) {
   assert(!redirectedPaths.has(new URL(url).pathname), `Redirected URL remains in sitemap: ${url}`);
 }
@@ -71,4 +85,4 @@ for (const route of redirectedPaths) {
   assert(!exists, `Redirected route was still prerendered: ${route}`);
 }
 
-console.log('Live SEO checks passed: 19 sitemap URLs, focused redirects, static route HTML, canonicals and LCP preloads.');
+console.log('Live SEO checks passed: 20 editorial URLs and 175 exact product URLs, focused redirects, static route HTML, canonicals and LCP preloads.');

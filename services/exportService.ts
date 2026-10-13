@@ -1,3 +1,4 @@
+import { ensureInscriptionFonts } from './inscriptionFonts';
 import { PlaqueState, Fixing, Material, MemorialImageMethod } from "../types";
 import QRCode from "qrcode";
 
@@ -244,6 +245,7 @@ const loadBrowserFontsUsedInLayer = async (layer: Element) => {
 };
 
 const waitForSvgTextLayout = async (layer?: Element) => {
+  await ensureInscriptionFonts();
   if (layer) await loadBrowserFontsUsedInLayer(layer);
   else await document.fonts.ready;
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));

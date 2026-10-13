@@ -127,6 +127,7 @@ export const getProofSessionByToken = async (publicToken) => {
     .maybeSingle();
 
   if (error) throw normalizeSupabaseError(error, "Saved proofs are temporarily unavailable. Please try again shortly.");
+  if (data?.expires_at && Date.parse(data.expires_at) <= Date.now()) return null;
   const scope = data?.metadata?.kind === "storefront_order"
     ? `order:${data.metadata.order?.id}` : `proof:${publicToken}`;
   return sanitizeProofSessionRecord(await loadArtwork(data, scope));

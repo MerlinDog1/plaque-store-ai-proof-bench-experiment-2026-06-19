@@ -1,19 +1,21 @@
+import { ensureInscriptionFonts } from './services/inscriptionFonts';
 import { MetaConsent } from './components/MetaConsent';
 import { trackMetaCheckout } from './services/metaPixel';
 import { OPTIONAL_AD_CONSENT_CHANGED } from './services/metaPixel';
 import { trackSiteEvent, trackSitePage } from './services/posthogAnalytics';
+import { publicRouteWithGoogleClick } from './services/googleClickNavigation';
 import { LayoutProgress } from './components/LayoutProgress';
 import { DesignRequest } from './components/DesignRequest';
 import { DesignerGuideDialog } from './components/DesignerGuide';
 import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
-import PlaquePreview from './components/PlaquePreview';
-import { Controls } from './components/Controls';
+const PlaquePreview = lazy(() => import('./components/PlaquePreview'));
+const Controls = lazy(() => import('./components/Controls').then(module => ({ default: module.Controls })));
 import { RealisticPreviewModal } from './components/RealisticPreviewModal';
 import { SiteExperience, useSeoMeta } from './components/SiteExperience';
 import { BorderStyle, DesignStyle, EtchmasterImageMode, EtchmasterShapeMask, Fixing, INITIAL_STATE, Material, MemorialImageMethod, MemorialImagePlacement, MemorialImageShape, PlaqueState, Shape, TextColor, TypographyEngine } from './types';
 import { refinePlaqueWording, generatePlaqueDesign, generateRealisticView, editPlaqueTypography, validateAuthoredTypographySvg, GenerationPhase } from './services/geminiService';
-import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportService';
+import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } from './services/exportActions';
 import { createManualTypography, readSvgInscription } from './services/manualTypography';
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
@@ -34,8 +36,8 @@ const SUPPORTED_MEMORIAL_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp',
 
 const PROOF_BENCH_INITIAL_STATE: PlaqueState = {
   ...INITIAL_STATE,
-  width: 297,
-  height: 210,
+  width: 210,
+  height: 148,
   material: Material.BrushedSteel,
   textColor: TextColor.Black,
   reverseEtch: false,
@@ -212,6 +214,9 @@ const App: React.FC = () => {
   const [hasAccess, setHasAccess] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [currentView, setCurrentView] = useState<SiteView>(getInitialView);
+  useEffect(() => {
+    if (['plaque','checkout','order-confirmed','admin'].includes(currentView)) void ensureInscriptionFonts().catch(() => {});
+  }, [currentView]);
   const [selectedProductSlug, setSelectedProductSlug] = useState(getInitialProductSlug);
   const [selectedLandingSlug, setSelectedLandingSlug] = useState(getInitialLandingSlug);
   const [mockOrders, setMockOrders] = useState<MockOrder[]>([]);
@@ -317,7 +322,7 @@ const App: React.FC = () => {
     let cancelled = false;
     const loadHubOrders = async () => {
       const params = new URLSearchParams(window.location.search);
-      const shouldLoadHubOrders = window.location.pathname === '/admin' || params.get('mockHub') === '1';
+      const shouldLoadHubOrders = import.meta.env.DEV && (window.location.pathname === '/admin' || params.get('mockHub') === '1');
       if (!shouldLoadHubOrders) return;
 
       try {
@@ -860,6 +865,7 @@ const App: React.FC = () => {
     trackSiteEvent('layout_requested', { method: 'manual', shape: state.shape, material: state.material });
     const snapshot = currentLayoutRef.current;
     try {
+      await ensureInscriptionFonts();
       await document.fonts?.load('400 16px Lato');
       if (currentLayoutRef.current.state !== snapshot.state || currentLayoutRef.current.prompt !== snapshot.prompt) return;
       const box = getInscriptionLayout(state, inscriptionPrompt);
@@ -1034,16 +1040,7 @@ const App: React.FC = () => {
     trackSiteEvent('proof_download_prepared', { format: 'svg', outcome_source: 'browser_download' });
   };
 
-  const handleExportPdf = async () => {
-    if (!svgRef.current) return;
-    if (!confirmReadiness('PDF export')) return;
-    trackSiteEvent('proof_download_requested', { format: 'pdf' });
-    let continueUrl: string | undefined;
-    try {
-      const response = await fetch('/api/proof-sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+  const proofSavePayload = () => ({
           status: isProductionReady ? 'proof_ready' : 'draft',
           plaqueState: sanitizeProofStateForRemoteSave(state),
           wording: inscriptionPrompt,
@@ -1056,7 +1053,29 @@ const App: React.FC = () => {
             layoutIsCurrent: hasCurrentLayout,
             source: 'pdf-resume-link-trial',
           },
-        }),
+        });
+
+  const handleEmailProof = async (email: string, requestId: string, website: string) => {
+    trackSiteEvent('proof_email_requested');
+    try {
+      const response = await fetch('/api/proof-sessions/email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...proofSavePayload(), email, requestId, website }), signal: AbortSignal.timeout(25000) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) throw new Error(result.error || 'Could not email the proof. Please retry without changing your design.');
+      if (!result.duplicate) trackSiteEvent('proof_emailed', { outcome_source: 'email_provider_acceptance' });
+    } catch (error) { trackSiteEvent('proof_email_failed'); throw error; }
+  };
+
+  const handleExportPdf = async () => {
+    if (!svgRef.current) return;
+    if (!confirmReadiness('PDF export')) return;
+    trackSiteEvent('proof_download_requested', { format: 'pdf' });
+    let continueUrl: string | undefined;
+    try {
+      const response = await fetch('/api/proof-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(proofSavePayload()),
       });
       if (!response.ok) throw new Error(`Proof session save failed (${response.status})`);
       const payload = await response.json();
@@ -1143,7 +1162,7 @@ const App: React.FC = () => {
     setCurrentView(view);
     const route = (view === 'product' || view === 'landing') && productSlug ? `/${productSlug}` : viewRoutes[view];
     if (route && window.location.pathname !== route) {
-      window.history.pushState({}, '', route);
+      window.history.pushState({}, '', publicRouteWithGoogleClick(route));
     }
   };
 
@@ -1163,7 +1182,7 @@ const App: React.FC = () => {
     setActiveStep(0);
     setCurrentView('plaque');
     if (window.location.pathname !== '/design') {
-      window.history.pushState({}, '', '/design');
+      window.history.pushState({}, '', publicRouteWithGoogleClick('/design'));
     }
   };
 
@@ -1198,7 +1217,7 @@ const App: React.FC = () => {
     setCurrentView('plaque');
     setActiveStep(5);
     if (window.location.pathname !== '/design') {
-      window.history.pushState({}, '', '/design');
+      window.history.pushState({}, '', publicRouteWithGoogleClick('/design'));
     }
   };
 
@@ -1212,7 +1231,7 @@ const App: React.FC = () => {
       }
       return next;
     });
-    if (order.stripeSimulation.provider !== 'mock') return;
+    if (!import.meta.env.DEV || order.stripeSimulation.provider !== 'mock') return;
     fireAndForget(fetch('/api/mock-admin-hub/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1545,6 +1564,7 @@ const App: React.FC = () => {
                   onRealisticPreviewAspectRatioChange={setRealisticPreviewAspectRatio}
                   onExportSvg={handleExportSvg}
                   onExportPdf={handleExportPdf}
+                  onEmailProof={handleEmailProof}
                   onPrint={handleNativePrint}
                 />
               </div>
