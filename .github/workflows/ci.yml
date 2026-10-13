@@ -35,5 +35,14 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Checkout, privacy and request security
+        run: |
+          node scripts/check-audit-checkout.mjs
+          npm run check:server-checkout
+          npm run check:one-pound-test
+          npm run check:security
+          npm run check:public-input-security
+          npm run check:analytics-redaction
+
       - name: Build
         run: npm run build

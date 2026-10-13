@@ -35,6 +35,6 @@ rootElement.replaceChildren();
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <React.Suspense fallback={<div role="status" style={{padding:32,color:"#243e34"}}>Loading your plaque designer…</div>}><App /></React.Suspense>
   </React.StrictMode>
 );

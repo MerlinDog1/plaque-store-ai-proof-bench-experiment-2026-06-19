@@ -55,6 +55,9 @@ const {
   createMockHubOrder,
   listMockHubOrders,
 } = await import("./server/mockHub.mjs");
+const { handleStripeEvent } = await import("./server/stripeEvents.mjs");
+const { emailSavedProof } = await import('./server/proofEmail.mjs');
+const { consumeRequestLimit, privateRateKey } = await import('./server/requestLimits.mjs');
 const {
   createStripeCheckoutSession,
   getStripeConfig,
@@ -581,9 +584,7 @@ export const handleRequest = async (req, res) => {
     try {
       const rawBody = await readBody(req);
       const event = parseStripeWebhook(rawBody, req.headers["stripe-signature"]);
-      if (event.type === "checkout.session.completed") {
-        await markOrderPaidFromSession(event.data.object);
-      }
+      await handleStripeEvent(event);
       sendJson(res, 200, { ok: true, received: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Stripe webhook failed.";
@@ -596,9 +597,7 @@ export const handleRequest = async (req, res) => {
     try {
       const rawBody = await readBody(req);
       const event = parseStripeWebhook(rawBody, req.headers["stripe-signature"]);
-      if (event.type === "checkout.session.completed") {
-        await markOrderPaidFromSession(event.data.object);
-      }
+      await handleStripeEvent(event);
       sendJson(res, 200, { ok: true, received: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Stripe webhook failed.";
@@ -735,6 +734,7 @@ export const handleRequest = async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/mock-admin-hub/orders") {
     if (!requireAdminRequest(req, res)) return;
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') { sendJson(res, 404, { error: 'Not found.' }); return; }
     try {
       const orders = await listMockHubOrders();
       sendJson(res, 200, { ok: true, orders });
@@ -747,6 +747,7 @@ export const handleRequest = async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/mock-admin-hub/orders") {
     if (!requireAdminRequest(req, res)) return;
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') { sendJson(res, 404, { error: 'Not found.' }); return; }
     try {
       const payload = JSON.parse(await readBody(req));
       const order = await createMockHubOrder(payload);
@@ -754,6 +755,21 @@ export const handleRequest = async (req, res) => {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create mock admin hub order.";
       sendJson(res, 500, { error: message });
+    }
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/proof-sessions/email') {
+    try {
+      if (!hasAllowedGeminiBrowserHeaders(req, { deployed: deployedGeminiEnvironment })) {
+        sendJson(res, 403, { error: 'An explicit same-origin browser request is required.' }); return;
+      }
+      const identity = getGeminiClientIdentity(req, { vercel: Boolean(process.env.VERCEL) });
+      if (!identity) { sendJson(res, 403, { error: 'A trusted client identity is required.' }); return; }
+      const payload = JSON.parse(await readBody(req, 4 * 1024 * 1024));
+      sendJsonWithHeaders(res, 200, await emailSavedProof(payload, identity), { 'Cache-Control': 'no-store' });
+    } catch (error) {
+      sendJsonWithHeaders(res, error.statusCode || 500, { error: error.statusCode ? error.message : 'Could not email the saved proof. Please try again shortly.' }, { 'Cache-Control': 'no-store' });
     }
     return;
   }
@@ -843,9 +859,17 @@ export const handleRequest = async (req, res) => {
         });
         return;
       }
+      if (deployedGeminiEnvironment) {
+        await consumeRequestLimit(privateRateKey('gemini-minute', clientIdentity), 20, 60, validated.cost);
+        await consumeRequestLimit('gemini-daily', 1000, 86400, validated.cost);
+      }
       const response = await generateGeminiContent(ai, validated);
       sendJsonWithHeaders(res, 200, addResponseText(response), rateHeaders);
     } catch (error) {
+      if (error.code === 'request_protection') {
+        sendJson(res, error.statusCode, { error: error.message, code: error.code, retryable: false });
+        return;
+      }
       const formatted = formatGeminiProxyError(error, requestId);
       if (formatted.shouldLog) console.error(`Gemini generateContent failed [${requestId}].`, error);
       sendJson(res, formatted.statusCode, formatted.payload);

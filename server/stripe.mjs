@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { getProductionEstimate } from '../services/productionTime.mjs';
 import { isOnePoundTestOrder, isOnePoundSandboxOrder, isOnePoundLiveOrder, assertOnePoundTestSession } from "./onePoundTest.mjs";
 import {
   assertServerCheckoutOrderIsPayable,
@@ -72,7 +73,12 @@ export const buildStripeCheckoutParams = (order, options = {}) => {
     params.set("success_url", `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
     params.set("cancel_url", `${origin}/design?stripe=cancelled&order=${encodeURIComponent(orderId)}&proof=${encodeURIComponent(recoveryToken)}`);
   }
-  params.set("payment_method_types[0]", "card");
+  // Enable only after this site's live webhook subscribes to completed,
+  // expired, async_payment_succeeded and async_payment_failed. The flag is
+  // scoped to this deployment; never change the other brands' settings here.
+  if (process.env.STRIPE_DYNAMIC_PAYMENT_METHODS !== 'true' || isOnePoundTestOrder(order)) {
+    params.set("payment_method_types[0]", "card");
+  }
   if (customerEmail.includes("@")) {
     params.set("customer_email", customerEmail);
   }
@@ -88,9 +94,10 @@ export const buildStripeCheckoutParams = (order, options = {}) => {
   params.set("shipping_options[0][shipping_rate_data][fixed_amount][currency]", currency);
   params.set("shipping_options[0][shipping_rate_data][display_name]", "UK delivery included");
   params.set("shipping_options[0][shipping_rate_data][delivery_estimate][minimum][unit]", "business_day");
-  params.set("shipping_options[0][shipping_rate_data][delivery_estimate][minimum][value]", "5");
+  const deliveryDays = String(getProductionEstimate(order.plaqueState).deliveryDays);
+  params.set("shipping_options[0][shipping_rate_data][delivery_estimate][minimum][value]", deliveryDays);
   params.set("shipping_options[0][shipping_rate_data][delivery_estimate][maximum][unit]", "business_day");
-  params.set("shipping_options[0][shipping_rate_data][delivery_estimate][maximum][value]", "5");
+  params.set("shipping_options[0][shipping_rate_data][delivery_estimate][maximum][value]", deliveryDays);
   params.set("metadata[order_id]", orderId);
   params.set("metadata[source]", "instaplaque");
   params.set("metadata[payload_version]", order.metadata.checkoutPolicyVersion);

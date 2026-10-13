@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import type { GoogleGenAI } from "@google/genai";
 import { PLAQUE_TEXT_MODEL, LEGACY_PLAQUE_TEXT_MODEL } from './aiModels.mjs';
 import { TEXT_PROXY_TIMEOUT_MS, GENERATION_TIMEOUT_MESSAGE } from './geminiTiming.mjs';
 
@@ -53,7 +53,10 @@ export const getGeminiClient = (): GoogleGenAI => {
   if (typeof window !== "undefined") {
     return createBrowserProxyClient() as unknown as GoogleGenAI;
   }
-  return new GoogleGenAI({ apiKey: process.env.API_KEY || process.env.GEMINI_API_KEY });
+  return { models: { generateContent: async (args: GenerateContentArgs) => {
+    const { GoogleGenAI: ServerClient } = await import("@google/genai");
+    return new ServerClient({ apiKey: process.env.API_KEY || process.env.GEMINI_API_KEY }).models.generateContent(args);
+  } } } as unknown as GoogleGenAI;
 };
 
 export const hasBrowserGeminiProxy = async (): Promise<boolean> => {

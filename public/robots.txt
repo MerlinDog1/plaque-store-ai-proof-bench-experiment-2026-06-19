@@ -5,3 +5,5 @@ Disallow: /checkout
 Disallow: /order-confirmed
 
 Sitemap: https://instaplaque.co.uk/sitemap.xml
+
+Sitemap: https://instaplaque.co.uk/sitemap-products.xml

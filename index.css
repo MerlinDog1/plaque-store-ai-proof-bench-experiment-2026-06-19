@@ -4761,3 +4761,13 @@
     display: none !important;
   }
 }
+/* Optional proof delivery, alongside the existing PDF download. */
+.proof-email-form { padding: 16px; border: 1px solid #c9cec6; border-radius: 12px; background: #f7f6ef; color: #243e34; }
+.proof-email-form > label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 9px; }
+.proof-email-fields { display: flex; flex-wrap: wrap; gap: 8px; }
+.proof-email-fields input { flex: 1 1 180px; min-width: 0; padding: 12px; border: 1px solid #85988e; border-radius: 8px; background: white; color: #172d24; }
+.proof-email-fields button { min-height: 46px; padding: 10px 16px; border-radius: 8px; background: #243e34; color: white; font-size: 13px; font-weight: 700; }
+.proof-email-fields button:disabled { opacity: .65; cursor: wait; }
+.proof-email-form small { display: block; margin-top: 10px; font-size: 12px; line-height: 1.6; color: #536059; }
+.proof-email-form p { margin-top: 10px; font-size: 13px; line-height: 1.5; }
+.proof-email-form .proof-email-trap { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

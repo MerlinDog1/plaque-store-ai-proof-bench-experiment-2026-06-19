@@ -1,5 +1,14 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Site audit fixes - 13 October 2026
+
+Owner authorised careful fixes and release. Task branch
+`codex/instaplaque-audit-fixes-20261013` includes the pending Consent Mode changes
+and verified production source. Security/lifecycle/rate migrations already
+applied to the migrated Supabase project; both other-brand cron jobs retained.
+See [scope, tests, remaining account work and rollback](docs/site-audit-fixes-2026-10-13.md).
+Release SHA/deployment evidence will be appended after staged verification.
+
 ## Consent follow-up Tasks2–4 — 13 October 2026
 
 Owner4527 requests purchase audit, Cookies/Privacy wording and real consent

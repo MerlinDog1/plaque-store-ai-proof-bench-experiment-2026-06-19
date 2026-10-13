@@ -442,7 +442,7 @@ export function ShopProduct({
       <section className="shop-section shop-buying-guide" id={isMemorial ? 'memorial-materials' : undefined}>
         <div>
           <p className="shop-kicker">Size, wording and fitting</p>
-          <h2>{isMemorial ? 'Choose the metal and the setting.' : `Plan your ${product.shortTitle.toLowerCase()} plaque.`}</h2>
+          <h2>{isMemorial ? 'Choose the metal and the setting.' : 'Choose the size and finish.'}</h2>
           <a className="shop-text-link" href="/materials">
             Explore the finishes ↗
           </a>
@@ -458,6 +458,16 @@ export function ShopProduct({
         </div>
       </section>
       {['bench-plaques', 'opening-plaques'].includes(product.slug) && <PlaqueWordingExamples slug={product.slug} />}
+      {product.slug === 'bench-plaques' && <nav className="shop-section" aria-label="Bench plaque sizes and prices">
+        <p className="shop-kicker">Compare bench plaques</p>
+        <h2>A size and finish for your wording.</h2>
+        <div className="shop-related">
+          {['brushed-stainless-150x50-rect-plaque', 'brushed-brass-225x75-rect-plaque', 'polished-brass-bench-plaque-200x100'].map(slug => {
+            const option = productFamilies.find(item => item.slug === slug);
+            return option ? <a key={slug} href={`/${slug}`}>{option.title} · {option.startingFrom}</a> : null;
+          })}
+        </div>
+      </nav>}
       {isMemorial && <MemorialWording />}
       {!['bench-plaques', 'opening-plaques', 'memorial-plaques'].includes(product.slug) && <ShopProcess />}
       {product.slug === 'garden-plaques' && <GardenAdvice />}

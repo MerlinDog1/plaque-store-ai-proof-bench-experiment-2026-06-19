@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import PlaquePreview from './PlaquePreview';
+import React, { lazy, useEffect, useRef, useState } from 'react';
+const PlaquePreview = lazy(() => import('./PlaquePreview'));
 import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies, seoLandingPages } from '../services/commerce';
 import { PlaqueState } from '../types';
-import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
+import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportActions';
 import { SeoRankTracker } from './SeoRankTracker';
 import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, shopFaqs } from './Shopfront';
 import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
@@ -934,10 +934,12 @@ export const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selec
     setMetaContent('meta[property="og:title"]', config.title);
     setMetaContent('meta[property="og:description"]', config.description);
     setMetaContent('meta[property="og:url"]', url);
-    setMetaContent('meta[property="og:image"]', siteShareImage);
+    const routeImage = view === 'product' ? selectedProduct.image : view === 'landing' ? selectedLanding.image : undefined;
+    const shareImage = routeImage ? new URL(routeImage, siteBaseUrl).href : siteShareImage;
+    setMetaContent('meta[property="og:image"]', shareImage);
     setMetaContent('meta[name="twitter:title"]', config.title);
     setMetaContent('meta[name="twitter:description"]', config.description);
-    setMetaContent('meta[name="twitter:image"]', siteShareImage);
+    setMetaContent('meta[name="twitter:image"]', shareImage);
     setCanonicalHref(url);
 
     const routeSchema = {
@@ -1515,7 +1517,7 @@ function FaqPage() {
   );
 }
 
-function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
+export function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
   return (
     <div className="commerce-page">
       <section className="commerce-product-detail">
@@ -1524,26 +1526,25 @@ function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
           <h1>{USE_CUSTOMER_COPY_PASS ? 'Need something made to measure?' : 'Start with an instant proof, then route complex work to quote.'}</h1>
           <p className="commerce-lede">
             {USE_CUSTOMER_COPY_PASS
-              ? 'Start with a proof and tell us what you need. We will confirm anything unusual, including custom sizes, oval plaques, circular plaques and longer-turnaround work, before payment.'
+              ? 'Tell us the size, wording, material and where your plaque will be fitted. We can help with oversized plaques, supplied artwork and unusual mounting, and confirm the design, price and production time before you pay.'
               : 'Customers should not hit a dead-end when a plaque is unusual. They can still create a proof, then the system flags custom sizes, ovals, circles or longer-turnaround work for manual confirmation.'}
           </p>
           <div className="commerce-actions">
-            <button type="button" className="commerce-primary" onClick={onStartDesign}>
-              Start bespoke proof
-            </button>
+            <a className="commerce-primary" href="/design-request">Ask us to design your plaque</a>
+            <a className="commerce-secondary" href="/design" onClick={event => { if (onStartDesign) { event.preventDefault(); onStartDesign(); } }}>Try the online designer</a>
           </div>
         </div>
         <div className="commerce-quote-panel">
           <p className="commerce-eyebrow">{USE_CUSTOMER_COPY_PASS ? 'We can quote for' : 'Quote triggers'}</p>
           <ul>
             <li>Oversized dimensions outside the standard production bed</li>
-            <li>Oval plaques and circular plaques</li>
+            <li>Supplied logos, images or specialist artwork</li>
             <li>Custom sizes up to our maximum production size</li>
             <li>Longer-turnaround finishes or wood-backed plaques</li>
             <li>Delivery outside the UK</li>
           </ul>
           <div className="commerce-warning">
-            Send the proof through and we will confirm anything unusual before payment.
+            Standard oval and circular plaques can be priced in the online designer. For a quote, include your approximate size, exact wording, fixing surface and any deadline. No payment is taken when you send a design request.
           </div>
         </div>
       </section>

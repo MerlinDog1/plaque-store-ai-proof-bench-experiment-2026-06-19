@@ -9,13 +9,16 @@ import { createServer } from 'vite';
 // Render the same shop components used in the browser, rather than a second
 // abbreviated version of the catalogue that drifts away from the visible page.
 const renderer = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom' });
-let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage, designer;
+let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage, designer, DesignRequest, initialState, QuotePage;
 try {
   shop = await renderer.ssrLoadModule('/components/Shopfront.tsx');
   guides = await renderer.ssrLoadModule('/components/ShopGuides.tsx');
   designer = await renderer.ssrLoadModule('/components/DesignerGuide.tsx');
+  DesignRequest = (await renderer.ssrLoadModule('/components/DesignRequest.tsx')).DesignRequest;
+  initialState = (await renderer.ssrLoadModule('/types.ts')).INITIAL_STATE;
   catalogue = await renderer.ssrLoadModule('/services/commerce.ts');
-  LegalPlaceholderPage = (await renderer.ssrLoadModule('/components/SiteExperience.tsx')).LegalPlaceholderPage;
+  const experience = await renderer.ssrLoadModule('/components/SiteExperience.tsx');
+  LegalPlaceholderPage = experience.LegalPlaceholderPage; QuotePage = experience.QuotePage;
   ShopHeader = (await renderer.ssrLoadModule('/components/Header.tsx')).Header;
 } finally {
   await renderer.close();
@@ -255,7 +258,7 @@ const indexableProductSlugs = new Set([
   'custom-plaques',
 ]);
 const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques']);
-const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.title, description: product.description, price: product.schemaStartingPrice, productionDays: product.productionDays, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
+const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.seoTitle, description: product.seoDescription, price: product.schemaStartingPrice, productionDays: product.productionDays, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
 const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)).map(page => {
   // Keep the revised memorial search metadata and illustration identical to
   // the hydrated page; the catalogue is the source for both representations.
@@ -302,6 +305,7 @@ const productListSchema = () => ({
 });
 
 const routePages = [
+  { slug: 'design-request', title: 'Have Us Design Your Plaque | InstaPlaque', description: 'Tell us your wording and plaque preferences. Review a personally prepared proof before payment.' },
   {
     slug: 'about',
     ...guides.aboutPage,
@@ -449,8 +453,8 @@ const writePrerenderedPage = async ({
   const url = `${siteBaseUrl}${pathPart}`;
   const product = catalogue.productFamilies.find(item => item.slug === slug);
   const landing = catalogue.seoLandingPages.find(item => item.slug === slug);
-  const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : slug === 'returns-and-cancellations' ? LegalPlaceholderPage : slug === 'about' ? guides.ShopAbout : slug === 'contact' ? guides.ShopContact : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
-  if (contentComponent && !['about', 'contact', 'returns-and-cancellations'].includes(slug)) {
+  const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : ['returns-and-cancellations','terms','privacy','cookies'].includes(slug) ? LegalPlaceholderPage : slug === 'quote' ? QuotePage : slug === 'design-request' ? DesignRequest : slug === 'about' ? guides.ShopAbout : slug === 'contact' ? guides.ShopContact : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
+  if (contentComponent && !['about', 'contact', 'returns-and-cancellations', 'terms', 'privacy', 'cookies','design-request','quote'].includes(slug)) {
     const visibleFaqs = !(product || landing) ? shop.shopFaqs : [...(product || landing).faqs, ...shop.shopFaqs]
       .filter((item, index, list) => list.findIndex(other => other.question === item.question) === index).slice(0, 6);
     schema = schema.filter(item => item['@type'] !== 'FAQPage');
@@ -465,10 +469,10 @@ const writePrerenderedPage = async ({
   html = replaceTag(html, /<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${escapeAttr(description)}" />`);
   html = replaceTag(html, /<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`);
-  html = replaceTag(html, /<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${shareImage}" />`);
+  html = replaceTag(html, /<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${image ? `${siteBaseUrl}${image}` : shareImage}" />`);
   html = replaceTag(html, /<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${escapeAttr(description)}" />`);
-  html = replaceTag(html, /<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${shareImage}" />`);
+  html = replaceTag(html, /<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${image ? `${siteBaseUrl}${image}` : shareImage}" />`);
 
   const routeSchema = {
     '@context': 'https://schema.org',
@@ -496,7 +500,7 @@ const writePrerenderedPage = async ({
     : contentComponent
     ? renderToStaticMarkup(React.createElement(React.Fragment, null,
       React.createElement(ShopHeader, { currentView: !slug ? 'home' : 'product', showPrice: false, priceLabel: '' }),
-      React.createElement('main', null, React.createElement(contentComponent, { product, landing, faq: slug === 'faq', view: slug === 'returns-and-cancellations' ? 'returns' : undefined })),
+      React.createElement('main', null, React.createElement(contentComponent, { product, landing, faq: slug === 'faq', view: slug === 'returns-and-cancellations' ? 'returns' : slug, initialState, initialWording: '', initialNotes: '', onBack: () => {} })),
       React.createElement(shop.ShopFooter)))
     : staticPageMarkup({ title, heading, description, image, faqs, price, kind });
   html = html.replace(
@@ -639,3 +643,9 @@ ${feedItems}
 `;
 
 await writeFile(path.join(distDir, 'google-merchant-feed.xml'), feedXml);
+
+// Exact catalogue variants get their own sitemap for Search Console reporting.
+const sitemapXml = urls => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...new Set(urls)].map(url => `  <url><loc>${escapeAttr(url)}</loc></url>`).join("\n")}\n</urlset>\n`;
+await writeFile(path.join(distDir, "sitemap-products.xml"), sitemapXml(merchantOffers.map(p => `${siteBaseUrl}/${p.slug}`)));
+const editorialSitemap = await readFile(path.join(process.cwd(), 'public/sitemap.xml'), 'utf8');
+await writeFile(path.join(distDir, 'sitemap.xml'), editorialSitemap.replace('</urlset>', '  <url><loc>https://instaplaque.co.uk/design-request</loc></url>\n</urlset>'));

@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { getSupabaseServiceClient } from "./supabase.mjs";
 import { storeArtwork, loadArtwork } from "./artwork-storage.mjs";
 import { getInternalProductionEmails, sendEmail } from "./email.mjs";
@@ -821,6 +822,8 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
     || (referencedOrderId ? await findById(referencedOrderId) : null);
   assertStripePaymentMatchesOrder(order, session);
 
+  if (order.paymentStatus === 'refunded') return order;
+
   const wasAlreadyPaid = order.paymentStatus === "paid";
   const shipping = session?.shipping_details || session?.shipping || {};
   const customer = session?.customer_details || {};
@@ -830,11 +833,11 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
   const paymentEvent = wasAlreadyPaid
     ? []
     : [{ type: "payment_received", label: "Payment received", at: paidAt }];
-  const next = await persistOrder({
+  const paymentUpdate = {
     ...order,
     customerEmail,
     customerName,
-    status: isOnePoundTestOrder(order) ? "issue" : "paid",
+    status: isOnePoundTestOrder(order) ? "issue" : wasAlreadyPaid ? order.status : "paid",
     paymentStatus: "paid",
     fulfilmentStatus: isOnePoundTestOrder(order) ? "issue" : order.fulfilmentStatus || "not_started",
     stripeCheckoutSessionId: sessionId || order.stripeCheckoutSessionId,
@@ -844,21 +847,37 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
     metadata: {
       ...(order.metadata || {}),
       checkoutRecoveryToken: null,
+      paymentReceiptPending: !wasAlreadyPaid && !isOnePoundTestOrder(order),
     },
     paidAt,
     events: [
       ...paymentEvent,
       ...(order.events || []),
     ],
-  });
+  };
+  const db = dependencies.saveOrder ? null : getSupabaseServiceClient();
+  let next;
+  if (db) {
+    const { data, error } = await db.rpc('apply_instaplaque_checkout_session', {
+      p_order_id: order.id, p_session: session, p_kind: 'paid', p_test: isOnePoundTestOrder(order),
+    });
+    if (error) throw error;
+    next = await fromRow(data);
+  } else {
+    next = await persistOrder(paymentUpdate);
+  }
 
-  if (!wasAlreadyPaid && !isOnePoundTestOrder(next)) {
-    await sendRecordedEmail(next, "customer-order-confirmation", customerEmail);
+  if ((!wasAlreadyPaid || next.metadata?.paymentReceiptPending) && !isOnePoundTestOrder(next)) {
+    next = await sendRecordedEmail(next, "customer-order-confirmation", customerEmail, { idempotent: true });
 
     if (next.proofPackage?.productionArtworkPdf) {
       for (const internalEmail of internalProductionEmails()) {
-        await sendRecordedEmail(next, "admin-new-paid-order", internalEmail).catch(() => null);
+        next = await sendRecordedEmail(next, "admin-new-paid-order", internalEmail, { idempotent: true });
       }
+    }
+    if (db) {
+      const { error } = await db.rpc('complete_instaplaque_payment_emails', { p_order_id: order.id });
+      if (error) throw error;
     }
   }
 
@@ -868,9 +887,12 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
 export const sendAndRecordOrderEmail = async (order, template, recipient, extra = {}) => {
   // Includes proof attachments, admin re-sends and delayed review requests.
   if (isOnePoundTestOrder(order)) return order;
-  const result = await sendEmail({ to: recipient, template, order, extra });
+  if (extra.idempotent && (order.emailEvents || []).some(event => event.type === template && event.recipient === recipient && event.status === 'sent')) return order;
+  const idempotencyKey = extra.idempotent ? createHash('sha256').update(`${order.id}:${template}:${recipient}`).digest('hex') : undefined;
+  const result = await sendEmail({ to: recipient, template, order, extra, idempotencyKey });
+  if (extra.idempotent && result.status !== 'sent') throw new Error('Order receipt sending is unavailable; retry required.');
   const event = {
-    id: `${order.id}-${template}-${Date.now()}`,
+    id: idempotencyKey || `${order.id}-${template}-${Date.now()}`,
     type: template,
     recipient,
     status: result.status,
@@ -879,6 +901,12 @@ export const sendAndRecordOrderEmail = async (order, template, recipient, extra 
     subject: result.message?.subject || "",
     at: nowIso(),
   };
+  const db = getSupabaseServiceClient();
+  if (db) {
+    const { data, error } = await db.rpc('record_instaplaque_order_email', { p_order_id: order.id, p_event: event });
+    if (error) throw error;
+    return fromRow(data);
+  }
   return saveOrder({
     ...order,
     emailEvents: [event, ...(order.emailEvents || [])],
@@ -897,6 +925,10 @@ export const updateOrderStatus = async (orderId, payload) => {
   }
   const status = payload.status || order.status;
   const fulfilmentStatus = payload.fulfilmentStatus || order.fulfilmentStatus;
+  if (order.paymentStatus !== 'paid' && (['in_production', 'ready_to_dispatch', 'dispatched', 'complete'].includes(status)
+    || ['in_production', 'ready_to_dispatch', 'dispatched', 'delivered'].includes(fulfilmentStatus))) {
+    throw new CheckoutRequestError('Confirm payment in Stripe before moving an order into production or dispatch.', 409, 'payment_required_for_fulfilment');
+  }
   const event = {
     type: "status_changed",
     label: `Status changed to ${status}`,

@@ -13,9 +13,10 @@ const publicPaths = new Set(['/', '/design', '/design-request', '/about', '/mate
   ...productFamilies.map(product => `/${product.slug}`), ...seoLandingPages.map(page => `/${page.slug}`)]);
 const events = new Set(['visit', 'page_viewed', 'product_viewed', 'designer_started', 'designer_step_viewed', 'wording_started',
   'layout_requested', 'layout_generated', 'layout_failed', 'proof_download_requested', 'proof_download_prepared', 'proof_download_failed',
-  'proof_saved', 'checkout_requested', 'checkout_started', 'checkout_failed', 'purchase_completed',
+  'proof_saved', 'proof_email_requested', 'proof_emailed', 'proof_email_failed', 'checkout_requested', 'checkout_started', 'checkout_failed', 'purchase_completed',
   'enquiry_started', 'enquiry_reviewed', 'enquiry_submission_requested', 'enquiry_submitted', 'enquiry_failed', 'contact_clicked']);
 type Properties = Record<string, string | number | boolean>;
+declare global { interface Window { gtag?: (...args: unknown[]) => void } }
 type Session = { id: string; last: number; attribution: Properties; seen: string[]; isTest: boolean };
 let session: Session | undefined;
 let lastPage = '';
@@ -90,7 +91,7 @@ function safeProperties(input: Properties): Properties {
     format: ['pdf', 'svg'], method: ['ai', 'manual'], channel: ['email', 'phone'],
     shape: ['rect', 'oval', 'circle', 'heart'],
     material: ['brushed-brass', 'orbital-brass-matt-lacquer', 'polished-brass', 'aged-brass', 'brushed-stainless', 'polished-stainless'],
-    outcome_source: ['design_request_api', 'stripe_session_api', 'paid_order_api', 'browser_download'],
+    outcome_source: ['design_request_api', 'stripe_session_api', 'paid_order_api', 'browser_download', 'email_provider_acceptance'],
   };
   for (const [key, choices] of Object.entries(enums)) {
     if (typeof input[key] === 'string' && choices.includes(input[key] as string)) result[key] = input[key];
@@ -142,7 +143,22 @@ export function trackSiteEvent(event: string, properties: Properties = {}, onceK
   const current = getSession(); ensureVisit(current, page);
   if (onceKey && current.seen.includes(onceKey)) return;
   if (onceKey) { current.seen = [...current.seen, onceKey].slice(-200); persistSession(); }
-  void capture(event, { ...safeProperties(properties), page }, current);
+  const safe = safeProperties(properties);
+  void capture(event, { ...safe, page }, current);
+  // These are GA4 funnel observations, not primary Ads conversions. Import
+  // them as secondary actions in Ads after verifying the account linkage.
+  if (!current.isTest && ['proof_download_prepared', 'checkout_started'].includes(event)) {
+    const checkout = event === 'checkout_started';
+    try {
+      window.gtag?.('event', checkout ? 'begin_checkout' : 'proof_download_prepared', {
+        send_to: 'G-FKP17EXNBX', site_id: 'instaplaque',
+        page_location: `https://instaplaque.co.uk${page}`, page_referrer: '',
+        ...(checkout && typeof safe.value_gbp === 'number' ? { currency: 'GBP', value: safe.value_gbp,
+          items: [{ item_id: 'custom_plaque', item_name: 'Personalised plaque', quantity: 1, price: safe.value_gbp }] } : {}),
+        ...(!checkout ? { file_format: safe.format } : {}),
+      });
+    } catch { /* Analytics must never interrupt proof downloads or checkout. */ }
+  }
 }
 export function trackSitePage(): void {
   const page = pagePath();

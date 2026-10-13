@@ -1,4 +1,5 @@
 import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ensureInscriptionFonts } from '../services/inscriptionFonts';
 import { BorderStyle, PlaqueState, Shape, Fixing, Material, TEXT_COLOR_VALUES, MemorialImageMethod, DesignStyle, MemorialImageShape } from '../types';
 import { getFixingGeometry, getFixingPositions } from '../services/fixingGeometry';
 import { getInscriptionLayout } from '../services/inscriptionLayout';
@@ -327,9 +328,9 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
 
     // Also try using the Font Loading API
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
+      ensureInscriptionFonts().then(() => document.fonts.ready).then(() => {
         if (!cancelled) requestAnimationFrame(measure);
-      });
+      }).catch(() => { /* Keep the preview usable; exports fail closed on missing fonts. */ });
     }
 
     return () => {

@@ -1,4 +1,6 @@
-import { Type } from "@google/genai";
+import type { Type as SchemaType } from "@google/genai";
+// Schema enum values only; avoid loading the provider SDK in the storefront.
+const Type = { ARRAY: "ARRAY" as SchemaType.ARRAY, OBJECT: "OBJECT" as SchemaType.OBJECT, STRING: "STRING" as SchemaType.STRING };
 import { AVAILABLE_FONTS, PlaqueState, Shape, Material, Fixing, MemorialImageMethod, DesignStyle, STYLE_FONT_PALETTES, FontPalette, TypographyEngine, TextColor } from "../types";
 import { composeEditorialTypography } from "./editorialComposer";
 import { getGeminiClient } from "./geminiClient";
