@@ -6,6 +6,7 @@ import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../se
 import { SeoRankTracker } from './SeoRankTracker';
 import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, shopFaqs } from './Shopfront';
 import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
+import { designerPage } from './DesignerGuide';
 import { businessContact } from '../services/shopInformation';
 import { trackGooglePurchase, OPTIONAL_AD_CONSENT_CHANGED } from '../services/googlePurchase';
 import { trackPostHogPurchase } from '../services/posthogAnalytics';
@@ -787,20 +788,10 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
   }
   if (view === 'plaque') {
     return {
-      title: 'Design a Custom Plaque Online | Free InstaPlaque Proof',
-      description: 'Use the InstaPlaque online plaque designer to create a free proof for a custom brass, stainless steel, bench or memorial plaque before checkout.',
+      title: designerPage.title,
+      description: designerPage.description,
       path: routePath,
-      schema: [{
-        '@type': 'WebApplication',
-        name: 'InstaPlaque online plaque designer',
-        applicationCategory: 'DesignApplication',
-        operatingSystem: 'Web',
-        offers: {
-          '@type': 'Offer',
-          price: '0',
-          priceCurrency: 'GBP',
-        },
-      }],
+      schema: designerPage.schema,
     };
   }
   if (view === 'materials') {

@@ -8,10 +8,11 @@ import { createServer } from 'vite';
 // Render the same shop components used in the browser, rather than a second
 // abbreviated version of the catalogue that drifts away from the visible page.
 const renderer = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom' });
-let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage;
+let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage, designer;
 try {
   shop = await renderer.ssrLoadModule('/components/Shopfront.tsx');
   guides = await renderer.ssrLoadModule('/components/ShopGuides.tsx');
+  designer = await renderer.ssrLoadModule('/components/DesignerGuide.tsx');
   catalogue = await renderer.ssrLoadModule('/services/commerce.ts');
   LegalPlaceholderPage = (await renderer.ssrLoadModule('/components/SiteExperience.tsx')).LegalPlaceholderPage;
   ShopHeader = (await renderer.ssrLoadModule('/components/Header.tsx')).Header;
@@ -312,15 +313,7 @@ const routePages = [
   },
   {
     slug: 'design',
-    title: 'Design a Custom Plaque Online | Free InstaPlaque Proof',
-    description: 'Use the InstaPlaque online plaque designer to create a free proof for a custom brass, stainless steel, bench or memorial plaque before checkout.',
-    schema: [{
-      '@type': 'WebApplication',
-      name: 'InstaPlaque online plaque designer',
-      applicationCategory: 'DesignApplication',
-      operatingSystem: 'Web',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'GBP' },
-    }],
+    ...designer.designerPage,
   },
   {
     slug: 'materials',
@@ -490,7 +483,14 @@ const writePrerenderedPage = async ({
     ],
   };
   html = html.replace('</head>', `  <script type="application/ld+json" id="instaplaque-prerender-route-schema">${JSON.stringify(routeSchema)}</script>\n</head>`);
-  const publicContent = contentComponent
+  const publicContent = slug === 'design'
+    ? renderToStaticMarkup(React.createElement('div', { className: 'designer-guide-prerender' },
+      React.createElement(ShopHeader, { currentView: 'home', showPrice: false, priceLabel: '' }),
+      React.createElement('main', null,
+        React.createElement('noscript', null, 'Enable JavaScript to use the interactive plaque designer. You can read the guide below or contact us for help with a design.'),
+        React.createElement(designer.DesignerGuide)),
+      React.createElement(shop.ShopFooter)))
+    : contentComponent
     ? renderToStaticMarkup(React.createElement(React.Fragment, null,
       React.createElement(ShopHeader, { currentView: !slug ? 'home' : 'product', showPrice: false, priceLabel: '' }),
       React.createElement('main', null, React.createElement(contentComponent, { product, landing, faq: slug === 'faq', view: slug === 'returns-and-cancellations' ? 'returns' : undefined })),

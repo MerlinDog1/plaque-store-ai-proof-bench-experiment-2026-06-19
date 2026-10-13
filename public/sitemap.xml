@@ -5,7 +5,12 @@
     <loc>https://instaplaque.co.uk/</loc><lastmod>2026-09-10</lastmod>
     <image:image><image:loc>https://instaplaque.co.uk/site-images/home-realistic-proof-row.jpg</image:loc><image:title>Custom plaque examples</image:title></image:image>
   </url>
-  <url><loc>https://instaplaque.co.uk/design</loc><lastmod>2026-08-08</lastmod></url>
+  <url>
+    <loc>https://instaplaque.co.uk/design</loc><lastmod>2026-10-13</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/home-gallery-aged-brass-wood.webp</image:loc><image:title>Aged brass memorial plaque layout example</image:title></image:image>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/home-gallery-brass-bench.webp</image:loc><image:title>Brass bench plaque layout example</image:title></image:image>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/home-gallery-oval-steel.webp</image:loc><image:title>Oval stainless steel plaque layout example</image:title></image:image>
+  </url>
   <url>
     <loc>https://instaplaque.co.uk/memorial-plaques</loc><lastmod>2026-09-29</lastmod>
     <image:image><image:loc>https://instaplaque.co.uk/site-images/home-gallery-aged-brass-wood.webp</image:loc><image:title>Memorial plaque design example in aged brass</image:title></image:image>

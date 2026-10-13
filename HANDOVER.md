@@ -1,5 +1,78 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Latest production release — 13 October 2026, designer FAQ pop-up
+
+Owner message 4495 corrected the published presentation: no added designer page
+scrolling; help should open on click in a pop-up/expander. Publication authority
+from message 4488 carries through this requested correction.
+Application `588afdb38957333c873a2acf3c4743c764111069` is deployed/promoted as
+`dpl_6o1LFnmir5w6VjKZdgqt5bRAotAu`:
+https://instaplaque-o99inec90-dullaghan31-3959s-projects.vercel.app.
+Canonical READY identity and candidate/public artifact equality were verified
+at 10:11 UTC. The live JS is `index-BGL2dIT7.js`, CSS `index-Bxw_YNF_.css`;
+both names match the exact-source browser-tested CI build.
+
+Guide & FAQs now opens a native modal, closed initially, with expandable FAQs
+first and a separate tips/examples disclosure. Close, Escape, backdrop and
+return actions restore focus and preserve the inscription, step and URL.
+The designer main is fixed; only the dialog's reading area and existing control
+panels scroll. Shared initial HTML and a readable no-JavaScript fallback retain
+the SEO content. CI run 38380879128 passed typecheck/build/SEO and browser checks
+at 320/390/820/1440 widths, short landscape and no-JavaScript. Mobile/desktop
+screenshots inspected. The checks caught and fixed keyboard-boundary behaviour;
+layout checks explicitly finish the pre-existing entrance animation.
+
+Vercel build/static checks, hosted assets/images/sitemap and read-only backend
+checks passed; no new live browser was launched on the memory-constrained VPS.
+No Ads, database, payment, analytics configuration, PIM or indexing changes.
+Immediate code rollback is prior `dpl_55MasQFh4ss1hW2kmJtTqvYVor51`, but that
+restores the scrollable guide the owner rejected. See
+[release evidence](docs/designer-seo-2026-10-13.md).
+
+## Earlier production release — 13 October 2026, initial designer SEO
+
+Owner message 4488 explicitly requested publication. Application source
+`37c841974dc6b8fc33f6762d40be8d2896da6688` on
+`codex/instaplaque-design-seo-20261013` is deployed and promoted as
+`dpl_55MasQFh4ss1hW2kmJtTqvYVor51`:
+https://instaplaque-f2nyd823o-dullaghan31-3959s-projects.vercel.app.
+Independent canonical inspection confirms this READY deployment. At 09:48 UTC,
+canonical and www `/design` returned the verified candidate's identical HTML,
+`index-BjtrW2fO.js` and `index-DhjswPCu.css`; www redirects to the canonical host.
+All three guide images, sitemap, robots and backend health/config checks passed.
+
+The exact application revision had already passed full CI including mobile,
+tablet, desktop and no-JavaScript interaction checks. Vercel's cloud build and
+static SEO checks also passed. No additional local browser/build was started
+because account memory remained above 3 GiB; hosted verification used read-only
+HTTP checks and artifact hashes, not a fresh live-browser interaction run.
+No database writes, payments, analytics configuration, ads, PIM changes or Google
+indexing request occurred. Code-only rollback: promote the previous deployment
+`dpl_6MFCt8yZsRfZvTrZ77MHhMKiTuQi` through the existing InstaPlaque project.
+See [the release evidence](docs/designer-seo-2026-10-13.md).
+
+## Designer SEO preparation — 13 October 2026, before publication
+
+Owner requested improvements to `/design`. Work is on
+`codex/instaplaque-design-seo-20261013`, based on the verified live PostHog
+release and handover checkpoint `8822391`. Production was independently checked
+at `dpl_6MFCt8yZsRfZvTrZ77MHhMKiTuQi`, serving `index-BNGuODZU.js`.
+The shared guide includes useful instructions, illustrative examples, material
+links and FAQs in both initial HTML and the interactive page, without displacing
+the full-height designer. Metadata and application/breadcrumb schema use one
+source. The sitemap entry records the content update and its example images.
+
+Typecheck, production build, static SEO and browser checks passed on the existing
+pull-request CI runner, including 320/390/820/1440 widths and no-JavaScript
+reading. Initial/client content and metadata match; guide navigation retains
+wording and URL state. Screenshots were recovered and inspected; capture was
+then adjusted to finish the existing fade-in animation before saving the image.
+See [draft PR 15](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/pull/15).
+CI is used because the VPS account is above its 3 GiB headroom threshold. No local heavy job, live AI
+call, customer action, analytics event, deployment or indexing submission is
+part of the checks. Git deployment remains disabled. See
+`docs/designer-seo-2026-10-13.md` for evidence and release next steps.
+
 ## Latest production release — 12 October 2026, consented PostHog analytics
 
 Application source `c02abb4ba1bea240741a9435da2d1362df9f00da`, branch

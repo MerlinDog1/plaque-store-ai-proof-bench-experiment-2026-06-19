@@ -231,7 +231,7 @@
     text-transform: none;
     font-weight: 400;
   }
-  .designer-mode .proofbench-customiser-head h1 {
+  .designer-mode .proofbench-customiser-head h2 {
     margin: 0 0 9px;
     font:
       30px/1.12 Georgia,
@@ -930,7 +930,7 @@
     margin-bottom: 7px;
     font-size: 8px;
   }
-  .designer-mode .proofbench-customiser-head h1 {
+  .designer-mode .proofbench-customiser-head h2 {
     font-size: 25px;
     margin-bottom: 0;
   }
@@ -958,6 +958,232 @@
   .designer-mode *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Reading stays in a modal; the interactive workbench never gains page scroll. */
+@media screen {
+  .designer-guide-dialog {
+    width: min(880px, calc(100vw - 32px));
+    max-width: none;
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 0;
+    border: 1px solid #d7ddd2;
+    border-radius: 16px;
+    background: #f9f9f4;
+    color: #243d33;
+    overflow: hidden;
+    box-shadow: 0 20px 70px #10271a40;
+  }
+  .designer-guide-dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  .designer-guide-dialog::backdrop {
+    background: #15271fb3;
+  }
+  .designer-guide-dialog-header,
+  .designer-guide-dialog-footer {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 20px;
+    background: #fdfdf9;
+  }
+  .designer-guide-dialog-header {
+    border-bottom: 1px solid #d7ddd2;
+  }
+  .designer-guide-dialog-header h2 {
+    font-size: 16px;
+    font-weight: 650;
+  }
+  .designer-guide-dialog-header button {
+    min-height: 44px;
+    padding: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .designer-guide-dialog-header button span {
+    margin-left: 8px;
+    font-size: 24px;
+    line-height: 1;
+  }
+  .designer-guide-dialog-footer {
+    justify-content: flex-end;
+    border-top: 1px solid #d7ddd2;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .designer-guide-dialog-content {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .designer-guide-dialog .designer-guide {
+    padding: 24px;
+  }
+  .designer-guide-dialog .designer-guide h1 {
+    font-size: 28px;
+  }
+  .designer-guide-dialog .designer-guide-intro {
+    font-size: 16px;
+  }
+  .designer-guide-dialog .designer-guide section {
+    margin-top: 24px;
+  }
+  .designer-guide-dialog .designer-guide-breadcrumb {
+    margin-bottom: 16px;
+  }
+  .designer-guide-prerender {
+    height: 100%;
+    overflow: auto;
+    background: #f9f9f4;
+  }
+  .designer-guide-prerender noscript {
+    display: block;
+    padding: 20px;
+    color: #243d33;
+  }
+  .designer-guide {
+    box-sizing: border-box;
+    width: min(1100px, 100%);
+    margin: 0 auto;
+    padding: clamp(28px, 5vw, 64px) clamp(20px, 5vw, 48px);
+    background: #f9f9f4;
+    color: #243d33;
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    overflow-wrap: break-word;
+  }
+  .designer-guide-breadcrumb {
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+  .designer-guide h1 {
+    margin: 0 0 16px;
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 650;
+    line-height: 1.15;
+    letter-spacing: -0.7px;
+  }
+  .designer-guide h2 {
+    margin-bottom: 16px;
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .designer-guide h3 {
+    margin-bottom: 8px;
+    font-size: 17px;
+    font-weight: 650;
+    line-height: 1.4;
+  }
+  .designer-guide p {
+    margin: 0 0 16px;
+    color: #52604f;
+  }
+  .designer-guide-intro {
+    max-width: 760px;
+    font-size: 18px;
+  }
+  .designer-guide section {
+    margin-top: 40px;
+  }
+  .designer-guide a {
+    color: #244e38;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .designer-guide :is(a, summary):focus-visible {
+    outline: 2px solid #527a64;
+    outline-offset: 4px;
+  }
+  .designer-guide-return {
+    display: inline-block;
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #243d33;
+    color: #fffdf5;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .designer-guide-steps {
+    padding-left: 24px;
+    list-style: decimal;
+  }
+  .designer-guide-steps li {
+    padding-left: 8px;
+    margin-top: 20px;
+  }
+  .designer-guide-examples {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .designer-guide-examples figure {
+    margin: 0;
+  }
+  .designer-guide-examples img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 10px;
+  }
+  .designer-guide-examples figcaption {
+    padding-top: 16px;
+    font-size: 14px;
+  }
+  .designer-guide-faqs details {
+    border-top: 1px solid #d7ddd2;
+    padding: 14px 0;
+  }
+  .designer-guide-faqs summary,
+  .designer-guide-more > summary {
+    min-height: 44px;
+    cursor: pointer;
+    font-weight: 600;
+    padding-block: 8px;
+  }
+  .designer-guide-more {
+    border-top: 1px solid #d7ddd2;
+    margin-top: 16px;
+    padding-top: 8px;
+  }
+  .designer-header-brand > .designer-header-label {
+    min-height: 44px;
+    font-size: 13px;
+    letter-spacing: 0;
+    color: #59634f;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+  .designer-guide-mobile {
+    display: none;
+  }
+}
+@media screen and (max-width: 1000px) {
+  .designer-guide-mobile {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    max-width: 50px;
+    font-size: 11px;
+    line-height: 1.3;
+    color: #526456;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+@media screen and (max-width: 600px) {
+  .designer-guide-examples {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
