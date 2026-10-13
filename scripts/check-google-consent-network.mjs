@@ -129,7 +129,7 @@ try {
       await expect.poll(() => h.hits.some(hit => hit.gcs === 'G100'), { timeout: 15000 }).toBe(true);
       assert.deepEqual(await googleCookies(h.context), [], 'No Google cookies before consent');
       const denied = hitSummary(h.hits);
-      await h.page.getByRole('link', { name: 'Cookies', exact: true }).click();
+      await h.page.getByRole('link', { name: 'Cookies', exact: true }).last().click();
       await expect(h.page).toHaveURL(/\/cookies\?/);
       const carriedUrl = h.page.url();
       assert(new URL(carriedUrl).searchParams.get('gclid') === 'TEST123' || new URL(carriedUrl).searchParams.has('_gl'), 'Link must carry ad click information');
@@ -157,8 +157,7 @@ try {
     try {
       await h.page.goto(origin + '/memorial-plaques?gclid=TEST123');
       await expect.poll(() => h.hits.some(hit => hit.gcs === 'G100'), { timeout: 15000 }).toBe(true);
-      const button = h.page.locator('.commerce-actions button').first();
-      await button.click();
+      await h.page.locator('a.shop-button[href="/design"]').first().click();
       await expect(h.page).toHaveURL(/\/design/);
       const afterClick = h.page.url();
       assert.equal(new URL(afterClick).searchParams.get('gclid'), 'TEST123', 'Designer button must preserve the landing click ID');

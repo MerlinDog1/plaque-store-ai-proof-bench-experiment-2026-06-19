@@ -2,6 +2,7 @@ import { MetaConsent } from './components/MetaConsent';
 import { trackMetaCheckout } from './services/metaPixel';
 import { OPTIONAL_AD_CONSENT_CHANGED } from './services/metaPixel';
 import { trackSiteEvent, trackSitePage } from './services/posthogAnalytics';
+import { publicRouteWithGoogleClick } from './services/googleClickNavigation';
 import { LayoutProgress } from './components/LayoutProgress';
 import { DesignRequest } from './components/DesignRequest';
 import { DesignerGuideDialog } from './components/DesignerGuide';
@@ -1143,7 +1144,7 @@ const App: React.FC = () => {
     setCurrentView(view);
     const route = (view === 'product' || view === 'landing') && productSlug ? `/${productSlug}` : viewRoutes[view];
     if (route && window.location.pathname !== route) {
-      window.history.pushState({}, '', route);
+      window.history.pushState({}, '', publicRouteWithGoogleClick(route));
     }
   };
 
@@ -1163,7 +1164,7 @@ const App: React.FC = () => {
     setActiveStep(0);
     setCurrentView('plaque');
     if (window.location.pathname !== '/design') {
-      window.history.pushState({}, '', '/design');
+      window.history.pushState({}, '', publicRouteWithGoogleClick('/design'));
     }
   };
 
@@ -1198,7 +1199,7 @@ const App: React.FC = () => {
     setCurrentView('plaque');
     setActiveStep(5);
     if (window.location.pathname !== '/design') {
-      window.history.pushState({}, '', '/design');
+      window.history.pushState({}, '', publicRouteWithGoogleClick('/design'));
     }
   };
 

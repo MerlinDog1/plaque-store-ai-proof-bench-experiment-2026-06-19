@@ -35,6 +35,10 @@ if (process.env.GITHUB_ACTIONS === 'true') {
       if (consent.error) console.error(consent.error.message);
       process.exitCode = consent.status === 0 ? 0 : 1;
       if (consent.status === 0) {
+        const navigation = spawnSync(process.execPath, ['scripts/check-google-click-navigation.cjs'], {
+          stdio: 'inherit', timeout: 30_000,
+        });
+        if (navigation.status !== 0) throw new Error('Google click navigation checks failed');
         const network = spawnSync(process.execPath, ['scripts/check-google-consent-network.mjs'], {
           stdio: 'inherit', timeout: 180_000,
         });
