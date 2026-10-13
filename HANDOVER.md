@@ -10,7 +10,14 @@ The exact block is first in head; public Google loading no longer waits for
 consent, while denied defaults, events, URL redaction and private exclusions
 remain. The sole ga-disable assignment is removed with the old block.
 
-**Prepared, not deployed; CI pending.** The separate Google purchase helper/frame
+**Prepared, pushed and tested; not deployed.** Application/checkpoint
+`d0891021c881e910c24da5128490fecdf370f665` passed
+[CI38397272755](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/actions/runs/38397272755):
+typecheck/build, exact source/generated script order, real built React banner
+Accept/Reject/saved choices, and catalogue/designer regressions. Google/Meta
+delivery was locally stubbed. [PR17](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/pull/17)
+targets the live-source product-policy branch. No new permission to publish was
+inferred from the code-only Task1 request. The separate Google purchase helper/frame
 still requires `instaplaque-meta-consent=yes` and is unchanged. This is not a full
 purchase-modelling or Ads-receipt fix. Meta/banner/PostHog and all checkout code
 are unchanged. See [scope, audit and checks](docs/google-consent-v2-2026-10-13.md).

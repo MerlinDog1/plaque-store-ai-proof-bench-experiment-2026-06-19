@@ -12,7 +12,11 @@ Base: `2c5cd37`, the documentation checkpoint for live application
 Independent pre-edit canonical inspection confirmed READY deployment
 `dpl_g23QYg6DYBEnv8AhHpJRkhGNqa6b`. Remote fetch found no newer source.
 
-Status: prepared for review; production build/browser CI pending. **Not deployed.**
+Status: prepared, pushed and tested. **Not deployed.** Application/checkpoint
+`d0891021c881e910c24da5128490fecdf370f665` passed
+[CI38397272755](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/actions/runs/38397272755).
+[Review PR17](https://github.com/MerlinDog1/plaque-store-ai-proof-bench-experiment-2026-06-19/pull/17)
+targets the current live-source product-policy branch, not the older default.
 This task's code-edit instruction does not itself explicitly request publication;
 the repository requires an explicit deployment request. No production state,
 Ads settings, database, customer data or payment is changed by these checks.
@@ -76,16 +80,29 @@ removed. Meta remains opt-in only, and PostHog/Vercel analytics remain unchanged
   empty private-page queue now reflect the requested advanced mode: one denied
   public loader, and private consent settings without destination/event setup.
 - The exact source block was compared directly with the owner's supplied text.
-- CI will check typecheck/build, source and generated-page script order, existing
+- CI passed typecheck/build, source and generated-page script order, existing
   catalogue/designer regressions and the actual built React banner. Google and
   Meta requests in the browser fixture are intercepted with local stubs; no
   analytics delivery, synthetic conversion or real purchase is involved.
+- Built-banner cases cover no stored choice and saved yes/no, actual Accept and
+  Reject controls, no duplicate Google loader, no ga-disable property, Meta
+  loading only on acceptance, and no JavaScript errors/missing fixture assets.
+- All360 physical offers/181 pages,175 feed items,11 hydrated catalogue/product
+  routes and the existing five-viewport/no-JavaScript designer tests passed.
+  Main JS `index-CpAc9MaU.js` and CSS `index-Bxw_YNF_.css` are unchanged; only the
+  Google HTML block changes the application. Removing the old/new blocks leaves
+  byte-identical HTML. Exact supplied script SHA256:
+  `0251c06b47cedb279e9df4112587616416f16b98b9bdd487a220d54bc66ad36f`.
+- First CI38397011965 passed build/static/designer checks but the new browser
+  fixture wrongly served HTML for Vercel's runtime-only insights script. The
+  fixture now explicitly stubs that hosted asset and reports unexpected missing
+  assets; d089102 changes the test only, not the owner's Google code. Full CI
+  rerun passed with no application correction needed.
 - No local heavy build/browser is started: account use is above 3 GiB. Existing
   read-only CI is reused without changing workflows or Git deployment guards.
 
 ## Next step / rollback
 
-Finish CI and record its exact application SHA and run. If publication is later
-requested, recheck the live baseline, create/inspect a protected Vercel candidate
+If publication is later requested, recheck the live baseline, create/inspect a protected Vercel candidate
 and independently verify canonical after promotion. Immediate compatible rollback
 is `dpl_g23QYg6DYBEnv8AhHpJRkhGNqa6b`; no backend rollback is necessary.
