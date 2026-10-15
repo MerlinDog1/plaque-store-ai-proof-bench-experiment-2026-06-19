@@ -1,15 +1,51 @@
 // Only the interactive designer and proof exports need the inscription catalogue.
-const stylesheet = "https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alex+Brush&family=Allura&family=Bebas+Neue&family=Bitter:wght@400;700&family=Caveat:wght@400;700&family=Cinzel:wght@400;700;900&family=Dancing+Script:wght@400;700&family=EB+Garamond:wght@400;600;700&family=Great+Vibes&family=Lato:wght@300;400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@300;400;600;700&family=Oswald:wght@400;600;700&family=Pacifico&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Raleway:wght@300;400;500;700&family=Roboto+Slab:wght@300;500;700&family=Satisfy&display=swap";
+// The @font-face rules point at the same pinned files the production outliner
+// uses (see inscriptionFontCatalog.ts); browsers download only the faces in use.
+import {
+  INSCRIPTION_FALLBACK_FAMILY,
+  inscriptionFallbackWeight,
+  inscriptionFontFaces,
+  inscriptionFontSubsets,
+  inscriptionFontSubsetsFor,
+  inscriptionFontUrl,
+  legacyKernFamilies,
+} from './inscriptionFontCatalog';
+
+const faceRule = (family: string, weight: number, style: string, file: { family: string; weight: number; style: 'normal' | 'italic' }) =>
+  inscriptionFontSubsetsFor(file.family).map((subset) => {
+    const range = inscriptionFontSubsets.find(s => s.name === subset)!.unicodeRange;
+    return `@font-face{font-family:'${family}';font-style:${style};font-weight:${weight};font-display:swap;`
+      + `src:url(${inscriptionFontUrl(file.family, file.weight, file.style, subset, 'woff2')}) format('woff2'),`
+      + `url(${inscriptionFontUrl(file.family, file.weight, file.style, subset, 'woff')}) format('woff');`
+      + `unicode-range:${range};}`;
+  });
+
+// Within a family, later @font-face rules are tried first for a character and a
+// face without the glyph passes it on. Each family's fallback rules therefore
+// come first, so they are used only for characters the family's own files lack.
+const fontFaceCss = () => inscriptionFontFaces().flatMap(({ family, weight, style }) => [
+  ...(family === INSCRIPTION_FALLBACK_FAMILY ? [] : faceRule(family, weight, style, {
+    family: INSCRIPTION_FALLBACK_FAMILY, weight: inscriptionFallbackWeight(weight), style: 'normal',
+  })),
+  ...faceRule(family, weight, style, { family, weight, style }),
+]).join('\n');
+
+// The production outliner draws one glyph per character, or one per standard
+// ligature such as "fi". Preview text shows the same: no contextual alternates,
+// and no synthetic bold or italic for weights and styles a font does not have.
+const textLayerCss = '#ai-text-layer text,#ai-text-layer tspan{'
+  + 'font-variant-ligatures:common-ligatures no-discretionary-ligatures no-historical-ligatures no-contextual;'
+  + 'font-feature-settings:"calt" 0,"clig" 0,"rclt" 0;font-synthesis:none}\n'
+  + legacyKernFamilies.map(family => `#ai-text-layer [font-family="${family}"]{font-kerning:none}`).join('\n');
+
 let pending: Promise<void> | undefined;
 export function ensureInscriptionFonts(): Promise<void> {
   if (typeof document === 'undefined') return Promise.resolve();
   if (pending) return pending;
-  pending = new Promise<void>((resolve, reject) => {
-    const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = stylesheet; link.id = 'inscription-fonts';
-    const timer = window.setTimeout(() => { link.remove(); pending = undefined; reject(new Error('Inscription fonts took too long to load. Please retry.')); }, 20000);
-    link.onload = () => { clearTimeout(timer); resolve(); };
-    link.onerror = () => { clearTimeout(timer); link.remove(); pending = undefined; reject(new Error('Inscription fonts could not load. Please retry.')); };
-    document.head.appendChild(link);
-  });
+  const style = document.createElement('style');
+  style.id = 'inscription-fonts';
+  style.textContent = `${fontFaceCss()}\n${textLayerCss}`;
+  document.head.appendChild(style);
+  pending = Promise.resolve();
   return pending;
 }

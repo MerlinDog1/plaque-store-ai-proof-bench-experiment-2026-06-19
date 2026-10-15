@@ -1,4 +1,16 @@
 import { ensureInscriptionFonts } from './inscriptionFonts';
+import {
+  INSCRIPTION_FALLBACK_FAMILY,
+  InscriptionFontStyle,
+  InscriptionFontSubset,
+  inscriptionFallbackWeight,
+  inscriptionFontSubsetsFor,
+  inscriptionFontUrl,
+  inscriptionFontVariants,
+  inscriptionFontWeight,
+  inscriptionSubsetCovers,
+  matchInscriptionFontWeight,
+} from './inscriptionFontCatalog';
 import { PlaqueState, Fixing, Material, MemorialImageMethod } from "../types";
 import QRCode from "qrcode";
 
@@ -26,73 +38,8 @@ declare global {
   }
 }
 
-// Map fonts to reliable, static WOFF files from JSDelivr (via Fontsource)
-const fontMap: Record<string, string> = {
-  // Serifs
-  "Cinzel": "https://cdn.jsdelivr.net/npm/@fontsource/cinzel@5.0.0/files/cinzel-latin-700-normal.woff",
-  "Playfair Display": "https://cdn.jsdelivr.net/npm/@fontsource/playfair-display@5.0.0/files/playfair-display-latin-700-normal.woff",
-  "EB Garamond": "https://cdn.jsdelivr.net/npm/@fontsource/eb-garamond@5.0.0/files/eb-garamond-latin-600-normal.woff",
-  "Merriweather": "https://cdn.jsdelivr.net/npm/@fontsource/merriweather@5.0.0/files/merriweather-latin-700-normal.woff",
-  "Lora": "https://cdn.jsdelivr.net/npm/@fontsource/lora@5.0.0/files/lora-latin-600-normal.woff",
-  "Roboto Slab": "https://cdn.jsdelivr.net/npm/@fontsource/roboto-slab@5.0.0/files/roboto-slab-latin-500-normal.woff",
-  "Bitter": "https://cdn.jsdelivr.net/npm/@fontsource/bitter@5.0.0/files/bitter-latin-700-normal.woff",
-  "Abril Fatface": "https://cdn.jsdelivr.net/npm/@fontsource/abril-fatface@5.0.0/files/abril-fatface-latin-400-normal.woff",
-
-  // Sans
-  "Montserrat": "https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.0/files/montserrat-latin-600-normal.woff",
-  "Open Sans": "https://cdn.jsdelivr.net/npm/@fontsource/open-sans@5.0.0/files/open-sans-latin-600-normal.woff",
-  "Lato": "https://cdn.jsdelivr.net/npm/@fontsource/lato@5.0.0/files/lato-latin-700-normal.woff",
-  "Oswald": "https://cdn.jsdelivr.net/npm/@fontsource/oswald@5.0.0/files/oswald-latin-600-normal.woff",
-  "Raleway": "https://cdn.jsdelivr.net/npm/@fontsource/raleway@5.0.0/files/raleway-latin-700-normal.woff",
-  "Bebas Neue": "https://cdn.jsdelivr.net/npm/@fontsource/bebas-neue@5.0.0/files/bebas-neue-latin-400-normal.woff",
-
-  // Scripts / Display
-  "Dancing Script": "https://cdn.jsdelivr.net/npm/@fontsource/dancing-script@5.0.0/files/dancing-script-latin-700-normal.woff",
-  "Pacifico": "https://cdn.jsdelivr.net/npm/@fontsource/pacifico@5.0.0/files/pacifico-latin-400-normal.woff",
-  "Satisfy": "https://cdn.jsdelivr.net/npm/@fontsource/satisfy@5.0.0/files/satisfy-latin-400-normal.woff",
-  "Caveat": "https://cdn.jsdelivr.net/npm/@fontsource/caveat@5.0.0/files/caveat-latin-700-normal.woff",
-  "Pinyon Script": "https://cdn.jsdelivr.net/npm/@fontsource/pinyon-script@5.0.0/files/pinyon-script-latin-400-normal.woff",
-  "Allura": "https://cdn.jsdelivr.net/npm/@fontsource/allura@5.0.0/files/allura-latin-400-normal.woff",
-  "Alex Brush": "https://cdn.jsdelivr.net/npm/@fontsource/alex-brush@5.0.0/files/alex-brush-latin-400-normal.woff",
-  "Great Vibes": "https://cdn.jsdelivr.net/npm/@fontsource/great-vibes@5.0.0/files/great-vibes-latin-400-normal.woff",
-};
-
 const DEFAULT_FALLBACK_FONT = "Open Sans";
 const scriptPromises = new Map<string, Promise<void>>();
-const scriptFontFamilies = new Set([
-  "Alex Brush",
-  "Allura",
-  "Caveat",
-  "Dancing Script",
-  "Great Vibes",
-  "Pacifico",
-  "Pinyon Script",
-  "Satisfy",
-]);
-const fontVariants: Record<string, { normal: number[]; italic?: number[] }> = {
-  "Abril Fatface": { normal: [400] },
-  "Alex Brush": { normal: [400] },
-  "Allura": { normal: [400] },
-  "Bebas Neue": { normal: [400] },
-  "Bitter": { normal: [400, 700] },
-  "Caveat": { normal: [400, 700] },
-  "Cinzel": { normal: [400, 700, 900] },
-  "Dancing Script": { normal: [400, 700] },
-  "EB Garamond": { normal: [400, 600, 700] },
-  "Great Vibes": { normal: [400] },
-  "Lato": { normal: [300, 400, 700] },
-  "Lora": { normal: [400, 600, 700], italic: [400] },
-  "Merriweather": { normal: [300, 400, 700] },
-  "Montserrat": { normal: [400, 600, 700, 800] },
-  "Open Sans": { normal: [300, 400, 600, 700] },
-  "Oswald": { normal: [400, 600, 700] },
-  "Pacifico": { normal: [400] },
-  "Pinyon Script": { normal: [400] },
-  "Playfair Display": { normal: [400, 700, 900], italic: [400] },
-  "Raleway": { normal: [300, 400, 500, 700] },
-  "Roboto Slab": { normal: [300, 500, 700] },
-  "Satisfy": { normal: [400] },
-};
 
 const loadScript = (src: string) => {
   const existing = scriptPromises.get(src);
@@ -125,30 +72,14 @@ const ensurePdfLibraries = async () => {
 };
 
 const firstFontFamily = (ff: string) => ff ? ff.split(",")[0].trim().replace(/^["']|["']$/g, "") : "";
-const fontSlug = (family: string) => family.toLowerCase().replace(/\s+/g, "-");
-const normalizedWeight = (weight: string) => {
-  const lower = weight.trim().toLowerCase();
-  if (lower === "bold" || lower === "bolder") return 700;
-  if (lower === "normal" || lower === "regular") return 400;
-  if (lower === "lighter" || lower === "light") return 300;
-  const parsed = Number.parseInt(weight, 10);
-  if (!Number.isFinite(parsed)) return 400;
-  return Math.min(900, Math.max(300, Math.round(parsed / 100) * 100));
-};
-const closestWeight = (family: string, weight: number, style: string) => {
-  const variants = fontVariants[family];
-  const weights = (style === "italic" ? variants?.italic : variants?.normal) || variants?.normal;
-  if (!weights?.length) return weight;
-  return weights.reduce((best, candidate) =>
-    Math.abs(candidate - weight) < Math.abs(best - weight) ? candidate : best
-  );
-};
-const fontDescriptor = (family: string, weight: string, style: string) =>
-  `${family}::${closestWeight(family, normalizedWeight(weight), style === "italic" ? "italic" : "normal")}::${style === "italic" ? "italic" : "normal"}`;
-const fontUrlForDescriptor = (descriptor: string) => {
-  const [family, weight, style] = descriptor.split("::");
-  const slug = fontSlug(family);
-  return `https://cdn.jsdelivr.net/npm/@fontsource/${slug}@5.0.0/files/${slug}-latin-${weight}-${style}.woff`;
+// The catalogue face the browser draws for this family, weight and style. With
+// font-synthesis off, a missing italic is drawn upright, so outline it upright.
+const fontDescriptor = (family: string, weight: string, style: string) => {
+  const variants = inscriptionFontVariants[family];
+  const italic = style === "italic" && !!variants?.italic?.length;
+  const available = (italic ? variants?.italic : variants?.normal) || [];
+  const faceWeight = matchInscriptionFontWeight(available, inscriptionFontWeight(weight));
+  return `${family}::${faceWeight}::${italic ? "italic" : "normal"}`;
 };
 const parseLength = (value: string | null, fontSize: number) => {
   if (!value) return 0;
@@ -177,32 +108,109 @@ const loadFontsUsedInLayer = async (liveLayer: Element) => {
     }
   });
 
-  const loadedFonts: Record<string, any> = {};
+  const loadedFonts: Record<string, OutlineFont> = {};
 
   await Promise.all(Array.from(descriptors).map(async (descriptor) => {
-    const [fam] = descriptor.split("::");
-    const urls = [fontUrlForDescriptor(descriptor), fontMap[fam]].filter(Boolean);
+    const [fam, weight, style] = descriptor.split("::");
+    if (!inscriptionFontVariants[fam]) {
+      console.error(`FAILED to load font "${descriptor}": not in the inscription font catalogue.`);
+      return;
+    }
     try {
-      for (const url of urls) {
-        try {
-          const buff = await fetch(url).then(r => {
-            if (!r.ok) throw new Error(`HTTP ${r.status}`);
-            return r.arrayBuffer();
+      const own = await loadOutlineFaces(fam, Number(weight), style as InscriptionFontStyle);
+      const fallback = fam === INSCRIPTION_FALLBACK_FAMILY
+        ? []
+        : await loadOutlineFaces(INSCRIPTION_FALLBACK_FAMILY, inscriptionFallbackWeight(Number(weight)), "normal")
+          .catch((e) => {
+            console.warn(`Could not load the fallback characters for "${descriptor}".`, e);
+            return [];
           });
-          loadedFonts[descriptor] = window.opentype.parse(buff);
-          if (!loadedFonts[fam]) loadedFonts[fam] = loadedFonts[descriptor];
-          return;
-        } catch {
-          // Try the curated family fallback when an exact variant is unavailable.
-        }
-      }
-      throw new Error("No matching font file");
+      // Browsers try the last @font-face rule for a character first, and the
+      // fallback rules come first (see inscriptionFonts.ts), so check in reverse.
+      loadedFonts[descriptor] = {
+        faces: [...own].reverse().concat([...fallback].reverse()),
+        primary: own.find(({ subset }) => subset === "latin")!.face,
+      };
     } catch (e) {
       console.error(`FAILED to load font "${descriptor}".`, e);
     }
   }));
 
   return loadedFonts;
+};
+
+type OutlineFace = { face: any; subset: InscriptionFontSubset };
+type OutlineFont = { faces: OutlineFace[]; primary: any };
+type Ligature = { sub: number[]; by: number };
+
+// The same pinned files the preview's @font-face rules use; latin-ext covers
+// names such as Tŷ or Łucja.
+const loadOutlineFaces = async (family: string, weight: number, style: InscriptionFontStyle) => {
+  const faces = await Promise.all(inscriptionFontSubsetsFor(family).map(async (subset) => {
+    const url = inscriptionFontUrl(family, weight, style, subset, "woff");
+    const fetchFace = async () => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return window.opentype.parse(await response.arrayBuffer());
+    };
+    try {
+      return { face: await fetchFace().catch(fetchFace), subset };
+    } catch (e) {
+      if (subset === "latin") throw e;
+      console.warn(`Could not load the ${subset} characters of ${family} ${weight}.`, e);
+      return null;
+    }
+  }));
+  return faces.filter((face): face is OutlineFace => face !== null);
+};
+
+// The face a browser draws this character from: the first in order whose
+// unicode-range covers it and which has the glyph.
+const faceForChar = (font: OutlineFont, char: string) => {
+  const codePoint = char.codePointAt(0) ?? 0;
+  return font.faces.find(({ face, subset }) =>
+    inscriptionSubsetCovers(subset, codePoint) && face.charToGlyphIndex(char) > 0)?.face;
+};
+
+const ligatureCache = new WeakMap<object, Ligature[]>();
+// Standard and required ligatures ("liga", "rlig"), which browsers apply by
+// default, longest first so "ffi" wins over "ff".
+const standardLigatures = (face: any): Ligature[] => {
+  const cached = ligatureCache.get(face);
+  if (cached) return cached;
+  const ligatures: Ligature[] = [];
+  for (const feature of ["liga", "rlig"]) {
+    for (const script of ["latn", "DFLT"]) {
+      let found: Ligature[] = [];
+      try {
+        found = face.substitution?.getFeature?.(feature, script) || [];
+      } catch {
+        found = [];
+      }
+      if (found.length) {
+        ligatures.push(...found);
+        break;
+      }
+    }
+  }
+  ligatures.sort((a, b) => b.sub.length - a.sub.length);
+  ligatureCache.set(face, ligatures);
+  return ligatures;
+};
+
+// Browsers draw a standard ligature such as "fi" as one glyph but still report
+// a position for each of its characters, splitting the joined width between
+// them. Outlining those characters separately squeezes a full "f" and a dotted
+// "i" into that width. The preview text layer turns common ligatures on
+// explicitly (inscriptionFonts.ts), and every browser joins them unless text
+// is letter-spaced, so a matching ligature is outlined as the one glyph shown.
+const ligatureAt = (face: any, ligatures: Ligature[], text: string, start: number, charCount: number) => {
+  const glyphAt = (index: number) => face.charToGlyphIndex(text[index]);
+  const first = glyphAt(start);
+  return ligatures.find((ligature) => {
+    if (ligature.sub[0] !== first || start + ligature.sub.length > charCount) return false;
+    return ligature.sub.every((glyph, k) => glyph === glyphAt(start + k));
+  }) || null;
 };
 
 const assertTextLayerOutlined = (cloneSvg: SVGSVGElement) => {
@@ -283,24 +291,6 @@ const recomputePreviewFitTransform = (
   }
 };
 
-const translatePathToSourceBBox = (pathEl: SVGPathElement, sourceRun: SVGTextContentElement) => {
-  try {
-    const sourceBox = sourceRun.getBBox();
-    const pathBox = pathEl.getBBox();
-    if (!pathBox.width || !pathBox.height) return;
-
-    const dx = sourceBox.x - pathBox.x;
-    const dy = sourceBox.y - pathBox.y;
-    if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) return;
-
-    const existingTransform = pathEl.getAttribute("transform");
-    const registration = `translate(${dx}, ${dy})`;
-    pathEl.setAttribute("transform", existingTransform ? `${registration} ${existingTransform}` : registration);
-  } catch {
-    // Keep the generated outline if browser bbox measurement is unavailable.
-  }
-};
-
 // Convert text nodes to path data
 const outlineTextLayer = async (
   cloneSvg: SVGSVGElement,
@@ -361,7 +351,9 @@ const outlineTextLayer = async (
         sourceRun.getAttribute("font-style") || style.fontStyle
       );
 
-      let font = loadedFonts[descriptor] || loadedFonts[fam] || fallbackFont;
+      // A catalogue font that failed to load must stop the export rather than be
+      // swapped for another face; only unknown families use the fallback.
+      const font = loadedFonts[descriptor] || (inscriptionFontVariants[fam] ? undefined : fallbackFont);
       if (!font) {
         console.error(`CRITICAL: No fonts available for "${textContent}".`);
         run.setAttribute("fill", "#FF0000");
@@ -387,39 +379,46 @@ const outlineTextLayer = async (
         || style.letterSpacing,
         fontSize
       );
-      // Script faces rely on contextual forms. Splitting them into individual
-      // glyph paths destroys the joins even when browser char positions are
-      // correct, so always outline script text as a shaped run.
-      const shouldKeepWholeRun = scriptFontFamilies.has(fam);
+      // Outline one glyph at a time at the browser-calculated positions, for
+      // script and non-script faces alike. This preserves SVG text-anchor,
+      // kerning, letter-spacing and script joins exactly as previewed. Contextual
+      // alternates and synthetic bold/italic are switched off for the preview
+      // text layer (inscriptionFonts.ts), so each character, or each joined
+      // standard ligature, is one glyph on screen and here.
+      let unavailableChar = "";
+      try {
+        const charCount = sourceRun.getNumberOfChars();
+        if (charCount > 0) {
+          // Browsers do not join ligatures in letter-spaced text.
+          const ligatures = letterSpacing === 0 ? standardLigatures(font.primary) : [];
+          for (let charIndex = 0; charIndex < charCount; charIndex++) {
+            const char = textContent[charIndex];
+            if (!char || !char.trim()) continue;
 
-      if (shouldKeepWholeRun) {
-        try {
-          const pt = sourceRun.getStartPositionOfChar(0);
-          const runPath = font.getPath(textContent, pt.x, pt.y, fontSize);
-          pathData = runPath.toPathData(2);
-          usedBrowserLayout = pathData.trim().length > 0;
-        } catch {
-          // Fall back to the generic outline logic below.
-        }
-      } else {
-        // Outline one character at a time at the browser-calculated positions.
-        // This preserves SVG text-anchor, kerning and letter-spacing exactly.
-        try {
-          const charCount = sourceRun.getNumberOfChars();
-          if (charCount > 0) {
-            for (let charIndex = 0; charIndex < charCount; charIndex++) {
-              const char = textContent[charIndex];
-              if (!char || !char.trim()) continue;
-
-              const pt = sourceRun.getStartPositionOfChar(charIndex);
-              const charPath = font.getPath(char, pt.x, pt.y, fontSize);
-              pathData += `${charPath.toPathData(2)} `;
+            const face = faceForChar(font, char);
+            if (!face) {
+              unavailableChar = Array.from(textContent.slice(charIndex))[0] || char;
+              break;
             }
-            usedBrowserLayout = pathData.trim().length > 0;
+            const pt = sourceRun.getStartPositionOfChar(charIndex);
+            const ligature = ligatures.length && face === font.primary
+              ? ligatureAt(face, ligatures, textContent, charIndex, charCount)
+              : null;
+            if (ligature) {
+              pathData += `${face.glyphs.get(ligature.by).getPath(pt.x, pt.y, fontSize).toPathData(2)} `;
+              charIndex += ligature.sub.length - 1;
+              continue;
+            }
+            pathData += `${face.getPath(char, pt.x, pt.y, fontSize).toPathData(2)} `;
           }
-        } catch (e) {
-          // Fall back to whole-run layout for unusual SVG text nodes.
+          usedBrowserLayout = !unavailableChar && pathData.trim().length > 0;
         }
+      } catch (e) {
+        // Fall back to whole-run layout for unusual SVG text nodes.
+      }
+      if (unavailableChar) {
+        // The browser drew this from a device font the plaque cannot be made in.
+        throw new Error(`"${unavailableChar}" is not available in ${fam}, so the plaque cannot be made exactly as previewed. Remove that character or choose another font.`);
       }
 
       if (!usedBrowserLayout) {
@@ -434,12 +433,12 @@ const outlineTextLayer = async (
         let x = parseFloat(xAttr || "0");
         let y = parseFloat(yAttr || "0");
 
-        const width = font.getAdvanceWidth(textContent, fontSize);
+        const width = font.primary.getAdvanceWidth(textContent, fontSize);
 
         if (textAnchor === "middle") x -= width / 2;
         if (textAnchor === "end") x -= width;
 
-        const runPath = font.getPath(textContent.trim(), x, y, fontSize);
+        const runPath = font.primary.getPath(textContent.trim(), x, y, fontSize);
         pathData = runPath.toPathData(2);
       }
 
@@ -457,9 +456,6 @@ const outlineTextLayer = async (
 
         if (textEl.parentNode) {
           textEl.parentNode.insertBefore(pathEl, textEl);
-          if (shouldKeepWholeRun) {
-            translatePathToSourceBBox(pathEl, sourceRun);
-          }
         }
       } catch (err) {
         console.warn(`Could not generate path for text "${textContent}".`, err);

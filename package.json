@@ -43,6 +43,7 @@
     "check:symbols": "node scripts/check-symbol-ornaments.cjs",
     "experiment:layout-harness": "node scripts/layout-experiment-harness.cjs",
     "test:export-fidelity": "node scripts/validate-export-fidelity.mjs",
+    "check:glyph-parity": "node scripts/check-glyph-parity.mjs",
     "preview": "node server.mjs",
     "serve": "node server.mjs",
     "check:manual-typography": "node scripts/check-manual-typography.mjs",
