@@ -74,11 +74,17 @@ for (const file of files) {
     checkConsent(h.queue()[3], 'update', 'denied');
   }
   assert.equal(run({ url: 'https://www.instaplaque.co.uk/' }).appended.length, 1);
-  const url = origin + '/design?view=design&utm_source=google&utm_medium=cpc&utm_campaign=memorial&utm_content=ad&utm_term=plaque&gclid=synthetic-click&email=private#private';
+  // Campaign tags and Google's ad-click identifiers reach GA4 (or ad clicks read as organic visits); anything else
+  // in the address, such as an email, does not.
+  const url = origin + '/design?view=design&utm_source=google&utm_medium=cpc&utm_campaign=memorial&utm_content=ad&utm_term=plaque&gclid=synthetic-click&email=private&gad_source=1&gbraid=synthetic-app&wbraid=synthetic-web&fbclid=other#private';
   const h = run({ url, referrer: origin + '/proof/private?order=private' });
   const ga = h.queue().find(args => args[0] === 'config' && args[1] === 'G-FKP17EXNBX')[2];
-  assert.equal(ga.page_location, origin + '/design?view=design&utm_source=google&utm_medium=cpc&utm_campaign=memorial&utm_content=ad&utm_term=plaque');
+  assert.equal(ga.page_location, origin + '/design?view=design&utm_source=google&utm_medium=cpc&utm_campaign=memorial&utm_content=ad&utm_term=plaque&gclid=synthetic-click&gad_source=1&gbraid=synthetic-app&wbraid=synthetic-web');
+  const adClick = run({ url: origin + '/brass-plaques?gclid=synthetic-click&gad_source=1', referrer: 'https://www.google.com/' });
+  const adConfig = adClick.queue().find(args => args[0] === 'config' && args[1] === 'G-FKP17EXNBX')[2];
+  assert.equal(adConfig.page_location, origin + '/brass-plaques?gclid=synthetic-click&gad_source=1', 'An ad click must reach GA4 as one');
+  assert.equal(adConfig.page_referrer, 'https://www.google.com');
   assert.equal(ga.page_referrer, origin);
   assert.equal(h.context.location.href, url, 'Redacting GA4 must not rewrite the click-bearing browser URL');
-  console.log(`PASS ${file}: consent ordering, public loading, saved/late consent, revocation, storage failure, private/preview exclusions, one loader and URL redaction`);
+  console.log(`PASS ${file}: consent ordering, public loading, saved/late consent, revocation, storage failure, private/preview exclusions, one loader, URL redaction and ad-click IDs kept`);
 }

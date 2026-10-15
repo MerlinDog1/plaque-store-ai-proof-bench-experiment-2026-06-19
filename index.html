@@ -42,10 +42,15 @@
     gtag('js', new Date());
     gtag('config', 'AW-18288208905');
 
+    // GA4 gets the page address without private or personal parameters, but with campaign tags and Google's own
+    // ad-click identifiers: without those GA4 cannot tell an ad click from an ordinary Google visit, so sessions
+    // and purchases from the ads were reported as organic and never credited to them.
+    var analyticsParams = ['view', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+      'gclid', 'gbraid', 'wbraid', 'gclsrc', 'dclid', 'gad_source', 'gad_campaignid'];
     var cleanUrl = new URL(window.location.href);
     cleanUrl.hash = '';
     Array.from(cleanUrl.searchParams.keys()).forEach(function (key) {
-      if (!['view', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].includes(key)) {
+      if (!analyticsParams.includes(key)) {
         cleanUrl.searchParams.delete(key);
       }
     });
