@@ -1,5 +1,12 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Google ad clicks kept for GA4 — 15 October 2026, about 05:20 UTC
+
+GA4's page address dropped `gclid` and the other Google click IDs, so ad clicks showed as `google / organic` and
+sales could never be credited to the ads. `4c36a4e` on `codex/instaplaque-ad-click-attribution-20261015` keeps them.
+Live READY `dpl_HQBYhNJxVhe5mcBrcKCBi7afd4Cp`; rollback `dpl_FoYyYzAjsD959FFdzVcWPJUy3CG7`. The GA4 property still
+needs its Google Ads link (owner, as Ads admin). Read [the finding and release record](docs/google-ad-click-attribution-2026-10-15.md).
+
 ## Account corrections released — 13 October 2026, 14:56 UTC
 
 Owner accepted the audit's proposed fixes. The existing live Stripe webhook now
