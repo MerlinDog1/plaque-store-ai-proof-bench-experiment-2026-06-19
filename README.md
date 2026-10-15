@@ -1,5 +1,7 @@
 # Plaque Store AI Proof Bench Experiment - 2026-06-19
 
+**Production backend handover (21 September 2026):** Instaplaque now uses fresh Supabase Free project `fygweiynqkglmjwqlouc` and private R2 artwork storage. Read [the migration handover](docs/supabase-r2-handover-2026-09-21.md) before continuing. Deployed code is on `codex/supabase-r2-migration`; older setup and experiment notes below are historical.
+
 Experimental copy of the consumer-facing Plaque Store AI proof bench. This repo
 is for fast iteration, diagnostics, and risky proof-flow experiments without
 disturbing the canonical proof-bench repo.

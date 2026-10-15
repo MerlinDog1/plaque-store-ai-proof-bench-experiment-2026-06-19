@@ -47,10 +47,12 @@ export function getSafeMarginsMm(params: {
   const longSide = Math.max(params.width, params.height);
   const percentMargin = minSide * (getSafeMarginPercent(params.safeMargin) / 100);
   const horizontal = clamp(
-    Math.max(percentMargin, minSide * 0.18, longSide * 0.065),
+    Math.max(percentMargin, minSide * 0.22, longSide * 0.10),
     minSide * 0.14,
-    minSide * 0.32,
+    longSide * 0.20,
   );
 
-  return { x: horizontal, y: base };
+  return params.width >= params.height
+    ? { x: horizontal, y: base }
+    : { x: base, y: horizontal };
 }

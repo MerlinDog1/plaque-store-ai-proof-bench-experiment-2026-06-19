@@ -7,6 +7,7 @@ const fixedProductionEmail = "etsysign2600@gmail.com";
 const USE_CUSTOMER_COPY_PASS = true;
 const reviewUrl = process.env.REVIEW_URL || process.env.PUBLIC_REVIEW_URL || "";
 const canonicalSiteUrl = "https://instaplaque.co.uk";
+const emailOrigin = "Made in the UK";
 
 const publicSiteRoot = (order = {}) => {
   const configured = process.env.PUBLIC_SITE_URL || "";
@@ -305,6 +306,7 @@ const customerOrderConfirmation = (order, { orderLink, title, total }) => {
                       </div>
                     ` : ""}
                     <p style="margin:24px 0 0;color:#76684f;font:12px Arial,sans-serif;line-height:1.6;">${USE_CUSTOMER_COPY_PASS ? "Please check this email for your records. If you spot anything wrong, reply straight away so we can help before your plaque is made." : "Please check this email for your records. If anything looks wrong, reply as soon as possible before production progresses."}</p>
+                    <p style="margin:12px 0 0;color:#76684f;font:12px Arial,sans-serif;">${emailOrigin}</p>
                   </td>
                 </tr>
               </table>
@@ -325,6 +327,7 @@ const customerOrderConfirmation = (order, { orderLink, title, total }) => {
       delivery ? `Delivery: ${delivery}` : "",
       "Your approved proof has been received for production. We will email you when it is dispatched.",
       orderLink ? `View your order: ${orderLink}` : "",
+      emailOrigin,
     ].filter(Boolean).join("\n"),
     attachments: proofAttachments(order, true, { includeSvg: false }),
   };
@@ -388,6 +391,7 @@ const brandedOrderUpdate = (order, {
                       </div>
                     ` : ""}
                     <p style="margin:24px 0 0;color:#76684f;font:12px Arial,sans-serif;line-height:1.6;">${escapeHtml(footer)}</p>
+                    <p style="margin:12px 0 0;color:#76684f;font:12px Arial,sans-serif;">${emailOrigin}</p>
                   </td>
                 </tr>
               </table>
@@ -406,6 +410,7 @@ const brandedOrderUpdate = (order, {
       panelCopy,
       primaryCtaUrl ? `${primaryCtaLabel}: ${primaryCtaUrl}` : "",
       footer,
+      emailOrigin,
     ].filter(Boolean).join("\n"),
     attachments: proofAttachments(order, includeProof, { includeSvg: false }),
   };
@@ -460,7 +465,7 @@ export const buildEmail = (template, order, extra = {}) => {
       panelTitle: "Delivery",
       panelCopy: extra.trackingReference || order.metadata?.trackingReference
         ? "Use the tracking or delivery reference below to follow the parcel where the carrier supports tracking."
-        : "Most UK mainland orders arrive soon after dispatch. Please keep an eye out for the delivery.",
+        : "Most UK orders arrive soon after dispatch. Please keep an eye out for the delivery.",
       orderLink,
       title,
       trackingReference: extra.trackingReference,
@@ -570,7 +575,7 @@ export const buildEmail = (template, order, extra = {}) => {
   };
 };
 
-export const sendEmail = async ({ to, template, order, extra = {} }) => {
+export const sendEmail = async ({ to, template, order, extra = {}, idempotencyKey }) => {
   const message = buildEmail(template, order, extra);
   if (!to || !String(to).includes("@")) {
     return { status: "skipped", reason: "missing-recipient", message };
@@ -585,7 +590,9 @@ export const sendEmail = async ({ to, template, order, extra = {} }) => {
     headers: {
       Authorization: `Bearer ${resendApiKey}`,
       "Content-Type": "application/json",
+      ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
     },
+    signal: AbortSignal.timeout(15000),
     body: JSON.stringify({
       from: fromEmail,
       to,

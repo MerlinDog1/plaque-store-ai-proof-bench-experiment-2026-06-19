@@ -1,9 +1,9 @@
 import React, { RefObject, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { BorderStyle, Fixing, Material, PlaqueState, Shape } from '../types';
+import { Fixing, Material, PlaqueState, Shape } from '../types';
 import { outlinePreviewTextLayer } from '../services/exportService';
-import { isBenchPlaqueFormat } from '../services/plaqueRules';
+import { getFixingPositions } from '../services/fixingGeometry';
 
 interface Props {
   state: PlaqueState;
@@ -26,6 +26,8 @@ const WOOD_BACKING_BEVEL_SIZE_MM = 8.4;
 const WOOD_BACKING_BEVEL_THICKNESS_MM = 5.25;
 const CAP_THICKNESS_MM = 1.25;
 const SCENE_PLAQUE_WIDTH = 3.4;
+// Match the curved face and extruded rim; the default 12 produces a faceted edge.
+const PLAQUE_CURVE_SEGMENTS = 128;
 
 type TextureCrop = {
   x: number;
@@ -486,6 +488,8 @@ function makeExtrudedMesh(
 ) {
   const geometry = new THREE.ExtrudeGeometry(shape, {
     depth,
+    steps: 1,
+    curveSegments: PLAQUE_CURVE_SEGMENTS,
     bevelEnabled,
     bevelThickness,
     bevelSize,
@@ -588,56 +592,11 @@ function makeWoodFaceMesh(state: PlaqueState, dims: ReturnType<typeof getSceneDi
 
   const geometry = state.shape === Shape.Rect
     ? new THREE.PlaneGeometry(width, height)
-    : new THREE.ShapeGeometry(makeShape(state, width, height).shape, 48);
+    : new THREE.ShapeGeometry(makeShape(state, width, height).shape, PLAQUE_CURVE_SEGMENTS);
   const face = new THREE.Mesh(geometry, material);
   face.position.z = 0.003;
   face.renderOrder = 1;
   return face;
-}
-
-function getFixingPositions(state: PlaqueState) {
-  if (state.fixing !== Fixing.Screws && state.fixing !== Fixing.Caps) return [];
-  if (state.shape === Shape.Heart) return [];
-
-  const borderOuterInset = 3;
-  const borderInnerInset = 5;
-  const fixingBorderClearance = state.fixing === Fixing.Screws ? 2.25 : 2;
-  const screwRadius = 2.5;
-  const capRadius = state.capSize / 2;
-  const fixingRadius = state.fixing === Fixing.Caps ? capRadius : screwRadius;
-  const isScallopedBorder = state.borderStyle === BorderStyle.Scalloped || state.borderStyle === BorderStyle.DoubleScalloped;
-  const scallopedCapCenterInset = state.capSize === 15 ? 12 : 10;
-  const capBorderInset = state.borderStyle === BorderStyle.Double ? borderInnerInset : borderOuterInset;
-  const screwBorderInset = state.borderStyle === BorderStyle.Double ? borderInnerInset : borderOuterInset;
-  const borderedCapInset = isScallopedBorder
-    ? scallopedCapCenterInset
-    : capBorderInset + capRadius + 2;
-  const borderedFixingInset = state.fixing === Fixing.Caps
-    ? borderedCapInset
-    : screwBorderInset + fixingRadius + fixingBorderClearance;
-  const holeInset = state.border
-    ? borderedFixingInset
-    : state.fixing === Fixing.Screws ? 7 : 10 + (state.capSize === 15 ? 2 : 0);
-  const sideMountedFixings = state.shape !== Shape.Rect || state.height < 80;
-  const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
-  const requestedHoleCount = state.fixing === Fixing.Screws
-    ? state.fixingHoleCount ?? (isBenchPlaque ? 2 : 4)
-    : 2;
-  const offset = state.wood ? WOOD_BACKING_EXTRA_MM / 2 : 0;
-  const cx = offset + state.width / 2;
-  const cy = offset + state.height / 2;
-
-  const useCornerFixings = requestedHoleCount === 4 || (state.fixing === Fixing.Caps && !sideMountedFixings);
-  if (!useCornerFixings) {
-    const xOffset = state.width / 2 - holeInset;
-    return [{ x: cx - xOffset, y: cy }, { x: cx + xOffset, y: cy }];
-  }
-
-  const x1 = offset + holeInset;
-  const x2 = offset + state.width - holeInset;
-  const y1 = offset + holeInset;
-  const y2 = offset + state.height - holeInset;
-  return [{ x: x1, y: y1 }, { x: x2, y: y1 }, { x: x2, y: y2 }, { x: x1, y: y2 }];
 }
 
 export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscription, sourceSvgRef }) => {
@@ -912,7 +871,20 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
             polygonOffsetFactor: -4,
             polygonOffsetUnits: -4,
           });
-      const face = new THREE.Mesh(new THREE.PlaneGeometry(dims.plaqueWidth, dims.plaqueHeight), faceMaterial);
+      const curvedFace = state.shape === Shape.Circle || state.shape === Shape.Oval;
+      const faceGeometry = curvedFace
+        ? new THREE.ShapeGeometry(metalShape, PLAQUE_CURVE_SEGMENTS)
+        : new THREE.PlaneGeometry(dims.plaqueWidth, dims.plaqueHeight);
+      if (curvedFace) {
+        // ShapeGeometry's default UVs are world coordinates; retain the same
+        // full-face texture crop while giving the edge a smooth mesh silhouette.
+        const positions = faceGeometry.getAttribute('position');
+        const uv = faceGeometry.getAttribute('uv');
+        for (let i = 0; i < positions.count; i += 1) {
+          uv.setXY(i, positions.getX(i) / dims.plaqueWidth + 0.5, positions.getY(i) / dims.plaqueHeight + 0.5);
+        }
+      }
+      const face = new THREE.Mesh(faceGeometry, faceMaterial);
       face.position.z = dims.metalDepth + Math.max(0.012, dims.unitPerMm * 0.35);
       face.renderOrder = 4;
       face.userData.previewFace = exactProof ? 'svg' : 'fallback';

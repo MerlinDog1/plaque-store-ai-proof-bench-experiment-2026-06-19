@@ -1,12 +1,35 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import React from 'react';
+import { merchantOffers } from '../services/merchantCatalogue.mjs';
+import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { createServer } from 'vite';
+
+// Render the same shop components used in the browser, rather than a second
+// abbreviated version of the catalogue that drifts away from the visible page.
+const renderer = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom' });
+let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage, designer, DesignRequest, initialState, QuotePage;
+try {
+  shop = await renderer.ssrLoadModule('/components/Shopfront.tsx');
+  guides = await renderer.ssrLoadModule('/components/ShopGuides.tsx');
+  designer = await renderer.ssrLoadModule('/components/DesignerGuide.tsx');
+  DesignRequest = (await renderer.ssrLoadModule('/components/DesignRequest.tsx')).DesignRequest;
+  initialState = (await renderer.ssrLoadModule('/types.ts')).INITIAL_STATE;
+  catalogue = await renderer.ssrLoadModule('/services/commerce.ts');
+  const experience = await renderer.ssrLoadModule('/components/SiteExperience.tsx');
+  LegalPlaceholderPage = experience.LegalPlaceholderPage; QuotePage = experience.QuotePage;
+  ShopHeader = (await renderer.ssrLoadModule('/components/Header.tsx')).Header;
+} finally {
+  await renderer.close();
+}
 
 const siteBaseUrl = 'https://instaplaque.co.uk';
 const shareImage = `${siteBaseUrl}/site-images/home-realistic-proof-row.jpg`;
 
 const homeFaqs = [
   ['Is my proof really free?', 'Yes. Your proof is 100% free with no account, no sign up and no obligation to buy. If you need time to decide, download the proof PDF and use the link inside it to come back later.'],
-  ['How much does a custom plaque cost?', 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK mainland delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.'],
+  ['How much does a custom plaque cost?', 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.'],
   ['Can I preview my plaque before ordering?', 'Yes. Add your wording, choose the material and size, then review a free proof before you pay. You can keep editing until the layout, wording and finish look right.'],
   ['What size is a bench plaque?', 'The compact bench plaque format starts at 150 x 50 mm for short inscriptions. Larger standard bench plaques are available, and custom sizes, oval plaques and circular plaques can be made up to our maximum size.'],
   ['Which material is best for an outdoor plaque?', 'Brushed stainless steel is clean and restrained for exposed outdoor settings. Brass gives a warmer traditional look, and aged brass is hand-patinated for more character.'],
@@ -145,7 +168,7 @@ const landingPages = [
     pageName: 'Engraved plaques',
     faqs: [
       ['Can I order one engraved plaque?', 'Yes. InstaPlaque is set up for single custom plaque orders as well as bespoke requests.'],
-      ['Do engraved plaques include delivery?', 'UK mainland delivery is included for standard plaques. Unusual sizes or non-mainland delivery may need confirmation before payment.'],
+      ['Do engraved plaques include delivery?', 'UK delivery is included for standard plaques. Delivery is included throughout the UK, including Northern Ireland, the Highlands and islands. Unusual plaque sizes may need confirmation before payment.'],
     ],
     relatedSearches: ['engraved plaques UK', 'custom engraved plaques', 'engraved brass plaques', 'engraved metal plaques'],
   },
@@ -225,6 +248,29 @@ const landingPages = [
   },
 ];
 
+// Keep Google's index focused on the strongest, genuinely distinct buying
+// journeys. The retired variants permanently redirect to one of these pages.
+const indexableProductSlugs = new Set([
+  'memorial-plaques',
+  'bench-plaques',
+  'brass-plaques',
+  'stainless-steel-plaques',
+  'custom-plaques',
+]);
+const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques']);
+const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.seoTitle, description: product.seoDescription, price: product.schemaStartingPrice, productionDays: product.productionDays, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
+const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)).map(page => {
+  // Keep the revised memorial search metadata and illustration identical to
+  // the hydrated page; the catalogue is the source for both representations.
+  if (page.slug !== 'memorial-plaques') return page;
+  const product = catalogue.productFamilies.find(item => item.slug === page.slug);
+  return { ...page, title: product.seoTitle, description: product.seoDescription, image: product.image };
+}), ...merchantPages];
+const indexableLandingPages = landingPages.filter((page) => indexableLandingSlugs.has(page.slug)).map(page => {
+  const visiblePage = catalogue.seoLandingPages.find(item => item.slug === page.slug);
+  return { ...page, title: visiblePage.seoTitle, description: visiblePage.seoDescription };
+});
+
 const faqSchema = (faqs) => ({
   '@type': 'FAQPage',
   mainEntity: faqs.map(([question, answer]) => ({
@@ -237,7 +283,7 @@ const faqSchema = (faqs) => ({
 const productListSchema = () => ({
   '@type': 'ItemList',
   name: 'Custom plaque formats',
-  itemListElement: pages.map((page, index) => ({
+  itemListElement: indexablePages.map((page, index) => ({
     '@type': 'ListItem',
     position: index + 1,
     item: {
@@ -252,29 +298,28 @@ const productListSchema = () => ({
         price: page.price.toString(),
         availability: 'https://schema.org/InStock',
         url: `${siteBaseUrl}/${page.slug}`,
+        ...productOfferPolicies(page.productionDays),
       },
     },
   })),
 });
 
 const routePages = [
+  { slug: 'design-request', title: 'Have Us Design Your Plaque | InstaPlaque', description: 'Tell us your wording and plaque preferences. Review a personally prepared proof before payment.' },
+  {
+    slug: 'about',
+    ...guides.aboutPage,
+    schema: [{ '@type': 'AboutPage', name: 'About InstaPlaque', url: `${siteBaseUrl}/about` }],
+  },
   {
     slug: '',
-    title: 'Custom Plaques Made Simple | Brass, Stainless Steel & Bench Plaques UK',
-    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK mainland delivery before you order.',
+    title: 'Custom Brass & Stainless Steel Plaques UK | InstaPlaque',
+    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK delivery before you order.',
     schema: [productListSchema(), faqSchema(homeFaqs)],
   },
   {
     slug: 'design',
-    title: 'Design a Custom Plaque Online | Free InstaPlaque Proof',
-    description: 'Use the InstaPlaque online plaque designer to create a free proof for a custom brass, stainless steel, bench or memorial plaque before checkout.',
-    schema: [{
-      '@type': 'WebApplication',
-      name: 'InstaPlaque online plaque designer',
-      applicationCategory: 'DesignApplication',
-      operatingSystem: 'Web',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'GBP' },
-    }],
+    ...designer.designerPage,
   },
   {
     slug: 'materials',
@@ -338,6 +383,7 @@ const routePages = [
     slug: 'returns-and-cancellations',
     title: 'Returns and Cancellations | Custom Plaques UK | InstaPlaque',
     description: 'Returns, cancellation and faulty goods information for personalised InstaPlaque brass and stainless steel plaque orders.',
+    schema: [merchantPolicyOrganization],
   },
 ];
 
@@ -346,6 +392,44 @@ const escapeAttr = (value) => value
   .replace(/"/g, '&quot;')
   .replace(/</g, '&lt;')
   .replace(/>/g, '&gt;');
+
+const escapeHtml = escapeAttr;
+
+const primaryNav = [
+  ['Custom plaques', '/custom-plaques'],
+  ['Memorial plaques', '/memorial-plaques'],
+  ['Bench plaques', '/bench-plaques'],
+  ['Brass plaques', '/brass-plaques'],
+  ['Stainless steel plaques', '/stainless-steel-plaques'],
+  ['Garden plaques', '/garden-plaques'],
+  ['Opening plaques', '/opening-plaques'],
+  ['Plaque materials', '/materials'],
+  ['How it works', '/how-it-works'],
+  ['FAQs', '/faq'],
+  ['Contact', '/contact'],
+  ['About InstaPlaque', '/about'],
+];
+
+const staticNav = () => `<nav aria-label="Primary navigation"><a href="/">InstaPlaque home</a>${primaryNav
+  .map(([label, href]) => `<a href="${href}">${escapeHtml(label)}</a>`)
+  .join('')}</nav>`;
+
+const staticFaqs = (faqs = []) => faqs.length
+  ? `<section aria-labelledby="prerender-faq-heading"><h2 id="prerender-faq-heading">Questions and answers</h2>${faqs
+      .map(([question, answer]) => `<article><h3>${escapeHtml(question)}</h3><p>${escapeHtml(answer)}</p></article>`)
+      .join('')}</section>`
+  : '';
+
+const staticPageMarkup = ({ title, heading, description, image, faqs = [], price = null, kind = 'page' }) => {
+  const visibleHeading = heading || title.split('|')[0].trim();
+  const details = kind === 'product'
+    ? `<section aria-labelledby="prerender-buy-heading"><h2 id="prerender-buy-heading">Design and order online</h2><p>Choose the plaque size, material, finish and fixings, then add your wording and check the exact proof before payment.${price ? ` Standard prices start from £${Number(price).toFixed(2).replace(/\.00$/, '')}.` : ''} Standard fixings and UK delivery are included on eligible standard plaques.</p><p>Brass gives a warm, traditional finish. Stainless steel gives a clean, contemporary finish and is well suited to outdoor use.</p><a href="/design">Create your free plaque proof</a></section>`
+    : kind === 'home'
+      ? `<section aria-labelledby="prerender-shop-heading"><h2 id="prerender-shop-heading">Popular custom plaque formats</h2><ul>${indexablePages.map((page) => `<li><a href="/${page.slug}">${escapeHtml(page.productType)}</a> from £${page.price.toFixed(2).replace(/\.00$/, '')}</li>`).join('')}</ul><p>Choose brass or stainless steel, enter the wording and review a free online proof before checkout. Standard plaque prices include engraving, standard fixings and UK delivery.</p><a href="/design">Start a free proof</a></section>`
+      : `<section aria-labelledby="prerender-process-heading"><h2 id="prerender-process-heading">Proof your plaque before payment</h2><p>Choose the format, add the wording and review the layout online. Standard prices are shown before checkout, with UK delivery included on eligible standard plaques.</p><a href="/design">Create your free plaque proof</a></section>`;
+
+  return `<div class="seo-prerendered-page" data-prerendered="true"><header>${staticNav()}</header><main><article><h1>${escapeHtml(visibleHeading)}</h1><p>${escapeHtml(description)}</p>${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(visibleHeading)} example" />` : ''}${details}${staticFaqs(faqs)}</article></main><footer><p>Made in the UK</p><nav aria-label="Legal"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/returns-and-cancellations">Returns and cancellations</a></nav></footer></div>`;
+};
 
 const replaceTag = (html, pattern, replacement) => html.replace(pattern, replacement);
 
@@ -357,22 +441,38 @@ const writePrerenderedPage = async ({
   slug,
   title,
   description,
+  image = '',
   schema = [],
   productSchema = null,
+  heading = '',
+  faqs = [],
+  price = null,
+  kind = 'page',
 }) => {
   const pathPart = slug ? `/${slug}` : '/';
   const url = `${siteBaseUrl}${pathPart}`;
+  const product = catalogue.productFamilies.find(item => item.slug === slug);
+  const landing = catalogue.seoLandingPages.find(item => item.slug === slug);
+  const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : ['returns-and-cancellations','terms','privacy','cookies'].includes(slug) ? LegalPlaceholderPage : slug === 'quote' ? QuotePage : slug === 'design-request' ? DesignRequest : slug === 'about' ? guides.ShopAbout : slug === 'contact' ? guides.ShopContact : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
+  if (contentComponent && !['about', 'contact', 'returns-and-cancellations', 'terms', 'privacy', 'cookies','design-request','quote'].includes(slug)) {
+    const visibleFaqs = !(product || landing) ? shop.shopFaqs : [...(product || landing).faqs, ...shop.shopFaqs]
+      .filter((item, index, list) => list.findIndex(other => other.question === item.question) === index).slice(0, 6);
+    schema = schema.filter(item => item['@type'] !== 'FAQPage');
+    schema.push(faqSchema(visibleFaqs.map(item => [item.question, item.answer])));
+  }
   let html = baseHtml;
   html = replaceTag(html, /<title>.*?<\/title>/, `<title>${escapeAttr(title)}</title>`);
   html = replaceTag(html, /<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${escapeAttr(description)}" />`);
   html = replaceTag(html, /<link rel="canonical" href="[^"]*" \/>/, `<link rel="canonical" href="${url}" />`);
+  html = html.replaceAll('hreflang="en-GB" href="https://instaplaque.co.uk/"', `hreflang="en-GB" href="${url}"`);
+  html = html.replaceAll('hreflang="x-default" href="https://instaplaque.co.uk/"', `hreflang="x-default" href="${url}"`);
   html = replaceTag(html, /<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${escapeAttr(description)}" />`);
   html = replaceTag(html, /<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`);
-  html = replaceTag(html, /<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${shareImage}" />`);
+  html = replaceTag(html, /<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${image ? `${siteBaseUrl}${image}` : shareImage}" />`);
   html = replaceTag(html, /<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${escapeAttr(description)}" />`);
-  html = replaceTag(html, /<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${shareImage}" />`);
+  html = replaceTag(html, /<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${image ? `${siteBaseUrl}${image}` : shareImage}" />`);
 
   const routeSchema = {
     '@context': 'https://schema.org',
@@ -390,6 +490,23 @@ const writePrerenderedPage = async ({
     ],
   };
   html = html.replace('</head>', `  <script type="application/ld+json" id="instaplaque-prerender-route-schema">${JSON.stringify(routeSchema)}</script>\n</head>`);
+  const publicContent = slug === 'design'
+    ? renderToStaticMarkup(React.createElement('div', { className: 'designer-guide-prerender' },
+      React.createElement(ShopHeader, { currentView: 'home', showPrice: false, priceLabel: '' }),
+      React.createElement('main', null,
+        React.createElement('noscript', null, 'Enable JavaScript to use the interactive plaque designer. You can read the guide below or contact us for help with a design.'),
+        React.createElement(designer.DesignerGuide)),
+      React.createElement(shop.ShopFooter)))
+    : contentComponent
+    ? renderToStaticMarkup(React.createElement(React.Fragment, null,
+      React.createElement(ShopHeader, { currentView: !slug ? 'home' : 'product', showPrice: false, priceLabel: '' }),
+      React.createElement('main', null, React.createElement(contentComponent, { product, landing, faq: slug === 'faq', view: slug === 'returns-and-cancellations' ? 'returns' : slug, initialState, initialWording: '', initialNotes: '', onBack: () => {} })),
+      React.createElement(shop.ShopFooter)))
+    : staticPageMarkup({ title, heading, description, image, faqs, price, kind });
+  html = html.replace(
+    '<div id="root"></div>',
+    `<div id="root">${publicContent}</div>`,
+  );
 
   if (!slug) {
     await writeFile(indexPath, html);
@@ -402,15 +519,16 @@ const writePrerenderedPage = async ({
 };
 
 for (const page of routePages) {
-  await writePrerenderedPage(page);
+  await writePrerenderedPage({ ...page, kind: page.slug === '' ? 'home' : 'page' });
 }
 
-for (const page of pages) {
+for (const page of indexablePages) {
   const url = `${siteBaseUrl}/${page.slug}`;
   await writePrerenderedPage({
     slug: page.slug,
     title: page.title,
     description: page.description,
+    image: page.image,
     productSchema: {
       '@type': 'Product',
       '@id': `${url}#product`,
@@ -419,7 +537,7 @@ for (const page of pages) {
       image: `${siteBaseUrl}${page.image}`,
       brand: { '@type': 'Brand', name: 'InstaPlaque' },
       category: 'Custom engraved plaques',
-      material: 'Brass or stainless steel',
+      material: merchantOffers.find(item => item.slug === page.slug)?.label || 'Brass or stainless steel',
       offers: {
         '@type': 'Offer',
         priceCurrency: 'GBP',
@@ -427,11 +545,7 @@ for (const page of pages) {
         availability: 'https://schema.org/InStock',
         itemCondition: 'https://schema.org/NewCondition',
         url,
-        shippingDetails: {
-          '@type': 'OfferShippingDetails',
-          shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'GB' },
-          shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'GBP' },
-        },
+        ...productOfferPolicies(page.productionDays),
       },
     },
     schema: [
@@ -444,15 +558,20 @@ for (const page of pages) {
       },
       faqSchema(page.faqs),
     ],
+    heading: page.productType,
+    faqs: page.faqs,
+    price: page.price,
+    kind: 'product',
   });
 }
 
-for (const page of landingPages) {
+for (const page of indexableLandingPages) {
   const url = `${siteBaseUrl}/${page.slug}`;
   await writePrerenderedPage({
     slug: page.slug,
     title: page.title,
     description: page.description,
+    image: page.image,
     schema: [
       {
         '@type': 'CollectionPage',
@@ -471,21 +590,32 @@ for (const page of landingPages) {
       },
       faqSchema(page.faqs),
     ],
+    heading: page.pageName,
+    faqs: page.faqs,
+    kind: 'product',
   });
 }
 
-const merchantFeedPages = pages.filter((page) => page.slug !== 'custom-plaques');
+const merchantFeedPages = merchantPages;
 
 const feedItems = merchantFeedPages.map((page) => {
   const url = `${siteBaseUrl}/${page.slug}`;
   const imageUrl = `${siteBaseUrl}${page.image}`;
+  const offer = merchantOffers.find(item => item.slug === page.slug);
   return `    <item>
-      <g:id>instaplaque-${page.slug}</g:id>
-      <g:title>${escapeAttr(page.title.replace(' UK | Free Online Plaque Proof', ''))}</g:title>
-      <g:description>${escapeAttr(page.description)}</g:description>
+      <g:id>${offer.offerId}</g:id>
+      <g:structured_title><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.title)}</g:content></g:structured_title>
+      <g:structured_description><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.description)}</g:content></g:structured_description>
+
       <g:link>${url}</g:link>
       <g:image_link>${imageUrl}</g:image_link>
       <g:brand>InstaPlaque</g:brand>
+      <g:material>${escapeAttr(offer.label)}</g:material>
+      <g:color>${escapeAttr(offer.colour)}</g:color>
+      <g:size>${escapeAttr(offer.size)}</g:size>
+      <g:item_group_id>${offer.groupId}</g:item_group_id>
+      <g:min_handling_time>${offer.productionDays}</g:min_handling_time>
+      <g:max_handling_time>${offer.productionDays}</g:max_handling_time>
       <g:condition>new</g:condition>
       <g:availability>in_stock</g:availability>
       <g:price>${page.price.toFixed(2)} GBP</g:price>
@@ -495,7 +625,7 @@ const feedItems = merchantFeedPages.map((page) => {
       <g:adult>no</g:adult>
       <g:shipping>
         <g:country>GB</g:country>
-        <g:service>UK mainland standard delivery</g:service>
+        <g:service>UK delivery</g:service>
         <g:price>0.00 GBP</g:price>
       </g:shipping>
     </item>`;
@@ -513,3 +643,9 @@ ${feedItems}
 `;
 
 await writeFile(path.join(distDir, 'google-merchant-feed.xml'), feedXml);
+
+// Exact catalogue variants get their own sitemap for Search Console reporting.
+const sitemapXml = urls => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...new Set(urls)].map(url => `  <url><loc>${escapeAttr(url)}</loc></url>`).join("\n")}\n</urlset>\n`;
+await writeFile(path.join(distDir, "sitemap-products.xml"), sitemapXml(merchantOffers.map(p => `${siteBaseUrl}/${p.slug}`)));
+const editorialSitemap = await readFile(path.join(process.cwd(), 'public/sitemap.xml'), 'utf8');
+await writeFile(path.join(distDir, 'sitemap.xml'), editorialSitemap.replace('</urlset>', '  <url><loc>https://instaplaque.co.uk/design-request</loc></url>\n</urlset>'));

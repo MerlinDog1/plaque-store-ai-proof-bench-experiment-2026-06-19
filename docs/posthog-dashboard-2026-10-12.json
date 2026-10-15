@@ -1,0 +1,1290 @@
+{
+  "project_id": 303026,
+  "site_id": "instaplaque",
+  "dashboard_id": 1017503,
+  "dashboard_url": "https://eu.posthog.com/project/303026/dashboard/1017503",
+  "subscription_id": 51654,
+  "subscription": {
+    "target_type": "email",
+    "target_value": "sales@tradeetching.com",
+    "frequency": "daily",
+    "interval": 1,
+    "start_date": "2026-10-13T08:00:00Z",
+    "timezone": "UTC",
+    "summary_enabled": false,
+    "dashboard_export_insights": [
+      6512431,
+      6512433,
+      6512435,
+      6512436,
+      6512437,
+      6512440,
+      6512424,
+      6512442,
+      6512444,
+      6512446
+    ]
+  },
+  "insights": [
+    {
+      "id": 6512431,
+      "short_id": "4p3SJEqZ",
+      "name": "InstaPlaque — visits · last 24h vs previous 24h",
+      "description": "Consented InstaPlaque production traffic only. QA excluded. Rolling 24 hours, UTC.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_visit",
+              "custom_name": "Visits"
+            }
+          ],
+          "interval": "hour",
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "Metric",
+            "showLegend": true,
+            "hideWeekends": false,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "compareFilter": {
+            "compare": true,
+            "compare_to": "-24h"
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 4,
+          "w": 4,
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 6512433,
+      "short_id": "yK8n3TfS",
+      "name": "InstaPlaque — traffic by hour · visits and pages",
+      "description": "Consented InstaPlaque production traffic only. QA excluded. Rolling 24 hours, UTC.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_visit",
+              "custom_name": "Visits"
+            },
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_page_viewed",
+              "custom_name": "Page views"
+            }
+          ],
+          "interval": "hour",
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "ActionsLineGraph",
+            "showLegend": true,
+            "hideWeekends": false,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "compareFilter": {
+            "compare": true,
+            "compare_to": "-24h"
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 4,
+          "w": 8,
+          "x": 4,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 6512435,
+      "short_id": "r4Fb9LRV",
+      "name": "InstaPlaque — traffic sources, campaigns and tagged QR",
+      "description": "First source of each 30-minute inactivity visit. Tagged QR is explicit utm_medium=qr or utm_source=qr. Untagged/no-referrer traffic is direct/unknown; typed, bookmark and untagged QR traffic cannot be separated. Site-scoped; QA excluded; last 24h.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_visit",
+              "custom_name": "Visits"
+            }
+          ],
+          "interval": "hour",
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "ActionsTable",
+            "showLegend": true,
+            "hideWeekends": false,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "breakdownFilter": {
+            "breakdowns": [
+              {
+                "type": "event",
+                "property": "source"
+              },
+              {
+                "type": "event",
+                "property": "medium"
+              },
+              {
+                "type": "event",
+                "property": "campaign"
+              }
+            ],
+            "breakdown_type": "event",
+            "breakdown_limit": 15
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 5,
+          "w": 12,
+          "x": 0,
+          "y": 4
+        }
+      }
+    },
+    {
+      "id": 6512436,
+      "short_id": "kClosvjh",
+      "name": "InstaPlaque — popular pages",
+      "description": "Consented InstaPlaque production traffic only. QA excluded. Rolling 24 hours, UTC.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_page_viewed",
+              "custom_name": "Page views"
+            }
+          ],
+          "interval": "hour",
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "ActionsBarValue",
+            "showLegend": true,
+            "hideWeekends": false,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "breakdownFilter": {
+            "breakdowns": [
+              {
+                "type": "event",
+                "property": "page"
+              }
+            ],
+            "breakdown_type": "event",
+            "breakdown_limit": 15
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 5,
+          "w": 6,
+          "x": 0,
+          "y": 9
+        }
+      }
+    },
+    {
+      "id": 6512437,
+      "short_id": "nLeC6Ylh",
+      "name": "InstaPlaque — popular plaque products",
+      "description": "Consented InstaPlaque production traffic only. QA excluded. Rolling 24 hours, UTC.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_product_viewed",
+              "custom_name": "Product views"
+            }
+          ],
+          "interval": "hour",
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "ActionsBarValue",
+            "showLegend": true,
+            "hideWeekends": false,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "breakdownFilter": {
+            "breakdowns": [
+              {
+                "type": "event",
+                "property": "product"
+              }
+            ],
+            "breakdown_type": "event",
+            "breakdown_limit": 15
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 5,
+          "w": 6,
+          "x": 6,
+          "y": 9
+        }
+      }
+    },
+    {
+      "id": 6512440,
+      "short_id": "jAfSEnDX",
+      "name": "InstaPlaque — important actions · attempts and results",
+      "description": "Attempts and outcomes are separate. Downloads mean prepared/browser hand-off, not proof of disk save; contact clicks are not enquiries. Consented InstaPlaque only, excluding QA; last 24h.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_designer_started",
+              "custom_name": "Designer starts"
+            },
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_layout_requested",
+              "custom_name": "Layout attempts"
+            },
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_layout_generated",
+              "custom_name": "Layouts generated"
+            },
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_proof_download_prepared",
+              "custom_name": "Downloads prepared"
+            },
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_checkout_requested",
+              "custom_name": "Checkout attempts"
+            },
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_checkout_started",
+              "custom_name": "Checkout sessions created"
+            },
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_contact_clicked",
+              "custom_name": "Contact link clicks"
+            }
+          ],
+          "interval": "hour",
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "ActionsBarValue",
+            "showLegend": true,
+            "hideWeekends": false,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 5,
+          "w": 12,
+          "x": 0,
+          "y": 14
+        }
+      }
+    },
+    {
+      "id": 6512424,
+      "short_id": "2ne8xo2M",
+      "name": "InstaPlaque — confirmed conversions · last 24h vs previous 24h",
+      "description": "Confirmed server responses only. Purchases require consent and return to the paid order page; excludes sandbox/live owner test policies. This is not the full sales ledger. InstaPlaque only, QA excluded; last 24h vs preceding 24h.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_enquiry_submitted",
+              "custom_name": "Enquiries confirmed"
+            },
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_purchase_completed",
+              "custom_name": "Paid returns confirmed"
+            }
+          ],
+          "interval": "hour",
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "ActionsTable",
+            "showLegend": true,
+            "hideWeekends": false,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "compareFilter": {
+            "compare": true,
+            "compare_to": "-24h"
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 4,
+          "w": 8,
+          "x": 0,
+          "y": 19
+        }
+      }
+    },
+    {
+      "id": 6512442,
+      "short_id": "8L9I0n6g",
+      "name": "InstaPlaque — confirmed paid-return value · GBP",
+      "description": "Consented InstaPlaque production traffic only. QA excluded. Rolling 24 hours, UTC.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "sum",
+              "event": "ip_purchase_completed",
+              "custom_name": "Confirmed value (GBP)",
+              "math_property": "value_gbp"
+            }
+          ],
+          "interval": "hour",
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "Metric",
+            "showLegend": false,
+            "hideWeekends": false,
+            "decimalPlaces": 2,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "aggregationAxisPrefix": "£",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "compareFilter": {
+            "compare": true,
+            "compare_to": "-24h"
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 4,
+          "w": 4,
+          "x": 8,
+          "y": 19
+        }
+      }
+    },
+    {
+      "id": 6512444,
+      "short_id": "6cu3wgql",
+      "name": "InstaPlaque — approximate locations and devices",
+      "description": "Network-derived approximate country/region, not GPS; VPNs can affect location. Visits on InstaPlaque only, QA excluded, rolling 24h.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_visit",
+              "custom_name": "Visits"
+            }
+          ],
+          "interval": "hour",
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "ActionsTable",
+            "showLegend": true,
+            "hideWeekends": false,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "breakdownFilter": {
+            "breakdowns": [
+              {
+                "type": "event",
+                "property": "$geoip_country_name"
+              },
+              {
+                "type": "event",
+                "property": "$geoip_subdivision_1_name"
+              },
+              {
+                "type": "event",
+                "property": "device_type"
+              }
+            ],
+            "breakdown_type": "event",
+            "breakdown_limit": 15
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 5,
+          "w": 12,
+          "x": 0,
+          "y": 23
+        }
+      }
+    },
+    {
+      "id": 6512446,
+      "short_id": "Kh8KibIj",
+      "name": "InstaPlaque — designer → checkout → paid return",
+      "description": "Ordered journey allowing pageviews/other actions between steps. Anonymous visits expire after 30 minutes inactivity. Confirmed paid return requires consent. Recent unfinished journeys may still complete. InstaPlaque only; QA excluded.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "FunnelsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "event": "ip_designer_started",
+              "custom_name": "Designer started"
+            },
+            {
+              "kind": "EventsNode",
+              "event": "ip_layout_generated",
+              "custom_name": "Layout ready"
+            },
+            {
+              "kind": "EventsNode",
+              "event": "ip_checkout_started",
+              "custom_name": "Stripe checkout created"
+            },
+            {
+              "kind": "EventsNode",
+              "event": "ip_purchase_completed",
+              "custom_name": "Paid return confirmed"
+            }
+          ],
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "funnelsFilter": {
+            "layout": "vertical",
+            "exclusions": [],
+            "showLegend": false,
+            "funnelVizType": "steps",
+            "legendPosition": "bottom",
+            "funnelOrderType": "ordered",
+            "showAnnotations": true,
+            "showValuesOnSeries": false,
+            "funnelStepReference": "total",
+            "funnelWindowInterval": 1,
+            "breakdownAttributionType": "first_touch",
+            "funnelWindowIntervalUnit": "day",
+            "hideIncompleteConversionWindowPeriods": false
+          },
+          "filterTestAccounts": false,
+          "version": 2
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 6,
+          "w": 6,
+          "x": 0,
+          "y": 28
+        }
+      }
+    },
+    {
+      "id": 6512447,
+      "short_id": "yfcfFoZV",
+      "name": "InstaPlaque — enquiry form drop-off",
+      "description": "Form interaction → reviewed brief → submission request → server-confirmed receipt. No names, email or wording captured. Anonymous visits; incomplete recent journeys may still complete. InstaPlaque only, QA excluded, last 24h.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "FunnelsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "event": "ip_enquiry_started",
+              "custom_name": "Started"
+            },
+            {
+              "kind": "EventsNode",
+              "event": "ip_enquiry_reviewed",
+              "custom_name": "Reviewed"
+            },
+            {
+              "kind": "EventsNode",
+              "event": "ip_enquiry_submission_requested",
+              "custom_name": "Sent"
+            },
+            {
+              "kind": "EventsNode",
+              "event": "ip_enquiry_submitted",
+              "custom_name": "Receipt confirmed"
+            }
+          ],
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "funnelsFilter": {
+            "layout": "vertical",
+            "exclusions": [],
+            "showLegend": false,
+            "funnelVizType": "steps",
+            "legendPosition": "bottom",
+            "funnelOrderType": "ordered",
+            "showAnnotations": true,
+            "showValuesOnSeries": false,
+            "funnelStepReference": "total",
+            "funnelWindowInterval": 1,
+            "breakdownAttributionType": "first_touch",
+            "funnelWindowIntervalUnit": "day",
+            "hideIncompleteConversionWindowPeriods": false
+          },
+          "filterTestAccounts": false,
+          "version": 2
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 6,
+          "w": 6,
+          "x": 6,
+          "y": 28
+        }
+      }
+    },
+    {
+      "id": 6512448,
+      "short_id": "jFZjPji0",
+      "name": "InstaPlaque — designer steps reached",
+      "description": "Each step counts once per anonymous visit. People may skip steps using product presets; this is reach, not an enforced sequential funnel. InstaPlaque only; QA excluded; last 24h.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_designer_step_viewed",
+              "custom_name": "Visits reaching step"
+            }
+          ],
+          "interval": "hour",
+          "dateRange": {
+            "date_to": "now",
+            "date_from": "-24h",
+            "explicitDate": true,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "ActionsBarValue",
+            "showLegend": true,
+            "hideWeekends": false,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "breakdownFilter": {
+            "breakdowns": [
+              {
+                "type": "event",
+                "property": "step"
+              }
+            ],
+            "breakdown_type": "event",
+            "breakdown_limit": 15
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 5,
+          "w": 6,
+          "x": 0,
+          "y": 34
+        }
+      }
+    },
+    {
+      "id": 6512449,
+      "short_id": "5S5o9yK3",
+      "name": "InstaPlaque — visits over 30 days",
+      "description": "Consented InstaPlaque visits, QA excluded. Tracking starts 12 October 2026; no historical backfill. Not part of the daily 24-hour email.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "math": "total",
+              "event": "ip_visit",
+              "custom_name": "Visits"
+            }
+          ],
+          "interval": "day",
+          "dateRange": {
+            "date_from": "-30d",
+            "explicitDate": false,
+            "excludeIncompletePeriods": false
+          },
+          "properties": [
+            {
+              "key": "site_id",
+              "type": "event",
+              "value": [
+                "instaplaque"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "environment",
+              "type": "event",
+              "value": [
+                "production"
+              ],
+              "operator": "exact"
+            },
+            {
+              "key": "is_test",
+              "type": "event",
+              "value": [
+                "false"
+              ],
+              "operator": "exact"
+            }
+          ],
+          "trendsFilter": {
+            "display": "ActionsLineGraph",
+            "showLegend": true,
+            "hideWeekends": false,
+            "metricSummary": "total",
+            "legendPosition": "bottom",
+            "yAxisScaleType": "linear",
+            "showAnnotations": true,
+            "metricShowChange": true,
+            "yAxisStartAtZero": true,
+            "showMultipleYAxes": false,
+            "showValuesOnSeries": false,
+            "smoothingIntervals": 1,
+            "showPercentStackView": false,
+            "stackBreakdownValues": false,
+            "aggregationAxisFormat": "numeric",
+            "resultCustomizationBy": "value",
+            "excludeBoxPlotOutliers": true,
+            "metricColorByDirection": false,
+            "showAlertThresholdLines": false
+          },
+          "filterTestAccounts": false,
+          "version": 4
+        }
+      },
+      "layout": {
+        "sm": {
+          "h": 5,
+          "w": 6,
+          "x": 6,
+          "y": 34
+        }
+      }
+    },
+    {
+      "id": 6512512,
+      "short_id": "mdjUUUzk",
+      "name": "InstaPlaque — timestamped activity · last 24h",
+      "description": "Newest 500 events in the exact rolling 24 hours (UTC), with fixed page labels and no customer identifiers. InstaPlaque production only; QA excluded. Open the insight to inspect events.",
+      "query": {
+        "kind": "DataVisualizationNode",
+        "source": {
+          "kind": "HogQLQuery",
+          "query": "SELECT timestamp AS time_utc, event AS action, properties.page AS page, properties.step AS designer_step, properties.source AS source, properties.campaign AS campaign, properties.device_type AS device, properties.$geoip_country_name AS approximate_country FROM events WHERE properties.site_id = 'instaplaque' AND properties.environment = 'production' AND properties.is_test = false AND timestamp >= now() - INTERVAL 24 HOUR AND timestamp < now() ORDER BY timestamp DESC LIMIT 500"
+        },
+        "display": "ActionsTable"
+      },
+      "layout": {
+        "sm": {
+          "h": 6,
+          "w": 12,
+          "x": 0,
+          "y": 39
+        }
+      }
+    }
+  ]
+}

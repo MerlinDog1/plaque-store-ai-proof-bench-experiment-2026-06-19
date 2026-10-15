@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { storeArtwork, loadArtwork } from "./artwork-storage.mjs";
 import {
   sanitizeProofSessionRecord,
   sanitizeProofSessionSvgFields,
@@ -10,10 +11,34 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
 let serviceClient = null;
 
+const getConfiguredProjectRef = () => {
+  try {
+    return new URL(supabaseUrl).hostname.split(".")[0] || "";
+  } catch {
+    return "";
+  }
+};
+
+const getKeyProjectRef = () => {
+  try {
+    const [, encodedPayload] = supabaseServiceRoleKey.split(".");
+    if (!encodedPayload) return "";
+    const payload = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8"));
+    return typeof payload.ref === "string" ? payload.ref : "";
+  } catch {
+    return "";
+  }
+};
+
 export const getSupabaseConfig = () => ({
   hasUrl: Boolean(supabaseUrl),
   hasServiceRoleKey: Boolean(supabaseServiceRoleKey),
   configured: Boolean(supabaseUrl && supabaseServiceRoleKey),
+  projectReferencesMatch: (() => {
+    const configuredRef = getConfiguredProjectRef();
+    const keyRef = getKeyProjectRef();
+    return configuredRef && keyRef ? configuredRef === keyRef : null;
+  })(),
 });
 
 export const getSupabaseServiceClient = () => {
@@ -31,6 +56,18 @@ export const getSupabaseServiceClient = () => {
 
 const makePublicToken = () => {
   return randomBytes(32).toString("base64url");
+};
+
+const normalizeSupabaseError = (error, publicMessage) => {
+  const diagnostic = `${error?.message || ""} ${error?.details || ""}`.toLowerCase();
+  if (diagnostic.includes("fetch failed") || diagnostic.includes("enotfound")) {
+    const unavailable = new Error(publicMessage);
+    unavailable.name = "SupabaseUnavailableError";
+    unavailable.code = "supabase_unavailable";
+    unavailable.statusCode = 503;
+    return unavailable;
+  }
+  return error;
 };
 
 export const createProofSession = async (payload) => {
@@ -64,13 +101,14 @@ export const createProofSession = async (payload) => {
     expires_at: payload.expiresAt || payload.expires_at || expiresAt.toISOString(),
   };
 
+  const storedRow = await storeArtwork(row, `proof:${row.public_token}`);
   const { data, error } = await supabase
     .from("proof_sessions")
-    .insert(row)
+    .insert(storedRow)
     .select("id, public_token, status, expires_at, created_at")
     .single();
 
-  if (error) throw error;
+  if (error) throw normalizeSupabaseError(error, "Saved proofs are temporarily unavailable. Please try again shortly.");
   return data;
 };
 
@@ -88,6 +126,9 @@ export const getProofSessionByToken = async (publicToken) => {
     .eq("public_token", publicToken)
     .maybeSingle();
 
-  if (error) throw error;
-  return sanitizeProofSessionRecord(data);
+  if (error) throw normalizeSupabaseError(error, "Saved proofs are temporarily unavailable. Please try again shortly.");
+  if (data?.expires_at && Date.parse(data.expires_at) <= Date.now()) return null;
+  const scope = data?.metadata?.kind === "storefront_order"
+    ? `order:${data.metadata.order?.id}` : `proof:${publicToken}`;
+  return sanitizeProofSessionRecord(await loadArtwork(data, scope));
 };

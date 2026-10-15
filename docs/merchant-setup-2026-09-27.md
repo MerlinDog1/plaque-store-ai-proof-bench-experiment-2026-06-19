@@ -1,0 +1,27 @@
+# Google Merchant Center setup — 27 September 2026
+
+Owner authorised free-listing setup (no paid ads). Account 5859684800 is Instaplaque; homepage claimed; free-listings enabled. Dedicated service-account access is live-proven via keyless impersonation using Cody's existing Google Cloud login. No keys, tokens, or customer data belong in this repository.
+
+Owner confirmed next-day carrier service with Monday–Friday dispatch, no weekends. Merchant settings now use 1 transit working day, Monday–Friday handling/transit and Europe/London timezone. Existing 14:00 cutoff, 5–15 handling days and GB free shipping preserved. Need ensure mainland-only exclusions align before product submission. Public contact URL/email added.
+
+Owner confirmed no physical return needed for faulty plaques, and agreed refunds issued through Stripe within2working days. Merchant policy9335430350 uses NO_RETURNS (no physical return), no exchanges, processRefundDays2 and the public returns page. This is not a denial of statutory remedies: website explicitly retains faulty/damaged/not-as-described rights and photo-based assessment for remake/refund. No actual refunds performed.
+
+Website adds approved wording and renders the complete returns page into initial HTML, using the same component as the browser (previous static page omitted all policy details). No checkout, pricing, artwork or model changes. Typecheck/build plus HTML/browser checks performed. Publication and live verification recorded below.
+
+Product feed is not yet connected: existing four entries are broad from-price families; image/variant consistency and mainland shipping coverage must be addressed before submission. Free-listings enabled is not product approval or proof of search visibility.
+
+Base:8a2844b; previous production dpl_8PHYTHFtkg7Q555qMJq78nB6ipJw. Branch codex/merchant-free-listings. Cloud rollback: saved private before-state for shipping; delete only this created return policy if necessary; website rollback to previous compatible deployment.
+
+Released c9e5e808df07c08332cd12231e8159ac5fa262e0 to dpl_8bykWxCwvMaK7hutvS74t6PK5TbZ. Canonical/www independently READY. Hosted initial HTML and hydrated390/1440 checks passed: refund turnaround, no physical returns, statutory protection, no overflow/JS errors. Source pushed. Merchant returns read-back matches created policy. Feed submission remains pending accurate product images/configurations and owner confirmation of mainland versus all-UK shipping coverage.
+
+
+## Whole-UK delivery — 27 September 2026
+Owner confirmed delivery included throughout UK and will absorb regional costs. Updated customer copy, SEO/static HTML, PDF estimate, dispatch-email wording, feed service label and Stripe checkout label. Existing Stripe GB/zero shipping rate unchanged; Merchant independently read as free GB with no regional exclusion. No prices, production times or payment operations changed.
+App5a86813 deployed to dpl_2P4ZCVFVDLfQ9tuEJwwPJV7P6gTt; canonical/www READY. Typecheck/build/server-checkout pass; all generated HTML scanned free of mainland restrictions; hosted home/how-it-works390/1440 wording/no-overflow/no-JS-error checks pass. Initial browser assertion incorrectly expected regional text on homepage rather than how-it-works; corrected route passed. Rollback dpl_8bykWxCwvMaK7hutvS74t6PK5TbZ. Product feed submission still pending image/configuration alignment, not shipping clarification.
+
+## First exact-product feed — 27 September 2026
+Owner authorised reuse/correction of existing images and completing submission. App d10c7a3 adds two exact offers rather than submitting four mismatched from-price families: A5 brushed stainless rectangle/caps/no wood £95.50; polished brass 200x100 rectangle/screws/no wood £86. Both use canonical pricing, matching designer presets and existing illustrative assets. New asset copies contain IPTC DigitalSourceType trainedAlgorithmicMedia metadata (pixels unchanged); pages explicitly disclose AI illustrations and surroundings not included. Feed uses structured AI title/description attributes, excludes Shopping/Display ads. Category pages unchanged.
+
+Typecheck/build passed; local and hosted390/1440 image/disclosure/price/designer launch/nooverflow/noJSerror checks passed; hosted schema and feed numeric prices match. Initial script needed canonical numeric formatting and script-tag attributes handled, corrected checks pass. Steel desktop composition visually inspected. Production dpl_AY8iSJ4VovByE6KLztq9TPYL9DyG canonical/www READY, source pushed. Rollback dpl_2P4ZCVFVDLfQ9tuEJwwPJV7P6gTt.
+
+Created data source10749182094, GB/en, FREE_LISTINGS only; scheduled hosted feed fetch daily06:00Europe/London. Initial immediate fetch404 due propagation; source subsequently readable and retry fetch accepted{}. Do not rerun creation blindly. Product processing/approval is separate and must be checked. No orders, payments, AI generation, ads or DB writes. Original four broad items were never submitted.

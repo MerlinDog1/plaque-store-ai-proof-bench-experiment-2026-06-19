@@ -12,12 +12,16 @@ import {
   getCheckoutPriceBreakdown,
   getCheckoutQuoteReasons,
 } from './checkoutPolicy.mjs';
+import { merchantOffers } from './merchantCatalogue.mjs';
+import { productionTiming } from './shopInformation';
 import { BENCH_SAFE_MARGIN_PERCENT } from './safeMargin';
 
 export const DEFAULT_PRODUCT_SLUG = 'bench-plaques';
 
 export type SiteView =
+  | 'design-request'
   | 'home'
+  | 'about'
   | 'product'
   | 'landing'
   | 'materials'
@@ -48,6 +52,10 @@ export interface ProductFamily {
   bestFor: string[];
   startingFrom: string;
   schemaStartingPrice?: number;
+  merchantOffer?: boolean;
+  imageKind?: 'ai' | 'render';
+  productionDays?: number;
+  merchantMaterial?: string;
   materialCue: 'brass' | 'stainless' | 'wood' | 'aged';
   image: string;
   proofPrompt: string;
@@ -192,19 +200,27 @@ export const productFamilies: ProductFamily[] = [
     eyebrow: 'Custom remembrance plaques',
     startingFrom: startingFromFor({ width: 210, height: 148, material: Material.BrushedSteel, shape: Shape.Rect }),
     materialCue: 'brass',
-    image: '/site-images/plaque-hero-memorial-wall-desktop.jpg',
+    image: '/site-images/home-gallery-aged-brass-wood.webp',
     description: 'Custom memorial plaques for graves, gardens, benches and remembrance walls, checked in a proof before production.',
-    seoTitle: 'Memorial Plaques UK | Brass & Stainless Steel Remembrance Plaques',
-    seoDescription: 'Create a custom memorial plaque for a grave, garden, bench or remembrance wall. Choose brass or stainless steel and approve a proof before ordering.',
-    seoIntro: 'A memorial plaque needs to be clear, respectful and correct before anything is made. Add the name, dates and tribute wording, choose the material, then review the proof carefully before checkout.',
+    seoTitle: 'Memorial Plaques UK | Brass & Stainless Steel | InstaPlaque',
+    seoDescription: 'Personalised memorial plaques in brass or stainless steel for walls, gardens and graves. Check your wording with a free online proof. UK delivery included.',
+    seoIntro: 'Create a personalised memorial plaque with a name, dates and a tribute in your own words. Choose brass or stainless steel for a remembrance wall, garden or graveside setting, then check the layout in a free online proof before you pay.',
     seoSections: [
       {
-        title: 'Memorial plaques made from your wording',
-        copy: 'Use memorial plaques for family gardens, benches, walls, graveside settings, scattering areas and quiet remembrance corners. The proof helps you catch wording, spacing and line breaks before production.',
+        title: 'Brass memorial plaques',
+        copy: 'Brass has a warm, gold-toned appearance for traditional remembrance settings. Choose brushed, polished, orbital or aged brass in the designer. The finish affects the appearance, price and care, so check the selected option before ordering. Aged brass takes additional finishing time.',
       },
       {
-        title: 'Brass, stainless steel and wood-backed options',
-        copy: 'Brass gives a warm traditional memorial look. Stainless steel feels cleaner and more modern. Aged brass works well in gardens and natural settings, while wood backing suits indoor or sheltered presentation plaques.',
+        title: 'Stainless steel memorial plaques',
+        copy: 'Stainless steel gives a silver finish, with brushed and polished options. It suits both contemporary wall memorials and outdoor remembrance plaques. Choose the finish for the setting and keep the inscription readable at the distance people will view it. Ask us about particularly exposed or coastal locations before ordering.',
+      },
+      {
+        title: 'Memorial wall plaques and fitting',
+        copy: 'Measure the available wall space and decide the fixing position before designing. Check the selected holes or decorative caps in the proof, leaving the inscription clear of them. Optional wood backing suits indoor or sheltered displays and changes the price and production time. If you are replacing an old plaque, send its dimensions and hole positions before ordering.',
+      },
+      {
+        title: 'Garden, grave and cemetery settings',
+        copy: 'For a garden, choose a position where planting will not cover the inscription and where it can be read and cleaned. For a cemetery, churchyard, public bench or managed remembrance space, check the permitted material, dimensions, wording and fitting method with the site manager before ordering. Approval of our design proof does not replace permission from the site.',
       },
     ],
     relatedSearches: ['memorial plaques UK', 'brass memorial plaques', 'custom remembrance plaques', 'garden memorial plaques'],
@@ -227,12 +243,28 @@ export const productFamilies: ProductFamily[] = [
     },
     faqs: [
       {
-        question: 'Can I check a memorial plaque before ordering?',
-        answer: 'Yes. Enter the wording and review a free online proof before approving the plaque for checkout.',
+        question: 'How much does a memorial plaque cost?',
+        answer: `A5 stainless steel memorial plaques without wood backing are available ${startingFromFor({ width: 210, height: 148, material: Material.BrushedSteel, shape: Shape.Rect })}. Engraving, standard fixings and UK delivery are included. Brass, selected finishes, larger sizes and wood backing can change the price; the designer shows the total before checkout. Compact bench plaques are a smaller option for short inscriptions.`,
       },
       {
-        question: 'Which material is best for a memorial plaque?',
-        answer: 'Brass gives a traditional warm finish, while stainless steel is a clean outdoor option. Wood backing can be added for wall and presentation plaques.',
+        question: 'What should I write on a memorial plaque?',
+        answer: 'A name, dates and a short personal dedication are a useful starting point. You can include a relationship, nickname or a few words about what made the person special. Use the sample inscriptions on this page as starting points, then review every name, date and line break in your proof.',
+      },
+      {
+        question: 'Can brass and stainless steel memorial plaques go outside?',
+        answer: 'Both metals can be used outdoors with suitable fixings. Choose the finish for the setting and follow its care instructions; do not assume every surface should be polished. Ask us about very exposed or coastal locations. Wood backing is better suited to indoor or sheltered displays.',
+      },
+      {
+        question: 'Can I put a memorial plaque on a grave or cemetery wall?',
+        answer: 'Check with the cemetery, churchyard or site manager before ordering. Requirements for dimensions, materials, wording and installation vary by location. Once you know what is permitted, choose the plaque options and approve the wording and layout in the proof.',
+      },
+      {
+        question: 'Can my family check the wording before I pay?',
+        answer: 'Yes. Create a free online proof with no account needed, then download the proof PDF to share with your family. It includes a link back to the design. Agree one final version and check the spelling, dates, line breaks and fixing positions before approval and payment. The proof confirms wording and layout; finish textures on screen are illustrative.',
+      },
+      {
+        question: 'How long does a memorial plaque take to make?',
+        answer: productionTiming.faq,
       },
     ],
   },
@@ -247,15 +279,23 @@ export const productFamilies: ProductFamily[] = [
     description: 'Compact plaques for benches, seats and short outdoor dedications where the wording needs to stay crisp.',
     seoTitle: 'Bench Plaques UK | Custom Brass & Stainless Steel Bench Plaques',
     seoDescription: 'Order custom bench plaques in brass or stainless steel. Build a proof online, check the inscription and see live pricing before payment.',
-    seoIntro: 'Bench plaques are small, so the wording has to work hard. Start with a compact bench size, keep the inscription readable, and use the proof to check text, border and screw positions before ordering.',
+    seoIntro: 'Design a brass or stainless steel plaque for a bench or seat, starting at 150 × 50 mm. Measure the available space, add your dedication and check the layout and price online before you pay.',
     seoSections: [
       {
-        title: 'Outdoor bench plaques for short dedications',
-        copy: 'A bench plaque usually suits a name, dates and one short message. If the wording turns into a paragraph, move up a size rather than squeezing the text.',
+        title: 'Measure the flat area of the bench',
+        copy: 'Measure the usable width and height of the slat or rail, allowing room around its edges and any existing bolts. The compact starting size is 150 × 50 mm. The designer also offers sizes such as 150 × 75 mm and 200 × 50 mm. Compare those dimensions with the actual bench before choosing a size; a deeper plaque will not suit every slat.',
       },
       {
         title: 'Brass or stainless steel bench plaques',
-        copy: 'Brushed stainless steel gives a clean silver finish. Brass gives the traditional bench plaque look. Standard visible screw fixings are shown in the proof so the whole plaque can be checked before payment.',
+        copy: 'Stainless steel gives a silver finish; brass gives a warmer, traditional appearance. Choose brushed or polished options in the designer and compare the price. Care depends on the finish: ask about your location if the bench is particularly exposed or near the sea, and check care instructions before using polish or abrasive cleaners.',
+      },
+      {
+        title: 'Leave room for the inscription and fixings',
+        copy: 'A name, dates and a short dedication are a useful starting point. Long names and several lines need more space, so check the proof at the chosen dimensions. Standard screw fixings are shown in the preview. Keep wording clear of the fixing positions and confirm the mounting arrangement if you are replacing an existing plaque.',
+      },
+      {
+        title: 'Check permission for a public or managed bench',
+        copy: 'If the bench belongs to a park, council, cemetery or another organisation, check its plaque rules before ordering. Ask for the permitted dimensions, wording and fitting method. If existing holes must be reused, contact us with their positions and measurements before approving a design.',
       },
     ],
     relatedSearches: ['bench plaques UK', 'memorial bench plaques', 'engraved bench plaques', 'brass bench plaques'],
@@ -277,12 +317,16 @@ export const productFamilies: ProductFamily[] = [
     },
     faqs: [
       {
-        question: 'Is the small size enough for a memorial?',
-        answer: 'Yes, for short wording. If the inscription has several lines, start with the medium plaque instead.',
+        question: 'What size plaque will fit my bench?',
+        answer: 'Measure the flat part of the bench where it will be fitted. Our compact starting size is 150 × 50 mm, with other bench sizes in the designer. Leave clearance around edges and existing fixings. For a replacement plaque, check the old hole positions as well as the outside dimensions.',
       },
       {
-        question: 'Can this be used outside?',
-        answer: 'Yes. Choose stainless steel or brass with standard screw fixings for outdoor use.',
+        question: 'How much wording fits on a bench plaque?',
+        answer: 'Start with a name, dates and one short dedication. There is no useful fixed word count: long names, the font and fixing positions all affect the space. Check the proof at your selected size, and shorten the wording or choose a larger plaque if it looks crowded.',
+      },
+      {
+        question: 'Can I match the fixing holes of an old plaque?',
+        answer: 'Contact us before ordering with the existing plaque dimensions and hole positions. The standard preview does not automatically match holes already in your bench, so the fitting arrangement needs checking before approval.',
       },
     ],
   },
@@ -356,7 +400,7 @@ export const productFamilies: ProductFamily[] = [
       },
       {
         title: 'Clear proofing and live pricing',
-        copy: 'Add your wording, choose the size and fixings, then check the proof before checkout. Standard pricing includes engraving, standard fixings and UK mainland delivery.',
+        copy: 'Add your wording, choose the size and fixings, then check the proof before checkout. Standard pricing includes engraving, standard fixings and UK delivery.',
       },
     ],
     relatedSearches: ['stainless steel plaques UK', 'outdoor metal plaques', 'engraved stainless steel plaques', 'custom steel plaques'],
@@ -549,20 +593,24 @@ export const seoLandingPages: SeoLandingPage[] = [
     shortTitle: 'Garden',
     eyebrow: 'Outdoor dedication plaques',
     description: 'Custom garden plaques for memorial corners, trees, benches, walls and planted spaces.',
-    seoTitle: 'Garden Plaques UK | Custom Memorial Garden Plaques',
-    seoDescription: 'Garden plaques for memorial corners, trees, benches, planted areas, walls and family gardens. Choose brass or stainless steel and check a proof before ordering.',
-    heroCopy: 'Garden plaques need to feel personal but stay readable outdoors. They are used for memorial corners, trees, benches, planted areas, walls and family gardens.',
+    seoTitle: 'Garden Memorial Plaques UK | Free Online Proof | InstaPlaque',
+    seoDescription: 'Personalise a brass or stainless steel garden plaque for a tree, bench or memorial corner. Compare sizes and fixings, then check a free proof before you buy.',
+    heroCopy: 'Mark a favourite spot, a memorial tree or a garden bench with words of your own. Choose brass or stainless steel, leave the inscription room to breathe, and check a free online proof before you order.',
     image: '/site-images/home-carousel-garden-brass.webp',
     relatedProductSlug: 'memorial-plaques',
     proofCta: 'Start a garden plaque proof',
     sections: [
       {
-        title: 'Keep the wording simple',
-        copy: 'Names, dates and a short dedication usually work best outside. The proof helps stop the inscription becoming too small or crowded.',
+        title: 'Choose a size for the whole inscription',
+        copy: 'A 150 × 50 mm bench plaque suits a name, dates and a short dedication. A5 (210 × 148 mm) gives a longer tribute more room. A4 (297 × 210 mm) suits a shared garden dedication or a message with several names. Measure the available mounting surface before choosing.',
       },
       {
         title: 'Choose the finish by setting',
-        copy: 'Stainless steel suits clean modern gardens. Brass and aged brass sit well with planting, stone, timber and more traditional spaces.',
+        copy: 'Brass gives a warm contrast against timber and stone. Aged brass is hand-patinated and sealed for a softer appearance. Stainless steel has a silver finish that suits a simple, contemporary garden. Brushed and polished brass naturally change over time; choose with that changing appearance in mind.',
+      },
+      {
+        title: 'Give every line enough space',
+        copy: 'Make the name or dedication the clearest part of the layout, then place dates and the personal message beneath it. Keep lettering clear of the border and fixing holes. View the proof at the intended plaque size: if it feels crowded, shorten the message or choose a larger plaque.',
       },
     ],
     faqs: [
@@ -579,23 +627,32 @@ export const seoLandingPages: SeoLandingPage[] = [
     description: 'Custom opening plaques for buildings, rooms, community spaces and formal unveilings, with an online proof before payment.',
     seoTitle: 'Opening Plaques UK | Custom Building Opening Plaques',
     seoDescription: 'Order custom opening plaques in the UK with a free online proof. Brass and stainless steel plaques for building openings, unveilings, presentations and formal ceremonies.',
-    heroCopy: 'Opening plaques need clear formal hierarchy: the place, the person opening it, the date and the occasion. A4 is usually the strongest starting point.',
+    heroCopy: 'Create an opening plaque for a school, building or community space. Arrange the venue name, opening person and date in a free online proof, with the price shown before payment. Start with A4 for formal wording and check any fixed ceremony deadline with us before ordering.',
     image: '/site-images/home-gallery-brass-community.webp',
     relatedProductSlug: 'a4-plaques',
     proofCta: 'Start an opening plaque proof',
     sections: [
       {
-        title: 'For buildings, rooms and ceremonies',
-        copy: 'Suitable for schools, offices, community centres, gardens, libraries, halls and funded spaces.',
+        title: 'Agree the names, titles and date first',
+        copy: 'Gather the official venue name, the opening person’s full name and title, the ceremony date and any required acknowledgement. For schools, community centres and funded projects, check contributor names with the people responsible before creating the final proof.',
       },
       {
-        title: 'Make the wording easy to follow',
-        copy: 'The proof should make the main subject obvious first, then the opening person and date. Brass gives a ceremonial feel; stainless steel suits modern buildings.',
+        title: 'Choose a size for the inscription and location',
+        copy: 'A4 (297 × 210 mm) provides space for a heading, name, role and date. A5 (210 × 148 mm) can work for a shorter inscription in a smaller space. Measure the wall or presentation area, consider how close visitors will stand and use the proof to check that every line has enough room.',
+      },
+      {
+        title: 'Plan the finish and mounting',
+        copy: 'Brass has a warm, traditional appearance; stainless steel has a silver finish suited to modern settings. Optional wood backing is available for suitable plaques and adds to the price and production time. Check the fixing options against the intended wall or support before approval.',
+      },
+      {
+        title: 'Leave time for approval and the ceremony',
+        copy: 'Download the proof PDF to share with colleagues and agree one final version before paying. Production begins after approval and payment, with delivery time additional. If your plaque is needed for an unveiling, contact us with the required arrival date and postcode before placing the order. For logos or supplied artwork, ask us to confirm what is possible before relying on it in your design.',
       },
     ],
     faqs: [
-      { question: 'Can I include the person opening the building?', answer: 'Yes. Add the person, role, date and venue wording, then check the hierarchy in the proof before checkout.' },
-      { question: 'Which size suits an opening plaque?', answer: 'A4 is usually best for formal opening wording. A5 can work for shorter inscriptions or smaller rooms.' },
+      { question: 'Can colleagues check the opening plaque before we order?', answer: 'Yes. Download the proof PDF and share it for review. It includes a link back to the design. Agree the exact spelling, titles, date and acknowledgement wording before one person approves the final layout and places the order.' },
+      { question: 'Can you meet our opening ceremony date?', answer: 'Contact us before ordering with the required arrival date, delivery postcode and plaque options. Production estimates start after proof approval and payment, and delivery takes additional time. Please have the date confirmed before depending on the plaque for an event.' },
+      { question: 'Can the plaque include a school crest or organisation logo?', answer: 'The online designer is set up for inscription layouts. For a crest, logo or supplied artwork, contact us before ordering so we can confirm whether your requirements can be accommodated and how they affect the proof, price and timing.' },
     ],
     relatedSearches: ['opening plaques UK', 'building opening plaques', 'unveiling plaques', 'presentation plaques'],
   },
@@ -632,7 +689,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     title: 'Engraved plaques',
     shortTitle: 'Engraved',
     eyebrow: 'Custom engraved metal plaques',
-    description: 'Custom engraved plaques in brass and stainless steel with live pricing, free online proofing and UK mainland delivery included.',
+    description: 'Custom engraved plaques in brass and stainless steel with live pricing, free online proofing and UK delivery included.',
     seoTitle: 'Engraved Plaques UK | Custom Brass & Stainless Steel Plaques',
     seoDescription: 'Order custom engraved plaques online in the UK. Create a free proof for brass, stainless steel, memorial, bench, wall and presentation plaques before payment.',
     heroCopy: 'If you know you need an engraved plaque but not the exact category, start here. Choose the size, material and wording, then check the proof before ordering.',
@@ -646,12 +703,12 @@ export const seoLandingPages: SeoLandingPage[] = [
       },
       {
         title: 'What is included',
-        copy: 'Standard prices include engraving, standard fixings and UK mainland delivery, with extras shown before checkout.',
+        copy: 'Standard prices include engraving, standard fixings and UK delivery, with extras shown before checkout.',
       },
     ],
     faqs: [
       { question: 'Can I order one engraved plaque?', answer: 'Yes. InstaPlaque is set up for single custom plaque orders as well as bespoke requests.' },
-      { question: 'Do engraved plaques include delivery?', answer: 'UK mainland delivery is included for standard plaques. Unusual sizes or non-mainland delivery may need confirmation before payment.' },
+      { question: 'Do engraved plaques include delivery?', answer: 'UK delivery is included for standard plaques. Delivery is included throughout the UK, including Northern Ireland, the Highlands and islands. Unusual plaque sizes may need confirmation before payment.' },
     ],
     relatedSearches: ['engraved plaques UK', 'custom engraved plaques', 'engraved brass plaques', 'engraved metal plaques'],
   },
@@ -946,6 +1003,22 @@ export const materialStories = [
     copy: 'A lighter backing option for softer contrast behind brass or stainless plates.',
   },
 ];
+
+export const merchantProducts: ProductFamily[] = merchantOffers.map(item => ({
+  slug: item.slug, title: item.title, shortTitle: item.materialCue === 'stainless' ? 'Stainless' : 'Brass',
+  eyebrow: 'Made to order', materialCue: item.materialCue as ProductFamily['materialCue'],
+  image: item.image, imageKind: item.imageKind as 'ai' | 'render', merchantOffer: true,
+  merchantMaterial: item.label, productionDays: item.productionDays,
+  description: item.description, seoIntro: item.description, seoTitle: `${item.title} UK | InstaPlaque`,
+  seoDescription: `${item.size} ${item.label.toLowerCase()} plaque${item.preset.wood ? ` with ${item.preset.woodTone} wood backing` : ''}. Add your wording, check a free proof and order with UK delivery included.`,
+  startingFrom: formatRetailPrice(item.price), schemaStartingPrice: item.price,
+  bestFor: ['Your own wording', 'Proof approval before payment', 'UK delivery included'],
+  proofPrompt: 'In loving memory of\nALEX MORGAN\nForever in our hearts',
+  preset: item.preset as Partial<PlaqueState>,
+  faqs: [{ question: 'Is this the price for the pictured configuration?',
+    answer: 'Yes. The stated price includes the specified size, finish, fixings and personalised wording. The image is a digital design illustration, not a photograph of a completed customer order. Your approved proof confirms the final layout. Changing the configuration can change the price.' }],
+}));
+productFamilies.push(...merchantProducts);
 
 export function getProductBySlug(slug: string | null | undefined) {
   return productFamilies.find((product) => product.slug === slug)

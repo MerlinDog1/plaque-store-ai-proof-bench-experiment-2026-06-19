@@ -1,3 +1,4 @@
+import { submitDesignRequest, MAX_DESIGN_REQUEST_BYTES } from "./server/designRequests.mjs";
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
@@ -10,6 +11,7 @@ import {
   MAX_GEMINI_REQUEST_BYTES,
   createGeminiRateLimiter,
   formatGeminiProxyError,
+  generateGeminiContent,
   getGeminiClientIdentity,
   hasAllowedGeminiBrowserHeaders,
   isDeployedGeminiEnvironment,
@@ -53,9 +55,15 @@ const {
   createMockHubOrder,
   listMockHubOrders,
 } = await import("./server/mockHub.mjs");
+const { handleStripeEvent } = await import("./server/stripeEvents.mjs");
+const { emailSavedProof } = await import('./server/proofEmail.mjs');
+const { consumeRequestLimit, privateRateKey } = await import('./server/requestLimits.mjs');
 const {
   createStripeCheckoutSession,
   getStripeConfig,
+  getLiveVerificationConfig,
+  requireLiveVerificationKeys,
+  requireStripeTestKey,
   parseStripeWebhook,
   retrieveStripeCheckoutSession,
 } = await import("./server/stripe.mjs");
@@ -65,6 +73,7 @@ const {
   createExternalOrder,
   createPendingOrder,
   getOrderById,
+  isLocalOrderJsonStoreEnabled,
   isPaidCompleteStripeSession,
   listOrders,
   markOrderPaidFromSession,
@@ -340,8 +349,26 @@ const serveStatic = (req, res) => {
   fs.createReadStream(filePath).pipe(res);
 };
 
+const designRequestLimiter = createGeminiRateLimiter({ limit: 5, windowMs: 15 * 60_000 });
 export const handleRequest = async (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+
+  if (url.pathname === "/api/design-requests") {
+    if (req.method !== "POST") { sendJson(res, 405, {error:"Use POST to submit a request."}); return; }
+    if (!hasAllowedGeminiBrowserHeaders(req, {deployed: deployedGeminiEnvironment}) || !String(req.headers["content-type"] || "").toLowerCase().startsWith("application/json")) {
+      sendJson(res, 403, {error:"Please submit the form from this website."}); return;
+    }
+    const identity = getGeminiClientIdentity(req);
+    if (!identity || !designRequestLimiter.consume(identity).ok) { sendJson(res, 429, {error:"Too many requests. Please wait 15 minutes before trying again."}); return; }
+    try {
+      const payload = JSON.parse(await readBody(req, MAX_DESIGN_REQUEST_BYTES));
+      const result = await submitDesignRequest(payload, {recipients:getInternalProductionEmails()});
+      sendJson(res, 201, result);
+    } catch (error) {
+      sendJson(res, error instanceof SyntaxError ? 400 : error.statusCode || 500, {error:error instanceof SyntaxError ? "Invalid request." : error.statusCode ? error.message : "Unable to submit your request. Please try again."});
+    }
+    return;
+  }
 
   if (req.method === "GET" && url.pathname === "/api/gemini/health") {
     sendJson(res, 200, { ok: true, enabled: geminiPublicProxyEnabled, hasKey: Boolean(apiKey) });
@@ -511,7 +538,19 @@ export const handleRequest = async (req, res) => {
   if (req.method === "POST" && url.pathname === "/api/stripe/checkout-session") {
     try {
       const payload = JSON.parse(await readBody(req));
-      const pendingOrder = await createPendingOrder(payload);
+      const sandboxTest = payload.sandboxTest === true;
+      const liveTest = payload.liveTest === true;
+      if (sandboxTest || liveTest) {
+        if (!requireAdminRequest(req, res)) return;
+        // Check availability before creating any persistent order/artwork.
+        if (sandboxTest && liveTest) { sendJson(res, 400, { error: "Choose one payment mode." }); return; }
+        if (liveTest) {
+          if (payload.confirmLivePayment !== true) { sendJson(res, 400, { error: "Confirm this is a real £1 payment." }); return; }
+          requireLiveVerificationKeys();
+        } else requireStripeTestKey();
+        payload.uiMode = "hosted";
+      }
+      const pendingOrder = await createPendingOrder(payload, { sandboxTest, liveTest });
       const session = await createStripeCheckoutSession(pendingOrder, {
         origin: payload.origin,
         uiMode: payload.uiMode,
@@ -521,8 +560,23 @@ export const handleRequest = async (req, res) => {
       sendJson(res, 201, { ok: true, session: publicSession, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create Stripe checkout session.";
+      console.error("Checkout session creation failed.", {
+        name: error?.name || "Error",
+        code: error?.code || "checkout_failed",
+        message: error?.message || message,
+        details: error?.details || "",
+        hint: error?.hint || "",
+      });
       sendJson(res, error.statusCode || 500, { error: message, code: error.code || "checkout_failed" });
     }
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/admin/checkout-test") {
+    if (!requireAdminRequest(req, res)) return;
+    sendJsonWithHeaders(res, 200, {
+      ok: true, ...getLiveVerificationConfig(), width: 123, height: 456, totalPence: 100, currency: "GBP",
+    }, { "Cache-Control": "no-store" });
     return;
   }
 
@@ -530,9 +584,7 @@ export const handleRequest = async (req, res) => {
     try {
       const rawBody = await readBody(req);
       const event = parseStripeWebhook(rawBody, req.headers["stripe-signature"]);
-      if (event.type === "checkout.session.completed") {
-        await markOrderPaidFromSession(event.data.object);
-      }
+      await handleStripeEvent(event);
       sendJson(res, 200, { ok: true, received: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Stripe webhook failed.";
@@ -545,9 +597,7 @@ export const handleRequest = async (req, res) => {
     try {
       const rawBody = await readBody(req);
       const event = parseStripeWebhook(rawBody, req.headers["stripe-signature"]);
-      if (event.type === "checkout.session.completed") {
-        await markOrderPaidFromSession(event.data.object);
-      }
+      await handleStripeEvent(event);
       sendJson(res, 200, { ok: true, received: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Stripe webhook failed.";
@@ -627,7 +677,7 @@ export const handleRequest = async (req, res) => {
           ),
       );
       if (order && needsStripeRefresh) {
-        const stripeSession = await retrieveStripeCheckoutSession(sessionId || storedSessionId);
+        const stripeSession = await retrieveStripeCheckoutSession(sessionId || storedSessionId, order);
         if (isPaidCompleteStripeSession(stripeSession)) {
           order = await markOrderPaidFromSession(stripeSession);
         } else {
@@ -684,6 +734,7 @@ export const handleRequest = async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/mock-admin-hub/orders") {
     if (!requireAdminRequest(req, res)) return;
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') { sendJson(res, 404, { error: 'Not found.' }); return; }
     try {
       const orders = await listMockHubOrders();
       sendJson(res, 200, { ok: true, orders });
@@ -696,6 +747,7 @@ export const handleRequest = async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/mock-admin-hub/orders") {
     if (!requireAdminRequest(req, res)) return;
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') { sendJson(res, 404, { error: 'Not found.' }); return; }
     try {
       const payload = JSON.parse(await readBody(req));
       const order = await createMockHubOrder(payload);
@@ -707,6 +759,21 @@ export const handleRequest = async (req, res) => {
     return;
   }
 
+  if (req.method === 'POST' && url.pathname === '/api/proof-sessions/email') {
+    try {
+      if (!hasAllowedGeminiBrowserHeaders(req, { deployed: deployedGeminiEnvironment })) {
+        sendJson(res, 403, { error: 'An explicit same-origin browser request is required.' }); return;
+      }
+      const identity = getGeminiClientIdentity(req, { vercel: Boolean(process.env.VERCEL) });
+      if (!identity) { sendJson(res, 403, { error: 'A trusted client identity is required.' }); return; }
+      const payload = JSON.parse(await readBody(req, 4 * 1024 * 1024));
+      sendJsonWithHeaders(res, 200, await emailSavedProof(payload, identity), { 'Cache-Control': 'no-store' });
+    } catch (error) {
+      sendJsonWithHeaders(res, error.statusCode || 500, { error: error.statusCode ? error.message : 'Could not email the saved proof. Please try again shortly.' }, { 'Cache-Control': 'no-store' });
+    }
+    return;
+  }
+
   if (req.method === "POST" && url.pathname === "/api/proof-sessions") {
     try {
       const payload = JSON.parse(await readBody(req));
@@ -714,7 +781,17 @@ export const handleRequest = async (req, res) => {
       sendJson(res, 201, { ok: true, proofSession });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create proof session.";
-      sendJson(res, message.includes("not configured") ? 501 : 500, { error: message });
+      console.error("Proof session creation failed.", {
+        name: error?.name || "Error",
+        code: error?.code || "proof_session_failed",
+        message: error?.message || message,
+        details: error?.details || "",
+        hint: error?.hint || "",
+      });
+      sendJson(res, error.statusCode || (message.includes("not configured") ? 501 : 500), {
+        error: message,
+        ...(error.code ? { code: error.code } : {}),
+      });
     }
     return;
   }
@@ -782,9 +859,17 @@ export const handleRequest = async (req, res) => {
         });
         return;
       }
-      const response = await ai.models.generateContent(validated.request);
+      if (deployedGeminiEnvironment) {
+        await consumeRequestLimit(privateRateKey('gemini-minute', clientIdentity), 20, 60, validated.cost);
+        await consumeRequestLimit('gemini-daily', 1000, 86400, validated.cost);
+      }
+      const response = await generateGeminiContent(ai, validated);
       sendJsonWithHeaders(res, 200, addResponseText(response), rateHeaders);
     } catch (error) {
+      if (error.code === 'request_protection') {
+        sendJson(res, error.statusCode, { error: error.message, code: error.code, retryable: false });
+        return;
+      }
       const formatted = formatGeminiProxyError(error, requestId);
       if (formatted.shouldLog) console.error(`Gemini generateContent failed [${requestId}].`, error);
       sendJson(res, formatted.statusCode, formatted.payload);
@@ -808,7 +893,10 @@ export const handleRequest = async (req, res) => {
 export default handleRequest;
 
 const reviewFollowUpIntervalMs = Number(process.env.REVIEW_FOLLOWUP_CHECK_INTERVAL_MS || 6 * 60 * 60 * 1000);
+const canRunReviewFollowUpSweep = () => getSupabaseConfig().configured || isLocalOrderJsonStoreEnabled(process.env);
 const runReviewFollowUpSweep = () => {
+  if (!canRunReviewFollowUpSweep()) return;
+
   processReviewFollowUps()
     .then((result) => {
       if (result.sent) console.log(`Review follow-up emails sent: ${result.sent}`);

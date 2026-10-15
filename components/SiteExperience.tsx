@@ -1,8 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
-import PlaquePreview from './PlaquePreview';
+import React, { lazy, useEffect, useRef, useState } from 'react';
+const PlaquePreview = lazy(() => import('./PlaquePreview'));
 import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies, seoLandingPages } from '../services/commerce';
 import { PlaqueState } from '../types';
-import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportService';
+import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportActions';
+import { SeoRankTracker } from './SeoRankTracker';
+import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, shopFaqs } from './Shopfront';
+import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
+import { designerPage } from './DesignerGuide';
+import { businessContact } from '../services/shopInformation';
+import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
+import { trackGooglePurchase, OPTIONAL_AD_CONSENT_CHANGED } from '../services/googlePurchase';
+import { trackPostHogPurchase } from '../services/posthogAnalytics';
+import { isOnePoundTestPlaque } from '../services/onePoundTestPlaque.mjs';
+import { OwnerTestCheckout } from './OwnerTestCheckout';
 
 const formatPrice = (value: number) => {
   const hasPence = Math.round(value * 100) % 100 !== 0;
@@ -22,6 +32,7 @@ interface SiteProps {
   inscription: string;
   price: number;
   isProductionReady: boolean;
+  checkoutRecoveryLoading?: boolean;
   orders: MockOrder[];
   onNavigate: (view: SiteView, productSlug?: string) => void;
   onStartDesign: () => void;
@@ -91,7 +102,6 @@ declare global {
 
 const USE_CUSTOMER_COPY_PASS = true;
 const VISUAL_PROOF_RENDERER_VERSION = 2;
-const GOOGLE_ADS_PURCHASE_EVENT = 'ads_conversion_Purchase_1';
 
 const DownloadIcon = () => (
   <svg className="button-icon" aria-hidden="true" viewBox="0 0 20 20" focusable="false">
@@ -196,7 +206,7 @@ const hasRenderablePlaqueState = (state?: Partial<PlaqueState> | null) =>
   );
 
 const storedProofSvgForOrder = (order?: PaidOrder | null) => {
-  const raw = String(order?.proofPackage?.productionSvg || order?.proofPackage?.visualProofSvg || '').trim();
+  const raw = String(order?.proofPackage?.visualProofSvg || order?.proofPackage?.productionSvg || '').trim();
   return raw || null;
 };
 
@@ -315,6 +325,11 @@ const storedProofSvgDataUrl = (order: PaidOrder) => {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(ensureSvgDocument(svg, order.plaqueState))}`;
 };
 
+const storedProofSvgDocument = (order: PaidOrder) => {
+  const svg = storedProofSvgForOrder(order);
+  return svg ? ensureSvgDocument(svg, order.plaqueState) : '';
+};
+
 const downloadStoredProductionArtwork = (order: PaidOrder) => {
   const svg = storedProofSvgForOrder(order);
   if (!svg) {
@@ -411,6 +426,29 @@ const versionedOrderProofImageUrl = (order: Pick<PaidOrder, 'id' | 'stripeChecko
   return `${baseUrl}${separator}v=${encodeURIComponent(order.updatedAt || order.id)}`;
 };
 
+function StoredProofSvgPreview({
+  order,
+  svgRef,
+  hidden = false,
+}: {
+  order: PaidOrder;
+  svgRef?: React.MutableRefObject<SVGSVGElement | null>;
+  hidden?: boolean;
+}) {
+  const html = storedProofSvgDocument(order);
+  if (!html) return null;
+  return (
+    <div
+      className={hidden ? 'admin-console__stored-svg-source' : 'admin-console__proof-image admin-console__proof-svg'}
+      aria-hidden={hidden || undefined}
+      ref={(node) => {
+        if (svgRef) svgRef.current = node?.querySelector('svg') || null;
+      }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+
 type HomeCarouselItem = {
   id: string;
   image: string;
@@ -436,16 +474,6 @@ type LegalPage = {
   sections: Array<{ title: string; copy: string }>;
 };
 
-const businessContact = {
-  tradingName: 'InstaPlaque',
-  legalForm: 'UK sole trader',
-  email: 'hello@instaplaque.co.uk',
-  phone: '07903 379839',
-  address: '4 Dunkirk Avenue, Kettering, NN14 2PL, United Kingdom',
-  updated: '28 June 2026',
-  privacyUpdated: '10 July 2026',
-};
-
 const legalPages: Partial<Record<SiteView, LegalPage>> = {
   contact: {
     eyebrow: 'Contact',
@@ -453,7 +481,6 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     intro: `For order questions, proof changes or delivery support, contact ${businessContact.tradingName} using the details below.`,
     sections: [
       { title: 'Trading identity', copy: `${businessContact.tradingName} is operated as a ${businessContact.legalForm}.` },
-      { title: 'Business address', copy: businessContact.address },
       { title: 'Email', copy: businessContact.email },
       { title: 'Phone', copy: businessContact.phone },
     ],
@@ -464,11 +491,11 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     intro: `These terms apply to orders placed with ${businessContact.tradingName}. Last updated ${businessContact.updated}.`,
     sections: [
       { title: 'Orders and proofs', copy: 'You create and approve a digital proof before payment. By approving the proof, you confirm that the wording, layout, material, size, fixings and any wood backing are correct for production.' },
-      { title: 'Prices and payment', copy: 'Prices are shown in pounds sterling. Payment is taken securely by Stripe. UK mainland delivery is included unless stated otherwise before checkout. We are not VAT registered.' },
+      { title: 'Prices and payment', copy: 'Prices are shown in pounds sterling. Payment is taken securely by Stripe. UK delivery is included unless stated otherwise before checkout. We are not VAT registered.' },
       { title: 'Production and delivery', copy: 'Estimated production times are shown before checkout and run from proof approval and payment. Standard orders are usually estimated at 5 working days; aged brass, custom sizes and wood-backed plaques may take longer.' },
       { title: 'Customer details', copy: 'You must provide accurate contact and delivery details at checkout. We may contact you if an order detail needs checking before production or dispatch.' },
       { title: 'Faults and support', copy: 'Your statutory rights are not affected. If goods are faulty, damaged, not as described or not made with reasonable care, contact us as soon as possible so we can put things right.' },
-      { title: 'Contact', copy: `${businessContact.email}. ${businessContact.address}.` },
+      { title: 'Contact', copy: businessContact.email },
     ],
   },
   privacy: {
@@ -476,10 +503,12 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     title: 'Privacy policy.',
     intro: `${businessContact.tradingName} uses customer data to create proofs, process orders and provide support. Last updated ${businessContact.privacyUpdated}.`,
     sections: [
-      { title: 'Data collected', copy: 'Customer name, contact details, delivery details, plaque wording, proof details and order history may be collected to fulfil orders. Cookieless analytics may also process the visit time, redacted page URL, referrer, coarse location, device type, browser and operating system.' },
+      { title: 'Data collected', copy: 'Customer name, contact details, delivery details, plaque wording, proof details and order history may be collected to fulfil orders. With analytics consent, we also measure visit time, public pages, traffic sources and campaigns, approximate location, device type and use of the designer.' },
       { title: 'Why it is used', copy: 'Data is used to create and save plaque proofs, take payment, send order emails, prepare production files, arrange delivery, provide customer support, understand aggregate page usage, and keep accounting and legal records.' },
-      { title: 'Service providers', copy: 'We use trusted providers to run the service, including Stripe for payments, Vercel for hosting and cookieless web analytics, Supabase for order storage, Resend for transactional email, and delivery providers where needed.' },
-      { title: 'Web analytics', copy: 'We use Vercel Web Analytics to understand aggregated page usage. Proof tokens, order identifiers and Stripe session identifiers are removed from analytics URLs before events are sent.' },
+      { title: 'Service providers', copy: 'We use trusted providers to run the service, including Stripe for payments, Vercel for hosting and web analytics, PostHog (EU hosting) and Google for analytics, Supabase for order storage, Resend for transactional email, and delivery providers where needed.' },
+      { title: 'Web analytics', copy: 'PostHog and Vercel Web Analytics start after you accept optional analytics in Cookie settings. PostHog measures public pages, campaign sources, anonymous browsing sessions, designer steps, prepared downloads and confirmed enquiry and purchase outcomes. It does not receive your name, email address, wording, uploaded artwork, payment details or private proof/order URLs. Session replay is disabled. Approximate location is inferred from the network connection, with IP anonymisation enabled. You can withdraw permission on the Cookie details page.' },
+      { title: 'Google measurement', copy: 'Before you accept, or if you reject optional cookies, Google Analytics and Google Ads receive limited cookieless measurement signals on public pages to help us understand whether our ads work. Google does not store or read analytics or advertising cookies, or build an advertising profile from these signals. If you accept, Google can use analytics and advertising cookies to measure visits and advertising performance. You can change your choice in Cookie settings on the Cookie details page.' },
+      { title: 'Purchase measurement', copy: 'If you accept optional advertising cookies, we report a confirmed purchase to Google Analytics with its value, currency and a pseudonymous transaction reference, to help measure advertising performance. This purchase event does not include your name, email, address, inscription, proof or private order link. You can change your choice using Cookie settings on our Cookie details page.' },
       { title: 'How long data is kept', copy: 'Order information is kept for as long as needed for production, support, accounting and legal record keeping. Proof artwork may be retained so we can remake or support the order.' },
       { title: 'Customer rights', copy: `You can ask to access, correct or delete personal data where the law allows by emailing ${businessContact.email}.` },
     ],
@@ -491,8 +520,11 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     sections: [
       { title: 'Essential storage', copy: 'The site may use cookies or local storage to remember proof progress, admin access and checkout state. These are needed for the service to work properly.' },
       { title: 'Payments', copy: 'Stripe may use cookies and similar technologies when processing secure checkout and fraud prevention.' },
-      { title: 'Analytics and marketing', copy: 'Vercel Web Analytics is cookieless. We will not add non-essential analytics or advertising cookies without the appropriate consent controls.' },
-      { title: 'Managing cookies', copy: 'You can block or delete cookies in your browser settings, but some proof, checkout or admin features may stop working correctly.' },
+      { title: 'Analytics and marketing', copy: 'Before you accept, or if you reject optional cookies, Google Analytics and Google Ads receive limited cookieless measurement signals on public pages to help us understand whether our ads work. Google does not store or read analytics or advertising cookies, or build an advertising profile from these signals. If you accept, Google can use analytics and advertising cookies to measure visits and advertising performance. Your choice is remembered separately from your design and order details.' },
+      { title: 'Other optional analytics', copy: 'With your permission, PostHog and Vercel Web Analytics measure visits and how the website is used. PostHog uses a random browsing identifier, renewed after 30 minutes of inactivity, stored in your browser. It does not record sessions, form contents or uploaded artwork. A hashed purchase reference is kept locally for up to 90 days to avoid counting the same purchase twice. Withdrawing analytics consent stops these services and removes PostHog analytics storage. Google returns to limited cookieless measurement.' },
+      { title: 'Purchase measurement', copy: 'With your permission, Google Analytics measures confirmed purchases using their value, currency and a pseudonymous transaction reference. We also store that reference locally to avoid reporting the same purchase again. Use Cookie settings on this page to allow or withdraw permission for this purchase measurement.' },
+      { title: 'Facebook advertising', copy: 'With your permission, Meta Pixel measures public-page visits and successful starts of live Stripe checkout. We send checkout value and currency, not your inscription, name, email or proof. Meta may process browser and device information. Use Cookie settings on this Cookie details page to allow or withdraw consent. Private proof and order links are excluded.' },
+      { title: 'Managing cookies', copy: 'Use Cookie settings on this page to accept or reject optional analytics and advertising, including withdrawing an earlier choice. Rejecting optional tracking does not prevent designing or ordering a plaque. You can also block or delete cookies in your browser settings, although essential proof, checkout or admin storage is needed for those features.' },
     ],
   },
   returns: {
@@ -503,7 +535,8 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
       { title: 'Personalised plaques', copy: 'Because plaques are made to your specification, change-of-mind cancellation normally cannot be accepted once you have approved the proof and production has started.' },
       { title: 'Before production', copy: `If you need to change or cancel an order, email ${businessContact.email} immediately. We will help where possible if production has not started.` },
       { title: 'Faulty or damaged goods', copy: 'Your statutory rights are not affected. If your plaque arrives damaged, faulty, not as described or not made with reasonable care, contact us promptly with photos and your order number.' },
-      { title: 'Returns process', copy: 'Do not return an item without contacting us first. We will confirm the best next step, which may be a remake, repair, refund or return depending on the issue.' },
+      { title: 'Returns process', copy: 'You do not need to post a faulty or damaged plaque back to us. Contact us with photos and your order number so we can assess the issue and arrange the appropriate remedy, such as a remake or refund. Your statutory rights are not affected.' },
+      { title: 'Agreed refunds', copy: 'We issue agreed refunds through Stripe to the original payment method within 2 working days. Your bank or card provider may take additional time to show the credit. This does not affect your statutory rights.' },
     ],
   },
 };
@@ -555,7 +588,7 @@ const homeFaqs: FaqItem[] = [
   },
   {
     question: 'How much does a custom plaque cost?',
-    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK mainland delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.',
+    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.',
   },
   {
     question: 'Can I preview my plaque before ordering?',
@@ -579,7 +612,7 @@ const homeFaqs: FaqItem[] = [
   },
   {
     question: 'Is UK delivery included?',
-    answer: 'UK mainland delivery is included in standard pricing. For delivery outside UK mainland, create or email the proof first and we will confirm delivery cost before sending a payment link.',
+    answer: 'Delivery throughout the UK is included in standard pricing, including Northern Ireland, the Highlands and islands. For delivery outside the UK, contact us before ordering.',
   },
   {
     question: 'Can I save the proof and come back later?',
@@ -605,7 +638,9 @@ const homeFaqs: FaqItem[] = [
 
 const routePathForView = (view: SiteView) => {
   const paths: Partial<Record<SiteView, string>> = {
+    'design-request': '/design-request',
     home: '/',
+    about: '/about',
     materials: '/materials',
     how: '/how-it-works',
     faq: '/faq',
@@ -680,6 +715,7 @@ const productListSchema = () => ({
           price,
           availability: 'https://schema.org/InStock',
           url: `${siteBaseUrl}/${product.slug}`,
+          ...productOfferPolicies(product.productionDays),
         } : undefined,
       },
     };
@@ -702,7 +738,7 @@ const productSchema = (product: ProductFamily) => {
       name: 'InstaPlaque',
     },
     category: 'Custom engraved plaques',
-    material: 'Brass or stainless steel',
+    material: product.merchantMaterial || 'Brass or stainless steel',
     offers: price ? {
       '@type': 'Offer',
       priceCurrency: 'GBP',
@@ -710,18 +746,7 @@ const productSchema = (product: ProductFamily) => {
       availability: 'https://schema.org/InStock',
       itemCondition: 'https://schema.org/NewCondition',
       url: `${siteBaseUrl}/${product.slug}`,
-      shippingDetails: {
-        '@type': 'OfferShippingDetails',
-        shippingDestination: {
-          '@type': 'DefinedRegion',
-          addressCountry: 'GB',
-        },
-        shippingRate: {
-          '@type': 'MonetaryAmount',
-          value: 0,
-          currency: 'GBP',
-        },
-      },
+      ...productOfferPolicies(product.productionDays),
     } : undefined,
   };
 };
@@ -750,22 +775,16 @@ const homepageProducts = productFamilies.filter((product) => homepageProductSlug
 
 const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, selectedLanding: SeoLandingPage): SeoMetaConfig => {
   const routePath = routePathForView(view);
+  if (view === 'design-request') return { title: 'Have Us Design Your Plaque | InstaPlaque', description: 'Tell us your wording and plaque preferences. Review a personally prepared proof before payment.', path: '/design-request', schema: [] };
+  if (view === 'about') {
+    return { ...aboutPage, path: routePath, schema: [{ '@type': 'AboutPage', name: 'About InstaPlaque', url: 'https://instaplaque.co.uk/about' }] };
+  }
   if (view === 'plaque') {
     return {
-      title: 'Design a Custom Plaque Online | Free InstaPlaque Proof',
-      description: 'Use the InstaPlaque online plaque designer to create a free proof for a custom brass, stainless steel, bench or memorial plaque before checkout.',
+      title: designerPage.title,
+      description: designerPage.description,
       path: routePath,
-      schema: [{
-        '@type': 'WebApplication',
-        name: 'InstaPlaque online plaque designer',
-        applicationCategory: 'DesignApplication',
-        operatingSystem: 'Web',
-        offers: {
-          '@type': 'Offer',
-          price: '0',
-          priceCurrency: 'GBP',
-        },
-      }],
+      schema: designerPage.schema,
     };
   }
   if (view === 'materials') {
@@ -798,7 +817,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
       title: 'Custom Plaque FAQs UK | InstaPlaque',
       description: 'Answers about custom plaque prices, materials, proofing, UK delivery, fixings, aged brass and bespoke plaque orders.',
       path: routePath,
-      schema: [faqSchema(homeFaqs)],
+      schema: [faqSchema(shopFaqs)],
     };
   }
   if (view === 'quote') {
@@ -864,7 +883,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
         '@type': 'WebPage',
         name: 'InstaPlaque returns and cancellations',
         description: 'Returns and cancellation policy for personalised custom plaques.',
-      }],
+      }, merchantPolicyOrganization],
     };
   }
   if (view === 'product') {
@@ -878,7 +897,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
           { name: 'Home', url: siteBaseUrl },
           { name: selectedProduct.title, url: `${siteBaseUrl}/${selectedProduct.slug}` },
         ]),
-        faqSchema(selectedProduct.faqs),
+        faqSchema(mergeFaqs(selectedProduct.faqs, shopFaqs).slice(0, 6)),
       ],
     };
   }
@@ -893,19 +912,19 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
           { name: 'Home', url: siteBaseUrl },
           { name: selectedLanding.title, url: `${siteBaseUrl}/${selectedLanding.slug}` },
         ]),
-        faqSchema(selectedLanding.faqs),
+        faqSchema(mergeFaqs(selectedLanding.faqs, shopFaqs).slice(0, 6)),
       ],
     };
   }
   return {
-    title: 'Custom Plaques Made Simple | Brass, Stainless Steel & Bench Plaques UK',
-    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK mainland delivery before you order.',
+    title: 'Custom Brass & Stainless Steel Plaques UK | InstaPlaque',
+    description: 'Design a brass, stainless steel, memorial or bench plaque online. See a free proof, clear live pricing and UK delivery before you order.',
     path: '/',
-    schema: [productListSchema(), faqSchema(homeFaqs)],
+    schema: [productListSchema(), faqSchema(shopFaqs)],
   };
 };
 
-const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLanding: SeoLandingPage) => {
+export const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLanding: SeoLandingPage) => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const config = seoConfigForView(view, selectedProduct, selectedLanding);
@@ -915,10 +934,12 @@ const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLand
     setMetaContent('meta[property="og:title"]', config.title);
     setMetaContent('meta[property="og:description"]', config.description);
     setMetaContent('meta[property="og:url"]', url);
-    setMetaContent('meta[property="og:image"]', siteShareImage);
+    const routeImage = view === 'product' ? selectedProduct.image : view === 'landing' ? selectedLanding.image : undefined;
+    const shareImage = routeImage ? new URL(routeImage, siteBaseUrl).href : siteShareImage;
+    setMetaContent('meta[property="og:image"]', shareImage);
     setMetaContent('meta[name="twitter:title"]', config.title);
     setMetaContent('meta[name="twitter:description"]', config.description);
-    setMetaContent('meta[name="twitter:image"]', siteShareImage);
+    setMetaContent('meta[name="twitter:image"]', shareImage);
     setCanonicalHref(url);
 
     const routeSchema = {
@@ -946,6 +967,7 @@ const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selectedLand
       document.head.appendChild(schemaElement);
     }
     schemaElement.textContent = JSON.stringify(routeSchema);
+    document.getElementById('instaplaque-prerender-route-schema')?.remove();
   }, [view, selectedProduct, selectedLanding]);
 };
 
@@ -1002,7 +1024,7 @@ function ProductGrid({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
         <p>
           InstaPlaque is for one-off engraved plaques where the wording matters: memorial plaques, bench dedications,
           garden plaques, opening plaques, donor plaques and custom metal signs. Prices update as you build, with
-          engraving, standard fixings and UK mainland delivery included on standard orders.
+          engraving, standard fixings and UK delivery included on standard orders.
         </p>
       </div>
       <div className="commerce-product-grid">
@@ -1248,7 +1270,7 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
             : 'Create a production-style plaque proof from your wording, check the layout before payment, then receive a plaque engraved with care using the finest materials.'}
         </p>
         <p>
-          No guesswork and no hidden costs: engraving, standard fixings and UK mainland delivery are
+          No guesswork and no hidden costs: engraving, standard fixings and UK delivery are
           included, with optional extras shown clearly before checkout.
         </p>
         <button type="button" className="commerce-primary" onClick={onStartDesign}>
@@ -1276,16 +1298,7 @@ function ProofStorySection({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) 
 }
 
 function HomePage(props: Pick<SiteProps, 'onNavigate' | 'onStartDesign' | 'onLaunchProduct'>) {
-  return (
-    <div className="commerce-page">
-      <SiteHero onStartDesign={props.onStartDesign} />
-      <ProofStorySection onStartDesign={props.onStartDesign} />
-      <ProductGrid onStartDesign={props.onStartDesign} />
-      <SeoLandingLinks onNavigate={props.onNavigate} />
-      <HomeMaterialPanels />
-      <HomeFaq />
-    </div>
-  );
+  return <ShopHome onStartDesign={props.onStartDesign} onRequestDesign={() => props.onNavigate('design-request')} />;
 }
 
 function ProductPage({ selectedProduct, onStartDesign, onNavigate }: Pick<SiteProps, 'selectedProduct' | 'onStartDesign' | 'onNavigate'>) {
@@ -1504,7 +1517,7 @@ function FaqPage() {
   );
 }
 
-function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
+export function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
   return (
     <div className="commerce-page">
       <section className="commerce-product-detail">
@@ -1513,26 +1526,25 @@ function QuotePage({ onStartDesign }: Pick<SiteProps, 'onStartDesign'>) {
           <h1>{USE_CUSTOMER_COPY_PASS ? 'Need something made to measure?' : 'Start with an instant proof, then route complex work to quote.'}</h1>
           <p className="commerce-lede">
             {USE_CUSTOMER_COPY_PASS
-              ? 'Start with a proof and tell us what you need. We will confirm anything unusual, including custom sizes, oval plaques, circular plaques and longer-turnaround work, before payment.'
+              ? 'Tell us the size, wording, material and where your plaque will be fitted. We can help with oversized plaques, supplied artwork and unusual mounting, and confirm the design, price and production time before you pay.'
               : 'Customers should not hit a dead-end when a plaque is unusual. They can still create a proof, then the system flags custom sizes, ovals, circles or longer-turnaround work for manual confirmation.'}
           </p>
           <div className="commerce-actions">
-            <button type="button" className="commerce-primary" onClick={onStartDesign}>
-              Start bespoke proof
-            </button>
+            <a className="commerce-primary" href="/design-request">Ask us to design your plaque</a>
+            <a className="commerce-secondary" href="/design" onClick={event => { if (onStartDesign) { event.preventDefault(); onStartDesign(); } }}>Try the online designer</a>
           </div>
         </div>
         <div className="commerce-quote-panel">
           <p className="commerce-eyebrow">{USE_CUSTOMER_COPY_PASS ? 'We can quote for' : 'Quote triggers'}</p>
           <ul>
             <li>Oversized dimensions outside the standard production bed</li>
-            <li>Oval plaques and circular plaques</li>
+            <li>Supplied logos, images or specialist artwork</li>
             <li>Custom sizes up to our maximum production size</li>
             <li>Longer-turnaround finishes or wood-backed plaques</li>
-            <li>Delivery outside UK mainland</li>
+            <li>Delivery outside the UK</li>
           </ul>
           <div className="commerce-warning">
-            Send the proof through and we will confirm anything unusual before payment.
+            Standard oval and circular plaques can be priced in the online designer. For a quote, include your approximate size, exact wording, fixing surface and any deadline. No payment is taken when you send a design request.
           </div>
         </div>
       </section>
@@ -1545,9 +1557,10 @@ function CheckoutPage({
   inscription,
   selectedProduct,
   isProductionReady,
+  checkoutRecoveryLoading = false,
   onCreateMockOrder,
   onNavigate,
-}: Pick<SiteProps, 'state' | 'inscription' | 'selectedProduct' | 'isProductionReady' | 'onCreateMockOrder' | 'onNavigate'>) {
+}: Pick<SiteProps, 'state' | 'inscription' | 'selectedProduct' | 'isProductionReady' | 'checkoutRecoveryLoading' | 'onCreateMockOrder' | 'onNavigate'>) {
   const [createdOrder, setCreatedOrder] = useState<MockOrder | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
@@ -1618,24 +1631,34 @@ function CheckoutPage({
     };
   }, [createdOrder, embeddedClientSecret, stripePublishableKey]);
 
+  if (!checkoutRecoveryLoading && isOnePoundTestPlaque(state)) {
+    return <div className="commerce-page"><section className="commerce-section"><OwnerTestCheckout /></section></div>;
+  }
+
   return (
     <div className="commerce-page">
       <section className="commerce-checkout">
         <div className="commerce-checkout-proof">
           <p className="commerce-eyebrow">Approved proof</p>
-          <div className="commerce-checkout-preview">
-            <PlaquePreview ref={checkoutProofSvgRef} state={state} activeStep={6} inscription={inscription} />
-          </div>
-          <div className="commerce-summary-lines">
-            <span><strong>{getPlaqueSummaryTitle(state, selectedProduct.title)}</strong></span>
-            <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
-            {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
-            <span>UK mainland delivery <strong>Included</strong></span>
-            <span className="commerce-summary-total">Total <strong>{formatPrice(breakdown.total)}</strong></span>
-          </div>
-          <button type="button" className="commerce-secondary" onClick={() => onNavigate('plaque')}>
-            Edit proof
-          </button>
+          {checkoutRecoveryLoading ? (
+            <div className="commerce-order-proof__pending">Loading approved proof...</div>
+          ) : (
+            <>
+              <div className="commerce-checkout-preview">
+                <PlaquePreview ref={checkoutProofSvgRef} state={state} activeStep={6} inscription={inscription} />
+              </div>
+              <div className="commerce-summary-lines">
+                <span><strong>{getPlaqueSummaryTitle(state, selectedProduct.title)}</strong></span>
+                <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
+                {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
+                <span>UK delivery <strong>Included</strong></span>
+                <span className="commerce-summary-total">Total <strong>{formatPrice(breakdown.total)}</strong></span>
+              </div>
+              <button type="button" className="commerce-secondary" onClick={() => onNavigate('plaque')}>
+                Edit proof
+              </button>
+            </>
+          )}
         </div>
         <div className="commerce-checkout-panel">
           <div className="commerce-checkout-form">
@@ -1644,13 +1667,16 @@ function CheckoutPage({
             <p>
               Continue to Stripe's secure checkout page to enter contact, delivery and payment details.
             </p>
-            {!isProductionReady && (
+            {checkoutRecoveryLoading && (
+              <div className="commerce-success">Loading your approved proof...</div>
+            )}
+            {!checkoutRecoveryLoading && !isProductionReady && (
               <div className="commerce-warning">
                 Finish your proof before checkout.
                 <button type="button" onClick={() => onNavigate('plaque')}>Return to proof</button>
               </div>
             )}
-            {breakdown.quoteRequired && (
+            {!checkoutRecoveryLoading && breakdown.quoteRequired && (
               <div className="commerce-warning">
                 This design needs a manual quote before payment: {breakdown.quoteReasons.join(', ')}.
                 <button type="button" onClick={() => onNavigate('quote')}>Request a quote</button>
@@ -1683,7 +1709,7 @@ function CheckoutPage({
               )}
               </>
             ) : null}
-            {isProductionReady && !breakdown.quoteRequired && (
+            {!checkoutRecoveryLoading && isProductionReady && !breakdown.quoteRequired && (
               <button
                 type="button"
                 className="commerce-primary"
@@ -1712,6 +1738,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   const [proofReady, setProofReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const proofRenderSvgRef = useRef<SVGSVGElement | null>(null);
+  const storedProofSvgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1775,14 +1802,16 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   }, [order?.id]);
 
   useEffect(() => {
-    if (!order || order.proofPackage?.visualProofRendererVersion === VISUAL_PROOF_RENDERER_VERSION || !proofRenderSvgRef.current) return;
+    if (!order || order.metadata?.checkoutTestPolicy === '123x456-sandbox-v1'
+      || order.metadata?.liveVerificationPolicy === '123x456-live-v1'
+      || order.proofPackage?.visualProofRendererVersion === VISUAL_PROOF_RENDERER_VERSION) return;
 
     let cancelled = false;
     const attachRenderedProof = async () => {
       try {
         await document.fonts?.ready;
         await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
-        const sourceSvg = proofRenderSvgRef.current;
+        const sourceSvg = storedProofSvgRef.current || proofRenderSvgRef.current;
         if (!sourceSvg || cancelled) return;
         const proofImageBase64 = await svgToProofPngBase64(sourceSvg);
         let productionArtworkPdf = '';
@@ -1821,16 +1850,12 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   }, [order?.id, order?.proofPackage?.visualProofPng, order?.proofPackage?.visualProofRendererVersion]);
 
   useEffect(() => {
-    if (!order || order.paymentStatus !== 'paid' || typeof window.gtag !== 'function') return;
-    const conversionKey = `google-ads-purchase-${order.id}`;
-    if (sessionStorage.getItem(conversionKey)) return;
-    window.gtag('event', GOOGLE_ADS_PURCHASE_EVENT, {
-      value: Math.max(0, (order.totalPence || 0) / 100),
-      currency: (order.currency || 'GBP').toUpperCase(),
-      transaction_id: order.id,
-    });
-    sessionStorage.setItem(conversionKey, 'sent');
-  }, [order?.id, order?.paymentStatus, order?.totalPence, order?.currency]);
+    if (!order) return;
+    const track = () => { void trackGooglePurchase(order); void trackPostHogPurchase(order); };
+    track();
+    window.addEventListener(OPTIONAL_AD_CONSENT_CHANGED, track);
+    return () => window.removeEventListener(OPTIONAL_AD_CONSENT_CHANGED, track);
+  }, [order?.id, order?.paymentStatus, order?.totalPence, order?.currency, order?.stripeCheckoutSessionId]);
 
   if (status === 'loading') {
     return (
@@ -1856,6 +1881,21 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   }
 
   const paid = order.paymentStatus === 'paid';
+  if (order.metadata?.checkoutTestPolicy === '123x456-sandbox-v1'
+    || order.metadata?.liveVerificationPolicy === '123x456-live-v1') {
+    const live = order.metadata?.liveVerificationPolicy === '123x456-live-v1';
+    return (
+      <div className="commerce-page">
+        <section className="commerce-section">
+          <p className="commerce-eyebrow">{live ? 'Private live-payment check' : 'Private sandbox test'}</p>
+          <h1>{paid ? (live ? 'Your £1 payment is confirmed.' : 'Your £1 test payment is confirmed.') : 'Your test payment is not complete.'}</h1>
+          <p>123 × 456 mm · {formatPence(order.totalPence, order.currency)}. {live ? 'This is a real payment.' : 'No real money has been taken.'}</p>
+          <p>No plaque will be made or dispatched, and no order email is sent. This test is excluded from live Google purchase tracking, even when optional measurement is allowed.</p>
+          <p><a href="/checkout-test.html">Back to the private test</a></p>
+        </section>
+      </div>
+    );
+  }
   const address = order.shippingAddress || {};
   const fulfilmentStage = order.fulfilmentStatus || order.status;
   const currentStepIndex = fulfilmentStage === 'dispatched' || fulfilmentStage === 'ready_to_dispatch'
@@ -1884,7 +1924,11 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
               className="commerce-order-export-renderer"
               style={{ width: proofExportWidth, height: proofExportHeight }}
             >
-              <PlaquePreview ref={proofRenderSvgRef} state={order.plaqueState} activeStep={6} inscription={order.inscription} />
+              {storedProofSvgForOrder(order) ? (
+                <StoredProofSvgPreview order={order} svgRef={storedProofSvgRef} hidden />
+              ) : (
+                <PlaquePreview ref={proofRenderSvgRef} state={order.plaqueState} activeStep={6} inscription={order.inscription} />
+              )}
             </div>
           )}
           <p className="commerce-eyebrow">{paid ? 'Order confirmed' : 'Order received'}</p>
@@ -1897,16 +1941,14 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
                 : 'Your order has been created. If payment has completed, this page will update once Stripe confirms it.'}
           </p>
           <div className="commerce-order-proof">
-            {order.proofPackage?.visualProofPng && proofReady ? (
+            {storedProofSvgForOrder(order) ? (
+              <StoredProofSvgPreview order={order} />
+            ) : order.proofPackage?.visualProofPng && proofReady ? (
               <img
                 src={versionedOrderProofImageUrl(order)}
                 alt="Approved plaque proof"
                 className="commerce-order-proof__image"
               />
-            ) : order.plaqueState ? (
-              <div className="commerce-order-proof__live-preview">
-                <PlaquePreview state={order.plaqueState} activeStep={6} inscription={order.inscription} />
-              </div>
             ) : (
               <div className="commerce-order-proof__pending">Loading approved proof...</div>
             )}
@@ -1971,6 +2013,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 }
 
 function AdminPage() {
+  const [adminSection, setAdminSection] = useState<'orders' | 'search'>('orders');
   const [orders, setOrders] = useState<PaidOrder[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedOrderDetail, setSelectedOrderDetail] = useState<PaidOrder | null>(null);
@@ -1984,6 +2027,7 @@ function AdminPage() {
   const [sortMode, setSortMode] = useState<AdminSortMode>('newest');
   const [searchTerm, setSearchTerm] = useState('');
   const adminProofSvgRef = useRef<SVGSVGElement | null>(null);
+  const adminStoredProofSvgRef = useRef<SVGSVGElement | null>(null);
   const selectedSummaryOrder = orders.find((order) => order.id === selectedId) || orders[0] || null;
   const selectedOrder = selectedOrderDetail?.id === selectedSummaryOrder?.id ? selectedOrderDetail : selectedSummaryOrder;
   const canRenderSelectedProof = hasRenderablePlaqueState(selectedOrder?.plaqueState);
@@ -1991,6 +2035,21 @@ function AdminPage() {
   const canDownloadSelectedProductionArtwork = Boolean(canRenderSelectedProof || selectedStoredProofSvg);
 
   const downloadProductionArtwork = async (order: PaidOrder) => {
+    const productionSourceSvg = selectedStoredProofSvg && selectedOrder?.id === order.id
+      ? adminStoredProofSvgRef.current
+      : adminProofSvgRef.current;
+    if (productionSourceSvg) {
+      if ('fonts' in document) {
+        await document.fonts.ready;
+      }
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      downloadCorelPdf(
+        productionSourceSvg,
+        order.plaqueState,
+        asPdfFilename(order.proofPackage?.productionFilename || `${order.id}-production-artwork.pdf`),
+      );
+      return;
+    }
     if (hasRenderablePlaqueState(order.plaqueState)) {
       if (!adminProofSvgRef.current) {
         window.alert('Production PDF is still preparing from the approved preview. Please try again in a moment.');
@@ -2172,7 +2231,7 @@ function AdminPage() {
       return orderDate(b) - orderDate(a);
     });
 
-  const paidOrders = orders.filter((order) => order.paymentStatus === 'paid');
+  const paidOrders = orders.filter((order) => order.paymentStatus === 'paid' && !order.metadata?.checkoutTestPolicy);
   const todayOrders = paidOrders.filter((order) => sameLocalDay(new Date(orderDate(order)), now));
   const monthOrders = paidOrders.filter((order) => sameLocalMonth(new Date(orderDate(order)), now));
   const overdueOrders = orders.filter((order) => {
@@ -2180,7 +2239,7 @@ function AdminPage() {
     return !['dispatched', 'archived', 'cancelled', 'refunded'].includes(status) && dueDateForOrder(order).getTime() < now.getTime();
   });
   const counts = {
-    paid: orders.filter((order) => order.paymentStatus === 'paid').length,
+    paid: paidOrders.length,
     production: orders.filter((order) => order.status === 'in_production').length,
     dispatched: orders.filter((order) => order.fulfilmentStatus === 'dispatched').length,
     emails: orders.reduce((total, order) => total + (order.emailEvents?.length || 0), 0),
@@ -2194,11 +2253,11 @@ function AdminPage() {
       <section className="admin-console__shell">
         <div className="admin-console__head">
           <div>
-            <p>Operations</p>
-            <h1>Orders</h1>
+            <p>{adminSection === 'orders' ? 'Operations' : 'Organic search'}</p>
+            <h1>{adminSection === 'orders' ? 'Orders' : 'Search position'}</h1>
           </div>
           <div className="admin-console__head-actions">
-            <span>{orders.length} orders</span>
+            <span>{adminSection === 'orders' ? `${orders.length} orders` : '25 searches'}</span>
             {authConfig?.operational && authConfig.authRequired && adminAuthenticated && (
               <button type="button" className="admin-console__ghost-button" onClick={logoutAdmin}>
                 Lock
@@ -2227,6 +2286,16 @@ function AdminPage() {
         {adminError && <div className="commerce-warning">{adminError}</div>}
         {loading && <div className="commerce-success">Loading orders...</div>}
         {authConfig?.operational === false || (authConfig?.authRequired && !adminAuthenticated) ? null : (
+          <>
+        <nav className="admin-console__section-tabs" aria-label="Admin sections">
+          <button type="button" className={adminSection === 'orders' ? 'is-active' : ''} onClick={() => setAdminSection('orders')}>
+            Orders
+          </button>
+          <button type="button" className={adminSection === 'search' ? 'is-active' : ''} onClick={() => setAdminSection('search')}>
+            Search position
+          </button>
+        </nav>
+        {adminSection === 'search' ? <SeoRankTracker /> : (
           <>
         <div className="admin-console__stats">
           <div><span>Sold today</span><strong>{todayOrders.length}</strong><small>{formatPence(counts.todayRevenue)}</small></div>
@@ -2297,16 +2366,12 @@ function AdminPage() {
                       <strong>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</strong>
                     </div>
                     <div className="admin-console__proof">
-                      {selectedOrder.proofPackage?.visualProofPng ? (
+                      {storedProofSvgForOrder(selectedOrder) ? (
+                        <StoredProofSvgPreview order={selectedOrder} />
+                      ) : selectedOrder.proofPackage?.visualProofPng ? (
                         <img
                           src={versionedOrderProofImageUrl(selectedOrder)}
                           alt="Approved plaque proof"
-                          className="admin-console__proof-image"
-                        />
-                      ) : storedProofSvgForOrder(selectedOrder) ? (
-                        <img
-                          src={storedProofSvgDataUrl(selectedOrder)}
-                          alt="Stored plaque artwork"
                           className="admin-console__proof-image"
                         />
                       ) : canRenderSelectedProof ? (
@@ -2422,16 +2487,12 @@ function AdminPage() {
                 <strong>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</strong>
               </div>
               <div className="admin-console__proof">
-                {selectedOrder.proofPackage?.visualProofPng ? (
+                {storedProofSvgForOrder(selectedOrder) ? (
+                  <StoredProofSvgPreview order={selectedOrder} />
+                ) : selectedOrder.proofPackage?.visualProofPng ? (
                   <img
                     src={versionedOrderProofImageUrl(selectedOrder)}
                     alt="Approved plaque proof"
-                    className="admin-console__proof-image"
-                  />
-                ) : storedProofSvgForOrder(selectedOrder) ? (
-                  <img
-                    src={storedProofSvgDataUrl(selectedOrder)}
-                    alt="Stored plaque artwork"
                     className="admin-console__proof-image"
                   />
                 ) : canRenderSelectedProof ? (
@@ -2563,10 +2624,17 @@ function AdminPage() {
             </AdminDetailBoundary>
           )}
         </div>
-        {selectedOrder && canRenderSelectedProof && (
+        {selectedOrder && selectedStoredProofSvg && (
+          <div className="admin-console__export-source" aria-hidden="true">
+            <StoredProofSvgPreview order={selectedOrder} svgRef={adminStoredProofSvgRef} hidden />
+          </div>
+        )}
+        {selectedOrder && canRenderSelectedProof && !selectedStoredProofSvg && (
           <div className="admin-console__export-source" aria-hidden="true">
             <PlaquePreview ref={adminProofSvgRef} state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
           </div>
+        )}
+          </>
         )}
           </>
         )}
@@ -2575,7 +2643,7 @@ function AdminPage() {
   );
 }
 
-function LegalPlaceholderPage({ view }: { view: SiteView }) {
+export function LegalPlaceholderPage({ view }: { view: SiteView }) {
   const page = legalPages[view] ?? legalPages.contact;
   if (!page) return null;
 
@@ -2617,7 +2685,8 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
         <strong className="brand-wordmark brand-wordmark--footer">
           <span>Insta</span><span>Plaque</span>
         </strong>
-        <p>{businessContact.tradingName} is operated as a UK sole trader. Business address: {businessContact.address}. Email: {businessContact.email}. Not VAT registered.</p>
+        <p>{businessContact.madeIn}</p>
+        <p><a href={`mailto:${businessContact.email}`}>{businessContact.email}</a></p>
       </div>
       <div className="commerce-footer__right">
         <div className="commerce-footer-socials" aria-label="Social links">
@@ -2635,9 +2704,9 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
         />
         <nav className="commerce-footer-legal" aria-label="Legal pages">
           {footerLinks.map((link) => (
-            <button key={link.view} type="button" onClick={() => onNavigate(link.view)}>
+            <a key={link.view} href={link.view === 'returns' ? '/returns-and-cancellations' : `/${link.view}`}>
               {link.label}
-            </button>
+            </a>
           ))}
         </nav>
       </div>
@@ -2646,25 +2715,32 @@ function CommerceFooter({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 }
 
 export function SiteExperience(props: SiteProps) {
-  useSeoMeta(props.view, props.selectedProduct, props.selectedLanding);
-
   useEffect(() => {
+    const anchor = document.getElementById(window.location.hash.slice(1));
+    if (anchor) {
+      anchor.scrollIntoView({ behavior: 'auto', block: 'start' });
+      return;
+    }
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     document.querySelector('main')?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [props.view, props.selectedProduct.slug]);
 
   let page: React.ReactNode;
 
-  if (props.view === 'product') {
-    page = <ProductPage selectedProduct={props.selectedProduct} onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />;
+  if (props.view === 'about') {
+    page = <ShopAbout />;
+  } else if (props.view === 'contact') {
+    page = <ShopContact />;
+  } else if (props.view === 'product') {
+    page = <ShopProduct product={props.selectedProduct} onRequestDesign={() => props.onNavigate('design-request', props.selectedProduct.slug)} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
   } else if (props.view === 'landing') {
-    page = <LandingPage selectedLanding={props.selectedLanding} onStartDesign={props.onStartDesign} onNavigate={props.onNavigate} />;
+    page = <ShopLanding landing={props.selectedLanding} onLaunch={() => props.onLaunchProduct(productFamilies.find(product => product.slug === props.selectedLanding.relatedProductSlug) || productFamilies[0])} />;
   } else if (props.view === 'materials') {
-    page = <MaterialsPage />;
+    page = <ShopMaterials />;
   } else if (props.view === 'how') {
-    page = <HowItWorksPage />;
+    page = <ShopHelp />;
   } else if (props.view === 'faq') {
-    page = <FaqPage />;
+    page = <ShopHelp faq />;
   } else if (props.view === 'quote') {
     page = <QuotePage onStartDesign={props.onStartDesign} />;
   } else if (props.view === 'checkout') {
@@ -2674,6 +2750,7 @@ export function SiteExperience(props: SiteProps) {
         inscription={props.inscription}
         selectedProduct={props.selectedProduct}
         isProductionReady={props.isProductionReady}
+        checkoutRecoveryLoading={props.checkoutRecoveryLoading}
         onCreateMockOrder={props.onCreateMockOrder}
         onNavigate={props.onNavigate}
       />
@@ -2695,7 +2772,7 @@ export function SiteExperience(props: SiteProps) {
   return (
     <>
       {page}
-      <CommerceFooter onNavigate={props.onNavigate} />
+      <ShopFooter />
     </>
   );
 }

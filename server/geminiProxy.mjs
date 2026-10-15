@@ -1,4 +1,6 @@
 import { isIP } from "node:net";
+import { PLAQUE_TEXT_MODEL, LEGACY_PLAQUE_TEXT_MODEL } from '../services/aiModels.mjs';
+import { TEXT_GENERATION_TIMEOUT_MS, GENERATION_TIMEOUT_MESSAGE } from '../services/geminiTiming.mjs';
 
 export const MAX_GEMINI_REQUEST_BYTES = 10 * 1024 * 1024;
 
@@ -10,7 +12,7 @@ const MAX_PARTS = 4;
 const MAX_SCHEMA_DEPTH = 7;
 const MAX_SCHEMA_NODES = 128;
 
-const STRUCTURED_TEXT_MODEL = "gemini-3.5-flash";
+const STRUCTURED_TEXT_MODELS = new Set([PLAQUE_TEXT_MODEL, LEGACY_PLAQUE_TEXT_MODEL]);
 const PROMPT_ENHANCEMENT_MODEL = "gemini-3-flash-preview";
 const IMAGE_MIME_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 const STANDARD_IMAGE_ASPECT_RATIOS = new Set([
@@ -268,7 +270,10 @@ const canonicalizeStructuredText = (payload, config) => {
   );
   if (config.responseMimeType !== "application/json") fail("Structured output must use application/json.");
   const nextConfig = {
-    maxOutputTokens: 8_192,
+    maxOutputTokens: 16_384,
+    // MEDIUM/16k passed the wider layout review; retain room for layout JSON.
+    // Server-owned: callers cannot raise the budget or reasoning level.
+    thinkingConfig: { thinkingLevel: "MEDIUM" },
     responseMimeType: "application/json",
     responseSchema: canonicalizeSchema(config.responseSchema),
   };
@@ -290,7 +295,7 @@ const canonicalizeStructuredText = (payload, config) => {
     operation: "structured-content",
     cost: 1,
     request: {
-      model: payload.model,
+      model: PLAQUE_TEXT_MODEL,
       contents,
       config: nextConfig,
     },
@@ -390,7 +395,7 @@ export const validateGeminiGenerateContentRequest = (value) => {
   if (typeof payload.model !== "string") fail("Gemini request model must be a string.");
   const config = assertRecord(payload.config, "config");
 
-  if (payload.model === STRUCTURED_TEXT_MODEL) return canonicalizeStructuredText(payload, config);
+  if (STRUCTURED_TEXT_MODELS.has(payload.model)) return canonicalizeStructuredText(payload, config);
   if (payload.model === PROMPT_ENHANCEMENT_MODEL) return canonicalizePromptEnhancement(payload, config);
   const imageProfile = IMAGE_MODEL_PROFILES.get(payload.model);
   if (imageProfile) return canonicalizeImageGeneration(payload, config, imageProfile);
@@ -405,7 +410,54 @@ export const parseGeminiRequestJson = (value) => {
   }
 };
 
+export class GeminiGenerationTimeoutError extends Error {
+  constructor() {
+    super(GENERATION_TIMEOUT_MESSAGE);
+    this.name = 'GeminiGenerationTimeoutError';
+  }
+}
+
+// The abort cancels the upstream HTTP request. The race also guarantees a
+// bounded response if a transport fails to honour cancellation. No retry or
+// model fallback is made here. Image operations retain their existing path.
+export const generateGeminiContent = async (ai, validated, { timeoutMs = TEXT_GENERATION_TIMEOUT_MS } = {}) => {
+  if (validated.operation !== 'structured-content') {
+    return ai.models.generateContent(validated.request);
+  }
+  const controller = new AbortController();
+  let timer;
+  const deadline = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new GeminiGenerationTimeoutError());
+      controller.abort();
+    }, timeoutMs);
+  });
+  try {
+    return await Promise.race([
+      ai.models.generateContent({
+        ...validated.request,
+        config: { ...validated.request.config, abortSignal: controller.signal },
+      }),
+      deadline,
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 export const formatGeminiProxyError = (error, requestId) => {
+  if (error instanceof GeminiGenerationTimeoutError) {
+    return {
+      statusCode: 504,
+      payload: {
+        error: GENERATION_TIMEOUT_MESSAGE,
+        code: 'generation_timeout',
+        retryable: false,
+        requestId,
+      },
+      shouldLog: true,
+    };
+  }
   if (error instanceof GeminiProxyRequestError) {
     return {
       statusCode: error.statusCode,

@@ -6,8 +6,10 @@ dist/
 data/
 logs/
 output/
+tmp/
 test-results/
 playwright-report/
+.playwright-cli/
 *.log
 .admin-test-*
 /*.png

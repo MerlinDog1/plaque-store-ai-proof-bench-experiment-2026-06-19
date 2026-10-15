@@ -1,5 +1,7 @@
 # Supabase Setup
 
+**Existing production installation:** see [the 21 September 2026 handover](supabase-r2-handover-2026-09-21.md). Its database already exists in `fygweiynqkglmjwqlouc`, and artwork uses R2. The initial setup below is not an instruction to create, reset or replace the live project.
+
 This repo now has a Supabase-first business data foundation. Supabase owns
 customers, proof sessions, carts, orders, artifacts, email logs, Stripe webhook
 idempotency, and admin notes. Stripe, Resend, and Gemini should reference these

@@ -103,13 +103,37 @@ assert.equal(canonicalOrder.plaqueState.productionSvg, undefined);
 assert.equal(canonicalOrder.plaqueState.visualProofSvg, undefined);
 assert.equal(canonicalOrder.plaqueState.visualProofPng, undefined);
 assert.equal(canonicalOrder.plaqueState.productionArtworkPdf, undefined);
-assert.equal(canonicalOrder.proofPackage.productionSvg, null);
-assert.equal(canonicalOrder.proofPackage.visualProofSvg, null);
+assert.equal(canonicalOrder.proofPackage.productionSvg.includes("onload"), false);
+assert.equal(canonicalOrder.proofPackage.productionSvg.includes("<script"), false);
+assert.equal(canonicalOrder.proofPackage.visualProofSvg.includes("<script"), false);
 assert.equal(canonicalOrder.proofPackage.visualProofPng, null);
 assert.equal(canonicalOrder.proofPackage.productionArtworkPdf, null);
-assert.equal(canonicalOrder.proofPackage.artworkStatus, "pending_sanitized_upload");
+assert.equal(canonicalOrder.proofPackage.artworkStatus, "stored_sanitized_svg");
 assert(checkoutRecoveryTokenMatches(canonicalOrder, canonicalOrder.metadata.checkoutRecoveryToken));
 assert(!checkoutRecoveryTokenMatches(canonicalOrder, "not-the-token"));
+
+const realVisualProof = '<svg xmlns="http://www.w3.org/2000/svg"><text>REAL CUSTOMER WORDING</text></svg>';
+const placeholderProductionProof = '<svg xmlns="http://www.w3.org/2000/svg"><text>REVIEW PROOF</text></svg>';
+const placeholderProofOrder = buildServerCheckoutOrder({
+  ...basePayload(),
+  orderSnapshot: {
+    ...basePayload().orderSnapshot,
+    proofPackage: {
+      productionSvg: placeholderProductionProof,
+      visualProofSvg: realVisualProof,
+    },
+  },
+}, {
+  orderId: secondServerId,
+  now: fixedNow,
+});
+assert.equal(
+  placeholderProofOrder.proofPackage.productionSvg.includes("REAL CUSTOMER WORDING"),
+  true,
+  "Checkout must not store the review placeholder ahead of the real visual proof.",
+);
+assert.equal(placeholderProofOrder.proofPackage.productionSvg.includes("REVIEW PROOF"), false);
+
 assert.equal(stripCheckoutSecretsFromOrder(canonicalOrder).metadata.checkoutRecoveryToken, undefined);
 assert.equal(stripCheckoutSecretsFromOrder({
   ...canonicalOrder,
@@ -149,6 +173,13 @@ assert.throws(
 
 const stripeCheckout = buildStripeCheckoutParams(canonicalOrder, { uiMode: "hosted" });
 const stripeParams = stripeCheckout.params;
+assert.equal(stripeParams.get('payment_method_types[0]'), 'card', 'Unverified delayed-payment configuration must remain disabled.');
+const previousDynamicMethods = process.env.STRIPE_DYNAMIC_PAYMENT_METHODS;
+process.env.STRIPE_DYNAMIC_PAYMENT_METHODS = 'true';
+assert.equal(buildStripeCheckoutParams(canonicalOrder).params.has('payment_method_types[0]'), false);
+if (previousDynamicMethods === undefined) delete process.env.STRIPE_DYNAMIC_PAYMENT_METHODS;
+else process.env.STRIPE_DYNAMIC_PAYMENT_METHODS = previousDynamicMethods;
+assert.equal(stripeParams.get('shipping_options[0][shipping_rate_data][delivery_estimate][minimum][value]'), '6');
 assert.equal(stripeParams.get("client_reference_id"), firstServerId);
 assert.equal(stripeParams.get("line_items[0][price_data][unit_amount]"), String(baseTotalPence));
 assert.equal(stripeParams.get("line_items[0][price_data][currency]"), "gbp");
@@ -156,6 +187,7 @@ assert.equal(stripeParams.get("line_items[0][price_data][product_data][name]"), 
 assert.equal(stripeCheckout.idempotencyKey, firstServerId);
 assert.equal(buildStripeRequestHeaders(stripeCheckout.idempotencyKey, "sk_test_example")["Idempotency-Key"], firstServerId);
 const cancelUrl = new URL(stripeParams.get("cancel_url"));
+assert.equal(cancelUrl.pathname, "/design");
 assert.equal(cancelUrl.searchParams.get("order"), firstServerId);
 assert.equal(cancelUrl.searchParams.get("proof"), canonicalOrder.metadata.checkoutRecoveryToken);
 
@@ -196,6 +228,18 @@ assert.throws(
   }),
   /Durable Supabase order storage is required/,
 );
+
+// Length alone must not block an approved proof at either checkout policy layer.
+for (const length of [360, 361, 650, 4000]) {
+  const payload = basePayload();
+  payload.orderSnapshot.inscription = "A".repeat(length);
+  assert.equal(getCheckoutPriceBreakdown(baseState, payload.orderSnapshot.inscription).quoteRequired, false);
+  const order = buildServerCheckoutOrder(payload, { orderId: firstServerId, now: fixedNow });
+  assert.doesNotThrow(() => buildStripeCheckoutParams(order));
+}
+for (const stateChange of [{ memorialImageEnabled: true }, { shape: "heart" }, { width: 500 }]) {
+  assert.equal(getCheckoutPriceBreakdown({ ...baseState, ...stateChange }, "A".repeat(650)).quoteRequired, true);
+}
 
 const manualQuotePayload = basePayload();
 manualQuotePayload.orderSnapshot.state.width = 500;

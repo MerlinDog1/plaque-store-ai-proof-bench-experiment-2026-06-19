@@ -1,4 +1,10 @@
-import { Shape } from '../types';
+import { PlaqueState, Shape } from '../types';
+
+export function normalizeCurvedFixings<T extends Partial<Pick<PlaqueState, 'shape' | 'fixingHoleCount'>>>(state: T): T {
+  return state.shape === Shape.Circle || state.shape === Shape.Oval
+    ? { ...state, fixingHoleCount: 2 }
+    : state;
+}
 
 export function isBenchPlaqueFormat(width: number, height: number, shape: Shape) {
   if (shape !== Shape.Rect) return false;

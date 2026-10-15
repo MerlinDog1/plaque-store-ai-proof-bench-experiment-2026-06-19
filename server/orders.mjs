@@ -1,7 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { getSupabaseServiceClient } from "./supabase.mjs";
+import { storeArtwork, loadArtwork } from "./artwork-storage.mjs";
 import { getInternalProductionEmails, sendEmail } from "./email.mjs";
+import { isOnePoundTestOrder, assertOnePoundTestSession } from "./onePoundTest.mjs";
 import {
   sanitizeOrderSvgFields,
   sanitizeProofPackageSvg,
@@ -61,11 +64,16 @@ const shouldUseLocalFallback = (error) => {
   return message.includes("42p01") || message.includes("pgrst205") || message.includes("storefront_orders");
 };
 
+const isSupabaseUnavailable = (error) => {
+  const diagnostic = `${error?.message || ""} ${error?.details || ""}`.toLowerCase();
+  return diagnostic.includes("fetch failed") || diagnostic.includes("enotfound");
+};
+
 const isMissingProofClaimFunction = (error) => ["42883", "PGRST202"].includes(String(error?.code || "").toUpperCase());
 
-const toRow = (input) => {
+const toRow = async (input) => {
   const order = sanitizeOrderSvgFields(input);
-  return {
+  return storeArtwork({
     id: order.id,
     stripe_checkout_session_id: order.stripeCheckoutSessionId || null,
     stripe_payment_intent_id: order.stripePaymentIntentId || null,
@@ -89,7 +97,7 @@ const toRow = (input) => {
     approved_at: order.approvedAt || null,
     paid_at: order.paidAt || null,
     updated_at: nowIso(),
-  };
+  }, `order:${order.id}`);
 };
 
 const listOrderColumns = [
@@ -111,44 +119,49 @@ const listOrderColumns = [
   "shipping_address",
   "email_events",
   "events",
+  "metadata",
   "approved_at",
   "paid_at",
   "created_at",
   "updated_at",
 ].join(",");
 
-const fromRow = (row) => row && sanitizeOrderSvgFields({
-  id: row.id,
-  stripeCheckoutSessionId: row.stripe_checkout_session_id,
-  stripePaymentIntentId: row.stripe_payment_intent_id,
-  customerEmail: row.customer_email,
-  customerName: row.customer_name,
-  status: row.status,
-  paymentStatus: row.payment_status,
-  fulfilmentStatus: row.fulfilment_status,
-  totalPence: row.total_pence,
-  currency: row.currency,
-  productTitle: row.product_title,
-  inscription: row.inscription,
-  plaqueState: row.plaque_state || {},
-  priceBreakdown: row.price_breakdown || {},
-  proofPackage: row.proof_package || {},
-  shippingAddress: row.shipping_address || {},
-  stripeSession: row.stripe_session || {},
-  emailEvents: row.email_events || [],
-  events: row.events || [],
-  metadata: row.metadata || {},
-  approvedAt: row.approved_at,
-  paidAt: row.paid_at,
-  createdAt: row.created_at,
-  updatedAt: row.updated_at,
-});
+const fromRow = async (storedRow) => {
+  if (!storedRow) return storedRow;
+  const row = await loadArtwork(storedRow, `order:${storedRow.id}`);
+  return sanitizeOrderSvgFields({
+    id: row.id,
+    stripeCheckoutSessionId: row.stripe_checkout_session_id,
+    stripePaymentIntentId: row.stripe_payment_intent_id,
+    customerEmail: row.customer_email,
+    customerName: row.customer_name,
+    status: row.status,
+    paymentStatus: row.payment_status,
+    fulfilmentStatus: row.fulfilment_status,
+    totalPence: row.total_pence,
+    currency: row.currency,
+    productTitle: row.product_title,
+    inscription: row.inscription,
+    plaqueState: row.plaque_state || {},
+    priceBreakdown: row.price_breakdown || {},
+    proofPackage: row.proof_package || {},
+    shippingAddress: row.shipping_address || {},
+    stripeSession: row.stripe_session || {},
+    emailEvents: row.email_events || [],
+    events: row.events || [],
+    metadata: row.metadata || {},
+    approvedAt: row.approved_at,
+    paidAt: row.paid_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  });
+};
 
 const orderProofSessionToken = (orderId) => `storefront-order-${orderId}`;
 
-const toProofSessionOrderRow = (input) => {
+const toProofSessionOrderRow = async (input) => {
   const order = sanitizeOrderSvgFields(input);
-  return {
+  return storeArtwork({
     public_token: orderProofSessionToken(order.id),
     email: order.customerEmail || null,
     status: "converted",
@@ -163,10 +176,12 @@ const toProofSessionOrderRow = (input) => {
       order,
     },
     expires_at: null,
-  };
+  }, `order:${order.id}`);
 };
 
-const fromProofSessionOrderRow = (row) => {
+const fromProofSessionOrderRow = async (storedRow) => {
+  if (!storedRow?.metadata?.order) return null;
+  const row = await loadArtwork(storedRow, `order:${storedRow.metadata.order.id}`);
   const order = row?.metadata?.order;
   if (!order) return null;
   return sanitizeOrderSvgFields({
@@ -233,21 +248,21 @@ const shippingFromPaymentIntent = (paymentIntent) => {
 const saveOrderToProofSessions = async (supabase, order) => {
   const { data, error } = await supabase
     .from("proof_sessions")
-    .upsert(toProofSessionOrderRow(order), { onConflict: "public_token" })
+    .upsert(await toProofSessionOrderRow(order), { onConflict: "public_token" })
     .select("email, wording, plaque_state, price_estimate_pence, currency, metadata, created_at, updated_at")
     .single();
   if (error) throw error;
-  return fromProofSessionOrderRow(data) || order;
+  return (await fromProofSessionOrderRow(data)) || order;
 };
 
 const insertOrderToProofSessions = async (supabase, order) => {
   const { data, error } = await supabase
     .from("proof_sessions")
-    .insert(toProofSessionOrderRow(order))
+    .insert(await toProofSessionOrderRow(order))
     .select("email, wording, plaque_state, price_estimate_pence, currency, metadata, created_at, updated_at")
     .single();
   if (error) throw error;
-  return fromProofSessionOrderRow(data) || order;
+  return (await fromProofSessionOrderRow(data)) || order;
 };
 
 const getProofSessionOrderById = async (supabase, orderId) => {
@@ -285,12 +300,15 @@ const listProofSessionOrders = async (supabase) => {
       "total_pence:metadata->order->totalPence",
       "paid_at:metadata->order->paidAt",
       "approved_at:metadata->order->approvedAt",
+      "order_metadata:metadata->order->metadata",
     ].join(","))
     .eq("metadata->>kind", "storefront_order")
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw error;
-  return data.map((row) => {
+  const hydratedRows = [];
+  for (const row of data) hydratedRows.push(await loadArtwork(row, `order:${row.order_id}`));
+  return hydratedRows.map((row) => {
     const shippingAddress = row.shipping_address && Object.keys(row.shipping_address).length
       ? row.shipping_address
       : shippingFromPaymentIntent(row.stripe_payment_intent_id);
@@ -314,7 +332,7 @@ const listProofSessionOrders = async (supabase) => {
       stripeSession: {},
       emailEvents: [],
       events: [],
-      metadata: {},
+      metadata: row.order_metadata || {},
       approvedAt: row.approved_at || row.created_at,
       paidAt: row.paid_at || row.created_at,
       createdAt: row.created_at,
@@ -425,7 +443,7 @@ const saveOrder = async (order) => {
   if (supabase) {
     const { data, error } = await supabase
       .from("storefront_orders")
-      .upsert(toRow(next), { onConflict: "id" })
+      .upsert(await toRow(next), { onConflict: "id" })
       .select("*")
       .single();
     if (error && !shouldUseLocalFallback(error)) throw error;
@@ -467,10 +485,11 @@ const insertNewOrder = async (order) => {
   if (supabase) {
     const { data, error } = await supabase
       .from("storefront_orders")
-      .insert(toRow(next))
+      .insert(await toRow(next))
       .select("*")
       .single();
     if (error && isUniqueViolation(error)) throw new OrderIdCollisionError(next.id);
+    if (error && isSupabaseUnavailable(error)) throw new DurableOrderStorageError();
     if (error && !shouldUseLocalFallback(error)) throw error;
     if (error && shouldUseLocalFallback(error)) {
       try {
@@ -498,7 +517,9 @@ export const createPendingOrder = async (payload, dependencies = {}) => {
   const maxAttempts = dependencies.maxAttempts || 5;
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    const order = buildServerCheckoutOrder(payload, { orderId: idFactory() });
+    const order = buildServerCheckoutOrder(payload, {
+      orderId: idFactory(), sandboxTest: dependencies.sandboxTest === true, liveTest: dependencies.liveTest === true,
+    });
     try {
       return await insertOrder(order);
     } catch (error) {
@@ -520,6 +541,7 @@ export const createExternalOrder = async (payload) => {
 export const attachStripeSessionToOrder = async (orderId, session) => {
   const order = await getOrderById(orderId);
   if (!order) throw new Error(`Order ${orderId} was not found.`);
+  assertOnePoundTestSession(order, session);
   if (order.stripeCheckoutSessionId && session?.id !== order.stripeCheckoutSessionId) {
     throw new StripePaymentVerificationError("Stripe session ID did not match the stored checkout session.");
   }
@@ -538,6 +560,9 @@ export const attachStripeSessionToOrder = async (orderId, session) => {
 };
 
 export const prepareVisualProofAttachment = (order, payload = {}) => {
+  if (isOnePoundTestOrder(order)) {
+    throw new CheckoutRequestError("Verification orders do not create production proof packs.", 409, "test_order_no_fulfilment");
+  }
   const sessionId = String(payload.stripeCheckoutSessionId || "").trim();
   const storedSessionId = String(order?.stripeCheckoutSessionId || "").trim();
   if (!storedSessionId || !sessionId || sessionId !== storedSessionId) {
@@ -612,7 +637,7 @@ const claimVisualProofInStorefrontOrders = async (originalOrder, preparedOrder) 
   const { data, error } = await supabase.rpc("claim_storefront_order_proof", {
     p_order_id: originalOrder.id,
     p_stripe_checkout_session_id: originalOrder.stripeCheckoutSessionId,
-    p_proof_package: preparedOrder.proofPackage,
+    p_proof_package: await storeArtwork(preparedOrder.proofPackage, `order:${originalOrder.id}`),
     p_event: preparedOrder.events[0],
   });
   if (error) {
@@ -621,7 +646,7 @@ const claimVisualProofInStorefrontOrders = async (originalOrder, preparedOrder) 
   }
 
   const claimedRow = Array.isArray(data) ? data[0] : data;
-  if (claimedRow) return { attached: true, order: fromRow(claimedRow) };
+  if (claimedRow) return { attached: true, order: await fromRow(claimedRow) };
 
   const storedOrder = await getOrderById(originalOrder.id);
   if (
@@ -720,7 +745,8 @@ export const listOrders = async () => {
         return readLocalOrders();
       }
     }
-    const storefrontOrders = data.map(fromRow);
+    const storefrontOrders = [];
+    for (const row of data) storefrontOrders.push(await fromRow(row));
     if (storefrontOrders.length) return storefrontOrders;
     try {
       const fallbackOrders = await listProofSessionOrders(supabase);
@@ -755,6 +781,7 @@ export const isPaidCompleteStripeSession = (session) => (
 
 export const assertStripePaymentMatchesOrder = (order, session) => {
   if (!order) throw new StripePaymentVerificationError("Paid Stripe session could not be matched to an order.");
+  assertOnePoundTestSession(order, session);
   if (!session?.id || !order.stripeCheckoutSessionId || session.id !== order.stripeCheckoutSessionId) {
     throw new StripePaymentVerificationError("Stripe session ID did not match the stored checkout session.");
   }
@@ -795,6 +822,8 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
     || (referencedOrderId ? await findById(referencedOrderId) : null);
   assertStripePaymentMatchesOrder(order, session);
 
+  if (order.paymentStatus === 'refunded') return order;
+
   const wasAlreadyPaid = order.paymentStatus === "paid";
   const shipping = session?.shipping_details || session?.shipping || {};
   const customer = session?.customer_details || {};
@@ -804,13 +833,13 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
   const paymentEvent = wasAlreadyPaid
     ? []
     : [{ type: "payment_received", label: "Payment received", at: paidAt }];
-  const next = await persistOrder({
+  const paymentUpdate = {
     ...order,
     customerEmail,
     customerName,
-    status: "paid",
+    status: isOnePoundTestOrder(order) ? "issue" : wasAlreadyPaid ? order.status : "paid",
     paymentStatus: "paid",
-    fulfilmentStatus: order.fulfilmentStatus || "not_started",
+    fulfilmentStatus: isOnePoundTestOrder(order) ? "issue" : order.fulfilmentStatus || "not_started",
     stripeCheckoutSessionId: sessionId || order.stripeCheckoutSessionId,
     stripePaymentIntentId: paymentIntentId(session.payment_intent) || order.stripePaymentIntentId,
     shippingAddress: shipping.address ? { name: shipping.name, phone: customer.phone || session.phone_number || "", ...shipping.address } : order.shippingAddress,
@@ -818,21 +847,37 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
     metadata: {
       ...(order.metadata || {}),
       checkoutRecoveryToken: null,
+      paymentReceiptPending: !wasAlreadyPaid && !isOnePoundTestOrder(order),
     },
     paidAt,
     events: [
       ...paymentEvent,
       ...(order.events || []),
     ],
-  });
+  };
+  const db = dependencies.saveOrder ? null : getSupabaseServiceClient();
+  let next;
+  if (db) {
+    const { data, error } = await db.rpc('apply_instaplaque_checkout_session', {
+      p_order_id: order.id, p_session: session, p_kind: 'paid', p_test: isOnePoundTestOrder(order),
+    });
+    if (error) throw error;
+    next = await fromRow(data);
+  } else {
+    next = await persistOrder(paymentUpdate);
+  }
 
-  if (!wasAlreadyPaid) {
-    await sendRecordedEmail(next, "customer-order-confirmation", customerEmail);
+  if ((!wasAlreadyPaid || next.metadata?.paymentReceiptPending) && !isOnePoundTestOrder(next)) {
+    next = await sendRecordedEmail(next, "customer-order-confirmation", customerEmail, { idempotent: true });
 
     if (next.proofPackage?.productionArtworkPdf) {
       for (const internalEmail of internalProductionEmails()) {
-        await sendRecordedEmail(next, "admin-new-paid-order", internalEmail).catch(() => null);
+        next = await sendRecordedEmail(next, "admin-new-paid-order", internalEmail, { idempotent: true });
       }
+    }
+    if (db) {
+      const { error } = await db.rpc('complete_instaplaque_payment_emails', { p_order_id: order.id });
+      if (error) throw error;
     }
   }
 
@@ -840,9 +885,14 @@ export const markOrderPaidFromSession = async (session, dependencies = {}) => {
 };
 
 export const sendAndRecordOrderEmail = async (order, template, recipient, extra = {}) => {
-  const result = await sendEmail({ to: recipient, template, order, extra });
+  // Includes proof attachments, admin re-sends and delayed review requests.
+  if (isOnePoundTestOrder(order)) return order;
+  if (extra.idempotent && (order.emailEvents || []).some(event => event.type === template && event.recipient === recipient && event.status === 'sent')) return order;
+  const idempotencyKey = extra.idempotent ? createHash('sha256').update(`${order.id}:${template}:${recipient}`).digest('hex') : undefined;
+  const result = await sendEmail({ to: recipient, template, order, extra, idempotencyKey });
+  if (extra.idempotent && result.status !== 'sent') throw new Error('Order receipt sending is unavailable; retry required.');
   const event = {
-    id: `${order.id}-${template}-${Date.now()}`,
+    id: idempotencyKey || `${order.id}-${template}-${Date.now()}`,
     type: template,
     recipient,
     status: result.status,
@@ -851,6 +901,12 @@ export const sendAndRecordOrderEmail = async (order, template, recipient, extra 
     subject: result.message?.subject || "",
     at: nowIso(),
   };
+  const db = getSupabaseServiceClient();
+  if (db) {
+    const { data, error } = await db.rpc('record_instaplaque_order_email', { p_order_id: order.id, p_event: event });
+    if (error) throw error;
+    return fromRow(data);
+  }
   return saveOrder({
     ...order,
     emailEvents: [event, ...(order.emailEvents || [])],
@@ -864,8 +920,15 @@ export const sendAndRecordOrderEmail = async (order, template, recipient, extra 
 export const updateOrderStatus = async (orderId, payload) => {
   const order = await getOrderById(orderId);
   if (!order) throw new Error(`Order ${orderId} was not found.`);
+  if (isOnePoundTestOrder(order)) {
+    throw new CheckoutRequestError("Verification orders cannot enter production or dispatch.", 409, "test_order_no_fulfilment");
+  }
   const status = payload.status || order.status;
   const fulfilmentStatus = payload.fulfilmentStatus || order.fulfilmentStatus;
+  if (order.paymentStatus !== 'paid' && (['in_production', 'ready_to_dispatch', 'dispatched', 'complete'].includes(status)
+    || ['in_production', 'ready_to_dispatch', 'dispatched', 'delivered'].includes(fulfilmentStatus))) {
+    throw new CheckoutRequestError('Confirm payment in Stripe before moving an order into production or dispatch.', 409, 'payment_required_for_fulfilment');
+  }
   const event = {
     type: "status_changed",
     label: `Status changed to ${status}`,

@@ -1,4 +1,5 @@
 const { chromium } = require("playwright");
+const { enterProofBench, clickJourney } = require("./designer-test-helpers.cjs");
 
 const APP_URL = process.env.APP_URL || "http://127.0.0.1:4179/";
 
@@ -6,15 +7,6 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function clickJourney(page, label) {
-  await page.evaluate((stepLabel) => {
-    const button = Array.from(document.querySelectorAll("button")).find((candidate) =>
-      new RegExp(`^\\d+\\s*${stepLabel}$`, "i").test((candidate.textContent || "").trim().replace(/\s+/g, "")),
-    );
-    if (!button) throw new Error(`${stepLabel} journey button was not found`);
-    button.click();
-  }, label.replace(/\s+/g, "\\s*"));
-}
 
 async function setShape(page, shapeLabel) {
   await clickJourney(page, "Size\\/Shape");
@@ -30,10 +22,7 @@ async function readScallopPath(page, capDiameter = 10, borderStyle = "Scalloped"
     await page.getByRole("button", { name: /15mm caps/i }).click();
   }
   await page.getByRole("button", { name: /^Border$/i }).click();
-  const borderToggle = page.getByRole("button", { name: /^Border (on|off)$/i });
-  if (/off/i.test(await borderToggle.textContent())) {
-    await borderToggle.click();
-  }
+  await page.getByRole("button", { name: /^Single\s/i }).click();
   await page.getByRole("button", { name: new RegExp(`^${borderStyle}`, "i") }).click();
   await page.waitForFunction(() => !!document.querySelector("#border-layer .engraved-border"), null, { timeout: 5000 });
   return page.evaluate(() => {

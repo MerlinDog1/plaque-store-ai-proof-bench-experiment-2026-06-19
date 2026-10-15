@@ -1,4 +1,5 @@
 const { chromium } = require("playwright");
+const { enterProofBench, clickJourney } = require("./designer-test-helpers.cjs");
 
 const APP_URL = process.env.APP_URL || "http://127.0.0.1:4179/";
 
@@ -6,18 +7,6 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function enterProofBench(page) {
-  if (await page.locator(".proofbench-board").count()) return;
-  await page.evaluate(() => {
-    const button = Array.from(document.querySelectorAll("button")).find((candidate) => {
-      const text = (candidate.textContent || "").trim().replace(/\s+/g, " ");
-      return text === "Design" || text === "Design now" || text === "Design a plaque";
-    });
-    if (!button) throw new Error("Design entry button was not found");
-    button.click();
-  });
-  await page.waitForSelector(".proofbench-board", { timeout: 5000 });
-}
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -45,13 +34,7 @@ async function enterProofBench(page) {
   assert(!initialState.activeButtons.some((label) => /border|decorative caps|countersunk screws|hidden adhesive/i.test(label)),
     `Initial state should not preselect border or fixings. Active: ${initialState.activeButtons.join(", ")}`);
 
-  await page.evaluate(() => {
-    const button = Array.from(document.querySelectorAll("button")).find((candidate) =>
-      /^4\s*Fixings\s*and\s*border$/i.test((candidate.textContent || "").trim().replace(/\s+/g, "")),
-    );
-    if (!button) throw new Error("Fixings and border journey button was not found");
-    button.click();
-  });
+  await clickJourney(page, "Fixings and border");
 
   const panelState = await page.evaluate(() => {
     const text = document.body.innerText;
@@ -88,21 +71,15 @@ async function enterProofBench(page) {
     };
   });
   assert(!borderPanelState.hasInsetOption, "Inset border option should not appear in the border menu.");
-  assert(!borderPanelState.hasScalloped, "Border style options should stay hidden until Border is switched on.");
-  assert(!borderPanelState.activeButtons.some((label) => /Border off|Single|Double|Scalloped/i.test(label)),
-    `Border controls should open without a preselected border style. Active: ${borderPanelState.activeButtons.join(", ")}`);
-  await page.getByRole("button", { name: /^Border off$/i }).click();
-  const enabledBorderPanelState = await page.evaluate(() => ({
-    hasInsetOption: Array.from(document.querySelectorAll("button")).some((button) => /^Inset\b/i.test((button.textContent || "").trim())),
-    hasScallopedOption: Array.from(document.querySelectorAll("button")).some((button) => /^Scalloped/i.test((button.textContent || "").trim())),
-  }));
-  assert(!enabledBorderPanelState.hasInsetOption, "Inset border option should not appear after Border is switched on.");
-  assert(enabledBorderPanelState.hasScallopedOption, "Full-size plaques should still offer scalloped borders after Border is switched on.");
+  assert(borderPanelState.hasScalloped, "Full-size plaques should offer scalloped styles in the border menu.");
+  assert(borderPanelState.activeButtons.some(label => /^Border off/.test(label)), "Border off should remain selected until a style is chosen.");
+  await page.getByRole("button", { name: /^Single\s/i }).click();
+  assert(await page.locator("#border-layer .engraved-border").count() > 0, "Choosing a style should render the border.");
   await page.getByRole("button", { name: /^Fixings$/i }).click();
 
   await page.getByRole("button", { name: /Decorative caps/i }).click();
   await page.waitForFunction(() => /Cap diameter/i.test(document.body.innerText), null, { timeout: 5000 });
-  await page.getByRole("button", { name: /Countersunk screws/i }).click();
+  await page.getByRole("button", { name: /Domed cross-head screws/i }).click();
   await page.waitForFunction(() => !/Cap diameter/i.test(document.body.innerText), null, { timeout: 5000 });
 
   await page.getByRole("button", { name: /Expand proof into 3D preview/i }).click();
@@ -152,16 +129,14 @@ async function enterProofBench(page) {
   await page.waitForFunction(() => !document.querySelector(".proofbench-stage")?.classList.contains("is-expanded"), null, { timeout: 5000 });
 
   await page.getByRole("button", { name: /Go to Size\/Shape/i }).click();
-  await page.getByRole("button", { name: /Bench plaque/i }).click();
+  await page.getByRole("button", { name: /150 x 50 mm/i }).click();
   await page.waitForFunction(() => {
     const svg = document.querySelector(".proofbench-svg-preview svg");
     return svg?.viewBox.baseVal.width === 150 && svg?.viewBox.baseVal.height === 50;
   }, null, { timeout: 5000 });
   await page.getByRole("button", { name: /Go to Fixings and border/i }).click();
   await page.getByRole("button", { name: /^Border$/i }).click();
-  if (/off/i.test(await page.getByRole("button", { name: /^Border (on|off)$/i }).textContent())) {
-    await page.getByRole("button", { name: /^Border off$/i }).click();
-  }
+  await page.getByRole("button", { name: /^Single\s/i }).click();
   const benchBorderMenu = await page.evaluate(() => ({
     hasInsetOption: Array.from(document.querySelectorAll("button")).some((button) => /^Inset\b/i.test((button.textContent || "").trim())),
     hasScallopedOption: Array.from(document.querySelectorAll("button")).some((button) => /^Scalloped/i.test((button.textContent || "").trim())),
@@ -201,17 +176,16 @@ async function enterProofBench(page) {
   await page.getByRole("button", { name: /Close expanded 3D proof/i }).click();
   await page.waitForFunction(() => !document.querySelector(".proofbench-stage")?.classList.contains("is-expanded"), null, { timeout: 5000 });
   await page.getByRole("button", { name: /Go to Wood/i }).click();
-  await page.getByRole("button", { name: /^Add £69$/i }).click();
+  assert(await page.getByRole("button", { name: "Not available", exact: true }).isDisabled(), "Bench-format plaques should not offer wood backing.");
+  assert(await page.locator(".wood-backing").count() === 0, "Bench proof should have no wood backing.");
+  await clickJourney(page, "Size/Shape");
+  await page.getByRole("button", { name: /A5 landscape/i }).click();
+  await clickJourney(page, "Wood");
+  await page.getByRole("button", { name: /^Add £/i }).click();
   await page.waitForFunction(() => !!document.querySelector(".wood-backing"), null, { timeout: 5000 });
-  const benchWoodState = await page.evaluate(() => ({
-    hasWood: !!document.querySelector(".wood-backing"),
-    text: document.body.innerText,
-  }));
-  assert(benchWoodState.hasWood, "Bench-format plaques should allow customers to add a wood backing.");
-  assert(/Added £69/.test(benchWoodState.text), "Bench wood toggle should show the selected wood add-on price.");
 
   await page.getByRole("button", { name: /Go to Material/i }).click();
-  await page.getByRole("button", { name: /Brushed steel/i }).click();
+  await page.getByRole("button", { name: /Brushed stainless/i }).click();
   await page.waitForFunction(() => {
     const cutLine = document.querySelector(".cut-line");
     return cutLine?.getAttribute("fill") === "url(#brushedSteel)";
@@ -262,13 +236,13 @@ async function enterProofBench(page) {
     await mobile.waitForTimeout(100);
   };
 
-  await clickMobileButton(/Colour/);
+  await clickJourney(mobile, "Colour");
   await clickMobileButton(/^Cream$/);
-  await clickMobileButton(/Fixings/);
+  await clickJourney(mobile, "Fixings and border");
   await clickMobileButton(/Decorative caps/);
-  await clickMobileButton(/Wood/);
+  await clickJourney(mobile, "Wood");
   await clickMobileButton(/^Add £/);
-  await clickMobileButton(/Bevel edge/);
+
 
   await mobile.getByRole("button", { name: /Expand proof into 3D preview/i }).click();
   await mobile.waitForFunction(() => document.querySelector(".proofbench-stage")?.classList.contains("is-expanded"), null, { timeout: 5000 });
@@ -304,10 +278,10 @@ async function enterProofBench(page) {
   assert(mobileState.metalThicknessMm === "1.5", `3D preview should model the plaque face as 1.5mm metal. State: ${JSON.stringify(mobileState)}`);
   assert(mobileState.woodThicknessMm === "15", `3D preview should model the wood backing as 15mm. State: ${JSON.stringify(mobileState)}`);
   assert(mobileState.woodOverhangMm === "12.5", `3D preview should model the wood backing as 12.5mm wider on each edge. State: ${JSON.stringify(mobileState)}`);
-  assert(mobileState.woodEdge === "bevel", `3D preview should expose the selected bevelled wood edge. State: ${JSON.stringify(mobileState)}`);
-  assert(mobileState.woodBevelSizeMm === "8.4", `3D preview should add a reduced but still visible real bevel to the bevelled wood edge. State: ${JSON.stringify(mobileState)}`);
-  assert(mobileState.woodBevelSides === "front", `3D preview should bevel only the visible/front face of the wood backing, not both front and back. State: ${JSON.stringify(mobileState)}`);
-  assert(mobileState.capThicknessMm === "2", `3D preview should model decorative caps as 2mm raised hardware. State: ${JSON.stringify(mobileState)}`);
+  assert(mobileState.woodEdge === "bevel", `3D preview should expose the standard bevelled wood edge. State: ${JSON.stringify(mobileState)}`);
+  assert(mobileState.woodBevelSizeMm === "8.4", `3D preview should model the standard bevel on the wood edge. State: ${JSON.stringify(mobileState)}`);
+  assert(mobileState.woodBevelSides === "front", `3D preview should bevel only the visible front face of the backing. State: ${JSON.stringify(mobileState)}`);
+  assert(mobileState.capThicknessMm === "1.25", `3D preview should model decorative caps as 1.25mm raised hardware. State: ${JSON.stringify(mobileState)}`);
   assert(mobileState.faceWidthMm === "297" && mobileState.faceHeightMm === "210",
     `3D proof texture should be cropped to the metal plaque face, not stretched over the larger wood board. State: ${JSON.stringify(mobileState)}`);
   assert(mobileState.proofTextFills.some((fill) => fill === "rgb(245, 230, 200)"),

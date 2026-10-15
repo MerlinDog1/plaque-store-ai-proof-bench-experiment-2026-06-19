@@ -1,4 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { getProductionEstimate } from '../services/productionTime.mjs';
+import { isOnePoundTestOrder, isOnePoundSandboxOrder, isOnePoundLiveOrder, assertOnePoundTestSession } from "./onePoundTest.mjs";
 import {
   assertServerCheckoutOrderIsPayable,
   resolveCheckoutOrigin,
@@ -8,6 +10,20 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
 const stripePublishableKey = process.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
 const stripeWebhookToleranceSeconds = 5 * 60;
+
+export const getStripeTestConfig = () => ({
+  configured: /^sk_test_\S+$/.test(process.env.STRIPE_TEST_SECRET_KEY || ""),
+});
+
+export const requireStripeTestKey = () => {
+  if (!getStripeTestConfig().configured) {
+    const error = new Error("Sandbox checkout is not connected yet. Add STRIPE_TEST_SECRET_KEY in Vercel; leave the live Stripe keys unchanged.");
+    error.statusCode = 503;
+    error.code = "stripe_test_not_configured";
+    throw error;
+  }
+  return process.env.STRIPE_TEST_SECRET_KEY;
+};
 
 const getStripeKeyMode = (key) => {
   if (key.startsWith("sk_test_") || key.startsWith("pk_test_")) return "test";
@@ -25,6 +41,20 @@ export const getStripeConfig = () => ({
   configured: Boolean(stripeSecretKey && stripePublishableKey),
 });
 
+export const getLiveVerificationConfig = () => ({
+  configured: getStripeKeyMode(stripeSecretKey) === "live" && getStripeKeyMode(stripePublishableKey) === "live",
+  mode: "live",
+});
+
+export const requireLiveVerificationKeys = () => {
+  if (!getLiveVerificationConfig().configured) {
+    const error = new Error("Live checkout is not configured. No order or payment was created.");
+    error.statusCode = 503;
+    error.code = "live_checkout_not_configured";
+    throw error;
+  }
+};
+
 export const buildStripeCheckoutParams = (order, options = {}) => {
   const { currency, productTitle, totalPence } = assertServerCheckoutOrderIsPayable(order);
   const orderId = order.id;
@@ -41,9 +71,14 @@ export const buildStripeCheckoutParams = (order, options = {}) => {
     params.set("return_url", `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
   } else {
     params.set("success_url", `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}&order=${encodeURIComponent(orderId)}`);
-    params.set("cancel_url", `${origin}/checkout?stripe=cancelled&order=${encodeURIComponent(orderId)}&proof=${encodeURIComponent(recoveryToken)}`);
+    params.set("cancel_url", `${origin}/design?stripe=cancelled&order=${encodeURIComponent(orderId)}&proof=${encodeURIComponent(recoveryToken)}`);
   }
-  params.set("payment_method_types[0]", "card");
+  // Enable only after this site's live webhook subscribes to completed,
+  // expired, async_payment_succeeded and async_payment_failed. The flag is
+  // scoped to this deployment; never change the other brands' settings here.
+  if (process.env.STRIPE_DYNAMIC_PAYMENT_METHODS !== 'true' || isOnePoundTestOrder(order)) {
+    params.set("payment_method_types[0]", "card");
+  }
   if (customerEmail.includes("@")) {
     params.set("customer_email", customerEmail);
   }
@@ -57,14 +92,31 @@ export const buildStripeCheckoutParams = (order, options = {}) => {
   params.set("shipping_options[0][shipping_rate_data][type]", "fixed_amount");
   params.set("shipping_options[0][shipping_rate_data][fixed_amount][amount]", "0");
   params.set("shipping_options[0][shipping_rate_data][fixed_amount][currency]", currency);
-  params.set("shipping_options[0][shipping_rate_data][display_name]", "UK mainland delivery included");
+  params.set("shipping_options[0][shipping_rate_data][display_name]", "UK delivery included");
   params.set("shipping_options[0][shipping_rate_data][delivery_estimate][minimum][unit]", "business_day");
-  params.set("shipping_options[0][shipping_rate_data][delivery_estimate][minimum][value]", "5");
+  const deliveryDays = String(getProductionEstimate(order.plaqueState).deliveryDays);
+  params.set("shipping_options[0][shipping_rate_data][delivery_estimate][minimum][value]", deliveryDays);
   params.set("shipping_options[0][shipping_rate_data][delivery_estimate][maximum][unit]", "business_day");
-  params.set("shipping_options[0][shipping_rate_data][delivery_estimate][maximum][value]", "5");
+  params.set("shipping_options[0][shipping_rate_data][delivery_estimate][maximum][value]", deliveryDays);
   params.set("metadata[order_id]", orderId);
   params.set("metadata[source]", "instaplaque");
   params.set("metadata[payload_version]", order.metadata.checkoutPolicyVersion);
+
+  if (isOnePoundTestOrder(order)) {
+    const live = isOnePoundLiveOrder(order);
+    if (uiMode !== "hosted") throw new Error("The verification payment uses hosted checkout.");
+    params.set("cancel_url", `${origin}/checkout-test.html`);
+    params.set("line_items[0][price_data][product_data][name]", `${live ? "£1 live verification" : "TEST ONLY"} — ${productTitle}`);
+    params.set("line_items[0][price_data][product_data][description]", live
+      ? "Real £1 payment authorised by the owner to verify checkout. No manufacture or delivery."
+      : "£1 sandbox rehearsal. No real payment, manufacture or delivery.");
+    params.set("shipping_options[0][shipping_rate_data][display_name]", "Test only — no delivery");
+    for (const key of [...params.keys()]) {
+      if (key.includes("delivery_estimate")) params.delete(key);
+    }
+    params.set(live ? "metadata[live_verification_policy]" : "metadata[checkout_test_policy]",
+      live ? order.metadata.liveVerificationPolicy : order.metadata.checkoutTestPolicy);
+  }
 
   return { idempotencyKey: orderId, params, uiMode };
 };
@@ -76,22 +128,27 @@ export const buildStripeRequestHeaders = (idempotencyKey, secretKey = stripeSecr
 });
 
 export const createStripeCheckoutSession = async (order, options = {}) => {
-  if (!stripeSecretKey) {
+  const sandboxTest = isOnePoundSandboxOrder(order);
+  if (isOnePoundLiveOrder(order)) requireLiveVerificationKeys();
+  // Never fall back to the live key when the private sandbox is unconfigured.
+  const selectedSecretKey = sandboxTest ? requireStripeTestKey() : stripeSecretKey;
+  const selectedPublishableKey = sandboxTest ? "" : stripePublishableKey;
+  if (!selectedSecretKey) {
     throw new Error("STRIPE_SECRET_KEY is not configured on the server.");
   }
-  if (!stripePublishableKey) {
+  if (!sandboxTest && !selectedPublishableKey) {
     throw new Error("VITE_STRIPE_PUBLISHABLE_KEY is not configured on the server.");
   }
 
-  const secretKeyMode = getStripeKeyMode(stripeSecretKey);
-  const publishableKeyMode = getStripeKeyMode(stripePublishableKey);
+  const secretKeyMode = getStripeKeyMode(selectedSecretKey);
+  const publishableKeyMode = getStripeKeyMode(selectedPublishableKey);
   if (!secretKeyMode) {
     throw new Error("STRIPE_SECRET_KEY must be a Stripe test or live secret key.");
   }
-  if (!publishableKeyMode) {
+  if (!sandboxTest && !publishableKeyMode) {
     throw new Error("VITE_STRIPE_PUBLISHABLE_KEY must be a Stripe test or live publishable key.");
   }
-  if (secretKeyMode !== publishableKeyMode) {
+  if (!sandboxTest && secretKeyMode !== publishableKeyMode) {
     throw new Error("Stripe secret and publishable keys must both be test keys or both be live keys.");
   }
 
@@ -103,7 +160,7 @@ export const createStripeCheckoutSession = async (order, options = {}) => {
   try {
     response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
-      headers: buildStripeRequestHeaders(idempotencyKey),
+      headers: buildStripeRequestHeaders(idempotencyKey, selectedSecretKey),
       body: params,
       signal: controller.signal,
     });
@@ -121,12 +178,13 @@ export const createStripeCheckoutSession = async (order, options = {}) => {
     const message = data?.error?.message || `Stripe checkout session failed (${response.status}).`;
     throw new Error(message);
   }
+  assertOnePoundTestSession(order, data);
 
   return {
     id: data.id,
     url: data.url,
     clientSecret: data.client_secret,
-    publishableKey: stripePublishableKey,
+    publishableKey: selectedPublishableKey,
     uiMode,
     mode: data.mode,
     paymentStatus: data.payment_status,
@@ -137,18 +195,21 @@ export const createStripeCheckoutSession = async (order, options = {}) => {
   };
 };
 
-export const retrieveStripeCheckoutSession = async (sessionId) => {
-  if (!stripeSecretKey) throw new Error("STRIPE_SECRET_KEY is not configured on the server.");
+export const retrieveStripeCheckoutSession = async (sessionId, order = null) => {
+  const selectedSecretKey = isOnePoundSandboxOrder(order) ? requireStripeTestKey() : stripeSecretKey;
+  if (!selectedSecretKey) throw new Error("STRIPE_SECRET_KEY is not configured on the server.");
   const url = new URL(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`);
   url.searchParams.set("expand[]", "payment_intent");
   url.searchParams.append("expand[]", "line_items");
   const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${stripeSecretKey}` },
+    headers: { Authorization: `Bearer ${selectedSecretKey}` },
+    signal: AbortSignal.timeout(15000),
   });
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data?.error?.message || `Could not retrieve Stripe checkout session (${response.status}).`);
   }
+  assertOnePoundTestSession(order, data);
   return data;
 };
 

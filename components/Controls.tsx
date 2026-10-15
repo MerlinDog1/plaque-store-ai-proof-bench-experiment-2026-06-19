@@ -1,3 +1,6 @@
+import { getProductionEstimate } from '../services/productionTime.mjs';
+import { FontSizeInput } from './FontSizeInput';
+import { ProofEmailForm } from './ProofEmailForm';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   DesignStyle,
@@ -22,6 +25,8 @@ import type { GenerationPhase } from '../services/geminiService';
 import { BENCH_SAFE_MARGIN_PERCENT, DEFAULT_SAFE_MARGIN_PERCENT, SAFE_MARGIN_PRESETS, getSafeMarginMm, getSafeMarginsMm, getSafeMarginPercent } from '../services/safeMargin';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { estimatePlaqueBasePrice, estimateWoodAddOn } from '../services/pricing';
+import { isOnePoundTestPlaque } from '../services/onePoundTestPlaque.mjs';
+import { OwnerTestCheckout } from './OwnerTestCheckout';
 
 const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
@@ -142,47 +147,6 @@ const fitsCustomFastTurnaround = (width: number, height: number) => {
   return longest <= CUSTOM_FAST_TURNAROUND_WIDTH_MM && shortest <= CUSTOM_FAST_TURNAROUND_HEIGHT_MM;
 };
 
-const sizeMatches = (width: number, height: number, targetWidth: number, targetHeight: number) => {
-  return Math.max(width, height) === Math.max(targetWidth, targetHeight)
-    && Math.min(width, height) === Math.min(targetWidth, targetHeight);
-};
-
-const isA4OrA5Size = (state: Pick<PlaqueState, 'width' | 'height'>) => {
-  return sizeMatches(state.width, state.height, 210, 148)
-    || sizeMatches(state.width, state.height, 297, 210);
-};
-
-const STANDARD_TURNAROUND_SIZES = [
-  ...SIZE_PRESETS,
-  ...BENCH_SIZE_PRESETS,
-  { width: 300, height: 200 },
-  { width: 400, height: 300 },
-];
-
-const isStandardTurnaroundSize = (state: Pick<PlaqueState, 'width' | 'height' | 'shape'>) => {
-  if (state.shape === Shape.Heart) return false;
-  if (!fitsCustomFastTurnaround(state.width, state.height)) return false;
-  return STANDARD_TURNAROUND_SIZES.some((preset) => sizeMatches(state.width, state.height, preset.width, preset.height));
-};
-
-const getTurnaroundEstimate = (state: PlaqueState) => {
-  if (state.wood) {
-    return isA4OrA5Size(state)
-      ? { days: 10, label: 'Estimated 10 working days after proof approval and payment', note: 'A4/A5 plaques with wood backing need extra workshop time.' }
-      : { days: 15, label: 'Estimated 15 working days after proof approval and payment', note: 'Custom or non-standard wood-backed plaques need a longer workshop slot.' };
-  }
-
-  if (!isStandardTurnaroundSize(state)) {
-    return { days: 15, label: 'Estimated 15 working days after proof approval and payment', note: 'Custom sizes and non-standard combinations need a longer workshop slot.' };
-  }
-
-  if (state.material === Material.AgedBrass) {
-    return { days: 7, label: 'Estimated 7 working days after proof approval and payment', note: 'Aged brass needs additional finishing time.' };
-  }
-
-  return { days: 5, label: 'Estimated 5 working days after proof approval and payment', note: 'Standard size, standard finish, fitting the 600 x 400mm production bed.' };
-};
-
 const STEP_COPY = [
   {
     eyebrow: 'Step 1 of 7',
@@ -225,12 +189,18 @@ interface Props {
   state: PlaqueState;
   onChange: (newState: Partial<PlaqueState>) => void;
   onGenerate: (text: string) => void;
+  onRequestDesign: () => void;
+  onCreateManualLayout: () => void;
+  onApplyLayoutInstruction: (instruction: string) => void;
+  onUndoLayout: () => void;
+  canUndoLayout: boolean;
+  layoutMessage: string;
   onClear: () => void;
   prompt: string;
   onPromptChange: (prompt: string) => void;
   guidance: string;
   onGuidanceChange: (guidance: string) => void;
-  onGeneratedSvgContentChange: (svgContent: string) => void;
+  onGeneratedSvgContentChange: (svgContent: string, style?: DesignStyle) => boolean;
   isGenerating: boolean;
   generationPhase: GenerationPhase;
   onMemorialImageUpload: (file: File) => void;
@@ -257,6 +227,7 @@ interface Props {
   onRealisticPreviewAspectRatioChange: (aspectRatio: string) => void;
   onExportSvg: () => void;
   onExportPdf: () => void;
+  onEmailProof: (email: string, requestId: string, website: string) => Promise<void>;
   onPrint: () => void;
 }
 
@@ -292,6 +263,7 @@ interface GeneratedTextControl {
   fontFamily: string;
   fontSize: number;
   fontWeight: string;
+  y: number;
 }
 
 const fieldClass =
@@ -467,6 +439,7 @@ export const Controls: React.FC<Props> = ({
   state,
   onChange,
   onGenerate,
+  onRequestDesign, onCreateManualLayout, onApplyLayoutInstruction, onUndoLayout, canUndoLayout, layoutMessage,
   onClear,
   prompt,
   onPromptChange,
@@ -499,6 +472,7 @@ export const Controls: React.FC<Props> = ({
   onRealisticPreviewAspectRatioChange,
   onExportSvg,
   onExportPdf,
+  onEmailProof,
   onPrint,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -516,6 +490,7 @@ export const Controls: React.FC<Props> = ({
   const [customHeightInput, setCustomHeightInput] = useState(String(state.height));
   const [fixingsBorderMode, setFixingsBorderMode] = useState<'fixings' | 'border'>('fixings');
   const [manualTextOpen, setManualTextOpen] = useState(false);
+  const [layoutInstruction, setLayoutInstruction] = useState('');
   const [turnaroundToast, setTurnaroundToast] = useState<string | null>(null);
   const [baseGeneratedSvgContent, setBaseGeneratedSvgContent] = useState<string | null>(null);
   const [instantStyleVariant, setInstantStyleVariant] = useState(1);
@@ -545,7 +520,7 @@ export const Controls: React.FC<Props> = ({
     const textarea = inscriptionTextareaRef.current;
     if (!textarea) return;
     textarea.style.height = 'auto';
-    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 240), 360);
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 150), 300);
     textarea.style.height = `${nextHeight}px`;
     textarea.style.overflowY = textarea.scrollHeight > nextHeight ? 'auto' : 'hidden';
   };
@@ -569,10 +544,11 @@ export const Controls: React.FC<Props> = ({
         return {
           index,
           label: (text.textContent || `Line ${index + 1}`).replace(/\s+/g, ' ').trim() || `Line ${index + 1}`,
-          text: text.textContent || '',
+          text: text.querySelector('tspan') ? Array.from(text.querySelectorAll('tspan')).map(span => span.textContent || '').join('\n') : text.textContent || '',
           fontFamily: AVAILABLE_FONTS.includes(fontFamily) ? fontFamily : 'Lato',
           fontSize: Number.isFinite(fontSize) ? fontSize : 12,
           fontWeight,
+          y: Number(text.getAttribute('y') || 0),
         };
       });
     } catch {
@@ -598,6 +574,7 @@ export const Controls: React.FC<Props> = ({
   const clampDimension = (value: number) => Math.min(MAX_CUSTOM_DIMENSION_MM, Math.max(MIN_CUSTOM_DIMENSION_MM, Number.isFinite(value) ? value : MIN_CUSTOM_DIMENSION_MM));
   const isHeartPlaque = state.shape === Shape.Heart;
   const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
+  const constrainTextFit = isBenchPlaque || state.shape !== Shape.Rect || state.fixing === Fixing.Caps || state.fixing === Fixing.Screws;
   const activeBenchSize = hasSelectedSize ? BENCH_SIZE_PRESETS.find((preset) => (
     state.shape === preset.shape && state.width === preset.width && state.height === preset.height
   )) : undefined;
@@ -609,9 +586,7 @@ export const Controls: React.FC<Props> = ({
   const shapeLabel = state.shape === Shape.Circle ? 'Circle' : state.shape === Shape.Oval ? 'Oval' : 'Rectangle';
   const customFastTurnaround = fitsCustomFastTurnaround(state.width, state.height) && !state.wood;
   const customLongTurnaround = !customFastTurnaround;
-  const customTurnaroundLabel = customFastTurnaround
-    ? 'Custom size: 5 working days'
-    : 'Custom size: 10 working days';
+  const customTurnaroundLabel = `Production: ${getProductionEstimate(state).days} working days`;
 
   useEffect(() => {
     setCustomWidthInput(String(state.width));
@@ -657,7 +632,7 @@ export const Controls: React.FC<Props> = ({
       return;
     }
     if (activeStep !== 0 || sizeMode !== 'custom' || !customLongTurnaround) return;
-    const message = '10 working days due to the custom size.';
+    const message = getProductionEstimate(state).label;
     setTurnaroundToast(message);
     const timer = window.setTimeout(() => setTurnaroundToast(null), 4200);
     return () => window.clearTimeout(timer);
@@ -707,7 +682,7 @@ export const Controls: React.FC<Props> = ({
     if (key === 'fixing' && value === Fixing.Screws) {
       onChange({
         fixing: value,
-        fixingHoleCount: state.fixing === Fixing.Screws ? state.fixingHoleCount : isBenchPlaque ? 2 : 4,
+        fixingHoleCount: state.shape !== Shape.Rect ? 2 : state.fixing === Fixing.Screws ? state.fixingHoleCount : isBenchPlaque ? 2 : 4,
       });
       return;
     }
@@ -784,10 +759,9 @@ export const Controls: React.FC<Props> = ({
     if (style === null) {
       if (baseGeneratedSvgContent) {
         instantStyleApplyingRef.current = true;
-        onGeneratedSvgContentChange(baseGeneratedSvgContent);
+        if (!onGeneratedSvgContentChange(baseGeneratedSvgContent, DesignStyle.Auto)) { instantStyleApplyingRef.current = false; return; }
       }
       setInstantStyleVariant(1);
-      onChange({ designStyle: DesignStyle.Auto });
       return;
     }
 
@@ -835,9 +809,8 @@ export const Controls: React.FC<Props> = ({
         .map(node => new XMLSerializer().serializeToString(node).replace(/\sxmlns="http:\/\/www\.w3\.org\/2000\/svg"/g, ''))
         .join('\n');
       instantStyleApplyingRef.current = true;
-      onGeneratedSvgContentChange(nextSvg);
+      if (!onGeneratedSvgContentChange(nextSvg, style)) { instantStyleApplyingRef.current = false; return; }
       setInstantStyleVariant(variant);
-      onChange({ designStyle: style });
     } catch (error) {
       console.warn('Instant style change failed.', error);
     }
@@ -867,7 +840,7 @@ export const Controls: React.FC<Props> = ({
   });
   const woodAddOnPrice = estimateWoodAddOn(state);
   const baseProofPrice = Math.max(0, price - (state.wood ? woodAddOnPrice : 0));
-  const turnaroundEstimate = getTurnaroundEstimate(state);
+  const turnaroundEstimate = getProductionEstimate(state);
   const checkoutReady = isProductionReady && proofApproved && !checkoutSubmitting;
 
   const handleProofCheckoutSubmit = async (event: React.FormEvent) => {
@@ -894,7 +867,9 @@ export const Controls: React.FC<Props> = ({
     if (!isProductionReady && proofApproved) setProofApproved(false);
   }, [isProductionReady, proofApproved]);
 
-  const updateGeneratedTextLine = (lineIndex: number, changes: Partial<Pick<GeneratedTextControl, 'text' | 'fontFamily' | 'fontSize' | 'fontWeight'>>) => {
+  useEffect(() => { setProofApproved(false); }, [state, prompt]);
+
+  const updateGeneratedTextLine = (lineIndex: number, changes: Partial<Pick<GeneratedTextControl, 'text' | 'fontFamily' | 'fontSize' | 'fontWeight' | 'y'>>) => {
     if (!state.generatedSvgContent || typeof DOMParser === 'undefined') return;
     try {
       const doc = new DOMParser().parseFromString(
@@ -907,19 +882,29 @@ export const Controls: React.FC<Props> = ({
 
       if (typeof changes.text === 'string') {
         const tspans = Array.from(text.querySelectorAll('tspan'));
-        if (tspans.length) {
-          tspans[0].textContent = changes.text;
-          tspans.slice(1).forEach(tspan => tspan.remove());
+        const lines = changes.text.split('\n');
+        if (tspans.length || lines.length > 1) {
+          const fontSize = Number(text.getAttribute('font-size') || 12);
+          const template = tspans[0]?.cloneNode(false) as Element | undefined;
+          text.textContent = '';
+          lines.forEach((line, index) => {
+            const span = template ? template.cloneNode(false) as Element : doc.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+            span.removeAttribute('y'); span.removeAttribute('dx');
+            span.setAttribute('x', text.getAttribute('x') || '0');
+            span.setAttribute('dy', index === 0 ? '0' : String(fontSize * 1.3));
+            span.textContent = line; text.appendChild(span);
+          });
         } else {
           text.textContent = changes.text;
         }
       }
+      if (typeof changes.y === 'number' && Number.isFinite(changes.y)) text.setAttribute('y', changes.y.toFixed(2));
       if (changes.fontFamily) {
         text.setAttribute('font-family', changes.fontFamily);
         text.querySelectorAll('tspan').forEach(tspan => tspan.setAttribute('font-family', changes.fontFamily!));
       }
       if (typeof changes.fontSize === 'number' && Number.isFinite(changes.fontSize)) {
-        const nextSize = Math.min(120, Math.max(4, changes.fontSize));
+        const nextSize = Math.min(120, Math.max(0.01, changes.fontSize));
         text.setAttribute('font-size', nextSize.toFixed(2));
         text.querySelectorAll('tspan').forEach(tspan => tspan.setAttribute('font-size', nextSize.toFixed(2)));
       }
@@ -970,7 +955,7 @@ export const Controls: React.FC<Props> = ({
               </span>
             )}
           </span>
-          <span className="mt-1 block text-[11px] font-bold opacity-70">{preset.note}</span>
+          <span className="mt-1 block text-[11px] font-bold opacity-70">{preset.note.replace(/^\d+\s*x\s*\d+\s*mm\s*·\s*/i, '')}</span>
         </span>
         <span className="flex flex-col items-end gap-1">
           <span className="size-dims rounded-full px-2 py-1 text-[10px] font-black">{preset.width} x {preset.height}</span>
@@ -1026,19 +1011,12 @@ export const Controls: React.FC<Props> = ({
 
             <div className="mt-3 rounded-lg border border-[#d7b66a]/25 bg-[#1b231f] px-3 py-2 text-xs font-black text-[#f2d688]">
               {sizeMode === 'standard'
-                ? 'Standard sizes: 5 working days'
+                ? `Production: ${getProductionEstimate(state).days} working days`
                 : customTurnaroundLabel}
             </div>
 
             {sizeMode === 'standard' && (
-              <div className="flex items-start justify-between gap-3">
-                <div className="mt-4">
-                  <div className="text-sm font-black">Standard size presets</div>
-                  <div className="text-xs leading-5 text-[#6a746d]">
-                    Choose a common production size. Prices update from your selected material.
-                  </div>
-                </div>
-              </div>
+              <p className="mt-4 text-xs leading-5 text-[#6a746d]">Sizes in millimetres. Prices update with your finish.</p>
             )}
 
             {sizeMode === 'standard' ? (
@@ -1354,8 +1332,8 @@ export const Controls: React.FC<Props> = ({
                             {isBenchPlaque ? 'Bench plaque' : 'Visible screws'}
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          {[2, 4].map((count) => (
+                        <div className={`grid ${state.shape === Shape.Rect ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                          {(state.shape === Shape.Rect ? [2, 4] : [2]).map((count) => (
                             <button
                               key={count}
                               onClick={() => update('fixingHoleCount', count)}
@@ -1366,7 +1344,7 @@ export const Controls: React.FC<Props> = ({
                           ))}
                         </div>
                         <div className="mt-2 text-xs font-bold leading-5 text-[#6a746d]">
-                          Choose two end holes or four corner screws. Production artwork marks 3mm drill holes; the proof shows the 5mm domed screw heads.
+                          {state.shape === Shape.Rect ? 'Choose two end holes or four corner screws.' : 'Round plaques have two screws, one on each side.'} Production artwork marks 3mm drill holes; the proof shows the 5mm domed screw heads.
                         </div>
                       </div>
                     )}
@@ -1881,33 +1859,14 @@ export const Controls: React.FC<Props> = ({
               </div>
               <div className="min-w-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f2d688]">
-                  Intelligent typesetter
+                  Your inscription
                 </p>
-                <h3 className="mt-1 text-lg font-black leading-tight text-[#edf3ef]">
-                  Enter your text below and our typesetter will lay it out.
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-[#aab8b0]">
-                  It corrects spelling and grammar, chooses the line breaks, hierarchy, spacing, and font balance for the plaque size you have selected.
+                <p className="mt-2 text-xs leading-5 text-[#aab8b0]">
+                  Type your wording exactly as it should appear. We’ll arrange the layout for you.
                 </p>
               </div>
             </div>
-            {isGenerating && (
-              <div className="mt-4 rounded-lg border border-[#f2d688]/25 bg-[#f2d688]/10 p-3" role="status" aria-live="polite">
-                <div className="flex items-center justify-between gap-3 text-xs font-black uppercase tracking-[0.14em] text-[#f7d98b]">
-                  <span>
-                    {generationPhase === 'concept'
-                      ? 'Reading the wording'
-                      : generationPhase === 'transcribe'
-                        ? 'Setting the plaque type'
-                        : 'Layout in progress'}
-                  </span>
-                  <span className="ai-typesetter-dots" aria-hidden="true"><i /><i /><i /></span>
-                </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#edf3ef]/10">
-                  <div className="ai-typesetter-progress h-full rounded-full bg-[#f2d688]" />
-                </div>
-              </div>
-            )}
+
           </div>
 
           <div className="grid gap-3">
@@ -1923,14 +1882,17 @@ export const Controls: React.FC<Props> = ({
                   onPromptChange(e.target.value);
                   requestAnimationFrame(resizeInscriptionTextarea);
                 }}
+                spellCheck
+                aria-describedby="inscription-proofreading-note"
                 placeholder="Type the words you want on the plaque..."
-                className={`${fieldClass} mt-1 min-h-[240px] max-h-[360px] resize-none overflow-hidden normal-case leading-6 tracking-normal`}
+                className={`${fieldClass} mt-1 min-h-[150px] max-h-[300px] resize-none overflow-auto normal-case leading-6 tracking-normal`}
               />
             </div>
           </div>
 
           {!isIterating && (
           <div className="grid gap-2">
+            <p id="inscription-proofreading-note" className="text-xs leading-5 text-[#6a746d]">We check spelling and capitalisation when you generate. Review the corrected wording, especially names and dates, before ordering.</p>
             <button
               onClick={() => {
                 setManualTextOpen(false);
@@ -2042,22 +2004,15 @@ export const Controls: React.FC<Props> = ({
                           </button>
                           <label className="flex min-w-[176px] items-center gap-2 text-xs font-black text-[#aab8b0]">
                             <span>Size</span>
-                            <input
-                              type="text"
-                              inputMode="decimal"
-                              value={Number.isInteger(line.fontSize) ? String(line.fontSize) : line.fontSize.toFixed(1)}
-                              onChange={(event) => {
-                                const nextValue = Number(event.target.value);
-                                if (Number.isFinite(nextValue)) {
-                                  updateGeneratedTextLine(line.index, { fontSize: nextValue });
-                                }
-                              }}
+                            <FontSizeInput
+                              value={line.fontSize}
+                              label={`Font size for ${line.label}`}
+                              onCommit={fontSize => updateGeneratedTextLine(line.index, { fontSize })}
                               className="h-[38px] w-[58px] rounded-lg border border-[#edf3ef]/18 bg-[#0f1817] px-2 text-sm font-black text-[#edf3ef] outline-none transition focus:border-[#c6932e] focus:ring-4 focus:ring-[#b98235]/20"
-                              aria-label={`Font size for ${line.label}`}
                             />
                             <NumberStepper
                               value={line.fontSize}
-                              min={4}
+                              min={0.01}
                               max={120}
                               step={0.5}
                               label={`font size for ${line.label}`}
@@ -2090,11 +2045,29 @@ export const Controls: React.FC<Props> = ({
                 </div>
                 </div>
               )}
+              <div className="rounded-lg border border-[#c6c8bd] bg-[#fffaf0] p-3">
+                <label htmlFor="layout-instruction" className="block text-sm font-black">Adjust with AI</label>
+                <p className="my-2 text-xs leading-5 text-[#59675d]">Give one set of layout instructions. Your wording stays unchanged; edit the wording field or manual lines to change the words.</p>
+                <textarea id="layout-instruction" value={layoutInstruction} maxLength={1200} disabled={isGenerating}
+                  onChange={event => setLayoutInstruction(event.target.value)}
+                  placeholder="Make the name larger and the dates smaller. Keep everything else as it is."
+                  className={`${fieldClass} min-h-[100px] normal-case leading-6 tracking-normal`} />
+                <div className="my-2 flex flex-wrap gap-2">
+                  {['Make the name larger', 'Bring the lines closer together', 'Use one font throughout', 'Make the dates smaller'].map(example => (
+                    <button key={example} type="button" disabled={isGenerating} onClick={() => setLayoutInstruction(example)}
+                      className="rounded-full border border-[#c6c8bd] px-3 py-2 text-xs">{example}</button>
+                  ))}
+                </div>
+                <button type="button" disabled={isGenerating || !layoutInstruction.trim()} onClick={() => onApplyLayoutInstruction(layoutInstruction)}
+                  className="min-h-[48px] w-full rounded-lg bg-[#f2d688] p-3 text-sm font-black text-[#13201c] disabled:opacity-50">{isGenerating ? 'Working…' : 'Apply changes'}</button>
+              </div>
               <button onClick={onClear} className="min-h-[48px] w-full rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 py-3 text-sm font-black text-[#ff9b7c]">
                 Clear inscription layout
               </button>
             </div>
           )}
+          {layoutMessage && <p role="status" aria-live="polite" className="rounded-lg border border-[#c6c8bd] bg-[#fffaf0] p-3 text-sm leading-6">{layoutMessage}</p>}
+          {canUndoLayout && <button type="button" disabled={isGenerating} onClick={onUndoLayout} className="min-h-[44px] w-full rounded-lg border border-[#b98235] p-3 text-sm font-black">Undo last change</button>}
         </section>
       )}
 
@@ -2243,10 +2216,10 @@ export const Controls: React.FC<Props> = ({
               />
               <FineTuneControl
                 label="Text scale"
-                valueLabel={`${Math.round(state.inscriptionScale * 100)}%`}
-                value={Math.round(state.inscriptionScale * 100)}
+                valueLabel={`${Math.round(Math.min(constrainTextFit ? 1 : 2.5, state.inscriptionScale) * 100)}%`}
+                value={Math.round(Math.min(constrainTextFit ? 1 : 2.5, state.inscriptionScale) * 100)}
                 min={40}
-                max={250}
+                max={constrainTextFit ? 100 : 250}
                 step={5}
                 locked={!fineTuneUnlocked}
                 onChange={(value) => onChange({ inscriptionScale: value / 100 })}
@@ -2297,6 +2270,7 @@ export const Controls: React.FC<Props> = ({
           </div>
           )}
 
+          {isOnePoundTestPlaque(state) ? <OwnerTestCheckout /> : (
           <div className="proof-checkout-panel rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Order summary</div>
             <div className="mt-3 space-y-2 text-sm font-bold text-[#2f3832]">
@@ -2311,7 +2285,7 @@ export const Controls: React.FC<Props> = ({
                 </div>
               )}
               <div className="flex items-center justify-between gap-3 border-b border-[rgba(84,72,52,0.12)] pb-2">
-                <span>UK mainland delivery</span>
+                <span>UK delivery</span>
                 <strong>Included</strong>
               </div>
               <div className="flex items-center justify-between gap-3 pt-1 text-lg text-[#17231f]">
@@ -2320,7 +2294,7 @@ export const Controls: React.FC<Props> = ({
               </div>
             </div>
             <p className="mt-3 text-xs font-bold leading-5 text-[#6a746d]">
-              UK mainland delivery included. Highlands, islands and non-UK delivery can be worked out at checkout.
+              UK delivery included. Includes Northern Ireland, the Highlands and islands. Contact us for delivery outside the UK.
             </p>
             <div className="proof-turnaround mt-3 rounded-lg p-3">
               <div className="proof-turnaround-header">
@@ -2392,7 +2366,7 @@ export const Controls: React.FC<Props> = ({
                   {checkoutSubmitting ? 'Opening checkout...' : 'Continue to secure checkout'}
                 </button>
                 <div className="proof-stripe-note" aria-label={USE_CUSTOMER_COPY_PASS ? 'Secure checkout powered by Stripe' : 'Secure test checkout powered by Stripe'}>
-                  <span>Secure card checkout</span>
+                  <span>Secure checkout · available payment options shown next</span>
                   <img src="/site-images/powered-by-stripe-black.svg" alt="Powered by Stripe" loading="lazy" />
                 </div>
               </div>
@@ -2411,6 +2385,7 @@ export const Controls: React.FC<Props> = ({
                   Download proof PDF
                 </button>
               </div>
+              <ProofEmailForm onSend={onEmailProof} />
               {showAdminProofTools && adminProofToolsOpen && (
                 <button onClick={onSaveProof} className="min-h-[52px] rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] px-4 text-sm font-black text-[#2f3832]">
                   Save proof locally
@@ -2429,6 +2404,7 @@ export const Controls: React.FC<Props> = ({
             </div>
           </div>
 
+          )}
           {showAdminProofTools && adminProofToolsOpen && (
           <details className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
             <summary className="cursor-pointer text-sm font-black text-[#6a746d]">Production file for our workshop</summary>

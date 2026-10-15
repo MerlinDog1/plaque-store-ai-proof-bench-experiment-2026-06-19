@@ -1,6 +1,9 @@
 import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ensureInscriptionFonts } from '../services/inscriptionFonts';
 import { BorderStyle, PlaqueState, Shape, Fixing, Material, TEXT_COLOR_VALUES, MemorialImageMethod, DesignStyle, MemorialImageShape } from '../types';
+import { getFixingGeometry, getFixingPositions } from '../services/fixingGeometry';
 import { getInscriptionLayout } from '../services/inscriptionLayout';
+import { fitTextToEllipse } from '../services/circularTextFit';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { sanitizeSvgMarkup } from '../services/svgSanitizer.mjs';
 
@@ -213,51 +216,11 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const plateFill = state.reverseEtch ? engravedFill : fillUrl;
 
   // Calculations for holes/caps
-  const isScallopedBorder = state.borderStyle === BorderStyle.Scalloped || state.borderStyle === BorderStyle.DoubleScalloped;
-  const borderOuterInset = 3;
-  const borderInnerInset = 5;
-  const borderStrokeScale = state.width < 100 || state.height < 100 ? 0.5 : 1;
-  const fixingBorderClearance = state.fixing === Fixing.Screws ? 2.25 : 2;
-  const screwRadius = 2.5;
-  const capRadius = state.capSize / 2;
-  const fixingRadius = state.fixing === Fixing.Caps ? capRadius : screwRadius;
-  const scallopedCapCenterInset = state.capSize === 15 ? 12 : 10;
-  const standardCapBorderClearance = state.borderStyle === BorderStyle.Double ? 4 : 2;
-  const capBorderInset = state.borderStyle === BorderStyle.Double ? borderInnerInset : borderOuterInset;
-  const screwBorderInset = state.borderStyle === BorderStyle.Double ? borderInnerInset : borderOuterInset;
-  const borderedCapInset = isScallopedBorder
-    ? scallopedCapCenterInset
-    : capBorderInset + capRadius + standardCapBorderClearance;
-  const borderedFixingInset = state.fixing === Fixing.Caps
-    ? borderedCapInset
-    : screwBorderInset + fixingRadius + fixingBorderClearance;
-  const holeInset = state.border
-    ? borderedFixingInset
-    : state.fixing === Fixing.Screws ? 7 : 10 + (state.capSize === 15 ? 2 : 0);
-  const sideMountedFixings = state.shape !== Shape.Rect || state.height < 80;
+  const { isScallopedBorder, borderOuterInset, borderInnerInset, borderStrokeScale, fixingBorderClearance, screwRadius, capRadius, fixingRadius } = getFixingGeometry(state);
   const isBenchPlaque = isBenchPlaqueFormat(state.width, state.height, state.shape);
-  const requestedHoleCount = state.fixing === Fixing.Screws
-    ? state.fixingHoleCount ?? (isBenchPlaque ? 2 : 4)
-    : 2;
-
-  let holes: { x: number, y: number }[] = [];
+  const holes = getFixingPositions(state);
   const cx = offset + state.width / 2;
   const cy = offset + state.height / 2;
-
-  // Calculate fixing positions
-  if (hasVisibleFixings && !isHeartPlaque) {
-    const useCornerFixings = requestedHoleCount === 4 || (state.fixing === Fixing.Caps && !sideMountedFixings);
-    if (useCornerFixings) {
-      const x1 = offset + holeInset;
-      const x2 = offset + state.width - holeInset;
-      const y1 = offset + holeInset;
-      const y2 = offset + state.height - holeInset;
-      holes = [{ x: x1, y: y1 }, { x: x2, y: y1 }, { x: x2, y: y2 }, { x: x1, y: y2 }];
-    } else {
-      const xOffset = state.width / 2 - holeInset;
-      holes = [{ x: cx - xOffset, y: cy }, { x: cx + xOffset, y: cy }];
-    }
-  }
 
   // --- Auto-Scaling Text Logic ---
   const textGroupRef = useRef<SVGGElement>(null);
@@ -299,7 +262,25 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     state.borderStyle,
     state.capSize,
     state.fixing,
+    state.fixingHoleCount,
   ]);
+  const constrainTextFit = isBenchPlaque || hasVisibleFixings || state.shape !== Shape.Rect;
+  const fittedTextScale = constrainTextFit
+    ? Math.min(1, Math.max(0.1, state.inscriptionScale))
+    : Math.max(0.1, state.inscriptionScale);
+  const requestedOffsetX = constrainTextFit
+    ? Math.max(-layout.textW * (1 - fittedTextScale) / 2, Math.min(layout.textW * (1 - fittedTextScale) / 2, state.inscriptionOffsetX))
+    : state.inscriptionOffsetX;
+  const requestedOffsetY = constrainTextFit
+    ? Math.max(-layout.textH * (1 - fittedTextScale) / 2, Math.min(layout.textH * (1 - fittedTextScale) / 2, state.inscriptionOffsetY))
+    : state.inscriptionOffsetY;
+  // Constrain diagonal dragging as well as each axis; a rectangular clamp can
+  // move a small inscription's centre outside the ellipse and hide every line.
+  const offsetRadius = Math.hypot(requestedOffsetX / (layout.textW / 2), requestedOffsetY / (layout.textH / 2));
+  const offsetScale = layout.textEllipse && offsetRadius > 0
+    ? Math.min(1, (1 - fittedTextScale) / offsetRadius) : 1;
+  const fittedOffsetX = requestedOffsetX * offsetScale;
+  const fittedOffsetY = requestedOffsetY * offsetScale;
   const artworkX = layout.artX + state.memorialImageOffsetX;
   const artworkY = layout.artY + state.memorialImageOffsetY;
 
@@ -312,7 +293,14 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             // Preserve glyph proportions while filling the inscription box.
             const scaleX = layout.textW / bbox.width;
             const scaleY = layout.textH / bbox.height;
-            const scale = Math.min(scaleX, scaleY, 3.0) * Math.max(0.1, state.inscriptionScale);
+            let scale = Math.min(scaleX, scaleY, 3.0) * fittedTextScale;
+            if (layout.textEllipse) {
+              const lines = Array.from(textGroupRef.current.querySelectorAll('text')).flatMap(text => {
+                const spans = Array.from(text.querySelectorAll('tspan'));
+                return (spans.length ? spans : [text]).map(line => line.getBBox());
+              });
+              scale = fitTextToEllipse(lines, bbox, layout.textW, layout.textH, scale, fittedOffsetX, fittedOffsetY);
+            }
 
             // Center the text block
             const centerOffsetX = -(bbox.x + bbox.width / 2);
@@ -340,16 +328,16 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
 
     // Also try using the Font Loading API
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
+      ensureInscriptionFonts().then(() => document.fonts.ready).then(() => {
         if (!cancelled) requestAnimationFrame(measure);
-      });
+      }).catch(() => { /* Keep the preview usable; exports fail closed on missing fonts. */ });
     }
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [activeStep, state.designStyle, state.generatedSvgContent, state.width, state.height, state.shape, state.safeMargin, state.memorialImageMethod, state.memorialImagePreviewUrl, state.memorialImageSourceUrl, state.memorialImageSvg, state.inscriptionScale, layout.textW, layout.textH]);
+  }, [activeStep, state.designStyle, state.generatedSvgContent, state.width, state.height, state.shape, state.safeMargin, state.memorialImageMethod, state.memorialImagePreviewUrl, state.memorialImageSourceUrl, state.memorialImageSvg, state.inscriptionScale, fittedTextScale, fittedOffsetX, fittedOffsetY, layout.textW, layout.textH, layout.textEllipse]);
 
 
   // --- Border Path Logic ---
@@ -585,8 +573,8 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     </g>
   `;
   const promptContentByStep: Record<number, string> = {
-    0: materialPromptContent,
-    1: sizePromptContent,
+    0: sizePromptContent,
+    1: materialPromptContent,
     2: colourPromptContent,
     3: fixingsPromptContent,
     4: woodPromptContent,
@@ -619,7 +607,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
       {/* Background grid pattern */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(#d9b45f 1px, transparent 1px), linear-gradient(90deg, #d9b45f 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
 
-      <div className="no-print absolute right-3 top-3 z-20 hidden flex-wrap items-center justify-end gap-1 text-[11px] font-black text-[#9a6a16] md:flex">
+      <div className="designer-preview-tools no-print absolute right-3 top-3 z-20 hidden flex-wrap items-center justify-end gap-1 text-[11px] font-black text-[#9a6a16] md:flex">
         <button
           type="button"
           onClick={() => updatePreviewZoom(previewZoom - 25)}
@@ -901,7 +889,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
           )}
 
           {/* Texture Overlay */}
-          {((state.material.includes('brushed') && state.material !== Material.BrushedSteel) || state.material.includes('aged')) && (
+          {!state.reverseEtch && ((state.material.includes('brushed') && state.material !== Material.BrushedSteel) || state.material.includes('aged')) && (
             state.shape === Shape.Rect ? (
               <rect x={offset} y={offset} width={state.width} height={state.height} rx={cornerR} fill="transparent" filter="url(#noise)" className="visual-effect" />
             ) : state.shape === Shape.Heart ? (
@@ -911,7 +899,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             )
           )}
 
-          {textureUrl && (
+          {!state.reverseEtch && textureUrl && (
             state.shape === Shape.Rect ? (
               <rect
                 x={offset} y={offset} width={state.width} height={state.height} rx={cornerR}
@@ -933,7 +921,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             )
           )}
 
-          {state.material === Material.BrushedBrass && (
+          {!state.reverseEtch && state.material === Material.BrushedBrass && (
             <g className="visual-effect" style={{ mixBlendMode: 'soft-light' }}>
               {state.shape === Shape.Rect ? (
                 <>
@@ -963,7 +951,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             </g>
           )}
 
-          {state.material === Material.PolishedSteel && (
+          {!state.reverseEtch && state.material === Material.PolishedSteel && (
             state.shape === Shape.Rect ? (
               <rect
                 x={offset} y={offset} width={state.width} height={state.height} rx={cornerR}
@@ -986,7 +974,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
           )}
 
           {/* Aged Patina Overlay */}
-          {state.material === Material.AgedBrass && (
+          {!state.reverseEtch && state.material === Material.AgedBrass && (
             state.shape === Shape.Rect ? (
               <rect
                 x={offset} y={offset} width={state.width} height={state.height} rx={cornerR}
@@ -1116,13 +1104,13 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
           )}
 
           {/* Text Layer (AI Generated or Default) */}
-          <g transform={`translate(${layout.textCx + state.inscriptionOffsetX}, ${layout.textCy + state.inscriptionOffsetY})`}>
+          <g transform={`translate(${layout.textCx + fittedOffsetX}, ${layout.textCy + fittedOffsetY})`}>
             <g
               id="ai-text-layer"
               ref={textGroupRef}
               data-fit-width={layout.textW}
               data-fit-height={layout.textH}
-              data-fit-scale={state.inscriptionScale}
+              data-fit-scale={fittedTextScale}
               transform={textTransform}
               className={state.reverseEtch ? `text-content-metal${isBrass ? '' : ' steel'}` : "text-content"}
               style={{

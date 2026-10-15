@@ -1,4 +1,5 @@
 import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
+import { getProductionEstimate } from '../services/productionTime.mjs';
 import {
   CHECKOUT_CURRENCY,
   CHECKOUT_POLICY_VERSION,
@@ -6,6 +7,8 @@ import {
   getPlaqueSummaryTitle,
   validateCheckoutPlaqueState,
 } from "../services/checkoutPolicy.mjs";
+import { sanitizeProofPackageSvg } from "../services/svgSanitizer.mjs";
+import { ONE_POUND_TEST_POLICY, ONE_POUND_LIVE_POLICY, isOnePoundTestOrder, getOnePoundTestPrice } from "./onePoundTest.mjs";
 
 const MAX_INSCRIPTION_LENGTH = 4_000;
 const MAX_EMAIL_LENGTH = 254;
@@ -128,17 +131,29 @@ const normaliseDeliveryAddress = (input) => {
   };
 };
 
-const canonicalProofPackage = (orderId, lockedAt) => ({
-  productionSvg: null,
-  visualProofSvg: null,
-  visualProofPng: null,
-  productionArtworkPdf: null,
-  artworkStatus: "pending_sanitized_upload",
-  artifactAuthority: "none",
-  productionFilename: `${orderId}-production-proof.svg`,
-  visualFilename: `${orderId}-visual-proof.svg`,
-  lockedAt,
-});
+const isReviewProofPlaceholderSvg = (value) => /\bREVIEW\s+PROOF\b/i.test(String(value || ""));
+
+const canonicalProofPackage = (orderId, lockedAt, clientProofPackage = {}) => {
+  const sanitizedProofPackage = sanitizeProofPackageSvg(clientProofPackage);
+  const visualProofSvg = sanitizedProofPackage.visualProofSvg || sanitizedProofPackage.productionSvg || null;
+  const productionSvg = (
+    sanitizedProofPackage.productionSvg
+    && !isReviewProofPlaceholderSvg(sanitizedProofPackage.productionSvg)
+  )
+    ? sanitizedProofPackage.productionSvg
+    : visualProofSvg;
+  return {
+    productionSvg,
+    visualProofSvg,
+    visualProofPng: null,
+    productionArtworkPdf: null,
+    artworkStatus: visualProofSvg ? "stored_sanitized_svg" : "pending_sanitized_upload",
+    artifactAuthority: visualProofSvg ? "sanitized_client_svg" : "none",
+    productionFilename: `${orderId}-production-proof.svg`,
+    visualFilename: `${orderId}-visual-proof.svg`,
+    lockedAt,
+  };
+};
 
 const stripClientArtworkFromPlaqueState = (state) => {
   const {
@@ -202,8 +217,11 @@ export const buildServerCheckoutOrder = (
     orderId = createServerOrderId(),
     recoveryToken = createCheckoutRecoveryToken(),
     now = new Date(),
+    sandboxTest = false,
+    liveTest = false,
   } = {},
 ) => {
+  if (sandboxTest && liveTest) throw new CheckoutRequestError("Choose one payment mode.");
   if (!SERVER_ORDER_ID.test(orderId)) {
     throw new CheckoutRequestError("Invalid server order ID.", 500, "invalid_server_order");
   }
@@ -222,7 +240,9 @@ export const buildServerCheckoutOrder = (
   }
 
   const inscription = normaliseInscription(order.inscription ?? payload.inscription ?? "");
-  const priceBreakdown = getCheckoutPriceBreakdown(plaqueState, inscription);
+  const priceBreakdown = (sandboxTest || liveTest)
+    ? getOnePoundTestPrice(plaqueState)
+    : getCheckoutPriceBreakdown(plaqueState, inscription);
   if (priceBreakdown.quoteRequired) {
     throw new ManualQuoteRequiredError(priceBreakdown.quoteReasons);
   }
@@ -253,14 +273,14 @@ export const buildServerCheckoutOrder = (
     customerName,
     status: "checkout_started",
     paymentStatus: "unpaid",
-    fulfilmentStatus: "not_started",
+    fulfilmentStatus: (sandboxTest || liveTest) ? "issue" : "not_started",
     totalPence,
     currency: CHECKOUT_CURRENCY,
     productTitle,
     inscription,
     plaqueState,
     priceBreakdown,
-    proofPackage: canonicalProofPackage(orderId, createdAt),
+    proofPackage: canonicalProofPackage(orderId, createdAt, order.proofPackage),
     shippingAddress: normaliseDeliveryAddress(order.deliveryAddress || payload.deliveryAddress),
     stripeSession: {},
     emailEvents: [],
@@ -273,12 +293,15 @@ export const buildServerCheckoutOrder = (
     ],
     metadata: {
       source: "instaplaque-checkout",
+      ...(sandboxTest ? { checkoutTestPolicy: ONE_POUND_TEST_POLICY, noFulfilment: true } : {}),
+      ...(liveTest ? { liveVerificationPolicy: ONE_POUND_LIVE_POLICY, noFulfilment: true } : {}),
       pricingAuthority: "server",
       checkoutPolicyVersion: CHECKOUT_POLICY_VERSION,
       clientOrderId: safeClientOrderId(order.id || payload.orderId),
       publicOrigin,
       checkoutRecoveryToken: recoveryToken,
       productionAuthority: "canonical_plaque_state",
+      turnaroundWorkingDays: getProductionEstimate(plaqueState).days,
       productionSpec: canonicalProductionSpec(plaqueState),
     },
     approvedAt: createdAt,
@@ -319,7 +342,9 @@ export const assertServerCheckoutOrderIsPayable = (order) => {
       "invalid_server_order",
     );
   }
-  const priceBreakdown = getCheckoutPriceBreakdown(plaqueState, order.inscription || "");
+  const priceBreakdown = isOnePoundTestOrder(order)
+    ? getOnePoundTestPrice(plaqueState)
+    : getCheckoutPriceBreakdown(plaqueState, order.inscription || "");
   if (priceBreakdown.quoteRequired) throw new ManualQuoteRequiredError(priceBreakdown.quoteReasons);
   const totalPence = Math.round(priceBreakdown.total * 100);
   if (!Number.isInteger(order.totalPence) || order.totalPence !== totalPence) {
