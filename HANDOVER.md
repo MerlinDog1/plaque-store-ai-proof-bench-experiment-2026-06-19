@@ -1,5 +1,14 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Production outlines match the preview — 15 October 2026, about 10:23 UTC
+
+A paid order's production PDF and emailed proof showed a lumpy "fi" that the customer never saw. Production
+outlining also used older font files than the preview, shifted script fonts, and dropped latin-ext characters.
+`cf7f79098c45d7849c41623c51614dccb34dd8f5` on `codex/instaplaque-ligature-fidelity-20261015` (draft PR 20, CI
+passed) makes the preview and the outlines share one pinned font catalogue and outlines ligatures as drawn.
+`npm run check:glyph-parity` compares every font both ways. Live READY `dpl_HPNDR4HhTj31LiTChGgaXBYeJpqq`;
+rollback `dpl_HQBYhNJxVhe5mcBrcKCBi7afd4Cp`. Read [the causes, change, check and release record](docs/preview-production-fidelity-2026-10-15.md).
+
 ## Google ad clicks kept for GA4 — 15 October 2026, about 05:20 UTC
 
 GA4's page address dropped `gclid` and the other Google click IDs, so ad clicks showed as `google / organic` and
