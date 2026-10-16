@@ -77,3 +77,11 @@ then verify the authenticated hosted list and one selected order. No migration
 or secret change is needed. Rollback is code-only to the current deployment
 above. `vercel.json` retains `git.deploymentEnabled: false`; the repository's
 only workflow is CI, with no deployment step.
+
+## Release — 16 October 2026
+
+The admin failed again with the same timeout (live list query 17.2 s, 42 MB). On the owner's "Deploy" the three
+commits were cherry-picked onto the live source `e55706a` as `f6c6f59`, `2750d83` and `2da34b3` on
+`codex/instaplaque-admin-list-release-20261016`. `check:admin-orders`, `check-admin-order-list-ui.cjs` (390 and
+1440 px), typecheck and the production build passed. The live database ran the equivalent summary projection in
+0.79 s (79 rows, 117 KB). Released as `dpl_F5LqMJKiDQNZE91JogdYbb81sAUn`; rollback `dpl_HPNDR4HhTj31LiTChGgaXBYeJpqq`.

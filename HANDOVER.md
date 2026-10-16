@@ -1,5 +1,19 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Admin order list fixed — 16 October 2026, about 23:20 UTC
+
+The owner's admin could not load orders: `GET /api/admin/orders` returned 500. The list selected full
+`plaque_state`/`proof_package` for every order, and 16 older orders still hold inline proof artwork (up to 5.2 MB
+each), so building the list took 17.2 s and 42 MB in Postgres, past the 8 s `authenticator` statement timeout.
+This was the fault diagnosed on 7 October; its prepared fix (`codex/admin-list-timeout`) had never been released.
+Owner: "Deploy". Cherry-picked `70e3f20`, `eb54620`, `aaecde3` onto live `e55706a` as `f6c6f59`, `2750d83`,
+`2da34b3` on `codex/instaplaque-admin-list-release-20261016` (only HANDOVER conflicted). The list now reads
+lightweight summaries (live DB equivalent: 79 rows, 117 KB, 0.79 s); artwork loads only when an order is clicked.
+`check:admin-orders`, the 390/1440 px admin UI check, typecheck and build with postbuild checks passed. Live READY
+`dpl_F5LqMJKiDQNZE91JogdYbb81sAUn` (bundle `index-2XO612Kq.js`, same as the tested local build); rollback
+`dpl_HPNDR4HhTj31LiTChGgaXBYeJpqq`. Authenticated list check awaits the owner's admin login. The inline legacy
+artwork is untouched.
+
 ## Production outlines match the preview — 15 October 2026, about 10:23 UTC
 
 A paid order's production PDF and emailed proof showed a lumpy "fi" that the customer never saw. Production
@@ -287,7 +301,7 @@ the address-free footer and current Supabase/R2 setup. PIM is unchanged.
 Owner follow-up: no initial auto-selection or artwork request. Details load only
 after an order-row click; searching, sorting and reloading stay summary-only.
 Switching rows cancels the previous in-flight detail request. Included on the same
-task branch; production deployment remains outstanding.
+task branch; released on 16 October 2026 (see the top entry).
 Application commit: `eb54620ffee3d7be6c4c889e2feb57ea6b84d6b6` on
 `codex/admin-list-timeout`. Changed-component/dependency typecheck, production
 build and 390/1440 px request-count/retry/exact-proof browser checks passed.
