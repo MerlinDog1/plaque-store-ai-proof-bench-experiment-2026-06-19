@@ -55,7 +55,6 @@ export function ShopContact() {
           <article><h2>For a new plaque</h2><p>Send your wording, approximate size, preferred material and where the plaque will be fitted. If you have a fixed event date, include the date you need it to arrive and your delivery postcode.</p></article>
           <article><h2>For an existing order</h2><p>Include your order number and the email address used at checkout. If you need a wording change, contact us as soon as possible so we can check whether production has started.</p></article>
           <article><h2>Ready to try a layout?</h2><p>The online designer is free to use. See the price, check the layout and download your proof PDF before you pay.</p><a className="shop-text-link" href="/design">Open the plaque designer ↗</a></article>
-          <p className="shop-smallprint">{businessContact.tradingName} is operated as a {businessContact.legalForm}. Not VAT registered.</p>
         </div>
       </section>
     </div>
@@ -87,7 +86,7 @@ export function PlaqueWordingExamples({ slug }: { slug: string }) {
 
 export const aboutPage = {
   title: 'About InstaPlaque | The Business Behind Your Plaque',
-  description: 'Meet the UK sole-trader business behind InstaPlaque and sister brand Portraits in Metal. Learn how free proofs and our illustrative design examples work.',
+  description: 'About InstaPlaque: how our free proofs work, what our illustrative design examples show, and portrait plaques from Portraits in Metal, our portrait studio.',
 };
 
 export function ShopAbout() {
@@ -96,7 +95,7 @@ export function ShopAbout() {
       <section className="shop-section">
         <p className="shop-kicker">The business behind your plaque</p>
         <h1>Your plaque,<br />from words to order.</h1>
-        <p className="shop-intro">InstaPlaque is a UK sole-trader business. Design a brass or stainless steel inscription plaque online, with a free proof and a clear price before you pay.</p>
+        <p className="shop-intro">InstaPlaque makes engraved brass and stainless steel plaques in the UK. Design your inscription plaque online, with a free proof and a clear price before you pay.</p>
       </section>
       <section className="shop-section shop-buying-guide">
         <div>
@@ -111,11 +110,10 @@ export function ShopAbout() {
         </div>
       </section>
       <section className="shop-section shop-buying-guide">
-        <div><p className="shop-kicker">Two ways to make it personal</p><h2>Our sister brand,<br />Portraits in Metal.</h2></div>
+        <div><p className="shop-kicker">Two ways to make it personal</p><h2>Portrait plaques,<br />by Portraits in Metal.</h2></div>
         <div>
-          <p>InstaPlaque is for designing your own inscription plaque. <a href="https://portraitsinmetal.com/about">Portraits in Metal</a> focuses on portraits of people and pets, made from a photograph with a carefully arranged inscription.</p>
-          <p>Send Portraits in Metal a favourite photograph for a <a href={portraitsInMetalLink('/free-proof', 'about_page', 'free_sketch_link')}>free portrait sketch</a>. The complete design and price are agreed before you pay. You can also <a href={portraitsInMetalLink('/gallery', 'about_page', 'gallery_link')}>explore its portrait plaque design examples</a>.</p>
-          <p>Both brands are operated by the same UK sole-trader business. We are not VAT registered.</p>
+          <p>InstaPlaque is for designing your own inscription plaque. Our portrait studio, <a href={portraitsInMetalLink('/about', 'about_page', 'studio_link')}>Portraits in Metal</a>, makes portraits of people and pets from a photograph, with a carefully arranged inscription.</p>
+          <p>Send a favourite photograph for a <a href={portraitsInMetalLink('/free-proof', 'about_page', 'free_sketch_link')}>free portrait sketch</a>. The complete design and price are agreed before you pay. You can also <a href={portraitsInMetalLink('/gallery', 'about_page', 'gallery_link')}>explore its portrait plaque design examples</a>.</p>
           <a className="shop-text-link" href="/contact">Contact InstaPlaque ↗</a>
         </div>
       </section>
@@ -158,7 +156,7 @@ export function CollectionLinks({ slug }: { slug: string }) {
       <h2>A little help choosing.</h2>
       <p>Compare the <a href="/materials">brass and stainless steel finishes</a> before choosing a material. {slug === 'memorial-plaques' ? <>For a narrow fixing area, see <a href="/bench-plaques">memorial bench sizes and fitting advice</a>. For a planted remembrance space, see our <a href="/garden-plaques">garden plaque guide</a>.</> : slug === 'opening-plaques' ? <>Once the inscription is agreed, <a href="/how-it-works">check how the free proof and approval process works</a> before arranging your ceremony.</> : <>For a ceremony, building dedication or a list of contributors, see <a href="/opening-plaques">opening plaques and formal inscriptions</a>.</>}</p>
       {['bench-plaques', 'garden-plaques', 'brass-plaques', 'stainless-steel-plaques'].includes(slug) && <p>Remembering someone? Compare <a href="/memorial-plaques">personalised memorial plaques in brass and stainless steel</a>, with <a href="/memorial-plaques#memorial-wording">memorial inscription examples</a> to help you find the words.</p>}
-      {['memorial-plaques', 'garden-plaques'].includes(slug) && <p>Looking for a portrait made from a favourite photograph? Portraits in Metal, our sister brand, will <a href={portraitsInMetalLink('/free-proof', 'collection_guide', `${slug}_free_sketch_link`)}>sketch your photo for free</a>, or you can <a href={portraitsInMetalLink('/gallery', 'collection_guide', `${slug}_gallery_link`)}>explore its portrait plaque examples</a>.</p>}
+      {['memorial-plaques', 'garden-plaques'].includes(slug) && <p>Looking for a portrait made from a favourite photograph? Our portrait studio, Portraits in Metal, will <a href={portraitsInMetalLink('/free-proof', 'collection_guide', `${slug}_free_sketch_link`)}>sketch your photo for free</a>, or you can <a href={portraitsInMetalLink('/gallery', 'collection_guide', `${slug}_gallery_link`)}>explore its portrait plaque examples</a>.</p>}
     </section>
   );
 }

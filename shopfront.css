@@ -465,7 +465,7 @@
   font-size: 11px;
   padding-top: 12px;
 }
-.shop-portrait-sister {
+.shop-portrait-plaques {
   display: grid;
   grid-template-columns: 0.8fr 1.2fr;
   grid-template-areas:
@@ -751,7 +751,7 @@
   .shop-faq {
     gap: 32px;
   }
-  .shop-portrait-sister {
+  .shop-portrait-plaques {
     column-gap: 32px;
   }
   .shop-product-hero {
@@ -886,7 +886,7 @@
   .shop-material-images figcaption {
     font-size: 10px;
   }
-  .shop-portrait-sister {
+  .shop-portrait-plaques {
     grid-template-columns: 1fr;
     grid-template-areas:
       "copy"

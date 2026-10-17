@@ -1,6 +1,5 @@
 export const businessContact = {
   tradingName: 'InstaPlaque',
-  legalForm: 'UK sole trader',
   email: 'hello@instaplaque.co.uk',
   phone: '07464 843841',
   phoneHref: 'tel:+447464843841',
@@ -11,7 +10,7 @@ export const businessContact = {
   privacyUpdated: '20 October 2026',
 };
 
-// Sister brand for portrait plaques. Links carry UTM tags so its analytics
+// Portraits in Metal, our portrait plaque studio. Links carry UTM tags so its analytics
 // can show which InstaPlaque page sent the visitor.
 export function portraitsInMetalLink(path: string, campaign: string, content: string) {
   const query = new URLSearchParams({

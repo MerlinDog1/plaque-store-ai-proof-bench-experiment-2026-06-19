@@ -480,7 +480,6 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     title: 'Contact InstaPlaque.',
     intro: `For order questions, proof changes or delivery support, contact ${businessContact.tradingName} using the details below.`,
     sections: [
-      { title: 'Trading identity', copy: `${businessContact.tradingName} is operated as a ${businessContact.legalForm}.` },
       { title: 'Email', copy: businessContact.email },
       { title: 'Phone', copy: businessContact.phone },
     ],
