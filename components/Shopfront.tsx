@@ -1,7 +1,7 @@
 import React from "react";
 import { MemorialSizes, MemorialWording, MemorialMaterialLinks } from './MemorialGuide';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
-import { businessContact, productionTiming } from '../services/shopInformation';
+import { businessContact, portraitsInMetalLink, productionTiming } from '../services/shopInformation';
 import { ContactLink, ContactOptions, MobileContactBar, plaqueSubject } from './ContactOptions';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import {
@@ -75,6 +75,31 @@ const materialProductImages: Record<string, string> = {
   'brass-plaques': '/site-images/home-gallery-brass-community.webp',
   'stainless-steel-plaques': '/site-images/home-gallery-oval-steel.webp',
 };
+
+// Illustrative designs from Portraits in Metal's own examples.
+const portraitExamples = [
+  {
+    file: 'alfie-polished-brass',
+    large: 1054,
+    height: '680',
+    alt: 'Example portrait plaque of Alfie the spaniel in polished brass on light oak',
+    caption: 'Dog · polished brass',
+  },
+  {
+    file: 'lily-brushed-steel',
+    large: 1086,
+    height: '640',
+    alt: 'Example portrait plaque of Lily, a tabby-and-white cat, in brushed stainless steel',
+    caption: 'Cat · brushed steel',
+  },
+  {
+    file: 'thomas-polished-steel',
+    large: 1054,
+    height: '679',
+    alt: 'Example family memorial plaque with a portrait of a loved one in polished stainless steel',
+    caption: 'Loved one · polished steel',
+  },
+];
 
 function DesignLink({
   onStart,
@@ -310,6 +335,47 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
         </ol>
       </section>
 
+      <section className="shop-section shop-portrait-sister" aria-labelledby="sister-site-heading">
+        <div className="shop-portrait-copy">
+          <p className="shop-kicker">From our sister studio</p>
+          <h2 id="sister-site-heading">Want a portrait on your plaque?</h2>
+          <p>
+            Send a favourite photo of a person or pet, and Portraits in Metal
+            will sketch it for free. You approve the design and price before
+            you pay.
+          </p>
+        </div>
+        <div className="shop-portrait-images">
+          {portraitExamples.map(example => (
+            <figure key={example.file}>
+              <img
+                src={`/site-images/pim-example-${example.file}-480.webp`}
+                srcSet={`/site-images/pim-example-${example.file}-480.webp 480w, /site-images/pim-example-${example.file}-${example.large}.webp ${example.large}w`}
+                sizes="(max-width: 720px) 30vw, 220px"
+                alt={example.alt}
+                width="480"
+                height={example.height}
+                loading="lazy"
+              />
+              <figcaption>{example.caption}</figcaption>
+            </figure>
+          ))}
+          <p>Illustrative portrait designs</p>
+        </div>
+        <div className="shop-portrait-actions">
+          <a className="shop-button" href={portraitsInMetalLink('/free-proof', 'homepage_portrait_section', 'free_sketch_button')}>
+            Start a free portrait sketch
+            <span aria-hidden="true">↗</span>
+          </a>
+          <p className="shop-smallprint">
+            Brass or stainless steel · UK mainland delivery included · No obligation to order
+          </p>
+          <a className="shop-text-link" href={portraitsInMetalLink('/plaques', 'homepage_portrait_section', 'examples_link')}>
+            See more portrait examples ↗
+          </a>
+        </div>
+      </section>
+
       <section className="shop-section shop-materials">
         <div>
           <p className="shop-kicker">Choose your material</p>
@@ -349,12 +415,6 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
         </div>
       </section>
       <ShopFaq />
-      <section className="shop-section" aria-labelledby="sister-site-heading">
-        <p className="shop-kicker">Our sister site</p>
-        <h2 id="sister-site-heading">Want a portrait on your plaque?</h2>
-        <p>Explore portrait plaque design examples at Portraits in Metal, our sister site for people and pets.</p>
-        <a className="shop-text-link" href="https://portraitsinmetal.com/gallery">Explore Portraits in Metal ↗</a>
-      </section>
       <section className="shop-closing">
         <p className="shop-kicker">Start with a few words</p>
         <h2>Make something meaningful.</h2>
