@@ -9,6 +9,18 @@ export const businessContact = {
   privacyUpdated: '13 October 2026',
 };
 
+// Sister brand for portrait plaques. Links carry UTM tags so its analytics
+// can show which InstaPlaque page sent the visitor.
+export function portraitsInMetalLink(path: string, campaign: string, content: string) {
+  const query = new URLSearchParams({
+    utm_source: 'instaplaque',
+    utm_medium: 'referral',
+    utm_campaign: campaign,
+    utm_content: content,
+  });
+  return `https://portraitsinmetal.com${path}?${query}`;
+}
+
 export const productionTiming = {
   summary: 'Standard production: estimated 5 working days',
   qualification: 'From proof approval and payment. Aged finishes, wood backing and custom options take longer.',
