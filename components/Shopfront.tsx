@@ -335,14 +335,14 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
         </ol>
       </section>
 
-      <section className="shop-section shop-portrait-sister" aria-labelledby="sister-site-heading">
+      <section className="shop-section shop-portrait-plaques" aria-labelledby="portrait-plaques-heading">
         <div className="shop-portrait-copy">
-          <p className="shop-kicker">From our sister studio</p>
-          <h2 id="sister-site-heading">Want a portrait on your plaque?</h2>
+          <p className="shop-kicker">Portrait plaques</p>
+          <h2 id="portrait-plaques-heading">Want a portrait on your plaque?</h2>
           <p>
-            Send a favourite photo of a person or pet, and Portraits in Metal
-            will sketch it for free. You approve the design and price before
-            you pay.
+            Send a favourite photo of a person or pet, and our portrait studio,
+            Portraits in Metal, will sketch it for free. You approve the design
+            and price before you pay.
           </p>
         </div>
         <div className="shop-portrait-images">
