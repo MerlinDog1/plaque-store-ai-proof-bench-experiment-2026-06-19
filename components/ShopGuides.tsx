@@ -44,7 +44,7 @@ export function ShopContact() {
         <div>
           <p className="shop-kicker">Help with your plaque</p>
           <h1>Contact<br />InstaPlaque.</h1>
-          <p className="shop-intro">Need help choosing a size, checking an order or planning for an opening? Contact InstaPlaque with the details below.</p>
+          <p className="shop-intro">Need help choosing a size, checking an order or planning for an opening? Contact InstaPlaque with the details below. WhatsApp is usually quickest.</p>
           <dl className="shop-contact-details">
             <div><dt>WhatsApp</dt><dd><ContactLink channel="whatsapp" placement="contact">{businessContact.whatsapp}</ContactLink></dd></div>
             <div><dt>Email</dt><dd><ContactLink channel="email" placement="contact">{businessContact.email}</ContactLink></dd></div>
@@ -52,7 +52,7 @@ export function ShopContact() {
           </dl>
         </div>
         <div className="shop-contact-help">
-          <article><h2>For a new plaque</h2><p>Send your wording, approximate size, preferred material and where the plaque will be fitted. If you have a fixed event date, include the date you need it to arrive and your delivery postcode.</p></article>
+          <article><h2>For a new plaque</h2><p>Send your wording, approximate size, preferred material and where the plaque will be fitted. If you have a fixed event date, include the date you need it to arrive and your delivery postcode. A photo of where it’s going, or a design you made in ChatGPT, helps too.</p></article>
           <article><h2>For an existing order</h2><p>Include your order number and the email address used at checkout. If you need a wording change, contact us as soon as possible so we can check whether production has started.</p></article>
           <article><h2>Ready to try a layout?</h2><p>The online designer is free to use. See the price, check the layout and download your proof PDF before you pay.</p><a className="shop-text-link" href="/design">Open the plaque designer ↗</a></article>
           <p className="shop-smallprint">{businessContact.tradingName} is operated as a {businessContact.legalForm}. Not VAT registered.</p>
@@ -113,7 +113,7 @@ export function ShopAbout() {
       <section className="shop-section shop-buying-guide">
         <div><p className="shop-kicker">Two ways to make it personal</p><h2>Our sister brand,<br />Portraits in Metal.</h2></div>
         <div>
-          <p>InstaPlaque is for designing your own inscription plaque. <a href="https://portraitsinmetal.com/about">Portraits in Metal</a> focuses on portraits of people and pets, made from a photograph with a carefully arranged inscription.</p>
+          <p>InstaPlaque is for inscription plaques: design your own online, or send us your wording and we’ll design it for you. <a href="https://portraitsinmetal.com/about">Portraits in Metal</a> focuses on portraits of people and pets, made from a photograph with a carefully arranged inscription.</p>
           <p>Portraits in Metal is currently a preview of the forthcoming service. You can <a href="https://portraitsinmetal.com/gallery">explore its portrait plaque design examples</a> while we prepare it for orders.</p>
           <p>Both brands are operated by the same UK sole-trader business. We are not VAT registered.</p>
           <a className="shop-text-link" href="/contact">Contact InstaPlaque ↗</a>

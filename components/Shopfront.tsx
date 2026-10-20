@@ -16,7 +16,7 @@ export const shopFaqs = [
   {
     question: "Can I see my plaque before I pay?",
     answer:
-      "Yes. Create your layout in the online designer, with no account or payment needed. Check names, dates, line breaks and fixing positions, then download your proof PDF if you need time to decide. The PDF includes a link to return to your design. The proof is for approving wording and layout; screen colours and texture previews are illustrative.",
+      "Yes. Create your layout in the online designer, with no account or payment needed. Check names, dates, line breaks and fixing positions, then download your proof PDF if you need time to decide. The PDF includes a link to return to your design. If we design it for you, we send you the proof to approve before you pay. The proof is for approving wording and layout; screen colours and texture previews are illustrative.",
   },
   {
     question: "What is included in the price?",
@@ -40,7 +40,7 @@ export const shopFaqs = [
   {
     question: "Can you help with an unusual plaque?",
     answer:
-      "For a custom shape, a longer inscription or unusual mounting, email hello@instaplaque.co.uk with the wording, approximate size and where the plaque will go. We can help you choose a suitable starting point.",
+      `Yes. For a custom shape, a longer inscription or unusual mounting, send us the wording, approximate size and where the plaque will go, on WhatsApp (${businessContact.whatsapp}) or by email to ${businessContact.email}. A photo of the spot, or a design you made in ChatGPT, helps too. We can suggest a starting point or design it for you.`,
   },
 ];
 
@@ -218,9 +218,9 @@ export function ShopFaq({ faqs = shopFaqs }: { faqs?: typeof shopFaqs }) {
         <p className="shop-kicker">Help before you order</p>
         <h2>Your questions, answered.</h2>
         <p>Have something else in mind?</p>
-        <a className="shop-text-link" href="/contact">
-          Talk to us ↗
-        </a>
+        <ContactLink channel="whatsapp" placement="page" className="shop-text-link">
+          Ask us on WhatsApp ↗
+        </ContactLink>
       </div>
       <div>
         {faqs.map((faq) => (
@@ -339,13 +339,19 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
         <div>
           <p className="shop-kicker">A little help, from real people</p>
           <h2 id="design-service-heading">Want us to take care of the design?</h2>
-          <p>Choose your plaque and tell us what you’d like. We’ll design it for you and email your proof within 3 hours, for you to review before you pay.</p>
-          <a href="/design-request" className="shop-button" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Have us design it</a>
+          {/* WhatsApp first, the brief form second, to match the hero (owner msg 5174). */}
+          <p>Send us your wording on WhatsApp, or use our design form. We’ll design it for you and send your proof within 3 hours, for you to review before you pay.</p>
+          <div className="shop-design-service-actions">
+            <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
+              <WhatsAppIcon /> Chat on WhatsApp
+            </ContactLink>
+            <a href="/design-request" className="shop-text-link" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>
+          </div>
           <p className="shop-smallprint">No layout tools to learn. Review your proof, request changes, then approve and pay.</p>
         </div>
         <ol className="design-service-steps">
-          <li><span>01</span><div><strong>Tell us your idea</strong><p>Your wording, plaque preferences and any special details.</p></div></li>
-          <li><span>02</span><div><strong>We arrange the design</strong><p>Your proof emailed within 3 hours, ready for you to review.</p></div></li>
+          <li><span>01</span><div><strong>Tell us your idea</strong><p>Your wording, a photo of where it’s going, or a design you made in ChatGPT.</p></div></li>
+          <li><span>02</span><div><strong>We design it</strong><p>Your proof within 3 hours, by WhatsApp or email.</p></div></li>
           <li><span>03</span><div><strong>Approve before you pay</strong><p>Happy with the proof? Follow your payment link.</p></div></li>
         </ol>
       </section>
@@ -399,7 +405,12 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
         <p className="shop-kicker">Start with a few words</p>
         <h2>Make something meaningful.</h2>
         <p>See the layout and price online. Save your free proof when you need more time.</p>
-        <DesignLink onStart={onStartDesign} className="shop-button-light" />
+        <div className="shop-closing-choices">
+          <DesignLink onStart={onStartDesign} className="shop-button-light" />
+          <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
+            <WhatsAppIcon /> Chat on WhatsApp
+          </ContactLink>
+        </div>
       </section>
       <MobileContactBar onDesign={onStartDesign} />
     </div>
@@ -420,11 +431,9 @@ const heroTitles: Record<string, string> = {
 export function ShopProduct({
   product,
   onLaunch,
-  onRequestDesign,
 }: {
   product: ProductFamily;
   onLaunch?: () => void;
-  onRequestDesign?: () => void;
 }) {
   const collection = collections.find((item) => item.slug === product.slug);
   const isMemorial = product.slug === 'memorial-plaques';
@@ -485,7 +494,6 @@ export function ShopProduct({
             Free online designer & proof · No account needed · Or <ContactLink channel="email" placement="hero">email us</ContactLink>
           </p>
           <p className="shop-product-description">{product.seoIntro || product.description}</p>
-          <p><a className="shop-text-link" href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Or send a design brief online ↗</a></p>
           {product.productionDays ? <aside className="shop-production-note"><strong>Estimated production: {product.productionDays} working days</strong><p>After proof approval and payment. Delivery time is additional; UK delivery is included.</p><a href="/how-it-works">Production and delivery details</a></aside> : <ProductionNote />}
           <ul className="shop-product-benefits">
             {product.bestFor.map((item) => (
@@ -540,7 +548,12 @@ export function ShopProduct({
       <section className="shop-closing">
         <h2>Put your words in place.</h2>
         <p>Create your layout and see the price before you pay.</p>
-        <DesignLink onStart={onLaunch} className="shop-button-light" />
+        <div className="shop-closing-choices">
+          <DesignLink onStart={onLaunch} className="shop-button-light" />
+          <ContactLink channel="whatsapp" placement="page" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
+            <WhatsAppIcon /> Chat on WhatsApp
+          </ContactLink>
+        </div>
       </section>
       <MobileContactBar subject={plaqueSubject(product.shortTitle)} onDesign={onLaunch} />
     </div>

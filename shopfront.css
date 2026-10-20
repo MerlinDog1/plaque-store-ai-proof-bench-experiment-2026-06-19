@@ -1408,3 +1408,28 @@
     margin: 18px 0 12px;
   }
 }
+
+/* WhatsApp beside the designer further down the page (owner msg 5174). */
+.shopfront .shop-whatsapp-button {
+  gap: 10px;
+  justify-content: center;
+}
+.shop-design-service-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 26px;
+  margin: 18px 0 8px;
+}
+.shopfront .shop-design-service-actions .shop-button {
+  margin: 0;
+}
+.shop-closing-choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.shopfront .shop-closing-choices > a {
+  min-width: 240px;
+}

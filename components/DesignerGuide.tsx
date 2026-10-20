@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { ContactLink } from './ContactOptions';
 
 // Shared by the interactive page and its initial HTML, including metadata.
 export const designerPage = {
@@ -120,7 +121,7 @@ export function DesignerGuide() {
       <section aria-labelledby="designer-materials-heading">
         <h2 id="designer-materials-heading">Choose a finish for its setting</h2>
         <p><a href="/brass-plaques">Brass plaques</a> have a warm, traditional appearance; <a href="/stainless-steel-plaques">stainless steel plaques</a> offer a cooler, contemporary finish. Compare the available finishes and optional backing in the <a href="/materials">plaque materials guide</a>. For outdoor use, consider the mounting surface and suitable fixings as well as the metal.</p>
-        <p>For more layout ideas, explore <a href="/garden-plaques">garden plaques</a> or <a href="/opening-plaques">building opening plaques</a>. If you would prefer help arranging your wording, you can <a href="/design-request">ask us to design your plaque</a>.</p>
+        <p>For more layout ideas, explore <a href="/garden-plaques">garden plaques</a> or <a href="/opening-plaques">building opening plaques</a>. If you would rather we designed it, <ContactLink channel="whatsapp" placement="page">send us your wording on WhatsApp</ContactLink> or <a href="/design-request">use our design form</a>.</p>
       </section>
 
         </div>

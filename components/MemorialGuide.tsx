@@ -1,5 +1,6 @@
 import React from 'react';
 import { productFamilies, merchantProducts } from '../services/commerce';
+import { ContactLink } from './ContactOptions';
 
 const sizes = [
   {
@@ -76,7 +77,7 @@ export function MemorialWording() {
       </div>
       <div className="memorial-proof-help">
         <div><h3>Keep the message personal and readable.</h3><p>A nickname, a shared place or a simple quality can say more than a long paragraph. There is no fixed word count: the name length, font, plaque size and fixings all affect how much fits.</p></div>
-        <div><h3>Check the proof with your family.</h3><p>Review names, dates and line breaks, then download the proof PDF to share. You can return to the design using its link. Approve one agreed version before payment and production.</p><a className="shop-text-link" href="/design-request">Prefer us to arrange your wording? ↗</a></div>
+        <div><h3>Check the proof with your family.</h3><p>Review names, dates and line breaks, then download the proof PDF to share. You can return to the design using its link. Approve one agreed version before payment and production.</p><ContactLink channel="whatsapp" placement="page" subject="a memorial plaque" className="shop-text-link">Prefer us to design it? Send your wording on WhatsApp ↗</ContactLink></div>
       </div>
     </section>
   );

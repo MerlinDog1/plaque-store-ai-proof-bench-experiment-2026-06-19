@@ -2754,7 +2754,7 @@ export function SiteExperience(props: SiteProps) {
   } else if (props.view === 'contact') {
     page = <ShopContact />;
   } else if (props.view === 'product') {
-    page = <ShopProduct product={props.selectedProduct} onRequestDesign={() => props.onNavigate('design-request', props.selectedProduct.slug)} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
+    page = <ShopProduct product={props.selectedProduct} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
   } else if (props.view === 'landing') {
     page = <ShopLanding landing={props.selectedLanding} onLaunch={() => props.onLaunchProduct(productFamilies.find(product => product.slug === props.selectedLanding.relatedProductSlug) || productFamilies[0])} />;
   } else if (props.view === 'materials') {
