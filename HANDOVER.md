@@ -1,5 +1,10 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Homepage routes and WhatsApp push live — 20 October 2026, about 20:10 UTC
+
+Home H1 "Personalised brass & stainless steel plaques" with the old slogan as tagline; "Design online" and "Chat on WhatsApp" as equal first choices; a "Made a design in ChatGPT?" prompt; phone occasion tiles; a teal WhatsApp bar; and the generic WhatsApp opener. Branch `codex/instaplaque-home-routes-20261020`.
+Live `dpl_4fxkjCKyECqXUTuSnjoFjKxh1BcY`; rollback `dpl_9owv5L5wmkfjBNBTXRFTxPu3r7AP`. See [docs/home-routes-2026-10-20.md](docs/home-routes-2026-10-20.md).
+
 ## Homepage H1 keywords live — 20 October 2026, about 16:45 UTC
 
 The home H1 now reads "Custom brass & stainless steel plaques: Some words deserve to stay." (`9e750f4`), with no visual change.
