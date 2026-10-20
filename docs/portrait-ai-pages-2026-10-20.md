@@ -115,4 +115,20 @@ Branch `codex/instaplaque-portrait-ai-pages-20261020`, built on the live release
   - The design form accepted a real 2.6 MB AI PNG as a shrunk JPEG.
   - `/samples/instaplaque-sample-proof.pdf` returns 200 application/pdf.
 
-NOT DEPLOYED: waiting for the owner's go-ahead.
+## Release — about 21:52 UTC (owner msg 5193 "Publish")
+
+- **Release:** live `dpl_6wifdbq5WGwSzQhU3gMbXnhJ9ZRd` (`index-_aX5f43b.js`, sha256
+  `370c51d7613da2b5…`, the same as the local build). Both health endpoints are OK. Rollback:
+  `dpl_BDFdvxSqAhkRNsPn5cCALgNzGPwd`.
+- **Pre-check:** live was still `dpl_BDFdvx…`, so nobody else had deployed.
+- **Candidate check:** the sample PDF matched the local file byte for byte, and both new pages had
+  their H1 and share card.
+- **Live checks:**
+  - Home, portrait, AI, memorial, garden, how-it-works, about, contact, design-request and design all
+    return 200 with the new bundle.
+  - `sitemap.xml`, `llms.txt`, the sample PDF and the new images are served with the right types.
+  - The sitemap lists both new URLs. About has no "sister" or "sole trader".
+  - The browser check at 390 and 1440 px with analytics blocked passes: no errors and no overflow.
+    The phone nav reads Memorial | Bench | Openings | Portraits, and the portrait page bar is
+    WhatsApp and Email. The design form accepted a 2.6 MB AI PNG as a shrunk JPEG; nothing was
+    submitted.

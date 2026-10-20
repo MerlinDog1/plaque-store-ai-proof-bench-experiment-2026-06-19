@@ -1,5 +1,21 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Portrait plaques and AI design pages live — 20 October 2026, about 21:52 UTC
+
+- **New pages:** `/portrait-plaques` (real Millie photos plus Portraits in Metal examples, with a
+  subtle UTM link to its free sketch) and `/ai-plaque-design` (generated concept → engraved plaque
+  pairs).
+- **Sample proof PDF:** `public/samples/instaplaque-sample-proof.pdf`. It is shown on home, the AI
+  page and how-it-works, and linked from the design form.
+- **Homepage:** proof, AI and portrait sections replace the sister-site note.
+- **Navigation and links:** a header Portraits link, footer links and internal links.
+- **Wording:** no sister or sole-trader wording (owner msg 4908).
+- **Design form:** shrinks images over 2 MB.
+- **Search:** Service and FAQ schema, share cards, sitemap entries and llms.txt.
+- **Release:** branch `codex/instaplaque-portrait-ai-pages-20261020` (`fd59c68`). Live
+  `dpl_6wifdbq5WGwSzQhU3gMbXnhJ9ZRd`; rollback `dpl_BDFdvxSqAhkRNsPn5cCALgNzGPwd`. See
+  [docs/portrait-ai-pages-2026-10-20.md](docs/portrait-ai-pages-2026-10-20.md).
+
 ## Lower-page CTAs follow the WhatsApp route — 20 October 2026, about 21:00 UTC
 
 The home "Want us to take care of the design?" section, the closing bands, the FAQ link and answers, the memorial wording link, the designer guide, about and contact now lead with WhatsApp, with the design form second. The duplicate "Or send a design brief online" product-hero link is gone (`49febe1`).
