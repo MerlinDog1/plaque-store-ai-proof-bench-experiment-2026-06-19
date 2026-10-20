@@ -7,10 +7,12 @@ import { portraitsInMetalLink } from '../services/shopInformation';
 
 // Bump ?v= whenever the sample PDF changes, so browsers that opened an older copy fetch the new one.
 export const sampleProofPdf = '/samples/instaplaque-sample-proof.pdf?v=3';
+// The same for the proof and AI images, which keep their file names when redrawn.
+export const featureImageVersion = 'v=3';
 
 const proofPage = (page: number) => ({
-  src: `/site-images/proof/sample-proof-page-${page}-760.webp`,
-  srcSet: `/site-images/proof/sample-proof-page-${page}-760.webp 760w, /site-images/proof/sample-proof-page-${page}-1400.webp 1400w`,
+  src: `/site-images/proof/sample-proof-page-${page}-760.webp?${featureImageVersion}`,
+  srcSet: `/site-images/proof/sample-proof-page-${page}-760.webp?${featureImageVersion} 760w, /site-images/proof/sample-proof-page-${page}-1400.webp?${featureImageVersion} 1400w`,
 });
 
 export function ProofPdfShowcase({ id = 'proof-pdf', heading = 'A proof you can check properly.', children }: {
@@ -46,13 +48,13 @@ export function AiConceptPair({ size = 640 }: { size?: 640 | 1200 }) {
   return (
     <div className="shop-ai-pair">
       <figure>
-        <img src={`/site-images/ai/ai-concept-memorial-${size}.webp`} width={size} height={size} loading="lazy"
+        <img src={`/site-images/ai/ai-concept-memorial-${size}.webp?${featureImageVersion}`} width={size} height={size} loading="lazy"
           alt="AI-generated concept of a gold memorial plaque with raised roses, reading In loving memory of Margaret Rose" />
         <figcaption><strong>Your AI concept</strong>Raised 3D roses and glowing light</figcaption>
       </figure>
       <span className="shop-ai-arrow" aria-hidden="true">→</span>
       <figure>
-        <img src={`/site-images/ai/ai-real-memorial-${size}.webp`} width={size} height={size} loading="lazy"
+        <img src={`/site-images/ai/ai-real-memorial-${size}.webp?${featureImageVersion}`} width={size} height={size} loading="lazy"
           alt="The same design as a flat engraved brushed brass plaque with a rose and vine border, fixed to a brick wall with four screw caps" />
         <figcaption><strong>The plaque we make</strong>Engraved brass, ready to fix</figcaption>
       </figure>

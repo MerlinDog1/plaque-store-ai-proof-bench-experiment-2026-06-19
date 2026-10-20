@@ -1,6 +1,6 @@
 import React from 'react';
 import { ContactLink, MobileContactBar, WhatsAppIcon } from './ContactOptions';
-import { AiConceptPair, ProofPdfShowcase, sampleProofPdf } from './FeatureSections';
+import { AiConceptPair, ProofPdfShowcase, featureImageVersion, sampleProofPdf } from './FeatureSections';
 import { ShopFaq } from './Shopfront';
 import { portraitsInMetalLink } from '../services/shopInformation';
 
@@ -328,13 +328,13 @@ export function ShopAiDesign() {
         </div>
         <div className="shop-ai-pair">
           <figure>
-            <img src="/site-images/ai/ai-concept-house-640.webp" width="640" height="640" loading="lazy"
+            <img src={`/site-images/ai/ai-concept-house-640.webp?${featureImageVersion}`} width="640" height="640" loading="lazy"
               alt="AI-generated concept of a cream enamel oval house sign reading Willow Cottage 12 with a raised green willow tree" />
             <figcaption><strong>AI concept</strong>Enamel colours and embossing</figcaption>
           </figure>
           <span className="shop-ai-arrow" aria-hidden="true">→</span>
           <figure>
-            <img src="/site-images/ai/ai-real-house-640.webp" width="640" height="640" loading="lazy"
+            <img src={`/site-images/ai/ai-real-house-640.webp?${featureImageVersion}`} width="640" height="640" loading="lazy"
               alt="The same Willow Cottage design as an engraved brushed stainless steel oval sign, fixed flat to a white-painted brick wall beside a front door" />
             <figcaption><strong>Made in metal</strong>Brushed steel, engraved and filled black</figcaption>
           </figure>
