@@ -196,3 +196,30 @@ the proof-derived one as "The plaque we make" on home and `/ai-plaque-design`. C
   the changed image, PDF and card files are byte-identical live. Rollback:
   `dpl_6oFFiLU8XivENvzXna1bkGtoYbJH`.
 
+## Sample proof border traced from the chosen plaque — released about 22:37 UTC
+
+Owner msg 5209: "No you'll need to use imagen and trace to get border correct" (the hand-drawn vine
+border didn't match the chosen photo closely enough). Commit `45731dd`.
+
+1. **Line art:** `image_generate` (OpenAI gpt-image, with the retouched rose photo as reference, 3:2)
+   produced flat black-on-white line art of the border only: corner roses, leafy vines,
+   tendrils, and the centre leaf with curls top and bottom; no text. Saved as
+   `output/instaplaque-sample-proof/border/rose-border-lineart.png`.
+2. **Trace:**
+   - Doubled with Lanczos, thresholded at 140 and cropped to the ink (aspect 1.602).
+   - Traced with **potrace 1.16** (`potrace -s --flat -t 12 -a 1.1 -O 0.35`) into one vector path:
+     `border/border.svg`, 160 KB.
+   - potrace was installed today with `sudo apt-get install potrace`; `apt-get remove potrace` undoes
+     it.
+3. **Placement:**
+   - `sample_html.py` embeds the traced path in the plate as a nested SVG in the box 10–290 ×
+     9–191 mm.
+   - It is masked clear for 10.5 mm around each of the four screw caps, so no engraving runs under a
+     cap or hole.
+   - The art's clear middle (about 202 × 115 mm) holds the unchanged wording.
+   - The previous generator is saved as `sample_html.before-traced-border.py`.
+4. **Output:** the PDF (3 pages, 762 KB) and proof page images were regenerated.
+5. **Release:** live `dpl_FpYhtGvBHURdPnnkkGsDE15H8jJH`. The bundle is unchanged
+   (`index-BwzcBT9V.js`); the PDF and page images are byte-identical live. Rollback:
+   `dpl_BsVM7nacMAiyb29Pz7yt4LEaaNgf`.
+

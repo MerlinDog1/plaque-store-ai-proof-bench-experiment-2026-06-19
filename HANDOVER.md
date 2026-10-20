@@ -1,5 +1,9 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Sample proof border traced from the chosen rose plaque — 20 October 2026, about 22:37 UTC
+
+The proof's border is now AI line art of the chosen photo's border, traced to vectors with potrace and masked clear of the screw caps (`45731dd`). Live `dpl_FpYhtGvBHURdPnnkkGsDE15H8jJH`; rollback `dpl_BsVM7nacMAiyb29Pz7yt4LEaaNgf`. See [docs/portrait-ai-pages-2026-10-20.md](docs/portrait-ai-pages-2026-10-20.md).
+
 ## AI page uses the owner's preferred rose plaque — 20 October 2026, about 22:26 UTC
 
 "The plaque we make" is now the fuller rose-and-vine photo (red vine tint retouched), and the sample proof's border and lettering were redrawn to match (`ccd859a`). Live `dpl_BsVM7nacMAiyb29Pz7yt4LEaaNgf`; rollback `dpl_6oFFiLU8XivENvzXna1bkGtoYbJH`. See [docs/portrait-ai-pages-2026-10-20.md](docs/portrait-ai-pages-2026-10-20.md).
