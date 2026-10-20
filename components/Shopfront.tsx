@@ -287,7 +287,7 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           <div className="shop-hero-choices">
             <DesignLink onStart={onStartDesign}>Design online</DesignLink>
             <ContactLink channel="whatsapp" placement="hero" subject="a plaque" className="shop-button shop-hero-choice-whatsapp">
-              <WhatsAppIcon /> WhatsApp a designer
+              <WhatsAppIcon /> Chat on WhatsApp
             </ContactLink>
           </div>
           <HeroRoutes />
