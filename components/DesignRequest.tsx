@@ -9,6 +9,28 @@ const materials: Record<Material, string> = {
 };
 const fixings: Record<Fixing, string> = { [Fixing.None]: 'No fixings', [Fixing.VHB]: 'Adhesive backing', [Fixing.Screws]: 'Screw holes', [Fixing.Caps]: 'Screws with decorative caps' };
 const shapes: Record<Shape, string> = { [Shape.Rect]: 'Rectangle', [Shape.Oval]: 'Oval', [Shape.Circle]: 'Circle', [Shape.Heart]: 'Heart' };
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
+// AI tools often export PNGs over the 2 MB limit (owner msg 5178), so shrink those to a
+// JPEG in the browser instead of refusing them.
+async function shrinkImage(file: File): Promise<File | null> {
+  const bitmap = await createImageBitmap(file).catch(() => null);
+  if (!bitmap) return null;
+  for (const [edge, quality] of [[2048, 0.86], [1600, 0.8], [1200, 0.75]] as const) {
+    const scale = Math.min(1, edge / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+    context.fillStyle = '#fff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+    if (blob && blob.size <= MAX_IMAGE_BYTES) return new File([blob], `${file.name.replace(/\.[^.]+$/, '') || 'reference'}.jpg`, { type: 'image/jpeg' });
+  }
+  return null;
+}
 
 export function DesignRequest({ initialState, initialWording, initialNotes, onBack }: {
   initialState: PlaqueState; initialWording: string; initialNotes: string; onBack: () => void;
@@ -99,14 +121,19 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
             <label>Exact wording for the plaque<textarea aria-label="Exact wording for the plaque" required value={draft.wording} maxLength={3000} rows={5} onChange={event => { event.currentTarget.setCustomValidity(event.target.value.trim() ? '' : 'Please enter the wording for your plaque.'); update('wording', event.target.value); }} placeholder={'In loving memory of\n…'} /></label>
             <p>Please check names and dates. Put design instructions below, not in the wording.</p>
             <label>What do you have in mind? <span>(optional)</span><textarea aria-label="What do you have in mind? (optional)" value={draft.notes} maxLength={2000} rows={4} onChange={event => update('notes', event.target.value)} placeholder="A traditional bench plaque. Make Dad’s name stand out, with a small rose above the wording." /></label>
-            <label>Reference image <span>(optional · JPG, PNG or WebP · up to 2 MB)</span><input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="reference-note" onChange={event => {
-              const next = event.target.files?.[0];
+            <label>Reference image <span>(optional · JPG, PNG or WebP · large images are resized)</span><input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="reference-note" onChange={event => {
+              const input = event.target;
+              const next = input.files?.[0];
               if (!next) return;
               setFileError(''); setFile(null);
-              if (!['image/jpeg', 'image/png', 'image/webp'].includes(next.type) || next.size > 2 * 1024 * 1024) { setFileError('Please choose a JPG, PNG or WebP image no larger than 2 MB.'); event.target.value = ''; return; }
-              setFile(next);
+              if (!['image/jpeg', 'image/png', 'image/webp'].includes(next.type)) { setFileError('Please choose a JPG, PNG or WebP image.'); input.value = ''; return; }
+              if (next.size <= MAX_IMAGE_BYTES) { setFile(next); return; }
+              void shrinkImage(next).then(smaller => {
+                if (smaller) setFile(smaller);
+                else { setFileError('Please choose a JPG, PNG or WebP image no larger than 2 MB.'); input.value = ''; }
+              });
             }} /></label>
-            <p id="reference-note">An example you like, a sketch or artwork you’d like included. It is sent to our design team only when you submit your request.</p>
+            <p id="reference-note">An example you like, a sketch, a design you made with ChatGPT or another AI tool, or artwork you’d like included. It is sent to our design team only when you submit your request.</p>
             {fileError && <p role="alert">{fileError}</p>}
             {file && <div>{fileUrl && <img className="request-image" src={fileUrl} alt="Your selected reference" />}<p>{file.name}</p><button className="shop-text-link" type="button" onClick={() => { setFile(null); if (fileInput.current) fileInput.current.value = ''; }}>Remove image</button></div>}
           </fieldset>
@@ -119,7 +146,7 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
         </form>}
         <aside className="request-aside"><p className="shop-kicker">How it works</p><h2>No designing required.</h2><ol className="design-service-steps">
           <li><span>01</span><div><strong>Send your brief</strong><p>Tell us your wording and preferences. Unsure about something? Ask us to advise.</p></div></li>
-          <li><span>02</span><div><strong>Review your emailed proof</strong><p>We prepare the layout. Check it carefully and request changes if needed.</p></div></li>
+          <li><span>02</span><div><strong>Review your emailed proof</strong><p>We prepare the layout. Check it carefully and request changes if needed. <a href="/samples/instaplaque-sample-proof.pdf" target="_blank" rel="noopener">See a sample proof</a>.</p></div></li>
           <li><span>03</span><div><strong>Approve and pay</strong><p>Confirm the proof and final price, then use the payment link before production.</p></div></li>
         </ol><p className="shop-smallprint">No payment details needed to ask for a design. We’ll email your proof within 3 hours of receiving your request.</p></aside>
       </div>

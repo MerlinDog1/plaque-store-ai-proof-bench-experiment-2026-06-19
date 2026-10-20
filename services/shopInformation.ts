@@ -1,6 +1,5 @@
 export const businessContact = {
   tradingName: 'InstaPlaque',
-  legalForm: 'UK sole trader',
   email: 'hello@instaplaque.co.uk',
   phone: '07464 843841',
   phoneHref: 'tel:+447464843841',
@@ -10,6 +9,18 @@ export const businessContact = {
   updated: '28 June 2026',
   privacyUpdated: '20 October 2026',
 };
+
+// Portraits in Metal, our portrait studio. Links carry UTM tags so its analytics can show
+// which InstaPlaque page sent the visitor.
+export function portraitsInMetalLink(path: string, campaign: string, content: string) {
+  const query = new URLSearchParams({
+    utm_source: 'instaplaque',
+    utm_medium: 'referral',
+    utm_campaign: campaign,
+    utm_content: content,
+  });
+  return `https://portraitsinmetal.com${path}?${query}`;
+}
 
 export const productionTiming = {
   summary: 'Standard production: estimated 5 working days',

@@ -80,15 +80,15 @@ export function ContactOptions({ subject = 'a plaque' }: { subject?: string }) {
   );
 }
 
-export function MobileContactBar({ subject = 'a plaque', onDesign }: { subject?: string; onDesign?: () => void }) {
+export function MobileContactBar({ subject = 'a plaque', onDesign, showDesign = true }: { subject?: string; onDesign?: () => void; showDesign?: boolean }) {
   return (
-    <nav className="shop-mobile-contact" aria-label="Design your plaque or ask us for help">
-      <a href="/design" className="shop-mobile-design" onClick={event => {
+    <nav className={`shop-mobile-contact${showDesign ? '' : ' is-contact-only'}`} aria-label={showDesign ? 'Design your plaque or ask us for help' : 'Ask us for help'}>
+      {showDesign && <a href="/design" className="shop-mobile-design" onClick={event => {
         if (onDesign && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
           event.preventDefault();
           onDesign();
         }
-      }}>Design online</a>
+      }}>Design online</a>}
       <ContactLink channel="whatsapp" placement="mobile_bar" subject={subject}><WhatsAppIcon /> WhatsApp</ContactLink>
       <ContactLink channel="email" placement="mobile_bar" subject={subject}>Email us</ContactLink>
     </nav>

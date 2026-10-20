@@ -3,6 +3,7 @@ import { MemorialSizes, MemorialWording, MemorialMaterialLinks } from './Memoria
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
+import { HomeAiSection, HomePortraitSection, ProofPdfShowcase } from './FeatureSections';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import {
   productFamilies,
@@ -355,6 +356,10 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           <li><span>03</span><div><strong>Approve before you pay</strong><p>Happy with the proof? Follow your payment link.</p></div></li>
         </ol>
       </section>
+      {/* What a designer-made proof looks like, then the AI and portrait routes (owner msg 5178). */}
+      <ProofPdfShowcase id="home-proof" />
+      <HomeAiSection />
+      <HomePortraitSection />
 
       <section className="shop-section shop-materials">
         <div>
@@ -395,12 +400,6 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
         </div>
       </section>
       <ShopFaq />
-      <section className="shop-section" aria-labelledby="sister-site-heading">
-        <p className="shop-kicker">Our sister site</p>
-        <h2 id="sister-site-heading">Want a portrait on your plaque?</h2>
-        <p>Explore portrait plaque design examples at Portraits in Metal, our sister site for people and pets.</p>
-        <a className="shop-text-link" href="https://portraitsinmetal.com/gallery">Explore Portraits in Metal ↗</a>
-      </section>
       <section className="shop-closing">
         <p className="shop-kicker">Start with a few words</p>
         <h2>Make something meaningful.</h2>
@@ -663,6 +662,9 @@ export function ShopHelp({ faq = false }: { faq?: boolean }) {
         <DesignLink />
       </section>
       {!faq && <ShopProcess />}
+      {!faq && <ProofPdfShowcase id="how-proof" heading="Prefer us to design it? You’ll get a proof like this.">
+        <p>Send us your wording on WhatsApp or through our <a href="/design-request">design form</a>, and we send you a PDF proof: your plaque drawn to size with every measurement, the fixings and the finish, plus simple fitting steps.</p>
+      </ProofPdfShowcase>}
       {!faq && <ShopTurnaround />}
       <ShopFaq />
     </div>
@@ -691,6 +693,8 @@ export function ShopFooter() {
         <a href="/garden-plaques">Garden plaques</a>
         <a href="/opening-plaques">Opening plaques</a>
         <a href="/custom-plaques">Custom plaques</a>
+        <a href="/portrait-plaques">Portrait plaques</a>
+        <a href="/ai-plaque-design">AI design to plaque</a>
       </nav>
       <nav aria-label="Help and information">
         <a href="/about">About InstaPlaque</a>

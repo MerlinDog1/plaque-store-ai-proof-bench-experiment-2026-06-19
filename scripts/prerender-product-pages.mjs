@@ -10,9 +10,10 @@ import { createServer } from 'vite';
 // Render the same shop components used in the browser, rather than a second
 // abbreviated version of the catalogue that drifts away from the visible page.
 const renderer = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom' });
-let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage, designer, DesignRequest, initialState, QuotePage;
+let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage, designer, DesignRequest, initialState, QuotePage, features;
 try {
   shop = await renderer.ssrLoadModule('/components/Shopfront.tsx');
+  features = await renderer.ssrLoadModule('/components/FeaturePages.tsx');
   guides = await renderer.ssrLoadModule('/components/ShopGuides.tsx');
   designer = await renderer.ssrLoadModule('/components/DesignerGuide.tsx');
   DesignRequest = (await renderer.ssrLoadModule('/components/DesignRequest.tsx')).DesignRequest;
@@ -306,6 +307,8 @@ const productListSchema = () => ({
 });
 
 const routePages = [
+  { slug: 'portrait-plaques', ...features.portraitPage, schema: [...features.portraitSchema] },
+  { slug: 'ai-plaque-design', ...features.aiDesignPage, schema: [...features.aiDesignSchema] },
   { slug: 'design-request', title: 'Have Us Design Your Plaque | InstaPlaque', description: 'Tell us your wording and plaque preferences. Review a personally prepared proof before payment.' },
   {
     slug: 'about',
@@ -404,6 +407,8 @@ const primaryNav = [
   ['Stainless steel plaques', '/stainless-steel-plaques'],
   ['Garden plaques', '/garden-plaques'],
   ['Opening plaques', '/opening-plaques'],
+  ['Portrait plaques', '/portrait-plaques'],
+  ['AI design to plaque', '/ai-plaque-design'],
   ['Plaque materials', '/materials'],
   ['How it works', '/how-it-works'],
   ['FAQs', '/faq'],
@@ -454,9 +459,10 @@ const writePrerenderedPage = async ({
   const url = `${siteBaseUrl}${pathPart}`;
   const product = catalogue.productFamilies.find(item => item.slug === slug);
   const landing = catalogue.seoLandingPages.find(item => item.slug === slug);
-  const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : ['returns-and-cancellations','terms','privacy','cookies'].includes(slug) ? LegalPlaceholderPage : slug === 'quote' ? QuotePage : slug === 'design-request' ? DesignRequest : slug === 'about' ? guides.ShopAbout : slug === 'contact' ? guides.ShopContact : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
+  const featurePage = { 'portrait-plaques': [features.ShopPortraitPlaques, features.portraitFaqs], 'ai-plaque-design': [features.ShopAiDesign, features.aiDesignFaqs] }[slug];
+  const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : featurePage ? featurePage[0] : ['returns-and-cancellations','terms','privacy','cookies'].includes(slug) ? LegalPlaceholderPage : slug === 'quote' ? QuotePage : slug === 'design-request' ? DesignRequest : slug === 'about' ? guides.ShopAbout : slug === 'contact' ? guides.ShopContact : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
   if (contentComponent && !['about', 'contact', 'returns-and-cancellations', 'terms', 'privacy', 'cookies','design-request','quote'].includes(slug)) {
-    const visibleFaqs = !(product || landing) ? shop.shopFaqs : [...(product || landing).faqs, ...shop.shopFaqs]
+    const visibleFaqs = featurePage ? featurePage[1] : !(product || landing) ? shop.shopFaqs : [...(product || landing).faqs, ...shop.shopFaqs]
       .filter((item, index, list) => list.findIndex(other => other.question === item.question) === index).slice(0, 6);
     schema = schema.filter(item => item['@type'] !== 'FAQPage');
     schema.push(faqSchema(visibleFaqs.map(item => [item.question, item.answer])));

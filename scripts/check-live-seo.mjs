@@ -28,7 +28,7 @@ const redirectedPaths = new Set([
   '/tree-plaques',
 ]);
 
-assert(sitemapUrls.length === 20 && sitemapUrls.includes('https://instaplaque.co.uk/design-request'), `Expected the public sitemap including design requests, found ${sitemapUrls.length}`);
+assert(sitemapUrls.length === 22 && ['design-request', 'portrait-plaques', 'ai-plaque-design'].every(slug => sitemapUrls.includes(`https://instaplaque.co.uk/${slug}`)), `Expected the public sitemap including design requests, portrait plaques and AI design, found ${sitemapUrls.length}`);
 const productSitemap = await read('dist/sitemap-products.xml');
 const productUrls = [...productSitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
 const { merchantOffers } = await import('../services/merchantCatalogue.mjs');
@@ -68,7 +68,7 @@ assert(home.includes('hreflang="en-GB" href="https://instaplaque.co.uk/"'), 'Hom
 assert(home.includes('home-gallery-brass-bench.webp'), 'Shop hero image is missing');
 assert(robots.includes('Sitemap: https://instaplaque.co.uk/sitemap.xml'), 'robots.txt sitemap declaration is missing');
 
-for (const route of ['about', 'memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques', 'garden-plaques', 'opening-plaques']) {
+for (const route of ['about', 'memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques', 'garden-plaques', 'opening-plaques', 'portrait-plaques', 'ai-plaque-design']) {
   const routeHtml = await read(`dist/${route}/index.html`);
   assert(routeHtml.includes('data-prerendered="true"'), `Missing crawlable HTML for /${route}`);
   assert(routeHtml.includes(`rel="canonical" href="https://instaplaque.co.uk/${route}"`), `Bad canonical for /${route}`);
@@ -85,4 +85,9 @@ for (const route of redirectedPaths) {
   assert(!exists, `Redirected route was still prerendered: ${route}`);
 }
 
-console.log('Live SEO checks passed: 20 editorial URLs and 175 exact product URLs, focused redirects, static route HTML, canonicals and LCP preloads.');
+const portraits = await read('dist/portrait-plaques/index.html');
+assert(portraits.includes('<h1>Personalised portrait plaques</h1>') && portraits.includes('"@type":"FAQPage"') && portraits.includes('Can you make a plaque from a photo of my pet?'), 'Portrait plaques page needs its H1, visible FAQs and FAQ schema');
+const aiDesign = await read('dist/ai-plaque-design/index.html');
+assert(aiDesign.includes('<h1>Turn your AI design into a real plaque</h1>') && aiDesign.includes('"@type":"FAQPage"') && aiDesign.includes('Can you make a real plaque from a ChatGPT design?'), 'AI design page needs its H1, visible FAQs and FAQ schema');
+assert(home.includes('href="/portrait-plaques"') && home.includes('href="/ai-plaque-design"'), 'Homepage must link to the portrait and AI design pages');
+console.log('Live SEO checks passed: 22 editorial URLs and 175 exact product URLs, focused redirects, static route HTML, canonicals and LCP preloads.');

@@ -3,7 +3,7 @@
 // Regenerate with scripts/generate-og-images.mjs. Merchant product pages keep their product photo.
 export const ogImageSlugs = [
   'memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques',
-  'garden-plaques', 'opening-plaques',
+  'garden-plaques', 'opening-plaques', 'portrait-plaques', 'ai-plaque-design',
 ];
 export const defaultShareImagePath = '/site-images/og/og-home.jpg';
 export const shareImagePathFor = (slug) => (slug && ogImageSlugs.includes(slug) ? `/site-images/og/og-${slug}.jpg` : undefined);

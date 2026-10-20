@@ -1,5 +1,5 @@
 import React from 'react';
-import { businessContact, productionTiming } from '../services/shopInformation';
+import { businessContact, portraitsInMetalLink, productionTiming } from '../services/shopInformation';
 import { deliveryServiceDescription } from '../services/merchantPolicies.mjs';
 import { ContactLink } from './ContactOptions';
 
@@ -52,10 +52,9 @@ export function ShopContact() {
           </dl>
         </div>
         <div className="shop-contact-help">
-          <article><h2>For a new plaque</h2><p>Send your wording, approximate size, preferred material and where the plaque will be fitted. If you have a fixed event date, include the date you need it to arrive and your delivery postcode. A photo of where it’s going, or a design you made in ChatGPT, helps too.</p></article>
+          <article><h2>For a new plaque</h2><p>Send your wording, approximate size, preferred material and where the plaque will be fitted. If you have a fixed event date, include the date you need it to arrive and your delivery postcode. A photo of where it’s going, or <a href="/ai-plaque-design">a design you made in ChatGPT</a>, helps too.</p></article>
           <article><h2>For an existing order</h2><p>Include your order number and the email address used at checkout. If you need a wording change, contact us as soon as possible so we can check whether production has started.</p></article>
           <article><h2>Ready to try a layout?</h2><p>The online designer is free to use. See the price, check the layout and download your proof PDF before you pay.</p><a className="shop-text-link" href="/design">Open the plaque designer ↗</a></article>
-          <p className="shop-smallprint">{businessContact.tradingName} is operated as a {businessContact.legalForm}. Not VAT registered.</p>
         </div>
       </section>
     </div>
@@ -87,7 +86,7 @@ export function PlaqueWordingExamples({ slug }: { slug: string }) {
 
 export const aboutPage = {
   title: 'About InstaPlaque | The Business Behind Your Plaque',
-  description: 'Meet the UK sole-trader business behind InstaPlaque and sister brand Portraits in Metal. Learn how free proofs and our illustrative design examples work.',
+  description: 'About InstaPlaque: engraved brass and stainless steel plaques made in the UK, how our free proofs work, and portrait plaques from our Portraits in Metal studio.',
 };
 
 export function ShopAbout() {
@@ -96,7 +95,7 @@ export function ShopAbout() {
       <section className="shop-section">
         <p className="shop-kicker">The business behind your plaque</p>
         <h1>Your plaque,<br />from words to order.</h1>
-        <p className="shop-intro">InstaPlaque is a UK sole-trader business. Design a brass or stainless steel inscription plaque online, with a free proof and a clear price before you pay.</p>
+        <p className="shop-intro">InstaPlaque makes engraved brass and stainless steel plaques in the UK. Design your plaque online, or send us your wording and we’ll design it for you, with a free proof and a clear price before you pay.</p>
       </section>
       <section className="shop-section shop-buying-guide">
         <div>
@@ -107,15 +106,14 @@ export function ShopAbout() {
         <div>
           <article><h3>Check the details before production</h3><p>Use the designer to choose a size and finish, add your wording and see the price. Review names, dates, spacing and fixings in the proof before approving your order. For unusual sizes or mounting, <a href="/contact">contact us</a> first.</p></article>
           <article><h3>Know the price and production estimate</h3><p>Standard prices include engraving, standard fixings and UK delivery. Selected finishes and backing are priced before checkout, alongside the production estimate. You can download your proof PDF and use its return link when you are ready.</p></article>
-          <article><h3>What the example images show</h3><p>Our images are illustrative design examples, including AI-generated visualisations. They show possible layouts and settings; they are not photographs of completed customer orders. Finishes and optional backing are confirmed through your proof and order.</p></article>
+          <article><h3>What the example images show</h3><p>Most of our images are illustrative design examples, including AI-generated visualisations. They show possible layouts and settings, not completed customer orders. Where we show a real photograph of a finished plaque, we say so. Finishes and optional backing are confirmed through your proof and order.</p></article>
         </div>
       </section>
       <section className="shop-section shop-buying-guide">
-        <div><p className="shop-kicker">Two ways to make it personal</p><h2>Our sister brand,<br />Portraits in Metal.</h2></div>
+        <div><p className="shop-kicker">Two ways to make it personal</p><h2>Portrait plaques,<br />by Portraits in Metal.</h2></div>
         <div>
-          <p>InstaPlaque is for inscription plaques: design your own online, or send us your wording and we’ll design it for you. <a href="https://portraitsinmetal.com/about">Portraits in Metal</a> focuses on portraits of people and pets, made from a photograph with a carefully arranged inscription.</p>
-          <p>Portraits in Metal is currently a preview of the forthcoming service. You can <a href="https://portraitsinmetal.com/gallery">explore its portrait plaque design examples</a> while we prepare it for orders.</p>
-          <p>Both brands are operated by the same UK sole-trader business. We are not VAT registered.</p>
+          <p>InstaPlaque is for inscription plaques: design your own online, or send us your wording and we’ll design it for you. Our portrait studio, Portraits in Metal, turns a favourite photograph of a person or pet into fine engraving artwork with a carefully arranged inscription.</p>
+          <p>See our <a href="/portrait-plaques">portrait plaques</a>, or explore more designs at <a href={portraitsInMetalLink('/gallery', 'about_page', 'gallery_link')}>Portraits in Metal</a>.</p>
           <a className="shop-text-link" href="/contact">Contact InstaPlaque ↗</a>
         </div>
       </section>
@@ -158,7 +156,7 @@ export function CollectionLinks({ slug }: { slug: string }) {
       <h2>A little help choosing.</h2>
       <p>Compare the <a href="/materials">brass and stainless steel finishes</a> before choosing a material. {slug === 'memorial-plaques' ? <>For a narrow fixing area, see <a href="/bench-plaques">memorial bench sizes and fitting advice</a>. For a planted remembrance space, see our <a href="/garden-plaques">garden plaque guide</a>.</> : slug === 'opening-plaques' ? <>Once the inscription is agreed, <a href="/how-it-works">check how the free proof and approval process works</a> before arranging your ceremony.</> : <>For a ceremony, building dedication or a list of contributors, see <a href="/opening-plaques">opening plaques and formal inscriptions</a>.</>}</p>
       {['bench-plaques', 'garden-plaques', 'brass-plaques', 'stainless-steel-plaques'].includes(slug) && <p>Remembering someone? Compare <a href="/memorial-plaques">personalised memorial plaques in brass and stainless steel</a>, with <a href="/memorial-plaques#memorial-wording">memorial inscription examples</a> to help you find the words.</p>}
-      {['memorial-plaques', 'garden-plaques'].includes(slug) && <p>Looking for a portrait made from a favourite photograph? <a href="https://portraitsinmetal.com/gallery">Explore the portrait plaque examples at Portraits in Metal</a>, our sister brand. Its portrait service is currently in preview.</p>}
+      {['memorial-plaques', 'garden-plaques'].includes(slug) && <p>Looking for a portrait made from a favourite photograph? See our <a href="/portrait-plaques">portrait plaques for people and pets</a>, engraved from your own photo.</p>}
     </section>
   );
 }

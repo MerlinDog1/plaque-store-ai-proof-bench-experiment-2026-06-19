@@ -104,7 +104,8 @@ export const Header: React.FC<Props> = ({
           <a href="/memorial-plaques">Memorial</a>
           <a href="/bench-plaques">Bench</a>
           <a href="/opening-plaques">Openings</a>
-          <a href="/materials">Materials</a>
+          <a href="/portrait-plaques">Portraits</a>
+          <a href="/materials" className="shop-nav-wide">Materials</a>
           <a href="/contact">Get in touch</a>
         </nav>
         <a

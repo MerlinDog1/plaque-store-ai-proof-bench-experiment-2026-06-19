@@ -36,6 +36,8 @@ export type SiteView =
   | 'privacy'
   | 'cookies'
   | 'returns'
+  | 'portraits'
+  | 'ai-design'
   | 'plaque';
 
 export interface ProductFamily {

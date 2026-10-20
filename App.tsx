@@ -70,6 +70,8 @@ const routeViews: Partial<Record<string, SiteView>> = {
   '/returns': 'returns',
   '/returns-and-cancellations': 'returns',
   '/design': 'plaque',
+  '/portrait-plaques': 'portraits',
+  '/ai-plaque-design': 'ai-design',
 };
 
 const viewRoutes: Partial<Record<SiteView, string>> = {
@@ -89,6 +91,8 @@ const viewRoutes: Partial<Record<SiteView, string>> = {
   cookies: '/cookies',
   returns: '/returns-and-cancellations',
   plaque: '/design',
+  portraits: '/portrait-plaques',
+  'ai-design': '/ai-plaque-design',
 };
 
 const productRouteSlugs = new Set(productFamilies.map((product) => product.slug));

@@ -10,7 +10,7 @@ const purchasesKey = 'instaplaque-analytics-purchases-v1';
 const qaKey = 'instaplaque-analytics-qa';
 const hosts = new Set(['instaplaque.co.uk', 'www.instaplaque.co.uk']);
 const products = new Set(productFamilies.map(product => product.slug));
-const publicPaths = new Set(['/', '/design', '/design-request', '/about', '/materials', '/how-it-works', '/faq', '/quote', '/contact', '/terms', '/privacy', '/cookies', '/returns-and-cancellations',
+const publicPaths = new Set(['/', '/design', '/design-request', '/about', '/materials', '/how-it-works', '/faq', '/quote', '/contact', '/terms', '/privacy', '/cookies', '/returns-and-cancellations', '/portrait-plaques', '/ai-plaque-design',
   ...productFamilies.map(product => `/${product.slug}`), ...seoLandingPages.map(page => `/${page.slug}`)]);
 const events = new Set(['visit', 'page_viewed', 'product_viewed', 'designer_started', 'designer_step_viewed', 'wording_started',
   'layout_requested', 'layout_generated', 'layout_failed', 'proof_download_requested', 'proof_download_prepared', 'proof_download_failed',

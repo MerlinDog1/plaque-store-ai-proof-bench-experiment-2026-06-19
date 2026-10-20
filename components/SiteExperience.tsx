@@ -6,6 +6,7 @@ import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../se
 import { SeoRankTracker } from './SeoRankTracker';
 import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, shopFaqs } from './Shopfront';
 import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
+import { ShopAiDesign, ShopPortraitPlaques, aiDesignFaqs, aiDesignPage, aiDesignSchema, portraitFaqs, portraitPage, portraitSchema } from './FeaturePages';
 import { designerPage } from './DesignerGuide';
 import { businessContact } from '../services/shopInformation';
 import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
@@ -481,7 +482,6 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     title: 'Contact InstaPlaque.',
     intro: `For order questions, proof changes or delivery support, contact ${businessContact.tradingName} using the details below.`,
     sections: [
-      { title: 'Trading identity', copy: `${businessContact.tradingName} is operated as a ${businessContact.legalForm}.` },
       { title: 'Email', copy: businessContact.email },
       { title: 'Phone', copy: businessContact.phone },
     ],
@@ -655,6 +655,8 @@ const routePathForView = (view: SiteView) => {
     checkout: '/checkout',
     'order-confirmed': '/order-confirmed',
     plaque: '/design',
+    portraits: '/portrait-plaques',
+    'ai-design': '/ai-plaque-design',
   };
   return paths[view] || '/';
 };
@@ -814,6 +816,8 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
       }],
     };
   }
+  if (view === 'portraits') return { ...portraitPage, path: routePath, schema: [...portraitSchema, faqSchema(portraitFaqs)] };
+  if (view === 'ai-design') return { ...aiDesignPage, path: routePath, schema: [...aiDesignSchema, faqSchema(aiDesignFaqs)] };
   if (view === 'faq') {
     return {
       title: 'Custom Plaque FAQs UK | InstaPlaque',
@@ -2763,6 +2767,10 @@ export function SiteExperience(props: SiteProps) {
     page = <ShopHelp />;
   } else if (props.view === 'faq') {
     page = <ShopHelp faq />;
+  } else if (props.view === 'portraits') {
+    page = <ShopPortraitPlaques />;
+  } else if (props.view === 'ai-design') {
+    page = <ShopAiDesign />;
   } else if (props.view === 'quote') {
     page = <QuotePage onStartDesign={props.onStartDesign} />;
   } else if (props.view === 'checkout') {
