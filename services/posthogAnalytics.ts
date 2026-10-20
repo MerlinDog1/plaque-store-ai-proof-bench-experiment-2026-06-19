@@ -105,6 +105,7 @@ function safeProperties(input: Properties): Properties {
     shape: ['rect', 'oval', 'circle', 'heart'],
     material: ['brushed-brass', 'orbital-brass-matt-lacquer', 'polished-brass', 'aged-brass', 'brushed-stainless', 'polished-stainless'],
     outcome_source: ['design_request_api', 'stripe_session_api', 'paid_order_api', 'browser_download', 'email_provider_acceptance'],
+    reason: ['save_http', 'network', 'no_token'],
   };
   for (const [key, choices] of Object.entries(enums)) {
     if (typeof input[key] === 'string' && choices.includes(input[key] as string)) result[key] = input[key];

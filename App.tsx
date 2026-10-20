@@ -1066,42 +1066,52 @@ const App: React.FC = () => {
     } catch (error) { trackSiteEvent('proof_email_failed'); throw error; }
   };
 
+  // One PDF at a time: a double tap on a phone used to save two proofs and could
+  // show a false 'could not be saved' alert while the first PDF was opening.
+  const pdfExportInFlight = useRef(false);
   const handleExportPdf = async () => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || pdfExportInFlight.current) return;
     if (!confirmReadiness('PDF export')) return;
-    trackSiteEvent('proof_download_requested', { format: 'pdf' });
-    let continueUrl: string | undefined;
+    pdfExportInFlight.current = true;
     try {
-      const response = await fetch('/api/proof-sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(proofSavePayload()),
-      });
-      if (!response.ok) throw new Error(`Proof session save failed (${response.status})`);
-      const payload = await response.json();
-      const token = payload.proofSession?.public_token;
-      if (token) {
-        continueUrl = `${window.location.origin}/design?proof=${encodeURIComponent(token)}`;
+      trackSiteEvent('proof_download_requested', { format: 'pdf' });
+      let continueUrl: string | undefined;
+      // 'network' unless the server answered with an error status.
+      let failureReason: 'save_http' | 'network' = 'network';
+      try {
+        const response = await fetch('/api/proof-sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(proofSavePayload()),
+        });
+        if (!response.ok) { failureReason = 'save_http'; throw new Error(`Proof session save failed (${response.status})`); }
+        const payload = await response.json();
+        const token = payload.proofSession?.public_token;
+        if (token) {
+          continueUrl = `${window.location.origin}/design?proof=${encodeURIComponent(token)}`;
+        }
+      } catch (error) {
+        console.error('Remote PDF resume link could not be created.', error);
+        trackSiteEvent('proof_download_failed', { format: 'pdf', reason: failureReason });
+        window.alert('The proof PDF could not be saved right now. Please try again shortly so its QR code can open a reliable saved proof.');
+        return;
       }
-    } catch (error) {
-      console.error('Remote PDF resume link could not be created.', error);
-      trackSiteEvent('proof_download_failed', { format: 'pdf' });
-      window.alert('The proof PDF could not be saved right now. Please try again shortly so its QR code can open a reliable saved proof.');
-      return;
+      if (!continueUrl) {
+        trackSiteEvent('proof_download_failed', { format: 'pdf', reason: 'no_token' });
+        window.alert('The proof PDF could not be saved right now. Please try again shortly.');
+        return;
+      }
+      const proofImageBase64 = generatedImage || await svgToProofPngBase64(svgRef.current);
+      await downloadPdf(svgRef.current, state, {
+        continueUrl,
+        proofImageBase64,
+        wording: inscriptionPrompt,
+        price,
+      });
+      trackSiteEvent('proof_download_prepared', { format: 'pdf', outcome_source: 'browser_download' });
+    } finally {
+      pdfExportInFlight.current = false;
     }
-    if (!continueUrl) {
-      trackSiteEvent('proof_download_failed', { format: 'pdf' });
-      window.alert('The proof PDF could not be saved right now. Please try again shortly.');
-      return;
-    }
-    const proofImageBase64 = generatedImage || await svgToProofPngBase64(svgRef.current);
-    await downloadPdf(svgRef.current, state, {
-      continueUrl,
-      proofImageBase64,
-      wording: inscriptionPrompt,
-      price,
-    });
-    trackSiteEvent('proof_download_prepared', { format: 'pdf', outcome_source: 'browser_download' });
   };
 
   const handleNativePrint = () => {
