@@ -1,5 +1,24 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Contact follow-ups live — 20 October 2026, about 16:20 UTC
+
+Owner asked for every change possible without them, using 07464 843841. Branch
+`codex/instaplaque-contact-followups-20261020` (`eaff934`, `a232517`) on top of the WhatsApp release.
+- Phone and schema telephone are now 07464 843841.
+- Enquiry text is singular ("a memorial plaque").
+- WhatsApp tracking reads the configured number.
+- On phones the cookie banner is compact and sits above the contact bar (same wording, equal choices).
+- Download proof PDF ignores double taps and records a failure reason.
+
+Checks and the local and live 390/1440 browser checks passed.
+
+Live is `dpl_ED4Br3NUyBhcHemAbzLHFyWN3zb7` (`index-4sjvs3Ge.js`); rollback is
+`dpl_24vUHJbRcoE9vHGs2XX9Mw7LfTSK`.
+
+GA4 now has contact custom dimensions, `whatsapp_click`/`email_click`/`phone_click` derived events, and
+those plus `enquiry_submitted` as key events. The GA4 to Ads link is still missing (owner).
+See [details](docs/contact-followups-2026-10-20.md).
+
 ## WhatsApp/email and tracking live — 20 October 2026, 12:16 UTC
 
 Owner reviewed the preview, then authorised "push to live".
