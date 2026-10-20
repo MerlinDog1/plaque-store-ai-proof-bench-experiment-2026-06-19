@@ -1303,3 +1303,29 @@
     text-decoration: underline;
   }
 }
+
+/* Home hero: descriptive H1 first, the slogan as a tagline (owner msg 5132). */
+.shopfront .shop-hero .shop-hero-title {
+  font-size: clamp(40px, 4.6vw, 66px);
+  line-height: 1.04;
+}
+.shopfront .shop-hero-tagline {
+  margin: 14px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 2.1vw, 30px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: #817349;
+}
+.shopfront .shop-hero-tagline em {
+  font-style: italic;
+}
+@media (max-width: 720px) {
+  .shopfront .shop-hero .shop-hero-title {
+    font-size: 38px;
+  }
+  .shopfront .shop-hero-tagline {
+    margin-top: 10px;
+    font-size: 21px;
+  }
+}

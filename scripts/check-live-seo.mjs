@@ -60,7 +60,7 @@ for (const source of redirectedPaths) {
 }
 
 assert(home.includes('data-prerendered="true"'), 'Homepage is missing crawlable prerendered content');
-assert(/<h1><span class="shop-kicker shop-hero-kicker">Custom brass &amp; stainless steel plaques<\/span><span class="shop-visually-hidden">: <\/span>Some words<br\/>deserve to <em>stay\.<\/em><\/h1>/.test(home), 'Homepage must render the visible shop heading with its descriptive keywords');
+assert(home.includes('<h1 class="shop-hero-title">Personalised brass &amp; stainless steel plaques</h1>') && home.includes('Some words deserve to <em>stay.</em>'), 'Homepage must render the descriptive H1 and its tagline');
 assert(home.includes('Find your plaque.') && home.includes('Your words. Your approval.'), 'Homepage is missing visible catalogue or buying guidance');
 assert(home.includes('from £58.50'), 'Homepage is missing its visible starting price');
 assert(home.includes('rel="canonical" href="https://instaplaque.co.uk/"'), 'Homepage canonical is missing');

@@ -276,17 +276,13 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
     <div className="shopfront" data-prerendered="true">
       <section className="shop-hero">
         <div className="shop-hero-copy">
-          {/* The descriptive line is part of the H1 for search (owner msg 5121); it looks unchanged. */}
-          <h1>
-            <span className="shop-kicker shop-hero-kicker">Custom brass & stainless steel plaques</span>
-            <span className="shop-visually-hidden">: </span>
-            Some words
-            <br />
-            deserve to <em>stay.</em>
-          </h1>
+          {/* Say what we sell first; the slogan becomes the tagline (owner msg 5132). */}
+          <p className="shop-kicker">Free proof · UK delivery included</p>
+          <h1 className="shop-hero-title">Personalised brass &amp; stainless steel plaques</h1>
+          <p className="shop-hero-tagline">Some words deserve to <em>stay.</em></p>
           <p className="shop-intro">
-            Engraved with your words, made to order and delivered. Design it
-            online in minutes, or send us your wording and we’ll design it for you.
+            Design yours online in minutes, or send us your wording and
+            we’ll design it for you.
           </p>
           <HeroRoutes />
           <div className="shop-hero-price">
