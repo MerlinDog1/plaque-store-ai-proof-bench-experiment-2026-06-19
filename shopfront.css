@@ -1274,7 +1274,7 @@
   .shop-hero-route img {
     display: block;
     width: 100%;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 16 / 9;
     object-fit: cover;
   }
   .shop-hero-route span {
@@ -1327,5 +1327,56 @@
   .shopfront .shop-hero-tagline {
     margin-top: 10px;
     font-size: 21px;
+  }
+}
+
+/* Home: two first choices, designer or a designer on WhatsApp (owner msg 5137). */
+.shop-hero-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+  margin: 6px 0 28px;
+}
+.shopfront .shop-hero-choices > a {
+  flex: 1 1 210px;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 18px;
+  text-decoration: none;
+}
+.shopfront .shop-hero-choice-whatsapp {
+  background: #0f7d70;
+  border-color: #0f7d70;
+}
+.shopfront .shop-hero-choice-whatsapp:hover {
+  background: #0b6a5f;
+}
+.shop-whatsapp-icon {
+  flex: none;
+}
+.shopfront .shop-hero-note a {
+  text-decoration: underline;
+}
+@media (max-width: 720px) {
+  .shop-hero-choices {
+    gap: 8px;
+    margin: 0 0 18px;
+  }
+  .shopfront .shop-hero-choices > a {
+    flex: 1 1 0;
+    min-height: 50px;
+    padding: 10px 8px;
+    font-size: 14px;
+    gap: 6px;
+  }
+  .shopfront .shop-hero-choices > a > span {
+    display: none;
+  }
+  .shop-mobile-contact a[data-contact-placement="mobile_bar"][href^="https://wa.me"] {
+    gap: 6px;
+    background: #0f7d70;
+    border-color: #0f7d70;
+    color: #fff;
   }
 }

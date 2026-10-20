@@ -2,7 +2,7 @@ import React from "react";
 import { MemorialSizes, MemorialWording, MemorialMaterialLinks } from './MemorialGuide';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
-import { ContactLink, ContactOptions, MobileContactBar, plaqueSubject } from './ContactOptions';
+import { ContactLink, ContactOptions, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import {
   productFamilies,
@@ -281,9 +281,15 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           <h1 className="shop-hero-title">Personalised brass &amp; stainless steel plaques</h1>
           <p className="shop-hero-tagline">Some words deserve to <em>stay.</em></p>
           <p className="shop-intro">
-            Design yours online in minutes, or send us your wording and
-            we’ll design it for you.
+            Design online instantly, or talk to one of our designers on WhatsApp.
           </p>
+          {/* Two equal first choices; WhatsApp is pushed as hard as the designer (owner msg 5137). */}
+          <div className="shop-hero-choices">
+            <DesignLink onStart={onStartDesign}>Design online</DesignLink>
+            <ContactLink channel="whatsapp" placement="hero" subject="a plaque" className="shop-button shop-hero-choice-whatsapp">
+              <WhatsAppIcon /> WhatsApp a designer
+            </ContactLink>
+          </div>
           <HeroRoutes />
           <div className="shop-hero-price">
             <span>Bench plaques</span>
@@ -292,11 +298,9 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
             </strong>
             <span>with UK delivery</span>
           </div>
-          <DesignLink onStart={onStartDesign} />
           <p className="shop-hero-note">
-            Free online designer & proof · No account needed
+            Free online designer & proof · No account needed · Or <ContactLink channel="email" placement="hero">email us</ContactLink>
           </p>
-          <ContactOptions />
           <a className="shop-text-link shop-hero-how" href="#how-it-works">See how the designer works</a>
           <ProductionNote />
         </div>
