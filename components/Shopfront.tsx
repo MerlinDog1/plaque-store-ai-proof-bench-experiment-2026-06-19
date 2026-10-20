@@ -249,6 +249,20 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
             <br />
             deserve to <em>stay.</em>
           </h1>
+          {/* Phones: the hero photo sits under the headline, not after the whole column. */}
+          <figure className="shop-hero-inline-image">
+            <img
+              src="/site-images/home-gallery-brass-bench.webp"
+              width="1200"
+              height="1200"
+              fetchPriority="high"
+              alt="Brass memorial plaque design on a wooden bench in a garden"
+            />
+            <figcaption>
+              <span>A name. A memory. A place to pause.</span>
+              <span>Design example</span>
+            </figcaption>
+          </figure>
           <p className="shop-intro">
             Design your brass or stainless steel plaque online. See the price
             as you choose, then check the wording and layout before you pay.
@@ -383,6 +397,9 @@ export function ShopProduct({
         list.findIndex((other) => other.question === item.question) === index,
     )
     .slice(0, 6);
+  const heroImage = collection?.image || materialProductImages[product.slug] || product.image;
+  const heroAlt = isMemorial ? 'Illustrative aged brass memorial plaque with a family inscription and dark wood backing' : `${product.title} design example`;
+  const heroCaption = product.merchantOffer ? `${product.imageKind === "ai" ? "AI-generated" : "Digitally rendered"} design illustration. Your wording replaces the example inscription; surroundings are not included.` : "Design example. Finish and optional backing affect the final price.";
   return (
     <div className="shopfront" data-prerendered="true">
       <div className="shop-breadcrumb">
@@ -392,16 +409,8 @@ export function ShopProduct({
       </div>
       <section className="shop-product-hero">
         <figure>
-          <img
-            src={collection?.image || materialProductImages[product.slug] || product.image}
-            alt={isMemorial ? 'Illustrative aged brass memorial plaque with a family inscription and dark wood backing' : `${product.title} design example`}
-            width="1200"
-            height="1200"
-            fetchPriority="high"
-          />
-          <figcaption>
-            {product.merchantOffer ? `${product.imageKind === "ai" ? "AI-generated" : "Digitally rendered"} design illustration. Your wording replaces the example inscription; surroundings are not included.` : "Design example. Finish and optional backing affect the final price."}
-          </figcaption>
+          <img src={heroImage} alt={heroAlt} width="1200" height="1200" fetchPriority="high" />
+          <figcaption>{heroCaption}</figcaption>
         </figure>
         <div>
           <p className="shop-kicker">Made to order · Your wording</p>
@@ -409,6 +418,11 @@ export function ShopProduct({
           <p className="shop-product-note">
             {collection?.note || "A plaque made for the words that matter."}
           </p>
+          {/* Phones: the product photo stays near the top while the copy comes first. */}
+          <figure className="shop-product-inline-image">
+            <img src={heroImage} alt={heroAlt} width="1200" height="1200" fetchPriority="high" />
+            <figcaption>{heroCaption}</figcaption>
+          </figure>
           <strong className="shop-product-price">
             <TrackedPrice value={displayedPriceValue(product.startingFrom)} product={product.slug}>{product.startingFrom}</TrackedPrice>
           </strong>
