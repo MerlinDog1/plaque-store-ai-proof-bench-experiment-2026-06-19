@@ -1,5 +1,10 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Phone hero photo live — 20 October 2026, about 16:40 UTC
+
+Phones show the hero photo under the home headline and under product titles (`925d2ad`); desktop unchanged.
+Live `dpl_45KMn4o2JGaRuXhQSVTi6U3FxG4K`; previous `dpl_ED4Br3NUyBhcHemAbzLHFyWN3zb7`. Details in docs/contact-followups-2026-10-20.md.
+
 ## Contact follow-ups live — 20 October 2026, about 16:20 UTC
 
 Owner asked for every change possible without them, using 07464 843841. Branch

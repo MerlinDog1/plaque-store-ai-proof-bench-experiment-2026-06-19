@@ -67,3 +67,24 @@ the PDF guard.
 - Still owner-only: the GA4 to Google Ads link (googleAdsLinks is 0 on 20 Oct), importing the key events
   into Ads as secondary conversions, the WhatsApp Business profile on 07464 843841, and Gmail
   "send as" for hello@.
+
+## Phone hero photo — released about 16:40 UTC
+
+Owner msg 5115 (live homepage screenshot): "This looks so dry now don't you think? An image higher up?"
+The WhatsApp release put product copy first on phones (`order: -1`), and the home photo sat after the
+whole copy column, so the first screen on a phone was text only.
+
+Commit `925d2ad` adds a phone-only figure with the same image, alt text and caption:
+- Home: directly under the headline.
+- Product pages: under the title and tagline.
+
+At 720 px and below the original figure is hidden, so the page still loads one image file; desktop is
+unchanged. The rules are prefixed with `.shopfront` because `.shopfront figure { margin: 0 }` otherwise
+wins.
+
+Results at 390 px, local and live: the photo spans 334–591 on home and 322–602 on memorial and bench,
+with no horizontal overflow or page errors. At 1440 px the phone figure is hidden and the original
+layout is unchanged.
+
+Live: `dpl_45KMn4o2JGaRuXhQSVTi6U3FxG4K`, entry `index-bl3-vJ4t.js` (sha256 `62d3a9a26aa2ec0a…`, same as the
+local build), CSS `index-BNRAoDot.css`. Previous: `dpl_ED4Br3NUyBhcHemAbzLHFyWN3zb7`.
