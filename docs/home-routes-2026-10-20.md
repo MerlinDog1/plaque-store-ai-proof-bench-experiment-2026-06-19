@@ -44,3 +44,27 @@ Owner messages 5128, 5132, 5137, 5142 and 5156, then "Go" (msg 5161). Branch
   - memorial help box shows the ChatGPT line
   - teal WhatsApp bar
   - no page errors, no overflow; desktop tiles hidden
+
+## Product pages in line with the homepage — released about 20:40 UTC
+
+Owner msg 5165: "Improve SEO h1 stuff on this page and bring ctas in line with home page"
+(/memorial-plaques). Commit `d1169d4` on `codex/instaplaque-product-ctas-20261020`.
+
+- **New H1s:** "Personalised memorial plaques", "Personalised bench plaques", "Personalised brass
+  plaques", "Personalised stainless steel plaques", "Personalised garden plaques", "Personalised pet
+  memorial plaques" and "Personalised memorial bench plaques". Other pages keep their titles; the
+  title tags and descriptions are unchanged.
+- **Every product page:**
+  - The kicker is "Free proof · UK delivery included".
+  - The single Design button, its note and the help box are replaced by the homepage pattern:
+    - lead line
+    - "Design online" plus the teal "Chat on WhatsApp"
+    - the "Made a design in ChatGPT?" prompt
+    - the free-proof note with an email link
+  - The photo, price and small print stay above the buttons.
+- **Checks:** typecheck, posthog, consent, redaction, purchase and build all pass. Local 390 and
+  1440 px screenshots taken.
+- **Release:** live `dpl_J47PdMVYUD3rEaiXFcW7ExB3ZywT` (`index-BTg_29uo.js`, sha256 `22712c3b6c0bd0de…`,
+  same as the local build). Rollback: `dpl_4fxkjCKyECqXUTuSnjoFjKxh1BcY`.
+- **Live verification:** home, memorial, bench, brass, stainless, garden, opening, contact and design
+  return 200 with the new bundle; the live phone check passes with no errors.
