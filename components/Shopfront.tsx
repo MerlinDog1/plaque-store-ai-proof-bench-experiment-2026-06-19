@@ -2,7 +2,7 @@ import React from "react";
 import { MemorialSizes, MemorialWording, MemorialMaterialLinks } from './MemorialGuide';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
-import { ContactLink, ContactOptions, MobileContactBar } from './ContactOptions';
+import { ContactLink, ContactOptions, MobileContactBar, plaqueSubject } from './ContactOptions';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import {
   productFamilies,
@@ -423,7 +423,7 @@ export function ShopProduct({
           <p className="shop-hero-note">
             Create your free proof online. No account needed.
           </p>
-          <ContactOptions subject={product.title.toLowerCase()} />
+          <ContactOptions subject={plaqueSubject(product.shortTitle)} />
           <p className="shop-product-description">{product.seoIntro || product.description}</p>
           <p><a className="shop-text-link" href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Or send a design brief online ↗</a></p>
           {product.productionDays ? <aside className="shop-production-note"><strong>Estimated production: {product.productionDays} working days</strong><p>After proof approval and payment. Delivery time is additional; UK delivery is included.</p><a href="/how-it-works">Production and delivery details</a></aside> : <ProductionNote />}
@@ -482,7 +482,7 @@ export function ShopProduct({
         <p>Create your layout and see the price before you pay.</p>
         <DesignLink onStart={onLaunch} className="shop-button-light" />
       </section>
-      <MobileContactBar subject={product.title.toLowerCase()} onDesign={onLaunch} />
+      <MobileContactBar subject={plaqueSubject(product.shortTitle)} onDesign={onLaunch} />
     </div>
   );
 }

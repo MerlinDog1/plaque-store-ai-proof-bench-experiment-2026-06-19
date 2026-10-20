@@ -2,6 +2,12 @@ import React, { useRef } from 'react';
 import { businessContact } from '../services/shopInformation';
 
 type Channel = 'whatsapp' | 'email';
+
+// "a memorial plaque", "an A5 plaque", "a stainless steel plaque" for the suggested message.
+export function plaqueSubject(shortTitle: string): string {
+  const noun = shortTitle === 'Stainless' ? 'stainless steel' : /^A\d$/.test(shortTitle) ? shortTitle : shortTitle.toLowerCase();
+  return `${/^([aeiou]|A\d)/i.test(noun) ? 'an' : 'a'} ${noun} plaque`;
+}
 type Placement = 'hero' | 'mobile_bar' | 'contact' | 'footer';
 
 function contactHref(channel: Channel, subject: string, reference?: string): string {

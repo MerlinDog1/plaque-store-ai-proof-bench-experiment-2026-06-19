@@ -8,12 +8,12 @@ export function MetaConsent() {
   if (!open) return window.location.pathname === '/cookies'
     ? <button type="button" onClick={() => setOpen(true)}>Cookie settings</button>
     : null;
-  return <section role="dialog" aria-label="Cookie preferences" style={{ position: 'fixed', bottom: 16, left: 16, right: 16, maxWidth: 520, margin: '0 auto', zIndex: 1000, padding: '20px 24px', borderRadius: 12, boxShadow: '0 4px 28px #0003', background: '#f6f4ed', color: '#203b32', border: '1px solid #ccc' }}>
+  return <section role="dialog" aria-label="Cookie preferences" className="cookie-banner">
     <strong>Cookies</strong>
-    <p style={{ margin: '8px 0 16px' }}>We use optional analytics and advertising cookies and storage to understand visits, use of the designer and how our ads perform. You can accept or reject them, and change your choice later in Cookie settings. <a href="/cookies" style={{ textDecoration: 'underline' }}>Cookie details</a>.</p>
-    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-      <button type="button" onClick={() => choose(true)} style={{ padding: '10px 18px', border: '1px solid #203b32', borderRadius: 4 }}>Accept</button>
-      <button type="button" onClick={() => choose(false)} style={{ padding: '10px 18px', border: '1px solid #203b32', borderRadius: 4 }}>Reject</button>
+    <p>We use optional analytics and advertising cookies and storage to understand visits, use of the designer and how our ads perform. You can accept or reject them, and change your choice later in Cookie settings. <a href="/cookies">Cookie details</a>.</p>
+    <div className="cookie-banner-actions">
+      <button type="button" onClick={() => choose(true)}>Accept</button>
+      <button type="button" onClick={() => choose(false)}>Reject</button>
     </div>
   </section>;
 }

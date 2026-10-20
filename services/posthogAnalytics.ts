@@ -1,5 +1,6 @@
 import { productFamilies, seoLandingPages } from './commerce';
 import { OPTIONAL_AD_CONSENT_CHANGED, metaConsent } from './metaPixel';
+import { businessContact } from './shopInformation';
 
 // Public ingestion token, NOT a personal/API management credential.
 const projectToken = 'phc_txLFAUv88ttyLLTKgi3arQ7428Jy5XSQEtGFm6jYrYxJ';
@@ -210,7 +211,8 @@ export function startSiteAnalytics(): void {
     if (!channel) {
       try {
         const target = new URL(href, location.href);
-        if (target.origin === 'https://wa.me' && target.pathname === '/447464843841' && !target.username && !target.password) channel = 'whatsapp';
+        const whatsapp = new URL(businessContact.whatsappHref);
+        if (target.origin === whatsapp.origin && target.pathname === whatsapp.pathname && !target.username && !target.password) channel = 'whatsapp';
       } catch { /* Not a contact link. */ }
     }
     if (!channel) return;

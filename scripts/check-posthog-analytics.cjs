@@ -5,6 +5,8 @@ const ts = require('typescript');
 const { webcrypto } = require('node:crypto');
 const source = fs.readFileSync('services/posthogAnalytics.ts', 'utf8');
 const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+// The real contact details, so tracking is tested against the configured WhatsApp number.
+const shopInformation = (() => { const s = { exports: {} }; vm.runInNewContext(ts.transpileModule(fs.readFileSync('services/shopInformation.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, s); return s.exports; })();
 const storage = () => { const data = new Map(); return { getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, String(value)), removeItem: key => data.delete(key) }; };
 function setup(url = 'https://instaplaque.co.uk/', saved = storage()) {
   const requests = [], google = [];
@@ -17,6 +19,7 @@ function setup(url = 'https://instaplaque.co.uk/', saved = storage()) {
     navigator: { userAgent: 'Mozilla Chrome/130.0 Safari/537', maxTouchPoints: 0 },
     fetch: async (url, options) => { requests.push({ url, options, payload: JSON.parse(options.body) }); return { ok: true }; },
     require: name => name === './commerce' ? { productFamilies: [{slug:'memorial-plaques'}], seoLandingPages: [{slug:'brass-plaques'}] }
+      : name === './shopInformation' ? shopInformation
       : { OPTIONAL_AD_CONSENT_CHANGED: 'consent', metaConsent: () => saved.getItem('instaplaque-meta-consent') },
   };
   vm.runInNewContext(code, sandbox);
