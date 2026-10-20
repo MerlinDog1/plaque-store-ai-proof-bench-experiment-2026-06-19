@@ -1,5 +1,17 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## WhatsApp/email and tracking prepared — 20 October 2026
+
+**Test branch only, not deployed; owner must review before release.**
+`codex/instaplaque-contact-options-20261020`, application
+`6488ab19a9e6b6f0558c5fcdea6bad44686b5391`, adds the confirmed WhatsApp number
+07464 843841 and hello@ email options beside the designer, a mobile contact bar,
+consented enquiry references and GA4 funnel observations. Typecheck, analytics/
+consent/purchase checks, build/postbuild and 320/390/1440 px browser checks pass.
+Local preview is on port 4182. Google Ads account linking/conversion settings remain
+unverified; no backend or deployment changes. See
+[scope, verification and next step](docs/contact-options-2026-10-20.md).
+
 ## Admin order list fixed — 16 October 2026, about 23:20 UTC
 
 The owner's admin could not load orders: `GET /api/admin/orders` returned 500. The list selected full
