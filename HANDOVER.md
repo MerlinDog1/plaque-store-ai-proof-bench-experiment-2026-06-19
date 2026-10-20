@@ -1,5 +1,10 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Product-page CTAs and branded share images live — 20 October 2026, about 20:30 and 20:43 UTC
+
+Product pages now use the "Personalised …" H1s and the homepage buttons: "Design online", "Chat on WhatsApp", the ChatGPT prompt and the free-proof note (`d1169d4`). Home and the seven indexable category pages share branded 1200 x 630 JPG cards (`6298ff1`, generator `scripts/generate-og-images.mjs`). Branch `codex/instaplaque-product-ctas-20261020`.
+Live `dpl_AiAD9heNUrrWHdRE2PSUEfhfRpqu`; rollback `dpl_J47PdMVYUD3rEaiXFcW7ExB3ZywT`, then `dpl_4fxkjCKyECqXUTuSnjoFjKxh1BcY`. See [docs/home-routes-2026-10-20.md](docs/home-routes-2026-10-20.md).
+
 ## Homepage routes and WhatsApp push live — 20 October 2026, about 20:10 UTC
 
 Home H1 "Personalised brass & stainless steel plaques" with the old slogan as tagline; "Design online" and "Chat on WhatsApp" as equal first choices; a "Made a design in ChatGPT?" prompt; phone occasion tiles; a teal WhatsApp bar; and the generic WhatsApp opener. Branch `codex/instaplaque-home-routes-20261020`.

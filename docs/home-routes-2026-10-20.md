@@ -45,7 +45,7 @@ Owner messages 5128, 5132, 5137, 5142 and 5156, then "Go" (msg 5161). Branch
   - teal WhatsApp bar
   - no page errors, no overflow; desktop tiles hidden
 
-## Product pages in line with the homepage — released about 20:40 UTC
+## Product pages in line with the homepage — released about 20:30 UTC
 
 Owner msg 5165: "Improve SEO h1 stuff on this page and bring ctas in line with home page"
 (/memorial-plaques). Commit `d1169d4` on `codex/instaplaque-product-ctas-20261020`.
@@ -68,3 +68,36 @@ Owner msg 5165: "Improve SEO h1 stuff on this page and bring ctas in line with h
   same as the local build). Rollback: `dpl_4fxkjCKyECqXUTuSnjoFjKxh1BcY`.
 - **Live verification:** home, memorial, bench, brass, stainless, garden, opening, contact and design
   return 200 with the new bundle; the live phone check passes with no errors.
+
+## Branded share images — released about 20:43 UTC
+
+Owner msg 5167: "Also change open graph image". Commit `6298ff1` on the same branch.
+
+- **Images:** eight 1200 x 630 JPGs (78–125 KB) in `public/site-images/og/`, one each for home and the
+  seven indexable category and landing pages (memorial, bench, brass, stainless steel, custom,
+  garden, opening). The retired slugs 301 to one of these. Each card has:
+  - the page's hero photo on the left
+  - a dark green panel with the InstaPlaque wordmark
+  - the page H1 and a tagline (memorial "Remember them in your own words.", bench "A small place for
+    a lasting memory.", garden "A dedication for a favourite place.", opening "Mark the occasion
+    clearly.", home "Some words deserve to stay.")
+  - "Free proof · UK delivery included" and instaplaque.co.uk
+  The old share images were WebP (memorial, bench, garden) or an unbranded photo (home). WebP
+  previews are unreliable in some apps.
+- **Regenerate:** `node scripts/generate-og-images.mjs`. The slug list and paths are in
+  `services/shareImages.mjs`.
+- **Tags:** `og:image` and `twitter:image` use the cards in the prerender
+  (`scripts/prerender-product-pages.mjs`) and after hydration (`useSeoMeta`). Pages without a card
+  (about, design, materials and similar) use the home card instead of the old proof-row photo.
+  Merchant product pages keep their product photo. Structured-data images are unchanged.
+- **Checks:** typecheck, posthog, consent, redaction, purchase and build (all postbuild checks)
+  pass. Built and hydrated tags were checked locally for home, memorial, bench, garden, a merchant
+  page and about.
+- **Release:** live `dpl_AiAD9heNUrrWHdRE2PSUEfhfRpqu` (`index-COfE0Vt7.js`, sha256
+  `c04ee00a653a23fc…`, same as the local build); health endpoints OK. Rollback:
+  `dpl_J47PdMVYUD3rEaiXFcW7ExB3ZywT`.
+- **Live verification:** all eight pages serve their card in raw HTML and after hydration, and the
+  merchant page keeps its photo. `og-home.jpg` and `og-memorial-plaques.jpg` return 200 image/jpeg.
+  Facebook and WhatsApp cache previews, so a link shared before today can show the old image until
+  their cache refreshes. The Facebook Sharing Debugger's "Scrape again" forces a refresh.
+
