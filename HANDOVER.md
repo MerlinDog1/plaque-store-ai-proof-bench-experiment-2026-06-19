@@ -1,5 +1,9 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Phone contact bar appears on scroll — 20 October 2026, about 22:09 UTC
+
+The fixed phone bar now slides up only once the page's own buttons have scrolled off the top, and glows once on WhatsApp the first time (`8bbc657`). Live `dpl_7SNmV88h5iMYaW1AqTUrsu4LFgQf`; rollback `dpl_6wifdbq5WGwSzQhU3gMbXnhJ9ZRd`. See [docs/portrait-ai-pages-2026-10-20.md](docs/portrait-ai-pages-2026-10-20.md).
+
 ## Portrait plaques and AI design pages live — 20 October 2026, about 21:52 UTC
 
 - **New pages:** `/portrait-plaques` (real Millie photos plus Portraits in Metal examples, with a

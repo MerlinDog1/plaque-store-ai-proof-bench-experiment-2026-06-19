@@ -132,3 +132,30 @@ Branch `codex/instaplaque-portrait-ai-pages-20261020`, built on the live release
     The phone nav reads Memorial | Bench | Openings | Portraits, and the portrait page bar is
     WhatsApp and Email. The design form accepted a 2.6 MB AI PNG as a shrunk JPEG; nothing was
     submitted.
+
+## Phone contact bar appears on scroll — released about 22:09 UTC
+
+Owner msg 5196 (a screenshot with the bottom bar circled): "What about if these didn't appear until
+you scrolled down and they had a tiny like highlight animation when they appeared?" Commit `8bbc657`.
+
+- **When it shows:** `MobileContactBar` (Design / WhatsApp / Email; WhatsApp / Email on the portrait
+  page) stays hidden while the page's own `.shop-hero-choices` buttons are on screen or still below
+  the fold. It slides up once they have scrolled off the top, using an IntersectionObserver.
+  `<main>` scrolls under the sticky header, so the buttons stop intersecting about 13 px before
+  their bottom edge reaches 0. The test is therefore "not intersecting and above mid-screen", not
+  `bottom <= 0`. The bar hides again when you scroll back to the top.
+- **Highlight:** the first reveal plays two soft teal glow pulses on the WhatsApp button
+  (`shop-bar-glow`); later reveals only slide. Reduced-motion users get neither. Without JS the bar
+  stays hidden and the page buttons remain. While the bar is hidden, the cookie banner sits at the
+  bottom edge.
+- **Checks:**
+  - Typecheck and build (all postbuild checks) pass.
+  - At 390 px, locally and live, on home, memorial and portrait: the bar is hidden at the top,
+    visible with the highlight after scrolling, highlight cleared after the glow, hidden again at
+    the top, and back again without a replay. No page errors.
+- **Demo clip:** `output/instaplaque-mobile-bar/bar-reveal-demo.mp4`, recorded with Playwright
+  using `/usr/bin/ffmpeg` symlinked as `~/.cache/ms-playwright/ffmpeg-1011/ffmpeg-linux`.
+- **Release:** live `dpl_7SNmV88h5iMYaW1AqTUrsu4LFgQf` (`index-BbfNuxCX.js`, sha256
+  `58d698d43874409d…`, the same as the local build); health endpoints OK. Rollback:
+  `dpl_6wifdbq5WGwSzQhU3gMbXnhJ9ZRd`.
+
