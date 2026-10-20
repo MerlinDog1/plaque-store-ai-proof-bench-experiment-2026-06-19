@@ -335,7 +335,7 @@ export function ShopAiDesign() {
           <span className="shop-ai-arrow" aria-hidden="true">→</span>
           <figure>
             <img src="/site-images/ai/ai-real-house-640.webp" width="640" height="640" loading="lazy"
-              alt="The same Willow Cottage design as an engraved brushed stainless steel oval sign beside a front door" />
+              alt="The same Willow Cottage design as an engraved brushed stainless steel oval sign, fixed flat to a white-painted brick wall beside a front door" />
             <figcaption><strong>Made in metal</strong>Brushed steel, engraved and filled black</figcaption>
           </figure>
         </div>
