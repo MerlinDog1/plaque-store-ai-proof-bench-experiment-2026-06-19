@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { businessContact } from '../services/shopInformation';
 
 type Channel = 'whatsapp' | 'email';
@@ -81,8 +81,35 @@ export function ContactOptions({ subject = 'a plaque' }: { subject?: string }) {
 }
 
 export function MobileContactBar({ subject = 'a plaque', onDesign, showDesign = true }: { subject?: string; onDesign?: () => void; showDesign?: boolean }) {
+  // Phones: the bar stays out of the way while the page's own buttons are on screen, then
+  // slides up once they scroll off the top, with a one-off glow on WhatsApp (owner msg 5196).
+  const bar = useRef<HTMLElement>(null);
+  const highlighted = useRef(false);
+  const [visible, setVisible] = useState(false);
+  const [highlight, setHighlight] = useState(false);
+  useEffect(() => {
+    const buttons = bar.current?.closest('.shopfront')?.querySelector('.shop-hero-choices');
+    if (!buttons || typeof IntersectionObserver === 'undefined') {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      // The page scrolls inside <main> below the sticky header, so the buttons stop
+      // intersecting while still just above the header; "above mid-screen" means scrolled past.
+      const scrolledPast = !entry.isIntersecting && entry.boundingClientRect.top < window.innerHeight / 2;
+      setVisible(scrolledPast);
+      if (scrolledPast && !highlighted.current) {
+        highlighted.current = true;
+        setHighlight(true);
+      }
+    });
+    observer.observe(buttons);
+    return () => observer.disconnect();
+  }, []);
+  const className = `shop-mobile-contact${showDesign ? '' : ' is-contact-only'}${visible ? ' is-visible' : ''}${highlight ? ' is-highlight' : ''}`;
   return (
-    <nav className={`shop-mobile-contact${showDesign ? '' : ' is-contact-only'}`} aria-label={showDesign ? 'Design your plaque or ask us for help' : 'Ask us for help'}>
+    <nav ref={bar} className={className} aria-label={showDesign ? 'Design your plaque or ask us for help' : 'Ask us for help'}
+      onAnimationEnd={event => { if (event.animationName === 'shop-bar-glow') setHighlight(false); }}>
       {showDesign && <a href="/design" className="shop-mobile-design" onClick={event => {
         if (onDesign && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
           event.preventDefault();
