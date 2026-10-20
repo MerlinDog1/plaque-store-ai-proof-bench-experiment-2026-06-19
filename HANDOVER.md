@@ -1,5 +1,9 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Proof and AI image URLs versioned — 20 October 2026, about 23:00 UTC
+
+Proof preview and AI images now carry `?v=3` (`featureImageVersion` in `components/FeatureSections.tsx`); bump it when one is redrawn under the same name (`22d7e0c`). Live `dpl_2C2nqMKWWAW6QGbJg3nCCL9xaYhb`; rollback `dpl_7ozNAjg73UxbARZppVd1ZTodGeBx`.
+
 ## Sample proof PDF link versioned — 20 October 2026, about 22:54 UTC
 
 Links to the sample proof now carry `?v=3`, so browsers that opened an older copy fetch the latest; bump it when the PDF changes (`2a821d5`). Live `dpl_7ozNAjg73UxbARZppVd1ZTodGeBx`; rollback `dpl_FpYhtGvBHURdPnnkkGsDE15H8jJH`.

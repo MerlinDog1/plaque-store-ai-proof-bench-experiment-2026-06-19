@@ -232,3 +232,13 @@ pdf". The live file was already the traced-border version (sha256 `168cad6281c7â
 the number whenever the PDF changes. Commit `2a821d5`. Live `dpl_7ozNAjg73UxbARZppVd1ZTodGeBx`
 (`index-ByhiNXyg.js`, the same as the local build); rollback `dpl_FpYhtGvBHURdPnnkkGsDE15H8jJH`.
 
+## Proof and AI image URLs versioned â€” released about 23:00 UTC
+
+Owner msg 5220: "I think you had or have the old one on homepage still". The live homepage already
+served the traced-border previews: every proof and AI image matched the repository byte for byte,
+and a fresh 390 px browser showed the new art. The owner's phone was showing images cached from an
+earlier visit. `featureImageVersion = 'v=3'` (in `FeatureSections.tsx`) is now appended to the proof
+page images and to the AI concept/plaque images on home and the AI page; bump it whenever one is
+redrawn under the same file name. Commit `22d7e0c`. Live `dpl_2C2nqMKWWAW6QGbJg3nCCL9xaYhb`
+(`index-DhcGNtTK.js`, the same as the local build); rollback `dpl_7ozNAjg73UxbARZppVd1ZTodGeBx`.
+
