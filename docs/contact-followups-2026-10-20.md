@@ -88,3 +88,17 @@ layout is unchanged.
 
 Live: `dpl_45KMn4o2JGaRuXhQSVTi6U3FxG4K`, entry `index-bl3-vJ4t.js` (sha256 `62d3a9a26aa2ec0a…`, same as the
 local build), CSS `index-BNRAoDot.css`. Previous: `dpl_ED4Br3NUyBhcHemAbzLHFyWN3zb7`.
+
+## Homepage H1 keywords — released about 16:45 UTC
+
+Owner msgs 5118/5121 ("What's my h1 on homepage", "Isn't that really bad for SEO?"). The only H1 was
+the slogan "Some words deserve to stay.". Commit `9e750f4` moves the existing kicker line inside the H1
+as `<span class="shop-kicker shop-hero-kicker">`, with a visually hidden ": " separator. The heading now
+reads "Custom brass & stainless steel plaques: Some words deserve to stay.". The kicker keeps Arial and
+1.65 line height through `.shop-hero-kicker`. `check-live-seo` asserts the new markup.
+
+Old and new live screenshots at 390 and 1440 px are pixel-identical (PIL difference bbox None), and
+there is still one H1 per page.
+
+Live: `dpl_9owv5L5wmkfjBNBTXRFTxPu3r7AP` (`index-B9W6ncW4.js`, sha256 `68764a9c958e9a4b…`, same as the
+local build). Previous: `dpl_45KMn4o2JGaRuXhQSVTi6U3FxG4K`.

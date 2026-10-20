@@ -1,5 +1,10 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Homepage H1 keywords live — 20 October 2026, about 16:45 UTC
+
+The home H1 now reads "Custom brass & stainless steel plaques: Some words deserve to stay." (`9e750f4`), with no visual change.
+Live `dpl_9owv5L5wmkfjBNBTXRFTxPu3r7AP`; previous `dpl_45KMn4o2JGaRuXhQSVTi6U3FxG4K`. Details in docs/contact-followups-2026-10-20.md.
+
 ## Phone hero photo live — 20 October 2026, about 16:40 UTC
 
 Phones show the hero photo under the home headline and under product titles (`925d2ad`); desktop unchanged.
