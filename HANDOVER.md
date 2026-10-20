@@ -1,16 +1,20 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## WhatsApp/email and tracking prepared — 20 October 2026
+## WhatsApp/email and tracking live — 20 October 2026, 12:16 UTC
 
-**Test branch only, not deployed; owner must review before release.**
+Owner reviewed the preview, then authorised "push to live".
 `codex/instaplaque-contact-options-20261020`, application
 `6488ab19a9e6b6f0558c5fcdea6bad44686b5391`, adds the confirmed WhatsApp number
 07464 843841 and hello@ email options beside the designer, a mobile contact bar,
 consented enquiry references and GA4 funnel observations. Typecheck, analytics/
 consent/purchase checks, build/postbuild and 320/390/1440 px browser checks pass.
-Local preview is on port 4182. Google Ads account linking/conversion settings remain
-unverified; no backend or deployment changes. See
-[scope, verification and next step](docs/contact-options-2026-10-20.md).
+Published source `ac297ac7d0a858cf1ca719f8c665711c00146585` is READY on canonical as
+`dpl_24vUHJbRcoE9vHGs2XX9Mw7LfTSK`; rollback is `dpl_F5LqMJKiDQNZE91JogdYbb81sAUn`.
+Candidate/local/live bundle hashes match. Hosted synthetic proof save/read against
+the migrated Supabase/private R2 passed and its fixture was removed. Live mobile
+navigation, contact links and health checks passed. Google Ads account linking/
+conversion settings remain unverified; backend configuration is unchanged. See
+[scope, release evidence and next step](docs/contact-options-2026-10-20.md).
 
 ## Admin order list fixed — 16 October 2026, about 23:20 UTC
 

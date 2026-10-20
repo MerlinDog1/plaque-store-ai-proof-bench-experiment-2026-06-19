@@ -1,6 +1,7 @@
-# WhatsApp, email and funnel tracking — review candidate
+# WhatsApp, email and funnel tracking — released
 
-**Prepared on a test branch only; not deployed.** The owner asked to see this before it goes live.
+The owner reviewed the local preview and explicitly approved release: "push to live".
+Released and independently verified **20 October 2026, 12:16 UTC**.
 
 - Branch: `codex/instaplaque-contact-options-20261020`
 - Application commit: `6488ab19a9e6b6f0558c5fcdea6bad44686b5391`
@@ -47,12 +48,26 @@ A production-origin browser fixture served the candidate build from localhost, i
 
 Existing Vite large-chunk warnings remain. The local preview is static: payment, AI generation, email delivery and authenticated admin operations were not exercised. No new failure remains in the tested scope.
 
-## Review and release boundary
+## Review and release
 
 Local preview: `http://127.0.0.1:4182/memorial-plaques`, started with `node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4182 --strictPort`.
 
-The preview runs on the Windows machine while that process remains active. Vercel connector inspection returned 403, so no hosted preview was created.
+The preview runs on the Windows machine while that process remains active. Vercel connector inspection returned 403; the existing CLI login successfully verified the intended owner/team and project.
 
-Before pushing, verified `vercel.json` disables Git deployment and the only repository workflow performs checks without deployment. Push is to this test branch only. Before any later release, obtain the owner's approval, recheck the actual live revision and reconcile newer work, follow the migration handover and deployment checks, and preserve all existing backend configuration.
+Before pushing, verified `vercel.json` disables Git deployment and the only repository workflow performs checks without deployment. No deployment integration was changed.
 
-Next step: owner reviews the layout and contact copy. Manual quote/order plumbing, mailbox setup, Google Ads account settings, automated messaging and production release are separate work.
+### Release evidence
+
+- Uploaded reviewed branch HEAD `ac297ac7d0a858cf1ca719f8c665711c00146585` (application commit above), with no untracked file contents in the deployment inputs.
+- Explicit target: `prj_e0enz36tdUE3mI8q3tKKG9YR5CLD`, team `team_ixtKhYUPfpSnMuyaBrzYUQQe`, production. Existing environment values were retained.
+- Staged using Vercel CLI 64.7.0, `deploy --prod --skip-domain`, then promoted the same READY build after validation.
+- Live deployment: `dpl_24vUHJbRcoE9vHGs2XX9Mw7LfTSK`, `instaplaque-pjqkghcm6-dullaghan31-3959s-projects.vercel.app`.
+- Previous/rollback deployment: `dpl_F5LqMJKiDQNZE91JogdYbb81sAUn`. Roll back with `vercel promote dpl_F5LqMJKiDQNZE91JogdYbb81sAUn --scope dullaghan31-3959s-projects`.
+- Remote build/postbuild checks passed. Runtime remains Node.js 22. Candidate, local and canonical `index-CeOYg_Jl.js` matched byte-for-byte (SHA-256 `7bbfd78a3ce5d9d92259b005050e70b09a6be99a6d75ba38d49c35d6b0d1db0a`).
+- Candidate consent checker passed. Hosted synthetic proof save/read verified the migrated Supabase project, a private R2 marker in the raw row, and exact SVG hydration. Removed only that synthetic row and its exact object afterward. No orders, emails, AI generation or payments were triggered.
+- Independent canonical inspection reported the new deployment READY. Home, memorial, bench, brass, garden and contact returned 200 with the reviewed bundle and correct WhatsApp destination.
+- Canonical Supabase/Gemini health checks passed. Live 390 px browser check confirmed contact destinations, fixed bar, no horizontal overflow, designer navigation and no uncaught errors.
+
+Google Ads account settings were not changed. The next useful account work is to recheck the GA4–Ads link and purchase import, derive channel-specific WhatsApp/email events and import them as secondary observations, then assess eligibility for Google's WhatsApp message assets. The October 15 audit recorded a missing GA4–Ads link; current account state is unverified.
+
+Manual quote/order plumbing, mailbox setup and automated messaging remain separate work.
