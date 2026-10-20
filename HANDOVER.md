@@ -1,5 +1,9 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## AI page uses the owner's preferred rose plaque — 20 October 2026, about 22:26 UTC
+
+"The plaque we make" is now the fuller rose-and-vine photo (red vine tint retouched), and the sample proof's border and lettering were redrawn to match (`ccd859a`). Live `dpl_BsVM7nacMAiyb29Pz7yt4LEaaNgf`; rollback `dpl_6oFFiLU8XivENvzXna1bkGtoYbJH`. See [docs/portrait-ai-pages-2026-10-20.md](docs/portrait-ai-pages-2026-10-20.md).
+
 ## AI page house-sign illustration re-shot — 20 October 2026, about 22:16 UTC
 
 The Willow Cottage "made in metal" picture now shows the sign centred and flat on the wall (`576e779`). Live `dpl_6oFFiLU8XivENvzXna1bkGtoYbJH`; rollback `dpl_7SNmV88h5iMYaW1AqTUrsu4LFgQf`. See [docs/portrait-ai-pages-2026-10-20.md](docs/portrait-ai-pages-2026-10-20.md).

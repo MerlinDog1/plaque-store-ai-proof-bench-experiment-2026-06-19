@@ -176,3 +176,23 @@ looking fixed to the wall.
   repository copy, and the phone check of the section showed no errors. Rollback:
   `dpl_7SNmV88h5iMYaW1AqTUrsu4LFgQf`.
 
+## Preferred rose plaque and matching proof — released about 22:26 UTC
+
+Owner msgs 5199 and 5205 ("Also this rose plaque is better actually", "See this one"): the fuller
+rose-and-vine version (generated from the AI concept, `ai-real-memorial-from-concept.png`) replaces
+the proof-derived one as "The plaque we make" on home and `/ai-plaque-design`. Commit `ccd859a`.
+
+- **Retouch:** one top-centre vine stroke had a red tint, which engraving infill would never have.
+  It is recoloured to black (green-to-red ratio test, brass area only). The result is
+  `output/instaplaque-ai-page/ai-real-memorial-rose-final.png`.
+- **Sample proof:** the plate now follows that photo. Lettering is upright at the photo's
+  proportions (name 30 mm font size, 19.5 mm capitals; other lines 14–14.5 mm). Corner roses are
+  larger, with three petal rings. Vines are leafier (3.5 waves per top half, 3 per side), with veined
+  leaves and a centre V under a leaf with curling tendrils. The cap-height callout was dropped from
+  the drawing; the spec table gives it. The previous generator is saved as
+  `source/sample_html.before-rose-match.py`. The PDF, proof page images and the AI share card were
+  regenerated.
+- **Release:** live `dpl_BsVM7nacMAiyb29Pz7yt4LEaaNgf`. The bundle is unchanged (`index-BwzcBT9V.js`);
+  the changed image, PDF and card files are byte-identical live. Rollback:
+  `dpl_6oFFiLU8XivENvzXna1bkGtoYbJH`.
+
