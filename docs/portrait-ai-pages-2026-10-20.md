@@ -223,3 +223,12 @@ border didn't match the chosen photo closely enough). Commit `45731dd`.
    (`index-BwzcBT9V.js`); the PDF and page images are byte-identical live. Rollback:
    `dpl_BsVM7nacMAiyb29Pz7yt4LEaaNgf`.
 
+## Sample PDF link versioned — released about 22:54 UTC
+
+Owner msg 5217 (phone screenshot of the first sample proof): "This wants updating too right? The
+pdf". The live file was already the traced-border version (sha256 `168cad6281c7…`, last-modified
+22:37 UTC). The phone was showing the copy Chrome had kept from an earlier visit.
+`sampleProofPdf` and the design-form link now use `/samples/instaplaque-sample-proof.pdf?v=3`; bump
+the number whenever the PDF changes. Commit `2a821d5`. Live `dpl_7ozNAjg73UxbARZppVd1ZTodGeBx`
+(`index-ByhiNXyg.js`, the same as the local build); rollback `dpl_FpYhtGvBHURdPnnkkGsDE15H8jJH`.
+
