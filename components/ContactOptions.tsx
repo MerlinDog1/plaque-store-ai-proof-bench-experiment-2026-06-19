@@ -11,7 +11,8 @@ export function plaqueSubject(shortTitle: string): string {
 type Placement = 'hero' | 'mobile_bar' | 'contact' | 'footer';
 
 function contactHref(channel: Channel, subject: string, reference?: string): string {
-  const message = `Hello InstaPlaque, I'd like help with ${subject}. Please send me a free proof.\n\nMy wording:\nApproximate size (if known):${reference ? `\n\nReference: ${reference}` : ''}`;
+  // A short, natural opener for every page (owner msg 5156); the greeting message does the guiding.
+  const message = `Hi InstaPlaque, I'm interested in a plaque${reference ? ` (ref ${reference})` : ''}`;
   return channel === 'whatsapp'
     ? `${businessContact.whatsappHref}?text=${encodeURIComponent(message)}`
     : `mailto:${businessContact.email}?subject=${encodeURIComponent(`Plaque enquiry${reference ? ` — ${reference}` : ''}`)}&body=${encodeURIComponent(message)}`;
@@ -66,6 +67,7 @@ export function ContactOptions({ subject = 'a plaque' }: { subject?: string }) {
     <div className="shop-contact-options">
       <p><strong>Prefer us to help with the design?</strong></p>
       <p>Send your wording. We’ll send a free proof for you to check.</p>
+      <p>Made a design in ChatGPT? Send us the picture and we’ll make it real.</p>
       <div className="shop-contact-actions">
         <ContactLink channel="whatsapp" placement="hero" subject={subject} className="shop-contact-whatsapp">
           WhatsApp us your wording <span aria-hidden="true">↗</span>

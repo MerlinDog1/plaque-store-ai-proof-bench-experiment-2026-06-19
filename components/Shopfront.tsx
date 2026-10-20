@@ -290,6 +290,10 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
               <WhatsAppIcon /> Chat on WhatsApp
             </ContactLink>
           </div>
+          {/* Customers increasingly arrive with an AI mock-up (owner msg 5156). */}
+          <p className="shop-hero-ai-note">
+            Made a design in ChatGPT? <ContactLink channel="whatsapp" placement="hero" subject="a plaque">Send us the picture</ContactLink> and we’ll make it real.
+          </p>
           <HeroRoutes />
           <div className="shop-hero-price">
             <span>Bench plaques</span>

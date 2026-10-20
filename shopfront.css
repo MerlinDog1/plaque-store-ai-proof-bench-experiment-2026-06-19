@@ -1249,13 +1249,13 @@
     margin: 0 0 8px;
   }
   .shopfront .shop-hero:has(.shop-hero-routes) .shop-hero-copy {
-    padding-top: 30px;
+    padding-top: 22px;
   }
   .shopfront .shop-hero:has(.shop-hero-routes) .shop-intro {
     margin: 16px 0 18px;
   }
   .shopfront .shop-hero-routes-title {
-    margin: 0 0 10px;
+    margin: 0 0 8px;
     font-size: 13px;
     font-weight: 700;
     color: var(--shop-ink);
@@ -1378,5 +1378,23 @@
     background: #0f7d70;
     border-color: #0f7d70;
     color: #fff;
+  }
+}
+
+/* "Made a design in ChatGPT?" note under the home choices (owner msg 5156). */
+.shopfront .shop-hero-ai-note {
+  margin: -14px 0 24px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--shop-ink);
+}
+.shopfront .shop-hero-ai-note a {
+  font-weight: 700;
+  text-decoration: underline;
+}
+@media (max-width: 720px) {
+  .shopfront .shop-hero-ai-note {
+    margin: -8px 0 12px;
+    font-size: 13px;
   }
 }
