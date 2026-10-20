@@ -2,6 +2,8 @@ import React from "react";
 import { MemorialSizes, MemorialWording, MemorialMaterialLinks } from './MemorialGuide';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
+import { ContactLink, ContactOptions, MobileContactBar } from './ContactOptions';
+import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import {
   productFamilies,
   ProductFamily,
@@ -236,6 +238,7 @@ export function ShopFaq({ faqs = shopFaqs }: { faqs?: typeof shopFaqs }) {
 }
 
 export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: () => void; onRequestDesign?: () => void }) {
+  const benchProduct = productFamilies.find(product => product.slug === 'bench-plaques')!;
   return (
     <div className="shopfront" data-prerendered="true">
       <section className="shop-hero">
@@ -250,22 +253,19 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
             Design your brass or stainless steel plaque online. See the price
             as you choose, then check the wording and layout before you pay.
           </p>
+          <div className="shop-hero-price">
+            <span>Bench plaques</span>
+            <strong>
+              <TrackedPrice value={displayedPriceValue(benchProduct.startingFrom)} product={benchProduct.slug}>{benchProduct.startingFrom}</TrackedPrice>
+            </strong>
+            <span>with UK delivery</span>
+          </div>
           <DesignLink onStart={onStartDesign} />
           <p className="shop-hero-note">
             Free online designer & proof · No account needed
           </p>
+          <ContactOptions />
           <a className="shop-text-link shop-hero-how" href="#how-it-works">See how the designer works</a>
-          <div className="shop-hero-price">
-            <span>Bench plaques</span>
-            <strong>
-              {
-                productFamilies.find(
-                  (product) => product.slug === "bench-plaques",
-                )!.startingFrom
-              }
-            </strong>
-            <span>with UK delivery</span>
-          </div>
           <ProductionNote />
         </div>
         <figure className="shop-hero-image">
@@ -361,6 +361,7 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
         <p>See the layout and price online. Save your free proof when you need more time.</p>
         <DesignLink onStart={onStartDesign} className="shop-button-light" />
       </section>
+      <MobileContactBar onDesign={onStartDesign} />
     </div>
   );
 }
@@ -408,8 +409,9 @@ export function ShopProduct({
           <p className="shop-product-note">
             {collection?.note || "A plaque made for the words that matter."}
           </p>
-          <p>{product.seoIntro || product.description}</p>
-          <strong className="shop-product-price">{product.startingFrom}</strong>
+          <strong className="shop-product-price">
+            <TrackedPrice value={displayedPriceValue(product.startingFrom)} product={product.slug}>{product.startingFrom}</TrackedPrice>
+          </strong>
           <p className="shop-smallprint">
             {isMemorial && <>Starting price for A5 stainless steel without wood backing. </>}
             Standard engraving, fixings and UK delivery included.
@@ -418,10 +420,12 @@ export function ShopProduct({
           <DesignLink onStart={onLaunch}>
             Design {product.shortTitle.toLowerCase()} plaque
           </DesignLink>
-          <p><a className="shop-text-link" href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Prefer us to design it? ↗</a></p>
           <p className="shop-hero-note">
             Create your free proof online. No account needed.
           </p>
+          <ContactOptions subject={product.title.toLowerCase()} />
+          <p className="shop-product-description">{product.seoIntro || product.description}</p>
+          <p><a className="shop-text-link" href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Or send a design brief online ↗</a></p>
           {product.productionDays ? <aside className="shop-production-note"><strong>Estimated production: {product.productionDays} working days</strong><p>After proof approval and payment. Delivery time is additional; UK delivery is included.</p><a href="/how-it-works">Production and delivery details</a></aside> : <ProductionNote />}
           <ul className="shop-product-benefits">
             {product.bestFor.map((item) => (
@@ -478,6 +482,7 @@ export function ShopProduct({
         <p>Create your layout and see the price before you pay.</p>
         <DesignLink onStart={onLaunch} className="shop-button-light" />
       </section>
+      <MobileContactBar subject={product.title.toLowerCase()} onDesign={onLaunch} />
     </div>
   );
 }
@@ -599,7 +604,8 @@ export function ShopFooter() {
           Insta<span>Plaque</span>
         </a>
         <p>Personal words, made lasting.</p>
-        <a href={`mailto:${businessContact.email}`}>{businessContact.email}</a>
+        <ContactLink channel="email" placement="footer">{businessContact.email}</ContactLink>
+        <p><ContactLink channel="whatsapp" placement="footer">WhatsApp: {businessContact.whatsapp}</ContactLink></p>
         <p className="shop-footer-address">
           {businessContact.madeIn}
         </p>

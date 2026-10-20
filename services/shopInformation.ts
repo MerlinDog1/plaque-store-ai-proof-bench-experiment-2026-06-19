@@ -4,9 +4,11 @@ export const businessContact = {
   email: 'hello@instaplaque.co.uk',
   phone: '07903 379839',
   phoneHref: 'tel:+447903379839',
+  whatsapp: '07464 843841',
+  whatsappHref: 'https://wa.me/447464843841',
   madeIn: 'Made in the UK',
   updated: '28 June 2026',
-  privacyUpdated: '13 October 2026',
+  privacyUpdated: '20 October 2026',
 };
 
 export const productionTiming = {

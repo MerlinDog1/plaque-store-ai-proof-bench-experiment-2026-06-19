@@ -14,6 +14,12 @@ const publicPaths = new Set(['/', '/design', '/design-request', '/about', '/mate
 const events = new Set(['visit', 'page_viewed', 'product_viewed', 'designer_started', 'designer_step_viewed', 'wording_started',
   'layout_requested', 'layout_generated', 'layout_failed', 'proof_download_requested', 'proof_download_prepared', 'proof_download_failed',
   'proof_saved', 'proof_email_requested', 'proof_emailed', 'proof_email_failed', 'checkout_requested', 'checkout_started', 'checkout_failed', 'purchase_completed',
+  'enquiry_started', 'enquiry_reviewed', 'enquiry_submission_requested', 'enquiry_submitted', 'enquiry_failed', 'contact_clicked', 'price_viewed']);
+// These are observations of the funnel, not confirmed leads or purchases.
+// Account-side Ads conversion settings must keep contact taps secondary.
+const googleFunnelEvents = new Set(['designer_started', 'designer_step_viewed', 'wording_started', 'price_viewed',
+  'layout_requested', 'layout_generated', 'layout_failed', 'proof_download_requested', 'proof_download_prepared', 'proof_download_failed',
+  'proof_saved', 'proof_email_requested', 'proof_emailed', 'proof_email_failed', 'checkout_requested', 'checkout_started', 'checkout_failed',
   'enquiry_started', 'enquiry_reviewed', 'enquiry_submission_requested', 'enquiry_submitted', 'enquiry_failed', 'contact_clicked']);
 type Properties = Record<string, string | number | boolean>;
 declare global { interface Window { gtag?: (...args: unknown[]) => void } }
@@ -52,15 +58,19 @@ function attribution(): Properties {
   const source = campaignLabel(url.searchParams.get('utm_source'));
   const medium = campaignLabel(url.searchParams.get('utm_medium'));
   const campaign = campaignLabel(url.searchParams.get('utm_campaign'));
+  // Google auto-tagging often arrives without UTMs. Classify the presence of
+  // a plausible ID, but never copy the ID into our session or event payload.
+  const googleClick = ['gclid', 'gbraid', 'wbraid'].some(key => /^[A-Za-z0-9_-]{6,512}$/.test(url.searchParams.get(key) || ''));
   let referringDomain = '';
   try {
     const ref = new URL(document.referrer);
     if (['http:', 'https:'].includes(ref.protocol) && !hosts.has(ref.hostname)) referringDomain = ref.hostname;
   } catch { /* No usable referrer. */ }
   const qr = medium === 'qr' || source === 'qr';
-  return { source: qr ? 'tagged QR' : source || referringDomain || 'direct/unknown',
-    medium: qr ? 'qr' : medium || (referringDomain ? 'referral' : 'direct/unknown'),
-    campaign: campaign || '(none)', traffic_type: qr ? 'tagged QR' : source || medium || campaign ? 'tagged campaign' : referringDomain ? 'referral' : 'direct/unknown' };
+  const inferGoogleAds = googleClick && !qr && (!source || source === 'google');
+  return { source: qr ? 'tagged QR' : source || (inferGoogleAds ? 'google' : referringDomain || 'direct/unknown'),
+    medium: qr ? 'qr' : medium || (inferGoogleAds ? 'cpc' : referringDomain ? 'referral' : 'direct/unknown'),
+    campaign: campaign || '(none)', traffic_type: qr ? 'tagged QR' : source || medium || campaign || inferGoogleAds ? 'tagged campaign' : referringDomain ? 'referral' : 'direct/unknown' };
 }
 function persistSession(): void {
   try { localStorage.setItem(sessionKey, JSON.stringify(session)); } catch { /* Memory only if storage is unavailable. */ }
@@ -88,7 +98,9 @@ function safeProperties(input: Properties): Properties {
   const result: Properties = {};
   const enums: Record<string, string[]> = {
     step: ['size', 'material', 'colour', 'fixings', 'backing', 'wording', 'review'],
-    format: ['pdf', 'svg'], method: ['ai', 'manual'], channel: ['email', 'phone'],
+    format: ['pdf', 'svg'], method: ['ai', 'manual'], channel: ['email', 'phone', 'whatsapp'],
+    placement: ['hero', 'mobile_bar', 'contact', 'footer'],
+    price_context: ['starting', 'configured'],
     shape: ['rect', 'oval', 'circle', 'heart'],
     material: ['brushed-brass', 'orbital-brass-matt-lacquer', 'polished-brass', 'aged-brass', 'brushed-stainless', 'polished-stainless'],
     outcome_source: ['design_request_api', 'stripe_session_api', 'paid_order_api', 'browser_download', 'email_provider_acceptance'],
@@ -97,6 +109,7 @@ function safeProperties(input: Properties): Properties {
     if (typeof input[key] === 'string' && choices.includes(input[key] as string)) result[key] = input[key];
   }
   if (typeof input.product === 'string' && products.has(input.product)) result.product = input.product;
+  if (typeof input.contact_reference === 'string' && /^IP-[A-F0-9]{10}$/.test(input.contact_reference)) result.contact_reference = input.contact_reference;
   for (const key of ['width_mm', 'height_mm']) {
     if (typeof input[key] === 'number' && Number.isFinite(input[key]) && input[key] > 0 && input[key] <= 3000) result[key] = input[key];
   }
@@ -147,17 +160,18 @@ export function trackSiteEvent(event: string, properties: Properties = {}, onceK
   void capture(event, { ...safe, page }, current);
   // These are GA4 funnel observations, not primary Ads conversions. Import
   // them as secondary actions in Ads after verifying the account linkage.
-  if (!current.isTest && ['proof_download_prepared', 'checkout_started'].includes(event)) {
+  if (!current.isTest && googleFunnelEvents.has(event)) {
     const checkout = event === 'checkout_started';
     try {
-      window.gtag?.('event', checkout ? 'begin_checkout' : 'proof_download_prepared', {
+      window.gtag?.('event', checkout ? 'begin_checkout' : event, {
         send_to: 'G-FKP17EXNBX', site_id: 'instaplaque',
         page_location: `https://instaplaque.co.uk${page}`, page_referrer: '',
+        ...safe,
         ...(checkout && typeof safe.value_gbp === 'number' ? { currency: 'GBP', value: safe.value_gbp,
           items: [{ item_id: 'custom_plaque', item_name: 'Personalised plaque', quantity: 1, price: safe.value_gbp }] } : {}),
-        ...(!checkout ? { file_format: safe.format } : {}),
+        ...(event === 'proof_download_prepared' ? { file_format: safe.format } : {}),
       });
-    } catch { /* Analytics must never interrupt proof downloads or checkout. */ }
+    } catch { /* Analytics must never interrupt shopping or opening a contact app. */ }
   }
 }
 export function trackSitePage(): void {
@@ -183,11 +197,35 @@ export function startSiteAnalytics(): void {
   window.addEventListener('storage', event => {
     if ([ANALYTICS_CONSENT_KEY, 'instaplaque-meta-consent', null].includes(event.key)) consentChanged();
   });
-  document.addEventListener('click', event => {
+  const lastContactClick = new WeakMap<Element, number>();
+  const contactClick = (event: MouseEvent): void => {
+    // A middle-click is auxclick only. Other mouse buttons, cancelled navigation
+    // and the second click of a double-click must not inflate contact intent.
+    if ((event.type === 'click' && event.button !== 0) || (event.type === 'auxclick' && event.button !== 1)
+      || event.defaultPrevented || event.detail > 1 || !allowed() || !pagePath()) return;
     const link = (event.target as Element)?.closest?.('a[href]');
     const href = link?.getAttribute('href') || '';
-    if (/^(mailto:|tel:)/i.test(href)) trackSiteEvent('contact_clicked', { channel: href.toLowerCase().startsWith('tel:') ? 'phone' : 'email' });
-  });
+    if (!link) return;
+    let channel = /^mailto:/i.test(href) ? 'email' : /^tel:/i.test(href) ? 'phone' : '';
+    if (!channel) {
+      try {
+        const target = new URL(href, location.href);
+        if (target.origin === 'https://wa.me' && target.pathname === '/447464843841' && !target.username && !target.password) channel = 'whatsapp';
+      } catch { /* Not a contact link. */ }
+    }
+    if (!channel) return;
+    const now = Date.now();
+    const previous = lastContactClick.get(link);
+    if (previous !== undefined && now - previous < 1000) return;
+    lastContactClick.set(link, now);
+    trackSiteEvent('contact_clicked', {
+      channel,
+      placement: link.getAttribute('data-contact-placement') || '',
+      contact_reference: link.getAttribute('data-contact-reference') || '',
+    });
+  };
+  document.addEventListener('click', contactClick);
+  document.addEventListener('auxclick', contactClick);
   trackSitePage();
 }
 

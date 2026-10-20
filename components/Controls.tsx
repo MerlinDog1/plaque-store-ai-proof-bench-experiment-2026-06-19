@@ -1,6 +1,7 @@
 import { getProductionEstimate } from '../services/productionTime.mjs';
 import { FontSizeInput } from './FontSizeInput';
 import { ProofEmailForm } from './ProofEmailForm';
+import { TrackedPrice } from './TrackedPrice';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   DesignStyle,
@@ -2290,7 +2291,7 @@ export const Controls: React.FC<Props> = ({
               </div>
               <div className="flex items-center justify-between gap-3 pt-1 text-lg text-[#17231f]">
                 <span>Total</span>
-                <strong>{formatPrice(price)}</strong>
+                <strong><TrackedPrice value={price} context="configured">{formatPrice(price)}</TrackedPrice></strong>
               </div>
             </div>
             <p className="mt-3 text-xs font-bold leading-5 text-[#6a746d]">

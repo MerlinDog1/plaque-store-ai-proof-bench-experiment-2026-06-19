@@ -1,6 +1,7 @@
 import React from 'react';
 import { businessContact, productionTiming } from '../services/shopInformation';
 import { deliveryServiceDescription } from '../services/merchantPolicies.mjs';
+import { ContactLink } from './ContactOptions';
 
 export function ProductionNote() {
   return (
@@ -45,7 +46,8 @@ export function ShopContact() {
           <h1>Contact<br />InstaPlaque.</h1>
           <p className="shop-intro">Need help choosing a size, checking an order or planning for an opening? Contact InstaPlaque with the details below.</p>
           <dl className="shop-contact-details">
-            <div><dt>Email</dt><dd><a href={`mailto:${businessContact.email}`}>{businessContact.email}</a></dd></div>
+            <div><dt>WhatsApp</dt><dd><ContactLink channel="whatsapp" placement="contact">{businessContact.whatsapp}</ContactLink></dd></div>
+            <div><dt>Email</dt><dd><ContactLink channel="email" placement="contact">{businessContact.email}</ContactLink></dd></div>
             <div><dt>Phone</dt><dd><a href={businessContact.phoneHref}>{businessContact.phone}</a></dd></div>
           </dl>
         </div>
