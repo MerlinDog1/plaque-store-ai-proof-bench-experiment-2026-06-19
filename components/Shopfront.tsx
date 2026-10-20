@@ -243,8 +243,10 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
     <div className="shopfront" data-prerendered="true">
       <section className="shop-hero">
         <div className="shop-hero-copy">
-          <p className="shop-kicker">Custom brass & stainless steel plaques</p>
+          {/* The descriptive line is part of the H1 for search (owner msg 5121); it looks unchanged. */}
           <h1>
+            <span className="shop-kicker shop-hero-kicker">Custom brass & stainless steel plaques</span>
+            <span className="shop-visually-hidden">: </span>
             Some words
             <br />
             deserve to <em>stay.</em>

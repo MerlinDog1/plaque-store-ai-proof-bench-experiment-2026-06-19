@@ -1221,3 +1221,19 @@
     color: var(--shop-muted);
   }
 }
+
+/* The descriptive kicker now sits inside the home H1; keep the kicker look, not the H1's. */
+.shopfront .shop-hero h1 .shop-hero-kicker {
+  display: block;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.65;
+}
+.shop-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
