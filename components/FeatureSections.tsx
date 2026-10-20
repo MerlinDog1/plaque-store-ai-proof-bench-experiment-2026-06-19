@@ -5,7 +5,8 @@ import { portraitsInMetalLink } from '../services/shopInformation';
 // Homepage sections and shared blocks for portrait plaques, AI designs and the proof PDF
 // (owner msg 5178). Kept apart from Shopfront so the full pages can import both.
 
-export const sampleProofPdf = '/samples/instaplaque-sample-proof.pdf';
+// Bump ?v= whenever the sample PDF changes, so browsers that opened an older copy fetch the new one.
+export const sampleProofPdf = '/samples/instaplaque-sample-proof.pdf?v=3';
 
 const proofPage = (page: number) => ({
   src: `/site-images/proof/sample-proof-page-${page}-760.webp`,

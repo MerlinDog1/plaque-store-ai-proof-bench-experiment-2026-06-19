@@ -146,7 +146,7 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
         </form>}
         <aside className="request-aside"><p className="shop-kicker">How it works</p><h2>No designing required.</h2><ol className="design-service-steps">
           <li><span>01</span><div><strong>Send your brief</strong><p>Tell us your wording and preferences. Unsure about something? Ask us to advise.</p></div></li>
-          <li><span>02</span><div><strong>Review your emailed proof</strong><p>We prepare the layout. Check it carefully and request changes if needed. <a href="/samples/instaplaque-sample-proof.pdf" target="_blank" rel="noopener">See a sample proof</a>.</p></div></li>
+          <li><span>02</span><div><strong>Review your emailed proof</strong><p>We prepare the layout. Check it carefully and request changes if needed. <a href="/samples/instaplaque-sample-proof.pdf?v=3" target="_blank" rel="noopener">See a sample proof</a>.</p></div></li>
           <li><span>03</span><div><strong>Approve and pay</strong><p>Confirm the proof and final price, then use the payment link before production.</p></div></li>
         </ol><p className="shop-smallprint">No payment details needed to ask for a design. We’ll email your proof within 3 hours of receiving your request.</p></aside>
       </div>
