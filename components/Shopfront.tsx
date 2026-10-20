@@ -237,6 +237,39 @@ export function ShopFaq({ faqs = shopFaqs }: { faqs?: typeof shopFaqs }) {
   );
 }
 
+// Phones: "what's your plaque for?" routes with photos straight under the headline,
+// so a visitor sees at once that they are in the right place and where to tap.
+const routeThumbs: Record<string, string> = {
+  'memorial-plaques': '/site-images/home-route-memorial-480.webp',
+  'bench-plaques': '/site-images/home-route-bench-480.webp',
+  'garden-plaques': '/site-images/home-route-garden-480.webp',
+  'opening-plaques': '/site-images/home-route-opening-480.webp',
+};
+
+function HeroRoutes() {
+  return (
+    <nav className="shop-hero-routes" aria-label="Choose your plaque">
+      <p className="shop-hero-routes-title">What’s your plaque for?</p>
+      <div className="shop-hero-routes-grid">
+        {collections.map((collection) => {
+          const landing = seoLandingPages.find((item) => item.slug === collection.slug);
+          const product = productFamilies.find((item) => item.slug === (landing?.relatedProductSlug || collection.slug))!;
+          const title = (landing?.title || product.title).replace(/\s+plaques?$/i, '');
+          return (
+            <a className="shop-hero-route" href={`/${collection.slug}`} key={collection.slug}>
+              <img src={routeThumbs[collection.slug] || collection.image} alt="" width="480" height="320" />
+              <span><strong>{title}</strong><small>{product.startingFrom}</small></span>
+            </a>
+          );
+        })}
+      </div>
+      <p className="shop-hero-routes-more">
+        Something else? <ContactLink channel="whatsapp" placement="hero" subject="a plaque">WhatsApp us your idea</ContactLink>
+      </p>
+    </nav>
+  );
+}
+
 export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: () => void; onRequestDesign?: () => void }) {
   const benchProduct = productFamilies.find(product => product.slug === 'bench-plaques')!;
   return (
@@ -251,24 +284,11 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
             <br />
             deserve to <em>stay.</em>
           </h1>
-          {/* Phones: the hero photo sits under the headline, not after the whole column. */}
-          <figure className="shop-hero-inline-image">
-            <img
-              src="/site-images/home-gallery-brass-bench.webp"
-              width="1200"
-              height="1200"
-              fetchPriority="high"
-              alt="Brass memorial plaque design on a wooden bench in a garden"
-            />
-            <figcaption>
-              <span>A name. A memory. A place to pause.</span>
-              <span>Design example</span>
-            </figcaption>
-          </figure>
           <p className="shop-intro">
-            Design your brass or stainless steel plaque online. See the price
-            as you choose, then check the wording and layout before you pay.
+            Engraved with your words, made to order and delivered. Design it
+            online in minutes, or send us your wording and we’ll design it for you.
           </p>
+          <HeroRoutes />
           <div className="shop-hero-price">
             <span>Bench plaques</span>
             <strong>
