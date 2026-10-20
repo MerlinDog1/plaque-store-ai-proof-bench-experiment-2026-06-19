@@ -1,5 +1,9 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## AI page house-sign illustration re-shot — 20 October 2026, about 22:16 UTC
+
+The Willow Cottage "made in metal" picture now shows the sign centred and flat on the wall (`576e779`). Live `dpl_6oFFiLU8XivENvzXna1bkGtoYbJH`; rollback `dpl_7SNmV88h5iMYaW1AqTUrsu4LFgQf`. See [docs/portrait-ai-pages-2026-10-20.md](docs/portrait-ai-pages-2026-10-20.md).
+
 ## Phone contact bar appears on scroll — 20 October 2026, about 22:09 UTC
 
 The fixed phone bar now slides up only once the page's own buttons have scrolled off the top, and glows once on WhatsApp the first time (`8bbc657`). Live `dpl_7SNmV88h5iMYaW1AqTUrsu4LFgQf`; rollback `dpl_6wifdbq5WGwSzQhU3gMbXnhJ9ZRd`. See [docs/portrait-ai-pages-2026-10-20.md](docs/portrait-ai-pages-2026-10-20.md).

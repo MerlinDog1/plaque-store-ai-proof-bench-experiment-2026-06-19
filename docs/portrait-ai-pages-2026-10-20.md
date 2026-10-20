@@ -159,3 +159,20 @@ you scrolled down and they had a tiny like highlight animation when they appeare
   `58d698d43874409d…`, the same as the local build); health endpoints OK. Rollback:
   `dpl_6wifdbq5WGwSzQhU3gMbXnhJ9ZRd`.
 
+## Willow Cottage illustration re-shot — released about 22:16 UTC
+
+Owner msg 5198, with a screenshot of the "Made in metal" house sign circled: "You'll need to do that image
+again so fits the wall better". The old picture had the sign running up to the door frame and not
+looking fixed to the wall.
+
+- **New image:** `ai-real-house` was regenerated with `image_generate`, using the previous image as
+  the design reference: the same engraved brushed-steel oval, now flat, level and centred on
+  white-painted brick, about 1.5 bricks wide and under 3 courses high, with the door frame only at the
+  far edge. The source is `output/instaplaque-ai-page/ai-real-house-v2.png`. Same file names
+  (`public/site-images/ai/ai-real-house-640/1200.webp`); the live cache-control is
+  `max-age=0, must-revalidate`, so no rename was needed. Alt text updated. Commit `576e779`.
+- **Release:** live `dpl_6oFFiLU8XivENvzXna1bkGtoYbJH` (`index-BwzcBT9V.js`, sha256
+  `8b18c7ffec749854…`, the same as the local build). The live image is byte-identical to the
+  repository copy, and the phone check of the section showed no errors. Rollback:
+  `dpl_7SNmV88h5iMYaW1AqTUrsu4LFgQf`.
+
