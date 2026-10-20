@@ -1398,3 +1398,13 @@
     font-size: 13px;
   }
 }
+
+/* Product pages: the homepage's lead line and two choices (owner msg 5165). */
+.shopfront .shop-product-hero .shop-product-lead {
+  margin: 22px 0 14px;
+}
+@media (max-width: 720px) {
+  .shopfront .shop-product-hero .shop-product-lead {
+    margin: 18px 0 12px;
+  }
+}

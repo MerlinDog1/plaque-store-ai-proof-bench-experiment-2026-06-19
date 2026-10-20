@@ -2,7 +2,7 @@ import React from "react";
 import { MemorialSizes, MemorialWording, MemorialMaterialLinks } from './MemorialGuide';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
-import { ContactLink, ContactOptions, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
+import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import {
   productFamilies,
@@ -406,6 +406,17 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
   );
 }
 
+// Search-led H1s for the main landing pages (owner msg 5165); other pages keep their title.
+const heroTitles: Record<string, string> = {
+  'memorial-plaques': 'Personalised memorial plaques',
+  'bench-plaques': 'Personalised bench plaques',
+  'brass-plaques': 'Personalised brass plaques',
+  'stainless-steel-plaques': 'Personalised stainless steel plaques',
+  'garden-plaques': 'Personalised garden plaques',
+  'pet-memorial-plaques': 'Personalised pet memorial plaques',
+  'memorial-bench-plaques': 'Personalised memorial bench plaques',
+};
+
 export function ShopProduct({
   product,
   onLaunch,
@@ -439,8 +450,8 @@ export function ShopProduct({
           <figcaption>{heroCaption}</figcaption>
         </figure>
         <div>
-          <p className="shop-kicker">Made to order · Your wording</p>
-          <h1>{product.title}</h1>
+          <p className="shop-kicker">Free proof · UK delivery included</p>
+          <h1>{heroTitles[product.slug] || product.title}</h1>
           <p className="shop-product-note">
             {collection?.note || "A plaque made for the words that matter."}
           </p>
@@ -457,13 +468,22 @@ export function ShopProduct({
             Standard engraving, fixings and UK delivery included.
             Extras are shown before checkout.
           </p>
-          <DesignLink onStart={onLaunch}>
-            Design {product.shortTitle.toLowerCase()} plaque
-          </DesignLink>
-          <p className="shop-hero-note">
-            Create your free proof online. No account needed.
+          {/* Same two first choices as the homepage (owner msg 5165). */}
+          <p className="shop-intro shop-product-lead">
+            Design online instantly, or talk to one of our designers on WhatsApp.
           </p>
-          <ContactOptions subject={plaqueSubject(product.shortTitle)} />
+          <div className="shop-hero-choices">
+            <DesignLink onStart={onLaunch}>Design online</DesignLink>
+            <ContactLink channel="whatsapp" placement="hero" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
+              <WhatsAppIcon /> Chat on WhatsApp
+            </ContactLink>
+          </div>
+          <p className="shop-hero-ai-note">
+            Made a design in ChatGPT? <ContactLink channel="whatsapp" placement="hero" subject={plaqueSubject(product.shortTitle)}>Send us the picture</ContactLink> and we’ll make it real.
+          </p>
+          <p className="shop-hero-note">
+            Free online designer & proof · No account needed · Or <ContactLink channel="email" placement="hero">email us</ContactLink>
+          </p>
           <p className="shop-product-description">{product.seoIntro || product.description}</p>
           <p><a className="shop-text-link" href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Or send a design brief online ↗</a></p>
           {product.productionDays ? <aside className="shop-production-note"><strong>Estimated production: {product.productionDays} working days</strong><p>After proof approval and payment. Delivery time is additional; UK delivery is included.</p><a href="/how-it-works">Production and delivery details</a></aside> : <ProductionNote />}
