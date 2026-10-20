@@ -3,6 +3,7 @@ import path from 'node:path';
 import React from 'react';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
+import { defaultShareImagePath, shareImagePathFor } from '../services/shareImages.mjs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 
@@ -25,7 +26,7 @@ try {
 }
 
 const siteBaseUrl = 'https://instaplaque.co.uk';
-const shareImage = `${siteBaseUrl}/site-images/home-realistic-proof-row.jpg`;
+const shareImage = `${siteBaseUrl}${defaultShareImagePath}`;
 
 const homeFaqs = [
   ['Is my proof really free?', 'Yes. Your proof is 100% free with no account, no sign up and no obligation to buy. If you need time to decide, download the proof PDF and use the link inside it to come back later.'],
@@ -469,10 +470,12 @@ const writePrerenderedPage = async ({
   html = replaceTag(html, /<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${escapeAttr(description)}" />`);
   html = replaceTag(html, /<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`);
-  html = replaceTag(html, /<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${image ? `${siteBaseUrl}${image}` : shareImage}" />`);
+  // Branded share cards for home and the indexable category pages; the schema keeps the photo.
+  const ogImage = shareImagePathFor(slug) ? `${siteBaseUrl}${shareImagePathFor(slug)}` : image ? `${siteBaseUrl}${image}` : shareImage;
+  html = replaceTag(html, /<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${ogImage}" />`);
   html = replaceTag(html, /<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${escapeAttr(description)}" />`);
-  html = replaceTag(html, /<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${image ? `${siteBaseUrl}${image}` : shareImage}" />`);
+  html = replaceTag(html, /<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${ogImage}" />`);
 
   const routeSchema = {
     '@context': 'https://schema.org',

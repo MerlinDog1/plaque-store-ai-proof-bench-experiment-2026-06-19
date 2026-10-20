@@ -12,6 +12,7 @@ import { merchantPolicyOrganization, productOfferPolicies } from '../services/me
 import { trackGooglePurchase, OPTIONAL_AD_CONSENT_CHANGED } from '../services/googlePurchase';
 import { trackPostHogPurchase } from '../services/posthogAnalytics';
 import { isOnePoundTestPlaque } from '../services/onePoundTestPlaque.mjs';
+import { defaultShareImagePath, shareImagePathFor } from '../services/shareImages.mjs';
 import { OwnerTestCheckout } from './OwnerTestCheckout';
 
 const formatPrice = (value: number) => {
@@ -935,8 +936,9 @@ export const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selec
     setMetaContent('meta[property="og:title"]', config.title);
     setMetaContent('meta[property="og:description"]', config.description);
     setMetaContent('meta[property="og:url"]', url);
+    const routeSlug = view === 'product' ? selectedProduct.slug : view === 'landing' ? selectedLanding.slug : undefined;
     const routeImage = view === 'product' ? selectedProduct.image : view === 'landing' ? selectedLanding.image : undefined;
-    const shareImage = routeImage ? new URL(routeImage, siteBaseUrl).href : siteShareImage;
+    const shareImage = new URL(shareImagePathFor(routeSlug) || routeImage || defaultShareImagePath, siteBaseUrl).href;
     setMetaContent('meta[property="og:image"]', shareImage);
     setMetaContent('meta[name="twitter:title"]', config.title);
     setMetaContent('meta[name="twitter:description"]', config.description);
