@@ -1,5 +1,10 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Lower-page CTAs follow the WhatsApp route — 20 October 2026, about 21:00 UTC
+
+The home "Want us to take care of the design?" section, the closing bands, the FAQ link and answers, the memorial wording link, the designer guide, about and contact now lead with WhatsApp, with the design form second. The duplicate "Or send a design brief online" product-hero link is gone (`49febe1`).
+Live `dpl_BDFdvxSqAhkRNsPn5cCALgNzGPwd`; rollback `dpl_AiAD9heNUrrWHdRE2PSUEfhfRpqu`. See [docs/home-routes-2026-10-20.md](docs/home-routes-2026-10-20.md).
+
 ## Product-page CTAs and branded share images live — 20 October 2026, about 20:30 and 20:43 UTC
 
 Product pages now use the "Personalised …" H1s and the homepage buttons: "Design online", "Chat on WhatsApp", the ChatGPT prompt and the free-proof note (`d1169d4`). Home and the seven indexable category pages share branded 1200 x 630 JPG cards (`6298ff1`, generator `scripts/generate-og-images.mjs`). Branch `codex/instaplaque-product-ctas-20261020`.

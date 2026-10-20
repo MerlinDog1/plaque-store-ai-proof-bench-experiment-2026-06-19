@@ -101,3 +101,45 @@ Owner msg 5167: "Also change open graph image". Commit `6298ff1` on the same bra
   Facebook and WhatsApp cache previews, so a link shared before today can show the old image until
   their cache refreshes. The Facebook Sharing Debugger's "Scrape again" forces a refresh.
 
+## Lower-page CTAs and help copy in line with WhatsApp — released about 21:00 UTC
+
+Owner msg 5174: "Just sense check all the text and stuff now that we added the WhatsApp stuff. Do
+any cta further down the page sound wrong now". Commit `49febe1`.
+
+What sounded wrong, and the change:
+
+- **Home "Want us to take care of the design?"** offered only the form ("Have us design it") and
+  "email your proof", although the hero says to talk to a designer on WhatsApp. It now leads with
+  **Chat on WhatsApp**, with **Use the design form ↗** as the second option. The steps now read
+  "Your wording, a photo of where it's going, or a design you made in ChatGPT" and "We design it:
+  your proof within 3 hours, by WhatsApp or email". The owner's 3-hour promise is kept, and now also
+  covers WhatsApp.
+- **Closing bands (home and every product page)** offered only "Design your plaque". They now have
+  **Chat on WhatsApp** beside it, both 240 px wide.
+- **FAQ side link** "Talk to us ↗" (contact page) is now **Ask us on WhatsApp ↗**.
+- **FAQ "Can you help with an unusual plaque?"** said email only. It now gives WhatsApp and email,
+  and mentions a photo of the spot or a ChatGPT design. **"Can I see my plaque before I pay?"** now
+  also says we send the proof to approve when we design it.
+- **Product heroes** had a fourth route under the description, "Or send a design brief online ↗",
+  which duplicated WhatsApp and email. It has been removed, along with the unused `onRequestDesign`
+  prop.
+- **Memorial wording:** "Prefer us to arrange your wording?" (form) is now "Prefer us to design it?
+  Send your wording on WhatsApp ↗".
+- **Designer guide:** the line now offers WhatsApp or the design form.
+- **About page:** "InstaPlaque is for designing your own inscription plaque" contradicted the design
+  service. It now reads "design your own online, or send us your wording and we'll design it for you".
+- **Contact page:** adds "WhatsApp is usually quickest" and the photo/ChatGPT hint.
+- **Analytics:** new `page` contact placement (type and PostHog enum) for these lower-page WhatsApp
+  links. `scripts/check-design-request.cjs` now clicks "Use the design form ↗".
+
+Left as they were: the design form page and its 3-hour promise, the how-it-works designer copy, the
+opening page's "Discuss a deadline or artwork requirement" (contact page) and the materials closing.
+
+- **Checks:** typecheck, posthog, consent, redaction, purchase and build (all postbuild checks)
+  pass. Local and live 390/1440 checks cover the WhatsApp links (placement `page`), the design form
+  link opening `/design-request`, the brief link being gone, the FAQ answer, no page errors and no
+  overflow.
+- **Release:** live `dpl_BDFdvxSqAhkRNsPn5cCALgNzGPwd` (`index-Dv8vp22V.js`, sha256
+  `f29e6306f99082d4…`, same as the local build); health endpoints OK. Rollback:
+  `dpl_AiAD9heNUrrWHdRE2PSUEfhfRpqu`.
+
