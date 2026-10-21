@@ -1,5 +1,18 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Catalogue pages: photos, specifications, links and sample proofs — 21 October 2026, about 07:20 UTC
+
+- **Every one of the 175 exact-offer pages now has:**
+  - a realistic photo of its configuration, in a gallery whose second image is the flat feed render (still the Product schema image and Merchant `image_link`)
+  - a "What you get." specification with finish and size notes
+  - links to the other sizes, finishes and backings, with prices
+  - its own three-page sample proof PDF
+- Brass and stainless pages list every size by finish, and the materials cards link to the A5 pages.
+- The realistic-preview stencil keeps the wood colour.
+- The sample proof's page 3 template no longer hits the footer (`?v=4`).
+- Commit `675cfb1`. Live `dpl_Egizxth8TEzLsDZy9Uh6hx8ybyJU`; rollback `dpl_5hQcQi8bCd9VretcmsUVcWytyVmg`.
+- See [docs/catalogue-pages-2026-10-21.md](docs/catalogue-pages-2026-10-21.md).
+
 ## Review fixes live — 21 October 2026, about 05:57 UTC
 
 - Trader address (no house number) sitewide, with the owner's name only on Terms and Privacy (with the ICO).

@@ -1,5 +1,13 @@
 # Catalogue product pages: photos, specifications, links and sample proofs (21 October 2026)
 
+Released at about 07:20 UTC.
+- Commit `675cfb1`.
+- Live deployment `dpl_Egizxth8TEzLsDZy9Uh6hx8ybyJU`; rollback `dpl_5hQcQi8bCd9VretcmsUVcWytyVmg`.
+- Live checks passed:
+  - 694 new photo, thumbnail and PDF URLs return 200.
+  - Desktop and phone galleries, specs, links and PDFs work, with no page errors.
+  - The earlier caption, address and fold checks still pass.
+
 Owner request (msg 5231), following the independent review of 21 October:
 
 > You should be able to use an old version of the site to generate very realistic plaque photos.
