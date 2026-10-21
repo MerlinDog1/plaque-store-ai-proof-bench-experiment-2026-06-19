@@ -1,5 +1,21 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Catalogue photo redo paused — 21 October 2026, about 11:48 UTC
+
+- The catalogue photos are being redone with each plaque's own wording, on Codex (gpt-image-2). The work is on Cody's VPS only, in the untracked `output/catalogue-wording/`.
+- **Progress:** 40 of 168 made. 39 were checked and sent to the owner, including scalloped and no-border designs.
+- **Final reject:** `polished-stainless-150x75-rect-plaque`, whose plate proportions kept coming out wrong.
+- **128 to go,** paused at the owner's request.
+- **Nothing is published.** The live pages still show this morning's Gemini photos, which all say "ALEX MORGAN".
+- **Planned once the photos are done (owner-approved):**
+  - matching sample PDFs
+  - a "Shop by size" page
+  - all 175 pages in the sitemap
+  - the photos as the Shopping image
+  - ProductGroup variant markup
+  - one release, then sitemap submission in Search Console
+- **To resume,** follow `output/catalogue-wording/PROGRESS.md` on the VPS. Don't regenerate or replace catalogue photos from another machine in the meantime.
+
 ## Catalogue pages: photos, specifications, links and sample proofs — 21 October 2026, about 07:20 UTC
 
 - **Every one of the 175 exact-offer pages now has:**
