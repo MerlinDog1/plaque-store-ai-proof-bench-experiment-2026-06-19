@@ -1,5 +1,15 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Review fixes live — 21 October 2026, about 05:57 UTC
+
+- Trader address (no house number) sitewide, with the owner's name only on Terms and Privacy (with the ICO).
+- "3 working hours", and "Have us design it – free proof" on every category and product hero (prefilled form).
+- Phone heroes with the buttons above the fold; no AI captions.
+- Product schema on product pages only, with category breadcrumbs.
+- /quote 301s to /custom-plaques; descriptive About and Materials H1s.
+- Branch `codex/instaplaque-review-fixes-20261021` (`931d4dd`). Live `dpl_5hQcQi8bCd9VretcmsUVcWytyVmg`; rollback `dpl_2C2nqMKWWAW6QGbJg3nCCL9xaYhb`.
+- See [docs/review-fixes-2026-10-21.md](docs/review-fixes-2026-10-21.md).
+
 ## Proof and AI image URLs versioned — 20 October 2026, about 23:00 UTC
 
 Proof preview and AI images now carry `?v=3` (`featureImageVersion` in `components/FeatureSections.tsx`); bump it when one is redrawn under the same name (`22d7e0c`). Live `dpl_2C2nqMKWWAW6QGbJg3nCCL9xaYhb`; rollback `dpl_7ozNAjg73UxbARZppVd1ZTodGeBx`.
