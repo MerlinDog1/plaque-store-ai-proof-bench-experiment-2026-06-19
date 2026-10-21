@@ -16,6 +16,8 @@ const REALISTIC_PREVIEW_IMAGE_SIZE = "4K";
 export interface RealisticPreviewOptions {
   prompt?: string;
   aspectRatio?: string;
+  // Catalogue photos (scripts/generate-merchant-photos.mjs) use 2K; the designer keeps 4K.
+  imageSize?: "1K" | "2K" | "4K";
 }
 
 // Retry helper for 503 Overloaded errors
@@ -1823,6 +1825,7 @@ export const generateRealisticView = async (
   };
 
   const mat = materials[state.material];
+  const imageSize = options.imageSize || REALISTIC_PREVIEW_IMAGE_SIZE;
   const plaqueAspectRatio = state.width / Math.max(1, state.height);
   const mockupAspectRatio = options.aspectRatio && options.aspectRatio !== "auto"
     ? options.aspectRatio
@@ -1897,7 +1900,7 @@ Create a high-resolution photorealistic product mockup from the attached plaque 
 Use the attached image as the exact finished plaque-face reference, not as a faint embossing hint. Preserve the plaque's ${orientation} orientation, ${plaqueAspectRatio.toFixed(4)}:1 aspect ratio, outline, text placement, borders, portrait/artwork placement, hardware placement, and high-contrast lettering.
 
 Output:
-- Generate a ${REALISTIC_PREVIEW_IMAGE_SIZE} image.
+- Generate a ${imageSize} image.
 - Output aspect ratio: ${mockupAspectRatio}.
 ${creativeBrief ? `\n${creativeBrief}\n` : ""}
 
@@ -1952,7 +1955,7 @@ Scene:
           },
           responseModalities: ["IMAGE", "TEXT"],
           imageConfig: {
-            imageSize: REALISTIC_PREVIEW_IMAGE_SIZE,
+            imageSize,
             aspectRatio: mockupAspectRatio
           }
         }

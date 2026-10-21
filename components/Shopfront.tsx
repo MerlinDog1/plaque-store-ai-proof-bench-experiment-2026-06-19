@@ -5,6 +5,7 @@ import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { HomeAiSection, HomePortraitSection, ProofPdfShowcase } from './FeatureSections';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
+import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
 import {
   productFamilies,
   ProductFamily,
@@ -443,6 +444,30 @@ export function productCategoryFor(product: ProductFamily): { slug: string; titl
     : { slug: 'brass-plaques', title: 'Brass plaques' };
 }
 
+type GalleryImage = { src: string; srcSet?: string; thumb?: string; thumbSrcSet?: string; alt: string; label: string };
+
+// Catalogue pages show the photo first and the flat design view (the feed image) as a second
+// image, so the Merchant Center image is still on the landing page.
+function ProductGallery({ images, caption, className, sizes }: { images: GalleryImage[]; caption: string; className?: string; sizes?: string }) {
+  const [active, setActive] = React.useState(0);
+  const image = images[active] || images[0];
+  return (
+    <figure className={className}>
+      <img src={image.src} srcSet={image.srcSet} sizes={image.srcSet ? sizes : undefined} alt={image.alt} width="1200" height="1200" fetchPriority="high" />
+      {images.length > 1 && (
+        <div className="shop-product-thumbs" role="group" aria-label="Product images">
+          {images.map((item, index) => (
+            <button type="button" key={item.src} aria-label={item.label} aria-pressed={index === active} onClick={() => setActive(index)}>
+              <img src={item.thumb || item.src} srcSet={item.thumbSrcSet} sizes={item.thumbSrcSet ? '64px' : undefined} alt="" width="120" height="120" loading="lazy" />
+            </button>
+          ))}
+        </div>
+      )}
+      <figcaption>{caption}</figcaption>
+    </figure>
+  );
+}
+
 export function ShopProduct({
   product,
   onLaunch,
@@ -460,8 +485,17 @@ export function ShopProduct({
         list.findIndex((other) => other.question === item.question) === index,
     )
     .slice(0, 6);
-  const heroImage = collection?.image || materialProductImages[product.slug] || product.image;
-  const heroAlt = isMemorial ? 'Aged brass memorial plaque with a family inscription on dark wood backing' : product.title;
+  const heroImage = product.photo || collection?.image || materialProductImages[product.slug] || product.image;
+  const heroAlt = isMemorial ? 'Aged brass memorial plaque with a family inscription on dark wood backing'
+    : product.merchantOffer ? `${product.title}, shown with an example inscription` : product.title;
+  const photoSmall = product.photo?.replace(/\.webp$/, '-600.webp');
+  const heroImages: GalleryImage[] = product.photo
+    ? [
+        { src: product.photo, srcSet: `${photoSmall} 600w, ${product.photo} 1200w`, thumb: photoSmall, alt: heroAlt, label: 'Shown in place' },
+        // The thumbnail keeps the feed image as its src; browsers pick the 160 px copy.
+        { src: product.image, thumbSrcSet: `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')} 160w, ${product.image} 1500w`, alt: `${product.title}: flat design view`, label: 'Flat design view' },
+      ]
+    : [{ src: heroImage, alt: heroAlt, label: product.title }];
   // No AI/illustration labels on product images (owner msg 5231). The memorial photo shows a
   // dearer configuration than its from-price, so say what is shown (review 21 Oct).
   const agedA5 = productFamilies.find(item => item.slug === 'aged-brass-210x148-rect-dark-wood-plaque');
@@ -481,10 +515,7 @@ export function ShopProduct({
         <span>{product.title}</span>
       </div>
       <section className="shop-product-hero">
-        <figure>
-          <img src={heroImage} alt={heroAlt} width="1200" height="1200" fetchPriority="high" />
-          <figcaption>{heroCaption}</figcaption>
-        </figure>
+        <ProductGallery images={heroImages} caption={heroCaption} sizes="(max-width: 720px) 92vw, 560px" />
         <div>
           <p className="shop-kicker">Free proof · UK delivery included</p>
           <h1 className={product.merchantOffer ? 'shop-product-title-long' : undefined}>{heroTitles[product.slug] || product.title}</h1>
@@ -492,10 +523,8 @@ export function ShopProduct({
             {collection?.note || "A plaque made for the words that matter."}
           </p>
           {/* Phones: the product photo stays near the top while the copy comes first. */}
-          <figure className="shop-product-inline-image">
-            <img src={heroImage} alt={heroAlt} width="1200" height="1200" fetchPriority="high" />
-            <figcaption>{heroCaption}</figcaption>
-          </figure>
+          {/* Same sizes as the desktop figure, so React emits one image preload, not two. */}
+          <ProductGallery className="shop-product-inline-image" images={heroImages} caption={heroCaption} sizes="(max-width: 720px) 92vw, 560px" />
           {/* Phones: price and the choices straight under the photo (owner msg 5231). */}
           <strong className="shop-product-price">
             <TrackedPrice value={displayedPriceValue(product.startingFrom)} product={product.slug}>{product.startingFrom}</TrackedPrice>
@@ -535,7 +564,7 @@ export function ShopProduct({
         </nav>
         <MemorialSizes />
       </>}
-      <section className="shop-section shop-buying-guide" id={isMemorial ? 'memorial-materials' : undefined}>
+      {product.merchantOffer ? <MerchantProductDetails slug={product.slug} /> : <section className="shop-section shop-buying-guide" id={isMemorial ? 'memorial-materials' : undefined}>
         <div>
           <p className="shop-kicker">Size, wording and fitting</p>
           <h2>{isMemorial ? 'Choose the metal and the setting.' : 'Choose the size and finish.'}</h2>
@@ -552,7 +581,9 @@ export function ShopProduct({
           ))}
           {isMemorial && <MemorialMaterialLinks />}
         </div>
-      </section>
+      </section>}
+      {product.slug === 'brass-plaques' && <CatalogueSizeLinks kicker="Sizes and prices" title="Brass plaques by size." materials={['brushed-brass', 'polished-brass', 'orbital-brass-matt-lacquer', 'aged-brass']} />}
+      {product.slug === 'stainless-steel-plaques' && <CatalogueSizeLinks kicker="Sizes and prices" title="Stainless steel plaques by size." materials={['brushed-stainless', 'polished-stainless']} />}
       {['bench-plaques', 'opening-plaques'].includes(product.slug) && <PlaqueWordingExamples slug={product.slug} />}
       {product.slug === 'bench-plaques' && <nav className="shop-section" aria-label="Bench plaque sizes and prices">
         <p className="shop-kicker">Compare bench plaques</p>
@@ -567,7 +598,8 @@ export function ShopProduct({
       {isMemorial && <MemorialWording />}
       {!['bench-plaques', 'opening-plaques', 'memorial-plaques'].includes(product.slug) && <ShopProcess />}
       {product.slug === 'garden-plaques' && <GardenAdvice />}
-      <CollectionLinks slug={product.slug} />
+      {/* Catalogue pages: wording and fitting help, not the opening-plaque route (review 21 Oct). */}
+      <CollectionLinks slug={product.merchantOffer ? 'catalogue' : product.slug} />
       <div id={isMemorial ? 'memorial-questions' : undefined}><ShopFaq faqs={faqs} /></div>
       <section className="shop-closing">
         <h2>Put your words in place.</h2>
@@ -616,6 +648,16 @@ export function ShopLanding({
   );
 }
 
+// Each finish links to its A5 catalogue page, so the exact product pages are reachable.
+const materialOfferKeys: Record<string, string> = {
+  'Brushed brass': 'brushed-brass',
+  'Polished brass': 'polished-brass',
+  'Aged brass': 'aged-brass',
+  'Orbital brass': 'orbital-brass-matt-lacquer',
+  'Brushed stainless steel': 'brushed-stainless',
+  'Mirror stainless': 'polished-stainless',
+};
+
 export function ShopMaterials() {
   return (
     <div className="shopfront" data-prerendered="true">
@@ -649,6 +691,10 @@ export function ShopMaterials() {
                 <h3>{material.title}</h3>
               </div>
               <p>{material.copy}</p>
+              {materialOfferKeys[material.title] && (() => {
+                const offer = coreOfferFor(materialOfferKeys[material.title]);
+                return offer ? <a className="shop-text-link" href={`/${offer.slug}`}>A5 {material.title.toLowerCase()} plaque · {coreOfferPrice(offer.slug)} ↗</a> : null;
+              })()}
             </article>
           ))}
         </div>

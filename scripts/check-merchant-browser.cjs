@@ -7,13 +7,18 @@ const {chromium}=require('playwright');const fs=require('node:fs');
   const p=await browser.newPage({viewport:{width,height:1000}});const errors=[];p.on('pageerror',e=>errors.push(e.message));
   await p.route('https://**/*',r=>r.request().url().startsWith(base)?r.continue():r.abort());
   await p.route('**/api/**',r=>r.fulfill({status:200,contentType:'application/json',body:'{}'}));
-  const cases=width===1440?merchantOffers:merchantOffers.filter((o,i)=>i%7===0||o.preset.shape!=='rect');
+  const only=process.env.ONLY?new Set(process.env.ONLY.split(',')):null;
+  const cases=(width===1440?merchantOffers:merchantOffers.filter((o,i)=>i%7===0||o.preset.shape!=='rect')).filter(o=>!only||only.has(o.slug));
   for(const o of cases){
    await p.goto(base+'/'+o.slug,{waitUntil:'domcontentloaded',timeout:60000});await p.locator('.shop-product-price').waitFor();
    await p.waitForFunction(()=>document.querySelector('.shop-product-hero img')?.complete,null,{timeout:20000});
    const actual=Number((await p.locator('.shop-product-price').innerText()).replace(/[^\d.]/g,''));if(actual!==o.price)throw Error('Page price '+o.slug);
-   const img=p.locator('.shop-product-hero img');if(await img.getAttribute('src')!==o.image)throw Error('Image mismatch');
-   if(!await img.evaluate(i=>i.naturalWidth>=500))throw Error('Small/broken image');
+   // Catalogue photo first; the feed image stays on the page as the second gallery image.
+   const img=p.locator('.shop-product-hero figure > img').first();const photo=o.imageKind==='render'?`/site-images/merchant-photo/${o.slug}.webp`:o.image;
+   if(await img.getAttribute('src')!==photo)throw Error('Image mismatch '+o.slug);
+   if(o.imageKind==='render'&&!await p.locator(`.shop-product-hero .shop-product-thumbs img[src="${o.image}"]`).count())throw Error('Feed image not on page '+o.slug);
+   // With srcset, naturalWidth is scaled by sizes; measure the pixels of the file the browser chose.
+   if(!await img.evaluate(async i=>{const f=new Image();f.src=i.currentSrc||i.src;await f.decode();return f.naturalWidth>=500}))throw Error('Small/broken image '+o.slug);
    if(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('Page overflow '+o.slug);
    const text=await p.locator('.shop-product-hero').innerText();if(!text.includes(`${o.productionDays} working days`))throw Error('Production '+o.slug);
    await p.locator('.shop-product-hero a.shop-button').first().click();

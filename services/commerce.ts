@@ -56,6 +56,8 @@ export interface ProductFamily {
   schemaStartingPrice?: number;
   merchantOffer?: boolean;
   imageKind?: 'ai' | 'render';
+  /** Product page photo (1200 px webp, with a -600 version); the feed and schema keep `image`. */
+  photo?: string;
   productionDays?: number;
   merchantMaterial?: string;
   materialCue: 'brass' | 'stainless' | 'wood' | 'aged';
@@ -1010,6 +1012,9 @@ export const merchantProducts: ProductFamily[] = merchantOffers.map(item => ({
   slug: item.slug, title: item.title, shortTitle: item.materialCue === 'stainless' ? 'Stainless' : 'Brass',
   eyebrow: 'Made to order', materialCue: item.materialCue as ProductFamily['materialCue'],
   image: item.image, imageKind: item.imageKind as 'ai' | 'render', merchantOffer: true,
+  // Realistic photos made by scripts/generate-merchant-photos.mjs (owner msg 5231); the two
+  // offers that already use a photo-style image keep it.
+  photo: item.imageKind === 'render' ? `/site-images/merchant-photo/${item.slug}.webp` : undefined,
   merchantMaterial: item.label, productionDays: item.productionDays,
   description: item.description, seoIntro: item.description, seoTitle: `${item.title} UK | InstaPlaque`,
   seoDescription: `${item.size} ${item.label.toLowerCase()} plaque${item.preset.wood ? ` with ${item.preset.woodTone} wood backing` : ''}. Add your wording, check a free proof and order with UK delivery included.`,

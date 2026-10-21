@@ -1147,6 +1147,9 @@ export const svgToPngBase64 = async (sourceSvg: SVGSVGElement, state?: PlaqueSta
 
     clone.querySelectorAll(".wood-backing").forEach(el => {
       el.setAttribute("fill", realisticReferenceWoodFill(state));
+      // The board shapes carry their own url(#wood…) texture fill and the defs are removed
+      // below, which left the board blank (cream) in the reference image.
+      el.querySelectorAll('[fill^="url("]').forEach(shape => shape.setAttribute("fill", realisticReferenceWoodFill(state)));
       el.setAttribute("stroke", "#2b1b12");
       el.setAttribute("stroke-width", "1.1");
       el.removeAttribute("style");

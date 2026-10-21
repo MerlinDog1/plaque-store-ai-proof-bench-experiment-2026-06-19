@@ -6,9 +6,9 @@ import { portraitsInMetalLink } from '../services/shopInformation';
 // (owner msg 5178). Kept apart from Shopfront so the full pages can import both.
 
 // Bump ?v= whenever the sample PDF changes, so browsers that opened an older copy fetch the new one.
-export const sampleProofPdf = '/samples/instaplaque-sample-proof.pdf?v=3';
+export const sampleProofPdf = '/samples/instaplaque-sample-proof.pdf?v=4';
 // The same for the proof and AI images, which keep their file names when redrawn.
-export const featureImageVersion = 'v=3';
+export const featureImageVersion = 'v=4';
 
 const proofPage = (page: number) => ({
   src: `/site-images/proof/sample-proof-page-${page}-760.webp?${featureImageVersion}`,
