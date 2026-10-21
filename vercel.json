@@ -113,6 +113,11 @@
       "source": "/a4-plaques",
       "destination": "/custom-plaques",
       "permanent": true
+    },
+    {
+      "source": "/quote",
+      "destination": "/custom-plaques",
+      "permanent": true
     }
   ],
   "headers": [

@@ -1018,7 +1018,7 @@ export const merchantProducts: ProductFamily[] = merchantOffers.map(item => ({
   proofPrompt: 'In loving memory of\nALEX MORGAN\nForever in our hearts',
   preset: item.preset as Partial<PlaqueState>,
   faqs: [{ question: 'Is this the price for the pictured configuration?',
-    answer: 'Yes. The stated price includes the specified size, finish, fixings and personalised wording. The image is a digital design illustration, not a photograph of a completed customer order. Your approved proof confirms the final layout. Changing the configuration can change the price.' }],
+    answer: 'Yes. The stated price includes the specified size, finish, fixings and personalised wording. Your approved proof confirms the final layout. Changing the configuration can change the price.' }],
 }));
 productFamilies.push(...merchantProducts);
 

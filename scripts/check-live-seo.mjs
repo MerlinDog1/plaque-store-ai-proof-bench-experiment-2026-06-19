@@ -24,11 +24,12 @@ const redirectedPaths = new Set([
   '/engraved-plaques',
   '/memorial-bench-plaques',
   '/pet-memorial-plaques',
+  '/quote',
   '/school-opening-plaques',
   '/tree-plaques',
 ]);
 
-assert(sitemapUrls.length === 22 && ['design-request', 'portrait-plaques', 'ai-plaque-design'].every(slug => sitemapUrls.includes(`https://instaplaque.co.uk/${slug}`)), `Expected the public sitemap including design requests, portrait plaques and AI design, found ${sitemapUrls.length}`);
+assert(sitemapUrls.length === 21 && ['design-request', 'portrait-plaques', 'ai-plaque-design'].every(slug => sitemapUrls.includes(`https://instaplaque.co.uk/${slug}`)), `Expected the public sitemap including design requests, portrait plaques and AI design, found ${sitemapUrls.length}`);
 const productSitemap = await read('dist/sitemap-products.xml');
 const productUrls = [...productSitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
 const { merchantOffers } = await import('../services/merchantCatalogue.mjs');
@@ -90,4 +91,4 @@ assert(portraits.includes('<h1>Personalised portrait plaques</h1>') && portraits
 const aiDesign = await read('dist/ai-plaque-design/index.html');
 assert(aiDesign.includes('<h1>Turn your AI design into a real plaque</h1>') && aiDesign.includes('"@type":"FAQPage"') && aiDesign.includes('Can you make a real plaque from a ChatGPT design?'), 'AI design page needs its H1, visible FAQs and FAQ schema');
 assert(home.includes('href="/portrait-plaques"') && home.includes('href="/ai-plaque-design"'), 'Homepage must link to the portrait and AI design pages');
-console.log('Live SEO checks passed: 22 editorial URLs and 175 exact product URLs, focused redirects, static route HTML, canonicals and LCP preloads.');
+console.log('Live SEO checks passed: 21 editorial URLs and 175 exact product URLs, focused redirects, static route HTML, canonicals and LCP preloads.');

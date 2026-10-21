@@ -282,27 +282,16 @@ const faqSchema = (faqs) => ({
   })),
 });
 
+// Category formats as a plain list of links; Product schema stays on the exact product pages
+// only, not the homepage or category pages (owner msg 5231, review 21 Oct).
 const productListSchema = () => ({
   '@type': 'ItemList',
   name: 'Custom plaque formats',
-  itemListElement: indexablePages.map((page, index) => ({
+  itemListElement: [...pages.filter((page) => indexableProductSlugs.has(page.slug)), ...indexableLandingPages].map((page, index) => ({
     '@type': 'ListItem',
     position: index + 1,
-    item: {
-      '@type': 'Product',
-      name: page.productType,
-      description: page.description,
-      image: `${siteBaseUrl}${page.image}`,
-      brand: { '@type': 'Brand', name: 'InstaPlaque' },
-      offers: {
-        '@type': 'Offer',
-        priceCurrency: 'GBP',
-        price: page.price.toString(),
-        availability: 'https://schema.org/InStock',
-        url: `${siteBaseUrl}/${page.slug}`,
-        ...productOfferPolicies(page.productionDays),
-      },
-    },
+    name: page.productType || page.pageName,
+    url: `${siteBaseUrl}/${page.slug}`,
   })),
 });
 
@@ -351,11 +340,6 @@ const routePages = [
     title: 'Custom Plaque FAQs UK | InstaPlaque',
     description: 'Answers about custom plaque prices, materials, proofing, UK delivery, fixings, aged brass and bespoke plaque orders.',
     schema: [faqSchema(homeFaqs)],
-  },
-  {
-    slug: 'quote',
-    title: 'Custom Plaque Quotes UK | InstaPlaque',
-    description: 'Start a proof for custom plaque sizes, oval plaques, circular plaques and longer-turnaround plaque orders in the UK.',
   },
   {
     slug: 'contact',
@@ -531,14 +515,18 @@ for (const page of routePages) {
   await writePrerenderedPage({ ...page, kind: page.slug === '' ? 'home' : 'page' });
 }
 
+const merchantSlugs = new Set(merchantOffers.map((offer) => offer.slug));
 for (const page of indexablePages) {
   const url = `${siteBaseUrl}/${page.slug}`;
+  const isProduct = merchantSlugs.has(page.slug);
+  const family = catalogue.productFamilies.find((item) => item.slug === page.slug);
+  const category = isProduct && family ? shop.productCategoryFor(family) : null;
   await writePrerenderedPage({
     slug: page.slug,
     title: page.title,
     description: page.description,
     image: page.image,
-    productSchema: {
+    productSchema: !isProduct ? null : {
       '@type': 'Product',
       '@id': `${url}#product`,
       name: page.productType,
@@ -562,7 +550,8 @@ for (const page of indexablePages) {
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Home', item: siteBaseUrl },
-          { '@type': 'ListItem', position: 2, name: page.productType, item: url },
+          ...(category ? [{ '@type': 'ListItem', position: 2, name: category.title, item: `${siteBaseUrl}/${category.slug}` }] : []),
+          { '@type': 'ListItem', position: category ? 3 : 2, name: page.productType, item: url },
         ],
       },
       faqSchema(page.faqs),

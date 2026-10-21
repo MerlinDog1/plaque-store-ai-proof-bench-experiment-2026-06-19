@@ -20,6 +20,7 @@ export const merchantPolicyOrganization = Object.freeze({
   '@id': `${site}/#organization`,
   name: 'InstaPlaque',
   url: `${site}/`,
+  address: { '@type': 'PostalAddress', streetAddress: 'Dunkirk Avenue', addressLocality: 'Desborough', addressRegion: 'Northamptonshire', postalCode: 'NN14 2PL', addressCountry: 'GB' },
   hasMerchantReturnPolicy: merchantReturnPolicy,
 });
 

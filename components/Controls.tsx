@@ -125,7 +125,7 @@ const SIZE_PRESETS: SizePreset[] = [
 ];
 
 const BENCH_SIZE_PRESETS: SizePreset[] = [
-  { label: '150 x 50 mm', note: 'Current compact bench default', shape: Shape.Rect, width: 150, height: 50, badge: 'Default' },
+  { label: '150 x 50 mm', note: 'Compact bench plaque', shape: Shape.Rect, width: 150, height: 50, badge: 'Smallest' },
   { label: '225 x 75 mm', note: 'Wider commemorative bench plaque', shape: Shape.Rect, width: 225, height: 75, badge: 'Most popular' },
   { label: '225 x 65 mm', note: 'Wide low-profile bench plaque', shape: Shape.Rect, width: 225, height: 65 },
   { label: '150 x 75 mm', note: 'Compact deeper bench plaque', shape: Shape.Rect, width: 150, height: 75 },

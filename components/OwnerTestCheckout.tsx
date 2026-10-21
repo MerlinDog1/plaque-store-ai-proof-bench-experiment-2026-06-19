@@ -10,7 +10,7 @@ export function OwnerTestCheckout() {
       <a className="mt-4 flex min-h-[52px] items-center justify-center rounded-lg bg-[#264c36] px-4 py-3 text-center font-black text-white" href="/checkout-test.html">
         Continue to £1 test checkout
       </a>
-      <p className="mt-3 text-xs">For an actual plaque in this size, <a className="underline" href="/quote">request a quote</a>.</p>
+      <p className="mt-3 text-xs">For an actual plaque in this size, <a className="underline" href="/design-request">request a quote</a>.</p>
     </section>
   );
 }

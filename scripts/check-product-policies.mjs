@@ -31,6 +31,12 @@ for (const file of (await readdir('dist', { recursive: true })).filter(file => f
   }
 }
 for (const variant of merchantOffers) assert.ok(seen.has(`https://instaplaque.co.uk/${variant.slug}`), `Missing variant ${variant.slug}`);
-assert.ok(pageCount >= merchantOffers.length + 6, 'Cover homepage, families and all exact-product pages');
-assert.ok(productCount >= merchantOffers.length * 2, 'Check home catalogue offers as well as standalone product pages');
+// Product schema belongs on the exact product pages only, not the homepage or category pages
+// (Google: a specific product, not a category; owner msg 5231).
+assert.equal(pageCount, merchantOffers.length, 'Product schema should appear on exactly the product pages');
+assert.equal(productCount, merchantOffers.length, 'One Product per exact product page');
+for (const page of ['index.html', 'memorial-plaques/index.html', 'bench-plaques/index.html', 'brass-plaques/index.html', 'stainless-steel-plaques/index.html', 'custom-plaques/index.html', 'garden-plaques/index.html', 'opening-plaques/index.html']) {
+  const graph = schemasFromHtml(await readFile(`dist/${page}`, 'utf8'));
+  assert.equal([...schemaObjects(graph)].filter(item => item['@type'] === 'Product').length, 0, `No Product schema on ${page}`);
+}
 console.log(`Product policies: ${productCount} physical offers across ${pageCount} pages pass shipping, returns, production/transit separation and weekday checks; free designer unchanged.`);

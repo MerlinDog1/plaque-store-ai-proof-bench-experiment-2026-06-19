@@ -1817,3 +1817,44 @@
     animation: none;
   }
 }
+
+/* Product heroes: price and choices first, then "Have us design it" (owner msg 5231). */
+.shopfront .shop-product-hero .shop-product-price {
+  margin: 18px 0 14px;
+}
+.shopfront .shop-hero-design-request {
+  margin: -16px 0 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--shop-ink);
+}
+.shopfront .shop-hero-design-request a {
+  font-weight: 700;
+  text-decoration: underline;
+}
+.shopfront .shop-product-hero h1.shop-product-title-long {
+  font-size: clamp(32px, 3.2vw, 46px);
+  line-height: 1.08;
+}
+@media (max-width: 720px) {
+  .shopfront .shop-product-hero h1 {
+    font-size: 34px;
+  }
+  .shopfront .shop-product-hero h1.shop-product-title-long {
+    font-size: 26px;
+  }
+  .shopfront .shop-product-hero .shop-product-note {
+    font-size: 19px;
+    margin: 10px 0 0;
+  }
+  .shopfront .shop-product-inline-image {
+    margin: 16px 0 2px;
+  }
+  .shopfront .shop-product-hero .shop-product-price {
+    margin: 12px 0 10px;
+  }
+  .shopfront .shop-hero-design-request {
+    margin: -8px 0 12px;
+    font-size: 13px;
+  }
+}

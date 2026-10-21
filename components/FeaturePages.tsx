@@ -35,7 +35,7 @@ export const portraitFaqs = [
   },
   {
     question: 'How much does a portrait plaque cost?',
-    answer: 'A5 portrait plaques start from £95.50, with UK mainland delivery included. Larger sizes, wood backing and freestanding styles cost more. Your free sketch comes with an exact quote, and you only pay once you approve the design.',
+    answer: 'A5 portrait plaques start from £95.50, with UK delivery included. Larger sizes, wood backing and freestanding styles cost more. Your free sketch comes with an exact quote, and you only pay once you approve the design.',
   },
   {
     question: 'How long does a portrait plaque take?',
@@ -108,13 +108,13 @@ const portraitSteps = [
 ];
 
 const portraitGallery = [
-  { file: 'thomas-polished-steel', width: 480, height: 679, title: 'Family memorial', detail: 'Polished stainless steel', alt: 'Illustrative family memorial plaque for Thomas with an engraved portrait, in polished stainless steel on stone' },
-  { file: 'alfie-polished-brass', width: 480, height: 680, title: 'Dog memorial', detail: 'Polished brass on light oak', alt: 'Illustrative spaniel portrait memorial plaque for Alfie in polished brass on light oak' },
-  { file: 'lily-brushed-steel', width: 480, height: 640, title: 'Cat portrait', detail: 'Brushed stainless steel', alt: 'Illustrative portrait of Lily the tabby-and-white cat above a family inscription on brushed stainless steel' },
-  { file: 'nell-orbital-brass', width: 480, height: 680, title: 'Sleeping cat', detail: 'Orbital brass on mahogany', alt: 'Illustrative full sleeping-cat portrait of Nell on orbital brass with a mahogany board' },
-  { file: 'anne-mahogany-easel', width: 480, height: 360, title: 'On an easel stand', detail: 'Polished steel, dark mahogany', alt: 'Illustrative memorial portrait plaque for Anne in polished stainless steel on a dark mahogany easel stand' },
-  { file: 'willow-aged-brass', width: 480, height: 360, title: 'Horse nameplate', detail: 'Aged brass on mahogany', alt: 'Illustrative stable nameplate with an engraved horse head for Willowbrook Belle, in aged brass on dark mahogany' },
-  { file: 'ruby-folded-steel', width: 480, height: 360, title: 'Freestanding', detail: 'Folded brushed steel', alt: 'Illustrative freestanding folded stainless steel portrait plaque of Ruby the Siamese cat on a windowsill' },
+  { file: 'thomas-polished-steel', width: 480, height: 679, title: 'Family memorial', detail: 'Polished stainless steel', alt: 'Family memorial plaque for Thomas with an engraved portrait, in polished stainless steel on stone' },
+  { file: 'alfie-polished-brass', width: 480, height: 680, title: 'Dog memorial', detail: 'Polished brass on light oak', alt: 'Spaniel portrait memorial plaque for Alfie in polished brass on light oak' },
+  { file: 'lily-brushed-steel', width: 480, height: 640, title: 'Cat portrait', detail: 'Brushed stainless steel', alt: 'Portrait of Lily the tabby-and-white cat above a family inscription on brushed stainless steel' },
+  { file: 'nell-orbital-brass', width: 480, height: 680, title: 'Sleeping cat', detail: 'Orbital brass on mahogany', alt: 'Full sleeping-cat portrait of Nell on orbital brass with a mahogany board' },
+  { file: 'anne-mahogany-easel', width: 480, height: 360, title: 'On an easel stand', detail: 'Polished steel, dark mahogany', alt: 'Memorial portrait plaque for Anne in polished stainless steel on a dark mahogany easel stand' },
+  { file: 'willow-aged-brass', width: 480, height: 360, title: 'Horse nameplate', detail: 'Aged brass on mahogany', alt: 'Stable nameplate with an engraved horse head for Willowbrook Belle, in aged brass on dark mahogany' },
+  { file: 'ruby-folded-steel', width: 480, height: 360, title: 'Freestanding', detail: 'Folded brushed steel', alt: 'Freestanding folded stainless steel portrait plaque of Ruby the Siamese cat on a windowsill' },
 ];
 
 export function ShopPortraitPlaques() {
@@ -187,7 +187,7 @@ export function ShopPortraitPlaques() {
           ))}
         </div>
         <p className="shop-smallprint">
-          Illustrative designs by our Portraits in Metal studio. Your plaque is drawn from your own photo. <a href={pim('/gallery', 'gallery_link')}>See more portrait designs ↗</a>
+          Your plaque is drawn from your own photo. <a href={pim('/gallery', 'gallery_link')}>See more portrait designs ↗</a>
         </p>
       </section>
 
@@ -201,7 +201,7 @@ export function ShopPortraitPlaques() {
           <article><h3>Three sizes</h3><p>A5 (210 × 148 mm), A4 (297 × 210 mm) or A3 (420 × 297 mm), in portrait or landscape. A full-length portrait or longer wording needs more room, and your sketch shows how it fits.</p></article>
           <article><h3>Six metal finishes</h3><p>Brushed, polished, aged or orbital brass, or brushed or polished stainless steel, all in 1.5 mm solid metal.</p></article>
           <article><h3>On the wall or freestanding</h3><p>Fix it to a wall with matching screw caps, mount it on oak or mahogany backing, or choose a freestanding folded plaque or a rear easel stand for a shelf or windowsill.</p></article>
-          <article><h3>Price</h3><p>A5 portrait plaques start from £95.50, with UK mainland delivery included. Your free sketch comes with an exact quote, and you only pay once you approve.</p></article>
+          <article><h3>Price</h3><p>A5 portrait plaques start from £95.50, with UK delivery included. Your free sketch comes with an exact quote, and you only pay once you approve.</p></article>
         </div>
       </section>
 
@@ -277,7 +277,6 @@ export function ShopAiDesign() {
         </div>
         <div className="shop-feature-hero-pair">
           <AiConceptPair size={1200} />
-          <p className="shop-smallprint">Illustrations of a fictional example: the AI concept, and the engraved plaque made from its proof.</p>
         </div>
       </section>
 

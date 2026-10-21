@@ -310,16 +310,20 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           <ProductionNote />
         </div>
         <figure className="shop-hero-image">
-          <img
-            src="/site-images/home-gallery-brass-bench.webp"
-            width="1200"
-            height="1200"
-            fetchPriority="high"
-            alt="Brass memorial plaque design on a wooden bench in a garden"
-          />
+          {/* Hidden on phones, which show the route tiles: point phones at the bench tile they
+              already load, so the 1200 px photo isn't fetched for nothing (review 21 Oct). */}
+          <picture>
+            <source media="(max-width: 720px)" srcSet="/site-images/home-route-bench-480.webp" />
+            <img
+              src="/site-images/home-gallery-brass-bench.webp"
+              width="1200"
+              height="1200"
+              fetchPriority="high"
+              alt="Brass memorial plaque on a wooden bench in a garden"
+            />
+          </picture>
           <figcaption>
             <span>A name. A memory. A place to pause.</span>
-            <span>Design example</span>
           </figcaption>
         </figure>
       </section>
@@ -341,7 +345,7 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           <p className="shop-kicker">A little help, from real people</p>
           <h2 id="design-service-heading">Want us to take care of the design?</h2>
           {/* WhatsApp first, the brief form second, to match the hero (owner msg 5174). */}
-          <p>Send us your wording on WhatsApp, or use our design form. We’ll design it for you and send your proof within 3 hours, for you to review before you pay.</p>
+          <p>Send us your wording on WhatsApp, or use our design form. We’ll design it for you and send your proof within 3 working hours, for you to review before you pay.</p>
           <div className="shop-design-service-actions">
             <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
               <WhatsAppIcon /> Chat on WhatsApp
@@ -352,7 +356,7 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
         </div>
         <ol className="design-service-steps">
           <li><span>01</span><div><strong>Tell us your idea</strong><p>Your wording, a photo of where it’s going, or a design you made in ChatGPT.</p></div></li>
-          <li><span>02</span><div><strong>We design it</strong><p>Your proof within 3 hours, by WhatsApp or email.</p></div></li>
+          <li><span>02</span><div><strong>We design it</strong><p>Your proof within 3 working hours, by WhatsApp or email.</p></div></li>
           <li><span>03</span><div><strong>Approve before you pay</strong><p>Happy with the proof? Follow your payment link.</p></div></li>
         </ol>
       </section>
@@ -427,12 +431,26 @@ const heroTitles: Record<string, string> = {
   'memorial-bench-plaques': 'Personalised memorial bench plaques',
 };
 
+// Exact product pages sit under a category in breadcrumbs (review 21 Oct).
+export function productCategoryFor(product: ProductFamily): { slug: string; title: string } {
+  const width = product.preset?.width || 0;
+  const height = product.preset?.height || 0;
+  const short = Math.max(1, Math.min(width, height));
+  if (product.preset?.shape && product.preset.shape !== 'rect') return { slug: 'custom-plaques', title: 'Custom plaques' };
+  if (short <= 100 && Math.max(width, height) / short >= 2) return { slug: 'bench-plaques', title: 'Bench plaques' };
+  return product.materialCue === 'stainless'
+    ? { slug: 'stainless-steel-plaques', title: 'Stainless steel plaques' }
+    : { slug: 'brass-plaques', title: 'Brass plaques' };
+}
+
 export function ShopProduct({
   product,
   onLaunch,
+  onRequestDesign,
 }: {
   product: ProductFamily;
   onLaunch?: () => void;
+  onRequestDesign?: () => void;
 }) {
   const collection = collections.find((item) => item.slug === product.slug);
   const isMemorial = product.slug === 'memorial-plaques';
@@ -443,13 +461,23 @@ export function ShopProduct({
     )
     .slice(0, 6);
   const heroImage = collection?.image || materialProductImages[product.slug] || product.image;
-  const heroAlt = isMemorial ? 'Illustrative aged brass memorial plaque with a family inscription and dark wood backing' : `${product.title} design example`;
-  const heroCaption = product.merchantOffer ? `${product.imageKind === "ai" ? "AI-generated" : "Digitally rendered"} design illustration. Your wording replaces the example inscription; surroundings are not included.` : "Design example. Finish and optional backing affect the final price.";
+  const heroAlt = isMemorial ? 'Aged brass memorial plaque with a family inscription on dark wood backing' : product.title;
+  // No AI/illustration labels on product images (owner msg 5231). The memorial photo shows a
+  // dearer configuration than its from-price, so say what is shown (review 21 Oct).
+  const agedA5 = productFamilies.find(item => item.slug === 'aged-brass-210x148-rect-dark-wood-plaque');
+  const steelA5 = productFamilies.find(item => item.slug === 'a5-brushed-steel-personalised-plaque');
+  const heroCaption = product.merchantOffer
+    ? 'Shown with an example inscription. Your wording replaces it.'
+    : isMemorial && agedA5 && steelA5
+      ? `Shown: aged brass on dark wood, A5 ${agedA5.startingFrom}. Brushed stainless steel from ${steelA5.startingFrom}.`
+      : 'Finish and optional backing affect the final price.';
+  const category = product.merchantOffer ? productCategoryFor(product) : null;
   return (
     <div className="shopfront" data-prerendered="true">
       <div className="shop-breadcrumb">
         <a href="/">Home</a>
         <span>/</span>
+        {category && <><a href={`/${category.slug}`}>{category.title}</a><span>/</span></>}
         <span>{product.title}</span>
       </div>
       <section className="shop-product-hero">
@@ -459,7 +487,7 @@ export function ShopProduct({
         </figure>
         <div>
           <p className="shop-kicker">Free proof · UK delivery included</p>
-          <h1>{heroTitles[product.slug] || product.title}</h1>
+          <h1 className={product.merchantOffer ? 'shop-product-title-long' : undefined}>{heroTitles[product.slug] || product.title}</h1>
           <p className="shop-product-note">
             {collection?.note || "A plaque made for the words that matter."}
           </p>
@@ -468,26 +496,23 @@ export function ShopProduct({
             <img src={heroImage} alt={heroAlt} width="1200" height="1200" fetchPriority="high" />
             <figcaption>{heroCaption}</figcaption>
           </figure>
+          {/* Phones: price and the choices straight under the photo (owner msg 5231). */}
           <strong className="shop-product-price">
             <TrackedPrice value={displayedPriceValue(product.startingFrom)} product={product.slug}>{product.startingFrom}</TrackedPrice>
           </strong>
-          <p className="shop-smallprint">
-            {isMemorial && <>Starting price for A5 stainless steel without wood backing. </>}
-            Standard engraving, fixings and UK delivery included.
-            Extras are shown before checkout.
-          </p>
-          {/* Same two first choices as the homepage (owner msg 5165). */}
-          <p className="shop-intro shop-product-lead">
-            Design online instantly, or talk to one of our designers on WhatsApp.
-          </p>
           <div className="shop-hero-choices">
             <DesignLink onStart={onLaunch}>Design online</DesignLink>
             <ContactLink channel="whatsapp" placement="hero" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
               <WhatsAppIcon /> Chat on WhatsApp
             </ContactLink>
           </div>
-          <p className="shop-hero-ai-note">
-            Made a design in ChatGPT? <ContactLink channel="whatsapp" placement="hero" subject={plaqueSubject(product.shortTitle)}>Send us the picture</ContactLink> and we’ll make it real.
+          <p className="shop-hero-design-request">
+            Prefer us to design it? <a href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Have us design it – free proof</a>
+          </p>
+          <p className="shop-smallprint">
+            {isMemorial && <>Starting price for A5 stainless steel without wood backing. </>}
+            Standard engraving, fixings and UK delivery included.
+            Extras are shown before checkout.
           </p>
           <p className="shop-hero-note">
             Free online designer & proof · No account needed · Or <ContactLink channel="email" placement="hero">email us</ContactLink>
@@ -562,9 +587,11 @@ export function ShopProduct({
 export function ShopLanding({
   landing,
   onLaunch,
+  onRequestDesign,
 }: {
   landing: SeoLandingPage;
   onLaunch?: () => void;
+  onRequestDesign?: () => void;
 }) {
   const related =
     productFamilies.find(
@@ -573,6 +600,7 @@ export function ShopLanding({
   return (
     <ShopProduct
       onLaunch={onLaunch}
+      onRequestDesign={onRequestDesign}
       product={{
         ...related,
         slug: landing.slug,
@@ -593,10 +621,7 @@ export function ShopMaterials() {
     <div className="shopfront" data-prerendered="true">
       <section className="shop-section">
         <p className="shop-kicker">Find your finish</p>
-        <h1>
-          Brass, steel
-          <br />& a personal touch.
-        </h1>
+        <h1>Plaque materials: brass &amp; stainless steel</h1>
         <p className="shop-intro">
           Compare the colour and character of each finish. Start with brass or
           stainless steel, then choose a surface and optional backing in the
@@ -682,6 +707,8 @@ export function ShopFooter() {
         <ContactLink channel="email" placement="footer">{businessContact.email}</ContactLink>
         <p><ContactLink channel="whatsapp" placement="footer">WhatsApp: {businessContact.whatsapp}</ContactLink></p>
         <p className="shop-footer-address">
+          {businessContact.address}
+          <br />
           {businessContact.madeIn}
         </p>
       </div>

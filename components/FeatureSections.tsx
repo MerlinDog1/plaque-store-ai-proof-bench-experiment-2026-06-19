@@ -76,18 +76,17 @@ export function HomeAiSection() {
           </ContactLink>
           <a className="shop-text-link" href="/ai-plaque-design">How it works ↗</a>
         </div>
-        <p className="shop-smallprint">Illustrations of a fictional example: an AI concept and the engraved plaque made from it.</p>
       </div>
     </section>
   );
 }
 
-// Millie's photo and finished plaque are real photographs; Alfie and Thomas are illustrative designs.
+// Millie's photo and finished plaque are real photographs; Alfie and Thomas are Portraits in Metal designs.
 const homePortraits = [
   { src: '/site-images/portraits/pim-millie-photo.webp', width: 600, height: 800, alt: 'Millie the cat in her owner’s everyday photo', caption: 'Millie’s photo' },
   { src: '/site-images/portraits/pim-millie-plaque.webp', width: 720, height: 1280, alt: 'Millie’s portrait engraved on her finished metal plaque, photographed', caption: 'Her finished plaque', top: true },
-  { src: '/site-images/portraits/pim-alfie-polished-brass-480.webp', width: 480, height: 680, alt: 'Illustrative portrait memorial plaque of Alfie the spaniel in polished brass on light oak', caption: 'Alfie · polished brass' },
-  { src: '/site-images/portraits/pim-thomas-polished-steel-480.webp', width: 480, height: 679, alt: 'Illustrative family memorial plaque with a portrait of Thomas in polished stainless steel', caption: 'Thomas · polished steel' },
+  { src: '/site-images/portraits/pim-alfie-polished-brass-480.webp', width: 480, height: 680, alt: 'Portrait memorial plaque of Alfie the spaniel in polished brass on light oak', caption: 'Alfie · polished brass' },
+  { src: '/site-images/portraits/pim-thomas-polished-steel-480.webp', width: 480, height: 679, alt: 'Family memorial plaque with a portrait of Thomas in polished stainless steel', caption: 'Thomas · polished steel' },
 ];
 
 export function HomePortraitSection() {
@@ -109,7 +108,7 @@ export function HomePortraitSection() {
             <figcaption>{image.caption}</figcaption>
           </figure>
         ))}
-        <p className="shop-smallprint">Millie: real photographs. Alfie and Thomas: illustrative designs. <a href={portraitsInMetalLink('/gallery', 'homepage_portrait_section', 'gallery_link')}>More at Portraits in Metal ↗</a></p>
+        <p className="shop-smallprint">More portrait designs at <a href={portraitsInMetalLink('/gallery', 'homepage_portrait_section', 'gallery_link')}>Portraits in Metal ↗</a></p>
       </div>
     </section>
   );

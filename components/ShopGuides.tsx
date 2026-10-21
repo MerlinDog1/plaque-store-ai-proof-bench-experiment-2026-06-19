@@ -49,6 +49,7 @@ export function ShopContact() {
             <div><dt>WhatsApp</dt><dd><ContactLink channel="whatsapp" placement="contact">{businessContact.whatsapp}</ContactLink></dd></div>
             <div><dt>Email</dt><dd><ContactLink channel="email" placement="contact">{businessContact.email}</ContactLink></dd></div>
             <div><dt>Phone</dt><dd><a href={businessContact.phoneHref}>{businessContact.phone}</a></dd></div>
+            <div><dt>Address</dt><dd>{businessContact.address}</dd></div>
           </dl>
         </div>
         <div className="shop-contact-help">
@@ -94,7 +95,7 @@ export function ShopAbout() {
     <div className="shopfront" data-prerendered="true">
       <section className="shop-section">
         <p className="shop-kicker">The business behind your plaque</p>
-        <h1>Your plaque,<br />from words to order.</h1>
+        <h1>About InstaPlaque: engraved plaques made in the UK</h1>
         <p className="shop-intro">InstaPlaque makes engraved brass and stainless steel plaques in the UK. Design your plaque online, or send us your wording and we’ll design it for you, with a free proof and a clear price before you pay.</p>
       </section>
       <section className="shop-section shop-buying-guide">
@@ -106,7 +107,7 @@ export function ShopAbout() {
         <div>
           <article><h3>Check the details before production</h3><p>Use the designer to choose a size and finish, add your wording and see the price. Review names, dates, spacing and fixings in the proof before approving your order. For unusual sizes or mounting, <a href="/contact">contact us</a> first.</p></article>
           <article><h3>Know the price and production estimate</h3><p>Standard prices include engraving, standard fixings and UK delivery. Selected finishes and backing are priced before checkout, alongside the production estimate. You can download your proof PDF and use its return link when you are ready.</p></article>
-          <article><h3>What the example images show</h3><p>Most of our images are illustrative design examples, including AI-generated visualisations. They show possible layouts and settings, not completed customer orders. Where we show a real photograph of a finished plaque, we say so. Finishes and optional backing are confirmed through your proof and order.</p></article>
+          <article><h3>What you approve before we make it</h3><p>Our pictures show example designs, finishes and settings. Your proof confirms the exact wording, layout, size, finish and backing before anything is made.</p></article>
         </div>
       </section>
       <section className="shop-section shop-buying-guide">

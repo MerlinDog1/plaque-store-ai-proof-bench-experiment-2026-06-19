@@ -1,13 +1,18 @@
 export const businessContact = {
   tradingName: 'InstaPlaque',
+  // Owner msg 5231: show the address, always without the house number; the owner's own name
+  // appears only on the legal pages (terms and privacy), never on ordinary pages.
+  traderName: 'Liam Dullaghan',
+  address: 'Dunkirk Avenue, Desborough, Northamptonshire NN14 2PL',
+  postalAddress: { streetAddress: 'Dunkirk Avenue', addressLocality: 'Desborough', addressRegion: 'Northamptonshire', postalCode: 'NN14 2PL', addressCountry: 'GB' },
   email: 'hello@instaplaque.co.uk',
   phone: '07464 843841',
   phoneHref: 'tel:+447464843841',
   whatsapp: '07464 843841',
   whatsappHref: 'https://wa.me/447464843841',
   madeIn: 'Made in the UK',
-  updated: '28 June 2026',
-  privacyUpdated: '20 October 2026',
+  updated: '21 October 2026',
+  privacyUpdated: '21 October 2026',
 };
 
 // Portraits in Metal, our portrait studio. Links carry UTM tags so its analytics can show

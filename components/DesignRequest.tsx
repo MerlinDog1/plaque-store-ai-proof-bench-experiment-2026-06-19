@@ -96,7 +96,7 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
       <header className="request-heading">
         <p className="shop-kicker">Your words. Our care and attention.</p>
         <h1 ref={heading} tabIndex={-1}>{receipt ? 'Your request has been received.' : review ? 'Your design brief, ready to review.' : 'Leave the layout to us.'}</h1>
-        <p>{receipt ? 'We’ll email your proof within 3 hours. No payment has been taken.' : review ? 'Check the details, then send your request to our design team.' : 'Tell us about your plaque. We’ll arrange the design and email your proof within 3 hours for you to review, with a payment link when you’re happy to proceed.'}</p>
+        <p>{receipt ? 'We’ll email your proof within 3 working hours. No payment has been taken.' : review ? 'Check the details, then send your request to our design team.' : 'Tell us about your plaque. We’ll arrange the design and email your proof within 3 working hours for you to review, with a payment link when you’re happy to proceed.'}</p>
       </header>
       <div className="request-layout">
         {receipt ? <section className="request-card" role="status"><h2>Thank you, {draft.name}.</h2><p>Your request is with our design team. Your proof will be sent to <strong>{draft.email}</strong>.</p><p>Reference: <strong>{receipt}</strong></p><p>If you need to correct anything, <a href="/contact">contact us</a> and quote this reference. Please don’t submit the same request again.</p><button type="button" className="shop-button" onClick={onBack}>Back to home</button></section> : review ? <section className="request-card request-summary" aria-label="Request summary">
@@ -148,7 +148,7 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
           <li><span>01</span><div><strong>Send your brief</strong><p>Tell us your wording and preferences. Unsure about something? Ask us to advise.</p></div></li>
           <li><span>02</span><div><strong>Review your emailed proof</strong><p>We prepare the layout. Check it carefully and request changes if needed. <a href="/samples/instaplaque-sample-proof.pdf?v=3" target="_blank" rel="noopener">See a sample proof</a>.</p></div></li>
           <li><span>03</span><div><strong>Approve and pay</strong><p>Confirm the proof and final price, then use the payment link before production.</p></div></li>
-        </ol><p className="shop-smallprint">No payment details needed to ask for a design. We’ll email your proof within 3 hours of receiving your request.</p></aside>
+        </ol><p className="shop-smallprint">No payment details needed to ask for a design. We’ll email your proof within 3 working hours of receiving your request.</p></aside>
       </div>
     </div>
   );

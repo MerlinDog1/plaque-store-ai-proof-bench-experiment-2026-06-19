@@ -4,7 +4,7 @@ import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTit
 import { PlaqueState } from '../types';
 import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportActions';
 import { SeoRankTracker } from './SeoRankTracker';
-import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, shopFaqs } from './Shopfront';
+import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter, productCategoryFor, shopFaqs } from './Shopfront';
 import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
 import { ShopAiDesign, ShopPortraitPlaques, aiDesignFaqs, aiDesignPage, aiDesignSchema, portraitFaqs, portraitPage, portraitSchema } from './FeaturePages';
 import { designerPage } from './DesignerGuide';
@@ -484,25 +484,26 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     sections: [
       { title: 'Email', copy: businessContact.email },
       { title: 'Phone', copy: businessContact.phone },
+      { title: 'Address', copy: businessContact.address },
     ],
   },
   terms: {
     eyebrow: 'Terms',
     title: 'Terms and conditions.',
-    intro: `These terms apply to orders placed with ${businessContact.tradingName}. Last updated ${businessContact.updated}.`,
+    intro: `These terms apply to orders placed with ${businessContact.tradingName}, a trading name of ${businessContact.traderName}, ${businessContact.address}. Last updated ${businessContact.updated}.`,
     sections: [
       { title: 'Orders and proofs', copy: 'You create and approve a digital proof before payment. By approving the proof, you confirm that the wording, layout, material, size, fixings and any wood backing are correct for production.' },
       { title: 'Prices and payment', copy: 'Prices are shown in pounds sterling. Payment is taken securely by Stripe. UK delivery is included unless stated otherwise before checkout. We are not VAT registered.' },
       { title: 'Production and delivery', copy: 'Estimated production times are shown before checkout and run from proof approval and payment. Standard orders are usually estimated at 5 working days; aged brass, custom sizes and wood-backed plaques may take longer.' },
       { title: 'Customer details', copy: 'You must provide accurate contact and delivery details at checkout. We may contact you if an order detail needs checking before production or dispatch.' },
       { title: 'Faults and support', copy: 'Your statutory rights are not affected. If goods are faulty, damaged, not as described or not made with reasonable care, contact us as soon as possible so we can put things right.' },
-      { title: 'Contact', copy: businessContact.email },
+      { title: 'Contact', copy: `${businessContact.email} · ${businessContact.phone} · ${businessContact.address}` },
     ],
   },
   privacy: {
     eyebrow: 'Privacy',
     title: 'Privacy policy.',
-    intro: `${businessContact.tradingName} uses customer data to create proofs, process orders and provide support. Last updated ${businessContact.privacyUpdated}.`,
+    intro: `${businessContact.tradingName} uses customer data to create proofs, process orders and provide support. The data controller is ${businessContact.traderName}, trading as ${businessContact.tradingName}, ${businessContact.address} (${businessContact.email}). Last updated ${businessContact.privacyUpdated}.`,
     sections: [
       { title: 'Data collected', copy: 'Customer name, contact details, delivery details, plaque wording, proof details and order history may be collected to fulfil orders. With analytics consent, we also measure visit time, public pages, traffic sources and campaigns, approximate location, device type and use of the designer.' },
       { title: 'WhatsApp and email enquiries', copy: 'Our contact links open WhatsApp or your email app with a suggested message and a short enquiry reference. You choose what to send. With analytics consent, we record the reference with the contact-link click so we can understand which website page or campaign led to your enquiry. We do not send your message text, phone number or email address to analytics. WhatsApp or your email provider processes the messages you send through its service.' },
@@ -512,7 +513,7 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
       { title: 'Google measurement', copy: 'Before you accept, or if you reject optional cookies, Google Analytics and Google Ads receive limited cookieless measurement signals on public pages to help us understand whether our ads work. Google does not store or read analytics or advertising cookies, or build an advertising profile from these signals. If you accept, Google can use analytics and advertising cookies to measure visits and advertising performance. You can change your choice in Cookie settings on the Cookie details page.' },
       { title: 'Purchase measurement', copy: 'If you accept optional advertising cookies, we report a confirmed purchase to Google Analytics with its value, currency and a pseudonymous transaction reference, to help measure advertising performance. This purchase event does not include your name, email, address, inscription, proof or private order link. You can change your choice using Cookie settings on our Cookie details page.' },
       { title: 'How long data is kept', copy: 'Order information is kept for as long as needed for production, support, accounting and legal record keeping. Proof artwork may be retained so we can remake or support the order.' },
-      { title: 'Customer rights', copy: `You can ask to access, correct or delete personal data where the law allows by emailing ${businessContact.email}.` },
+      { title: 'Customer rights', copy: `You can ask to access, correct or delete personal data where the law allows by emailing ${businessContact.email}. If you are unhappy with how we handle your data, you can complain to the Information Commissioner's Office (ico.org.uk).` },
     ],
   },
   cookies: {
@@ -646,7 +647,6 @@ const routePathForView = (view: SiteView) => {
     materials: '/materials',
     how: '/how-it-works',
     faq: '/faq',
-    quote: '/quote',
     contact: '/contact',
     terms: '/terms',
     privacy: '/privacy',
@@ -696,34 +696,17 @@ const faqSchema = (faqs: FaqItem[]) => ({
   })),
 });
 
+// Category formats as a plain list of links: Product schema belongs only on the exact
+// product pages, not on the homepage or category pages (owner msg 5231, review 21 Oct).
 const productListSchema = () => ({
   '@type': 'ItemList',
   name: 'Custom plaque formats',
-  itemListElement: productFamilies.map((product, index) => {
-    const price = product.schemaStartingPrice?.toString() || product.startingFrom.match(/£(\d+(?:\.\d+)?)/)?.[1];
-    return {
-      '@type': 'ListItem',
-      position: index + 1,
-      item: {
-        '@type': 'Product',
-        name: product.title,
-        description: product.description,
-        image: product.image ? `${siteBaseUrl}${product.image}` : siteShareImage,
-        brand: {
-          '@type': 'Brand',
-          name: 'InstaPlaque',
-        },
-        offers: price ? {
-          '@type': 'Offer',
-          priceCurrency: 'GBP',
-          price,
-          availability: 'https://schema.org/InStock',
-          url: `${siteBaseUrl}/${product.slug}`,
-          ...productOfferPolicies(product.productionDays),
-        } : undefined,
-      },
-    };
-  }),
+  itemListElement: productFamilies.filter(product => !product.merchantOffer).map((product, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: product.title,
+    url: `${siteBaseUrl}/${product.slug}`,
+  })),
 });
 
 const priceForProduct = (product: ProductFamily) =>
@@ -898,9 +881,10 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
       description: selectedProduct.seoDescription || `${selectedProduct.description} Create a free proof online before ordering.`,
       path: `/${selectedProduct.slug}`,
       schema: [
-        productSchema(selectedProduct),
+        ...(selectedProduct.merchantOffer ? [productSchema(selectedProduct)] : []),
         breadcrumbSchema([
           { name: 'Home', url: siteBaseUrl },
+          ...(selectedProduct.merchantOffer ? [productCategoryFor(selectedProduct)].map(category => ({ name: category.title, url: `${siteBaseUrl}/${category.slug}` })) : []),
           { name: selectedProduct.title, url: `${siteBaseUrl}/${selectedProduct.slug}` },
         ]),
         faqSchema(mergeFaqs(selectedProduct.faqs, shopFaqs).slice(0, 6)),
@@ -1686,7 +1670,7 @@ function CheckoutPage({
             {!checkoutRecoveryLoading && breakdown.quoteRequired && (
               <div className="commerce-warning">
                 This design needs a manual quote before payment: {breakdown.quoteReasons.join(', ')}.
-                <button type="button" onClick={() => onNavigate('quote')}>Request a quote</button>
+                <button type="button" onClick={() => onNavigate('design-request')}>Request a quote</button>
               </div>
             )}
             {isSubmitting && <div className="commerce-success">Preparing secure checkout...</div>}
@@ -2758,9 +2742,9 @@ export function SiteExperience(props: SiteProps) {
   } else if (props.view === 'contact') {
     page = <ShopContact />;
   } else if (props.view === 'product') {
-    page = <ShopProduct product={props.selectedProduct} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
+    page = <ShopProduct product={props.selectedProduct} onRequestDesign={() => props.onNavigate('design-request', props.selectedProduct.slug)} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
   } else if (props.view === 'landing') {
-    page = <ShopLanding landing={props.selectedLanding} onLaunch={() => props.onLaunchProduct(productFamilies.find(product => product.slug === props.selectedLanding.relatedProductSlug) || productFamilies[0])} />;
+    page = <ShopLanding landing={props.selectedLanding} onRequestDesign={() => props.onNavigate('design-request', props.selectedLanding.relatedProductSlug)} onLaunch={() => props.onLaunchProduct(productFamilies.find(product => product.slug === props.selectedLanding.relatedProductSlug) || productFamilies[0])} />;
   } else if (props.view === 'materials') {
     page = <ShopMaterials />;
   } else if (props.view === 'how') {
