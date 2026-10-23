@@ -56,7 +56,7 @@ export function MemorialSizes() {
 }
 
 const inscriptions = [
-  { title: 'A short remembrance', lines: ['In loving memory of', 'Alex Morgan', '1950–2024', 'Always in our hearts'] },
+  { title: 'A short remembrance', lines: ['In loving memory of', 'Peter Ward', '1950–2024', 'Always in our hearts'] },
   { title: 'A family tribute', lines: ['Remembering', 'Jamie Taylor', 'A much-loved partner, parent and friend', 'Your kindness stays with us'] },
   { title: 'A favourite place', lines: ['For Sam', 'Who found peace in this garden', 'And joy in sharing it'] },
 ];
@@ -66,7 +66,7 @@ export function MemorialWording() {
     <section className="shop-section shop-wording-examples" id="memorial-wording" aria-labelledby="memorial-wording-heading">
       <p className="shop-kicker">Your words, at your own pace</p>
       <h2 id="memorial-wording-heading">Memorial plaque wording examples.</h2>
-      <p>Start with the name as you want it remembered. Add dates if you wish, then a short dedication. These sample inscriptions are starting points, not customer commissions.</p>
+      <p>Start with the name as you want it remembered. Add dates if you wish, then a short dedication. These sample inscriptions are starting points, not customer commissions. For over 40 more, see our <a href="/memorial-plaque-wording">memorial plaque wording ideas</a>.</p>
       <div className="shop-inscription-grid">
         {inscriptions.map(example => (
           <article key={example.title}>

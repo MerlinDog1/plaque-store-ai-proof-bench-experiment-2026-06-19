@@ -127,6 +127,24 @@ const pages = [
 
 const landingPages = [
   {
+    slug: 'memorial-plaque-wording',
+    title: 'Memorial Plaque Wording Ideas & Examples | What to Write | InstaPlaque',
+    description: 'Memorial plaque wording ideas and examples.',
+    image: '/site-images/merchant-photo/aged-brass-210x148-rect-plaque.webp',
+    pageName: 'Memorial plaque wording',
+    faqs: [],
+    relatedSearches: ['memorial plaque wording', 'what to write on a memorial plaque', 'memorial bench plaque wording', 'short memorial phrases'],
+  },
+  {
+    slug: 'plaque-sizes',
+    title: 'Plaque Sizes & Prices UK | Brass & Stainless Steel Plaques | InstaPlaque',
+    description: 'Compare every plaque size and finish with photos and prices.',
+    image: '/site-images/merchant-photo/polished-brass-297x210-rect-plaque.webp',
+    pageName: 'Plaque sizes and prices',
+    faqs: [],
+    relatedSearches: ['plaque sizes', 'brass plaque sizes', 'memorial plaque sizes', 'A5 brass plaque'],
+  },
+  {
     slug: 'tree-memorial-plaques',
     title: 'Memorial Tree Plaques UK | Engraved Tree Dedication Plaques | InstaPlaque',
     description: 'Personalised memorial tree plaques in brass or stainless steel, made for outdoors and fixed to a post beside the tree.',
@@ -268,7 +286,7 @@ const indexableProductSlugs = new Set([
   'stainless-steel-plaques',
   'custom-plaques',
 ]);
-const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques', 'tree-memorial-plaques']);
+const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording']);
 const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.seoTitle, description: product.seoDescription, feedTitle: product.feedTitle || product.seoTitle, feedDescription: product.feedDescription || product.seoDescription, photo: product.photo, price: product.schemaStartingPrice, productionDays: product.productionDays, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
 const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)).map(page => {
   // Keep the revised memorial search metadata and illustration identical to
@@ -400,6 +418,8 @@ const primaryNav = [
   ['Stainless steel plaques', '/stainless-steel-plaques'],
   ['Garden plaques', '/garden-plaques'],
   ['Tree memorial plaques', '/tree-memorial-plaques'],
+  ['Plaque sizes and prices', '/plaque-sizes'],
+  ['Memorial plaque wording', '/memorial-plaque-wording'],
   ['Opening plaques', '/opening-plaques'],
   ['Portrait plaques', '/portrait-plaques'],
   ['AI design to plaque', '/ai-plaque-design'],

@@ -6,6 +6,8 @@ import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './Co
 import { HomeAiSection, HomePortraitSection, ProofPdfShowcase } from './FeatureSections';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
+import { merchantOffers } from '../services/merchantCatalogue.mjs';
+import { WordingLibrary } from './WordingGuide';
 import {
   productFamilies,
   ProductFamily,
@@ -157,7 +159,7 @@ export function ShopCollections() {
         </div>
         <p>
           Start with where your plaque will go. <br />
-          Choose brass or stainless steel in the designer.
+          Choose brass or stainless steel in the designer, or <a className="shop-text-link" href="/plaque-sizes">see every size and price</a>.
         </p>
       </div>
       <div className="shop-collections">
@@ -319,6 +321,56 @@ export function ProductPicks({ slugs, kicker, title, intro }: { slugs: string[];
         ))}
       </ul>
     </nav>
+  );
+}
+
+
+// Every catalogue plaque by size (owner-approved plan of 21 Oct: a "Shop by size" page with photos).
+const sizeGroups: Array<[string, (offer: typeof merchantOffers[number]) => boolean]> = [
+  ['Bench plaques', offer => offer.format === 'Bench'],
+  ['A5 landscape (210 × 148 mm)', offer => offer.format === 'A5 landscape'],
+  ['A5 portrait (148 × 210 mm)', offer => offer.format === 'A5 portrait'],
+  ['200 × 150 mm', offer => offer.preset.width === 200 && offer.preset.height === 150],
+  ['A4 landscape (297 × 210 mm)', offer => offer.format === 'A4 landscape'],
+  ['A4 portrait (210 × 297 mm)', offer => offer.format === 'A4 portrait'],
+  ['300 × 200 mm', offer => offer.preset.width === 300 && offer.preset.height === 200],
+  ['400 × 300 mm', offer => offer.preset.width === 400 && offer.preset.height === 300],
+  ['Oval (250 × 150 mm)', offer => offer.preset.shape === 'oval'],
+  ['Circle (200 × 200 mm)', offer => offer.preset.shape === 'circle'],
+];
+
+export function ShopBySize() {
+  return (
+    <section className="shop-section shop-by-size" aria-labelledby="shop-by-size-heading">
+      <p className="shop-kicker">Every standard plaque</p>
+      <h2 id="shop-by-size-heading">Sizes, finishes and prices.</h2>
+      <p>Prices include engraving of your wording, standard fixings and UK delivery. Wood-backed versions are listed under each size.</p>
+      {sizeGroups.map(([title, test]) => {
+        const offers = merchantOffers.filter(test);
+        const metal = offers.filter(offer => !offer.preset.wood);
+        const wood = offers.filter(offer => offer.preset.wood);
+        return (
+          <div className="shop-size-group" key={title}>
+            <h3>{title}</h3>
+            <ul className="shop-size-cards">
+              {metal.map(offer => {
+                const item = productFamilies.find(product => product.slug === offer.slug);
+                if (!item) return null;
+                return (
+                  <li key={offer.slug}><a href={`/${offer.slug}`}>
+                    <img src={(item.photo || item.image).replace(/\.webp$/, '-600.webp')} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+                    <span>{offer.label}{offer.format === 'Bench' ? ` · ${offer.size}` : ''}</span><strong>{item.startingFrom}</strong>
+                  </a></li>
+                );
+              })}
+            </ul>
+            {wood.length > 0 && <p className="shop-smallprint">On wood: {wood.map((offer, index) => (
+              <React.Fragment key={offer.slug}>{index > 0 && ' · '}<a href={`/${offer.slug}`}>{offer.label} on {offer.preset.woodTone === 'dark' ? 'dark walnut' : 'light oak'}</a></React.Fragment>
+            ))}</p>}
+          </div>
+        );
+      })}
+    </section>
   );
 }
 
@@ -683,7 +735,7 @@ export function ShopProduct({
         </nav>
         <MemorialSizes />
       </>}
-      {product.merchantOffer ? <MerchantProductDetails slug={product.slug} /> : <section className="shop-section shop-buying-guide" id={isMemorial ? 'memorial-materials' : undefined}>
+      {product.merchantOffer ? <MerchantProductDetails slug={product.slug} /> : product.seoSections?.length === 0 ? null : <section className="shop-section shop-buying-guide" id={isMemorial ? 'memorial-materials' : undefined}>
         <div>
           <p className="shop-kicker">Size, wording and fitting</p>
           <h2>{isMemorial ? 'Choose the metal and the setting.' : 'Choose the size and finish.'}</h2>
@@ -717,6 +769,8 @@ export function ShopProduct({
       {isMemorial && <MemorialWording />}
       {examples && examples.length > 0 && <LandingExamples examples={examples} kicker="Ideas from real-life settings" title={product.slug === 'tree-memorial-plaques' ? 'Memorial tree plaques in place.' : 'Garden and tree dedications in place.'} />}
       {productPicks[product.slug] && <ProductPicks {...productPicks[product.slug]} />}
+      {product.slug === 'plaque-sizes' && <ShopBySize />}
+      {product.slug === 'memorial-plaque-wording' && <WordingLibrary />}
       {!product.merchantOffer && !['bench-plaques', 'opening-plaques', 'memorial-plaques', 'tree-memorial-plaques'].includes(product.slug) && <ShopProcess />}
       {['garden-plaques', 'tree-memorial-plaques'].includes(product.slug) && <GardenAdvice />}
       <CustomAnything subject={plaqueSubject(product.shortTitle)} />
@@ -892,6 +946,8 @@ export function ShopFooter() {
         <a href="/tree-memorial-plaques">Tree memorial plaques</a>
         <a href="/opening-plaques">Opening plaques</a>
         <a href="/custom-plaques">Custom plaques</a>
+        <a href="/plaque-sizes">Every size and price</a>
+        <a href="/memorial-plaque-wording">Memorial wording ideas</a>
         <a href="/portrait-plaques">Portrait plaques</a>
         <a href="/ai-plaque-design">AI design to plaque</a>
       </nav>
