@@ -1363,12 +1363,18 @@
     gap: 8px;
     margin: 0 0 18px;
   }
+  /* "Design on WhatsApp" (owner msg 5654) is longer than the old label: on 360–410 px phones the
+     text eases down slightly and the icon/gaps tighten, so both buttons stay one line, 50 px. */
   .shopfront .shop-hero-choices > a {
     flex: 1 1 0;
     min-height: 50px;
-    padding: 10px 6px;
-    font-size: 13.5px;
-    gap: 5px;
+    padding: 10px 4px;
+    font-size: min(13.5px, 3.3vw);
+    gap: 4px;
+  }
+  .shopfront .shop-hero-choices .shop-whatsapp-icon {
+    width: 16px;
+    height: 16px;
   }
   .shopfront .shop-hero-choices > a > span {
     display: none;

@@ -1,5 +1,14 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## "Design on WhatsApp" buttons — 23 October 2026
+
+- **Label:** the owner chose "Design on WhatsApp" over "Chat on WhatsApp" (msg 5654). It now pairs with "Design online". The change covers all five WhatsApp buttons in `components/Shopfront.tsx`: the home hero, the design-service section, the home closing, the product hero and the product closing. The sticky mobile bar still says "WhatsApp".
+- **Unchanged:** the pre-filled message ("Hi InstaPlaque, I'm interested in a plaque", plus the reference) and the link.
+- **Phone fit:** the longer label wrapped onto two lines in the hero at 360–393 px and made both buttons 67 px tall. Under 720 px, `shopfront.css` now sets the hero button text to `min(13.5px, 3.3vw)`, the icon to 16 px and the gap and inline padding to 4 px.
+  - Measured in Chrome with Arial metrics (Liberation Sans): one line and 50 px tall at 360, 375, 390, 393, 412 and 430 px; 54 px on desktop.
+  - It still wraps at 320 px.
+- **Released:** the branch `codex/instaplaque-design-on-whatsapp-20261023` was built from the live 21 Oct release plus docs. The build and postbuild checks passed. The deployment ids and rollback are recorded in the workspace MEMORY.md entry for 23 Oct.
+
 ## Catalogue photo redo paused — 21 October 2026, about 11:48 UTC
 
 - The catalogue photos are being redone with each plaque's own wording, on Codex (gpt-image-2). The work is on Cody's VPS only, in the untracked `output/catalogue-wording/`.

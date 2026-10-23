@@ -289,7 +289,7 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           <div className="shop-hero-choices">
             <DesignLink onStart={onStartDesign}>Design online</DesignLink>
             <ContactLink channel="whatsapp" placement="hero" subject="a plaque" className="shop-button shop-hero-choice-whatsapp">
-              <WhatsAppIcon /> Chat on WhatsApp
+              <WhatsAppIcon /> Design on WhatsApp
             </ContactLink>
           </div>
           {/* Customers increasingly arrive with an AI mock-up (owner msg 5156). */}
@@ -349,7 +349,7 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           <p>Send us your wording on WhatsApp, or use our design form. We’ll design it for you and send your proof within 3 working hours, for you to review before you pay.</p>
           <div className="shop-design-service-actions">
             <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
-              <WhatsAppIcon /> Chat on WhatsApp
+              <WhatsAppIcon /> Design on WhatsApp
             </ContactLink>
             <a href="/design-request" className="shop-text-link" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>
           </div>
@@ -412,7 +412,7 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
         <div className="shop-closing-choices">
           <DesignLink onStart={onStartDesign} className="shop-button-light" />
           <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
-            <WhatsAppIcon /> Chat on WhatsApp
+            <WhatsAppIcon /> Design on WhatsApp
           </ContactLink>
         </div>
       </section>
@@ -532,7 +532,7 @@ export function ShopProduct({
           <div className="shop-hero-choices">
             <DesignLink onStart={onLaunch}>Design online</DesignLink>
             <ContactLink channel="whatsapp" placement="hero" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
-              <WhatsAppIcon /> Chat on WhatsApp
+              <WhatsAppIcon /> Design on WhatsApp
             </ContactLink>
           </div>
           <p className="shop-hero-design-request">
@@ -607,7 +607,7 @@ export function ShopProduct({
         <div className="shop-closing-choices">
           <DesignLink onStart={onLaunch} className="shop-button-light" />
           <ContactLink channel="whatsapp" placement="page" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
-            <WhatsAppIcon /> Chat on WhatsApp
+            <WhatsAppIcon /> Design on WhatsApp
           </ContactLink>
         </div>
       </section>
