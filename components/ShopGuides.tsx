@@ -44,7 +44,7 @@ export function ShopContact() {
         <div>
           <p className="shop-kicker">Help with your plaque</p>
           <h1>Contact<br />InstaPlaque.</h1>
-          <p className="shop-intro">Need help choosing a size, checking an order or planning for an opening? Contact InstaPlaque with the details below. WhatsApp is usually quickest.</p>
+          <p className="shop-intro">Need help choosing a size, checking an order or planning for an opening? Or something different: we can make almost any size, shape or wording, including logos and portraits from your photos. WhatsApp is usually quickest: send us your idea and we’ll design it for you.</p>
           <dl className="shop-contact-details">
             <div><dt>WhatsApp</dt><dd><ContactLink channel="whatsapp" placement="contact">{businessContact.whatsapp}</ContactLink></dd></div>
             <div><dt>Email</dt><dd><ContactLink channel="email" placement="contact">{businessContact.email}</ContactLink></dd></div>
