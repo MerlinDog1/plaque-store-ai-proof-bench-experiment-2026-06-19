@@ -313,7 +313,7 @@ export function ProductPicks({ slugs, kicker, title, intro }: { slugs: string[];
         {items.map(item => (
           <li key={item.slug}>
             <a href={`/${item.slug}`}>
-              <img src={(item.photo || item.image).replace(/\.webp$/, '-600.webp')} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+              <img src={item.photo ? item.photo.replace(/\.webp$/, '-600.webp') : item.image} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
               <span>{item.title}</span>
               <strong>{item.startingFrom}</strong>
             </a>
@@ -358,7 +358,7 @@ export function ShopBySize() {
                 if (!item) return null;
                 return (
                   <li key={offer.slug}><a href={`/${offer.slug}`}>
-                    <img src={(item.photo || item.image).replace(/\.webp$/, '-600.webp')} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+                    <img src={item.photo ? item.photo.replace(/\.webp$/, '-600.webp') : item.image} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
                     <span>{offer.label}{offer.format === 'Bench' ? ` · ${offer.size}` : ''}</span><strong>{item.startingFrom}</strong>
                   </a></li>
                 );
@@ -402,6 +402,12 @@ const productPicks: Record<string, { kicker: string; title: string; intro: strin
     slugs: ['brushed-stainless-200x150-rect-plaque', 'polished-brass-210x148-rect-plaque', 'polished-brass-148x210-rect-plaque', 'orbital-brass-matt-lacquer-200x200-circle-plaque', 'aged-brass-297x210-rect-plaque', 'orbital-brass-matt-lacquer-210x297-rect-plaque', 'brushed-stainless-148x210-rect-plaque', 'aged-brass-250x150-oval-plaque'] },
   'memorial-plaques': { kicker: 'Memorial plaques', title: 'Memorial plaques, shown with example wording.', intro: 'From a short bench dedication to a family memorial with an engraved portrait. Open any plaque for its sizes, finishes and a sample proof.',
     slugs: ['aged-brass-210x148-rect-plaque', 'polished-brass-250x150-oval-plaque', 'polished-stainless-148x210-rect-plaque', 'polished-brass-297x210-rect-plaque', 'aged-brass-148x210-rect-plaque', 'brushed-stainless-300x200-rect-plaque', 'polished-brass-148x210-rect-light-wood-plaque', 'brushed-stainless-150x50-rect-plaque'] },
+  'brass-plaques': { kicker: 'Brass plaques', title: 'Brass plaques, shown in place.', intro: 'Brushed, polished, orbital and aged brass, each shown with its own example wording. Open any plaque for its sizes, backing options and a sample proof.',
+    slugs: ['polished-brass-300x200-rect-plaque', 'aged-brass-210x148-rect-plaque', 'brushed-brass-297x210-rect-dark-wood-plaque', 'orbital-brass-matt-lacquer-400x300-rect-plaque', 'polished-brass-210x148-rect-plaque', 'aged-brass-400x300-rect-plaque', 'brushed-brass-210x297-rect-light-wood-plaque', 'polished-brass-250x150-oval-plaque'] },
+  'stainless-steel-plaques': { kicker: 'Stainless steel plaques', title: 'Stainless steel plaques, shown in place.', intro: 'Brushed and polished stainless steel, each shown with its own example wording.',
+    slugs: ['brushed-stainless-400x300-rect-plaque', 'polished-stainless-210x148-rect-plaque', 'brushed-stainless-297x210-rect-dark-wood-plaque', 'polished-stainless-148x210-rect-light-wood-plaque', 'brushed-stainless-200x150-rect-plaque', 'polished-stainless-250x150-oval-plaque', 'brushed-stainless-300x200-rect-plaque', 'polished-stainless-200x50-rect-plaque'] },
+  'custom-plaques': { kicker: 'Shapes and sizes', title: 'Ovals, circles and larger plaques.', intro: 'Standard ovals, circles and large wall plaques with their own example wording. For anything else, send us the size and shape on WhatsApp.',
+    slugs: ['aged-brass-250x150-oval-plaque', 'polished-brass-200x200-circle-plaque', 'orbital-brass-matt-lacquer-400x300-rect-plaque', 'brushed-stainless-200x200-circle-plaque', 'polished-stainless-250x150-oval-plaque', 'aged-brass-400x300-rect-dark-wood-plaque', 'orbital-brass-matt-lacquer-200x200-circle-plaque', 'brushed-brass-250x150-oval-plaque'] },
   'bench-plaques': { kicker: 'Bench plaques', title: 'Bench plaques, shown on a bench.', intro: 'Each bench plaque is shown on a real-looking bench rail with its own example dedication.',
     slugs: ['brushed-stainless-150x50-rect-plaque', 'brushed-brass-225x75-rect-plaque', 'polished-stainless-200x50-rect-plaque', 'aged-brass-225x75-rect-plaque', 'polished-brass-150x75-rect-plaque', 'orbital-brass-matt-lacquer-225x65-rect-plaque', 'brushed-brass-150x65-rect-plaque', 'polished-brass-bench-plaque-200x100'] },
 };

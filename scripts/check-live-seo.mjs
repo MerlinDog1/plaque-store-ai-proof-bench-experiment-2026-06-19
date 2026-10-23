@@ -29,7 +29,7 @@ const redirectedPaths = new Set([
   '/tree-plaques',
 ]);
 
-assert(sitemapUrls.length === 21 && ['design-request', 'portrait-plaques', 'ai-plaque-design'].every(slug => sitemapUrls.includes(`https://instaplaque.co.uk/${slug}`)), `Expected the public sitemap including design requests, portrait plaques and AI design, found ${sitemapUrls.length}`);
+assert(sitemapUrls.length === 24 && ['design-request', 'portrait-plaques', 'ai-plaque-design', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording'].every(slug => sitemapUrls.includes(`https://instaplaque.co.uk/${slug}`)), `Expected the public sitemap including design requests, portrait plaques and AI design, found ${sitemapUrls.length}`);
 const productSitemap = await read('dist/sitemap-products.xml');
 const productUrls = [...productSitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
 const { merchantOffers } = await import('../services/merchantCatalogue.mjs');
@@ -69,7 +69,7 @@ assert(home.includes('hreflang="en-GB" href="https://instaplaque.co.uk/"'), 'Hom
 assert(home.includes('home-gallery-brass-bench.webp'), 'Shop hero image is missing');
 assert(robots.includes('Sitemap: https://instaplaque.co.uk/sitemap.xml'), 'robots.txt sitemap declaration is missing');
 
-for (const route of ['about', 'memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques', 'garden-plaques', 'opening-plaques', 'portrait-plaques', 'ai-plaque-design']) {
+for (const route of ['about', 'memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques', 'garden-plaques', 'opening-plaques', 'portrait-plaques', 'ai-plaque-design', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording']) {
   const routeHtml = await read(`dist/${route}/index.html`);
   assert(routeHtml.includes('data-prerendered="true"'), `Missing crawlable HTML for /${route}`);
   assert(routeHtml.includes(`rel="canonical" href="https://instaplaque.co.uk/${route}"`), `Bad canonical for /${route}`);
