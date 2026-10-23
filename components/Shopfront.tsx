@@ -8,6 +8,7 @@ import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { WordingLibrary } from './WordingGuide';
+import { exampleFor } from '../services/catalogueContent';
 import {
   productFamilies,
   ProductFamily,
@@ -663,7 +664,9 @@ export function ShopProduct({
     )
     .slice(0, 6);
   const heroImage = product.photo || collection?.image || materialProductImages[product.slug] || product.image;
+  const example = product.merchantOffer ? exampleFor(product.slug) : undefined;
   const heroAlt = isMemorial ? 'Aged brass memorial plaque with a family inscription on dark wood backing'
+    : example ? `${product.title}, engraved with the example wording “${example.lines.slice(0, 3).join(' ')}”${example.portrait ? ' and a portrait' : ''}`
     : product.merchantOffer ? `${product.title}, shown with an example inscription` : product.title;
   const photoSmall = product.photo?.replace(/\.webp$/, '-600.webp');
   const heroImages: GalleryImage[] = product.photo
@@ -825,6 +828,7 @@ export function ShopLanding({
         seoSections: landing.sections,
         bestFor: related.bestFor,
         faqs: landing.faqs,
+        heroNote: landing.heroNote,
       }}
       examples={landing.examples}
     />

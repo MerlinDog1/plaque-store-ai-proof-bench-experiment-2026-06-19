@@ -74,14 +74,20 @@ def photos():
 def scenes():
     os.makedirs(SCENES, exist_ok=True)
     written = []
-    for slug, path in sorted(read('scenes-accepted.json').items()):
-        im = Image.open(os.path.join(WORK, path)).convert('RGB')
+    for slug, entry in sorted(read('scenes-accepted.json').items()):
+        # entry: {"file": "scenes/<slug>.vN.jpg", "crop_x": 0..1} -- crop_x centres the square hero crop on the plaque.
+        im = Image.open(os.path.join(WORK, entry['file'])).convert('RGB')
         for size, name in (((1536, 1024), f'{slug}.webp'), ((900, 600), f'{slug}-900.webp')):
             out = os.path.join(SCENES, name)
             im.resize(size, Image.LANCZOS).save(out, 'WEBP', quality=80, method=6)
             written.append(out)
+        w, h = im.size
+        left = int(max(0, min(w - h, entry.get('crop_x', 0.5) * w - h / 2)))
+        out = os.path.join(SCENES, f'{slug}-sq.webp')
+        im.crop((left, 0, left + h, h)).resize((1200, 1200), Image.LANCZOS).save(out, 'WEBP', quality=80, method=6)
+        written.append(out)
     tag(written)
-    print(f'published {len(written) // 2} scenes')
+    print(f'published {len(written) // 3} scenes')
 
 
 def thumbs():

@@ -71,6 +71,14 @@ function SizeLinks({ title, offers }: { title: string; offers: Offer[] }) {
   );
 }
 
+// Real portrait work (owner msg 5736: "Add more real portraits stuff. Portraits only on a5 and above").
+// Millie's plaque is a photograph of a finished plaque; Alfie and Thomas are Portraits in Metal designs.
+const portraitExamples = [
+  { src: '/site-images/portraits/pim-millie-plaque.webp', width: 720, height: 1280, alt: 'Millie the cat’s portrait engraved on her finished metal plaque, photographed', caption: 'Millie · a finished plaque' },
+  { src: '/site-images/portraits/pim-alfie-polished-brass-480.webp', width: 480, height: 680, alt: 'Portrait memorial plaque of Alfie the spaniel in polished brass on light oak', caption: 'Alfie · polished brass' },
+  { src: '/site-images/portraits/pim-thomas-polished-steel-480.webp', width: 480, height: 679, alt: 'Family memorial plaque with a portrait of Thomas in polished stainless steel', caption: 'Thomas · polished steel' },
+];
+
 export function MerchantProductDetails({ slug }: { slug: string }) {
   const offer = offerFor(slug);
   if (!offer) return null;
@@ -122,6 +130,31 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
           <p>
             Not sure what to write? <ContactLink channel="whatsapp" placement="page" subject={`a ${offer.size} plaque`}><WhatsAppIcon /> Send us a few words on WhatsApp</ContactLink> and we will suggest a layout, or see our <a href="/memorial-plaques#memorial-wording">memorial wording examples</a>.
           </p>
+        </section>
+      )}
+      {isPortraitSize(offer) && (
+        <section className="shop-section shop-product-portrait" aria-labelledby="product-portrait-heading">
+          <div>
+            <p className="shop-kicker">Add a portrait</p>
+            <h2 id="product-portrait-heading">A favourite face, engraved beside your words.</h2>
+            <p>
+              On this {offerSizeLabel(offer)} plaque, and any A5 or larger plaque, we can engrave a portrait of a person or pet from a
+              favourite photo. We draw it as fine engraving lines, arrange your wording around it and send you a free sketch with an exact
+              price before you decide.
+            </p>
+            <p>
+              <a href="/portrait-plaques">See real portrait plaques ↗</a>{' · '}
+              <ContactLink channel="whatsapp" placement="page" subject={`a portrait on a ${offer.size} plaque`}>Send us a photo on WhatsApp ↗</ContactLink>
+            </p>
+          </div>
+          <div className="shop-product-portrait-images">
+            {portraitExamples.map(image => (
+              <figure key={image.src}>
+                <img src={image.src} width={image.width} height={image.height} alt={image.alt} loading="lazy" />
+                <figcaption>{image.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
         </section>
       )}
       <section className="shop-section shop-buying-guide shop-product-spec">

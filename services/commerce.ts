@@ -90,6 +90,8 @@ export interface SeoLandingPage {
   examples?: Array<{ title: string; copy: string; image: string; alt: string }>;
   faqs: Array<{ question: string; answer: string }>;
   relatedSearches: string[];
+  /** The short line under the page title. */
+  heroNote?: string;
 }
 
 export interface PriceBreakdown {
@@ -636,6 +638,7 @@ export const seoLandingPages: SeoLandingPage[] = [
   },
   {
     slug: 'memorial-plaque-wording',
+    heroNote: 'The right words, one line at a time.',
     title: 'Memorial plaque wording',
     shortTitle: 'Wording',
     eyebrow: 'Ideas and examples',
@@ -657,6 +660,7 @@ export const seoLandingPages: SeoLandingPage[] = [
   },
   {
     slug: 'plaque-sizes',
+    heroNote: 'Every standard size, shown with its own wording.',
     title: 'Plaque sizes and prices',
     shortTitle: 'Sizes',
     eyebrow: 'Every size and finish',
@@ -680,6 +684,7 @@ export const seoLandingPages: SeoLandingPage[] = [
   },
   {
     slug: 'tree-memorial-plaques',
+    heroNote: 'A tree that grows, and their name beside it.',
     title: 'Tree memorial plaques',
     shortTitle: 'Tree',
     eyebrow: 'Memorial tree dedications',
@@ -687,7 +692,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     seoTitle: 'Memorial Tree Plaques UK | Engraved Tree Dedication Plaques | InstaPlaque',
     seoDescription: 'Personalised memorial tree plaques in brass or stainless steel, made for outdoors and fixed to a post beside the tree. Free proof, or we design it for you on WhatsApp.',
     heroCopy: 'Planting a tree is a living way to remember someone. Mark it with a plaque in their name, in brass or stainless steel made for outdoors, fixed to a short oak post or a nearby wall rather than to the tree itself. See a free online proof, or send us your words on WhatsApp and we’ll design it for you.',
-    image: '/site-images/scenes/scene-01-family-cherry.webp',
+    image: '/site-images/scenes/scene-01-family-cherry-sq.webp',
     relatedProductSlug: 'memorial-plaques',
     proofCta: 'Start a tree plaque proof',
     sections: [
