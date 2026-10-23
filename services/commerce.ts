@@ -13,6 +13,7 @@ import {
   getCheckoutQuoteReasons,
 } from './checkoutPolicy.mjs';
 import { merchantOffers } from './merchantCatalogue.mjs';
+import { exampleFor, feedDescriptionFor, feedTitleFor, heroNote, productFaqs, productIntro, seoDescriptionFor, seoTitleFor } from './catalogueContent';
 import { productionTiming } from './shopInformation';
 import { BENCH_SAFE_MARGIN_PERCENT } from './safeMargin';
 
@@ -58,6 +59,10 @@ export interface ProductFamily {
   imageKind?: 'ai' | 'render';
   /** Product page photo (1200 px webp, with a -600 version); the feed and schema keep `image`. */
   photo?: string;
+  /** Catalogue pages: a line under the title, and the Google Shopping title and description. */
+  heroNote?: string;
+  feedTitle?: string;
+  feedDescription?: string;
   productionDays?: number;
   merchantMaterial?: string;
   materialCue: 'brass' | 'stainless' | 'wood' | 'aged';
@@ -599,10 +604,16 @@ export const seoLandingPages: SeoLandingPage[] = [
     description: 'Custom garden plaques for memorial corners, trees, benches, walls and planted spaces.',
     seoTitle: 'Garden Memorial Plaques UK | Free Online Proof | InstaPlaque',
     seoDescription: 'Personalise a brass or stainless steel garden plaque for a tree, bench or memorial corner. Compare sizes and fixings, then check a free proof before you buy.',
-    heroCopy: 'Mark a favourite spot, a memorial tree or a garden bench with words of your own. Choose brass or stainless steel, leave the inscription room to breathe, and check a free online proof before you order.',
+    heroCopy: 'Mark a favourite spot, a memorial tree or a garden bench with words of your own. Choose brass or stainless steel, leave the inscription room to breathe, and check a free online proof before you order, or send us your words on WhatsApp and we’ll design it for you.',
     image: '/site-images/home-carousel-garden-brass.webp',
     relatedProductSlug: 'memorial-plaques',
     proofCta: 'Start a garden plaque proof',
+    examples: [
+      { title: 'Mum’s apple tree.', copy: '200 × 150 mm aged brass, fixed to a timber sleeper at the foot of the tree.', image: '/site-images/scenes/scene-03-sisters-apple.webp', alt: 'Two sisters watering a newly planted apple tree in a cottage garden, with an aged brass memorial plaque on a sleeper' },
+      { title: 'A magnolia to sit beside.', copy: 'A5 polished brass on a short post in the border.', image: '/site-images/scenes/scene-06-magnolia.webp', alt: 'A woman with a cup of tea on a garden bench beside a magnolia tree and its polished brass memorial plaque' },
+      { title: 'A silver birch for Biscuit.', copy: 'A5 brushed stainless steel on square-edged oak.', image: '/site-images/scenes/scene-08-birch-dog.webp', alt: 'A couple planting a young silver birch in a country garden, with a stainless steel pet memorial plaque on a post' },
+      { title: 'Mum’s acer on the patio.', copy: 'A5 orbital brass on the side of a raised planter.', image: '/site-images/scenes/scene-10-acer.webp', alt: 'A father and teenage daughter beside a red acer in a raised planter on a patio, with a brass memorial plaque on the planter' },
+    ],
     sections: [
       {
         title: 'Choose a size for the whole inscription',
@@ -622,6 +633,46 @@ export const seoLandingPages: SeoLandingPage[] = [
       { question: 'What size is best for a garden plaque?', answer: 'A5 is a good starting point for names, dates and a short message. Bench plaque sizes work better for very short wording.' },
     ],
     relatedSearches: ['garden plaques UK', 'memorial garden plaques', 'tree dedication plaques', 'outdoor memorial plaques'],
+  },
+  {
+    slug: 'tree-memorial-plaques',
+    title: 'Tree memorial plaques',
+    shortTitle: 'Tree',
+    eyebrow: 'Memorial tree dedications',
+    description: 'Engraved brass and stainless steel plaques for a memorial tree in a garden, churchyard, school or park.',
+    seoTitle: 'Memorial Tree Plaques UK | Engraved Tree Dedication Plaques | InstaPlaque',
+    seoDescription: 'Personalised memorial tree plaques in brass or stainless steel, made for outdoors and fixed to a post beside the tree. Free proof, or we design it for you on WhatsApp.',
+    heroCopy: 'Planting a tree is a living way to remember someone. Mark it with a plaque in their name, in brass or stainless steel made for outdoors, fixed to a short oak post or a nearby wall rather than to the tree itself. See a free online proof, or send us your words on WhatsApp and we’ll design it for you.',
+    image: '/site-images/scenes/scene-01-family-cherry.webp',
+    relatedProductSlug: 'memorial-plaques',
+    proofCta: 'Start a tree plaque proof',
+    sections: [
+      { title: 'Fix it beside the tree, not to it', copy: 'Screws and wire damage a growing tree, and the bark slowly swallows anything fixed to it. Mount the plaque on a short oak post or stake next to the tree, on a sleeper at its foot, or on a nearby wall or fence. A post about 70 to 90 cm tall keeps the words easy to read and clear of the mower.' },
+      { title: 'Choose a size for the words and the setting', copy: 'A 200 × 150 mm plaque suits a name, dates and a line about them. A5 (210 × 148 mm) is the most popular size for a memorial tree, with room for a dedication such as “This cherry tree was planted in loving memory of”. Choose A4 (297 × 210 mm) for a school, a community orchard or several names, or a round plaque for a short dedication.' },
+      { title: 'Pick a finish that suits the garden', copy: 'Stainless steel keeps its silver colour outdoors. Brass is warm and traditional and slowly mellows outside; aged brass starts darker and keeps developing gently. An oak backing board suits a sheltered spot in the garden; in an open, exposed position choose a metal plaque without backing.' },
+      { title: 'Check first if the tree is in a public place', copy: 'Parks, churchyards, schools and cemeteries usually have rules for memorial trees and plaques. Ask the site manager or council about the permitted size, material, wording and fixing before ordering; many councils run their own tree dedication schemes. Approving our proof does not replace their permission.' },
+    ],
+    examples: [
+      { title: 'A cherry tree for Grandad.', copy: 'A5 brushed brass on square-edged oak, fixed to a short oak post.', image: '/site-images/scenes/scene-01-family-cherry.webp', alt: 'A family kneeling round a newly planted cherry tree in a back garden, with a brass memorial plaque on an oak post' },
+      { title: 'An oak on the village green.', copy: 'A5 brushed stainless steel on a timber post beside the tree guard.', image: '/site-images/scenes/scene-02-couple-oak.webp', alt: 'An older couple beside a young oak in a wooden tree guard on a village green, with a stainless steel memorial plaque on a post' },
+      { title: 'Mum’s apple tree.', copy: '200 × 150 mm aged brass, fixed to a timber sleeper at the foot of the tree.', image: '/site-images/scenes/scene-03-sisters-apple.webp', alt: 'Two sisters watering a newly planted apple tree in a cottage garden, with an aged brass memorial plaque on a sleeper' },
+      { title: 'A school’s tree for a much-loved teacher.', copy: 'A4 polished stainless steel on a sturdy oak post.', image: '/site-images/scenes/scene-04-school-tree.webp', alt: 'Primary school children and their teacher planting a memorial tree on a school field, with a stainless steel plaque on a post' },
+      { title: 'A rowan for Grandpa Ted.', copy: 'A5 portrait brushed brass on square-edged oak, on a short oak stake.', image: '/site-images/scenes/scene-05-grandpa-rowan.webp', alt: 'A father and young son planting a rowan tree by a hedge, with a brass memorial plaque on an oak stake' },
+      { title: 'A magnolia to sit beside.', copy: 'A5 polished brass on a short post in the border.', image: '/site-images/scenes/scene-06-magnolia.webp', alt: 'A woman with a cup of tea on a garden bench beside a magnolia tree and its polished brass memorial plaque' },
+      { title: 'Planted together.', copy: 'A5 brushed brass on square-edged oak.', image: '/site-images/scenes/scene-07-hands.webp', alt: 'Gloved hands firming the soil round a newly planted sapling beside a brass memorial plaque on an oak post' },
+      { title: 'A silver birch for Biscuit.', copy: 'A5 brushed stainless steel on square-edged oak.', image: '/site-images/scenes/scene-08-birch-dog.webp', alt: 'A couple planting a young silver birch in a country garden, with a stainless steel pet memorial plaque on a post' },
+      { title: 'A community orchard.', copy: 'A4 brushed brass, fixed to an oak post by the volunteers.', image: '/site-images/scenes/scene-09-orchard.webp', alt: 'Allotment volunteers planting fruit trees while one fixes a brass orchard dedication plaque to an oak post' },
+      { title: 'Mum’s acer on the patio.', copy: 'A5 orbital brass on the side of a raised planter.', image: '/site-images/scenes/scene-10-acer.webp', alt: 'A father and teenage daughter beside a red acer in a raised planter on a patio, with a brass memorial plaque on the planter' },
+    ],
+    faqs: [
+      { question: 'Can I fix a plaque to a tree?', answer: 'We recommend not fixing it to the tree itself. Screws and wire damage a growing tree and the bark grows over them. Fix the plaque to a short post or stake beside the tree, a sleeper at its foot, or a nearby wall or fence.' },
+      { question: 'What size should a memorial tree plaque be?', answer: 'A5 (210 × 148 mm) suits most memorial trees: a dedication line, a name, dates and a short message. Choose 200 × 150 mm for shorter wording, or A4 for a school, a community planting or several names.' },
+      { question: 'What should a tree memorial plaque say?', answer: 'Most start with a dedication such as “This oak was planted in memory of”, then the name, the dates and a short line about them, such as “who loved this garden”. Send us a few words on WhatsApp if you would like help with the wording.' },
+      { question: 'Will the plaque last outdoors?', answer: 'Yes. Our brass and stainless steel plaques are 1.5 mm solid metal with etched, paint-filled lettering. Stainless steel keeps its colour and brass mellows slowly outside. For an open, exposed spot choose a metal plaque without wood backing.' },
+      { question: 'Can you add a photo or portrait?', answer: 'Yes, on A5 and larger plaques. Send a favourite photo of a person or pet on WhatsApp and we turn it into engraving artwork beside the wording, with a free proof before you pay.' },
+      { question: 'Can you design it for me?', answer: 'Yes. Send us the wording, the kind of tree and where the plaque will go on WhatsApp, and we send you a proof drawn to size, usually within 3 working hours.' },
+    ],
+    relatedSearches: ['memorial tree plaques', 'tree dedication plaques', 'memorial plaque for a tree', 'tree planting memorial plaque'],
   },
   {
     slug: 'opening-plaques',
@@ -1008,7 +1059,7 @@ export const materialStories = [
   },
 ];
 
-export const merchantProducts: ProductFamily[] = merchantOffers.map(item => ({
+export const merchantProducts: ProductFamily[] = merchantOffers.map(item => catalogueCopy(item, {
   slug: item.slug, title: item.title, shortTitle: item.materialCue === 'stainless' ? 'Stainless' : 'Brass',
   eyebrow: 'Made to order', materialCue: item.materialCue as ProductFamily['materialCue'],
   image: item.image, imageKind: item.imageKind as 'ai' | 'render', merchantOffer: true,
@@ -1025,6 +1076,21 @@ export const merchantProducts: ProductFamily[] = merchantOffers.map(item => ({
   faqs: [{ question: 'Is this the price for the pictured configuration?',
     answer: 'Yes. The stated price includes the specified size, finish, fixings and personalised wording. Your approved proof confirms the final layout. Changing the configuration can change the price.' }],
 }));
+
+// Each catalogue page gets its own intro, questions, titles and example wording (owner msg 5736);
+// the two older photo-style offers keep the shared copy above.
+function catalogueCopy(item: (typeof merchantOffers)[number], base: ProductFamily): ProductFamily {
+  const example = exampleFor(item.slug);
+  if (!example) return base;
+  return {
+    ...base,
+    seoIntro: productIntro(item.slug), heroNote: heroNote(item.slug),
+    seoTitle: seoTitleFor(item.slug), seoDescription: seoDescriptionFor(item.slug),
+    feedTitle: feedTitleFor(item.slug), feedDescription: feedDescriptionFor(item.slug),
+    proofPrompt: example.lines.join('\n'),
+    faqs: productFaqs(item.slug),
+  };
+}
 productFamilies.push(...merchantProducts);
 
 export function getProductBySlug(slug: string | null | undefined) {

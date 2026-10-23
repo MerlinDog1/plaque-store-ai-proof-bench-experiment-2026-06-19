@@ -1951,3 +1951,49 @@
   .shop-product-thumbs { gap: 8px; margin-top: 8px; }
   .shop-product-thumbs button { width: 46px; height: 46px; }
 }
+
+/* Overnight 23 Oct 2026 (owner msg 5736): photo picks, landing photo examples, the example
+   wording on catalogue pages and the "tell us what you want" WhatsApp band. */
+.shop-product-picks > p:not(.shop-kicker) { max-width: 760px; margin-top: 14px; }
+.shop-product-picks ul {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.shop-product-picks a { display: flex; flex-direction: column; gap: 8px; color: inherit; text-decoration: none; }
+.shopfront .shop-product-picks img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; background: #e8e5dc; border-radius: 3px; }
+.shop-product-picks a span { font-size: 15px; line-height: 1.35; }
+.shop-product-picks a:hover span { text-decoration: underline; text-underline-offset: 3px; }
+.shop-product-picks strong { font-size: 14px; font-weight: 600; }
+.shop-landing-example-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+  margin-top: 28px;
+}
+.shop-landing-example-grid figure { margin: 0; }
+.shopfront .shop-landing-example-grid img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 3px; background: #e8e5dc; }
+.shop-landing-example-grid figcaption { margin-top: 10px; font-size: 15px; line-height: 1.5; color: var(--shop-muted); }
+.shop-landing-example-grid figcaption strong { color: var(--shop-ink); font-weight: 600; }
+.shop-product-example > p:not(.shop-kicker) { max-width: 760px; margin-top: 14px; }
+.shop-product-example .shop-inscription-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.shop-product-example .shop-inscription-grid article:first-child { background: #fff; }
+.shop-product-example .shop-inscription-grid blockquote { font-size: 16px; line-height: 1.6; }
+.shop-product-example .shop-smallprint { margin-top: 14px; }
+.shop-product-example .shop-smallprint a,
+.shop-product-example p a { text-decoration: underline; text-underline-offset: 3px; }
+.shop-product-example .shop-whatsapp-icon { width: 16px; height: 16px; vertical-align: -3px; margin-right: 4px; }
+.shop-custom-anything { margin-top: 0; }
+@media (max-width: 1000px) {
+  .shop-product-picks ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .shop-product-example .shop-inscription-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .shop-product-picks ul { gap: 16px; }
+  .shop-product-picks a span { font-size: 14px; }
+  .shop-landing-example-grid { grid-template-columns: 1fr; gap: 22px; }
+  .shop-product-example .shop-inscription-grid { grid-template-columns: 1fr; }
+}

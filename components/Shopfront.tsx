@@ -46,6 +46,39 @@ export const shopFaqs = [
   },
 ];
 
+// The /faq page answers the questions people search for (owner msg 5736), on top of the shared ones.
+export const helpFaqs = [
+  ...shopFaqs,
+  {
+    question: "What should I write on a memorial plaque?",
+    answer: "Start with the name as the largest line, then the dates, then a short line about them: for example “In loving memory of / MARGARET ELLIS / 1942 – 2024 / who loved this garden”. Keep it short enough to read at a glance. Stuck for words? Send us what you have on WhatsApp and we’ll suggest a layout.",
+  },
+  {
+    question: "How much does a memorial plaque cost?",
+    answer: "Bench plaques start from £58.50 and A5 memorial plaques from £95.50, including engraving, standard fixings and UK delivery. Larger sizes, wood backing and special finishes cost more, and the designer shows the exact price before you pay.",
+  },
+  {
+    question: "Can I fix a plaque to a tree?",
+    answer: "We recommend not fixing a plaque to the tree itself: screws and wire damage it and the bark grows over them. Fix it to a short post or stake beside the tree, a sleeper at its foot, or a nearby wall or fence.",
+  },
+  {
+    question: "Can you engrave a photo, portrait or logo?",
+    answer: "Yes. Send a favourite photo of a person or pet, or your logo, on WhatsApp. We turn it into engraving artwork and arrange your words around it, then send a free proof with an exact price. Portraits need an A5 (210 × 148 mm) or larger plaque.",
+  },
+  {
+    question: "Can you make a size or shape that isn’t listed?",
+    answer: "Yes. Message us on WhatsApp with the size, shape, wording and where it will go, or a photo or sketch of what you have in mind. We’ll design it and send a free proof with the price before you decide.",
+  },
+  {
+    question: "Do you make house signs and name plates?",
+    answer: "Yes. House names and numbers, door plates and business signs in brass or stainless steel. A 300 × 200 mm or A4 plaque suits most house names; send us the name and a photo of the wall on WhatsApp and we’ll design it for you.",
+  },
+  {
+    question: "How do I fit a plaque to a memorial bench?",
+    answer: "Measure the flat face of the backrest rail first: the plaque needs to sit within it, clear of bolts and joints. Bench plaques come with screws for timber rails. For a metal or composite bench, or a council or park bench, ask us and the site manager before ordering.",
+  },
+];
+
 const collections = [
   {
     slug: "bench-plaques",
@@ -239,6 +272,88 @@ export function ShopFaq({ faqs = shopFaqs }: { faqs?: typeof shopFaqs }) {
   );
 }
 
+// "Make it clear we can make whatever you want via WhatsApp" (owner msg 5736): one band on every
+// shop page, so a visitor who can't see their exact plaque knows to just ask.
+export function CustomAnything({ subject = 'a custom plaque' }: { subject?: string }) {
+  return (
+    <section className="shop-section shop-design-service shop-custom-anything" aria-labelledby="custom-anything-heading">
+      <div>
+        <p className="shop-kicker">Can’t see exactly what you need?</p>
+        <h2 id="custom-anything-heading">Tell us what you want. We’ll make it.</h2>
+        <p>Almost any size, shape or wording: memorials, tree and garden dedications, house names, awards, logos, and portraits engraved from your own photos. Send us a few words, a sketch or a photo of the spot on WhatsApp, and we’ll design it for you and send a free proof, usually within 3 working hours.</p>
+        <div className="shop-design-service-actions">
+          <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
+            <WhatsAppIcon /> Message us on WhatsApp
+          </ContactLink>
+          <a href="/design-request" className="shop-text-link">Or use the design form ↗</a>
+        </div>
+        <p className="shop-smallprint">No obligation. You only pay once you’re happy with your proof.</p>
+      </div>
+      <ol className="design-service-steps">
+        <li><span>01</span><div><strong>Tell us your idea</strong><p>Wording, size, where it’s going, or a picture of something you like.</p></div></li>
+        <li><span>02</span><div><strong>We design it</strong><p>A proof drawn to size, by WhatsApp or email.</p></div></li>
+        <li><span>03</span><div><strong>Approve, then pay</strong><p>Ask for changes until it’s right.</p></div></li>
+      </ol>
+    </section>
+  );
+}
+
+/** Photo links to exact catalogue plaques, for the category and landing pages. */
+export function ProductPicks({ slugs, kicker, title, intro }: { slugs: string[]; kicker: string; title: string; intro?: string }) {
+  const items = slugs.map(slug => productFamilies.find(item => item.slug === slug)).filter((item): item is ProductFamily => Boolean(item));
+  if (!items.length) return null;
+  return (
+    <nav className="shop-section shop-product-picks" aria-label={title}>
+      <p className="shop-kicker">{kicker}</p>
+      <h2>{title}</h2>
+      {intro && <p>{intro}</p>}
+      <ul>
+        {items.map(item => (
+          <li key={item.slug}>
+            <a href={`/${item.slug}`}>
+              <img src={(item.photo || item.image).replace(/\.webp$/, '-600.webp')} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+              <span>{item.title}</span>
+              <strong>{item.startingFrom}</strong>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+type LandingExample = NonNullable<SeoLandingPage['examples']>[number];
+
+/** Photo examples on a landing page (the tree and garden pages). */
+function LandingExamples({ examples, kicker, title }: { examples: LandingExample[]; kicker: string; title: string }) {
+  return (
+    <section className="shop-section shop-landing-examples" aria-label={title}>
+      <p className="shop-kicker">{kicker}</p>
+      <h2>{title}</h2>
+      <div className="shop-landing-example-grid">
+        {examples.map(example => (
+          <figure key={example.image}>
+            <img src={example.image.replace(/\.webp$/, '-900.webp')} srcSet={`${example.image.replace(/\.webp$/, '-900.webp')} 900w, ${example.image} 1536w`} sizes="(max-width: 720px) 92vw, 46vw" alt={example.alt} width="1536" height="1024" loading="lazy" />
+            <figcaption><strong>{example.title}</strong> {example.copy}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// Picks for the garden, tree, memorial and bench pages: real catalogue pages with their photos.
+const productPicks: Record<string, { kicker: string; title: string; intro: string; slugs: string[] }> = {
+  'garden-plaques': { kicker: 'Garden and tree plaques', title: 'Popular garden plaques.', intro: 'Each plaque is shown with its own example wording. Open one to see its sizes, finishes and a sample proof.',
+    slugs: ['brushed-stainless-200x150-rect-plaque', 'polished-brass-210x148-rect-plaque', 'polished-brass-148x210-rect-plaque', 'orbital-brass-matt-lacquer-200x200-circle-plaque', 'brushed-stainless-148x210-rect-plaque', 'aged-brass-250x150-oval-plaque', 'brushed-brass-200x150-rect-plaque', 'polished-stainless-210x148-rect-plaque'] },
+  'tree-memorial-plaques': { kicker: 'Tree memorial plaques', title: 'Plaques for a memorial tree.', intro: 'Metal plaques without wood backing are made for outdoors. Each is shown with its own example wording.',
+    slugs: ['brushed-stainless-200x150-rect-plaque', 'polished-brass-210x148-rect-plaque', 'polished-brass-148x210-rect-plaque', 'orbital-brass-matt-lacquer-200x200-circle-plaque', 'aged-brass-297x210-rect-plaque', 'orbital-brass-matt-lacquer-210x297-rect-plaque', 'brushed-stainless-148x210-rect-plaque', 'aged-brass-250x150-oval-plaque'] },
+  'memorial-plaques': { kicker: 'Memorial plaques', title: 'Memorial plaques, shown with example wording.', intro: 'From a short bench dedication to a family memorial with an engraved portrait. Open any plaque for its sizes, finishes and a sample proof.',
+    slugs: ['aged-brass-210x148-rect-plaque', 'polished-brass-250x150-oval-plaque', 'polished-stainless-148x210-rect-plaque', 'polished-brass-297x210-rect-plaque', 'aged-brass-148x210-rect-plaque', 'brushed-stainless-300x200-rect-plaque', 'polished-brass-148x210-rect-light-wood-plaque', 'brushed-stainless-150x50-rect-plaque'] },
+  'bench-plaques': { kicker: 'Bench plaques', title: 'Bench plaques, shown on a bench.', intro: 'Each bench plaque is shown on a real-looking bench rail with its own example dedication.',
+    slugs: ['brushed-stainless-150x50-rect-plaque', 'brushed-brass-225x75-rect-plaque', 'polished-stainless-200x50-rect-plaque', 'aged-brass-225x75-rect-plaque', 'polished-brass-150x75-rect-plaque', 'orbital-brass-matt-lacquer-225x65-rect-plaque', 'brushed-brass-150x65-rect-plaque', 'polished-brass-bench-plaque-200x100'] },
+};
+
 // Phones: "what's your plaque for?" routes with photos straight under the headline,
 // so a visitor sees at once that they are in the right place and where to tap.
 const routeThumbs: Record<string, string> = {
@@ -404,6 +519,7 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           </figure>
         </div>
       </section>
+      <CustomAnything />
       <ShopFaq />
       <section className="shop-closing">
         <p className="shop-kicker">Start with a few words</p>
@@ -430,6 +546,7 @@ const heroTitles: Record<string, string> = {
   'garden-plaques': 'Personalised garden plaques',
   'pet-memorial-plaques': 'Personalised pet memorial plaques',
   'memorial-bench-plaques': 'Personalised memorial bench plaques',
+  'tree-memorial-plaques': 'Memorial tree plaques',
 };
 
 // Exact product pages sit under a category in breadcrumbs (review 21 Oct).
@@ -472,10 +589,12 @@ export function ShopProduct({
   product,
   onLaunch,
   onRequestDesign,
+  examples,
 }: {
   product: ProductFamily;
   onLaunch?: () => void;
   onRequestDesign?: () => void;
+  examples?: SeoLandingPage['examples'];
 }) {
   const collection = collections.find((item) => item.slug === product.slug);
   const isMemorial = product.slug === 'memorial-plaques';
@@ -520,7 +639,7 @@ export function ShopProduct({
           <p className="shop-kicker">Free proof · UK delivery included</p>
           <h1 className={product.merchantOffer ? 'shop-product-title-long' : undefined}>{heroTitles[product.slug] || product.title}</h1>
           <p className="shop-product-note">
-            {collection?.note || "A plaque made for the words that matter."}
+            {product.heroNote || collection?.note || "A plaque made for the words that matter."}
           </p>
           {/* Phones: the product photo stays near the top while the copy comes first. */}
           {/* Same sizes as the desktop figure, so React emits one image preload, not two. */}
@@ -596,8 +715,11 @@ export function ShopProduct({
         </div>
       </nav>}
       {isMemorial && <MemorialWording />}
-      {!['bench-plaques', 'opening-plaques', 'memorial-plaques'].includes(product.slug) && <ShopProcess />}
-      {product.slug === 'garden-plaques' && <GardenAdvice />}
+      {examples && examples.length > 0 && <LandingExamples examples={examples} kicker="Ideas from real-life settings" title={product.slug === 'tree-memorial-plaques' ? 'Memorial tree plaques in place.' : 'Garden and tree dedications in place.'} />}
+      {productPicks[product.slug] && <ProductPicks {...productPicks[product.slug]} />}
+      {!product.merchantOffer && !['bench-plaques', 'opening-plaques', 'memorial-plaques', 'tree-memorial-plaques'].includes(product.slug) && <ShopProcess />}
+      {['garden-plaques', 'tree-memorial-plaques'].includes(product.slug) && <GardenAdvice />}
+      <CustomAnything subject={plaqueSubject(product.shortTitle)} />
       {/* Catalogue pages: wording and fitting help, not the opening-plaque route (review 21 Oct). */}
       <CollectionLinks slug={product.merchantOffer ? 'catalogue' : product.slug} />
       <div id={isMemorial ? 'memorial-questions' : undefined}><ShopFaq faqs={faqs} /></div>
@@ -644,6 +766,7 @@ export function ShopLanding({
         bestFor: related.bestFor,
         faqs: landing.faqs,
       }}
+      examples={landing.examples}
     />
   );
 }
@@ -704,6 +827,7 @@ export function ShopMaterials() {
         </nav>
         <p className="shop-smallprint">Texture previews are illustrative. Your proof confirms wording, layout and selected options; colour and grain can look different on screen.</p>
       </section>
+      <CustomAnything />
       <ShopFaq />
       <section className="shop-closing">
         <h2>See your words in metal.</h2>
@@ -737,7 +861,8 @@ export function ShopHelp({ faq = false }: { faq?: boolean }) {
         <p>Send us your wording on WhatsApp or through our <a href="/design-request">design form</a>, and we send you a PDF proof: your plaque drawn to size with every measurement, the fixings and the finish, plus simple fitting steps.</p>
       </ProofPdfShowcase>}
       {!faq && <ShopTurnaround />}
-      <ShopFaq />
+      <CustomAnything />
+      <ShopFaq faqs={faq ? helpFaqs : shopFaqs} />
     </div>
   );
 }
@@ -764,6 +889,7 @@ export function ShopFooter() {
         <a href="/brass-plaques">Brass plaques</a>
         <a href="/stainless-steel-plaques">Stainless steel plaques</a>
         <a href="/garden-plaques">Garden plaques</a>
+        <a href="/tree-memorial-plaques">Tree memorial plaques</a>
         <a href="/opening-plaques">Opening plaques</a>
         <a href="/custom-plaques">Custom plaques</a>
         <a href="/portrait-plaques">Portrait plaques</a>

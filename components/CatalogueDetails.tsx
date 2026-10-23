@@ -1,6 +1,8 @@
 import React from 'react';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { merchantProducts } from '../services/commerce';
+import { exampleFor, ideasFor, isPortraitSize } from '../services/catalogueContent';
+import { ContactLink, WhatsAppIcon } from './ContactOptions';
 
 // Catalogue product pages (owner msg 5231, review 21 Oct 2026): a real specification where the
 // empty "Choose the size and finish." block was, and links between sizes, finishes and backings
@@ -83,15 +85,45 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
     ['Shape', shapeText],
     ['Finish', `${offer.label}, 1.5 mm solid metal`],
     ['Lettering', `Etched and paint-filled ${p.textColor}`],
-    ['Border', `Engraved ${p.borderStyle} line, or none`],
+    ['Border', `Engraved ${p.borderStyle} line, scalloped or none`],
     ['Fixings', `${fixingText(offer)}. Standard fixings included`],
     ['Backing', p.wood ? `${p.woodTone === 'dark' ? 'Dark' : 'Light'} wood, bevelled edge` : 'None: fixed directly to the surface'],
+    ['Portrait or logo', isPortraitSize(offer) ? 'Can be engraved from your photo: ask for a free sketch and exact price' : 'Portraits need A5 or larger; a small logo may fit'],
     ['Production', `Estimated ${offer.productionDays} working days after proof approval and payment`],
     ['Delivery', 'UK delivery included'],
     ['Price', `${priceFor(offer.slug)}, including engraving of your wording, fixings and UK delivery`],
   ];
+  const example = exampleFor(offer.slug);
+  const ideas = ideasFor(offer.slug);
   return (
     <>
+      {example && (
+        <section className="shop-section shop-wording-examples shop-product-example" aria-labelledby="product-example-heading">
+          <p className="shop-kicker">The example in the photo</p>
+          <h2 id="product-example-heading">Shown as {example.use}.</h2>
+          <p>
+            The photo shows this {offerSizeLabel(offer)} plaque with invented example wording{example.portrait ? ' and an engraved portrait' : ''}.
+            Your own words replace it, laid out to fit the plate, and you see the proof before you pay.
+            {example.portrait ? ' Portraits are drawn from a favourite photo of a person or pet that you send us.' : ''}
+          </p>
+          <div className="shop-inscription-grid">
+            <article>
+              <h3>On this plaque</h3>
+              <blockquote>{example.lines.map((line, index) => <React.Fragment key={index}>{index > 0 && <br />}{line}</React.Fragment>)}</blockquote>
+            </article>
+            {ideas.map(idea => (
+              <article key={idea.slug}>
+                <h3>Another idea: {idea.use.replace(/^an? /, '')}</h3>
+                <blockquote>{idea.lines.map((line, index) => <React.Fragment key={index}>{index > 0 && <br />}{line}</React.Fragment>)}</blockquote>
+                <p className="shop-smallprint">Shown on <a href={`/${idea.slug}`}>{idea.label}</a></p>
+              </article>
+            ))}
+          </div>
+          <p>
+            Not sure what to write? <ContactLink channel="whatsapp" placement="page" subject={`a ${offer.size} plaque`}><WhatsAppIcon /> Send us a few words on WhatsApp</ContactLink> and we will suggest a layout, or see our <a href="/memorial-plaques#memorial-wording">memorial wording examples</a>.
+          </p>
+        </section>
+      )}
       <section className="shop-section shop-buying-guide shop-product-spec">
         <div>
           <p className="shop-kicker">Size, finish and fitting</p>

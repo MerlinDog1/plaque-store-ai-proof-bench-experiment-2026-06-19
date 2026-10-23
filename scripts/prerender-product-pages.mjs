@@ -127,6 +127,15 @@ const pages = [
 
 const landingPages = [
   {
+    slug: 'tree-memorial-plaques',
+    title: 'Memorial Tree Plaques UK | Engraved Tree Dedication Plaques | InstaPlaque',
+    description: 'Personalised memorial tree plaques in brass or stainless steel, made for outdoors and fixed to a post beside the tree.',
+    image: '/site-images/scenes/scene-01-family-cherry.webp',
+    pageName: 'Memorial tree plaques',
+    faqs: [],
+    relatedSearches: ['memorial tree plaques', 'tree dedication plaques', 'memorial plaque for a tree', 'tree planting memorial plaque'],
+  },
+  {
     slug: 'garden-plaques',
     title: 'Garden Plaques UK | Custom Memorial Garden Plaques',
     description: 'Garden plaques for memorial corners, trees, benches, planted areas, walls and family gardens. Choose brass or stainless steel and check a proof before ordering.',
@@ -259,8 +268,8 @@ const indexableProductSlugs = new Set([
   'stainless-steel-plaques',
   'custom-plaques',
 ]);
-const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques']);
-const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.seoTitle, description: product.seoDescription, price: product.schemaStartingPrice, productionDays: product.productionDays, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
+const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques', 'tree-memorial-plaques']);
+const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.seoTitle, description: product.seoDescription, feedTitle: product.feedTitle || product.seoTitle, feedDescription: product.feedDescription || product.seoDescription, photo: product.photo, price: product.schemaStartingPrice, productionDays: product.productionDays, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
 const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)).map(page => {
   // Keep the revised memorial search metadata and illustration identical to
   // the hydrated page; the catalogue is the source for both representations.
@@ -390,6 +399,7 @@ const primaryNav = [
   ['Brass plaques', '/brass-plaques'],
   ['Stainless steel plaques', '/stainless-steel-plaques'],
   ['Garden plaques', '/garden-plaques'],
+  ['Tree memorial plaques', '/tree-memorial-plaques'],
   ['Opening plaques', '/opening-plaques'],
   ['Portrait plaques', '/portrait-plaques'],
   ['AI design to plaque', '/ai-plaque-design'],
@@ -446,7 +456,7 @@ const writePrerenderedPage = async ({
   const featurePage = { 'portrait-plaques': [features.ShopPortraitPlaques, features.portraitFaqs], 'ai-plaque-design': [features.ShopAiDesign, features.aiDesignFaqs] }[slug];
   const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : featurePage ? featurePage[0] : ['returns-and-cancellations','terms','privacy','cookies'].includes(slug) ? LegalPlaceholderPage : slug === 'quote' ? QuotePage : slug === 'design-request' ? DesignRequest : slug === 'about' ? guides.ShopAbout : slug === 'contact' ? guides.ShopContact : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
   if (contentComponent && !['about', 'contact', 'returns-and-cancellations', 'terms', 'privacy', 'cookies','design-request','quote'].includes(slug)) {
-    const visibleFaqs = featurePage ? featurePage[1] : !(product || landing) ? shop.shopFaqs : [...(product || landing).faqs, ...shop.shopFaqs]
+    const visibleFaqs = featurePage ? featurePage[1] : slug === 'faq' ? shop.helpFaqs : !(product || landing) ? shop.shopFaqs : [...(product || landing).faqs, ...shop.shopFaqs]
       .filter((item, index, list) => list.findIndex(other => other.question === item.question) === index).slice(0, 6);
     schema = schema.filter(item => item['@type'] !== 'FAQPage');
     schema.push(faqSchema(visibleFaqs.map(item => [item.question, item.answer])));
@@ -602,11 +612,12 @@ const feedItems = merchantFeedPages.map((page) => {
   const offer = merchantOffers.find(item => item.slug === page.slug);
   return `    <item>
       <g:id>${offer.offerId}</g:id>
-      <g:structured_title><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.title)}</g:content></g:structured_title>
-      <g:structured_description><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.description)}</g:content></g:structured_description>
+      <g:structured_title><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.feedTitle)}</g:content></g:structured_title>
+      <g:structured_description><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.feedDescription)}</g:content></g:structured_description>
 
       <g:link>${url}</g:link>
-      <g:image_link>${imageUrl}</g:image_link>
+      <g:image_link>${imageUrl}</g:image_link>${page.photo ? `
+      <g:additional_image_link>${siteBaseUrl}${page.photo}</g:additional_image_link>` : ''}
       <g:brand>InstaPlaque</g:brand>
       <g:material>${escapeAttr(offer.label)}</g:material>
       <g:color>${escapeAttr(offer.colour)}</g:color>
@@ -643,7 +654,12 @@ ${feedItems}
 await writeFile(path.join(distDir, 'google-merchant-feed.xml'), feedXml);
 
 // Exact catalogue variants get their own sitemap for Search Console reporting.
-const sitemapXml = urls => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...new Set(urls)].map(url => `  <url><loc>${escapeAttr(url)}</loc></url>`).join("\n")}\n</urlset>\n`;
-await writeFile(path.join(distDir, "sitemap-products.xml"), sitemapXml(merchantOffers.map(p => `${siteBaseUrl}/${p.slug}`)));
+// Each product URL lists its photo and flat design image, with the date its content last changed.
+const productsLastmod = '2026-10-24';
+const productSitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${merchantPages.map(page => {
+  const images = [page.photo, page.image].filter(Boolean).map(src => `<image:image><image:loc>${escapeAttr(siteBaseUrl + src)}</image:loc><image:title>${escapeAttr(page.productType)}</image:title></image:image>`).join('');
+  return `  <url><loc>${escapeAttr(`${siteBaseUrl}/${page.slug}`)}</loc><lastmod>${productsLastmod}</lastmod>${images}</url>`;
+}).join("\n")}\n</urlset>\n`;
+await writeFile(path.join(distDir, "sitemap-products.xml"), productSitemapXml);
 const editorialSitemap = await readFile(path.join(process.cwd(), 'public/sitemap.xml'), 'utf8');
 await writeFile(path.join(distDir, 'sitemap.xml'), editorialSitemap.replace('</urlset>', '  <url><loc>https://instaplaque.co.uk/design-request</loc></url>\n</urlset>'));
