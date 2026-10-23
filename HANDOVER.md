@@ -7,7 +7,13 @@
 - **Phone fit:** the longer label wrapped onto two lines in the hero at 360–393 px and made both buttons 67 px tall. Under 720 px, `shopfront.css` now sets the hero button text to `min(13.5px, 3.3vw)`, the icon to 16 px and the gap and inline padding to 4 px.
   - Measured in Chrome with Arial metrics (Liberation Sans): one line and 50 px tall at 360, 375, 390, 393, 412 and 430 px; 54 px on desktop.
   - It still wraps at 320 px.
-- **Released:** the branch `codex/instaplaque-design-on-whatsapp-20261023` was built from the live 21 Oct release plus docs. The build and postbuild checks passed. The deployment ids and rollback are recorded in the workspace MEMORY.md entry for 23 Oct.
+- **Released:** the branch `codex/instaplaque-design-on-whatsapp-20261023` (`cfa4e94`) was built from the live 21 Oct release (`675cfb1`) plus docs. The build and postbuild checks passed.
+  - The candidate `dpl_5gu3AbcGzKWFSYNkZws7Cz8SZ9Wd` (instaplaque-rbvemgttz) had JS and CSS byte-identical to the tested local dist (`index-C7dmdx6S.js`, `index-C9pByEAQ.css`). It was promoted about 10:41 UTC on 23 Oct.
+  - Live checks:
+    - Home and /memorial-plaques show the new label (none of the old).
+    - www returns 308 and /api/health returns 200.
+    - A browser check of the live site at 360, 390 and 1280 px has every new-label button on one line.
+  - **Rollback:** `vercel promote dpl_Egizxth8TEzLsDZy9Uh6hx8ybyJU`, the 21 Oct release.
 
 ## Catalogue photo redo paused — 21 October 2026, about 11:48 UTC
 
