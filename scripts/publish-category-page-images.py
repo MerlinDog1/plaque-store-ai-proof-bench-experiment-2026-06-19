@@ -12,8 +12,12 @@ Writes:
   a studio shot). Their pages link them with ?v=N (services/commerce.ts) so phones fetch the new copy.
 Every file carries IPTC DigitalSourceType trainedAlgorithmicMedia (metadata only, no visible label: owner msg 5231).
 
+- public/site-images/memorial/<name>.webp at the entry's "size" [w, h]: the memorial page's own tiles (600 x 450) and
+  portrait cards (600 x 600), added when the memorial page's photos were redone as real-looking photos (owner msg 6056).
+
 Usage: python3 -I scripts/publish-category-page-images.py SOURCES.json
-SOURCES.json: {"heroes": {name: {file, crop_x?, crop_y?}}, "tiles": {...}, "catalogue": {slug: {...}}}
+SOURCES.json: {"heroes": {name: {file, crop_x?, crop_y?}}, "tiles": {...}, "catalogue": {slug: {...}},
+               "memorial": {name: {file, size: [w, h], crop_x?, crop_y?}}}
 """
 import json
 import os
@@ -25,6 +29,7 @@ from PIL import Image
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CATEGORY = os.path.join(ROOT, 'public/site-images/category')
 CATALOGUE = os.path.join(ROOT, 'public/site-images/catalogue-photo')
+MEMORIAL = os.path.join(ROOT, 'public/site-images/memorial')
 AI = 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia'
 
 
@@ -59,6 +64,9 @@ def main():
         written += write(entry, 4 / 3, [(os.path.join(CATEGORY, f'{name}.webp'), 600, 450)])
     for slug, entry in sources.get('catalogue', {}).items():
         written += write(entry, 1, [(os.path.join(CATALOGUE, f'{slug}.webp'), 1200, 1200), (os.path.join(CATALOGUE, f'{slug}-600.webp'), 600, 600)])
+    for name, entry in sources.get('memorial', {}).items():
+        width, height = entry['size']
+        written += write(entry, width / height, [(os.path.join(MEMORIAL, f'{name}.webp'), width, height)])
     subprocess.run(['exiftool', '-q', '-overwrite_original', f'-XMP-iptcExt:DigitalSourceType={AI}', *written], check=True)
     for path in written:
         print(os.path.relpath(path, ROOT), Image.open(path).size, os.path.getsize(path) // 1024, 'KB')

@@ -1129,6 +1129,15 @@ const cataloguePhotoVersions: Record<string, number> = {
   'orbital-brass-matt-lacquer-200x200-circle-plaque': 3,
   'polished-brass-200x200-circle-plaque': 3,
   'a5-brushed-steel-personalised-plaque': 2,
+  // Version 2: real-looking photos with new example wording and a setting from each plaque's story (owner msg 6056).
+  'aged-brass-210x148-rect-plaque': 2,
+  'polished-brass-250x150-oval-plaque': 2,
+  'polished-stainless-148x210-rect-plaque': 2,
+  'polished-brass-297x210-rect-plaque': 2,
+  'aged-brass-148x210-rect-plaque': 2,
+  'brushed-stainless-300x200-rect-plaque': 2,
+  'polished-brass-148x210-rect-light-wood-plaque': 2,
+  'brushed-stainless-150x50-rect-plaque': 2,
 };
 const cataloguePhotoFor = (slug: string) => `/site-images/catalogue-photo/${slug}.webp${(cataloguePhotoVersions[slug] || 1) > 1 ? `?v=${cataloguePhotoVersions[slug]}` : ''}`;
 /** The 600 px copy of a catalogue photo, keeping any ?v= version. */

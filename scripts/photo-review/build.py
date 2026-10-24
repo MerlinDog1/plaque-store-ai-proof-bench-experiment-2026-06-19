@@ -61,7 +61,7 @@ SECTIONS = [
 
 # Plaque wording on photos that are not catalogue photos (from the stencils they were made from).
 SAYS = {
-    '/site-images/category/memorial-hero-v2.webp': 'In loving memory of / MARGARET ROWLEY / 1936 – 2023 / Loved always, missed every day',
+    '/site-images/category/memorial-hero-v3.webp': 'IN LOVING MEMORY OF / MARGARET ROWLEY / 1936 – 2023 / Mum, Nan and dear friend, / who loved this garden in every season. / Forever in our hearts',
     '/site-images/category/bench-hero.webp': 'In loving memory of / GEORGE HOLLAND / who loved this view',
     '/site-images/category/garden-hero-v2.webp': 'This garden was planted / in loving memory of / SUSAN MARSH / 1951 – 2022 / Where she was happiest',
     '/site-images/category/brass-hero-v2.webp': 'In memory of / FRED & ELSIE BOND / married 1950 / who are remembered here / with love from their family',
@@ -70,13 +70,13 @@ SAYS = {
     '/site-images/category/opening-hero-v2.webp': 'THE MEADOWS / COMMUNITY HUB / was officially opened by / Councillor Jean Mitchell / Mayor of Westbrook / 14 March 2026',
     '/site-images/category/custom-hero-v2.webp': 'HAWTHORN / HOUSE / Built 1898',
     '/site-images/category/route-garden-fence.webp': 'In memory of / BISCUIT / Our gentle cat / 2006 – 2024 / Sunbathing forever',
-    '/site-images/category/route-garden-stone-v2.webp': 'In memory of / IVY & SID MOORE / whose ashes rest here together / in the garden they loved / Loved and remembered always',
-    '/site-images/memorial/route-grave-cross.webp': 'In loving memory of / ALICE GRANT / 1933 – 2021',
-    '/site-images/memorial/route-tree.webp': 'This cherry tree was planted / in loving memory of / JIM PARTRIDGE / 1947 – 2025 / Every spring, we will think of you',
+    '/site-images/category/route-garden-stone-v3.webp': 'IN LOVING MEMORY OF / IVY & SID MOORE / Ivy 1938 – 2021 · Sid 1935 – 2023 / They made this garden together, / and here they rest together.',
+    '/site-images/memorial/route-grave-cross-v2.webp': 'ALICE MAY GRANT / 4 June 1933 – 2 March 2021 / Forever in our hearts',
+    '/site-images/memorial/route-tree-v2.webp': 'THIS CHERRY TREE WAS PLANTED / IN LOVING MEMORY OF / JIM PARTRIDGE / 1947 – 2025 / Grandad, gardener and teller of tall tales. / Every spring, we think of you',
 }
 
 TITLES = {
-    '/site-images/category/memorial-hero-v2.webp': 'Memorial page · top photo',
+    '/site-images/category/memorial-hero-v3.webp': 'Memorial page · top photo',
     '/site-images/category/bench-hero.webp': 'Bench page · top photo',
     '/site-images/category/garden-hero-v2.webp': 'Garden page · top photo',
     '/site-images/category/brass-hero-v2.webp': 'Brass page · top photo',
@@ -87,14 +87,14 @@ TITLES = {
     '/site-images/home-gallery-brass-bench.webp': 'Homepage · top photo',
     '/site-images/portraits/pim-millie-detail.webp': 'Portraits page · top photo (real photo)',
     '/site-images/memorial/route-bench.webp': 'Tile · On a bench',
-    '/site-images/category/route-garden-stone-v2.webp': 'Tile · In the garden / On a stone',
-    '/site-images/memorial/route-tree.webp': 'Tile · By a tree',
-    '/site-images/memorial/route-grave-cross.webp': 'Tile · At a grave',
+    '/site-images/category/route-garden-stone-v3.webp': 'Tile · In the garden / On a stone',
+    '/site-images/memorial/route-tree-v2.webp': 'Tile · By a tree',
+    '/site-images/memorial/route-grave-cross-v2.webp': 'Tile · At a grave',
     '/site-images/category/route-garden-fence.webp': 'Tile · On a fence',
-    '/site-images/memorial/portrait-george.webp': 'Portrait strip · George',
-    '/site-images/memorial/portrait-joan.webp': 'Portrait strip · Joan',
-    '/site-images/memorial/portrait-bramble.webp': 'Portrait strip · Bramble',
-    '/site-images/memorial/portrait-ron-pat.webp': 'Portrait strip · Ron & Pat',
+    '/site-images/memorial/portrait-george-v2.webp': 'Portrait strip · George',
+    '/site-images/memorial/portrait-daniel.webp': 'Portrait strip · Daniel',
+    '/site-images/memorial/portrait-bramble-v2.webp': 'Portrait strip · Bramble',
+    '/site-images/memorial/portrait-ron-pat-v2.webp': 'Portrait strip · Ron & Pat',
     '/site-images/home-route-memorial.webp': 'Homepage phone tile · Memorial',
     '/site-images/home-route-bench.webp': 'Homepage phone tile · Bench',
     '/site-images/home-route-garden.webp': 'Homepage phone tile · Garden',
@@ -138,7 +138,7 @@ ORDER = [
     'home-route-memorial', 'home-route-bench', 'home-route-garden', 'home-route-opening', 'home-gallery-aged-brass-wood',
     'home-carousel-garden-brass', 'home-gallery-brass-community', 'home-gallery-oval-steel',
     'route-bench', 'route-garden-stone', 'route-tree', 'route-grave', 'route-garden-fence',
-    'portrait-george', 'portrait-joan', 'portrait-bramble', 'portrait-ron',
+    'portrait-george', 'portrait-daniel', 'portrait-joan', 'portrait-bramble', 'portrait-ron',
     'quality/', 'sample-proof-page-1', 'sample-proof-page-2', 'ai-concept-memorial', 'ai-real-memorial',
     'pim-millie-photo', 'pim-millie-plaque', 'pim-alfie', 'pim-thomas',
     'pim-millie-artwork', 'pim-lily', 'pim-nell', 'pim-anne', 'pim-willow', 'pim-ruby', 'ai-concept-house', 'ai-real-house',
@@ -217,7 +217,9 @@ def extra_wording():
     if portraits.exists():
         for variation in json.load(open(portraits)):
             name = variation['slug'].replace('portrait-tree-', 'portrait-')
-            says[f'/site-images/memorial/{name}.webp'] = ' / '.join([variation['name']] + variation['inscription'].split('\n'))
+            text = ' / '.join([variation['name']] + variation['inscription'].split('\n'))
+            for suffix in ('', '-v2'):
+                says[f'/site-images/memorial/{name}{suffix}.webp'] = text
     return says
 
 

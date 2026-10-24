@@ -65,5 +65,6 @@ for (const entry of entries) {
 }
 export const merchantOffers = entries;
 // Added to the flat design image URLs that Google reads (feed image_link, Product schema, image sitemap).
-// Bump it whenever those images are redrawn in place, so Google fetches them again (24 Oct 2026: v=2).
-export const merchantImageQuery = '?v=2';
+// Bump it whenever those images are redrawn in place, so Google fetches them again (24 Oct 2026: v=2; v=3 when the
+// memorial page's eight products got new example wording, owner msg 6056). Product pages use it too.
+export const merchantImageQuery = '?v=3';

@@ -5,9 +5,9 @@ export interface CatalogueExample { lines: string[]; use: string; portrait?: boo
 export const catalogueExamples: Record<string, CatalogueExample> = {
  "brushed-stainless-150x50-rect-plaque": {
   "lines": [
-   "In memory of",
+   "In loving memory of",
    "JOAN PARRY",
-   "who loved her garden"
+   "who loved this garden and all of us"
   ],
   "use": "a memorial bench dedication"
  },
@@ -515,8 +515,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "SAMUEL",
    "HARGREAVES",
    "1924 – 2011",
-   "Bell ringer",
-   "for 70 years",
+   "Bell ringer at St Mary's",
+   "for seventy years",
    "Ring on"
   ],
   "use": "a memorial plaque"
@@ -1270,8 +1270,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "In loving memory of",
    "JAMES ORMEROD",
    "1941 – 2019",
-   "Husband, father and grandfather",
-   "Rest in peace"
+   "Signalman, volunteer and friend,",
+   "who kept this little station running",
+   "for forty happy years"
   ],
   "use": "a memorial plaque",
   "portrait": true
@@ -1294,8 +1295,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "HAROLD",
    "JENKINS",
    "1930 – 2018",
-   "Loving husband,",
-   "father and grandad"
+   "Club captain, patient coach",
+   "and always first to the bar.",
+   "He bowled here for sixty years"
   ],
   "use": "a memorial plaque",
   "portrait": true
@@ -1339,8 +1341,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "BEATRICE",
    "ANNE HOLT",
    "1922 – 2017",
-   "Mother, grandmother",
-   "and great-grandmother"
+   "She started our Thursday",
+   "lunch club and ran it here",
+   "for thirty-one years"
   ],
   "use": "a memorial plaque",
   "portrait": true
@@ -1381,8 +1384,10 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "CHARLOTTE MAY",
    "PEMBERTON",
    "1931 – 2021",
-   "Her ashes rest in this garden",
-   "Forever loved"
+   "Headmistress of this school",
+   "from 1968 to 1991, who planted",
+   "this rose garden with her pupils.",
+   "Given with love by her former pupils"
   ],
   "use": "a memorial plaque"
  },
@@ -1548,8 +1553,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "In loving memory of",
    "ALAN VAUGHAN",
    "1944 – 2021",
-   "Forever in our hearts",
-   "Placed by his wife and children"
+   "Crew member and coxswain",
+   "of this lifeboat station for 32 years",
+   "Placed by his wife, his children and his crew"
   ],
   "use": "a memorial plaque"
  },
@@ -1705,7 +1711,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "In loving memory of",
    "IRENE BAXTER",
    "1933 – 2022",
-   "Always in our hearts"
+   "who arranged the flowers here",
+   "for more than fifty years"
   ],
   "use": "a memorial plaque",
   "portrait": true

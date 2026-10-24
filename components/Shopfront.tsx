@@ -7,7 +7,7 @@ import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './Co
 import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
-import { merchantOffers } from '../services/merchantCatalogue.mjs';
+import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogue.mjs';
 import { WordingLibrary } from './WordingGuide';
 import { exampleFor } from '../services/catalogueContent';
 import {
@@ -704,8 +704,9 @@ export function ShopProduct({
   const heroImages: GalleryImage[] = product.photo
     ? [
         { src: product.photo, srcSet: `${photoSmall} 600w, ${product.photo} 1200w`, thumb: photoSmall, alt: heroAlt, label: 'Shown in place' },
-        // The thumbnail keeps the feed image as its src; browsers pick the 160 px copy.
-        { src: product.image, thumbSrcSet: `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')} 160w, ${product.image} 1500w`, alt: `${product.title}: flat design view`, label: 'Flat design view' },
+        // The thumbnail keeps the feed image as its src; browsers pick the 160 px copy. Both carry the feed's ?v= so a
+        // redrawn design (new example wording) is fetched fresh, not shown from an old cached copy.
+        { src: product.image + merchantImageQuery, thumbSrcSet: `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`, alt: `${product.title}: flat design view`, label: 'Flat design view' },
       ]
     : [{ src: heroImage, alt: heroAlt, label: product.title }];
   // No AI/illustration labels on product images (owner msg 5231).
