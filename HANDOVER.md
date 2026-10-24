@@ -1,22 +1,22 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Overnight catalogue and contact upgrade: STAGED, not live — 24 October 2026, about 02:00 UTC
+## Overnight catalogue and contact upgrade: LIVE — 24 October 2026, 05:30 UTC
 
 - **What it is:** the owner's msg 5736 overnight work: 173 new catalogue photos with their own wording (22 with portraits), 10 tree and garden scenes, per-product flat images and sample PDFs, per-product copy and questions, the WhatsApp "we'll make it" band, and the new tree, sizes and wording-guide pages. See [docs/overnight-catalogue-2026-10-24.md](docs/overnight-catalogue-2026-10-24.md).
-- **Branch:** `codex/instaplaque-overnight-20261023`, pushed. It is based on `b0f2970`, which contains the live `cfa4e94`.
-- **Checks:** the local build, all postbuild checks and `tsc --noEmit` pass. `check-merchant-browser.cjs` passes 16 desktop and mobile checks on 12 representative pages. Phone screenshots of the home, tree, sizes, wording and two product pages show no page errors.
-- **Candidate:** `dpl_8Rbi8zC7Wg9w1aQqz5qKCKxgeWjb` (instaplaque-12cb89mx3), deployed with `--prod --skip-domain`. The Vercel build ran every postbuild check.
-  - `vercel curl` shows its `index-Eh3SouRG.js` is byte-identical to the local dist.
-  - The checked photo and PDF match the repository copies.
-  - The feed has 175 items, with `?v=2` image links and `catalogue-photo` additional images.
-  - `sitemap-products.xml` lists 175 URLs. There is no ALEX MORGAN on the checked pages.
-- **Live is unchanged:** `dpl_5gu3AbcGzKWFSYNkZws7Cz8SZ9Wd`. Before msg 5736 the owner was told "You'll see it before it goes live", so promotion waits for their go.
-- **To release:**
-  1. `vercel promote dpl_8Rbi8zC7Wg9w1aQqz5qKCKxgeWjb --yes --scope dullaghan31-3959s-projects`.
-  2. Verify the live alias.
-  3. Run `python3 -I /home/coding-agent/workspace/output/instaplaque-google-visibility-tools/post_release_submit.py`. It submits both GSC sitemaps, asks Merchant Center to fetch the feed, and pings IndexNow.
-  4. Create the paused search campaign (`build-overnight-campaigns.py search apply`).
-- **Rollback:** `vercel promote dpl_5gu3AbcGzKWFSYNkZws7Cz8SZ9Wd`.
+- **Branch:** `codex/instaplaque-overnight-20261023`, pushed. It is based on `b0f2970`, which contains the previously live `cfa4e94`. The release was built from `17a465b`; `79f3986` and later commits change only this handover.
+- **Checks before release:** the local build, all postbuild checks and `tsc --noEmit` pass. `check-merchant-browser.cjs` passes 16 desktop and mobile checks on 12 representative pages. Phone screenshots of the home, tree, sizes, wording and two product pages show no page errors. The candidate's `index-Eh3SouRG.js` was byte-identical to the local dist (`vercel curl`).
+- **Released:** the owner said "Push changes live" (msg 5757). Production was still `dpl_5gu3AbcGzKWFSYNkZws7Cz8SZ9Wd`, so nothing newer was overwritten. `vercel promote dpl_8Rbi8zC7Wg9w1aQqz5qKCKxgeWjb` (instaplaque-12cb89mx3) succeeded at 05:30:12 UTC, and `vercel inspect instaplaque.co.uk` returns that id.
+- **Live checks** (`workspace/output/instaplaque-overnight-20261024/verify_live.py`, PASS):
+  - The home page serves `index-Eh3SouRG.js`. www returns 308 to the apex, and `/tree-plaques` returns 308 to `/tree-memorial-plaques`.
+  - The new pages and the category pages return 200, with the "We'll make it" band and no ALEX MORGAN.
+  - All 175 product pages return 200 with no ALEX MORGAN and no `merchant-photo` links.
+  - All 1,040 photos, flat images, scenes and sample PDFs those pages link to match the repository copies byte for byte. The old `/site-images/merchant-photo/` returns 404.
+  - The feed has 175 items: every `image_link` has `?v=2`, and 173 have a `catalogue-photo` additional image. `sitemap.xml` has 24 URLs and `sitemap-products.xml` 175. The IndexNow key file is served.
+  - `/api/gemini/health`, `/api/supabase/health` and `/api/stripe/config` return 200 and report configured, with Stripe still in live mode. `/api/health` is not a real route: it returns the app's HTML on this and the previous release alike.
+  - No headless-browser check was run on the live domain, because the account was at 3.3 GiB of memory. The identical files passed the browser checks locally.
+- **Google, 05:35 UTC:** both sitemaps were submitted to Search Console (204, pending). Merchant Center was asked to fetch the feed (200). IndexNow accepted all 199 sitemap URLs (202). Log: `workspace/output/instaplaque-overnight-20261024/post-release-submit-20261024.log`.
+- **Ads, 05:36 UTC:** the stronger search campaign was created **PAUSED**: 24385756716 "InstaPlaque | UK | Search | Top of page test (paused, Oct 2026)", £20 a day, ending 31 Oct. Nothing is running, and £0 has been spent today. The record and undo steps are in `projects/instaplaque-google-ads-memorial-20261009/evidence/paused-campaigns-2026-10-24.md`.
+- **Rollback:** `vercel promote dpl_5gu3AbcGzKWFSYNkZws7Cz8SZ9Wd --yes --scope dullaghan31-3959s-projects` (the 23 Oct "Design on WhatsApp" release). It restores the ALEX MORGAN photos, the old feed images and the old PDFs, and removes the new pages from the site but not from the sitemaps already sent to Google.
 
 ## "Design on WhatsApp" buttons — 23 October 2026
 

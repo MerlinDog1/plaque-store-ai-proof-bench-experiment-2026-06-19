@@ -60,8 +60,12 @@ Phones, and Google, keep same-name copies of redrawn files. On 20 Oct this made 
 
 - The Shopping campaign `24390273287` is PAUSED, at £10/day until 8 Nov.
 - Five GA4 contact events are secondary conversions.
-- The stronger search campaign script is ready but not created: `projects/instaplaque-google-ads-memorial-20261009/scripts/build-overnight-campaigns.py`. It waits for the tree page to be live.
+- The stronger search campaign `24385756716` was created PAUSED on 24 Oct at 05:36 UTC, once the tree page was live. It runs at £20/day, aims for the top of the page and ends on 31 Oct. Script: `projects/instaplaque-google-ads-memorial-20261009/scripts/build-overnight-campaigns.py`. Record: `evidence/paused-campaigns-2026-10-24.md` in that project.
 
 ## Release
 
-See HANDOVER.md for the candidate deployment, the checks and the rollback. The release is promoted only after the owner has seen it, as promised before msg 5736.
+- **Live:** the release went live on 24 Oct at 05:30 UTC, after the owner had seen it and said "Push changes live" (msg 5757). It is `dpl_8Rbi8zC7Wg9w1aQqz5qKCKxgeWjb`.
+- **Checks:** every product page and all 1,040 linked images and PDFs were checked on the live domain.
+- **Google:** the sitemaps went to Search Console, Merchant Center was asked to fetch the feed, and IndexNow was sent at 05:35.
+- **Rollback:** `dpl_5gu3AbcGzKWFSYNkZws7Cz8SZ9Wd`.
+- **More:** see HANDOVER.md for the full results.
