@@ -117,3 +117,29 @@ The gaps for each page are in the owner report (msg 5898).
 - On the memorial page, "Design online" opens the designer on the memorial preset (A5 brushed brass on dark wood, £165, the same preset as before).
 
 **Rollback:** `vercel promote dpl_6ZY8UAg58abxM8VaKWRreKWMxQBY --yes --scope dullaghan31-3959s-projects`. That is the homepage-tidy release, live before this one.
+
+## Fixes 1, 3 and 4 (owner msg 5906, "Fix134")
+
+The owner asked whether the new page was really a 10 (msg 5903). My honest answer was about a 7, with five gaps; they asked me to fix gaps 1, 3 and 4.
+
+1. **The price jump.**
+   - **Problem:** the page said "from £95.50", but the hero photo was the £161.50 polished brass A4, and Design online opened A5 brushed brass on dark wood at £165.
+   - **Hero:** now the £95.50 plaque itself: A5 brushed stainless, Margaret Rowley, on the same stone wall with roses.
+     - The stencil was rendered by the designer itself through `output/stencil-app` (an esbuild bundle of PlaquePreview + svgToPngBase64, no Vite dev server). Its caps were repainted in metal.
+     - The photo comes from the built-in realistic preview.
+   - **Designer:** the memorial `preset` is now A5 brushed stainless without wood backing, so Design online opens at £95.50. The garden, tree and other pages that borrow the memorial product open there too. Checked in the staged app: memorial and garden both open at £95.50, 210 × 148 mm, brushed stainless.
+3. **Shorter on phones:** 8,251 px, down from 9,755 (and 10,332 before the rebuild). Changes:
+   - 4 picks instead of 6
+   - sizes as rows
+   - compact quality and proof blocks (`compact` props in FeatureSections)
+   - the FAQs and the buying guide in one list (`QuestionsAndGuide`; the FAQ schema list is unchanged and comes first)
+   - tighter section spacing
+4. **Where will it go?**
+   - The tiles are now bench, garden, tree and grave:
+     - garden: brushed brass 200×150 (Ivy & Sid Moore) on a stone in a flower border
+     - grave: aged brass 150×75 (Alice Grant) on an oak cross in a churchyard
+   - The wall tile is gone, because wall plaques are the hero and the picks.
+   - The new images have new file names, because phones keep old copies of same-name images.
+   - The 6 built-in preview images cost about $0.91.
+
+**Status:** staged as instaplaque-5ncih1yyd (commit 372fe63). Every Vercel postbuild check passed. The real app ran with no page errors. The preview was sent as msg 5916. **Not live**: waiting for the owner's go.
