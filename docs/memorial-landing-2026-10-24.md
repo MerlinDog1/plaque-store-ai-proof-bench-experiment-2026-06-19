@@ -100,6 +100,20 @@ The gaps for each page are in the owner report (msg 5898).
 
 ## Release and undo
 
-The page is staged only, waiting for the owner's go. Once promoted, record the deployment id here.
+**LIVE at 14:15 UTC on 24 Oct**, at the owner's request (msg 5900, "Put memorial live for me to check properly").
+- The staged candidate instaplaque-2wx5oi77h was promoted, and is now **dpl_FSTHn5UUgVz51kQxE1JCwmQ1NNGq** (commit 3f90d1d, bundle `index-CgzGX6S5.js`).
+- Before promoting, production was confirmed to still be the homepage-tidy release, so no other change was overwritten.
+
+**Live checks after the promote** (scripts in workspace/output/instaplaque-memorial-page-20261024):
+- `verify_memorial_live.py` passed 22 of 22 page checks:
+  - title, H1, canonical
+  - FAQPage schema, no Product schema
+  - the bundle and hero preload
+  - all seven anchors and the section headings
+
+  It also checked all 26 linked assets: the 11 memorial images are byte-identical to the repo, and the 15 others are served correctly.
+- The overnight `verify_live.py` (BUNDLE=index-CgzGX6S5.js) passed: 175 product pages and 1,061 linked assets identical to the repo, feed 175 items, sitemaps, redirects.
+- `check_pages_live.cjs` ran the real app on phone and desktop for memorial, home, bench, garden, brass, tree and a product page. There were no page or console errors, no failed requests and no broken images.
+- On the memorial page, "Design online" opens the designer on the memorial preset (A5 brushed brass on dark wood, £165, the same preset as before).
 
 **Rollback:** `vercel promote dpl_6ZY8UAg58abxM8VaKWRreKWMxQBY --yes --scope dullaghan31-3959s-projects`. That is the homepage-tidy release, live before this one.
