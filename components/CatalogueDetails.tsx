@@ -16,8 +16,9 @@ const sameBacking = (a: Offer, b: Offer) => a.preset.wood === b.preset.wood && (
 const sameSize = (a: Offer, b: Offer) => a.preset.width === b.preset.width && a.preset.height === b.preset.height && a.preset.shape === b.preset.shape;
 const bySize = (a: Offer, b: Offer) => a.preset.width * a.preset.height - b.preset.width * b.preset.height || a.preset.width - b.preset.width;
 
+// ?v= changes whenever the sample PDFs are redrawn, so browsers that opened an older copy fetch the new one.
 export function samplePdfFor(slug: string) {
-  return `/samples/products/${slug}.pdf`;
+  return `/samples/products/${slug}.pdf?v=2`;
 }
 
 /** Short size name, e.g. "150 × 50 mm bench", "A5 landscape", "250 × 150 mm oval". */

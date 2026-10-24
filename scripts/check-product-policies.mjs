@@ -44,12 +44,12 @@ const { existsSync } = await import('node:fs');
 for (const offer of merchantOffers) {
   const html = await readFile(`dist/${offer.slug}/index.html`, 'utf8');
   if (offer.imageKind === 'render') {
-    const photo = `/site-images/merchant-photo/${offer.slug}.webp`;
+    const photo = `/site-images/catalogue-photo/${offer.slug}.webp`;
     assert.ok(html.includes(`src="${photo}"`), `Photo on ${offer.slug}`);
     for (const file of [photo, photo.replace('.webp', '-600.webp'), offer.image.replace('/merchant/', '/merchant/thumbs/').replace('.jpg', '.webp')]) assert.ok(existsSync(`dist${file}`), `Missing ${file}`);
   }
   assert.ok(html.includes('class="shop-spec-list"') && html.includes(`${offer.productionDays} working days`), `Specification on ${offer.slug}`);
   assert.ok((html.match(/class="shop-catalogue-links"/g) || []).length >= 1, `Variant links on ${offer.slug}`);
-  assert.ok(html.includes(`href="/samples/products/${offer.slug}.pdf"`) && existsSync(`dist/samples/products/${offer.slug}.pdf`), `Sample proof PDF for ${offer.slug}`);
+  assert.ok(html.includes(`href="/samples/products/${offer.slug}.pdf?v=2"`) && existsSync(`dist/samples/products/${offer.slug}.pdf`), `Sample proof PDF for ${offer.slug}`);
 }
 console.log(`Product policies: ${productCount} physical offers across ${pageCount} pages pass shipping, returns, production/transit separation and weekday checks; free designer unchanged. Every product page has its photo, specification, variant links and sample proof.`);

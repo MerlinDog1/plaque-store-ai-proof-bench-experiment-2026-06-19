@@ -64,3 +64,6 @@ for (const entry of entries) {
   entry.offerId = originalId.length <= 50 ? originalId : `ip-${shortMaterials[p.material]}-${p.width}x${p.height}-${p.shape}-${p.wood ? p.woodTone : 'metal'}`;
 }
 export const merchantOffers = entries;
+// Added to the flat design image URLs that Google reads (feed image_link, Product schema, image sitemap).
+// Bump it whenever those images are redrawn in place, so Google fetches them again (24 Oct 2026: v=2).
+export const merchantImageQuery = '?v=2';

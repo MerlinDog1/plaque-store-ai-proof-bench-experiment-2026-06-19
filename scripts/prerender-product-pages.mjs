@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import React from 'react';
-import { merchantOffers } from '../services/merchantCatalogue.mjs';
+import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogue.mjs';
 import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
 import { defaultShareImagePath, shareImagePathFor } from '../services/shareImages.mjs';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -130,7 +130,7 @@ const landingPages = [
     slug: 'memorial-plaque-wording',
     title: 'Memorial Plaque Wording Ideas & Examples | What to Write | InstaPlaque',
     description: 'Memorial plaque wording ideas and examples.',
-    image: '/site-images/merchant-photo/aged-brass-210x148-rect-plaque.webp',
+    image: '/site-images/catalogue-photo/aged-brass-210x148-rect-plaque.webp',
     pageName: 'Memorial plaque wording',
     faqs: [],
     relatedSearches: ['memorial plaque wording', 'what to write on a memorial plaque', 'memorial bench plaque wording', 'short memorial phrases'],
@@ -139,7 +139,7 @@ const landingPages = [
     slug: 'plaque-sizes',
     title: 'Plaque Sizes & Prices UK | Brass & Stainless Steel Plaques | InstaPlaque',
     description: 'Compare every plaque size and finish with photos and prices.',
-    image: '/site-images/merchant-photo/polished-brass-297x210-rect-plaque.webp',
+    image: '/site-images/catalogue-photo/polished-brass-297x210-rect-plaque.webp',
     pageName: 'Plaque sizes and prices',
     faqs: [],
     relatedSearches: ['plaque sizes', 'brass plaque sizes', 'memorial plaque sizes', 'A5 brass plaque'],
@@ -561,7 +561,7 @@ for (const page of indexablePages) {
       '@id': `${url}#product`,
       name: page.productType,
       description: page.description,
-      image: `${siteBaseUrl}${page.image}`,
+      image: `${siteBaseUrl}${page.image}${merchantImageQuery}`,
       brand: { '@type': 'Brand', name: 'InstaPlaque' },
       category: 'Custom engraved plaques',
       material: merchantOffers.find(item => item.slug === page.slug)?.label || 'Brass or stainless steel',
@@ -628,7 +628,7 @@ const merchantFeedPages = merchantPages;
 
 const feedItems = merchantFeedPages.map((page) => {
   const url = `${siteBaseUrl}/${page.slug}`;
-  const imageUrl = `${siteBaseUrl}${page.image}`;
+  const imageUrl = `${siteBaseUrl}${page.image}${merchantImageQuery}`;
   const offer = merchantOffers.find(item => item.slug === page.slug);
   return `    <item>
       <g:id>${offer.offerId}</g:id>
@@ -677,7 +677,7 @@ await writeFile(path.join(distDir, 'google-merchant-feed.xml'), feedXml);
 // Each product URL lists its photo and flat design image, with the date its content last changed.
 const productsLastmod = '2026-10-24';
 const productSitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${merchantPages.map(page => {
-  const images = [page.photo, page.image].filter(Boolean).map(src => `<image:image><image:loc>${escapeAttr(siteBaseUrl + src)}</image:loc><image:title>${escapeAttr(page.productType)}</image:title></image:image>`).join('');
+  const images = [page.photo, page.image && page.image + merchantImageQuery].filter(Boolean).map(src => `<image:image><image:loc>${escapeAttr(siteBaseUrl + src)}</image:loc><image:title>${escapeAttr(page.productType)}</image:title></image:image>`).join('');
   return `  <url><loc>${escapeAttr(`${siteBaseUrl}/${page.slug}`)}</loc><lastmod>${productsLastmod}</lastmod>${images}</url>`;
 }).join("\n")}\n</urlset>\n`;
 await writeFile(path.join(distDir, "sitemap-products.xml"), productSitemapXml);

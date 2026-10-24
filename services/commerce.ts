@@ -646,7 +646,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     seoTitle: 'Memorial Plaque Wording Ideas & Examples | What to Write | InstaPlaque',
     seoDescription: 'What to write on a memorial plaque: over 40 wording examples for mums, dads, grandparents, benches, trees and pets, plus short phrases. We can design it for you.',
     heroCopy: 'Finding the right words is often the hardest part. Here is a simple way to structure the wording, over 40 examples for different people and places, and short phrases to finish with. When you have a few words, design it online or send them to us on WhatsApp and we’ll lay it out for you.',
-    image: '/site-images/merchant-photo/aged-brass-210x148-rect-plaque.webp',
+    image: '/site-images/catalogue-photo/aged-brass-210x148-rect-plaque.webp',
     relatedProductSlug: 'memorial-plaques',
     proofCta: 'Start a memorial plaque proof',
     sections: [],
@@ -668,7 +668,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     seoTitle: 'Plaque Sizes & Prices UK | Brass & Stainless Steel Plaques | InstaPlaque',
     seoDescription: 'Compare every plaque size and finish with photos and prices: bench plaques, A5, A4, 300 × 200 mm, 400 × 300 mm, ovals and circles. UK delivery included.',
     heroCopy: 'Every standard plaque we make, in one place: bench plaques from 150 × 50 mm up to 400 × 300 mm wall plaques, ovals and circles, in six brass and stainless steel finishes, with or without wood backing. Each is shown with its own example wording. Need a size that isn’t here? Message us on WhatsApp and we’ll make it.',
-    image: '/site-images/merchant-photo/polished-brass-297x210-rect-plaque.webp',
+    image: '/site-images/catalogue-photo/polished-brass-297x210-rect-plaque.webp',
     relatedProductSlug: 'bench-plaques',
     proofCta: 'Start a plaque proof',
     sections: [
@@ -1114,7 +1114,7 @@ export const merchantProducts: ProductFamily[] = merchantOffers.map(item => cata
   image: item.image, imageKind: item.imageKind as 'ai' | 'render', merchantOffer: true,
   // Realistic photos made by scripts/generate-merchant-photos.mjs (owner msg 5231); the two
   // offers that already use a photo-style image keep it.
-  photo: item.imageKind === 'render' ? `/site-images/merchant-photo/${item.slug}.webp` : undefined,
+  photo: item.imageKind === 'render' ? `/site-images/catalogue-photo/${item.slug}.webp` : undefined,
   merchantMaterial: item.label, productionDays: item.productionDays,
   description: item.description, seoIntro: item.description, seoTitle: `${item.title} UK | InstaPlaque`,
   seoDescription: `${item.size} ${item.label.toLowerCase()} plaque${item.preset.wood ? ` with ${item.preset.woodTone} wood backing` : ''}. Add your wording, check a free proof and order with UK delivery included.`,

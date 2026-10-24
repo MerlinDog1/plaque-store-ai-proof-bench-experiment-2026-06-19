@@ -1,7 +1,7 @@
 """Publish the Codex catalogue photos and garden scenes made in output/catalogue-wording (owner msgs
 5302 and 5736: each plaque with its own wording; tree-planting scenes with invented people).
 
-python3 scripts/publish-codex-photos.py photos   public/site-images/merchant-photo/<slug>.webp + -600.webp
+python3 scripts/publish-codex-photos.py photos   public/site-images/catalogue-photo/<slug>.webp + -600.webp
 python3 scripts/publish-codex-photos.py scenes   public/site-images/scenes/<slug>.webp + -900.webp
 python3 scripts/publish-codex-photos.py thumbs   public/site-images/merchant/thumbs/<slug>.webp (flat renders, 160 px)
 
@@ -11,6 +11,7 @@ IPTC DigitalSourceType trainedAlgorithmicMedia (metadata only, no visible label:
 """
 import json
 import os
+import shutil
 import subprocess
 import sys
 
@@ -18,7 +19,10 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORK = os.path.join(ROOT, 'output/catalogue-wording')
-PHOTOS = os.path.join(ROOT, 'public/site-images/merchant-photo')
+# A new folder, not the old merchant-photo one: phones and Google keep same-name copies of redrawn
+# images, so the new photos get new URLs (24 Oct 2026).
+PHOTOS = os.path.join(ROOT, 'public/site-images/catalogue-photo')
+OLD_PHOTOS = os.path.join(ROOT, 'public/site-images/merchant-photo')
 SCENES = os.path.join(ROOT, 'public/site-images/scenes')
 RENDERS = os.path.join(ROOT, 'public/site-images/merchant')
 AI = 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia'
@@ -68,6 +72,9 @@ def photos():
     tag(written)
     wording = [item['slug'] for item in read('wording.json')]
     missing = [slug for slug in wording if slug not in chosen]
+    for slug in missing:  # carry the earlier photo over to the new folder so the page never breaks
+        for name in (f'{slug}.webp', f'{slug}-600.webp'):
+            shutil.copy2(os.path.join(OLD_PHOTOS, name), os.path.join(PHOTOS, name))
     print(f'published {len(chosen)} photos ({sum(os.path.getsize(p) for p in written) / 1048576:.1f} MiB); keeping the old photo for: {missing}')
 
 

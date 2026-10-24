@@ -14,7 +14,7 @@ const {chromium}=require('playwright');const fs=require('node:fs');
    await p.waitForFunction(()=>document.querySelector('.shop-product-hero img')?.complete,null,{timeout:20000});
    const actual=Number((await p.locator('.shop-product-price').innerText()).replace(/[^\d.]/g,''));if(actual!==o.price)throw Error('Page price '+o.slug);
    // Catalogue photo first; the feed image stays on the page as the second gallery image.
-   const img=p.locator('.shop-product-hero figure > img').first();const photo=o.imageKind==='render'?`/site-images/merchant-photo/${o.slug}.webp`:o.image;
+   const img=p.locator('.shop-product-hero figure > img').first();const photo=o.imageKind==='render'?`/site-images/catalogue-photo/${o.slug}.webp`:o.image;
    if(await img.getAttribute('src')!==photo)throw Error('Image mismatch '+o.slug);
    if(o.imageKind==='render'&&!await p.locator(`.shop-product-hero .shop-product-thumbs img[src="${o.image}"]`).count())throw Error('Feed image not on page '+o.slug);
    // With srcset, naturalWidth is scaled by sizes; measure the pixels of the file the browser chose.
