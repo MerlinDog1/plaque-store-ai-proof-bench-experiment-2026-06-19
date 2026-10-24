@@ -4,8 +4,12 @@
 
 - **Why:** in msg 5762 the owner said several of the overnight tree scenes "make zero sense", and asked for the Gemini key and the Nicola order's oak board and black steel ground stake in every photo.
 - **What changed:** ten new photos in `public/site-images/tree-scenes/` (the old `scenes/` folder is removed). Each shows an A5 plate with four caps on a 235 × 173 mm oak board and one 30 mm square black stake at the foot of the tree, at true scale. The tree and garden captions, the tree page hero, the fixing text and FAQ, the sitemap images and `llms.txt` are updated to match.
-- **Branch:** `codex/instaplaque-tree-scenes-20261024`.
+- **Branch:** `codex/instaplaque-tree-scenes-20261024` (`8ff4088`).
 - **Spend:** about $1.90 on the Gemini key.
+- **Live** at 06:09 UTC as `dpl_GQrPSjbByYpZxUENobdgXkWXgN5F` (instaplaque-1jey5msee). The Vercel build ran every postbuild check, and the staged copy was checked with `vercel curl` before it was promoted.
+  - `verify_live.py` with `BUNDLE=index-DqxGpN0l.js` passes: 175 product pages, and 1,061 linked photos, images and PDFs (including the 21 tree-scene files) match the repository.
+  - No page links to `site-images/scenes/`.
+- **Rollback:** `vercel promote dpl_8Rbi8zC7Wg9w1aQqz5qKCKxgeWjb --yes --scope dullaghan31-3959s-projects`. That is the overnight release with the old scenes.
 - **More:** see [docs/tree-scenes-2026-10-24.md](docs/tree-scenes-2026-10-24.md).
 
 ## Overnight catalogue and contact upgrade: LIVE — 24 October 2026, 05:30 UTC
