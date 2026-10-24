@@ -13,6 +13,10 @@
   - `verify_live.py` (`BUNDLE=index-C4Pag9-L.js`) passes: 175 product pages and 1,061 assets.
   - Live screenshots on desktop and phone were sent to the owner.
 - **Rollback:** `vercel promote dpl_3VdWJAfa8gA3nEUmBXg9BbcDJuH5 --yes --scope dullaghan31-3959s-projects`.
+- **Caption removed** at about 09:51 UTC. In msg 5855 the owner said "Remove this caption" about "A real etched plaque, photographed up close." The photo's alt text is kept, and the unused figcaption CSS is removed.
+  - Commit `e66f790`, live as `dpl_5ERTMmCmnWGU4rG2U69m4zSqef74` (instaplaque-njyg1goun).
+  - Checks: the staged copy had no caption and an intact section; the live page has no caption; a live phone screenshot shows 0 figcaptions; `verify_live.py` (`BUNDLE=index-D1Cs1H2A.js`) passes.
+  - Rollback to the version with the caption: `vercel promote dpl_iWG2pjpuC3iToJE8HyUM7cGvJ5k4 --yes --scope dullaghan31-3959s-projects`.
 
 ## Tree close-ups remade with the designer's built-in realistic preview — 24 October 2026, about 07:10 UTC
 
