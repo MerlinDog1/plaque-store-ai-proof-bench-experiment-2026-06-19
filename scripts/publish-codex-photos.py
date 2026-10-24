@@ -4,8 +4,8 @@
 python3 scripts/publish-codex-photos.py photos   public/site-images/catalogue-photo/<slug>.webp + -600.webp
 python3 scripts/publish-codex-photos.py scenes   public/site-images/scenes/<slug>.webp + -900.webp
 python3 scripts/publish-codex-photos.py thumbs   public/site-images/merchant/thumbs/<slug>.webp (flat renders, 160 px)
-python3 scripts/publish-codex-photos.py tree ACCEPTED.json
-                                                 public/site-images/tree-scenes/<slug>.webp + -900.webp + -sq.webp
+python3 scripts/publish-codex-photos.py tree ACCEPTED.json [FOLDER]
+                                                 public/site-images/<FOLDER, default tree-plaques>/<slug>.webp + -900.webp + -sq.webp
 
 Only photos accepted in codex-review.json (or listed in scenes-accepted.json) are published; any
 other offer keeps its existing photo, and the script lists them. Every published photo carries
@@ -26,9 +26,10 @@ WORK = os.path.join(ROOT, 'output/catalogue-wording')
 PHOTOS = os.path.join(ROOT, 'public/site-images/catalogue-photo')
 OLD_PHOTOS = os.path.join(ROOT, 'public/site-images/merchant-photo')  # removed 24 Oct once all 173 were new
 SCENES = os.path.join(ROOT, 'public/site-images/scenes')  # removed 24 Oct once the tree scenes replaced them
-# Tree scenes redone on the Gemini key with the Nicola-order mount (owner msg 5762, 24 Oct 2026); a new folder so
-# phones and Google fetch them fresh.
-TREE_SCENES = os.path.join(ROOT, 'public/site-images/tree-scenes')
+# Tree photos on the Gemini key with the Nicola-order mount (owner msg 5762, 24 Oct 2026), then as close-ups with no
+# people (msg 5778). Each redo gets a new folder so phones and Google fetch it fresh: tree-scenes/ was replaced by
+# tree-plaques/.
+TREE_FOLDER = 'tree-plaques'
 RENDERS = os.path.join(ROOT, 'public/site-images/merchant')
 AI = 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia'
 # The five Codex samples the owner saw on 21 Oct, made before the queue existed.
@@ -104,9 +105,10 @@ def scenes():
     print(f'published {len(written) // 3} scenes')
 
 
-def tree(accepted_path):
-    """Publish the chosen tree scenes. ACCEPTED.json maps slug -> {"file": absolute path, "crop_x": 0..1}; crop_x
+def tree(accepted_path, folder=TREE_FOLDER):
+    """Publish the chosen tree photos. ACCEPTED.json maps slug -> {"file": absolute path, "crop_x": 0..1}; crop_x
     centres the square crop (the tree page hero and share image)."""
+    TREE_SCENES = os.path.join(ROOT, 'public/site-images', folder)
     os.makedirs(TREE_SCENES, exist_ok=True)
     with open(accepted_path) as f:
         accepted = json.load(f)
@@ -131,7 +133,7 @@ def tree(accepted_path):
         im.crop((left, 0, left + h, h)).resize((1200, 1200), Image.LANCZOS).save(out, 'WEBP', quality=82, method=6)
         written.append(out)
     tag(written)
-    print(f'published {len(written) // 3} tree scenes')
+    print(f'published {len(written) // 3} tree photos to {TREE_SCENES}')
 
 
 def thumbs():
@@ -147,6 +149,6 @@ def thumbs():
 
 if __name__ == '__main__':
     if sys.argv[1] == 'tree':
-        tree(sys.argv[2])
+        tree(*sys.argv[2:4])
     else:
         {'photos': photos, 'scenes': scenes, 'thumbs': thumbs}[sys.argv[1]]()

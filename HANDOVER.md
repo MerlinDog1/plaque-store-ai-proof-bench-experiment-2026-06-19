@@ -1,5 +1,15 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Tree page photos as close-ups — 24 October 2026, about 06:40 UTC
+
+- **Why:** at 06:15 (msg 5778) the owner sent the Nicola proof illustration and said: "Just have them all be regular close ups like this, don't need the whole scene around it".
+- **What changed:**
+  - Ten close-up photos with no people, in `public/site-images/tree-plaques/memorial-tree-plaque-<tree>.webp`.
+  - Each shows its A5 plate on the oak board and black steel stake, filling about half the frame, with the young tree beside it.
+  - The `tree-scenes/` photos from the redo below are removed. The tree page hero, the tree and garden captions and alt text, and the sitemap image entries are updated.
+- **Spend:** about $1.45 on the Gemini key.
+- **More:** see [docs/tree-scenes-2026-10-24.md](docs/tree-scenes-2026-10-24.md).
+
 ## Tree page photos redone on the Gemini key — 24 October 2026
 
 - **Why:** in msg 5762 the owner said several of the overnight tree scenes "make zero sense", and asked for the Gemini key and the Nicola order's oak board and black steel ground stake in every photo.

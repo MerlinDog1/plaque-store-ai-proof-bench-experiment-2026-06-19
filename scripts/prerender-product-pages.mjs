@@ -148,7 +148,7 @@ const landingPages = [
     slug: 'tree-memorial-plaques',
     title: 'Memorial Tree Plaques UK | Engraved Tree Dedication Plaques | InstaPlaque',
     description: 'Personalised memorial tree plaques in brass or stainless steel, on an oak board and black steel ground stake beside the tree.',
-    image: '/site-images/tree-scenes/tree-01-family-cherry-sq.webp',
+    image: '/site-images/tree-plaques/memorial-tree-plaque-cherry-sq.webp',
     pageName: 'Memorial tree plaques',
     faqs: [],
     relatedSearches: ['memorial tree plaques', 'tree dedication plaques', 'memorial plaque for a tree', 'tree planting memorial plaque'],

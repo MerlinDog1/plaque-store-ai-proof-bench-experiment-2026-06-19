@@ -1,5 +1,22 @@
 # Tree page photos redone on the Gemini key — 24 October 2026
 
+## Update, about 06:40 UTC: close-ups, no people
+
+- **Request:** at 06:15 (msg 5778) the owner sent the Nicola proof's illustration and said: "Just have them all be regular close ups like this, don't need the whole scene around it".
+- **What changed:** the ten photos are now close product shots in that style.
+  - The plaque on its oak board and black steel stake fills about half the frame, the young tree's trunk (with tie and support stake) is beside it, and the garden behind is softly blurred. There are no people.
+  - Each keeps its own wording, finish and border.
+- **How they were made:**
+  - The same pipeline and model (Nano Banana 2.1 on the Gemini key), with `SCENES_FILE=tree-closeups.json` and the close-up brief in `gen_scenes.py` (`prompt_closeup`).
+  - Two versions of each, plus two more of the oak, which came out too wide. The largest, cleanest one was chosen.
+  - The checker read every one as exact, and each choice was checked by eye at full resolution.
+  - This round cost about $1.45, about $3.30 for both rounds together.
+- **Where they are:** `public/site-images/tree-plaques/memorial-tree-plaque-<tree>.webp` (with `-900` and `-sq`). The `tree-scenes/` folder from the earlier redo is removed.
+  - The tree page hero and share image is `memorial-tree-plaque-cherry-sq.webp`.
+  - The captions, alt text and sitemap image titles describe the close-ups.
+
+The rest of this note covers the earlier redo, with people, that these close-ups replace.
+
 ## Request
 
 The owner's msg 5762 (05:41 UTC), about https://instaplaque.co.uk/tree-memorial-plaques: "Use gemini key for these. You have a bunch that make zero sense. Use always the same backing board stake combo as nicola order".
