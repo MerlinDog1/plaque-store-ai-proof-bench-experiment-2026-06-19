@@ -1,5 +1,23 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Overnight catalogue and contact upgrade: STAGED, not live — 24 October 2026, about 02:00 UTC
+
+- **What it is:** the owner's msg 5736 overnight work: 173 new catalogue photos with their own wording (22 with portraits), 10 tree and garden scenes, per-product flat images and sample PDFs, per-product copy and questions, the WhatsApp "we'll make it" band, and the new tree, sizes and wording-guide pages. See [docs/overnight-catalogue-2026-10-24.md](docs/overnight-catalogue-2026-10-24.md).
+- **Branch:** `codex/instaplaque-overnight-20261023`, pushed. It is based on `b0f2970`, which contains the live `cfa4e94`.
+- **Checks:** the local build, all postbuild checks and `tsc --noEmit` pass. `check-merchant-browser.cjs` passes 16 desktop and mobile checks on 12 representative pages. Phone screenshots of the home, tree, sizes, wording and two product pages show no page errors.
+- **Candidate:** `dpl_8Rbi8zC7Wg9w1aQqz5qKCKxgeWjb` (instaplaque-12cb89mx3), deployed with `--prod --skip-domain`. The Vercel build ran every postbuild check.
+  - `vercel curl` shows its `index-Eh3SouRG.js` is byte-identical to the local dist.
+  - The checked photo and PDF match the repository copies.
+  - The feed has 175 items, with `?v=2` image links and `catalogue-photo` additional images.
+  - `sitemap-products.xml` lists 175 URLs. There is no ALEX MORGAN on the checked pages.
+- **Live is unchanged:** `dpl_5gu3AbcGzKWFSYNkZws7Cz8SZ9Wd`. Before msg 5736 the owner was told "You'll see it before it goes live", so promotion waits for their go.
+- **To release:**
+  1. `vercel promote dpl_8Rbi8zC7Wg9w1aQqz5qKCKxgeWjb --yes --scope dullaghan31-3959s-projects`.
+  2. Verify the live alias.
+  3. Run `python3 -I /home/coding-agent/workspace/output/instaplaque-google-visibility-tools/post_release_submit.py`. It submits both GSC sitemaps, asks Merchant Center to fetch the feed, and pings IndexNow.
+  4. Create the paused search campaign (`build-overnight-campaigns.py search apply`).
+- **Rollback:** `vercel promote dpl_5gu3AbcGzKWFSYNkZws7Cz8SZ9Wd`.
+
 ## "Design on WhatsApp" buttons — 23 October 2026
 
 - **Label:** the owner chose "Design on WhatsApp" over "Chat on WhatsApp" (msg 5654). It now pairs with "Design online". The change covers all five WhatsApp buttons in `components/Shopfront.tsx`: the home hero, the design-service section, the home closing, the product hero and the product closing. The sticky mobile bar still says "WhatsApp".
