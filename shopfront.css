@@ -1277,7 +1277,7 @@
     aspect-ratio: 16 / 9;
     object-fit: cover;
   }
-  .shop-hero-route span {
+  .shop-hero-route > span {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
@@ -2075,5 +2075,115 @@
   .shop-quality-points {
     grid-template-columns: minmax(0, 1fr);
     gap: 20px;
+  }
+}
+
+/* Homepage tidy (owner msg 5860): each thing once. Phones get the category tiles in the hero, so the
+   desktop grid and the hero's separate starting-price and how-it-works lines are hidden there. */
+@media (max-width: 720px) {
+  .shopfront .shop-home-collections,
+  .shopfront .shop-hero:has(.shop-hero-routes) .shop-hero-price,
+  .shopfront .shop-hero:has(.shop-hero-routes) .shop-hero-how {
+    display: none;
+  }
+}
+.shopfront .shop-hero-routes-more a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The two ways to order, side by side, replacing three overlapping sections. */
+.shop-ways {
+  border-top: 1px solid var(--shop-line);
+}
+.shop-ways-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+.shop-way {
+  display: flex;
+  flex-direction: column;
+  padding: 34px 34px 30px;
+  background: #fff;
+  border: 1px solid var(--shop-line);
+}
+.shop-way-whatsapp {
+  background: #e9eadf;
+  border-color: #e9eadf;
+}
+.shopfront .shop-way h3 {
+  margin-bottom: 22px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  color: var(--shop-ink);
+}
+.shop-way ol {
+  list-style: none;
+  counter-reset: way;
+  display: grid;
+  gap: 16px;
+  flex: 1;
+  margin: 0 0 26px;
+  padding: 0;
+}
+.shop-way li {
+  counter-increment: way;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  column-gap: 6px;
+}
+.shop-way li::before {
+  content: "0" counter(way);
+  grid-row: span 2;
+  color: #8a6232;
+  font: italic 23px/1.15 Georgia, serif;
+}
+.shop-way li strong,
+.shop-way li span {
+  grid-column: 2;
+}
+.shop-way li strong {
+  font-size: 16px;
+  line-height: 1.4;
+  color: #20382e;
+}
+.shop-way li span {
+  margin-top: 3px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--shop-muted);
+}
+.shopfront .shop-way .shop-design-service-actions {
+  margin: 0;
+}
+.shopfront .shop-ways-anything {
+  max-width: 900px;
+  margin-top: 28px;
+  font-size: 15px;
+  line-height: 1.65;
+}
+.shopfront .shop-ways-anything strong {
+  color: var(--shop-ink);
+}
+.shopfront .shop-ways-anything a {
+  white-space: nowrap;
+  color: var(--shop-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (max-width: 720px) {
+  .shop-ways-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .shop-way {
+    padding: 26px 22px 24px;
+  }
+  .shopfront .shop-way h3 {
+    font-size: 24px;
   }
 }

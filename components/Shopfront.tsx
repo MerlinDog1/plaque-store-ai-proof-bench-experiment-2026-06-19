@@ -150,9 +150,11 @@ function DesignLink({
   );
 }
 
+// Desktop category grid. Phones show the same four as photo tiles under the home headline
+// (HeroRoutes), so this section is hidden there rather than shown twice (owner msg 5860).
 export function ShopCollections() {
   return (
-    <section className="shop-section" id="products">
+    <section className="shop-section shop-home-collections" id="products">
       <div className="shop-section-heading">
         <div>
           <p className="shop-kicker">Choose by occasion</p>
@@ -434,15 +436,65 @@ function HeroRoutes() {
           return (
             <a className="shop-hero-route" href={`/${collection.slug}`} key={collection.slug}>
               <img src={routeThumbs[collection.slug] || collection.image} alt="" width="480" height="320" />
-              <span><strong>{title}</strong><small>{product.startingFrom}</small></span>
+              <span><strong>{title}</strong><small><TrackedPrice value={displayedPriceValue(product.startingFrom)} product={product.slug}>{product.startingFrom}</TrackedPrice></small></span>
             </a>
           );
         })}
       </div>
       <p className="shop-hero-routes-more">
-        Something else? <ContactLink channel="whatsapp" placement="hero" subject="a plaque">WhatsApp us your idea</ContactLink>
+        Something else? <ContactLink channel="whatsapp" placement="hero" subject="a plaque">WhatsApp us your idea</ContactLink>, or <a href="/plaque-sizes">see every size and price</a>.
       </p>
     </nav>
+  );
+}
+
+// How to order, in one place (owner msg 5860, 24 Oct 2026: the homepage repeated itself). It replaces three
+// homepage sections that each explained the same thing: designing online ("Your words. Your approval."),
+// "Want us to take care of the design?" (msg 5174) and "Tell us what you want. We'll make it." (msg 5736).
+// The two routes sit side by side, so WhatsApp is as prominent as the designer (msg 5137).
+function HomeWays({ onStartDesign, onRequestDesign }: { onStartDesign?: () => void; onRequestDesign?: () => void }) {
+  return (
+    <section className="shop-section shop-ways" id="how-it-works" aria-labelledby="ways-heading">
+      <div className="shop-section-heading">
+        <div>
+          <p className="shop-kicker">Two ways to make your plaque</p>
+          <h2 id="ways-heading">Your words. Your approval.</h2>
+        </div>
+        <a className="shop-text-link" href="/how-it-works">How it works ↗</a>
+      </div>
+      <div className="shop-ways-grid">
+        <article className="shop-way">
+          <h3>Design it yourself, online</h3>
+          <ol>
+            <li><strong>Choose your plaque</strong><span>Size, metal and fixings, with the price including engraving and UK delivery as you go.</span></li>
+            <li><strong>Add your words</strong><span>Adjust the layout, then download a free proof PDF to check or share.</span></li>
+            <li><strong>Check, then order</strong><span>Approve the layout and pay securely. We make it after that.</span></li>
+          </ol>
+          <div className="shop-design-service-actions">
+            <DesignLink onStart={onStartDesign}>Design online</DesignLink>
+          </div>
+        </article>
+        <article className="shop-way shop-way-whatsapp">
+          <h3>Want us to take care of the design?</h3>
+          <ol>
+            <li><strong>Tell us your idea</strong><span>Your wording, a photo of where it’s going, or a picture of something you like.</span></li>
+            <li><strong>We design it</strong><span>Your proof within 3 working hours, by WhatsApp or email.</span></li>
+            <li><strong>Approve, then pay</strong><span>Ask for changes until it’s right. No obligation.</span></li>
+          </ol>
+          <div className="shop-design-service-actions">
+            <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
+              <WhatsAppIcon /> Design on WhatsApp
+            </ContactLink>
+            <a href="/design-request" className="shop-text-link" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>
+          </div>
+        </article>
+      </div>
+      <p className="shop-ways-anything">
+        <strong>Can’t see exactly what you need? Tell us what you want. We’ll make it.</strong>{' '}
+        Almost any size, shape or wording: memorials, tree and garden dedications, house names, awards, logos, and portraits engraved from your own photos.{' '}
+        <ContactLink channel="whatsapp" placement="page" subject="a custom plaque">Message us on WhatsApp ↗</ContactLink>
+      </p>
+    </section>
   );
 }
 
@@ -502,20 +554,10 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           </figcaption>
         </figure>
       </section>
-      <div className="shop-reassurance">
-        <span>
-          01 <strong>Made to your wording</strong>
-        </span>
-        <span>
-          02 <strong>Approve before production</strong>
-        </span>
-        <span>
-          03 <strong>UK delivery included</strong>
-        </span>
-      </div>
-      <ShopProcess />
+      {/* Owner msg 5860 ("This like repeats on the homepage"): each thing once. Categories, then the two
+          ways to order, then quality and metals. */}
       <ShopCollections />
-      {/* How the plaques are made, then the metals, as one quality and material block (owner msg 5843). */}
+      <HomeWays onStartDesign={onStartDesign} onRequestDesign={onRequestDesign} />
       <HomeQualitySection />
       <section className="shop-section shop-materials">
         <div>
@@ -555,32 +597,10 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           </figure>
         </div>
       </section>
-      <section className="shop-section shop-design-service" aria-labelledby="design-service-heading">
-        <div>
-          <p className="shop-kicker">A little help, from real people</p>
-          <h2 id="design-service-heading">Want us to take care of the design?</h2>
-          {/* WhatsApp first, the brief form second, to match the hero (owner msg 5174). */}
-          <p>Send us your wording on WhatsApp, or use our design form. We’ll design it for you and send your proof within 3 working hours, for you to review before you pay.</p>
-          <div className="shop-design-service-actions">
-            <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
-              <WhatsAppIcon /> Design on WhatsApp
-            </ContactLink>
-            <a href="/design-request" className="shop-text-link" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>
-          </div>
-          <p className="shop-smallprint">No layout tools to learn. Review your proof, request changes, then approve and pay.</p>
-        </div>
-        <ol className="design-service-steps">
-          <li><span>01</span><div><strong>Tell us your idea</strong><p>Your wording, a photo of where it’s going, or a design you made in ChatGPT.</p></div></li>
-          <li><span>02</span><div><strong>We design it</strong><p>Your proof within 3 working hours, by WhatsApp or email.</p></div></li>
-          <li><span>03</span><div><strong>Approve before you pay</strong><p>Happy with the proof? Follow your payment link.</p></div></li>
-        </ol>
-      </section>
       {/* What a designer-made proof looks like, then the AI and portrait routes (owner msg 5178). */}
       <ProofPdfShowcase id="home-proof" />
       <HomeAiSection />
       <HomePortraitSection />
-
-      <CustomAnything />
       <ShopFaq />
       <section className="shop-closing">
         <p className="shop-kicker">Start with a few words</p>
