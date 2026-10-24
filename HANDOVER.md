@@ -9,6 +9,10 @@
   - The `tree-scenes/` photos from the redo below are removed. The tree page hero, the tree and garden captions and alt text, and the sitemap image entries are updated.
 - **Spend:** about $1.45 on the Gemini key.
 - **More:** see [docs/tree-scenes-2026-10-24.md](docs/tree-scenes-2026-10-24.md).
+- **Live** at 06:29 UTC as `dpl_7kR3o75nbkb5ofso99srcKyf9ZWX` (instaplaque-e90ulyu1o), from `5542845`. The Vercel build ran every postbuild check.
+  - The staged copy was checked with `vercel curl`: 10 close-ups on the tree page and 4 on the garden page, no old photos, no people in the alt text, the photo bytes match, and the share image is the cherry close-up.
+  - `verify_live.py` (`BUNDLE=index-Cwtd2rjz.js`) passes on 175 product pages and 1,061 linked assets. `/site-images/tree-scenes/` returns 404.
+- **Rollback:** `vercel promote dpl_GQrPSjbByYpZxUENobdgXkWXgN5F --yes --scope dullaghan31-3959s-projects`, which brings back the scenes with people.
 
 ## Tree page photos redone on the Gemini key — 24 October 2026
 
