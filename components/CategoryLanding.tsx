@@ -1,16 +1,18 @@
 import React from 'react';
-import { productFamilies, seoLandingPages, type ProductFamily } from '../services/commerce';
+import { merchantProducts, productFamilies, seoLandingPages, type ProductFamily } from '../services/commerce';
+import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
-import { MemorialMaterialLinks, memorialInscriptions } from './MemorialGuide';
+import { offerSizeLabel } from './CatalogueDetails';
 import { DesignLink, ProductPicks } from './Shopfront';
 
-// Category landing sections, phone first. The memorial plaques page is built from them (owner msg 5876,
-// 24 Oct 2026: "make memorial page amazing and then use as yardstick to measure against other pages").
-// 93% of ad visitors were on phones, so the first screens give an in-place photo, the price, both ways to
-// order and photo routes; long guidance folds away. Shared blocks (quality, sample proof, FAQs) are the
-// homepage's own.
+// Category landing sections, phone first. The memorial plaques page was built from them first (owner msg 5876,
+// 24 Oct 2026: "make memorial page amazing and then use as yardstick to measure against other pages"), then every
+// other category page (msg 5927: "bring every other page up to that standard"); the content of each page is in
+// CategoryPages.tsx. 93% of ad visitors were on phones, so the first screens give an in-place photo of the plaque
+// the price is for, the price, both ways to order and photo routes; long guidance folds away. Shared blocks
+// (quality, sample proof, FAQs) are the homepage's own.
 
 /** The page a route leads to and its from-price: landing pages take their related product's price. */
 function startingPrice(slug: string) {
@@ -41,16 +43,19 @@ function HeroPhoto({ image, className }: { image: HeroImage; className: string }
   );
 }
 
-export function CategoryHero({ product, title, note, image, priceNote, trust, onLaunch, onRequestDesign }: {
+export function CategoryHero({ product, title, note, image, price, priceNote, trust, onLaunch, onRequestDesign }: {
   product: ProductFamily;
   title: string;
   note: string;
   image: HeroImage;
+  /** A from-price other than the category's own (the custom page has no standard price; it shows its ovals'). */
+  price?: { label: string; slug: string };
   priceNote: string;
   trust: string[];
   onLaunch?: () => void;
   onRequestDesign?: () => void;
 }) {
+  const shown = price || { label: product.startingFrom, slug: product.slug };
   return (
     <section className="cat-hero">
       <div className="cat-hero-copy">
@@ -60,7 +65,7 @@ export function CategoryHero({ product, title, note, image, priceNote, trust, on
         <HeroPhoto image={image} className="cat-hero-photo-inline" />
         <p className="cat-hero-buy">
           <strong className="shop-product-price">
-            <TrackedPrice value={displayedPriceValue(product.startingFrom)} product={product.slug}>{product.startingFrom}</TrackedPrice>
+            <TrackedPrice value={displayedPriceValue(shown.label)} product={shown.slug}>{shown.label}</TrackedPrice>
           </strong>
           <span>{priceNote}</span>
         </p>
@@ -102,9 +107,9 @@ export function PlaceRoutes({ id, kicker, title, routes, more }: { id?: string; 
   );
 }
 
-export type SizeStep = { slug: string; label: string; widthMm: number; heightMm: number; fits: string };
+export type SizeStep = { slug: string; label: string; widthMm: number; heightMm: number; fits: string; shape?: 'oval' | 'circle' };
 
-export function SizeLadder({ id, kicker, title, intro, sizes, note }: { id?: string; kicker: string; title: string; intro: string; sizes: SizeStep[]; note: React.ReactNode }) {
+export function SizeLadder({ id, kicker, title, intro, sizes, note, more }: { id?: string; kicker: string; title: string; intro: string; sizes: SizeStep[]; note: React.ReactNode; more?: React.ReactNode }) {
   const widest = Math.max(...sizes.map(size => size.widthMm));
   return (
     <section className="shop-section cat-sizes" id={id} aria-labelledby="cat-sizes-heading">
@@ -117,7 +122,7 @@ export function SizeLadder({ id, kicker, title, intro, sizes, note }: { id?: str
             <a href={`/${size.slug}`}>
               {/* Each plate is drawn to scale against the largest size. */}
               <span className="cat-size-stage" aria-hidden="true">
-                <span className="cat-size-plate" style={{ width: `${(size.widthMm / widest) * 100}%`, aspectRatio: `${size.widthMm} / ${size.heightMm}` }} />
+                <span className={size.shape ? `cat-size-plate is-${size.shape}` : 'cat-size-plate'} style={{ width: `${(size.widthMm / widest) * 100}%`, aspectRatio: `${size.widthMm} / ${size.heightMm}` }} />
               </span>
               <span className="cat-size-label">{size.label}</span>
               <span className="cat-size-fits">{size.fits}</span>
@@ -127,6 +132,56 @@ export function SizeLadder({ id, kicker, title, intro, sizes, note }: { id?: str
         ))}
       </ul>
       <p className="shop-smallprint">{note}</p>
+      {more}
+    </section>
+  );
+}
+
+type Offer = (typeof merchantOffers)[number];
+const productPrice = (slug: string) => merchantProducts.find(item => item.slug === slug)?.startingFrom || '';
+
+/** Every catalogue size for the given offers, grouped by finish and folded away: the category page stays short and
+ * still links every exact product page (the brass, stainless and bench categories are their parents). */
+export function SizeLinksFold({ title, offers }: { title: string; offers: Offer[] }) {
+  const groups = new Map<string, Offer[]>();
+  for (const offer of [...offers].sort((a, b) => a.price - b.price)) {
+    const label = `${offer.label}${offer.preset.wood ? ` on ${offer.preset.woodTone === 'dark' ? 'dark wood' : 'light oak'}` : ''}`;
+    groups.set(label, [...(groups.get(label) || []), offer]);
+  }
+  return (
+    <details className="cat-size-links">
+      <summary>{title}<span aria-hidden="true">+</span></summary>
+      <div>
+        {[...groups].map(([label, items]) => (
+          <div key={label}>
+            <h3>{label}</h3>
+            <ul>
+              {items.map(offer => <li key={offer.slug}><a href={`/${offer.slug}`}>{offerSizeLabel(offer)}</a> <span>{productPrice(offer.slug)}</span></li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
+
+export type ExampleItem = { title: string; copy: string; image: string; alt: string };
+
+/** Photos of a plaque type in place, four or five across on computers and a sideways row on phones. */
+export function ExamplesRow({ id, kicker, title, intro, items }: { id?: string; kicker: string; title: string; intro?: string; items: ExampleItem[] }) {
+  return (
+    <section className="shop-section cat-examples" id={id} aria-labelledby="cat-examples-heading">
+      <p className="shop-kicker">{kicker}</p>
+      <h2 id="cat-examples-heading">{title}</h2>
+      {intro && <p className="cat-section-intro">{intro}</p>}
+      <div className="cat-scroll-row cat-examples-row">
+        {items.map(item => (
+          <figure key={item.image}>
+            <img src={item.image} alt={item.alt} width="900" height="600" loading="lazy" decoding="async" />
+            <figcaption><strong>{item.title}</strong> {item.copy}</figcaption>
+          </figure>
+        ))}
+      </div>
     </section>
   );
 }
@@ -246,9 +301,48 @@ export function WordingIdeas({ id, kicker, title, intro, inscriptions, link }: {
   );
 }
 
-const images = '/site-images/memorial';
+export type LandingConfig = {
+  /** Anchor prefix: `${prefix}-places`, -picks, -sizes, -materials, -wording, -questions, -proof (other pages link to
+   * some of them, e.g. /memorial-plaques#memorial-wording). */
+  prefix: string;
+  title: string;
+  note: string;
+  /** Photo files `${base}-{800,1200,1600}.webp`, 4:3. */
+  hero: { base: string; alt: string; caption: React.ReactNode };
+  price?: { label: string; slug: string };
+  priceNote: string;
+  trust?: string[];
+  routes?: { kicker: string; title: string; routes: PlaceRoute[]; more?: React.ReactNode };
+  examples?: { kicker: string; title: string; intro?: string; items: ExampleItem[] };
+  sizes: { kicker?: string; title: string; intro: string; sizes: SizeStep[]; note: React.ReactNode; more?: React.ReactNode };
+  steps?: [string, string][];
+  portraits?: boolean;
+  proofCopy?: string;
+  wording: { kicker?: string; title: string; intro: string; inscriptions: Inscription[]; link?: { href: string; label: string } };
+  guide?: { title: string; copy: string }[];
+  questionsIntro?: string;
+  related?: React.ReactNode;
+};
 
-export function MemorialLanding({ product, faqs, picks, onLaunch, onRequestDesign }: {
+const defaultTrust = ['Made in the UK', 'Infilled by hand', 'Free proof before you pay', 'No account needed'];
+const defaultSteps: [string, string][] = [
+  ['Add your words', 'Design it online, or send us the wording on WhatsApp and we’ll lay it out for you.'],
+  ['Check your free proof', 'Download the proof PDF to share with family, and change anything until it’s right.'],
+  ['Approve, then pay', 'We etch it into solid metal, infill it by hand and deliver it free in the UK.'],
+];
+const memorialImages = '/site-images/memorial';
+// The four tree plaques with portraits drawn by Portraits in Metal's own process (owner msgs 5816, 5830).
+const portraitCards: PortraitExample[] = [
+  { src: `${memorialImages}/portrait-george.webp`, alt: 'Brass memorial plaque with an engraved portrait of George Hartley, on an oak board and stake beside a young tree in autumn', caption: 'George · brass' },
+  { src: `${memorialImages}/portrait-joan.webp`, alt: 'Stainless steel memorial plaque with an engraved portrait of Joan Whitfield and a short poem, beside a cherry tree in blossom', caption: 'Joan · stainless steel, with a poem' },
+  { src: `${memorialImages}/portrait-bramble.webp`, alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the spaniel, on an oak board beside a silver birch', caption: 'Bramble · for a much-loved dog' },
+  { src: `${memorialImages}/portrait-ron-pat.webp`, alt: 'Stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, under an apple tree in blossom', caption: 'Ron & Pat · together again' },
+];
+
+/** One category page: hero, optional photo routes and examples, picks, sizes, how it works, optional portraits,
+ * quality, sample proof, wording ideas, questions with the folded guide, and the closing buttons. */
+export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, onRequestDesign }: {
+  config: LandingConfig;
   product: ProductFamily;
   faqs: { question: string; answer: string }[];
   picks?: { kicker: string; title: string; intro: string; slugs: string[] };
@@ -256,8 +350,8 @@ export function MemorialLanding({ product, faqs, picks, onLaunch, onRequestDesig
   onRequestDesign?: () => void;
 }) {
   const subject = plaqueSubject(product.shortTitle);
-  // The hero shows the plaque the from-price is for, and "Design online" opens on it (owner msg 5906).
-  const heroSlug = 'a5-brushed-steel-personalised-plaque';
+  const id = (name: string) => `${config.prefix}-${name}`;
+  const { hero, routes, examples, sizes, wording } = config;
   return (
     <div className="shopfront cat-page" data-prerendered="true">
       <div className="shop-breadcrumb">
@@ -267,85 +361,54 @@ export function MemorialLanding({ product, faqs, picks, onLaunch, onRequestDesig
       </div>
       <CategoryHero
         product={product}
-        title="Personalised memorial plaques"
-        note={product.heroNote || 'Remember them in your own words.'}
+        title={config.title}
+        note={config.note}
         image={{
-          src: `${images}/memorial-hero-a5-stainless-1200.webp`,
-          srcSet: `${images}/memorial-hero-a5-stainless-800.webp 800w, ${images}/memorial-hero-a5-stainless-1200.webp 1200w, ${images}/memorial-hero-a5-stainless-1600.webp 1600w`,
-          alt: 'Brushed stainless steel memorial plaque reading In loving memory of Margaret Rowley, 1936 to 2023, Loved always, missed every day, on a Cotswold stone garden wall beside pink roses and lavender',
-          caption: <>Shown: A5 brushed stainless steel, the plaque priced below. <a href={`/${heroSlug}`}>See this plaque</a></>,
+          src: `${hero.base}-1200.webp`,
+          srcSet: `${hero.base}-800.webp 800w, ${hero.base}-1200.webp 1200w, ${hero.base}-1600.webp 1600w`,
+          alt: hero.alt,
+          caption: hero.caption,
         }}
-        priceNote="A5 stainless steel, with engraving, fixings and UK delivery"
-        trust={['Made in the UK', 'Infilled by hand', 'Free proof before you pay', 'No account needed']}
+        price={config.price}
+        priceNote={config.priceNote}
+        trust={config.trust || defaultTrust}
         onLaunch={onLaunch}
         onRequestDesign={onRequestDesign}
       />
-      {/* Four distinct settings (owner msg 5906); wall plaques are the hero and the picks below. */}
-      <PlaceRoutes
-        id="memorial-places"
-        kicker="Choose by setting"
-        title="Where will it go?"
-        routes={[
-          { href: '/bench-plaques', title: 'On a bench', image: `${images}/route-bench.webp`, alt: 'Polished brass memorial plaque on a wooden bench, reading Peter John Wilson, please sit awhile, enjoy the view', priceSlug: 'bench-plaques' },
-          { href: '/garden-plaques', title: 'In the garden', image: `${images}/route-garden-stone.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore fixed to a natural stone in a cottage-garden border of roses, lavender and catmint', priceSlug: 'garden-plaques' },
-          { href: '/tree-memorial-plaques', title: 'By a tree', image: `${images}/route-tree.webp`, alt: 'Brass tree memorial plaque for Jim Partridge on an oak board and ground stake beside a cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
-          { href: '/polished-brass-150x50-rect-plaque', title: 'At a grave', image: `${images}/route-grave-cross.webp`, alt: 'Small polished brass memorial plaque for Alice Grant screwed onto the arm of a light oak memorial cross at a grave in a country churchyard, with white and yellow flowers', priceSlug: 'polished-brass-150x50-rect-plaque' },
-        ]}
-        more={<>On a wall, in a church or somewhere else? <ContactLink channel="whatsapp" placement="page" subject={subject}>Ask us on WhatsApp</ContactLink> and we’ll suggest a size and fixings. For a grave, check the cemetery’s rules first.</>}
-      />
-      {picks && <ProductPicks {...picks} id="memorial-picks" className="cat-picks" />}
-      <SizeLadder
-        id="memorial-sizes"
-        kicker="Sizes and prices"
-        title="Choose a size for your words."
-        intro="Measure the space first, then give the words room to breathe. Each plate is drawn to scale."
-        sizes={[
-          { slug: 'bench-plaques', label: '150 × 50 mm', widthMm: 150, heightMm: 50, fits: 'A name and dates, for a bench' },
-          { slug: 'a5-brushed-steel-personalised-plaque', label: 'A5 · 210 × 148 mm', widthMm: 210, heightMm: 148, fits: 'A name, dates and a short tribute' },
-          { slug: 'brushed-stainless-297x210-rect-plaque', label: 'A4 · 297 × 210 mm', widthMm: 297, heightMm: 210, fits: 'A longer tribute or several names' },
-          { slug: 'brushed-stainless-400x300-rect-plaque', label: '400 × 300 mm', widthMm: 400, heightMm: 300, fits: 'A family memorial, a poem or a portrait' },
-        ]}
-        note={<>Prices are for brushed stainless steel without wood backing, including engraving, fixings and UK delivery. Brass, other finishes and wood backing are priced in the designer. <a href="/plaque-sizes">See every size and price</a>.</>}
-      />
+      {routes && <PlaceRoutes id={id('places')} kicker={routes.kicker} title={routes.title} routes={routes.routes} more={routes.more} />}
+      {examples && <ExamplesRow id={id('examples')} kicker={examples.kicker} title={examples.title} intro={examples.intro} items={examples.items} />}
+      {picks && <ProductPicks {...picks} id={id('picks')} className="cat-picks" />}
+      <SizeLadder id={id('sizes')} kicker={sizes.kicker || 'Sizes and prices'} title={sizes.title} intro={sizes.intro} sizes={sizes.sizes} note={sizes.note} more={sizes.more} />
       <OrderSteps
         id="how-it-works"
         kicker="How it works"
         title="Your words. Your approval."
         subject={subject}
-        steps={[
-          ['Add your words', 'Design it online, or send us the wording on WhatsApp and we’ll lay it out for you.'],
-          ['Check your free proof', 'Download the proof PDF to share with family, and change anything until it’s right.'],
-          ['Approve, then pay', 'We etch it into solid metal, infill it by hand and deliver it free in the UK.'],
-        ]}
+        steps={config.steps || defaultSteps}
         onLaunch={onLaunch}
         onRequestDesign={onRequestDesign}
       />
-      <PortraitStrip
+      {config.portraits && <PortraitStrip
         kicker="Add their portrait"
         title="A favourite face, beside their name."
         intro="Send us a photo of a person or a pet. Our Portraits in Metal studio draws it for engraving, with a free proof first."
-        portraits={[
-          { src: `${images}/portrait-george.webp`, alt: 'Brass memorial plaque with an engraved portrait of George Hartley, on an oak board and stake beside a young tree in autumn', caption: 'George · brass' },
-          { src: `${images}/portrait-joan.webp`, alt: 'Stainless steel memorial plaque with an engraved portrait of Joan Whitfield and a short poem, beside a cherry tree in blossom', caption: 'Joan · stainless steel, with a poem' },
-          { src: `${images}/portrait-bramble.webp`, alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the spaniel, on an oak board beside a silver birch', caption: 'Bramble · for a much-loved dog' },
-          { src: `${images}/portrait-ron-pat.webp`, alt: 'Stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, under an apple tree in blossom', caption: 'Ron & Pat · together again' },
-        ]}
+        portraits={portraitCards}
         link={{ href: '/portrait-plaques', label: 'See portrait plaques' }}
-      />
+      />}
       <HomeQualitySection compact />
-      <ProofPdfShowcase id="memorial-proof" heading="Check every word before you pay." compact>
-        <p>Before anything is made, you get a PDF proof with every measurement, the finish and the fixings. Share it with family and agree it together.</p>
+      <ProofPdfShowcase id={id('proof')} heading="Check every word before you pay." compact>
+        <p>{config.proofCopy || 'Before anything is made, you get a PDF proof with every measurement, the finish and the fixings. Share it with family and agree it together.'}</p>
       </ProofPdfShowcase>
       <WordingIdeas
-        id="memorial-wording"
-        kicker="Finding the words"
-        title="Memorial plaque wording ideas."
-        intro="Start with the name as you want it remembered, then dates if you wish and a few words of your own. These examples are starting points: change anything you like."
-        inscriptions={[...memorialInscriptions, { title: 'For a pet', lines: ['Bramble', '2011–2025', 'Our faithful friend,', 'forever by our side'] }]}
-        link={{ href: '/memorial-plaque-wording', label: 'See over 40 more wording ideas' }}
+        id={id('wording')}
+        kicker={wording.kicker || 'Finding the words'}
+        title={wording.title}
+        intro={wording.intro}
+        inscriptions={wording.inscriptions}
+        link={wording.link || { href: '/memorial-plaque-wording', label: 'See over 40 more wording ideas' }}
       />
-      <QuestionsAndGuide id="memorial-questions" guideId="memorial-materials" intro={product.seoIntro} faqs={faqs} guide={product.seoSections || []} subject={subject}>
-        <MemorialMaterialLinks />
+      <QuestionsAndGuide id={id('questions')} guideId={id('materials')} intro={config.questionsIntro ?? product.seoIntro} faqs={faqs} guide={config.guide || product.seoSections || []} subject={subject}>
+        {config.related}
       </QuestionsAndGuide>
       <section className="shop-closing">
         <h2>Put your words in place.</h2>

@@ -25,13 +25,8 @@
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-/* Anchors on the memorial page, linked from other pages (e.g. #memorial-wording). */
-#memorial-places,
-#memorial-picks,
-#memorial-sizes,
-#memorial-materials,
-#memorial-wording,
-#memorial-questions {
+/* Anchors on the category pages, linked from other pages (e.g. /memorial-plaques#memorial-wording). */
+.shopfront.cat-page [id] {
   scroll-margin-top: 24px;
 }
 .shopfront .memorial-material-links {
@@ -2312,6 +2307,12 @@
   border: 1px solid rgba(80, 86, 78, 0.55);
   border-radius: 1px;
 }
+.cat-size-plate.is-oval,
+.cat-size-plate.is-oval::before,
+.cat-size-plate.is-circle,
+.cat-size-plate.is-circle::before {
+  border-radius: 50%;
+}
 /* Three lines of "lettering", so each outline reads as a plaque. */
 .cat-size-plate::after {
   content: "";
@@ -2426,6 +2427,83 @@
   margin-top: 18px;
 }
 
+/* Every catalogue size for a category, folded under the size ladder. */
+.cat-size-links {
+  margin-top: 22px;
+  border-top: 1px solid var(--shop-line);
+  border-bottom: 1px solid var(--shop-line);
+}
+.cat-size-links summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 25px;
+  padding: 16px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--shop-ink);
+  list-style: none;
+  cursor: pointer;
+}
+.cat-size-links summary::-webkit-details-marker {
+  display: none;
+}
+.cat-size-links summary span {
+  flex: none;
+  font-size: 20px;
+  font-weight: 300;
+}
+.cat-size-links[open] summary span {
+  transform: rotate(45deg);
+}
+.cat-size-links > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px 28px;
+  padding: 0 0 18px;
+}
+.shopfront .cat-size-links h3 {
+  margin: 8px 0 6px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.cat-size-links ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.shopfront .cat-size-links a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.cat-size-links li span {
+  color: var(--shop-muted);
+}
+
+/* Photos in place (the tree page): five across on computers, a sideways row on phones. */
+.cat-scroll-row.cat-examples-row {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.shopfront .cat-examples-row img {
+  height: auto;
+  aspect-ratio: 3 / 2;
+  border-radius: 3px;
+  background: #e8e5dc;
+}
+.shopfront .cat-examples-row figcaption {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--shop-muted);
+}
+.shopfront .cat-examples-row figcaption strong {
+  display: block;
+  color: var(--shop-ink);
+}
+
 /* Portraits and wording ideas: four across on computers, a sideways row on phones. */
 .cat-scroll-row {
   display: grid;
@@ -2494,7 +2572,8 @@
   }
   .cat-routes-grid,
   .cat-sizes-list,
-  .cat-scroll-row {
+  .cat-scroll-row,
+  .cat-scroll-row.cat-examples-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

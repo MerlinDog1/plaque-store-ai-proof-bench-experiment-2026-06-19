@@ -45,7 +45,8 @@ for (const offer of merchantOffers) {
   const html = await readFile(`dist/${offer.slug}/index.html`, 'utf8');
   if (offer.imageKind === 'render') {
     const photo = `/site-images/catalogue-photo/${offer.slug}.webp`;
-    assert.ok(html.includes(`src="${photo}"`), `Photo on ${offer.slug}`);
+    // Redrawn photos carry ?v=N (services/commerce.ts), so match the path up to any version.
+    assert.ok(html.includes(`src="${photo}"`) || html.includes(`src="${photo}?v=`), `Photo on ${offer.slug}`);
     for (const file of [photo, photo.replace('.webp', '-600.webp'), offer.image.replace('/merchant/', '/merchant/thumbs/').replace('.jpg', '.webp')]) assert.ok(existsSync(`dist${file}`), `Missing ${file}`);
   }
   assert.ok(html.includes('class="shop-spec-list"') && html.includes(`${offer.productionDays} working days`), `Specification on ${offer.slug}`);

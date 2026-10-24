@@ -1,6 +1,8 @@
 import React from 'react';
 import { ContactLink, MobileContactBar, WhatsAppIcon } from './ContactOptions';
-import { AiConceptPair, ProofPdfShowcase, featureImageVersion, sampleProofPdf } from './FeatureSections';
+import { AiConceptPair, HomeQualitySection, ProofPdfShowcase, featureImageVersion, sampleProofPdf } from './FeatureSections';
+import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
+import { merchantProducts } from '../services/commerce';
 import { ShopFaq } from './Shopfront';
 import { portraitsInMetalLink } from '../services/shopInformation';
 
@@ -117,6 +119,16 @@ const portraitGallery = [
   { file: 'ruby-folded-steel', width: 480, height: 360, title: 'Freestanding', detail: 'Folded brushed steel', alt: 'Freestanding folded stainless steel portrait plaque of Ruby the Siamese cat on a windowsill' },
 ];
 
+// Portrait plaques photographed in place: tree plaques with portraits drawn by Portraits in Metal's own process
+// (owner msgs 5816 and 5830), also shown on the memorial and tree pages.
+const portraitsInPlace = [
+  { src: '/site-images/memorial/portrait-george.webp', alt: 'Brass memorial plaque with an engraved portrait of George Hartley, on an oak board and stake beside a young tree in autumn', caption: 'George · brass, by a young tree' },
+  { src: '/site-images/memorial/portrait-joan.webp', alt: 'Stainless steel memorial plaque with an engraved portrait of Joan Whitfield and a short poem, beside a cherry tree in blossom', caption: 'Joan · stainless steel, with a poem' },
+  { src: '/site-images/memorial/portrait-bramble.webp', alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the spaniel, on an oak board beside a silver birch', caption: 'Bramble · for a much-loved dog' },
+  { src: '/site-images/memorial/portrait-ron-pat.webp', alt: 'Stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, under an apple tree in blossom', caption: 'Ron & Pat · together again' },
+];
+const portraitFrom = merchantProducts.find(item => item.slug === 'a5-brushed-steel-personalised-plaque')?.startingFrom || '£95.50';
+
 export function ShopPortraitPlaques() {
   return (
     <div className="shopfront" data-prerendered="true">
@@ -133,6 +145,13 @@ export function ShopPortraitPlaques() {
           <p className="shop-intro">
             Send us a favourite photo of a person or pet. Using our Portraits in Metal technology, we turn it into
             fine engraving artwork, arrange your words around it and send you a free sketch and proof before you pay.
+          </p>
+          {/* The price on the first screen, like the other category pages (owner msg 5927). */}
+          <p className="cat-hero-buy">
+            <strong className="shop-product-price">
+              <TrackedPrice value={displayedPriceValue(portraitFrom)} product="portrait-plaques">from {portraitFrom}</TrackedPrice>
+            </strong>
+            <span>A5 portrait plaque, with your free sketch, engraving and UK delivery</span>
           </p>
           <div className="shop-hero-choices">
             <ContactLink channel="whatsapp" placement="hero" className="shop-button shop-hero-choice-whatsapp">
@@ -190,6 +209,22 @@ export function ShopPortraitPlaques() {
           Your plaque is drawn from your own photo. <a href={pim('/gallery', 'gallery_link')}>See more portrait designs ↗</a>
         </p>
       </section>
+
+      <section className="shop-section cat-portraits" aria-labelledby="portrait-place-heading">
+        <p className="shop-kicker">In place</p>
+        <h2 id="portrait-place-heading">Portrait plaques beside a memorial tree.</h2>
+        <p className="cat-section-intro">On an oak board and ground stake, a portrait plaque stands beside a tree planted for them. <a href="/tree-memorial-plaques">See memorial tree plaques</a>.</p>
+        <div className="cat-scroll-row cat-portraits-row">
+          {portraitsInPlace.map(card => (
+            <figure key={card.src}>
+              <img src={card.src} alt={card.alt} width="600" height="600" loading="lazy" decoding="async" />
+              <figcaption>{card.caption}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      <HomeQualitySection compact />
 
       <section className="shop-section shop-buying-guide" aria-labelledby="portrait-options-heading">
         <div>

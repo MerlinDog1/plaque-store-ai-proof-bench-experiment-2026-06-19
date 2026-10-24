@@ -14,8 +14,9 @@ const {chromium}=require('playwright');const fs=require('node:fs');
    await p.waitForFunction(()=>document.querySelector('.shop-product-hero img')?.complete,null,{timeout:20000});
    const actual=Number((await p.locator('.shop-product-price').innerText()).replace(/[^\d.]/g,''));if(actual!==o.price)throw Error('Page price '+o.slug);
    // Catalogue photo first; the feed image stays on the page as the second gallery image.
-   const img=p.locator('.shop-product-hero figure > img').first();const photo=o.imageKind==='render'?`/site-images/catalogue-photo/${o.slug}.webp`:o.image;
-   if(await img.getAttribute('src')!==photo)throw Error('Image mismatch '+o.slug);
+   const img=p.locator('.shop-product-hero figure > img').first();const catalogue=`/site-images/catalogue-photo/${o.slug}.webp`;const photo=o.imageKind==='render'||require('fs').existsSync('public'+catalogue)?catalogue:o.image;
+   // Redrawn photos carry ?v=N (services/commerce.ts).
+   if((await img.getAttribute('src')).split('?')[0]!==photo)throw Error('Image mismatch '+o.slug);
    if(o.imageKind==='render'&&!await p.locator(`.shop-product-hero .shop-product-thumbs img[src="${o.image}"]`).count())throw Error('Feed image not on page '+o.slug);
    // With srcset, naturalWidth is scaled by sizes; measure the pixels of the file the browser chose.
    if(!await img.evaluate(async i=>{const f=new Image();f.src=i.currentSrc||i.src;await f.decode();return f.naturalWidth>=500}))throw Error('Small/broken image '+o.slug);

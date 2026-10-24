@@ -369,6 +369,7 @@ export const productFamilies: ProductFamily[] = [
     relatedSearches: ['brass plaques UK', 'engraved brass plaques', 'custom brass plaques', 'brass memorial plaques'],
     bestFor: ['Traditional memorial plaques', 'Presentation and opening plaques', 'Warm gold-toned finish', 'Optional aged brass patina'],
     proofPrompt: 'Presented to\nDavid Morgan\nIn recognition of 25 years of service\n2026',
+    // Opens on the plaque the page's from-price is for: A5 brushed brass without wood backing (owner msg 5927).
     preset: {
       width: 210,
       height: 148,
@@ -377,9 +378,9 @@ export const productFamilies: ProductFamily[] = [
       fixing: Fixing.Caps,
       border: true,
       borderStyle: BorderStyle.Double,
-      wood: true,
-      woodTone: 'dark',
-      woodEdge: 'bevel',
+      wood: false,
+      woodTone: 'light',
+      woodEdge: 'square',
       designStyle: DesignStyle.Auto,
       textColor: TextColor.Black,
       cornerRadius: 0,
@@ -520,6 +521,8 @@ export const productFamilies: ProductFamily[] = [
     relatedSearches: ['A4 plaques UK', 'large memorial plaques', 'presentation plaques', 'opening plaques'],
     bestFor: ['Longer tribute wording', 'Presentation plaques', 'Opening plaques', 'Prominent wall displays'],
     proofPrompt: 'Opened by\nThe Rt Hon. Eleanor Hart MP\non 18 June 2026\nRiverside Community Centre',
+    // Opens on the plaque the opening page's from-price is for: A4 brushed stainless steel without wood backing
+    // (owner msg 5927).
     preset: {
       width: 297,
       height: 210,
@@ -528,9 +531,9 @@ export const productFamilies: ProductFamily[] = [
       fixing: Fixing.Caps,
       border: true,
       borderStyle: BorderStyle.Double,
-      wood: true,
-      woodTone: 'dark',
-      woodEdge: 'bevel',
+      wood: false,
+      woodTone: 'light',
+      woodEdge: 'square',
       designStyle: DesignStyle.Auto,
       textColor: TextColor.Black,
       cornerRadius: 0,
@@ -572,17 +575,19 @@ export const productFamilies: ProductFamily[] = [
     relatedSearches: ['custom plaques UK', 'bespoke plaques', 'oval plaques', 'made to measure plaques'],
     bestFor: ['Up to 600 mm long', 'Oval plaques', 'Circular plaques', 'Special fixing requirements'],
     proofPrompt: 'The Old Mill\nRestored 2026\nIn honour of everyone who brought this place back to life',
+    // Opens on the oval the page's from-price is for: 250 x 150 mm brushed stainless steel (owner msg 5927).
     preset: {
-      width: 400,
-      height: 300,
+      width: 250,
+      height: 150,
       material: Material.BrushedSteel,
-      shape: Shape.Rect,
+      shape: Shape.Oval,
       fixing: Fixing.Caps,
+      fixingHoleCount: 2,
       border: true,
       borderStyle: BorderStyle.Double,
-      wood: true,
+      wood: false,
       woodTone: 'light',
-      woodEdge: 'bevel',
+      woodEdge: 'square',
       designStyle: DesignStyle.Auto,
       textColor: TextColor.Black,
       cornerRadius: 0,
@@ -1111,13 +1116,30 @@ export const materialStories = [
   },
 ];
 
+// Catalogue photos redrawn after launch keep their file name but get ?v=N, so phones and Google fetch the new copy
+// (owner msg 5927, 24 Oct 2026: tree, orchard and hedge plaques shown with no tree, orchard or hedge, a pet's
+// "Here lies" on a house wall). The A5 stainless plaque had only a studio picture; it now has an in-place photo.
+const cataloguePhotoVersions: Record<string, number> = {
+  'brushed-stainless-200x150-rect-plaque': 2,
+  'polished-brass-210x148-rect-plaque': 2,
+  'polished-brass-148x210-rect-plaque': 2,
+  'polished-stainless-210x297-rect-plaque': 2,
+  'aged-brass-297x210-rect-plaque': 2,
+  'orbital-brass-matt-lacquer-200x200-circle-plaque': 2,
+  'polished-brass-200x200-circle-plaque': 2,
+  'a5-brushed-steel-personalised-plaque': 1,
+};
+const cataloguePhotoFor = (slug: string) => `/site-images/catalogue-photo/${slug}.webp${(cataloguePhotoVersions[slug] || 1) > 1 ? `?v=${cataloguePhotoVersions[slug]}` : ''}`;
+/** The 600 px copy of a catalogue photo, keeping any ?v= version. */
+export const photo600 = (photo: string) => photo.replace(/\.webp(?=\?|$)/, '-600.webp');
+
 export const merchantProducts: ProductFamily[] = merchantOffers.map(item => catalogueCopy(item, {
   slug: item.slug, title: item.title, shortTitle: item.materialCue === 'stainless' ? 'Stainless' : 'Brass',
   eyebrow: 'Made to order', materialCue: item.materialCue as ProductFamily['materialCue'],
   image: item.image, imageKind: item.imageKind as 'ai' | 'render', merchantOffer: true,
   // Realistic photos made by scripts/generate-merchant-photos.mjs (owner msg 5231); the two
   // offers that already use a photo-style image keep it.
-  photo: item.imageKind === 'render' ? `/site-images/catalogue-photo/${item.slug}.webp` : undefined,
+  photo: item.imageKind === 'render' || cataloguePhotoVersions[item.slug] ? cataloguePhotoFor(item.slug) : undefined,
   merchantMaterial: item.label, productionDays: item.productionDays,
   description: item.description, seoIntro: item.description, seoTitle: `${item.title} UK | InstaPlaque`,
   seoDescription: `${item.size} ${item.label.toLowerCase()} plaque${item.preset.wood ? ` with ${item.preset.woodTone} wood backing` : ''}. Add your wording, check a free proof and order with UK delivery included.`,
