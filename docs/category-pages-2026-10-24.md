@@ -153,3 +153,44 @@ All new photos come from the designer's built-in realistic preview, as the owner
 - The overnight `verify_live.py` passed: 175 product pages, 1,052 linked assets identical to the repo, feed 175 items (174 with a catalogue photo, now including the A5 stainless plaque), sitemaps, redirects.
 
 **Rollback:** `vercel promote dpl_W46YXp76C9Trjbq2o6rBNbVf8oAF --yes --scope dullaghan31-3959s-projects`.
+
+## Plaques at their true size (owner msg 5959, 17:06 UTC)
+
+The owner's message, about the opening page's top photo: "Scale kinda f'd on this one". The A4 plaque was drawn about three times too big. It covered about ten courses of bricks, and an A4 plaque covers three.
+
+The built-in preview draws plaques two to three times too big against bricks, stones and flowers unless the brief pins the scale down, so every photo from today was checked by counting bricks.
+
+**What reliably works:**
+- **A large or irregular surface:** limestone cladding panels, lime render, a broad stone.
+- **Or the brick count spelled out:** "the same length as one single brick … exactly two courses, not four". Put the camera about 1 m away, with the plaque about a quarter of the frame width.
+- **Or a mount the plaque must fit inside:** an oak post or a cross arm, "with bare oak showing on both sides".
+- **Then check the result by counting bricks.** Tries that only said "keep it true to its size" failed.
+
+**Redrawn:**
+- **Round 1:** live at 17:28 UTC as `dpl_DkxC7z5sFDypn7JEGmUbaGP1rNcd` (commit 9bd31ec).
+  - Opening hero: limestone panels by the glass entrance.
+  - Garden hero: one brick by two courses on painted brick.
+  - Custom hero: the oval on painted brick by the door.
+  - Product photos at `?v=3`:
+    - cherry on render under blossom
+    - Year 6 on an oak post
+    - hedge, with the brick count
+    - orchard
+    - Willow
+- **Round 2:** live at 17:42 UTC as **`dpl_G9QMwFLX9BqKrawZbfiKSEGH2ynX`** (commit 939d8c6, bundle `index-B6_Skf-q.js`).
+  - Brass hero: Fred & Elsie on lime render.
+  - Memorial hero: Margaret Rowley a third of the frame, with life-size roses. The A5 stainless product photo is re-cropped from it, at `?v=2`.
+  - The garden "On a stone" tile.
+  - Class 4 on render.
+  - Tom Henshaw on a broad stone, at `?v=3`.
+- **Files:** heroes and the tile have new file names (`*-v2`) so phones fetch them fresh. The old files are removed.
+- **Cost:** about $4.00 on the Gemini key for these two rounds (most tries kept only one picture). That brings today's category work to about $6.
+
+**Checks after each promote:**
+- the staged app on phone and desktop (no errors, designer prices right)
+- `verify_pages_live.py` and `verify_memorial_live.py` (every asset; new files byte-identical to the repo)
+- the overnight `verify_live.py`
+
+**Rollback:**
+- to round 1: `vercel promote dpl_DkxC7z5sFDypn7JEGmUbaGP1rNcd`
+- to before the scale fix: `dpl_5SYpYyW9MfuuobLTRQCpXmkh7kTC`
