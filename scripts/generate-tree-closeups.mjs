@@ -5,7 +5,8 @@
 // people (msg 5778) and the Nicola-order mount, an oak board on one black steel ground stake (msg 5762).
 // Run with the project's Gemini key, without printing it (from the Vercel-linked projects/instaplaque folder):
 //   vercel env run -e development -- node <repo>/scripts/generate-tree-closeups.mjs WORDING STENCIL_DIR OUT_DIR [slug ...]
-// WORDING entries: { slug, offer, overrides, lines, setting, ground, light, side }.
+// WORDING entries: { slug, offer, overrides, lines, setting, ground, light, side }. An entry may instead give a
+// complete scene `brief` and an `aspectRatio` (default 3:2), e.g. the memorial page hero (owner msg 5876).
 // Env: VERSIONS (default 2 per slug), CONCURRENCY (default 3), IMAGE_SIZE (default 4K, as in the designer).
 import { build } from 'esbuild';
 import fs from 'node:fs';
@@ -62,7 +63,7 @@ async function worker() {
     let file = null;
     let error = '';
     try {
-      const data = await generateRealisticView(stencil, state, { prompt: sceneBrief(item), aspectRatio: '3:2', imageSize });
+      const data = await generateRealisticView(stencil, state, { prompt: item.brief || sceneBrief(item), aspectRatio: item.aspectRatio || '3:2', imageSize });
       if (data) {
         const buffer = Buffer.from(data, 'base64');
         file = `${item.slug}.builtin.v${attempt}.${extension(buffer)}`;

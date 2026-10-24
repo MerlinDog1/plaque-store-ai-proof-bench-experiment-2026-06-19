@@ -1,5 +1,5 @@
 import React from "react";
-import { MemorialSizes, MemorialWording, MemorialMaterialLinks } from './MemorialGuide';
+import { MemorialLanding } from './CategoryLanding';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
@@ -114,7 +114,7 @@ const materialProductImages: Record<string, string> = {
   'stainless-steel-plaques': '/site-images/home-gallery-oval-steel.webp',
 };
 
-function DesignLink({
+export function DesignLink({
   onStart,
   children = "Design your plaque",
   className = "",
@@ -304,11 +304,11 @@ export function CustomAnything({ subject = 'a custom plaque' }: { subject?: stri
 }
 
 /** Photo links to exact catalogue plaques, for the category and landing pages. */
-export function ProductPicks({ slugs, kicker, title, intro }: { slugs: string[]; kicker: string; title: string; intro?: string }) {
+export function ProductPicks({ slugs, kicker, title, intro, id, className }: { slugs: string[]; kicker: string; title: string; intro?: string; id?: string; className?: string }) {
   const items = slugs.map(slug => productFamilies.find(item => item.slug === slug)).filter((item): item is ProductFamily => Boolean(item));
   if (!items.length) return null;
   return (
-    <nav className="shop-section shop-product-picks" aria-label={title}>
+    <nav className={`shop-section shop-product-picks${className ? ` ${className}` : ''}`} id={id} aria-label={title}>
       <p className="shop-kicker">{kicker}</p>
       <h2>{title}</h2>
       {intro && <p>{intro}</p>}
@@ -452,7 +452,8 @@ function HeroRoutes() {
 // homepage sections that each explained the same thing: designing online ("Your words. Your approval."),
 // "Want us to take care of the design?" (msg 5174) and "Tell us what you want. We'll make it." (msg 5736).
 // The two routes sit side by side, so WhatsApp is as prominent as the designer (msg 5137).
-function HomeWays({ onStartDesign, onRequestDesign }: { onStartDesign?: () => void; onRequestDesign?: () => void }) {
+// The memorial page reuses it (CategoryLanding), with its own WhatsApp subject.
+export function HomeWays({ onStartDesign, onRequestDesign, subject = 'a plaque' }: { onStartDesign?: () => void; onRequestDesign?: () => void; subject?: string }) {
   return (
     <section className="shop-section shop-ways" id="how-it-works" aria-labelledby="ways-heading">
       <div className="shop-section-heading">
@@ -482,7 +483,7 @@ function HomeWays({ onStartDesign, onRequestDesign }: { onStartDesign?: () => vo
             <li><strong>Approve, then pay</strong><span>Ask for changes until it’s right. No obligation.</span></li>
           </ol>
           <div className="shop-design-service-actions">
-            <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
+            <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
               <WhatsAppIcon /> Design on WhatsApp
             </ContactLink>
             <a href="/design-request" className="shop-text-link" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>
@@ -678,17 +679,20 @@ export function ShopProduct({
   examples?: SeoLandingPage['examples'];
 }) {
   const collection = collections.find((item) => item.slug === product.slug);
-  const isMemorial = product.slug === 'memorial-plaques';
+  // The FAQ schema in scripts/prerender-product-pages.mjs is built from this same list.
   const faqs = [...product.faqs, ...shopFaqs]
     .filter(
       (item, index, list) =>
         list.findIndex((other) => other.question === item.question) === index,
     )
     .slice(0, 6);
+  // The memorial page is the phone-first category landing (owner msg 5876, 24 Oct 2026).
+  if (product.slug === 'memorial-plaques') {
+    return <MemorialLanding product={product} faqs={faqs} picks={productPicks[product.slug]} onLaunch={onLaunch} onRequestDesign={onRequestDesign} />;
+  }
   const heroImage = product.photo || collection?.image || materialProductImages[product.slug] || product.image;
   const example = product.merchantOffer ? exampleFor(product.slug) : undefined;
-  const heroAlt = isMemorial ? 'Aged brass memorial plaque with a family inscription on dark wood backing'
-    : example ? `${product.title}, engraved with the example wording “${example.lines.slice(0, 3).join(' ')}”${example.portrait ? ' and a portrait' : ''}`
+  const heroAlt = example ? `${product.title}, engraved with the example wording “${example.lines.slice(0, 3).join(' ')}”${example.portrait ? ' and a portrait' : ''}`
     : product.merchantOffer ? `${product.title}, shown with an example inscription` : product.title;
   const photoSmall = product.photo?.replace(/\.webp$/, '-600.webp');
   const heroImages: GalleryImage[] = product.photo
@@ -698,15 +702,10 @@ export function ShopProduct({
         { src: product.image, thumbSrcSet: `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')} 160w, ${product.image} 1500w`, alt: `${product.title}: flat design view`, label: 'Flat design view' },
       ]
     : [{ src: heroImage, alt: heroAlt, label: product.title }];
-  // No AI/illustration labels on product images (owner msg 5231). The memorial photo shows a
-  // dearer configuration than its from-price, so say what is shown (review 21 Oct).
-  const agedA5 = productFamilies.find(item => item.slug === 'aged-brass-210x148-rect-dark-wood-plaque');
-  const steelA5 = productFamilies.find(item => item.slug === 'a5-brushed-steel-personalised-plaque');
+  // No AI/illustration labels on product images (owner msg 5231).
   const heroCaption = product.merchantOffer
     ? 'Shown with an example inscription. Your wording replaces it.'
-    : isMemorial && agedA5 && steelA5
-      ? `Shown: aged brass on dark wood, A5 ${agedA5.startingFrom}. Brushed stainless steel from ${steelA5.startingFrom}.`
-      : 'Finish and optional backing affect the final price.';
+    : 'Finish and optional backing affect the final price.';
   const category = product.merchantOffer ? productCategoryFor(product) : null;
   return (
     <div className="shopfront" data-prerendered="true">
@@ -741,7 +740,6 @@ export function ShopProduct({
             Prefer us to design it? <a href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Have us design it – free proof</a>
           </p>
           <p className="shop-smallprint">
-            {isMemorial && <>Starting price for A5 stainless steel without wood backing. </>}
             Standard engraving, fixings and UK delivery included.
             Extras are shown before checkout.
           </p>
@@ -757,19 +755,10 @@ export function ShopProduct({
           </ul>
         </div>
       </section>
-      {isMemorial && <>
-        <nav className="shop-section memorial-jump-links" aria-label="Memorial plaque buying guide">
-          <a href="#memorial-sizes">Sizes & prices</a>
-          <a href="#memorial-materials">Materials & fitting</a>
-          <a href="#memorial-wording">Wording examples</a>
-          <a href="#memorial-questions">Questions & answers</a>
-        </nav>
-        <MemorialSizes />
-      </>}
-      {product.merchantOffer ? <MerchantProductDetails slug={product.slug} /> : product.seoSections?.length === 0 ? null : <section className="shop-section shop-buying-guide" id={isMemorial ? 'memorial-materials' : undefined}>
+      {product.merchantOffer ? <MerchantProductDetails slug={product.slug} /> : product.seoSections?.length === 0 ? null : <section className="shop-section shop-buying-guide">
         <div>
           <p className="shop-kicker">Size, wording and fitting</p>
-          <h2>{isMemorial ? 'Choose the metal and the setting.' : 'Choose the size and finish.'}</h2>
+          <h2>Choose the size and finish.</h2>
           <a className="shop-text-link" href="/materials">
             Explore the finishes ↗
           </a>
@@ -781,7 +770,6 @@ export function ShopProduct({
               <p>{section.copy}</p>
             </article>
           ))}
-          {isMemorial && <MemorialMaterialLinks />}
         </div>
       </section>}
       {product.slug === 'brass-plaques' && <CatalogueSizeLinks kicker="Sizes and prices" title="Brass plaques by size." materials={['brushed-brass', 'polished-brass', 'orbital-brass-matt-lacquer', 'aged-brass']} />}
@@ -797,17 +785,16 @@ export function ShopProduct({
           })}
         </div>
       </nav>}
-      {isMemorial && <MemorialWording />}
       {examples && examples.length > 0 && <LandingExamples examples={examples} kicker="Ideas from real-life settings" title={product.slug === 'tree-memorial-plaques' ? 'Memorial tree plaques in place.' : 'Garden and tree dedications in place.'} />}
       {productPicks[product.slug] && <ProductPicks {...productPicks[product.slug]} />}
       {product.slug === 'plaque-sizes' && <ShopBySize />}
       {product.slug === 'memorial-plaque-wording' && <WordingLibrary />}
-      {!product.merchantOffer && !['bench-plaques', 'opening-plaques', 'memorial-plaques', 'tree-memorial-plaques'].includes(product.slug) && <ShopProcess />}
+      {!product.merchantOffer && !['bench-plaques', 'opening-plaques', 'tree-memorial-plaques'].includes(product.slug) && <ShopProcess />}
       {['garden-plaques', 'tree-memorial-plaques'].includes(product.slug) && <GardenAdvice />}
       <CustomAnything subject={plaqueSubject(product.shortTitle)} />
       {/* Catalogue pages: wording and fitting help, not the opening-plaque route (review 21 Oct). */}
       <CollectionLinks slug={product.merchantOffer ? 'catalogue' : product.slug} />
-      <div id={isMemorial ? 'memorial-questions' : undefined}><ShopFaq faqs={faqs} /></div>
+      <ShopFaq faqs={faqs} />
       <section className="shop-closing">
         <h2>Put your words in place.</h2>
         <p>Create your layout and see the price before you pay.</p>
