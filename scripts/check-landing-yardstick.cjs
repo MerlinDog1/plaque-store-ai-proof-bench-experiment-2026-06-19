@@ -83,7 +83,7 @@ const SCREEN = 844;
         wording: headings.find(h => /wording|inscription|words/i.test(h) && !/approval/i.test(h)) || null,
         portraits: has('.cat-portraits, .shop-product-portrait, .shop-portrait-home'),
         faq: has('.shop-faq'),
-        foldedGuide: has('.cat-guide'),
+        foldedGuide: has('.cat-guide, .cat-questions'),
         openGuideWords,
         designUsSections,
         internalLinks: [...new Set(links.map(a => a.getAttribute('href')).filter(h => h && h.startsWith('/') && !h.startsWith('//')))].length,

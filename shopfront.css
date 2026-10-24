@@ -2209,12 +2209,6 @@
   margin-top: 20px;
   font-size: 13px;
 }
-.shopfront .cat-hero-intro {
-  max-width: 540px;
-  margin-top: 18px;
-  font-size: 15px;
-  line-height: 1.65;
-}
 .shopfront .cat-section-intro {
   max-width: 720px;
   margin: 14px 0 0;
@@ -2411,41 +2405,25 @@
   text-underline-offset: 3px;
 }
 
-/* Long guidance, folded. */
-.cat-guide {
-  display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
-  gap: 55px;
-  border-top: 1px solid var(--shop-line);
+/* FAQs and the folded buying guide in one list (the .shop-faq look). */
+.shopfront .cat-questions .shop-text-link {
+  margin-top: 18px;
 }
-.cat-guide details {
-  border-bottom: 1px solid var(--shop-line);
+
+/* Compact quality and proof blocks for category pages: titles only, no checklist. */
+.shop-quality-home.is-compact .shop-quality-points {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  margin-top: 22px;
 }
-.cat-guide summary {
-  display: flex;
-  justify-content: space-between;
-  gap: 25px;
-  padding: 20px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--shop-ink);
-  list-style: none;
-  cursor: pointer;
-}
-.cat-guide summary::-webkit-details-marker {
-  display: none;
-}
-.cat-guide summary span {
-  flex: none;
+.shopfront .shop-quality-home.is-compact .shop-quality-points li > span {
   font-size: 20px;
-  font-weight: 300;
 }
-.cat-guide details[open] summary span {
-  transform: rotate(45deg);
-}
-.shopfront .cat-guide details > p {
-  padding: 0 32px 22px 0;
+.shopfront .shop-quality-home.is-compact .shop-quality-points strong {
   font-size: 15px;
+}
+.shopfront .shop-proof-pdf.is-compact .shop-text-link {
+  margin-top: 18px;
 }
 
 /* Portraits and wording ideas: four across on computers, a sideways row on phones. */
@@ -2519,14 +2497,16 @@
   .cat-scroll-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .cat-guide {
-    gap: 32px;
-  }
 }
 @media (max-width: 720px) {
+  /* Shorter page (owner msg 5906): tighter section spacing on phones. */
+  .shopfront.cat-page .shop-section {
+    padding-top: 38px;
+    padding-bottom: 38px;
+  }
   .cat-hero {
     display: block;
-    padding: 0 24px 44px;
+    padding: 0 24px 36px;
   }
   .shopfront .cat-hero h1 {
     font-size: 36px;
@@ -2569,9 +2549,6 @@
   .shopfront .cat-hero-trust {
     margin-top: 16px;
   }
-  .shopfront .cat-hero-intro {
-    font-size: 14px;
-  }
   .shopfront .cat-section-intro {
     font-size: 15px;
   }
@@ -2594,30 +2571,54 @@
     margin-top: 14px;
     font-size: 13px;
   }
-  .shopfront .cat-picks li:nth-child(n + 7) {
+  .shopfront .cat-picks li:nth-child(n + 5) {
     display: none;
   }
+  /* Sizes as one row each: the plate to scale, what fits, the price. */
   .cat-sizes-list {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 10px;
-    margin-top: 20px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 18px;
   }
   .shopfront .cat-sizes-list a {
-    padding: 14px 12px 12px;
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    column-gap: 14px;
+    align-items: center;
+    padding: 10px 14px;
   }
   .cat-size-stage {
-    margin-bottom: 12px;
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+  .cat-size-plate::before {
+    inset: 2px;
   }
   .cat-size-label {
+    grid-column: 2;
     font-size: 14px;
   }
   .cat-size-fits {
-    margin: 2px 0 8px;
+    grid-column: 2;
+    margin: 0;
     font-size: 12px;
   }
-  .cat-guide {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
+  .shopfront .cat-sizes-list strong {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+  .shopfront .shop-quality-home.is-compact,
+  .shopfront .shop-proof-pdf.is-compact {
+    gap: 22px;
+  }
+  .shopfront .shop-quality-home.is-compact .shop-quality-points {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .shopfront .shop-proof-pdf.is-compact .shop-proof-pdf-stack {
+    width: 80%;
+    margin: 0 auto;
   }
   .cat-steps-list {
     grid-template-columns: minmax(0, 1fr);
@@ -2629,10 +2630,6 @@
   }
   .shopfront .cat-steps-more {
     font-size: 14px;
-  }
-  .cat-guide summary {
-    padding: 16px 0;
-    font-size: 15px;
   }
   .cat-scroll-row {
     display: flex;

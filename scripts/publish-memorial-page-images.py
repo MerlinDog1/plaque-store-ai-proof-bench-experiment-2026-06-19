@@ -1,10 +1,12 @@
 """Images for the rebuilt memorial plaques page (owner msg 5876, 24 Oct 2026: "make memorial page amazing").
 
 Writes public/site-images/memorial/:
-- memorial-hero-garden-wall-{1600,1200,800}.webp: the hero, made with the designer's built-in realistic preview from
-  the catalogue stencil of polished-brass-297x210-rect-plaque (Charlotte May Pemberton), caps repainted in metal.
-- route-{bench,garden,tree,wall}.webp (600 x 450): the "Where will it go?" tiles. Bench, garden and tree are crops
-  of photos already on the site; the wall photo is the built-in preview of brushed-brass-210x148-rect-plaque.
+- memorial-hero-a5-stainless-{1600,1200,800}.webp: the hero, the plaque the page's from-price is for (owner msg 5906):
+  A5 brushed stainless steel (Margaret Rowley), made with the designer's built-in realistic preview from a designer
+  stencil (output/stencil-app in the repo), caps repainted in metal.
+- route-{bench,garden-stone,tree,grave}.webp (600 x 450): the "Where will it go?" tiles. Bench and tree are crops of photos
+  already on the site; garden (brushed-brass-200x150, Ivy & Sid Moore, on a stone in a flower border) and grave
+  (aged-brass-150x75, Alice Grant, on an oak cross in a churchyard) are built-in previews of catalogue stencils.
 - portrait-{george,joan,bramble,ron-pat}.webp (600 x 600): tree plaques with portraits made by Portraits in Metal's
   own process (owner msg 5816), photographed with the built-in preview, borders outside the caps (msg 5830).
 Every file carries IPTC DigitalSourceType trainedAlgorithmicMedia (metadata only; owner msg 5231).
@@ -23,8 +25,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'public/site-images/memorial')
 AI = 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia'
 SIZES = {
-    'memorial-hero-garden-wall': [(1600, 1200), (1200, 900), (800, 600)],
-    'route-bench': [(600, 450)], 'route-garden': [(600, 450)], 'route-tree': [(600, 450)], 'route-wall': [(600, 450)],
+    'memorial-hero-a5-stainless': [(1600, 1200), (1200, 900), (800, 600)],
+    'route-bench': [(600, 450)], 'route-garden-stone': [(600, 450)], 'route-tree': [(600, 450)], 'route-grave': [(600, 450)],
     'portrait-george': [(600, 600)], 'portrait-joan': [(600, 600)], 'portrait-bramble': [(600, 600)], 'portrait-ron-pat': [(600, 600)],
 }
 

@@ -4,7 +4,7 @@ import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './Co
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { MemorialMaterialLinks, memorialInscriptions } from './MemorialGuide';
-import { DesignLink, ProductPicks, ShopFaq } from './Shopfront';
+import { DesignLink, ProductPicks } from './Shopfront';
 
 // Category landing sections, phone first. The memorial plaques page is built from them (owner msg 5876,
 // 24 Oct 2026: "make memorial page amazing and then use as yardstick to measure against other pages").
@@ -76,7 +76,6 @@ export function CategoryHero({ product, title, note, image, priceNote, trust, on
         <ul className="shop-product-benefits cat-hero-trust">
           {trust.map(item => <li key={item}>{item}</li>)}
         </ul>
-        {product.seoIntro && <p className="cat-hero-intro">{product.seoIntro}</p>}
       </div>
       <HeroPhoto image={image} className="cat-hero-photo-side" />
     </section>
@@ -132,17 +131,37 @@ export function SizeLadder({ id, kicker, title, intro, sizes, note }: { id?: str
   );
 }
 
-export function GuideAccordion({ id, kicker, title, sections, children }: { id?: string; kicker: string; title: string; sections: { title: string; copy: string }[]; children?: React.ReactNode }) {
+/** The FAQs and the longer buying guide, folded into one list (owner msg 5906: a shorter page). The FAQs come
+ * first and are the same list the prerendered FAQPage schema is built from; the guide topics follow. */
+export function QuestionsAndGuide({ id, guideId, intro, faqs, guide, subject, children }: {
+  id?: string;
+  guideId?: string;
+  intro?: string;
+  faqs: { question: string; answer: string }[];
+  guide: { title: string; copy: string }[];
+  subject: string;
+  children?: React.ReactNode;
+}) {
   return (
-    <section className="shop-section cat-guide" id={id} aria-labelledby="cat-guide-heading">
+    <section className="shop-section shop-faq cat-questions" id={id} aria-labelledby="cat-questions-heading">
       <div>
-        <p className="shop-kicker">{kicker}</p>
-        <h2 id="cat-guide-heading">{title}</h2>
+        <p className="shop-kicker">Help before you order</p>
+        <h2 id="cat-questions-heading">Your questions, answered.</h2>
+        {intro && <p className="cat-questions-intro">{intro}</p>}
         {children}
+        <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-text-link">
+          Ask us on WhatsApp ↗
+        </ContactLink>
       </div>
       <div>
-        {sections.map(section => (
-          <details key={section.title}>
+        {faqs.map(faq => (
+          <details key={faq.question}>
+            <summary>{faq.question}<span aria-hidden="true">+</span></summary>
+            <p>{faq.answer}</p>
+          </details>
+        ))}
+        {guide.map((section, index) => (
+          <details key={section.title} id={index === 0 ? guideId : undefined}>
             <summary>{section.title}<span aria-hidden="true">+</span></summary>
             <p>{section.copy}</p>
           </details>
@@ -178,7 +197,7 @@ export function OrderSteps({ id, kicker, title, steps, subject, onLaunch, onRequ
       {/* "Make it clear we can make whatever you want" (owner msg 5736), once on the page. */}
       <p className="cat-steps-more">
         <strong>Can’t see exactly what you need? Tell us what you want. We’ll make it.</strong>{' '}
-        Almost any size, shape or wording, and portraits engraved from your own photos. Send us a few words, a sketch or a photo of the spot, and we’ll design it and send a free proof, usually within 3 working hours.{' '}
+        Any size, shape or wording, with a free proof, usually within 3 working hours.{' '}
         <a href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>
       </p>
     </section>
@@ -237,7 +256,8 @@ export function MemorialLanding({ product, faqs, picks, onLaunch, onRequestDesig
   onRequestDesign?: () => void;
 }) {
   const subject = plaqueSubject(product.shortTitle);
-  const heroSlug = 'polished-brass-297x210-rect-plaque';
+  // The hero shows the plaque the from-price is for, and "Design online" opens on it (owner msg 5906).
+  const heroSlug = 'a5-brushed-steel-personalised-plaque';
   return (
     <div className="shopfront cat-page" data-prerendered="true">
       <div className="shop-breadcrumb">
@@ -250,27 +270,28 @@ export function MemorialLanding({ product, faqs, picks, onLaunch, onRequestDesig
         title="Personalised memorial plaques"
         note={product.heroNote || 'Remember them in your own words.'}
         image={{
-          src: `${images}/memorial-hero-garden-wall-1200.webp`,
-          srcSet: `${images}/memorial-hero-garden-wall-800.webp 800w, ${images}/memorial-hero-garden-wall-1200.webp 1200w, ${images}/memorial-hero-garden-wall-1600.webp 1600w`,
-          alt: 'Polished brass memorial plaque reading In loving memory of Charlotte May Pemberton, 1931 to 2021, on a Cotswold stone garden wall beside pink roses and lavender',
-          caption: <>Shown: polished brass, 297 × 210 mm, <Price slug={heroSlug} bare />. <a href={`/${heroSlug}`}>See this plaque</a></>,
+          src: `${images}/memorial-hero-a5-stainless-1200.webp`,
+          srcSet: `${images}/memorial-hero-a5-stainless-800.webp 800w, ${images}/memorial-hero-a5-stainless-1200.webp 1200w, ${images}/memorial-hero-a5-stainless-1600.webp 1600w`,
+          alt: 'Brushed stainless steel memorial plaque reading In loving memory of Margaret Rowley, 1936 to 2023, Loved always, missed every day, on a Cotswold stone garden wall beside pink roses and lavender',
+          caption: <>Shown: A5 brushed stainless steel, the plaque priced below. <a href={`/${heroSlug}`}>See this plaque</a></>,
         }}
         priceNote="A5 stainless steel, with engraving, fixings and UK delivery"
         trust={['Made in the UK', 'Infilled by hand', 'Free proof before you pay', 'No account needed']}
         onLaunch={onLaunch}
         onRequestDesign={onRequestDesign}
       />
+      {/* Four distinct settings (owner msg 5906); wall plaques are the hero and the picks below. */}
       <PlaceRoutes
         id="memorial-places"
         kicker="Choose by setting"
         title="Where will it go?"
         routes={[
           { href: '/bench-plaques', title: 'On a bench', image: `${images}/route-bench.webp`, alt: 'Polished brass memorial plaque on a wooden bench, reading Peter John Wilson, please sit awhile, enjoy the view', priceSlug: 'bench-plaques' },
-          { href: '/garden-plaques', title: 'In the garden', image: `${images}/route-garden.webp`, alt: 'Brass garden dedication plaque on dark wood, fixed to a brick wall', priceSlug: 'garden-plaques' },
+          { href: '/garden-plaques', title: 'In the garden', image: `${images}/route-garden-stone.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore fixed to a natural stone in a cottage-garden border of roses, lavender and catmint', priceSlug: 'garden-plaques' },
           { href: '/tree-memorial-plaques', title: 'By a tree', image: `${images}/route-tree.webp`, alt: 'Brass tree memorial plaque for Jim Partridge on an oak board and ground stake beside a cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
-          { href: '/brushed-brass-210x148-rect-plaque', title: 'On a wall', image: `${images}/route-wall.webp`, alt: 'Brushed brass memorial plaque for Fred and Elsie Bond on a red brick wall with honeysuckle and foxgloves', priceSlug: 'brushed-brass-210x148-rect-plaque' },
+          { href: '/aged-brass-150x75-rect-plaque', title: 'At a grave', image: `${images}/route-grave.webp`, alt: 'Small aged brass memorial plaque for Alice Grant screwed to a weathered oak cross at a grave in a country churchyard, with white and yellow flowers', priceSlug: 'aged-brass-150x75-rect-plaque' },
         ]}
-        more={<>Somewhere else, like a grave, a church or a club? <ContactLink channel="whatsapp" placement="page" subject={subject}>Ask us on WhatsApp</ContactLink> and we’ll suggest a size and fixings.</>}
+        more={<>On a wall, in a church or somewhere else? <ContactLink channel="whatsapp" placement="page" subject={subject}>Ask us on WhatsApp</ContactLink> and we’ll suggest a size and fixings. For a grave, check the cemetery’s rules first.</>}
       />
       {picks && <ProductPicks {...picks} id="memorial-picks" className="cat-picks" />}
       <SizeLadder
@@ -286,9 +307,6 @@ export function MemorialLanding({ product, faqs, picks, onLaunch, onRequestDesig
         ]}
         note={<>Prices are for brushed stainless steel without wood backing, including engraving, fixings and UK delivery. Brass, other finishes and wood backing are priced in the designer. <a href="/plaque-sizes">See every size and price</a>.</>}
       />
-      <GuideAccordion id="memorial-materials" kicker="Metal and fitting" title="Choose the metal and the setting." sections={product.seoSections || []}>
-        <MemorialMaterialLinks />
-      </GuideAccordion>
       <OrderSteps
         id="how-it-works"
         kicker="How it works"
@@ -305,7 +323,7 @@ export function MemorialLanding({ product, faqs, picks, onLaunch, onRequestDesig
       <PortraitStrip
         kicker="Add their portrait"
         title="A favourite face, beside their name."
-        intro="Send us a photo of a person or a pet. Our Portraits in Metal studio draws it for engraving and sets it beside your words, and you see a free proof before you decide."
+        intro="Send us a photo of a person or a pet. Our Portraits in Metal studio draws it for engraving, with a free proof first."
         portraits={[
           { src: `${images}/portrait-george.webp`, alt: 'Brass memorial plaque with an engraved portrait of George Hartley, on an oak board and stake beside a young tree in autumn', caption: 'George · brass' },
           { src: `${images}/portrait-joan.webp`, alt: 'Stainless steel memorial plaque with an engraved portrait of Joan Whitfield and a short poem, beside a cherry tree in blossom', caption: 'Joan · stainless steel, with a poem' },
@@ -314,9 +332,9 @@ export function MemorialLanding({ product, faqs, picks, onLaunch, onRequestDesig
         ]}
         link={{ href: '/portrait-plaques', label: 'See portrait plaques' }}
       />
-      <HomeQualitySection />
-      <ProofPdfShowcase id="memorial-proof" heading="Check every word before you pay.">
-        <p>Before anything is made, you get a clear PDF proof: the plaque at a glance, a drawing with every measurement, and the finish and fixings. Share it with family and agree it together.</p>
+      <HomeQualitySection compact />
+      <ProofPdfShowcase id="memorial-proof" heading="Check every word before you pay." compact>
+        <p>Before anything is made, you get a PDF proof with every measurement, the finish and the fixings. Share it with family and agree it together.</p>
       </ProofPdfShowcase>
       <WordingIdeas
         id="memorial-wording"
@@ -326,7 +344,9 @@ export function MemorialLanding({ product, faqs, picks, onLaunch, onRequestDesig
         inscriptions={[...memorialInscriptions, { title: 'For a pet', lines: ['Bramble', '2011–2025', 'Our faithful friend,', 'forever by our side'] }]}
         link={{ href: '/memorial-plaque-wording', label: 'See over 40 more wording ideas' }}
       />
-      <div id="memorial-questions"><ShopFaq faqs={faqs} /></div>
+      <QuestionsAndGuide id="memorial-questions" guideId="memorial-materials" intro={product.seoIntro} faqs={faqs} guide={product.seoSections || []} subject={subject}>
+        <MemorialMaterialLinks />
+      </QuestionsAndGuide>
       <section className="shop-closing">
         <h2>Put your words in place.</h2>
         <p>Create your layout and see the price before you pay, or send us your words and we’ll design it for you.</p>

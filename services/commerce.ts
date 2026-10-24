@@ -237,17 +237,20 @@ export const productFamilies: ProductFamily[] = [
     relatedSearches: ['memorial plaques UK', 'brass memorial plaques', 'custom remembrance plaques', 'garden memorial plaques'],
     bestFor: ['Names, dates and tribute wording', 'Garden and wall memorials', 'Brass or stainless steel finishes', 'Optional wood backing'],
     proofPrompt: 'In loving memory of\nArthur James Williams\nA devoted husband, father and grandfather\n1938 - 2026',
+    // "Design online" opens on the plaque the from-price is for: A5 brushed stainless steel without wood
+    // backing (owner msg 5906, 24 Oct 2026). It opened on brass with dark wood at £165 under "from £95.50".
+    // The garden, tree and other pages that borrow this product start there too.
     preset: {
       width: 210,
       height: 148,
-      material: Material.BrushedBrass,
+      material: Material.BrushedSteel,
       shape: Shape.Rect,
       fixing: Fixing.Caps,
       border: true,
       borderStyle: BorderStyle.Double,
-      wood: true,
-      woodTone: 'dark',
-      woodEdge: 'bevel',
+      wood: false,
+      woodTone: 'light',
+      woodEdge: 'square',
       designStyle: DesignStyle.Auto,
       textColor: TextColor.Black,
       cornerRadius: 0,

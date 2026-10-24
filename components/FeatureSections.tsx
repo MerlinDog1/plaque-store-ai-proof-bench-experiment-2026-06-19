@@ -15,13 +15,15 @@ const proofPage = (page: number) => ({
   srcSet: `/site-images/proof/sample-proof-page-${page}-760.webp?${featureImageVersion} 760w, /site-images/proof/sample-proof-page-${page}-1400.webp?${featureImageVersion} 1400w`,
 });
 
-export function ProofPdfShowcase({ id = 'proof-pdf', heading = 'A proof you can check properly.', children }: {
+// compact: no checklist and a smaller picture, for the phone-length category pages (owner msg 5906).
+export function ProofPdfShowcase({ id = 'proof-pdf', heading = 'A proof you can check properly.', compact = false, children }: {
   id?: string;
   heading?: string;
+  compact?: boolean;
   children?: React.ReactNode;
 }) {
   return (
-    <section className="shop-section shop-proof-pdf" aria-labelledby={`${id}-heading`}>
+    <section className={`shop-section shop-proof-pdf${compact ? ' is-compact' : ''}`} aria-labelledby={`${id}-heading`}>
       <a className="shop-proof-pdf-stack" href={sampleProofPdf} target="_blank" rel="noopener" aria-label="Open the sample proof PDF">
         <img className="is-back" {...proofPage(2)} sizes="(max-width: 720px) 78vw, 440px" width="760" height="537" loading="lazy"
           alt="Sample proof page with the plaque drawn with every dimension, the hole positions and a side view of the screw caps" />
@@ -32,12 +34,12 @@ export function ProofPdfShowcase({ id = 'proof-pdf', heading = 'A proof you can 
         <p className="shop-kicker">Your proof, before you pay</p>
         <h2 id={`${id}-heading`}>{heading}</h2>
         {children || <p>When we design your plaque, you get a clear PDF proof: the plaque at a glance, a drawing with every measurement, and the finish, fixings and fitting steps. Share it with family, hold it up to the spot, then approve.</p>}
-        <ul className="shop-proof-pdf-list">
+        {!compact && <ul className="shop-proof-pdf-list">
           <li>Exact size, with every dimension marked</li>
           <li>Hole positions, screw caps and the fixings supplied</li>
           <li>Material, finish and lettering sizes</li>
           <li>Simple fitting steps and how to approve</li>
-        </ul>
+        </ul>}
         <a className="shop-text-link" href={sampleProofPdf} target="_blank" rel="noopener">See a sample proof (PDF) ↗</a>
       </div>
     </section>
@@ -91,9 +93,10 @@ const qualityPoints = [
   ['Laser cut for precision', 'Each plate is laser cut to size, for clean edges and accurate corners, ovals and hearts.'],
 ];
 
-export function HomeQualitySection() {
+// compact: the four points as short titles without the paragraph, for the phone-length category pages (msg 5906).
+export function HomeQualitySection({ compact = false }: { compact?: boolean }) {
   return (
-    <section className="shop-section shop-quality-home" aria-labelledby="quality-home-heading">
+    <section className={`shop-section shop-quality-home${compact ? ' is-compact' : ''}`} aria-labelledby="quality-home-heading">
       <figure className="shop-quality-photo">
         <img
           src="/site-images/quality/real-etched-detail-1200.webp"
@@ -110,12 +113,12 @@ export function HomeQualitySection() {
       <div className="shop-quality-copy">
         <p className="shop-kicker">Made in the UK · Finished by hand</p>
         <h2 id="quality-home-heading">Solid metal, made to stay.</h2>
-        <p>Every plaque is made here in the UK from high-quality solid metal, with the care that something this lasting deserves. Look closely and you’ll see the difference.</p>
+        {!compact && <p>Every plaque is made here in the UK from high-quality solid metal, with the care that something this lasting deserves. Look closely and you’ll see the difference.</p>}
         <ol className="shop-quality-points">
           {qualityPoints.map(([title, text], index) => (
             <li key={title}>
               <span aria-hidden="true">0{index + 1}</span>
-              <div><strong>{title}</strong><p>{text}</p></div>
+              <div><strong>{title}</strong>{!compact && <p>{text}</p>}</div>
             </li>
           ))}
         </ol>
