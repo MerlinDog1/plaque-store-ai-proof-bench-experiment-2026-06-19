@@ -18,7 +18,7 @@ const bySize = (a: Offer, b: Offer) => a.preset.width * a.preset.height - b.pres
 
 // ?v= changes whenever the sample PDFs are redrawn, so browsers that opened an older copy fetch the new one.
 export function samplePdfFor(slug: string) {
-  return `/samples/products/${slug}.pdf?v=3`;
+  return `/samples/products/${slug}.pdf?v=4`;
 }
 
 /** Short size name, e.g. "150 × 50 mm bench", "A5 landscape", "250 × 150 mm oval". */

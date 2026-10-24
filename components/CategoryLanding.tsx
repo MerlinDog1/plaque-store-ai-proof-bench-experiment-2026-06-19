@@ -331,13 +331,14 @@ const defaultSteps: [string, string][] = [
   ['Approve, then pay', 'We etch it into solid metal, infill it by hand and deliver it free in the UK.'],
 ];
 const memorialImages = '/site-images/memorial';
-// Four portrait plaques with portraits drawn by Portraits in Metal's own process (owner msgs 5816, 5830), photographed
-// in a setting that fits each one's story (owner msgs 5992, 6056).
+// Four portrait plaques with portraits drawn by Portraits in Metal's own process (owner msgs 5816, 5830), photographed in
+// a setting that fits each one's story (owner msgs 5992, 6056): two close-ups on ground stakes, one on a wall and one on
+// our workshop bench, not all on stakes (owner msg 6085).
 const portraitCards: PortraitExample[] = [
-  { src: `${memorialImages}/portrait-george-v2.webp`, alt: 'Brass memorial plaque with an engraved portrait of George Hartley, on an oak board and ground stake under a young oak by an allotment gate', caption: 'George · brass' },
-  { src: `${memorialImages}/portrait-daniel.webp`, alt: 'Brass memorial plaque with an engraved portrait of Daniel Price, on an oak board and ground stake beside a bench at the top of a coastal cliff path', caption: 'Daniel · brass, on the cliff path' },
-  { src: `${memorialImages}/portrait-bramble-v2.webp`, alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel, on an oak board and ground stake by a back garden gate', caption: 'Bramble · for a much-loved dog' },
-  { src: `${memorialImages}/portrait-ron-pat-v2.webp`, alt: 'Stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on an oak board and ground stake under their apple tree', caption: 'Ron & Pat · together again' },
+  { src: `${memorialImages}/portrait-george-v3.webp`, alt: 'Close-up of a brass memorial plaque with an engraved portrait of George Hartley, on an oak board and ground stake under a young oak by an allotment gate', caption: 'George · brass, under the oak he planted' },
+  { src: `${memorialImages}/portrait-bramble-v3.webp`, alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel on an oak board, on our workshop bench after its final polish', caption: 'Bramble · on our workshop bench' },
+  { src: `${memorialImages}/portrait-daniel-v2.webp`, alt: 'Brass memorial plaque with an engraved portrait of Daniel Price on an oak board, fixed to the painted timber wall of a sailing club boathouse', caption: 'Daniel · on the boathouse wall' },
+  { src: `${memorialImages}/portrait-ron-pat-v3.webp`, alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on an oak board and ground stake under their apple tree', caption: 'Ron & Pat · under their apple tree' },
 ];
 
 /** One category page: hero, optional photo routes and examples, picks, sizes, how it works, optional portraits,

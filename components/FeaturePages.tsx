@@ -119,14 +119,14 @@ const portraitGallery = [
   { file: 'ruby-folded-steel', width: 480, height: 360, title: 'Freestanding', detail: 'Folded brushed steel', alt: 'Freestanding folded stainless steel portrait plaque of Ruby the Siamese cat on a windowsill' },
 ];
 
-// Portrait plaques in place, with portraits drawn by Portraits in Metal's own process (owner msgs 5816 and 5830),
-// also shown on the memorial and tree pages (portraitCards in CategoryLanding.tsx). Real-looking photos made from
-// each plaque's own artwork, in a setting that fits its story (owner msgs 5992 and 6056).
+// Portrait plaques in place, with portraits drawn by Portraits in Metal's own process (owner msgs 5816 and 5830), also
+// shown on the memorial and tree pages (portraitCards in CategoryLanding.tsx). Real-looking photos made from each plaque's
+// own artwork, in a setting that fits its story; not all on ground stakes (owner msgs 5992, 6056, 6085).
 const portraitsInPlace = [
-  { src: '/site-images/memorial/portrait-george-v2.webp', alt: 'Brass memorial plaque with an engraved portrait of George Hartley, on an oak board and ground stake under a young oak by an allotment gate', caption: 'George · brass, under the oak he planted' },
-  { src: '/site-images/memorial/portrait-daniel.webp', alt: 'Brass memorial plaque with an engraved portrait of Daniel Price, on an oak board and ground stake beside a bench at the top of a coastal cliff path', caption: 'Daniel · brass, on the cliff path' },
-  { src: '/site-images/memorial/portrait-bramble-v2.webp', alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel, on an oak board and ground stake by a back garden gate', caption: 'Bramble · by the gate where he waited' },
-  { src: '/site-images/memorial/portrait-ron-pat-v2.webp', alt: 'Stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on an oak board and ground stake under their apple tree', caption: 'Ron & Pat · under their apple tree' },
+  { src: '/site-images/memorial/portrait-george-v3.webp', alt: 'Close-up of a brass memorial plaque with an engraved portrait of George Hartley, on an oak board and ground stake under a young oak by an allotment gate', caption: 'George · brass, under the oak he planted' },
+  { src: '/site-images/memorial/portrait-bramble-v3.webp', alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel on an oak board, on our workshop bench after its final polish', caption: 'Bramble · on our workshop bench' },
+  { src: '/site-images/memorial/portrait-daniel-v2.webp', alt: 'Brass memorial plaque with an engraved portrait of Daniel Price on an oak board, fixed to the painted timber wall of a sailing club boathouse', caption: 'Daniel · on the boathouse wall' },
+  { src: '/site-images/memorial/portrait-ron-pat-v3.webp', alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on an oak board and ground stake under their apple tree', caption: 'Ron & Pat · under their apple tree' },
 ];
 const portraitFrom = merchantProducts.find(item => item.slug === 'a5-brushed-steel-personalised-plaque')?.startingFrom || '£95.50';
 

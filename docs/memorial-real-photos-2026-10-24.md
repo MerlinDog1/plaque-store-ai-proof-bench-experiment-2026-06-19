@@ -100,3 +100,32 @@ Scripts are in `scripts/real-photos/`. Working files are in `workspace/output/in
 | Static render | No missing images on the eight category pages |
 | Real app, phone and desktop | Memorial, garden, tree and one product page passed; the designer opens at the expected prices |
 | Live bytes | Every new asset served live matches the repository |
+
+## Round 2 (owner msg 6085, 24 Oct about 22:25 UTC)
+
+The owner's feedback (msg 6085):
+
+> Not all the portrait plaques on that page have to be tree stake ones. Also for the tree stake ones make sure the plaque
+> still looks real and keep real close to them and show less background. Some of these the thickness is very
+> exaggerated and I don't see any scalloped borders or wip Pics?
+
+What changed:
+
+- **Thickness.** Every prompt now states the real 1.5 mm plate and 15 mm board. It also asks for a fine edge line only, never a slab or a deep block. The five round-1 products that left the memorial page were redone the same way, for their own product pages (photos `?v=3`).
+- **Scalloped borders and wood.** The memorial page's picks moved to wood-backed products with the scalloped border:
+  - Margaret Rowley, A5 stainless on walnut
+  - Bob Cuthbert, aged brass 400×300 on oak, cricket pavilion
+  - David Okafor, polished stainless 210×297 on walnut, summerhouse
+  - Ruth Adeyemi, aged brass 148×210 on walnut, library
+  - Ivor Pugh, polished brass 200×150 on oak
+  - Samuel Hargreaves, bell ringer, kept
+  - The church-porch oval and the bench plaque were kept and redone thinner.
+  - New wording, flat drawings, thumbs and sample PDFs for the five changed products: feed images `?v=4`, PDFs `?v=4`.
+- **Workshop pictures.** Margaret's plaque is propped on the workshop bench (the first pick, also the hero's product). Ivor's plaque gets a macro shot on the bench. Bramble's portrait is also on the bench.
+- **Portraits.** Not all on stakes:
+  - George and Ron & Pat on stakes, as tight close-ups with little background
+  - Daniel on a sailing club boathouse wall
+  - Bramble in the workshop
+- **Top photo and tiles.** All redone at true thickness: Margaret on the wall, Ivy & Sid on the stone, and a tight close-up of Jim Partridge's tree plaque.
+
+Scripts: `scripts/real-photos/round2.py` (specs, `designer` and `prompts` commands); `run_batch.py` reads `JOBS=` for another jobs file. One Codex call in about 15 hung for 11 minutes (the CLI timeout); the batch carries on past it.

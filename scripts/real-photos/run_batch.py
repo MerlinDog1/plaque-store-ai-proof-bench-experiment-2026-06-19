@@ -4,6 +4,7 @@ are skipped. Saves out/<id>.v<N>.jpg (q95; the disk is near its reserve) and app
 Usage: python3 -I run_batch.py [id ...]
 """
 import json
+import os
 import subprocess
 import sys
 import time
@@ -27,7 +28,7 @@ def log(record):
 
 def main():
     only = set(sys.argv[1:])
-    jobs = [j for j in json.loads((HERE / 'jobs.json').read_text()) if not only or j['id'] in only]
+    jobs = [j for j in json.loads((HERE / os.environ.get('JOBS', 'jobs.json')).read_text()) if not only or j['id'] in only]
     for job in jobs:
         prompt = (HERE / 'prompts' / f"{job['id']}.txt").read_text()
         for v in range(1, job['versions'] + 1):

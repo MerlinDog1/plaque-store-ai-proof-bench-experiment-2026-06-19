@@ -305,13 +305,14 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-stainless-210x148-rect-dark-wood-plaque": {
   "lines": [
-   "This lectern was given",
-   "in loving memory of",
-   "WILLIAM ROWE",
-   "Churchwarden 1972 – 2001",
-   "by his family"
+   "In loving memory of",
+   "MARGARET ROWLEY",
+   "1936 – 2023",
+   "Mum, Nan and dear friend,",
+   "who loved this garden in every season.",
+   "Forever in our hearts"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "brushed-stainless-210x148-rect-light-wood-plaque": {
   "lines": [
@@ -546,15 +547,15 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "aged-brass-148x210-rect-dark-wood-plaque": {
   "lines": [
-   "In memory of",
+   "In loving memory of",
    "RUTH",
    "ADEYEMI",
    "1952 – 2023",
    "Scholar, teacher",
-   "and friend",
-   "of this library"
+   "and friend of this library,",
+   "who opened so many doors"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "aged-brass-148x210-rect-light-wood-plaque": {
   "lines": [
@@ -725,15 +726,16 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-stainless-210x297-rect-dark-wood-plaque": {
   "lines": [
-   "To the glory of God",
-   "and in memory of",
-   "CHRISTOPHER",
-   "MILES",
-   "1942 – 2019",
-   "Choirmaster",
-   "1968 – 2010"
+   "In loving memory of",
+   "DAVID",
+   "OKAFOR",
+   "1951 – 2020",
+   "He built this summerhouse",
+   "and spent every evening here",
+   "with a book and a brew.",
+   "Dad, we still save your seat"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-stainless-210x297-rect-light-wood-plaque": {
   "lines": [
@@ -920,7 +922,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "IVOR PUGH",
    "1938 – 2017",
    "Lay reader in this church",
-   "for thirty years"
+   "for thirty years,",
+   "a good and faithful servant"
   ],
   "use": "a church dedication"
  },
@@ -1214,13 +1217,13 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "aged-brass-400x300-rect-light-wood-plaque": {
   "lines": [
-   "In memory of",
+   "In loving memory of",
    "BOB CUTHBERT",
-   "Founder member",
-   "who built this pavilion",
-   "with his own hands",
    "1938 – 2022",
-   "Millbrook Cricket Club"
+   "Founder member of Millbrook Cricket Club,",
+   "who built this pavilion with his own hands",
+   "and kept the tea urn going for fifty summers.",
+   "Always one of us"
   ],
   "use": "a memorial plaque"
  },
