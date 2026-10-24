@@ -22,7 +22,7 @@ WORK = os.path.join(ROOT, 'output/catalogue-wording')
 # A new folder, not the old merchant-photo one: phones and Google keep same-name copies of redrawn
 # images, so the new photos get new URLs (24 Oct 2026).
 PHOTOS = os.path.join(ROOT, 'public/site-images/catalogue-photo')
-OLD_PHOTOS = os.path.join(ROOT, 'public/site-images/merchant-photo')
+OLD_PHOTOS = os.path.join(ROOT, 'public/site-images/merchant-photo')  # removed 24 Oct once all 173 were new
 SCENES = os.path.join(ROOT, 'public/site-images/scenes')
 RENDERS = os.path.join(ROOT, 'public/site-images/merchant')
 AI = 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia'
@@ -74,7 +74,9 @@ def photos():
     missing = [slug for slug in wording if slug not in chosen]
     for slug in missing:  # carry the earlier photo over to the new folder so the page never breaks
         for name in (f'{slug}.webp', f'{slug}-600.webp'):
-            shutil.copy2(os.path.join(OLD_PHOTOS, name), os.path.join(PHOTOS, name))
+            old, new = os.path.join(OLD_PHOTOS, name), os.path.join(PHOTOS, name)
+            if not os.path.exists(new) and os.path.exists(old):
+                shutil.copy2(old, new)
     print(f'published {len(chosen)} photos ({sum(os.path.getsize(p) for p in written) / 1048576:.1f} MiB); keeping the old photo for: {missing}')
 
 
