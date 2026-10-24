@@ -1,5 +1,16 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Tree close-ups remade with the designer's built-in realistic preview — 24 October 2026, about 07:10 UTC
+
+- **Why:** in msg 5796 the owner asked whether the tree photos used "the plaques Ai thing that has the ai image stuff built in", because "it makes way better results that way". They hadn't: the close-ups below were made with my own prompt and a plate face I had drawn.
+- **What changed:**
+  - The same ten close-ups, remade through the designer's own pipeline. The plate face is the designer's stencil (`svgToPngBase64`, via `output/catalogue-wording/render-wording-stencils.cjs`), and the photo is `generateRealisticView` (`gemini-3.1-flash-image-preview`, 4K, built-in prompt unchanged). The scene brief carries the close-up framing, no people, and the Nicola mount.
+  - New script: `scripts/generate-tree-closeups.mjs`.
+  - The photos are in `public/site-images/tree-plaque-photos/` (a new folder, so phones fetch them fresh). `tree-plaques/` is removed.
+  - The lettering now follows the designer's layout exactly: the previous set's italic small lines, and the acer's stray italic line, are gone.
+- **Spend:** about $3.02 on the Gemini key (20 pictures at about $0.15), plus the checker.
+- **More:** see [docs/tree-scenes-2026-10-24.md](docs/tree-scenes-2026-10-24.md).
+
 ## Tree page photos as close-ups — 24 October 2026, about 06:40 UTC
 
 - **Why:** at 06:15 (msg 5778) the owner sent the Nicola proof illustration and said: "Just have them all be regular close ups like this, don't need the whole scene around it".

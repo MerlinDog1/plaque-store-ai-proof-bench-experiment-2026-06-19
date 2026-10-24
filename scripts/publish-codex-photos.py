@@ -27,9 +27,10 @@ PHOTOS = os.path.join(ROOT, 'public/site-images/catalogue-photo')
 OLD_PHOTOS = os.path.join(ROOT, 'public/site-images/merchant-photo')  # removed 24 Oct once all 173 were new
 SCENES = os.path.join(ROOT, 'public/site-images/scenes')  # removed 24 Oct once the tree scenes replaced them
 # Tree photos on the Gemini key with the Nicola-order mount (owner msg 5762, 24 Oct 2026), then as close-ups with no
-# people (msg 5778). Each redo gets a new folder so phones and Google fetch it fresh: tree-scenes/ was replaced by
-# tree-plaques/.
-TREE_FOLDER = 'tree-plaques'
+# people (msg 5778), then through the designer's built-in realistic preview (msg 5796, scripts/generate-tree-closeups.mjs).
+# Each redo gets a new folder so phones and Google fetch it fresh: tree-scenes/, then tree-plaques/, then
+# tree-plaque-photos/.
+TREE_FOLDER = 'tree-plaque-photos'
 RENDERS = os.path.join(ROOT, 'public/site-images/merchant')
 AI = 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia'
 # The five Codex samples the owner saw on 21 Oct, made before the queue existed.

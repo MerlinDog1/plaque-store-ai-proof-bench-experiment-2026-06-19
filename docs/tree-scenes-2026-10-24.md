@@ -1,5 +1,16 @@
 # Tree page photos redone on the Gemini key — 24 October 2026
 
+## Update, about 07:10 UTC: made with the designer's built-in realistic preview
+
+- **Request:** at 06:50 (msg 5796) the owner asked: "Did you use the plaques Ai thing that has the ai image stuff built in I mean? It makes way better results that way". The close-ups below used my own prompt and a plate face drawn by `make_refs.py`, so all ten were remade.
+- **How they were made:**
+  - **Plate face:** the designer's own stencil. `output/catalogue-wording/render-wording-stencils.cjs` runs `PlaquePreview` and `svgToPngBase64` on the Vite dev server, from `closeups-wording.json` (in the VPS work folder). Each entry copies the A5 light-oak catalogue offer (`brushed-brass-` or `brushed-stainless-210x148-rect-light-wood-plaque`) with the photo's border.
+  - **Photo:** `scripts/generate-tree-closeups.mjs` bundles `services/geminiService.ts` and calls `generateRealisticView` with the stencil: `gemini-3.1-flash-image-preview` at 4K and 3:2, with the built-in prompt unchanged. The scene brief (`options.prompt`) gives the setting, the close-up framing, no people, and the Nicola mount: one black 30 mm square steel stake under a 235 × 173 mm oak board.
+  - Two versions of each, about 25 seconds and $0.15 apiece: about $3.02 in all.
+- **Checking:** `check_scenes.py` read all 20 as exact, with four caps, the single stake and no extra text. By eye at full resolution, five versions had black caps where the product has caps in the plate's own metal, so their other version was chosen. The acer's second version had a dark mark on the plate.
+- **Compared with the previous set:** the lettering follows the designer's layout exactly, and the metal and oak look more real. The previous set's own drawing put the small last lines in italics, which the designer doesn't, and the acer's "In loving memory of" came out in italics by mistake. The settings, captions and alt text still match.
+- **Where they are:** `public/site-images/tree-plaque-photos/memorial-tree-plaque-<tree>.webp` (with `-900` and `-sq`). `tree-plaques/` is removed. The hero and share image is still the cherry.
+
 ## Update, about 06:40 UTC: close-ups, no people
 
 - **Request:** at 06:15 (msg 5778) the owner sent the Nicola proof's illustration and said: "Just have them all be regular close ups like this, don't need the whole scene around it".
