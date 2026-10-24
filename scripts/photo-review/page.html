@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f6f4ef">
+<title>InstaPlaque photo check</title>
+<style>
+:root { --ink:#1d1d1b; --muted:#66645f; --line:#e2ded5; --bg:#f6f4ef; --keep:#1d7a3e; --keep-soft:#e2f2e7; --redo:#b3261e; --redo-soft:#fbe5e2; --gold:#8a6420; }
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body { margin:0; font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); padding-bottom:calc(84px + env(safe-area-inset-bottom)); }
+button { font:inherit; color:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+header { max-width:1200px; margin:0 auto; padding:16px 14px 4px; }
+h1 { font-size:21px; margin:0 0 6px; }
+.lede { margin:0 0 6px; font-size:14.5px; }
+.built { margin:0 0 8px; color:var(--muted); font-size:13px; }
+.filters { position:sticky; top:0; z-index:5; display:flex; gap:6px; overflow-x:auto; padding:8px 14px; background:rgba(246,244,239,.97); border-bottom:1px solid var(--line); scrollbar-width:none; }
+.filters::-webkit-scrollbar { display:none; }
+.chip { flex:none; border:1px solid var(--line); background:#fff; border-radius:999px; padding:7px 12px; font-size:14px; }
+.chip[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:#fff; }
+.chip[hidden] { display:none; }
+main { max-width:1200px; margin:0 auto; padding:0 10px; }
+.sec { margin:20px 0 4px; }
+.sec[hidden] { display:none; }
+.sec-head { padding:0 4px 8px; }
+h2 { font-size:18px; margin:0; }
+.sec-intro { margin:3px 0 0; color:var(--muted); font-size:13.5px; }
+.sec-tools { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; margin-top:4px; font-size:13px; color:var(--muted); }
+.link-btn { border:0; background:none; padding:6px 0; color:var(--gold); font-size:13.5px; text-decoration:underline; text-underline-offset:2px; }
+.open-sec { display:block; width:100%; margin:0 0 6px; border:1px dashed #c9c3b6; background:#fff; border-radius:12px; padding:14px; font-weight:600; }
+.grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.grid[hidden] { display:none; }
+@media (min-width:720px) { .grid { grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); } }
+.card { display:flex; flex-direction:column; min-width:0; background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+.card[hidden] { display:none; }
+.card.is-keep { border-color:#9dd1ae; }
+.card.is-redo { border-color:#e8a198; box-shadow:0 0 0 2px var(--redo-soft); }
+.card.is-changed { border-color:#d9bd84; box-shadow:0 0 0 2px #f6ecd6; }
+.thumb { position:relative; display:block; width:100%; aspect-ratio:4/3; padding:0; border:0; background:#ebe7df; cursor:zoom-in; }
+.thumb img { display:block; width:100%; height:100%; object-fit:contain; }
+.num { position:absolute; left:6px; top:6px; padding:2px 6px; border-radius:6px; background:rgba(0,0,0,.68); color:#fff; font-size:12px; font-weight:700; }
+.badge { position:absolute; right:6px; top:6px; padding:2px 6px; border-radius:6px; color:#fff; font-size:11.5px; font-weight:700; }
+.badge[hidden] { display:none; }
+.badge.keep { background:var(--keep); }
+.badge.redo { background:var(--redo); }
+.badge.changed { background:var(--gold); }
+.info { flex:1; padding:8px 9px 2px; min-width:0; }
+.title { font-weight:650; font-size:13.5px; line-height:1.3; overflow-wrap:anywhere; }
+.where, .says, .prev { margin-top:3px; font-size:12px; color:var(--muted); overflow-wrap:anywhere; }
+.says { font-style:italic; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.prev { color:var(--gold); font-weight:600; }
+.prev[hidden], .where:empty, .says:empty { display:none; }
+.actions { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:7px 8px 8px; }
+.act { border:1.5px solid var(--line); background:#fff; border-radius:9px; padding:9px 2px; font-size:14px; font-weight:700; }
+.act.keep[aria-pressed="true"] { background:var(--keep); border-color:var(--keep); color:#fff; }
+.act.redo[aria-pressed="true"] { background:var(--redo); border-color:var(--redo); color:#fff; }
+.add-note { margin:-4px 8px 6px; align-self:flex-start; }
+.add-note[hidden], .note[hidden] { display:none; }
+.note { padding:0 8px 8px; }
+textarea { display:block; width:100%; min-height:62px; resize:vertical; border:1px solid #d6d0c4; border-radius:8px; padding:7px 8px; background:#fffdf8; color:var(--ink); font:inherit; font-size:14.5px; }
+.card.is-redo textarea { border-color:#e2a49b; }
+footer { max-width:1200px; margin:28px auto 0; padding:0 14px 20px; color:var(--muted); font-size:13px; }
+.bar { position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex; align-items:center; gap:10px; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); background:#fff; border-top:1px solid var(--line); box-shadow:0 -4px 16px rgba(0,0,0,.07); }
+.counts { flex:1; min-width:0; font-size:13.5px; line-height:1.3; }
+.counts b { font-size:15px; }
+.c-keep { color:var(--keep); } .c-redo { color:var(--redo); }
+.send { flex:none; border:0; border-radius:11px; padding:12px 16px; background:#229ed9; color:#fff; font-weight:750; font-size:15px; }
+.zoom { position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; background:#141414; color:#f2f2f2; }
+.zoom[hidden] { display:none; }
+.z-top { display:flex; align-items:center; gap:10px; padding:8px 8px 6px 14px; font-size:14px; }
+.z-pos { flex:1; }
+.x { border:0; background:rgba(255,255,255,.12); color:#fff; width:40px; height:40px; border-radius:50%; font-size:20px; line-height:40px; padding:0; }
+.z-img { position:relative; flex:1 1 auto; min-height:120px; display:flex; align-items:center; justify-content:center; overflow:hidden; touch-action:pan-y pinch-zoom; }
+.z-img img { max-width:100%; max-height:100%; object-fit:contain; }
+.z-body { flex:none; max-height:48vh; overflow-y:auto; padding:8px 14px 4px; background:#1e1e1e; border-top:1px solid #333; }
+.z-title { font-weight:700; font-size:15px; }
+.z-where, .z-says { margin-top:3px; font-size:13px; color:#bdbdbd; }
+.z-says { font-style:italic; }
+.z-prev { margin-top:3px; font-size:13px; color:#e6c27a; font-weight:600; }
+.z-prev:empty, .z-where:empty, .z-says:empty { display:none; }
+.z-links { display:flex; gap:16px; margin-top:6px; font-size:13.5px; }
+.z-links a { color:#9fd0ff; }
+.zoom .actions { padding:10px 0 8px; }
+.zoom .act { background:#2b2b2b; border-color:#444; color:#fff; padding:11px 2px; font-size:15px; }
+.zoom .act.keep[aria-pressed="true"] { background:var(--keep); border-color:var(--keep); }
+.zoom .act.redo[aria-pressed="true"] { background:var(--redo); border-color:var(--redo); }
+.zoom textarea { background:#2a2a2a; border-color:#4a4a4a; color:#fff; margin-bottom:8px; }
+.zoom textarea[hidden] { display:none; }
+.z-nav { flex:none; display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:8px 14px calc(8px + env(safe-area-inset-bottom)); background:#1e1e1e; }
+.z-nav button { border:1px solid #444; background:#2b2b2b; color:#fff; border-radius:10px; padding:11px; font-weight:650; }
+.z-nav button:disabled { opacity:.35; }
+.sheet { position:fixed; inset:0; z-index:50; display:flex; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.45); }
+.sheet[hidden] { display:none; }
+.sheet-box { width:100%; max-width:560px; max-height:92vh; overflow-y:auto; background:#fff; border-radius:16px 16px 0 0; padding:14px 16px calc(16px + env(safe-area-inset-bottom)); }
+.sheet-head { display:flex; align-items:center; gap:10px; }
+.sheet-head h2 { flex:1; }
+.sheet .x { background:#eee; color:var(--ink); }
+.s-sum { margin:8px 0; font-size:14.5px; }
+.s-treat { display:flex; gap:8px; align-items:flex-start; margin:8px 0; font-size:14px; }
+.s-treat input { width:20px; height:20px; margin:1px 0 0; flex:none; }
+.s-treat[hidden] { display:none; }
+.tg { display:block; margin:8px 0; padding:13px; border-radius:11px; background:#229ed9; color:#fff; text-align:center; font-weight:750; text-decoration:none; }
+.tg.done { background:#7fbfe0; }
+.s-help { margin:6px 0 10px; color:var(--muted); font-size:13px; }
+.s-copy { width:100%; border:1.5px solid var(--line); background:#fff; border-radius:11px; padding:11px; font-weight:700; }
+.s-text { margin-top:10px; min-height:150px; font-size:13px; background:#faf8f3; }
+.toast { position:fixed; left:50%; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:60; transform:translateX(-50%); padding:9px 14px; border-radius:999px; background:var(--ink); color:#fff; font-size:14px; pointer-events:none; }
+.toast[hidden] { display:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>InstaPlaque photo check</h1>
+  <p class="lede">Every photo on instaplaque.co.uk. Tap <b>Keep</b> or <b>Redo</b>; Redo opens a box to say what’s wrong. Tap a photo to see it big. When you’re done (or partly done), tap <b>Send to Cody</b>.</p>
+  <p class="built" id="built"></p>
+</header>
+<nav class="filters" id="filters" aria-label="Show"></nav>
+<main id="main"></main>
+<footer>
+  <p>Your answers save on this phone as you go. When I redo a photo and update this page, it comes back marked “New version” for you to check again.</p>
+  <p><button type="button" class="link-btn" id="clear">Clear all my answers</button></p>
+</footer>
+<div class="bar">
+  <div class="counts" id="counts"></div>
+  <button type="button" class="send" id="send-open">Send to Cody</button>
+</div>
+
+<div class="zoom" id="zoom" hidden role="dialog" aria-modal="true" aria-label="Photo">
+  <div class="z-top"><span class="z-pos" id="z-pos"></span><button type="button" class="x" id="z-close" aria-label="Close">✕</button></div>
+  <div class="z-img" id="z-img"><img id="z-pic" alt=""></div>
+  <div class="z-body">
+    <div class="z-title" id="z-title"></div>
+    <div class="z-where" id="z-where"></div>
+    <div class="z-says" id="z-says"></div>
+    <div class="z-prev" id="z-prev"></div>
+    <div class="z-links"><a id="z-page" target="_blank" rel="noopener">See it on the site ↗</a><a id="z-full" target="_blank" rel="noopener">Full size ↗</a></div>
+    <div class="actions"><button type="button" class="act keep" data-d="keep" aria-pressed="false">✓ Keep</button><button type="button" class="act redo" data-d="redo" aria-pressed="false">✗ Redo</button></div>
+    <textarea id="z-note" rows="2" hidden></textarea>
+  </div>
+  <div class="z-nav"><button type="button" id="z-back">‹ Previous</button><button type="button" id="z-next">Next ›</button></div>
+</div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="s-title">
+  <div class="sheet-box">
+    <div class="sheet-head"><h2 id="s-title">Send your answers to Cody</h2><button type="button" class="x" id="s-close" aria-label="Close">✕</button></div>
+    <p class="s-sum" id="s-sum"></p>
+    <label class="s-treat" id="s-treat-wrap"><input type="checkbox" id="s-treat"><span id="s-treat-text"></span></label>
+    <div id="s-parts"></div>
+    <p class="s-help" id="s-help"></p>
+    <button type="button" class="s-copy" id="s-copy">Copy the list</button>
+    <textarea class="s-text" id="s-text" readonly rows="8" aria-label="The list"></textarea>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  'use strict';
+  const DATA = /*REVIEW_DATA*/null;
+  const STORE = 'instaplaque-photo-review-v1';
+  const BOT = 'CODYLINUX_bot';
+  const PART_CHARS = 3500;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const items = DATA.items;
+  const byKey = new Map(items.map(it => [it.key, it]));
+  const sections = DATA.sections.map(sec => Object.assign({}, sec, { items: items.filter(it => it.sec === sec.id), built: false }));
+  const cards = new Map();
+  const noteOpen = new Set();
+
+  let state = {};
+  try { state = JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch (e) { state = {}; }
+  let warned = false;
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); }
+    catch (e) { if (!warned) { warned = true; alert('This browser is not saving your answers. Send them to Cody before you close the page.'); } }
+  }
+  const answer = it => { const s = state[it.key]; return s && s.h === it.hash ? s : null; };
+  const earlier = it => { const s = state[it.key]; return s && s.h !== it.hash ? s : null; };
+  const status = it => { const a = answer(it); return a ? a.d : earlier(it) ? 'changed' : 'todo'; };
+
+  let toastTimer = 0;
+  function toast(text) {
+    const el = $('toast'); el.textContent = text; el.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 1800);
+  }
+
+  // ---------- filters ----------
+  const FILTERS = [['all', 'All'], ['todo', 'To check'], ['redo', 'Redo'], ['keep', 'Keep'], ['changed', 'New versions']];
+  let filter = 'all';
+  $('filters').innerHTML = FILTERS.map(([id, label]) => `<button type="button" class="chip" data-f="${id}" aria-pressed="${id === filter}">${label} <span></span></button>`).join('');
+  $('filters').addEventListener('click', e => {
+    const chip = e.target.closest('.chip'); if (!chip) return;
+    filter = chip.dataset.f;
+    for (const c of $('filters').children) c.setAttribute('aria-pressed', c === chip);
+    applyFilter();
+    window.scrollTo({ top: 0 });
+  });
+  const matches = it => {
+    const s = status(it);
+    return filter === 'all' || (filter === 'todo' ? s === 'todo' || s === 'changed' : s === filter);
+  };
+
+  // ---------- cards ----------
+  function cardHtml(it) {
+    return `<button type="button" class="thumb" data-zoom aria-label="See #${it.n} big"><img src="${esc(it.thumb)}" loading="lazy" decoding="async" width="${it.tw}" height="${it.th}" alt="${esc(it.alt)}"><span class="num">#${it.n}</span><span class="badge" hidden></span></button>` +
+      `<div class="info"><div class="title">${esc(it.title)}</div><div class="where">${esc(it.where)}</div><div class="says">${it.says ? '“' + esc(it.says) + '”' : ''}</div><div class="prev" hidden></div></div>` +
+      `<div class="actions"><button type="button" class="act keep" data-d="keep" aria-pressed="false">✓ Keep</button><button type="button" class="act redo" data-d="redo" aria-pressed="false">✗ Redo</button></div>` +
+      `<button type="button" class="link-btn add-note" hidden>+ Add a note</button>` +
+      `<div class="note" hidden><textarea rows="2" aria-label="Comment on #${it.n}"></textarea></div>`;
+  }
+  const prevText = p => `New version since you checked it. You said ${p.d === 'redo' ? 'Redo' : 'Keep'}${p.n && p.n.trim() ? ': “' + p.n.trim() + '”' : ''}`;
+  function refresh(it) {
+    const el = cards.get(it.key); if (!el) return;
+    const st = status(it), a = answer(it), p = earlier(it);
+    el.classList.toggle('is-keep', st === 'keep');
+    el.classList.toggle('is-redo', st === 'redo');
+    el.classList.toggle('is-changed', st === 'changed');
+    const badge = el.querySelector('.badge');
+    badge.hidden = st === 'todo';
+    badge.className = 'badge ' + st;
+    badge.textContent = st === 'keep' ? '✓ Keep' : st === 'redo' ? '✗ Redo' : st === 'changed' ? 'New version' : '';
+    el.querySelector('.act.keep').setAttribute('aria-pressed', st === 'keep');
+    el.querySelector('.act.redo').setAttribute('aria-pressed', st === 'redo');
+    const prev = el.querySelector('.prev');
+    prev.hidden = !p; prev.textContent = p ? prevText(p) : '';
+    const showNote = st === 'redo' || (st === 'keep' && (!!(a.n && a.n.trim()) || noteOpen.has(it.key)));
+    const box = el.querySelector('.note'); box.hidden = !showNote;
+    const ta = box.querySelector('textarea');
+    ta.placeholder = st === 'redo' ? 'What’s wrong? What should it show instead?' : 'Note (optional)';
+    if (document.activeElement !== ta) ta.value = a ? a.n || '' : '';
+    el.querySelector('.add-note').hidden = !(st === 'keep' && !showNote);
+  }
+  function buildSection(sec) {
+    if (sec.built) return;
+    sec.built = true;
+    const grid = sec.el.querySelector('.grid');
+    const frag = document.createDocumentFragment();
+    for (const it of sec.items) {
+      const el = document.createElement('article');
+      el.className = 'card'; el.dataset.key = it.key; el.id = 'p' + it.n;
+      el.innerHTML = cardHtml(it);
+      cards.set(it.key, el); frag.appendChild(el);
+    }
+    grid.appendChild(frag);
+    sec.items.forEach(refresh);
+    grid.hidden = false;
+    const opener = sec.el.querySelector('.open-sec'); if (opener) opener.hidden = true;
+    applyFilter(true);
+  }
+
+  // ---------- sections ----------
+  const main = $('main');
+  for (const sec of sections) {
+    if (!sec.items.length) continue;
+    const el = document.createElement('section');
+    el.className = 'sec'; el.id = 's-' + sec.id;
+    el.innerHTML = `<div class="sec-head"><h2>${esc(sec.title)}</h2>${sec.intro ? `<p class="sec-intro">${esc(sec.intro)}</p>` : ''}` +
+      `<div class="sec-tools"><span class="sec-count"></span><button type="button" class="link-btn keep-rest">Keep all the unchecked ones here</button></div></div>` +
+      (sec.collapsed ? `<button type="button" class="open-sec">Show the ${sec.items.length} drawings</button>` : '') +
+      `<div class="grid" ${sec.collapsed ? 'hidden' : ''}></div>`;
+    sec.el = el;
+    main.appendChild(el);
+  }
+  for (const sec of sections) if (sec.el && !sec.collapsed) buildSection(sec);
+
+  main.addEventListener('click', e => {
+    const secEl = e.target.closest('.sec');
+    const sec = secEl && sections.find(s => s.el === secEl);
+    if (e.target.closest('.open-sec')) return buildSection(sec);
+    if (e.target.closest('.keep-rest')) return keepRest(sec);
+    const card = e.target.closest('.card'); if (!card) return;
+    const it = byKey.get(card.dataset.key);
+    if (e.target.closest('[data-zoom]')) return openZoom(it);
+    const act = e.target.closest('.act');
+    if (act) {
+      decide(it, act.dataset.d);
+      if (status(it) === 'redo') card.querySelector('textarea').focus({ preventScroll: true });
+      return;
+    }
+    if (e.target.closest('.add-note')) { noteOpen.add(it.key); refresh(it); card.querySelector('textarea').focus({ preventScroll: true }); }
+  });
+  main.addEventListener('input', e => {
+    if (e.target.tagName !== 'TEXTAREA') return;
+    setNote(byKey.get(e.target.closest('.card').dataset.key), e.target.value);
+  });
+
+  function decide(it, d) {
+    const a = answer(it);
+    if (a && a.d === d) delete state[it.key];
+    else state[it.key] = { d, n: a ? a.n || '' : '', h: it.hash };
+    save(); refresh(it); counts();
+    if (zoomIt === it) renderZoom();
+  }
+  function setNote(it, text) {
+    const a = answer(it); if (!a) return;
+    a.n = text; save();
+    if (zoomIt === it && document.activeElement !== $('z-note')) $('z-note').value = text;
+    const card = cards.get(it.key);
+    if (card && document.activeElement !== card.querySelector('textarea')) card.querySelector('textarea').value = text;
+  }
+  function keepRest(sec) {
+    const rest = sec.items.filter(it => !answer(it));
+    if (!rest.length) return toast('Nothing left to check here');
+    if (!confirm(`Mark the ${rest.length} unchecked photo${rest.length > 1 ? 's' : ''} in “${sec.title}” as Keep?`)) return;
+    for (const it of rest) state[it.key] = { d: 'keep', n: '', h: it.hash };
+    save(); rest.forEach(refresh); counts();
+    toast(`${rest.length} marked Keep`);
+  }
+
+  function applyFilter(quiet) {
+    for (const sec of sections) {
+      if (!sec.el) continue;
+      let shown = 0;
+      for (const it of sec.items) {
+        const ok = matches(it);
+        if (ok) shown++;
+        const el = cards.get(it.key); if (el) el.hidden = !ok;
+      }
+      // Answered drawings show under Redo/Keep/New versions; the optional drawings stay folded under To check.
+      if (!sec.built && filter !== 'all' && filter !== 'todo' && shown && !quiet) { buildSection(sec); return; }
+      sec.el.hidden = filter !== 'all' && !shown;
+    }
+  }
+
+  function counts() {
+    let keep = 0, redo = 0, todo = 0, changed = 0;
+    const per = new Map();
+    for (const it of items) {
+      const s = status(it);
+      if (s === 'keep') keep++; else if (s === 'redo') redo++; else { todo++; if (s === 'changed') changed++; }
+      if (s === 'todo' || s === 'changed') per.set(it.sec, (per.get(it.sec) || 0) + 1);
+    }
+    $('counts').innerHTML = `<b class="c-keep">${keep}</b> keep · <b class="c-redo">${redo}</b> redo<br><b>${todo}</b> of ${items.length} still to check`;
+    const n = { all: items.length, todo, redo, keep, changed };
+    for (const chip of $('filters').children) {
+      chip.querySelector('span').textContent = n[chip.dataset.f];
+      chip.hidden = chip.dataset.f === 'changed' && !changed;
+    }
+    for (const sec of sections) {
+      if (!sec.el) continue;
+      const left = per.get(sec.id) || 0;
+      sec.el.querySelector('.sec-count').textContent = `${sec.items.length} photo${sec.items.length > 1 ? 's' : ''} · ${left ? left + ' to check' : 'all checked'}`;
+      sec.el.querySelector('.keep-rest').hidden = !left;
+    }
+  }
+
+  // ---------- zoom ----------
+  let zoomIt = null, zoomList = [], zoomHistory = false;
+  function visibleList() {
+    const list = [];
+    for (const sec of sections) {
+      if (!sec.el || !sec.built || sec.el.hidden) continue;
+      for (const it of sec.items) { const el = cards.get(it.key); if (el && !el.hidden) list.push(it); }
+    }
+    return list;
+  }
+  function openZoom(it) {
+    zoomList = visibleList();
+    if (!zoomList.includes(it)) zoomList = [it];
+    zoomIt = it;
+    $('zoom').hidden = false;
+    document.body.style.overflow = 'hidden';
+    if (!zoomHistory) { history.pushState({ zoom: 1 }, ''); zoomHistory = true; }
+    renderZoom();
+  }
+  function closeZoom(fromHistory) {
+    if ($('zoom').hidden) return;
+    $('zoom').hidden = true;
+    document.body.style.overflow = '';
+    const el = zoomIt && cards.get(zoomIt.key);
+    zoomIt = null;
+    if (zoomHistory) { zoomHistory = false; if (!fromHistory) history.back(); }
+    if (el) el.scrollIntoView({ block: 'center' });
+  }
+  function renderZoom() {
+    const it = zoomIt; if (!it) return;
+    const i = zoomList.indexOf(it);
+    const st = status(it), a = answer(it), p = earlier(it);
+    $('z-pos').textContent = `#${it.n} · ${i + 1} of ${zoomList.length}`;
+    const pic = $('z-pic');
+    if (pic.dataset.key !== it.key) {
+      pic.dataset.key = it.key;
+      pic.src = it.thumb; pic.alt = it.alt;
+      const full = new Image();
+      full.onload = () => { if (pic.dataset.key === it.key) pic.src = it.full; };
+      full.src = it.full;
+      const next = zoomList[i + 1]; if (next) new Image().src = next.full;
+    }
+    $('z-title').textContent = it.title;
+    $('z-where').textContent = it.where;
+    $('z-says').textContent = it.says ? '“' + it.says + '”' : '';
+    $('z-prev').textContent = p ? prevText(p) : '';
+    $('z-page').href = it.link;
+    $('z-full').href = it.full;
+    for (const b of $('zoom').querySelectorAll('.act')) b.setAttribute('aria-pressed', b.dataset.d === st);
+    const note = $('z-note');
+    note.hidden = !(st === 'redo' || st === 'keep');
+    note.placeholder = st === 'redo' ? 'What’s wrong? What should it show instead?' : 'Note (optional)';
+    if (document.activeElement !== note) note.value = a ? a.n || '' : '';
+    $('z-back').disabled = i <= 0;
+    $('z-next').disabled = i >= zoomList.length - 1;
+  }
+  function step(dir) {
+    const i = zoomList.indexOf(zoomIt) + dir;
+    if (i < 0 || i >= zoomList.length) return;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    zoomIt = zoomList[i]; renderZoom();
+  }
+  $('z-close').addEventListener('click', () => closeZoom(false));
+  $('z-back').addEventListener('click', () => step(-1));
+  $('z-next').addEventListener('click', () => step(1));
+  $('zoom').querySelector('.actions').addEventListener('click', e => {
+    const act = e.target.closest('.act'); if (!act || !zoomIt) return;
+    const it = zoomIt;
+    decide(it, act.dataset.d);
+    const st = status(it);
+    if (st === 'redo') $('z-note').focus({ preventScroll: true });
+    if (st === 'keep') setTimeout(() => { if (zoomIt === it && zoomList.indexOf(it) < zoomList.length - 1) step(1); }, 260);
+  });
+  $('z-note').addEventListener('input', e => { if (zoomIt) setNote(zoomIt, e.target.value); });
+  let touch = null;
+  $('z-img').addEventListener('touchstart', e => { touch = e.touches.length === 1 ? [e.touches[0].clientX, e.touches[0].clientY] : null; }, { passive: true });
+  $('z-img').addEventListener('touchend', e => {
+    if (!touch || e.changedTouches.length !== 1) return;
+    const dx = e.changedTouches[0].clientX - touch[0], dy = e.changedTouches[0].clientY - touch[1];
+    touch = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+  }, { passive: true });
+  document.addEventListener('keydown', e => {
+    if ($('zoom').hidden || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') step(1);
+    else if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === 'Escape') closeZoom(false);
+  });
+
+  // ---------- send ----------
+  const oneLine = s => s.trim().replace(/\s*\n+\s*/g, ' / ');
+  function message(treatRest) {
+    const redo = [], notes = [];
+    let keep = 0, todo = 0;
+    for (const it of items) {
+      const a = answer(it);
+      if (!a) { todo++; continue; }
+      const note = a.n && a.n.trim() ? oneLine(a.n) : '';
+      if (a.d === 'redo') redo.push(`#${it.n} ${it.title}${note ? ' — ' + note : ''}`);
+      else { keep++; if (note) notes.push(`#${it.n} ${it.title} — ${note}`); }
+    }
+    const lines = [`Redo ${redo.length} · Keep ${keep}` + (todo ? (treatRest ? ` · the other ${todo}: keep too` : ` · not checked ${todo}`) : '')];
+    if (redo.length) lines.push('', 'REDO', ...redo);
+    if (notes.length) lines.push('', 'KEEP, WITH A NOTE', ...notes);
+    if (!redo.length && !notes.length) lines.push('', 'Nothing to redo.');
+    const parts = [];
+    let current = [];
+    let size = 0;
+    for (const raw of lines) {
+      const line = raw.length > PART_CHARS - 200 ? raw.slice(0, PART_CHARS - 201) + '…' : raw;
+      if (size + line.length + 1 > PART_CHARS - 120 && current.length) { parts.push(current); current = []; size = 0; }
+      current.push(line); size += line.length + 1;
+    }
+    parts.push(current);
+    return parts.map((part, i) => {
+      const head = `Photo check (page version ${DATA.built})` + (parts.length > 1 ? `, part ${i + 1} of ${parts.length}` : '');
+      return [head, ...part].join('\n').replace(/\n{3,}/g, '\n\n');
+    });
+  }
+  let sheetHistory = false;
+  function renderSheet() {
+    const treat = $('s-treat').checked;
+    const parts = message(treat);
+    let keep = 0, redo = 0, todo = 0;
+    for (const it of items) { const a = answer(it); if (!a) todo++; else if (a.d === 'redo') redo++; else keep++; }
+    $('s-sum').innerHTML = `<b>${redo}</b> to redo, <b>${keep}</b> to keep` + (todo ? `, <b>${todo}</b> not checked yet.` : '.');
+    $('s-treat-wrap').hidden = !todo;
+    $('s-treat-text').textContent = `Tell Cody the ${todo} I haven’t ticked are fine too`;
+    $('s-parts').innerHTML = parts.map((text, i) =>
+      `<a class="tg" data-i="${i}" href="https://t.me/${BOT}?text=${encodeURIComponent(text)}">${parts.length > 1 ? `Send part ${i + 1} of ${parts.length} in Telegram` : 'Open Telegram with the list'}</a>`).join('');
+    $('s-help').textContent = (parts.length > 1 ? 'Send each part in turn: tap a button, press send in Telegram, then come back here for the next part. ' : '') +
+      'Telegram opens your chat with Cody with the list already typed in; just press send. If the message box is empty, tap “Copy the list” and paste it into the chat.';
+    $('s-text').value = parts.join('\n\n');
+  }
+  function openSheet() {
+    renderSheet();
+    $('sheet').hidden = false;
+    document.body.style.overflow = 'hidden';
+    if (!sheetHistory) { history.pushState({ sheet: 1 }, ''); sheetHistory = true; }
+  }
+  function closeSheet(fromHistory) {
+    if ($('sheet').hidden) return;
+    $('sheet').hidden = true;
+    document.body.style.overflow = '';
+    if (sheetHistory) { sheetHistory = false; if (!fromHistory) history.back(); }
+  }
+  $('send-open').addEventListener('click', openSheet);
+  $('s-close').addEventListener('click', () => closeSheet(false));
+  $('sheet').addEventListener('click', e => { if (e.target === $('sheet')) closeSheet(false); });
+  $('s-treat').addEventListener('change', renderSheet);
+  $('s-parts').addEventListener('click', e => { const a = e.target.closest('.tg'); if (a) a.classList.add('done'); });
+  $('s-copy').addEventListener('click', async () => {
+    const text = $('s-text').value;
+    try { await navigator.clipboard.writeText(text); toast('Copied. Paste it into the chat with Cody'); }
+    catch (err) {
+      const ta = $('s-text'); ta.removeAttribute('readonly'); ta.focus(); ta.select();
+      try { document.execCommand('copy'); toast('Copied. Paste it into the chat with Cody'); } catch (e2) { toast('Select the text below and copy it'); }
+      ta.setAttribute('readonly', '');
+    }
+  });
+  window.addEventListener('popstate', () => {
+    if (!$('zoom').hidden) closeZoom(true);
+    else if (!$('sheet').hidden) closeSheet(true);
+  });
+
+  $('clear').addEventListener('click', () => {
+    if (!confirm('Clear all your Keep / Redo answers and comments on this phone?')) return;
+    state = {}; save(); noteOpen.clear();
+    items.forEach(refresh); counts(); applyFilter();
+  });
+
+  // Answers are saved in other tabs too: keep this tab in step.
+  window.addEventListener('storage', e => {
+    if (e.key !== STORE) return;
+    try { state = JSON.parse(e.newValue || '{}') || {}; } catch (err) { return; }
+    items.forEach(refresh); counts();
+  });
+
+  const photos = items.filter(it => it.sec !== 'drawings').length;
+  $('built').textContent = `${photos} photos and ${items.length - photos} drawings · page updated ${DATA.built}`;
+  counts();
+  if (location.hash && /^#p\d+$/.test(location.hash)) {
+    const it = items.find(x => 'p' + x.n === location.hash.slice(1));
+    if (it) { buildSection(sections.find(s => s.id === it.sec)); const el = cards.get(it.key); if (el) el.scrollIntoView({ block: 'center' }); }
+  }
+})();
+</script>
+</body>
+</html>
