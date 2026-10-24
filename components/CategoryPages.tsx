@@ -11,6 +11,10 @@ import { SizeLinksFold, type ExampleItem, type LandingConfig } from './CategoryL
 // for, and "Design online" opens on that plaque (the product presets in services/commerce.ts), so the price does not
 // jump (owner msg 5906). Photos: scripts/publish-category-page-images.py and publish-memorial-page-images.py.
 
+// Scale (owner msg 5959, 24 Oct: "Scale kinda f'd on this one" about the opening hero): the built-in preview draws a
+// plaque about 2-3 times too big against bricks and doors. Heroes show the plaque against large or irregular surfaces
+// (stone cladding, render) or with the brick count spelled out in the brief and checked by eye: an A5 plaque is one brick
+// long and two courses tall, A4 one and a half bricks and three courses.
 const memorial = '/site-images/memorial';
 const category = '/site-images/category';
 const photo = (slug: string) => `/site-images/catalogue-photo/${slug}-600.webp`;
@@ -107,8 +111,8 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Personalised garden plaques',
         note: product.heroNote || 'A dedication for a favourite place.',
         hero: {
-          base: `${category}/garden-hero`,
-          alt: 'Brushed stainless steel garden plaque with a scalloped border, reading This garden was planted in loving memory of Susan Marsh, on a white-painted cottage garden wall above blue and pink hydrangeas',
+          base: `${category}/garden-hero-v2`,
+          alt: 'Brushed stainless steel garden plaque with a scalloped border, reading This garden was planted in loving memory of Susan Marsh, on a white-painted brick cottage garden wall above blue and pink hydrangeas',
           caption: <>Shown: A5 brushed stainless steel, the plaque priced below. {seeThis('a5-brushed-steel-personalised-plaque')}</>,
         },
         priceNote: 'A5 stainless steel, with engraving, fixings and UK delivery',
@@ -298,8 +302,8 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Opening plaques',
         note: product.heroNote || 'Mark the occasion clearly.',
         hero: {
-          base: `${category}/opening-hero`,
-          alt: 'Brushed stainless steel opening plaque reading The Meadows Community Hub was officially opened by Councillor Jean Mitchell, Mayor of Westbrook, 14 March 2026, beside the entrance of a new brick building',
+          base: `${category}/opening-hero-v2`,
+          alt: 'Brushed stainless steel opening plaque reading The Meadows Community Hub was officially opened by Councillor Jean Mitchell, Mayor of Westbrook, 14 March 2026, on pale limestone cladding beside the glass entrance of a new community centre',
           caption: <>Shown: A4 brushed stainless steel, the plaque priced below. {seeThis('brushed-stainless-297x210-rect-plaque')}</>,
         },
         priceNote: 'A4 stainless steel, with engraving, fixings and UK delivery',
@@ -340,8 +344,8 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Custom plaques',
         note: 'Ovals, circles, larger sizes and your own ideas.',
         hero: {
-          base: `${category}/custom-hero`,
-          alt: 'Oval brushed stainless steel house sign reading Hawthorn House, built 1898, on a honey-coloured stone cottage wall beside a sage-green front door, a climbing rose and a pot of lavender',
+          base: `${category}/custom-hero-v2`,
+          alt: 'Oval brushed stainless steel house sign reading Hawthorn House, built 1898, on the white-painted brick wall of a cottage beside a sage-green front door',
           caption: <>Shown: a 250 × 150 mm oval in brushed stainless steel, the plaque priced below. {seeThis('brushed-stainless-250x150-oval-plaque')}</>,
         },
         price: { label: `from ${priceOf('brushed-stainless-250x150-oval-plaque')}`, slug: 'brushed-stainless-250x150-oval-plaque' },

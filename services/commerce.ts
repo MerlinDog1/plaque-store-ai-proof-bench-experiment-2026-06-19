@@ -1119,14 +1119,15 @@ export const materialStories = [
 // Catalogue photos redrawn after launch keep their file name but get ?v=N, so phones and Google fetch the new copy
 // (owner msg 5927, 24 Oct 2026: tree, orchard and hedge plaques shown with no tree, orchard or hedge, a pet's
 // "Here lies" on a house wall). The A5 stainless plaque had only a studio picture; it now has an in-place photo.
+// Version 3: redrawn again with the plaque at its true size against bricks, stones and posts (owner msg 5959).
 const cataloguePhotoVersions: Record<string, number> = {
-  'brushed-stainless-200x150-rect-plaque': 2,
+  'brushed-stainless-200x150-rect-plaque': 3,
   'polished-brass-210x148-rect-plaque': 2,
   'polished-brass-148x210-rect-plaque': 2,
-  'polished-stainless-210x297-rect-plaque': 2,
-  'aged-brass-297x210-rect-plaque': 2,
-  'orbital-brass-matt-lacquer-200x200-circle-plaque': 2,
-  'polished-brass-200x200-circle-plaque': 2,
+  'polished-stainless-210x297-rect-plaque': 3,
+  'aged-brass-297x210-rect-plaque': 3,
+  'orbital-brass-matt-lacquer-200x200-circle-plaque': 3,
+  'polished-brass-200x200-circle-plaque': 3,
   'a5-brushed-steel-personalised-plaque': 1,
 };
 const cataloguePhotoFor = (slug: string) => `/site-images/catalogue-photo/${slug}.webp${(cataloguePhotoVersions[slug] || 1) > 1 ? `?v=${cataloguePhotoVersions[slug]}` : ''}`;
