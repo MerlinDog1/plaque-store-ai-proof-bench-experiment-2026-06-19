@@ -4,9 +4,10 @@ Writes public/site-images/memorial/:
 - memorial-hero-a5-stainless-{1600,1200,800}.webp: the hero, the plaque the page's from-price is for (owner msg 5906):
   A5 brushed stainless steel (Margaret Rowley), made with the designer's built-in realistic preview from a designer
   stencil (output/stencil-app in the repo), caps repainted in metal.
-- route-{bench,garden-stone,tree,grave}.webp (600 x 450): the "Where will it go?" tiles. Bench and tree are crops of photos
-  already on the site; garden (brushed-brass-200x150, Ivy & Sid Moore, on a stone in a flower border) and grave
-  (aged-brass-150x75, Alice Grant, on an oak cross in a churchyard) are built-in previews of catalogue stencils.
+- route-{bench,garden-stone,tree,grave-cross}.webp (600 x 450): the "Where will it go?" tiles. Bench and tree are crops
+  of photos already on the site; garden (brushed-brass-200x150, Ivy & Sid Moore, on a stone in a flower border) and
+  grave (polished-brass-150x50, Alice Grant, sitting wholly on the arm of an oak cross in a churchyard; owner msg 5918:
+  the 150 x 75 plaque overhung the arm) are built-in previews of designer stencils.
 - portrait-{george,joan,bramble,ron-pat}.webp (600 x 600): tree plaques with portraits made by Portraits in Metal's
   own process (owner msg 5816), photographed with the built-in preview, borders outside the caps (msg 5830).
 Every file carries IPTC DigitalSourceType trainedAlgorithmicMedia (metadata only; owner msg 5231).
@@ -26,7 +27,7 @@ OUT = os.path.join(ROOT, 'public/site-images/memorial')
 AI = 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia'
 SIZES = {
     'memorial-hero-a5-stainless': [(1600, 1200), (1200, 900), (800, 600)],
-    'route-bench': [(600, 450)], 'route-garden-stone': [(600, 450)], 'route-tree': [(600, 450)], 'route-grave': [(600, 450)],
+    'route-bench': [(600, 450)], 'route-garden-stone': [(600, 450)], 'route-tree': [(600, 450)], 'route-grave-cross': [(600, 450)],
     'portrait-george': [(600, 600)], 'portrait-joan': [(600, 600)], 'portrait-bramble': [(600, 600)], 'portrait-ron-pat': [(600, 600)],
 }
 
