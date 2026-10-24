@@ -3,7 +3,7 @@ import { MemorialSizes, MemorialWording, MemorialMaterialLinks } from './Memoria
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
-import { HomeAiSection, HomePortraitSection, ProofPdfShowcase } from './FeatureSections';
+import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
@@ -515,31 +515,8 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
       </div>
       <ShopProcess />
       <ShopCollections />
-      <section className="shop-section shop-design-service" aria-labelledby="design-service-heading">
-        <div>
-          <p className="shop-kicker">A little help, from real people</p>
-          <h2 id="design-service-heading">Want us to take care of the design?</h2>
-          {/* WhatsApp first, the brief form second, to match the hero (owner msg 5174). */}
-          <p>Send us your wording on WhatsApp, or use our design form. We’ll design it for you and send your proof within 3 working hours, for you to review before you pay.</p>
-          <div className="shop-design-service-actions">
-            <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
-              <WhatsAppIcon /> Design on WhatsApp
-            </ContactLink>
-            <a href="/design-request" className="shop-text-link" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>
-          </div>
-          <p className="shop-smallprint">No layout tools to learn. Review your proof, request changes, then approve and pay.</p>
-        </div>
-        <ol className="design-service-steps">
-          <li><span>01</span><div><strong>Tell us your idea</strong><p>Your wording, a photo of where it’s going, or a design you made in ChatGPT.</p></div></li>
-          <li><span>02</span><div><strong>We design it</strong><p>Your proof within 3 working hours, by WhatsApp or email.</p></div></li>
-          <li><span>03</span><div><strong>Approve before you pay</strong><p>Happy with the proof? Follow your payment link.</p></div></li>
-        </ol>
-      </section>
-      {/* What a designer-made proof looks like, then the AI and portrait routes (owner msg 5178). */}
-      <ProofPdfShowcase id="home-proof" />
-      <HomeAiSection />
-      <HomePortraitSection />
-
+      {/* How the plaques are made, then the metals, as one quality and material block (owner msg 5843). */}
+      <HomeQualitySection />
       <section className="shop-section shop-materials">
         <div>
           <p className="shop-kicker">Choose your material</p>
@@ -578,6 +555,31 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           </figure>
         </div>
       </section>
+      <section className="shop-section shop-design-service" aria-labelledby="design-service-heading">
+        <div>
+          <p className="shop-kicker">A little help, from real people</p>
+          <h2 id="design-service-heading">Want us to take care of the design?</h2>
+          {/* WhatsApp first, the brief form second, to match the hero (owner msg 5174). */}
+          <p>Send us your wording on WhatsApp, or use our design form. We’ll design it for you and send your proof within 3 working hours, for you to review before you pay.</p>
+          <div className="shop-design-service-actions">
+            <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
+              <WhatsAppIcon /> Design on WhatsApp
+            </ContactLink>
+            <a href="/design-request" className="shop-text-link" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>
+          </div>
+          <p className="shop-smallprint">No layout tools to learn. Review your proof, request changes, then approve and pay.</p>
+        </div>
+        <ol className="design-service-steps">
+          <li><span>01</span><div><strong>Tell us your idea</strong><p>Your wording, a photo of where it’s going, or a design you made in ChatGPT.</p></div></li>
+          <li><span>02</span><div><strong>We design it</strong><p>Your proof within 3 working hours, by WhatsApp or email.</p></div></li>
+          <li><span>03</span><div><strong>Approve before you pay</strong><p>Happy with the proof? Follow your payment link.</p></div></li>
+        </ol>
+      </section>
+      {/* What a designer-made proof looks like, then the AI and portrait routes (owner msg 5178). */}
+      <ProofPdfShowcase id="home-proof" />
+      <HomeAiSection />
+      <HomePortraitSection />
+
       <CustomAnything />
       <ShopFaq />
       <section className="shop-closing">

@@ -81,6 +81,49 @@ export function HomeAiSection() {
   );
 }
 
+// How every plaque is made (owner msg 5843, 24 Oct 2026: "etched in solid high quality metal in UK,
+// Infilled by hand, laser cut for precision"). The close-up is a real photograph, not AI: an etched,
+// hand-filled plaque from our Portraits in Metal studio (its homepage shows the same picture).
+const qualityPoints = [
+  ['Solid brass or stainless steel', 'Real, quality metal all the way through, never a metal-effect print.'],
+  ['Etched into the metal', 'Your words and artwork are etched into the surface, so they become part of the plaque.'],
+  ['Infilled by hand', 'Every etched letter and line is paint-filled by hand, for crisp contrast that’s easy to read.'],
+  ['Laser cut for precision', 'Each plate is laser cut to size, for clean edges and accurate corners, ovals and hearts.'],
+];
+
+export function HomeQualitySection() {
+  return (
+    <section className="shop-section shop-quality-home" aria-labelledby="quality-home-heading">
+      <figure className="shop-quality-photo">
+        <img
+          src="/site-images/quality/real-etched-detail-1200.webp"
+          srcSet="/site-images/quality/real-etched-detail-600.webp 600w, /site-images/quality/real-etched-detail-1200.webp 1200w"
+          sizes="(max-width: 720px) 92vw, 600px"
+          width="1200"
+          height="675"
+          loading="lazy"
+          decoding="async"
+          alt="Close-up photograph of a real etched metal plaque, with fine engraved lines filled with dark paint on brushed metal"
+        />
+        <figcaption>A real etched plaque, photographed up close.</figcaption>
+      </figure>
+      <div className="shop-quality-copy">
+        <p className="shop-kicker">Made in the UK · Finished by hand</p>
+        <h2 id="quality-home-heading">Solid metal, made to stay.</h2>
+        <p>Every plaque is made here in the UK from high-quality solid metal, with the care that something this lasting deserves. Look closely and you’ll see the difference.</p>
+        <ol className="shop-quality-points">
+          {qualityPoints.map(([title, text], index) => (
+            <li key={title}>
+              <span aria-hidden="true">0{index + 1}</span>
+              <div><strong>{title}</strong><p>{text}</p></div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
 // Millie's photo and finished plaque are real photographs; Alfie and Thomas are Portraits in Metal designs.
 const homePortraits = [
   { src: '/site-images/portraits/pim-millie-photo.webp', width: 600, height: 800, alt: 'Millie the cat in her owner’s everyday photo', caption: 'Millie’s photo' },
