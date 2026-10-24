@@ -4,13 +4,13 @@ import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './Co
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { MemorialMaterialLinks, memorialInscriptions } from './MemorialGuide';
-import { DesignLink, HomeWays, ProductPicks, ShopFaq } from './Shopfront';
+import { DesignLink, ProductPicks, ShopFaq } from './Shopfront';
 
 // Category landing sections, phone first. The memorial plaques page is built from them (owner msg 5876,
 // 24 Oct 2026: "make memorial page amazing and then use as yardstick to measure against other pages").
 // 93% of ad visitors were on phones, so the first screens give an in-place photo, the price, both ways to
-// order and photo routes; long guidance folds away. Shared blocks (quality, proof, two ways to order,
-// FAQs) are the homepage's own.
+// order and photo routes; long guidance folds away. Shared blocks (quality, sample proof, FAQs) are the
+// homepage's own.
 
 /** The page a route leads to and its from-price: landing pages take their related product's price. */
 function startingPrice(slug: string) {
@@ -152,6 +152,39 @@ export function GuideAccordion({ id, kicker, title, sections, children }: { id?:
   );
 }
 
+/** How to order in three steps, with both ways to start: a phone-length version of the homepage's two cards. */
+export function OrderSteps({ id, kicker, title, steps, subject, onLaunch, onRequestDesign }: {
+  id?: string;
+  kicker: string;
+  title: string;
+  steps: [string, string][];
+  subject: string;
+  onLaunch?: () => void;
+  onRequestDesign?: () => void;
+}) {
+  return (
+    <section className="shop-section cat-steps" id={id} aria-labelledby="cat-steps-heading">
+      <p className="shop-kicker">{kicker}</p>
+      <h2 id="cat-steps-heading">{title}</h2>
+      <ol className="cat-steps-list">
+        {steps.map(([heading, copy]) => <li key={heading}><strong>{heading}</strong><span>{copy}</span></li>)}
+      </ol>
+      <div className="shop-hero-choices">
+        <DesignLink onStart={onLaunch}>Design online</DesignLink>
+        <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-button shop-hero-choice-whatsapp">
+          <WhatsAppIcon /> Design on WhatsApp
+        </ContactLink>
+      </div>
+      {/* "Make it clear we can make whatever you want" (owner msg 5736), once on the page. */}
+      <p className="cat-steps-more">
+        <strong>Can’t see exactly what you need? Tell us what you want. We’ll make it.</strong>{' '}
+        Almost any size, shape or wording, and portraits engraved from your own photos. Send us a few words, a sketch or a photo of the spot, and we’ll design it and send a free proof, usually within 3 working hours.{' '}
+        <a href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>
+      </p>
+    </section>
+  );
+}
+
 export type PortraitExample = { src: string; alt: string; caption: string };
 
 export function PortraitStrip({ kicker, title, intro, portraits, link }: { kicker: string; title: string; intro: string; portraits: PortraitExample[]; link: { href: string; label: string } }) {
@@ -256,7 +289,19 @@ export function MemorialLanding({ product, faqs, picks, onLaunch, onRequestDesig
       <GuideAccordion id="memorial-materials" kicker="Metal and fitting" title="Choose the metal and the setting." sections={product.seoSections || []}>
         <MemorialMaterialLinks />
       </GuideAccordion>
-      <HomeWays subject={subject} onStartDesign={onLaunch} onRequestDesign={onRequestDesign} />
+      <OrderSteps
+        id="how-it-works"
+        kicker="How it works"
+        title="Your words. Your approval."
+        subject={subject}
+        steps={[
+          ['Add your words', 'Design it online, or send us the wording on WhatsApp and we’ll lay it out for you.'],
+          ['Check your free proof', 'Download the proof PDF to share with family, and change anything until it’s right.'],
+          ['Approve, then pay', 'We etch it into solid metal, infill it by hand and deliver it free in the UK.'],
+        ]}
+        onLaunch={onLaunch}
+        onRequestDesign={onRequestDesign}
+      />
       <PortraitStrip
         kicker="Add their portrait"
         title="A favourite face, beside their name."

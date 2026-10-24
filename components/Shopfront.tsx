@@ -452,8 +452,7 @@ function HeroRoutes() {
 // homepage sections that each explained the same thing: designing online ("Your words. Your approval."),
 // "Want us to take care of the design?" (msg 5174) and "Tell us what you want. We'll make it." (msg 5736).
 // The two routes sit side by side, so WhatsApp is as prominent as the designer (msg 5137).
-// The memorial page reuses it (CategoryLanding), with its own WhatsApp subject.
-export function HomeWays({ onStartDesign, onRequestDesign, subject = 'a plaque' }: { onStartDesign?: () => void; onRequestDesign?: () => void; subject?: string }) {
+function HomeWays({ onStartDesign, onRequestDesign }: { onStartDesign?: () => void; onRequestDesign?: () => void }) {
   return (
     <section className="shop-section shop-ways" id="how-it-works" aria-labelledby="ways-heading">
       <div className="shop-section-heading">
@@ -483,7 +482,7 @@ export function HomeWays({ onStartDesign, onRequestDesign, subject = 'a plaque' 
             <li><strong>Approve, then pay</strong><span>Ask for changes until it’s right. No obligation.</span></li>
           </ol>
           <div className="shop-design-service-actions">
-            <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
+            <ContactLink channel="whatsapp" placement="page" className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
               <WhatsAppIcon /> Design on WhatsApp
             </ContactLink>
             <a href="/design-request" className="shop-text-link" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>

@@ -2318,6 +2318,77 @@
   border: 1px solid rgba(80, 86, 78, 0.55);
   border-radius: 1px;
 }
+/* Three lines of "lettering", so each outline reads as a plaque. */
+.cat-size-plate::after {
+  content: "";
+  position: absolute;
+  inset: 30% 20%;
+  background:
+    linear-gradient(#59605a, #59605a) center top / 70% 14% no-repeat,
+    linear-gradient(#3e4540, #3e4540) center / 100% 20% no-repeat,
+    linear-gradient(#59605a, #59605a) center bottom / 55% 14% no-repeat;
+  opacity: 0.6;
+}
+
+/* How it works: three steps and both ways to start. */
+.cat-steps {
+  border-top: 1px solid var(--shop-line);
+}
+.cat-steps-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  margin: 30px 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.cat-steps-list li {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  column-gap: 6px;
+  counter-increment: step;
+}
+.cat-steps-list li::before {
+  content: "0" counter(step);
+  grid-row: span 2;
+  color: #8a6232;
+  font: italic 24px/1.15 Georgia, serif;
+}
+.cat-steps-list strong,
+.cat-steps-list span {
+  grid-column: 2;
+}
+.cat-steps-list strong {
+  font-size: 16px;
+  line-height: 1.4;
+  color: #20382e;
+}
+.cat-steps-list span {
+  margin-top: 3px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--shop-muted);
+}
+.shopfront .cat-steps .shop-hero-choices {
+  max-width: 560px;
+  margin: 0 0 24px;
+}
+.shopfront .cat-steps-more {
+  max-width: 900px;
+  font-size: 15px;
+  line-height: 1.65;
+}
+.shopfront .cat-steps-more strong {
+  color: var(--shop-ink);
+}
+.shopfront .cat-steps-more a {
+  font-weight: 600;
+  color: var(--shop-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
 .cat-size-label {
   font-size: 16px;
   font-weight: 700;
@@ -2385,7 +2456,7 @@
   margin: 28px 0 24px;
 }
 .cat-portraits {
-  background: #f1efe6;
+  border-top: 1px solid var(--shop-line);
 }
 .shopfront .cat-portraits-row img {
   height: auto;
@@ -2547,6 +2618,17 @@
   .cat-guide {
     grid-template-columns: minmax(0, 1fr);
     gap: 18px;
+  }
+  .cat-steps-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin: 22px 0 24px;
+  }
+  .shopfront .cat-steps .shop-hero-choices {
+    margin-bottom: 20px;
+  }
+  .shopfront .cat-steps-more {
+    font-size: 14px;
   }
   .cat-guide summary {
     padding: 16px 0;
