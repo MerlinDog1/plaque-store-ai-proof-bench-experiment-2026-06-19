@@ -105,7 +105,7 @@ export function HomeQualitySection() {
           decoding="async"
           alt="Close-up photograph of a real etched metal plaque, with fine engraved lines filled with dark paint on brushed metal"
         />
-        <figcaption>A real etched plaque, photographed up close.</figcaption>
+        {/* No visible caption (owner msg 5855); the alt text still describes the photo. */}
       </figure>
       <div className="shop-quality-copy">
         <p className="shop-kicker">Made in the UK · Finished by hand</p>
