@@ -1,5 +1,27 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Homepage tidy: each thing once — 24 October 2026, about 10:05 UTC
+
+- **Why:** in msg 5860 the owner sent phone screenshots of the hero category tiles and of "Find your plaque.", and said: "This like repeats on the homepage like right next to each other. Low key feel like home page is a bit of a cluster fuck now huh?"
+- **Before:** the phone homepage had 13 sections and was about 10,900 px long.
+  - The four category photos appeared twice.
+  - Three sections explained the same thing: designing online ("Your words. Your approval."), "Want us to take care of the design?" and "Tell us what you want. We'll make it."
+  - A 01/02/03 strip and the hero's starting-price line repeated the hero and the tiles.
+- **After:** the phone page has 9 sections and is 8,294 px long. Desktop has 10 sections and is 6,608 px long, down from 13 sections and 7,379 px.
+  - **Categories:** phones keep the hero "What's your plaque for?" tiles. "Find your plaque." becomes the desktop grid (`.shop-home-collections`, hidden at 720 px and below) and sits straight after the hero.
+  - On phones, the hero's separate starting-price and "See how the designer works" lines are hidden. The tile prices are now `TrackedPrice`, so `price_viewed` still fires on phones, and the tile footer carries the "see every size and price" link.
+  - **One `HomeWays` section:** "Your words. Your approval.", with two cards side by side. One is "Design it yourself, online"; the other is "Want us to take care of the design?", with WhatsApp and the design form. The "Tell us what you want. We'll make it." line sits under both.
+  - `ShopProcess`, the design-service block and `CustomAnything` are unchanged on the other pages.
+  - The reassurance strip is removed.
+  - Unchanged: quality, metals, the proof PDF, AI, portraits, FAQ and the closing section.
+- **Branch:** `codex/instaplaque-homepage-tidy-20261024` (`6aaf759`, pushed), based on `61de829`.
+- **Live** as `dpl_6ZY8UAg58abxM8VaKWRreKWMxQBY` (instaplaque-q44pidd7i).
+  - Every postbuild check passed. The `check-live-seo` strings are kept, and the `check-design-request` heading and link are still there.
+  - The staged copy was mirrored with `vercel curl` (HTML and built CSS) and screenshotted on phone and desktop.
+  - On the live phone page, the collections and hero price compute to `display: none` and the tiles show.
+  - `verify_live.py` (`BUNDLE=index-CoyOPz1a.js`) passes.
+- **Rollback:** `vercel promote dpl_5ERTMmCmnWGU4rG2U69m4zSqef74 --yes --scope dullaghan31-3959s-projects`.
+
 ## Homepage quality and material section — 24 October 2026, about 08:57 UTC
 
 - **Why:** in msg 5843 the owner said: "We need some homepage section about quality and material, like they etched in solid high quality metal in UK, Infilled by hand, laser cut for precision amazing quality etc". Portraits in Metal already had such a section and InstaPlaque had none, so it went here. The laser-cut line was also added to PIM's section.
