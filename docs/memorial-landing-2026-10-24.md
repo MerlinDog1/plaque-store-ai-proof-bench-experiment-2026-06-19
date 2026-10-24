@@ -143,3 +143,13 @@ The owner asked whether the new page was really a 10 (msg 5903). My honest answe
    - The 6 built-in preview images cost about $0.91.
 
 **Status:** staged as instaplaque-5ncih1yyd (commit 372fe63). Every Vercel postbuild check passed. The real app ran with no page errors. The preview was sent as msg 5916. **Not live**: waiting for the owner's go.
+
+**Grave tile corrected** (owner msg 5918, "The grave one doesn't fit on the cross"):
+- **Problem:** the 150 × 75 aged brass plaque overhung the cross arm.
+- **Fix:** the tile is now a polished brass 150 × 50 (Alice Grant: In loving memory of / 1933 – 2021) that sits wholly on the arm, with oak above and below it.
+  - The stencil was rendered with `output/stencil-app`. Its two screw holes were repainted in brass with `metal_screws.py`, in workspace/output/instaplaque-memorial-page-20261024.
+  - The scene brief states the fit explicitly: a plaque 50 mm tall on an arm 100 mm tall, with no overhang.
+  - All 3 built-in previews fitted. I picked v1. Cost about $0.45.
+- New file `route-grave-cross.webp`. The tile links to polished-brass-150x50-rect-plaque (from £63.50).
+- Staged as instaplaque-n5xyr1uoh (commit b4cb580): postbuild checks passed, the app ran with no errors, and the designer opens at £95.50.
+- The corrected preview was sent as msg 5922. **Not live**: waiting for the go.
