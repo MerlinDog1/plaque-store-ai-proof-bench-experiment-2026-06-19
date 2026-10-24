@@ -1,5 +1,13 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Tree page photos redone on the Gemini key — 24 October 2026
+
+- **Why:** in msg 5762 the owner said several of the overnight tree scenes "make zero sense", and asked for the Gemini key and the Nicola order's oak board and black steel ground stake in every photo.
+- **What changed:** ten new photos in `public/site-images/tree-scenes/` (the old `scenes/` folder is removed). Each shows an A5 plate with four caps on a 235 × 173 mm oak board and one 30 mm square black stake at the foot of the tree, at true scale. The tree and garden captions, the tree page hero, the fixing text and FAQ, the sitemap images and `llms.txt` are updated to match.
+- **Branch:** `codex/instaplaque-tree-scenes-20261024`.
+- **Spend:** about $1.90 on the Gemini key.
+- **More:** see [docs/tree-scenes-2026-10-24.md](docs/tree-scenes-2026-10-24.md).
+
 ## Overnight catalogue and contact upgrade: LIVE — 24 October 2026, 05:30 UTC
 
 - **What it is:** the owner's msg 5736 overnight work: 173 new catalogue photos with their own wording (22 with portraits), 10 tree and garden scenes, per-product flat images and sample PDFs, per-product copy and questions, the WhatsApp "we'll make it" band, and the new tree, sizes and wording-guide pages. See [docs/overnight-catalogue-2026-10-24.md](docs/overnight-catalogue-2026-10-24.md).
