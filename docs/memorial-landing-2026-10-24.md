@@ -152,4 +152,23 @@ The owner asked whether the new page was really a 10 (msg 5903). My honest answe
   - All 3 built-in previews fitted. I picked v1. Cost about $0.45.
 - New file `route-grave-cross.webp`. The tile links to polished-brass-150x50-rect-plaque (from £63.50).
 - Staged as instaplaque-n5xyr1uoh (commit b4cb580): postbuild checks passed, the app ran with no errors, and the designer opens at £95.50.
+
+## Second release: fixes 1, 3, 4 and the grave tile LIVE
+
+**LIVE at 15:15 UTC on 24 Oct**, at the owner's request (msg 5923, "Put it live").
+- instaplaque-n5xyr1uoh was promoted, and is now **dpl_W46YXp76C9Trjbq2o6rBNbVf8oAF** (commit b4cb580, bundle `index-CuCe7N3_.js`).
+- Before promoting, production was confirmed to be dpl_FSTHn5UUgVz51kQxE1JCwmQ1NNGq (the first memorial release), so nothing else was overwritten.
+- The intermediate candidate instaplaque-5ncih1yyd, with the overhanging grave plaque, was never promoted.
+
+**Live checks after the promote:**
+- `verify_memorial_live.py` (BUNDLE=index-CuCe7N3_.js) passed 24 of 24 page checks. These now include the new hero preload, the grave tile (route-grave-cross.webp, linking to polished-brass-150x50) and the garden tile. All 26 linked assets are fine, and the 11 memorial images are byte-identical to the repo.
+- `verify_live.py` passed: 175 product pages and 1,061 linked assets identical to the repo, feed 175 items, sitemaps, redirects and the IndexNow key.
+- `check_pages_live.cjs` ran the real app on phone and desktop for memorial, home, bench, garden, brass, tree and polished-brass-150x50. There were no page or console errors, no failed requests and no broken images.
+- "Design online" opens the designer at **£95.50** (A5 brushed stainless, 210 × 148 mm) from the memorial, garden and tree pages.
+
+**Rollback:**
+- To the first memorial release: `vercel promote dpl_FSTHn5UUgVz51kQxE1JCwmQ1NNGq --yes --scope dullaghan31-3959s-projects`.
+- To the page before the rebuild: `vercel promote dpl_6ZY8UAg58abxM8VaKWRreKWMxQBY --yes --scope dullaghan31-3959s-projects`.
+
+**Still open:** gap 2, real reviews and photos of real orders, waits on the owner sending some. After that comes applying the same sections to garden, brass and bench.
 - The corrected preview was sent as msg 5922. **Not live**: waiting for the go.
