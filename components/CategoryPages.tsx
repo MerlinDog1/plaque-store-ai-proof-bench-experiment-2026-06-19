@@ -32,7 +32,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Personalised memorial plaques',
         note: product.heroNote || 'Remember them in your own words.',
         hero: {
-          base: `${memorial}/memorial-hero-a5-stainless`,
+          base: `${category}/memorial-hero-v2`,
           alt: 'Brushed stainless steel memorial plaque reading In loving memory of Margaret Rowley, 1936 to 2023, Loved always, missed every day, on a Cotswold stone garden wall beside pink roses and lavender',
           caption: <>Shown: A5 brushed stainless steel, the plaque priced below. {seeThis('a5-brushed-steel-personalised-plaque')}</>,
         },
@@ -43,7 +43,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           title: 'Where will it go?',
           routes: [
             { href: '/bench-plaques', title: 'On a bench', image: `${memorial}/route-bench.webp`, alt: 'Polished brass memorial plaque on a wooden bench, reading Peter John Wilson, please sit awhile, enjoy the view', priceSlug: 'bench-plaques' },
-            { href: '/garden-plaques', title: 'In the garden', image: `${memorial}/route-garden-stone.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore fixed to a natural stone in a cottage-garden border of roses, lavender and catmint', priceSlug: 'garden-plaques' },
+            { href: '/garden-plaques', title: 'In the garden', image: `${category}/route-garden-stone-v2.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore fixed to a natural stone in a cottage-garden border of roses, lavender and daisies', priceSlug: 'garden-plaques' },
             { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree.webp`, alt: 'Brass tree memorial plaque for Jim Partridge on an oak board and ground stake beside a cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
             { href: '/polished-brass-150x50-rect-plaque', title: 'At a grave', image: `${memorial}/route-grave-cross.webp`, alt: 'Small polished brass memorial plaque for Alice Grant screwed onto the arm of a light oak memorial cross at a grave in a country churchyard, with white and yellow flowers', priceSlug: 'polished-brass-150x50-rect-plaque' },
           ],
@@ -120,7 +120,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           kicker: 'Choose by setting',
           title: 'Where in the garden?',
           routes: [
-            { href: '/brushed-brass-200x150-rect-plaque', title: 'On a stone', image: `${memorial}/route-garden-stone.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore fixed to a natural stone in a cottage-garden border of roses, lavender and catmint', priceSlug: 'brushed-brass-200x150-rect-plaque' },
+            { href: '/brushed-brass-200x150-rect-plaque', title: 'On a stone', image: `${category}/route-garden-stone-v2.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore fixed to a natural stone in a cottage-garden border of roses, lavender and daisies', priceSlug: 'brushed-brass-200x150-rect-plaque' },
             { href: '/orbital-brass-matt-lacquer-200x150-rect-plaque', title: 'On a fence', image: `${category}/route-garden-fence.webp`, alt: 'Orbital brass pet memorial plaque for Biscuit the cat on a weathered wooden garden fence with climbing roses, lavender and daisies', priceSlug: 'orbital-brass-matt-lacquer-200x150-rect-plaque' },
             { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree.webp`, alt: 'Brass tree memorial plaque for Jim Partridge on an oak board and ground stake beside a cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
             { href: '/bench-plaques', title: 'On a bench', image: `${memorial}/route-bench.webp`, alt: 'Polished brass memorial plaque on a wooden bench, reading Peter John Wilson, please sit awhile, enjoy the view', priceSlug: 'bench-plaques' },
@@ -163,8 +163,8 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Personalised brass plaques',
         note: 'Warm, traditional and made to last.',
         hero: {
-          base: `${category}/brass-hero`,
-          alt: 'Brushed brass memorial plaque for Fred and Elsie Bond, married 1950, on a red brick garden wall with honeysuckle and foxgloves',
+          base: `${category}/brass-hero-v2`,
+          alt: 'Brushed brass memorial plaque for Fred and Elsie Bond, married 1950, on a cream lime-rendered cottage garden wall with honeysuckle and foxgloves',
           caption: <>Shown: A5 brushed brass, the plaque priced below. {seeThis('brushed-brass-210x148-rect-plaque')}</>,
         },
         priceNote: 'A5 brushed brass, with engraving, fixings and UK delivery',
