@@ -10,6 +10,10 @@
   - The lettering now follows the designer's layout exactly: the previous set's italic small lines, and the acer's stray italic line, are gone.
 - **Spend:** about $3.02 on the Gemini key (20 pictures at about $0.15), plus the checker.
 - **More:** see [docs/tree-scenes-2026-10-24.md](docs/tree-scenes-2026-10-24.md).
+- **Live** at about 07:13 UTC as `dpl_3VdWJAfa8gA3nEUmBXg9BbcDJuH5` (instaplaque-eybvr7w6r), from `9a8f235`. The Vercel build ran every postbuild check.
+  - The staged copy was checked with `vercel curl`. The tree page links 21 new files and the garden page 8, with no `tree-plaques/` links. All 30 photos match the repository byte for byte, the share image is the cherry, and the old folder returns 404.
+  - `verify_live.py` (`BUNDLE=index-zBn8nx0p.js`, now aware of `tree-plaque-photos/`) passes on 175 product pages and 1,061 linked assets. `/site-images/tree-plaques/` returns 404.
+- **Rollback:** `vercel promote dpl_7kR3o75nbkb5ofso99srcKyf9ZWX --yes --scope dullaghan31-3959s-projects`, which brings back the previous close-ups.
 
 ## Tree page photos as close-ups — 24 October 2026, about 06:40 UTC
 
