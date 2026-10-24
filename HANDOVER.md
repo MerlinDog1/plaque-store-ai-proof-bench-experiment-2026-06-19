@@ -1,5 +1,19 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Homepage quality and material section — 24 October 2026, about 08:57 UTC
+
+- **Why:** in msg 5843 the owner said: "We need some homepage section about quality and material, like they etched in solid high quality metal in UK, Infilled by hand, laser cut for precision amazing quality etc". Portraits in Metal already had such a section and InstaPlaque had none, so it went here. The laser-cut line was also added to PIM's section.
+- **What changed:**
+  - `HomeQualitySection` (in `components/FeatureSections.tsx`): kicker "Made in the UK · Finished by hand", heading "Solid metal, made to stay.", and four points. The points are solid brass or stainless steel, etched into the metal, infilled by hand, and laser cut for precision.
+  - The photo is real, not AI: Portraits in Metal's Millie close-up, from the same studio. It is copied to `public/site-images/quality/real-etched-detail-{600,1200}.webp`, with no AI tag.
+  - It sits after "Find your plaque.". The "Brass or stainless steel?" section now follows it, so quality and material read as one block. The rest of the order is unchanged.
+- **Branch:** `codex/instaplaque-quality-section-20261024` (`ec62957`, pushed), based on the live tree release `15deca5`.
+- **Live** as `dpl_iWG2pjpuC3iToJE8HyUM7cGvJ5k4` (instaplaque-b0ddlqdlm). The Vercel build ran every postbuild check.
+  - The staged copy had the section in order, its CSS rules and byte-identical photos.
+  - `verify_live.py` (`BUNDLE=index-C4Pag9-L.js`) passes: 175 product pages and 1,061 assets.
+  - Live screenshots on desktop and phone were sent to the owner.
+- **Rollback:** `vercel promote dpl_3VdWJAfa8gA3nEUmBXg9BbcDJuH5 --yes --scope dullaghan31-3959s-projects`.
+
 ## Tree close-ups remade with the designer's built-in realistic preview — 24 October 2026, about 07:10 UTC
 
 - **Why:** in msg 5796 the owner asked whether the tree photos used "the plaques Ai thing that has the ai image stuff built in", because "it makes way better results that way". They hadn't: the close-ups below were made with my own prompt and a plate face I had drawn.
