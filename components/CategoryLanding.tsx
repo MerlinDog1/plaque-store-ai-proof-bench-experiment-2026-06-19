@@ -168,7 +168,7 @@ export function SizeLinksFold({ title, offers }: { title: string; offers: Offer[
 export type ExampleItem = { title: string; copy: string; image: string; alt: string };
 
 /** Photos of a plaque type in place, four or five across on computers and a sideways row on phones. */
-export function ExamplesRow({ id, kicker, title, intro, items }: { id?: string; kicker: string; title: string; intro?: string; items: ExampleItem[] }) {
+export function ExamplesRow({ id, kicker, title, intro, items }: { id?: string; kicker: string; title: string; intro?: React.ReactNode; items: ExampleItem[] }) {
   return (
     <section className="shop-section cat-examples" id={id} aria-labelledby="cat-examples-heading">
       <p className="shop-kicker">{kicker}</p>
@@ -313,7 +313,7 @@ export type LandingConfig = {
   priceNote: string;
   trust?: string[];
   routes?: { kicker: string; title: string; routes: PlaceRoute[]; more?: React.ReactNode };
-  examples?: { kicker: string; title: string; intro?: string; items: ExampleItem[] };
+  examples?: { kicker: string; title: string; intro?: React.ReactNode; items: ExampleItem[] };
   sizes: { kicker?: string; title: string; intro: string; sizes: SizeStep[]; note: React.ReactNode; more?: React.ReactNode };
   steps?: [string, string][];
   portraits?: boolean;

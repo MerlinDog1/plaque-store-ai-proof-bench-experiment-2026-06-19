@@ -19,6 +19,7 @@ import { downloadCorelSvg, downloadPdf, svgToPngBase64, svgToProofPngBase64 } fr
 import { createManualTypography, readSvgInscription } from './services/manualTypography';
 import { getInscriptionLayout } from './services/inscriptionLayout';
 import { estimatePlaquePrice } from './services/pricing';
+import { DESIGN_WITH_STAKE_PARAM } from './services/groundStake';
 import { DEFAULT_PRODUCT_SLUG, DeliveryAddress, MockOrder, ProductFamily, SiteView, getLandingPageBySlug, getPlaqueSummaryTitle, getProductBySlug, makeMockOrder, productFamilies, seoLandingPages } from './services/commerce';
 import { isBenchPlaqueFormat, normalizeCurvedFixings } from './services/plaqueRules';
 import { BENCH_SAFE_MARGIN_PERCENT } from './services/safeMargin';
@@ -1236,6 +1237,22 @@ const App: React.FC = () => {
       window.history.pushState({}, '', publicRouteWithGoogleClick('/design'));
     }
   };
+
+  // The tree page's "/design?backing=stake" link: open on the plaque its "Design online" starts with, already on the
+  // light oak board and the black steel ground stake (owner msg 6394). Proof and checkout links take precedence.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (window.location.pathname !== '/design' || params.get(DESIGN_WITH_STAKE_PARAM.name) !== DESIGN_WITH_STAKE_PARAM.value
+      || params.get('proof') || params.get('order')) return;
+    const product = productFamilies.find(item => item.slug === 'memorial-plaques');
+    if (!product) return;
+    handleLaunchProduct({ ...product, preset: { ...product.preset, wood: true, woodTone: 'light', woodEdge: 'bevel', groundStake: true } });
+    params.delete(DESIGN_WITH_STAKE_PARAM.name);
+    const rest = params.toString();
+    window.history.replaceState(window.history.state, '', `/design${rest ? `?${rest}` : ''}${window.location.hash}`);
+    // Once, on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const persistCheckoutOrder = (order: MockOrder) => {
     setMockOrders(prev => {

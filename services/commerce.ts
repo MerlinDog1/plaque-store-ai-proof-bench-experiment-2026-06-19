@@ -10,6 +10,7 @@ import {
 import { estimatePlaquePrice } from './pricing';
 import { vettedCataloguePhotos } from './vettedPhotos.mjs';
 import {
+  GROUND_STAKE_PRICE,
   getCheckoutPriceBreakdown,
   getCheckoutQuoteReasons,
 } from './checkoutPolicy.mjs';
@@ -707,7 +708,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     relatedProductSlug: 'memorial-plaques',
     proofCta: 'Start a tree plaque proof',
     sections: [
-      { title: 'Fix it beside the tree, not to it', copy: 'Screws and wire damage a growing tree, and the bark slowly swallows anything fixed to it. Stand the plaque beside it instead: we fix the plate to a solid oak board on a chunky black steel ground stake that pushes straight into the soil at the foot of the tree, as in the photos below. Ask us for the stake on WhatsApp. A short post, a nearby wall or a fence work too.' },
+      { title: 'Fix it beside the tree, not to it', copy: `Screws and wire damage a growing tree, and the bark slowly swallows anything fixed to it. Stand the plaque beside it instead: we fix the plate to a solid oak board on a chunky black steel ground stake that pushes straight into the soil at the foot of the tree, as in the photos below. In the designer, add the oak board and then the stake (£${GROUND_STAKE_PRICE}) at the Backing step. A short post, a nearby wall or a fence work too.` },
       { title: 'Choose a size for the words and the setting', copy: 'A 200 × 150 mm plaque suits a name, dates and a line about them. A5 (210 × 148 mm) is the most popular size for a memorial tree, with room for a dedication such as “This cherry tree was planted in loving memory of”. Choose A4 (297 × 210 mm) for a school, a community orchard or several names, or a round plaque for a short dedication.' },
       { title: 'Pick a finish that suits the garden', copy: 'Stainless steel keeps its silver colour outdoors. Brass is warm and traditional and slowly mellows outside; aged brass starts darker and keeps developing gently. An oak backing board suits a sheltered spot in the garden; in an open, exposed position choose a metal plaque without backing.' },
       { title: 'Check first if the tree is in a public place', copy: 'Parks, churchyards, schools and cemeteries usually have rules for memorial trees and plaques. Ask the site manager or council about the permitted size, material, wording and fixing before ordering; many councils run their own tree dedication schemes. Approving our proof does not replace their permission.' },
@@ -720,7 +721,7 @@ export const seoLandingPages: SeoLandingPage[] = [
       { title: 'A silver birch for Moss.', copy: 'A5 polished brass on an oak board and ground stake, in the bark mulch.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-birch-v2.webp', alt: 'Polished brass pet memorial plaque reading In loving memory of Moss, 2009 to 2023, forever by our side, on an oak board and ground stake beside a young silver birch' },
     ],
     faqs: [
-      { question: 'Can I fix a plaque to a tree?', answer: 'We recommend not fixing it to the tree itself. Screws and wire damage a growing tree and the bark grows over them. Stand the plaque beside the tree on an oak board and black steel ground stake (ask us on WhatsApp), or fix it to a short post, a nearby wall or a fence.' },
+      { question: 'Can I fix a plaque to a tree?', answer: `We recommend not fixing it to the tree itself. Screws and wire damage a growing tree and the bark grows over them. Stand the plaque beside the tree on an oak board and black steel ground stake (add both in the designer’s Backing step; the stake is £${GROUND_STAKE_PRICE}), or fix it to a short post, a nearby wall or a fence.` },
       { question: 'What size should a memorial tree plaque be?', answer: 'A5 (210 × 148 mm) suits most memorial trees: a dedication line, a name, dates and a short message. Choose 200 × 150 mm for shorter wording, or A4 for a school, a community planting or several names.' },
       { question: 'What should a tree memorial plaque say?', answer: 'Most start with a dedication such as “This oak was planted in memory of”, then the name, the dates and a short line about them, such as “who loved this garden”. Send us a few words on WhatsApp if you would like help with the wording.' },
       { question: 'Will the plaque last outdoors?', answer: 'Yes. Our brass and stainless steel plaques are 1.5 mm solid metal with etched, paint-filled lettering. Stainless steel keeps its colour and brass mellows slowly outside. For an open, exposed spot choose a metal plaque without wood backing.' },

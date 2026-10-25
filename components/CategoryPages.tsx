@@ -4,6 +4,8 @@ import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { ContactLink } from './ContactOptions';
 import { MemorialMaterialLinks, memorialInscriptions } from './MemorialGuide';
 import { SizeLinksFold, type ExampleItem, type LandingConfig } from './CategoryLanding';
+import { GROUND_STAKE_PRICE } from '../services/pricing';
+import { DESIGN_WITH_STAKE_HREF } from '../services/groundStake';
 
 // What each category page shows, on the layout of the memorial page (owner msg 5876) and brought up to its standard
 // (msg 5927, 24 Oct 2026: "bring every other page up to that standard. Sense check each Pic and redo if dumb.
@@ -272,13 +274,14 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           // Plain wording (owner msgs 6270, 6313); also the memorial and garden pages' "By a tree" tile.
           base: `${category}/tree-hero-v2`,
           alt: 'Brushed brass memorial plaque with a scalloped border reading This cherry tree was planted in loving memory of Jim Partridge, 1947 to 2025, on an oak board and black steel ground stake beside a young cherry tree in blossom',
-          caption: <>Shown: A5 brushed brass on an oak board, {priceOf('brushed-brass-210x148-rect-light-wood-plaque')}, with a ground stake (ask us). {seeThis('brushed-brass-210x148-rect-light-wood-plaque')}</>,
+          // The ground stake is chosen in the designer's Backing step once there is a board (owner msgs 6378, 6394).
+          caption: <>Shown: A5 brushed brass on an oak board, {priceOf('brushed-brass-210x148-rect-light-wood-plaque')}, plus £{GROUND_STAKE_PRICE} for the ground stake. {seeThis('brushed-brass-210x148-rect-light-wood-plaque')}</>,
         },
-        priceNote: 'A5 stainless steel plate, with engraving and UK delivery; the oak board and stake cost extra',
+        priceNote: `A5 stainless steel plate, with engraving and UK delivery; the oak board and the £${GROUND_STAKE_PRICE} ground stake are extra`,
         examples: {
           kicker: 'Memorial tree plaques in place',
           title: 'Beside the tree, never fixed to it.',
-          intro: 'Each plate stands on an oak board on a black steel ground stake, pushed into the soil at the foot of the tree. Ask us for the stake on WhatsApp.',
+          intro: <>Each plate stands on an oak board on a black steel ground stake, pushed into the soil at the foot of the tree. Add both in the designer’s Backing step; the stake is £{GROUND_STAKE_PRICE}. <a href={DESIGN_WITH_STAKE_HREF}>Design one on a board and stake</a>.</>,
           // The cherry tree is the top photo, so the row starts with the next one.
           items: examples.filter(example => !example.image.includes('-cherry')).map(example => ({ ...example, image: example.image.replace(/\.webp$/, '-900.webp') })),
         },
@@ -291,7 +294,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
             { slug: 'brushed-stainless-200x200-circle-plaque', label: '200 mm round', widthMm: 200, heightMm: 200, fits: 'A short dedication', shape: 'circle' },
             { slug: 'brushed-stainless-297x210-rect-plaque', label: 'A4 · 297 × 210 mm', widthMm: 297, heightMm: 210, fits: 'A school, an orchard or several names' },
           ],
-          note: <>Prices are for brushed stainless steel plates, including engraving, fixings and UK delivery. An oak board is priced on each plaque; ask us for the ground stake.</>,
+          note: <>Prices are for brushed stainless steel plates, including engraving, fixings and UK delivery. An oak board is priced on each plaque, and the ground stake adds £{GROUND_STAKE_PRICE}: <a href={DESIGN_WITH_STAKE_HREF}>design one on a board and stake</a>.</>,
         },
         portraits: true,
         wording: {
