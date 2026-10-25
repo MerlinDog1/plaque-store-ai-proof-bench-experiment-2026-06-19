@@ -6,6 +6,7 @@ import { composeEditorialTypography } from "./editorialComposer";
 import { getGeminiClient } from "./geminiClient";
 import { PLAQUE_TEXT_MODEL } from './aiModels.mjs';
 import { buildTypographyPrompt } from './typographyPrompt';
+import { hasGroundStake } from './pricing';
 
 const getAIClient = getGeminiClient;
 
@@ -1851,7 +1852,11 @@ export const generateRealisticView = async (
     if (state.shape === Shape.Heart) backingShape = "Heart";
 
     backingDesc = `Solid Wood Backing Board. Material: ${tone}. Edge: ${edge}. Shape: ${backingShape} (following the contour of the metal plaque with a small border). The metal plate is centered on this wood base.`;
+    if (hasGroundStake(state)) {
+      backingDesc += " The board is mounted on ONE chunky black powder-coated 30mm square steel ground stake, fixed by a bracket to the back of the board at its bottom centre. From the front only the part below the board shows: a single straight black square post running down from the middle of the board's bottom edge into the ground. The plaque stands in the ground on this stake; it is not fixed to a wall, post or tree.";
+    }
   }
+  const groundStakeScene = hasGroundStake(state);
 
   let hardwareDesc = "Hidden adhesive (VHB) - Floating appearance";
   if (state.shape === Shape.Heart) {
@@ -1924,10 +1929,14 @@ Product details:
 - If the material is brushed stainless, show clean fine horizontal satin grain and muted reflection, with no chrome reflections, scratches, scuffs, stains, fingerprints, or wear marks. If the material is mirror polished stainless, show a clean smooth mirror-polished reflection contrast instead, with no brush grain, damage marks, or exaggerated stripe pattern.
 
 Scene:
-- Close-up studio product photo, almost front-facing, with only a very slight natural perspective.
-- The full plaque must be visible in frame with breathing room on all sides. Do not crop off any edge, corner, cap, screw, border, text, portrait, or wood backing.
+${groundStakeScene ? `- Close-up outdoor product photo, almost front-facing, with only a very slight natural perspective, like a garden memorial plaque photographed at eye level.
+- The plaque on its wood board stands on the single black steel ground stake, pushed straight into the lawn, soil or bark mulch at the bottom of the frame. Show the stake from the bottom of the board down to where it enters the ground.
+- The full plaque must be visible in frame with breathing room on all sides. Do not crop off any edge, corner, cap, screw, border, text, portrait, wood backing, or the stake.` : `- Close-up studio product photo, almost front-facing, with only a very slight natural perspective.
+- The full plaque must be visible in frame with breathing room on all sides. Do not crop off any edge, corner, cap, screw, border, text, portrait, or wood backing.`}
 - Keep the plaque flat and rectangular/oval/circular/heart-shaped as specified. Do not bend it, warp it, rotate it dramatically, place it on a table, or view it from a steep side angle.
-- Plain white or light plaster wall background unless the user brief explicitly asks for a different setting.
+${groundStakeScene
+    ? "- A softly blurred garden behind (lawn, flower bed or a young tree), with no people and no hands, unless the user brief explicitly asks for a different setting."
+    : "- Plain white or light plaster wall background unless the user brief explicitly asks for a different setting."}
 - Soft realistic reflections and shadows.
 - Treat the attached stencil as artwork to preserve, not inspiration to reinterpret. Do not rewrite, duplicate, invent, misspell, or rearrange the plaque text.
 - The generated image is unacceptable if it looks like a blank sheet, washed-out frosted glass, ghost text, or a barely visible engraving. It must read as a real finished product photograph with the proof artwork plainly visible.

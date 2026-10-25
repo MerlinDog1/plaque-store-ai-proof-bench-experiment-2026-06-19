@@ -6,6 +6,8 @@ import { getInscriptionLayout } from '../services/inscriptionLayout';
 import { fitTextToEllipse } from '../services/circularTextFit';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { sanitizeSvgMarkup } from '../services/svgSanitizer.mjs';
+import { GROUND_STAKE_WIDTH_MM, hasGroundStake } from '../services/pricing';
+import { groundStakeVisibleMm } from '../services/groundStake';
 
 interface Props {
   state: PlaqueState;
@@ -167,6 +169,56 @@ async function loadSvgTextFonts(group: SVGGElement) {
   await document.fonts.ready;
 }
 
+// Draws the black steel ground stake under the board (owner msg 6378: "show it like in Nicola's order"),
+// fading out where it goes into the ground.
+// The plaque's own <svg> (the ref every proof and production export clones) sits inside unchanged, so the
+// stake never reaches the artwork files; without a stake the plaque <svg> is returned exactly as before.
+function GroundStakeFrame({ enabled, totalW, totalH, children }: {
+  enabled: boolean;
+  totalW: number;
+  totalH: number;
+  children: React.ReactElement;
+}) {
+  if (!enabled) return children;
+  const visibleH = groundStakeVisibleMm(totalH);
+  const stakeX = totalW / 2 - GROUND_STAKE_WIDTH_MM / 2;
+  const stakeTop = totalH - 2;
+  const stakeH = visibleH + 2;
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox={`0 0 ${totalW} ${totalH + visibleH}`}
+      preserveAspectRatio="xMidYMid meet"
+      overflow="visible"
+      data-ground-stake="preview"
+      className="h-full max-h-full w-full max-w-full transition-all duration-300"
+    >
+      <defs>
+        <linearGradient id="groundStakeSteel" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#0b0c0d" />
+          <stop offset="0.3" stopColor="#3b3f43" />
+          <stop offset="0.58" stopColor="#1f2225" />
+          <stop offset="1" stopColor="#090a0b" />
+        </linearGradient>
+        <linearGradient id="groundStakeFade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="1" />
+          <stop offset="0.62" stopColor="#fff" stopOpacity="1" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <mask id="groundStakeMask" maskUnits="userSpaceOnUse" x={stakeX} y={stakeTop} width={GROUND_STAKE_WIDTH_MM} height={stakeH}>
+          <rect x={stakeX} y={stakeTop} width={GROUND_STAKE_WIDTH_MM} height={stakeH} fill="url(#groundStakeFade)" />
+        </mask>
+      </defs>
+      <g className="ground-stake" mask="url(#groundStakeMask)" aria-hidden="true">
+        <rect x={stakeX} y={stakeTop} width={GROUND_STAKE_WIDTH_MM} height={stakeH} fill="url(#groundStakeSteel)" />
+        {/* The board's shadow across the top of the stake. */}
+        <rect x={stakeX} y={stakeTop} width={GROUND_STAKE_WIDTH_MM} height={Math.min(12, visibleH * 0.12)} fill="#000" opacity="0.35" />
+      </g>
+      {children}
+    </svg>
+  );
+}
+
 const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, inscription }, ref) => {
   const [previewZoom, setPreviewZoom] = useState(100);
   const previewViewportRef = useRef<HTMLDivElement>(null);
@@ -174,6 +226,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
   const totalW = state.width + woodExtra;
   const totalH = state.height + woodExtra;
   const offset = woodExtra / 2;
+  const showGroundStake = hasGroundStake(state);
   const woodFill = state.woodTone === 'dark' ? "url(#woodDarkTexture)" : "url(#woodLightTexture)";
   const woodChamfer = Math.max(4, Math.min(8, offset * 0.55));
 
@@ -649,13 +702,18 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             height: `max(1px, calc(${effectivePreviewZoom}% - var(--preview-gutter, 0px)))`,
           }}
         >
+          <GroundStakeFrame enabled={showGroundStake} totalW={totalW} totalH={totalH}>
           <svg
             ref={ref}
             xmlns="http://www.w3.org/2000/svg"
             viewBox={`0 0 ${totalW} ${totalH}`}
             preserveAspectRatio="xMidYMid meet"
             overflow="visible"
-            className="h-full max-h-full w-full max-w-full transition-all duration-300"
+            x={showGroundStake ? 0 : undefined}
+            y={showGroundStake ? 0 : undefined}
+            width={showGroundStake ? totalW : undefined}
+            height={showGroundStake ? totalH : undefined}
+            className={showGroundStake ? undefined : "h-full max-h-full w-full max-w-full transition-all duration-300"}
           >
         <defs>
           <linearGradient id="brushedBrass" x1="0" y1="0" x2="1" y2="0.08">
@@ -1163,6 +1221,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
           ))}
         </g>
           </svg>
+          </GroundStakeFrame>
         </div>
       </div>
     </div>

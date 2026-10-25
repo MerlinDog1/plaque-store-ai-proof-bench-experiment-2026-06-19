@@ -99,6 +99,8 @@ export interface PriceBreakdown {
   total: number;
   base: number;
   wood: number;
+  // Ground stake add-on; absent on orders made before it existed.
+  stake?: number;
   delivery: number;
   quoteRequired: boolean;
   quoteReasons: string[];

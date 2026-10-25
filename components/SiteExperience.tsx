@@ -216,6 +216,12 @@ type AdminStatusFilter = 'active' | 'all' | 'paid' | 'in_production' | 'ready_to
 type AdminSortMode = 'newest' | 'oldest' | 'due' | 'status' | 'value';
 
 const statusLabel = (value?: string) => String(value || 'not_started').replace(/_/g, ' ');
+// What to fit behind the plate: the wood board and, if chosen, the black steel ground stake.
+const backingLabel = (state?: Partial<PlaqueState>) => {
+  if (!state?.wood) return 'None';
+  const board = state.woodTone === 'dark' ? 'Dark wood board' : 'Light wood board';
+  return state.groundStake === true ? `${board} + ground stake` : board;
+};
 
 const orderDate = (order: PaidOrder) => {
   const raw = order.paidAt || order.createdAt || order.updatedAt || '';
@@ -1644,6 +1650,7 @@ function CheckoutPage({
                 <span><strong>{getPlaqueSummaryTitle(state, selectedProduct.title)}</strong></span>
                 <span>Base plaque <strong>{formatPrice(breakdown.base)}</strong></span>
                 {breakdown.wood > 0 && <span>Wood backing <strong>{formatPrice(breakdown.wood)}</strong></span>}
+                {(breakdown.stake || 0) > 0 && <span>Black steel ground stake <strong>{formatPrice(breakdown.stake || 0)}</strong></span>}
                 <span>UK delivery <strong>Included</strong></span>
                 <span className="commerce-summary-total">Total <strong>{formatPrice(breakdown.total)}</strong></span>
               </div>
@@ -2387,6 +2394,7 @@ function AdminPage() {
                     </div>
                     <div className="admin-console__data-grid">
                       <div><span>Product</span><strong>{getPlaqueSummaryTitle(selectedOrder.plaqueState, selectedOrder.productTitle)}</strong></div>
+                      <div><span>Backing</span><strong>{backingLabel(selectedOrder.plaqueState)}</strong></div>
                       <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
                       <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
                       <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
@@ -2517,6 +2525,7 @@ function AdminPage() {
               </div>
               <div className="admin-console__data-grid">
                 <div><span>Product</span><strong>{getPlaqueSummaryTitle(selectedOrder.plaqueState, selectedOrder.productTitle)}</strong></div>
+                <div><span>Backing</span><strong>{backingLabel(selectedOrder.plaqueState)}</strong></div>
                 <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
                 <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
                 <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>

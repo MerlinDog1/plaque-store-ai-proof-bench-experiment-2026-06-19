@@ -186,7 +186,8 @@ const woodDetails = (order) => {
   const tone = state.woodTone === "light" ? "Light wood" : "Dark wood";
   const edge = state.woodEdge ? `${labelFromSlug(state.woodEdge)} edge` : "";
   const size = boardWidth && boardHeight ? `${boardWidth} x ${boardHeight} mm board` : "";
-  return [tone, edge, size].filter(Boolean).join(", ");
+  const stake = state.groundStake === true ? "with black steel ground stake (30 mm square)" : "";
+  return [tone, edge, size, stake].filter(Boolean).join(", ");
 };
 
 const plaqueSizeText = (order) => {

@@ -183,6 +183,8 @@ const canonicalProductionSpec = (state) => ({
   fixing: state.fixing,
   fixingHoleCount: state.fixingHoleCount,
   wood: state.wood,
+  // Only present when chosen, so orders started before the stake existed still verify at payment.
+  ...(state.groundStake === true ? { groundStake: true } : {}),
 });
 
 const assertClientPriceHint = (value, canonicalPence, field, multiplier = 1) => {

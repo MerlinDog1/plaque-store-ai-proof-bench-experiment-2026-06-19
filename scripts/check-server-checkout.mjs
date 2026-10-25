@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   CheckoutRequestError,
   ManualQuoteRequiredError,
+  assertServerCheckoutOrderIsPayable,
   buildServerCheckoutOrder,
   checkoutRecoveryTokenMatches,
   createServerOrderId,
@@ -367,5 +368,57 @@ const collisionSafeOrder = await createPendingOrder(basePayload(), {
 });
 assert.deepEqual(insertAttempts, [firstServerId, secondServerId]);
 assert.equal(collisionSafeOrder.id, secondServerId, "A collision must allocate a new ID, not overwrite an order.");
+
+// Ground stake (owner msg 6378): a flat £35 on top of the wood board, and only with a board.
+const woodState = { ...baseState, width: 210, height: 148, wood: true, woodTone: "light", woodEdge: "bevel" };
+const stakeState = { ...woodState, groundStake: true };
+const woodBreakdown = getCheckoutPriceBreakdown(woodState, "In loving memory");
+const stakeBreakdown = getCheckoutPriceBreakdown(stakeState, "In loving memory");
+assert.equal(woodBreakdown.stake, 0);
+assert.equal(stakeBreakdown.stake, 35);
+assert.equal(stakeBreakdown.total, woodBreakdown.total + 35, "The stake adds exactly £35.");
+assert.equal(stakeBreakdown.wood, woodBreakdown.wood, "The board price is unchanged by the stake.");
+assert.equal(stakeBreakdown.base, woodBreakdown.base, "The plate price is unchanged by the stake.");
+const strayStakeBreakdown = getCheckoutPriceBreakdown({ ...baseState, groundStake: true }, "In loving memory");
+assert.equal(strayStakeBreakdown.stake, 0, "No board, no stake charge.");
+assert.equal(strayStakeBreakdown.total, baseBreakdown.total);
+
+const stakePayload = (stateChanges, breakdown) => {
+  const payload = basePayload();
+  return {
+    ...payload,
+    totalPence: Math.round(breakdown.total * 100),
+    orderSnapshot: {
+      ...payload.orderSnapshot,
+      total: breakdown.total,
+      state: { ...payload.orderSnapshot.state, ...stateChanges },
+      priceBreakdown: { ...breakdown },
+    },
+  };
+};
+const stakeOrder = buildServerCheckoutOrder(stakePayload(stakeState, stakeBreakdown), { orderId: firstServerId, now: fixedNow });
+assert.equal(stakeOrder.totalPence, Math.round(stakeBreakdown.total * 100));
+assert.equal(stakeOrder.plaqueState.groundStake, true);
+assert.equal(stakeOrder.priceBreakdown.stake, 35);
+assert.equal(stakeOrder.metadata.productionSpec.groundStake, true, "Production must see the stake.");
+assert.equal(assertServerCheckoutOrderIsPayable(stakeOrder).totalPence, stakeOrder.totalPence);
+assert.throws(
+  () => buildServerCheckoutOrder(stakePayload(stakeState, woodBreakdown), { orderId: firstServerId, now: fixedNow }),
+  (error) => error instanceof CheckoutRequestError && error.code === "checkout_price_changed",
+  "A page showing the price without the stake must be refused, not charged.",
+);
+const strayStakeOrder = buildServerCheckoutOrder(stakePayload({ groundStake: true }, baseBreakdown), { orderId: firstServerId, now: fixedNow });
+assert.equal(strayStakeOrder.plaqueState.groundStake, false, "A stake without a board is dropped.");
+assert.equal(strayStakeOrder.metadata.productionSpec.groundStake, undefined);
+assert.equal(strayStakeOrder.totalPence, baseTotalPence);
+assert.throws(
+  () => buildServerCheckoutOrder(stakePayload({ ...stakeState, groundStake: "yes" }, stakeBreakdown), { orderId: firstServerId, now: fixedNow }),
+  /ground stake/,
+);
+// Orders started before the stake existed have no groundStake anywhere and must still pass at payment.
+const legacyOrder = structuredClone(canonicalOrder);
+delete legacyOrder.plaqueState.groundStake;
+assert.equal(legacyOrder.metadata.productionSpec.groundStake, undefined);
+assert.equal(assertServerCheckoutOrderIsPayable(legacyOrder).totalPence, baseTotalPence);
 
 console.log("Server checkout enforces canonical pricing/artifacts, durable storage gates, protected recovery, idempotency, and strict Stripe payment finalization.");

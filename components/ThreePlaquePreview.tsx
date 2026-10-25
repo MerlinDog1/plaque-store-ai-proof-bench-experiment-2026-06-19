@@ -4,6 +4,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Fixing, Material, PlaqueState, Shape } from '../types';
 import { outlinePreviewTextLayer } from '../services/exportService';
 import { getFixingPositions } from '../services/fixingGeometry';
+import { GROUND_STAKE_WIDTH_MM, hasGroundStake } from '../services/pricing';
+import { groundStakeVisibleMm } from '../services/groundStake';
 
 interface Props {
   state: PlaqueState;
@@ -464,6 +466,7 @@ function getSceneDimensions(state: PlaqueState) {
   const plaqueHeight = state.height * unitPerMm;
   const totalWidthMm = state.width + (state.wood ? WOOD_BACKING_EXTRA_MM : 0);
   const totalHeightMm = state.height + (state.wood ? WOOD_BACKING_EXTRA_MM : 0);
+  const stakeVisibleMm = hasGroundStake(state) ? groundStakeVisibleMm(totalHeightMm) : 0;
   return {
     unitPerMm,
     plaqueWidth,
@@ -473,10 +476,15 @@ function getSceneDimensions(state: PlaqueState) {
     metalDepth: METAL_THICKNESS_MM * unitPerMm,
     woodDepth: WOOD_BACKING_THICKNESS_MM * unitPerMm,
     capDepth: CAP_THICKNESS_MM * unitPerMm,
+    stakeVisible: stakeVisibleMm * unitPerMm,
+    stakeSize: GROUND_STAKE_WIDTH_MM * unitPerMm,
     totalWidthMm,
     totalHeightMm,
   };
 }
+
+// Camera framing covers the board plus any ground stake showing below it.
+const sceneFitHeight = (dims: ReturnType<typeof getSceneDimensions>) => dims.totalHeight + dims.stakeVisible;
 
 function makeExtrudedMesh(
   shape: THREE.Shape,
@@ -649,7 +657,7 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
       const fieldOfView = THREE.MathUtils.degToRad(camera.fov);
       const dims = getSceneDimensions(state);
       const shapeWidth = dims.totalWidth;
-      const shapeHeight = dims.totalHeight;
+      const shapeHeight = sceneFitHeight(dims);
       const distanceForHeight = shapeHeight / (2 * Math.tan(fieldOfView / 2));
       const distanceForWidth = shapeWidth / (2 * Math.tan(fieldOfView / 2) * Math.max(0.1, camera.aspect));
       const fittedDistance = Math.max(distanceForHeight, distanceForWidth) * 1.42;
@@ -714,11 +722,13 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
       const rect = host.getBoundingClientRect();
       camera.aspect = Math.max(1, rect.width) / Math.max(1, rect.height);
       const fieldOfView = THREE.MathUtils.degToRad(camera.fov);
-      const distanceForHeight = dims.totalHeight / (2 * Math.tan(fieldOfView / 2));
+      const distanceForHeight = sceneFitHeight(dims) / (2 * Math.tan(fieldOfView / 2));
       const distanceForWidth = dims.totalWidth / (2 * Math.tan(fieldOfView / 2) * Math.max(0.1, camera.aspect));
       camera.position.z = THREE.MathUtils.clamp(Math.max(distanceForHeight, distanceForWidth) * 1.42, 5.1, 12);
       camera.updateProjectionMatrix();
     }
+    // Centre the board and stake together in the view.
+    existingGroup.position.y = dims.stakeVisible / 2;
 
     const tone = materialTone[state.material];
 
@@ -774,6 +784,21 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
         applyWoodTexture(faceMaterial, woodTexture);
         host.dataset.woodTexture = 'scan-body';
       });
+
+      if (dims.stakeVisible > 0) {
+        // Black steel ground stake on a bracket behind the board, running up behind its lower half.
+        const stakeLength = dims.totalHeight * 0.45 + dims.stakeVisible;
+        const stake = new THREE.Mesh(
+          new THREE.BoxGeometry(dims.stakeSize, stakeLength, dims.stakeSize),
+          new THREE.MeshStandardMaterial({ color: 0x1c1e20, roughness: 0.6, metalness: 0.3 }),
+        );
+        stake.position.set(
+          0,
+          -dims.totalHeight / 2 - dims.stakeVisible + stakeLength / 2,
+          -dims.woodDepth - dims.stakeSize / 2,
+        );
+        existingGroup.add(stake);
+      }
     }
 
     if (state.fixing === Fixing.Caps || state.fixing === Fixing.Screws) {

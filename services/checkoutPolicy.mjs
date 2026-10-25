@@ -13,6 +13,10 @@ const WOOD_AREA_RATE_EX_VAT_PER_M2 = 447.4;
 const WOOD_MINIMUM_UNIT_EX_VAT = 10;
 const WOOD_CARRIAGE_EX_VAT = 15;
 const WOOD_PRICE_MATCH_TOLERANCE_MM = 0.55;
+// Black steel ground stake fixed to the back of the wood board, as on the Nicola order: the owner's
+// flat £35 add-on on top of the board (Telegram msgs 5360, 5395, 6378).
+export const GROUND_STAKE_PRICE = 35;
+export const GROUND_STAKE_WIDTH_MM = 30;
 
 const onePoundTestPlaqueEnabled = () => (
   String(globalThis.process?.env?.ONE_POUND_TEST_PLAQUE_ENABLED || "").toLowerCase() === "true"
@@ -135,6 +139,11 @@ export const estimateWoodAddOn = (state) => {
   return roundUpToNearestHalfPound(supplierCostWithVat / (1 - WOOD_TARGET_GROSS_MARGIN));
 };
 
+// The stake mounts the wood board, so it only counts (and is only offered) when there is one.
+export const hasGroundStake = (state) => Boolean(
+  state && state.wood === true && state.groundStake === true && state.shape !== "heart",
+);
+
 export const estimatePlaquePrice = (state) => {
   if (onePoundTestPlaqueEnabled()) return 1;
 
@@ -147,11 +156,12 @@ export const estimatePlaquePrice = (state) => {
     fitsProductionBed(state) ? baseRetail : baseRetail * OVERSIZED_BED_UPLIFT,
   );
   const woodAddOn = state.wood && state.shape !== "heart" ? estimateWoodAddOn(state) : 0;
+  const groundStake = hasGroundStake(state) ? GROUND_STAKE_PRICE : 0;
 
-  return roundUpToNearestHalfPound(metalRetail + woodAddOn);
+  return roundUpToNearestHalfPound(metalRetail + woodAddOn + groundStake);
 };
 
-export const estimatePlaqueBasePrice = (state) => estimatePlaquePrice({ ...state, wood: false });
+export const estimatePlaqueBasePrice = (state) => estimatePlaquePrice({ ...state, wood: false, groundStake: false });
 
 export const getCheckoutQuoteReasons = (state, inscription = "") => {
   const reasons = [];
@@ -170,14 +180,16 @@ export const getCheckoutQuoteReasons = (state, inscription = "") => {
 export const getCheckoutPriceBreakdown = (state, inscription = "") => {
   const total = estimatePlaquePrice(state);
   const wood = state.wood
-    ? estimatePlaquePrice({ ...state, wood: true }) - estimatePlaquePrice({ ...state, wood: false })
+    ? estimatePlaquePrice({ ...state, wood: true, groundStake: false }) - estimatePlaquePrice({ ...state, wood: false, groundStake: false })
     : 0;
+  const stake = hasGroundStake(state) ? GROUND_STAKE_PRICE : 0;
   const quoteReasons = getCheckoutQuoteReasons(state, inscription);
   return {
     total,
     wood,
+    stake,
     delivery: 0,
-    base: total - wood,
+    base: total - wood - stake,
     quoteRequired: quoteReasons.length > 0,
     quoteReasons,
   };
@@ -206,6 +218,9 @@ export const validateCheckoutPlaqueState = (input) => {
     throw new Error("Circular plaques must use the same width and height.");
   }
   if (typeof input.wood !== "boolean") throw new Error("Invalid wood backing selection.");
+  if (input.groundStake !== undefined && typeof input.groundStake !== "boolean") {
+    throw new Error("Invalid ground stake selection.");
+  }
   if (typeof input.memorialImageEnabled !== "boolean") throw new Error("Invalid artwork selection.");
   if (input.fixingHoleCount !== 2 && input.fixingHoleCount !== 4) {
     throw new Error("Unsupported fixing hole count.");
@@ -219,6 +234,8 @@ export const validateCheckoutPlaqueState = (input) => {
     material,
     fixing,
     wood: input.wood,
+    // Older designs have no stake field; a stake without a board is dropped rather than charged.
+    groundStake: hasGroundStake({ ...input, shape }),
     memorialImageEnabled: input.memorialImageEnabled,
     fixingHoleCount: input.fixingHoleCount,
   };

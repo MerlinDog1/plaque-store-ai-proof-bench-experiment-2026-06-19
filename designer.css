@@ -654,6 +654,10 @@
   .designer-mode .proofbench-proof-pad svg {
     filter: drop-shadow(0 18px 18px #3d463526);
   }
+  /* With a ground stake the plaque sits inside the stake frame, which already casts the shadow. */
+  .designer-mode .proofbench-proof-pad svg[data-ground-stake] > svg {
+    filter: none;
+  }
   .designer-mode .proofbench-proof-pad .proof-preview-scale {
     --preview-gutter: 32px;
   }

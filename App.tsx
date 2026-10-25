@@ -592,6 +592,10 @@ const App: React.FC = () => {
           next.memorialImageShape = MemorialImageShape.Heart;
         }
       }
+      // The ground stake fixes to the wood board, so it goes when the board does.
+      if (!next.wood) {
+        next.groundStake = false;
+      }
       return next;
     });
   };

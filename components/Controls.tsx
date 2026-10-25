@@ -25,7 +25,7 @@ import {
 import type { GenerationPhase } from '../services/geminiService';
 import { BENCH_SAFE_MARGIN_PERCENT, DEFAULT_SAFE_MARGIN_PERCENT, SAFE_MARGIN_PRESETS, getSafeMarginMm, getSafeMarginsMm, getSafeMarginPercent } from '../services/safeMargin';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
-import { estimatePlaqueBasePrice, estimateWoodAddOn } from '../services/pricing';
+import { GROUND_STAKE_PRICE, estimatePlaqueBasePrice, estimateWoodAddOn, hasGroundStake } from '../services/pricing';
 import { isOnePoundTestPlaque } from '../services/onePoundTestPlaque.mjs';
 import { OwnerTestCheckout } from './OwnerTestCheckout';
 
@@ -172,7 +172,7 @@ const STEP_COPY = [
   {
     eyebrow: 'Step 5 of 7',
     title: 'Wood',
-    detail: 'Choose whether the plaque needs a timber backing board and edge finish.',
+    detail: 'Choose whether the plaque needs a timber backing board, and a ground stake to stand it in the garden.',
   },
   {
     eyebrow: 'Step 6 of 7',
@@ -840,7 +840,8 @@ export const Controls: React.FC<Props> = ({
     wood: false,
   });
   const woodAddOnPrice = estimateWoodAddOn(state);
-  const baseProofPrice = Math.max(0, price - (state.wood ? woodAddOnPrice : 0));
+  const groundStakeChosen = hasGroundStake(state);
+  const baseProofPrice = Math.max(0, price - (state.wood ? woodAddOnPrice : 0) - (groundStakeChosen ? GROUND_STAKE_PRICE : 0));
   const turnaroundEstimate = getProductionEstimate(state);
   const checkoutReady = isProductionReady && proofApproved && !checkoutSubmitting;
 
@@ -1848,6 +1849,27 @@ export const Controls: React.FC<Props> = ({
               </div>
             )}
           </div>
+          {/* Only offered once a board is chosen: the stake fixes to the back of the board (owner msg 6378). */}
+          {state.wood && !isHeartPlaque && !isBenchPlaque && (
+            <div className="ground-stake-option rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-black">Ground stake</div>
+                  <div className="text-xs text-[#6a746d]">
+                    A black steel stake fixed to the back of the board, so the plaque stands in a lawn or flower bed, or beside a tree. Adds {formatPrice(GROUND_STAKE_PRICE)}.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => update('groundStake', !groundStakeChosen)}
+                  aria-pressed={groundStakeChosen}
+                  className={pillClass(groundStakeChosen)}
+                >
+                  {groundStakeChosen ? `Added ${formatPrice(GROUND_STAKE_PRICE)}` : `Add ${formatPrice(GROUND_STAKE_PRICE)}`}
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       )}
 
@@ -2285,6 +2307,12 @@ export const Controls: React.FC<Props> = ({
                   <strong>{formatPrice(woodAddOnPrice)}</strong>
                 </div>
               )}
+              {groundStakeChosen && (
+                <div className="flex items-center justify-between gap-3 border-b border-[rgba(84,72,52,0.12)] pb-2">
+                  <span>Black steel ground stake</span>
+                  <strong>{formatPrice(GROUND_STAKE_PRICE)}</strong>
+                </div>
+              )}
               <div className="flex items-center justify-between gap-3 border-b border-[rgba(84,72,52,0.12)] pb-2">
                 <span>UK delivery</span>
                 <strong>Included</strong>
@@ -2439,7 +2467,7 @@ export const Controls: React.FC<Props> = ({
             </div>
             <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
               <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Wood</div>
-              <div className="mt-1 text-lg font-black">{state.wood ? `+${formatPrice(woodAddOnPrice)}` : 'None'}</div>
+              <div className="mt-1 text-lg font-black">{state.wood ? `+${formatPrice(woodAddOnPrice)}${groundStakeChosen ? ` + stake ${formatPrice(GROUND_STAKE_PRICE)}` : ''}` : 'None'}</div>
             </div>
             <div className="rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-4">
               <div className="text-xs font-black uppercase tracking-wide text-[#6a746d]">Layout</div>

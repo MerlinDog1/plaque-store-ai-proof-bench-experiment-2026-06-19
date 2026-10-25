@@ -4,7 +4,14 @@ import {
   estimatePlaquePrice as estimatePlaquePriceFromPolicy,
   estimateWoodAddOn as estimateWoodAddOnFromPolicy,
   fitsProductionBed as fitsProductionBedFromPolicy,
+  hasGroundStake as hasGroundStakeFromPolicy,
 } from './checkoutPolicy.mjs';
+
+export { GROUND_STAKE_PRICE, GROUND_STAKE_WIDTH_MM } from './checkoutPolicy.mjs';
+
+export function hasGroundStake(state: Partial<PlaqueState> | null | undefined) {
+  return hasGroundStakeFromPolicy(state);
+}
 
 export function fitsProductionBed(state: Pick<PlaqueState, 'width' | 'height'>) {
   return fitsProductionBedFromPolicy(state);

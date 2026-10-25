@@ -197,6 +197,9 @@ export interface PlaqueState {
   wood: boolean;
   woodTone: 'light' | 'dark';
   woodEdge: 'square' | 'bevel';
+  // Black steel ground stake on the back of the wood board; only counts with a board (hasGroundStake).
+  // Optional so saved designs and orders from before it existed still load.
+  groundStake?: boolean;
   ageIntensity: number;
   designStyle: DesignStyle;
   typographyEngine: TypographyEngine;
@@ -248,6 +251,7 @@ export const INITIAL_STATE: PlaqueState = {
   wood: false,
   woodTone: 'light',
   woodEdge: 'square',
+  groundStake: false,
   ageIntensity: 0.5,
   designStyle: DesignStyle.Auto,
   typographyEngine: TypographyEngine.GeminiAuthored,
