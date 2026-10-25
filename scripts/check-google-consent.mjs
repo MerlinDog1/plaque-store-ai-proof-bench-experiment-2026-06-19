@@ -17,8 +17,8 @@ for (const file of files) {
   assert.equal(scripts.filter(script => script[1].includes('function updateGoogleConsent()')).length, 1);
   assert.doesNotMatch(bootstrap, /ga-disable|googleTagsStarted/);
 
-  function run({ url = origin, consent = null, storageThrows = false, referrer = '' } = {}) {
-    const appended = [], listeners = new Map(), map = new Map([[consentKey, consent]]);
+  function run({ url = origin, consent = null, storageThrows = false, referrer = '', internal = null } = {}) {
+    const appended = [], listeners = new Map(), map = new Map([[consentKey, consent], ['instaplaque-internal-v1', internal]]);
     const context = { URL, Date, location: new URL(url), addEventListener(name, listener) { listeners.set(name, listener); },
       localStorage: { getItem(key) { if (storageThrows) throw Error('Storage blocked'); return map.get(key) ?? null; } },
       document: { referrer, createElement: () => ({}), head: { appendChild(script) { appended.push(script); } } } };
@@ -74,6 +74,16 @@ for (const file of files) {
     checkConsent(h.queue()[3], 'update', 'denied');
   }
   assert.equal(run({ url: 'https://www.instaplaque.co.uk/' }).appended.length, 1);
+  // The owner's own browsers (marked earlier, or arriving with ?internal=on) load no Google tags and configure nothing;
+  // ?internal=off loads them again straight away, before the app clears the mark (owner msg 6422).
+  for (const [path, internal, loads] of [['/', 'yes', false], ['/memorial-plaques?internal=on', null, false],
+    ['/?internal=off', 'yes', true], ['/?internal=maybe', 'yes', false], ['/', 'no', true]]) {
+    const h = run({ url: origin + path, consent: 'yes', internal });
+    assert.equal(h.appended.length, loads ? 1 : 0, `${path} (internal ${internal})`);
+    assert.equal(h.queue().some(args => ['js', 'config', 'event'].includes(args[0])), loads, `${path} (internal ${internal})`);
+    checkConsent(h.queue()[3], 'update', 'granted');
+  }
+  assert.equal(run({ consent: 'yes', storageThrows: true }).appended.length, 1, 'Unreadable storage is not an internal mark');
   // Campaign tags and Google's ad-click identifiers reach GA4 (or ad clicks read as organic visits); anything else
   // in the address, such as an email, does not.
   const url = origin + '/design?view=design&utm_source=google&utm_medium=cpc&utm_campaign=memorial&utm_content=ad&utm_term=plaque&gclid=synthetic-click&email=private&gad_source=1&gbraid=synthetic-app&wbraid=synthetic-web&fbclid=other#private';
@@ -86,5 +96,5 @@ for (const file of files) {
   assert.equal(adConfig.page_referrer, 'https://www.google.com');
   assert.equal(ga.page_referrer, origin);
   assert.equal(h.context.location.href, url, 'Redacting GA4 must not rewrite the click-bearing browser URL');
-  console.log(`PASS ${file}: consent ordering, public loading, saved/late consent, revocation, storage failure, private/preview exclusions, one loader, URL redaction and ad-click IDs kept`);
+  console.log(`PASS ${file}: consent ordering, public loading, saved/late consent, revocation, storage failure, private/preview exclusions, owner's own browsers excluded, one loader, URL redaction and ad-click IDs kept`);
 }

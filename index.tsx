@@ -7,7 +7,11 @@ import './shopfront.css';
 import './designer.css';
 import { redactAnalyticsEvent } from './services/analyticsPrivacy.mjs';
 import { analyticsConsent, startSiteAnalytics } from './services/posthogAnalytics';
-import { OPTIONAL_AD_CONSENT_CHANGED } from './services/metaPixel';
+import { OPTIONAL_AD_CONSENT_CHANGED, isInternalBrowser } from './services/metaPixel';
+import { applyInternalSwitch } from './services/internalTraffic';
+
+// Before any analytics starts: ?internal=on / ?internal=off marks or clears the owner's own browser.
+applyInternalSwitch();
 
 const analyticsHosts = new Set([
   'instaplaque.co.uk',
@@ -16,9 +20,10 @@ const analyticsHosts = new Set([
 
 let vercelAnalyticsStarted = false;
 const startVercelAnalytics = () => {
-  if (vercelAnalyticsStarted || !analyticsHosts.has(window.location.hostname) || analyticsConsent() !== 'yes') return;
+  if (vercelAnalyticsStarted || !analyticsHosts.has(window.location.hostname) || analyticsConsent() !== 'yes'
+    || isInternalBrowser()) return;
   vercelAnalyticsStarted = true;
-  inject({ beforeSend: event => analyticsConsent() === 'yes' ? redactAnalyticsEvent(event) : null });
+  inject({ beforeSend: event => analyticsConsent() === 'yes' && !isInternalBrowser() ? redactAnalyticsEvent(event) : null });
 };
 startVercelAnalytics();
 window.addEventListener(OPTIONAL_AD_CONSENT_CHANGED, startVercelAnalytics);

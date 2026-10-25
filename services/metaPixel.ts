@@ -1,6 +1,12 @@
 export const META_PIXEL_ID = '2766586460430567';
 export const META_CONSENT_KEY = 'instaplaque-meta-consent';
 export const OPTIONAL_AD_CONSENT_CHANGED = 'instaplaque:optional-ad-consent-changed';
+// The owner's own browsers are left out of every statistic (owner msg 6422, 25 Oct 2026: "Is there a way to hide my
+// views"). ?internal=on marks a browser (services/internalTraffic.ts); index.html's Google tag reads the same key.
+export const INTERNAL_BROWSER_KEY = 'instaplaque-internal-v1';
+export function isInternalBrowser(): boolean {
+  try { return localStorage.getItem(INTERNAL_BROWSER_KEY) === 'yes'; } catch { return false; }
+}
 type Pixel = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; loaded: boolean; version: string; push?: Pixel };
 declare global { interface Window { fbq?: Pixel; _fbq?: Pixel } }
 let initialized = false;
@@ -16,7 +22,7 @@ export function safeMetaPage(): boolean {
     (!document.referrer || (() => { try { const r = new URL(document.referrer); return !r.search && !/proof|order|admin|receipt/i.test(r.pathname); } catch { return false; } })());
 }
 export function enableMeta(): boolean {
-  if (metaConsent() !== 'yes' || !safeMetaPage()) return false;
+  if (metaConsent() !== 'yes' || isInternalBrowser() || !safeMetaPage()) return false;
   if (initialized) return true;
   if (!window.fbq) {
     const q = function (...args: unknown[]) { if (q.callMethod) q.callMethod(...args); else q.queue.push(args); } as Pixel;

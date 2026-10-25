@@ -17,7 +17,7 @@ const order = { id: 'synthetic-order-reference', paymentStatus: 'paid',
   customerName: 'PRIVATE-NAME', customerEmail: 'PRIVATE-EMAIL', inscription: 'PRIVATE-WORDING' };
 const returnUrl = origin + '/order-confirmed?order=' + order.id + '&session_id=' + order.stripeCheckoutSessionId;
 
-function mainHarness({ url = returnUrl, consent = 'yes', map = new Map(),
+function mainHarness({ url = returnUrl, consent = 'yes', internal = false, map = new Map(),
   noReply = false, storageThrows = false, forgeReplies = false, crypto = webcrypto } = {}) {
   const frames = [], messages = [], listeners = new Set();
   const storage = {
@@ -43,7 +43,7 @@ function mainHarness({ url = returnUrl, consent = 'yes', map = new Map(),
     },
     body: { appendChild(frame) { frames.push(frame); queueMicrotask(() => frame.onload()); } },
   };
-  const context = { exports: {}, require: () => ({ metaConsent: () => consent,
+  const context = { exports: {}, require: () => ({ metaConsent: () => consent, isInternalBrowser: () => internal,
     OPTIONAL_AD_CONSENT_CHANGED: 'instaplaque:optional-ad-consent-changed' }),
     window: w, document, localStorage: storage, URL, TextEncoder, Uint8Array, Map, Set };
   vm.runInNewContext(mainCode, context);
@@ -70,7 +70,7 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
   for (const url of [returnUrl, origin + '/order-confirmed', origin + '/admin',
     origin + '/proof/private', origin + '/?proof=private', origin + '/?view=checkout']) {
     const scripts = [], window = { location: new URL(url), addEventListener() {} };
-    const context = { window, location: window.location, localStorage: { getItem: () => 'yes' }, URL, Date, document: { referrer: '', createElement: () => ({}),
+    const context = { window, location: window.location, localStorage: { getItem: key => key === 'instaplaque-internal-v1' ? null : 'yes' }, URL, Date, document: { referrer: '', createElement: () => ({}),
       head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
     vm.runInNewContext(bootstrap, context);
@@ -80,7 +80,7 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
   }
   {
     const scripts = [], window = { location: new URL(origin + '/brass-plaques?utm_source=ad&untrusted=private#secret'), addEventListener() {} };
-    const context = { window, location: window.location, localStorage: { getItem: () => 'yes' }, URL, Date, document: { referrer: origin + '/?proof=private',
+    const context = { window, location: window.location, localStorage: { getItem: key => key === 'instaplaque-internal-v1' ? null : 'yes' }, URL, Date, document: { referrer: origin + '/?proof=private',
       createElement: () => ({}), head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
     vm.runInNewContext(bootstrap, context);
@@ -157,7 +157,7 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
     assert.equal(h.frames.length, 0);
   }
   for (const options of [
-    { consent: 'no' }, { consent: null }, { url: origin + '/admin' },
+    { consent: 'no' }, { consent: null }, { internal: true }, { url: origin + '/admin' },
     { url: origin + '/order-confirmed?order=' + order.id },
     { url: returnUrl.replace('cs_live_synthetic123', 'cs_live_other') },
     { url: returnUrl.replace(origin, 'https://preview.vercel.app') },
@@ -168,7 +168,7 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
     assert.equal(await h.track(order), false, JSON.stringify(options));
     assert.equal(h.frames.length, 0);
   }
-  console.log('PASS unpaid/refunded/test/malformed orders, rejected/missing consent and non-production/private visits');
+  console.log('PASS unpaid/refunded/test/malformed orders, rejected/missing consent, the owner\'s own browsers and non-production/private visits');
 
   h = mainHarness({ noReply: true, forgeReplies: true });
   assert.equal(await h.track(order), false, 'Forged messages cannot mark a conversion');

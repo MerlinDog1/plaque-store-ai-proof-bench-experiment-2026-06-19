@@ -1,5 +1,5 @@
 import { productFamilies, seoLandingPages } from './commerce';
-import { OPTIONAL_AD_CONSENT_CHANGED, metaConsent } from './metaPixel';
+import { OPTIONAL_AD_CONSENT_CHANGED, isInternalBrowser, metaConsent } from './metaPixel';
 import { businessContact } from './shopInformation';
 
 // Public ingestion token, NOT a personal/API management credential.
@@ -80,6 +80,8 @@ function getSession(): Session {
   const now = Date.now();
   let isTest = false;
   try { isTest = sessionStorage.getItem(qaKey) === 'yes'; } catch { /* Default to ordinary traffic. */ }
+  // The owner's own browsers (?internal=on) are recorded as tests, which every saved report leaves out.
+  isTest = isTest || isInternalBrowser();
   if (!session) {
     try {
       const saved = JSON.parse(localStorage.getItem(sessionKey) || 'null');

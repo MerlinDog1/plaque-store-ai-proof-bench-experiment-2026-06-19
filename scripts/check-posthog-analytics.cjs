@@ -20,14 +20,15 @@ function setup(url = 'https://instaplaque.co.uk/', saved = storage()) {
     fetch: async (url, options) => { requests.push({ url, options, payload: JSON.parse(options.body) }); return { ok: true }; },
     require: name => name === './commerce' ? { productFamilies: [{slug:'memorial-plaques'}], seoLandingPages: [{slug:'brass-plaques'}] }
       : name === './shopInformation' ? shopInformation
-      : { OPTIONAL_AD_CONSENT_CHANGED: 'consent', metaConsent: () => saved.getItem('instaplaque-meta-consent') },
+      : { OPTIONAL_AD_CONSENT_CHANGED: 'consent', metaConsent: () => saved.getItem('instaplaque-meta-consent'),
+        isInternalBrowser: () => saved.getItem('instaplaque-internal-v1') === 'yes' },
   };
   vm.runInNewContext(code, sandbox);
   return { api: sandbox.exports, requests, google, sandbox, saved, win, advanceTime: ms => { timeOffset += ms; } };
 }
-function contactLink(href, placement = 'hero', reference = 'IP-A1B2C3D4E5') {
-  const attributes = { href, 'data-contact-placement': placement, 'data-contact-reference': reference };
-  return { getAttribute: name => attributes[name] ?? null };
+function contactLink(href, placement = 'hero', reference = 'IP-A1B2C3D4E5', extra = {}) {
+  const attributes = { href, 'data-contact-placement': placement, 'data-contact-reference': reference, ...extra };
+  return { getAttribute: name => attributes[name] ?? null, hasAttribute: name => Object.hasOwn(attributes, name) };
 }
 function clickContact(s, link, { type = 'click', button = 0, detail = 1, cancelled = false } = {}) {
   const event = new Event(type, { cancelable: true });
@@ -73,6 +74,15 @@ const flush = () => new Promise(resolve => setImmediate(resolve));
   assert.equal(reload.requests.length, 1, 'Reload pageview without duplicate visit');
   const qa = setup(); qa.sandbox.sessionStorage.setItem('instaplaque-analytics-qa', 'yes'); qa.api.setAnalyticsConsent(true);
   assert.ok(qa.requests.every(r => r.payload.properties.is_test === true));
+  // The owner's own browsers (?internal=on) are recorded as tests and never reach GA4 (owner msg 6422).
+  const own = setup(); own.saved.setItem('instaplaque-internal-v1', 'yes'); own.api.setAnalyticsConsent(true);
+  own.api.trackSiteEvent('designer_started');
+  own.api.trackSiteEvent('contact_clicked', { channel: 'whatsapp', placement: 'hero' });
+  assert.ok(own.requests.length >= 3 && own.requests.every(r => r.payload.properties.is_test === true), 'Internal browsers are recorded as tests');
+  assert.equal(own.google.length, 0, 'Internal browsers send no Google funnel events');
+  const ordinary = setup('https://instaplaque.co.uk/', own.saved);
+  own.saved.removeItem('instaplaque-internal-v1'); ordinary.api.startSiteAnalytics();
+  assert.ok(ordinary.requests.length > 0 && ordinary.requests.every(r => r.payload.properties.is_test === false), 'Clearing the mark counts the browser again');
   const google = [], funnel = setup('https://instaplaque.co.uk/design?email=private@example.test');
   funnel.win.gtag = (...args) => google.push(args);
   funnel.api.trackSiteEvent('proof_download_prepared',{format:'pdf'});
@@ -152,6 +162,9 @@ const flush = () => new Promise(resolve => setImmediate(resolve));
   clickContact(contacts, contactLink('mailto:hello@instaplaque.co.uk'), {button:1});
   clickContact(contacts, contactLink('mailto:hello@instaplaque.co.uk'), {cancelled:true});
   assert.equal(contacts.google.length,contactCount,'Only the intended WhatsApp target and genuine mail/phone actions count');
+  // The WhatsApp QR window's own "Open WhatsApp" link: the contact was recorded when the window opened (owner msg 6356).
+  clickContact(contacts, contactLink('https://wa.me/447464843841', 'hero', 'IP-A1B2C3D4E5', { 'data-contact-counted': '' }));
+  assert.equal(contacts.google.length,contactCount,'A link already counted by the QR window is not counted twice');
   clickContact(contacts, contactLink('mailto:hello@instaplaque.co.uk', 'PRIVATEPLACEMENT', 'PRIVATEREFERENCE'));
   assert.equal(contacts.google.at(-1)[2].placement,undefined);
   assert.equal(contacts.google.at(-1)[2].contact_reference,undefined);

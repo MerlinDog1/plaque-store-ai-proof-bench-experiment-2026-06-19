@@ -22,6 +22,13 @@
     || ['proof', 'order', 'session_id'].some(function (key) { return analyticsUrl.searchParams.has(key); })
     || ['admin', 'checkout', 'order'].includes(analyticsUrl.searchParams.get('view'));
   var onLiveSite = ['instaplaque.co.uk', 'www.instaplaque.co.uk'].includes(location.hostname);
+  // The owner's own browsers load no Google tags: ?internal=on marks a browser and ?internal=off counts it again
+  // (services/internalTraffic.ts stores the choice when the app starts).
+  var internalSwitch = analyticsUrl.searchParams.get('internal');
+  var internalBrowser = internalSwitch === 'on';
+  if (internalSwitch !== 'off') {
+    try { internalBrowser = internalBrowser || localStorage.getItem('instaplaque-internal-v1') === 'yes'; } catch (_) {}
+  }
 
   function updateGoogleConsent() {
     var allowed = false;
@@ -38,7 +45,7 @@
   window.addEventListener('instaplaque:optional-ad-consent-changed', updateGoogleConsent);
   window.addEventListener('storage', updateGoogleConsent);
 
-  if (onLiveSite && !privateAnalyticsPage) {
+  if (onLiveSite && !privateAnalyticsPage && !internalBrowser) {
     gtag('js', new Date());
     gtag('config', 'AW-18288208905');
 

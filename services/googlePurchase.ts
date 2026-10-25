@@ -1,4 +1,4 @@
-import { metaConsent, OPTIONAL_AD_CONSENT_CHANGED } from './metaPixel';
+import { isInternalBrowser, metaConsent, OPTIONAL_AD_CONSENT_CHANGED } from './metaPixel';
 
 export { OPTIONAL_AD_CONSENT_CHANGED };
 
@@ -17,7 +17,8 @@ const pending = new Map<string, Promise<boolean>>();
 const storagePrefix = 'instaplaque-ga4-purchase-v1:';
 
 function validCheckoutReturn(order: PurchaseOrder): boolean {
-  if (typeof window === 'undefined' || metaConsent() !== 'yes') return false;
+  // The owner's own browsers (?internal=on) never report purchases to Google.
+  if (typeof window === 'undefined' || metaConsent() !== 'yes' || isInternalBrowser()) return false;
   const url = new URL(window.location.href);
   return ['instaplaque.co.uk', 'www.instaplaque.co.uk'].includes(url.hostname)
     && url.protocol === 'https:'
