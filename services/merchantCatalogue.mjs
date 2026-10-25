@@ -68,5 +68,5 @@ export const merchantOffers = entries;
 // Bump it whenever those images are redrawn in place, so Google fetches them again (24 Oct 2026: v=2; v=3 when the
 // memorial page's eight products got new example wording, owner msg 6056; v=4 for the second round, msg 6085; v=5 for
 // the bench page's seven, msg 6132; v=6 when they took the simpler wording, msgs 6189-6192; v=7 for the garden page's
-// picks and fence plaque, msg 6281). Product pages use it too.
-export const merchantImageQuery = '?v=7';
+// picks and fence plaque, msg 6281; v=8 for the brass and stainless pages' plaques). Product pages use it too.
+export const merchantImageQuery = '?v=8';

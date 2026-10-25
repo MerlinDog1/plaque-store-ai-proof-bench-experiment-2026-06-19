@@ -402,6 +402,7 @@ function LandingExamples({ examples, kicker, title }: { examples: LandingExample
 // Picks for the category pages: real catalogue pages with their photos. Each mixes metals, finishes, borders, shapes
 // and wood backings, settings that make sense for the wording, and nothing shown twice on a page (owner msg 5927).
 // Phones show the first four, so those four are the most varied.
+// The brass and stainless pages have no picks: their four finish tiles are the plaques shown (owner msg 6270).
 const productPicks: Record<string, { kicker: string; title: string; intro: string; slugs: string[] }> = {
   // Four picks, each one photographed on the wall, shed or gate it is fixed to, so every photo on the page is one the
   // owner has seen (owner msg 6270: "too many [images] realistically for me to root out the bad ones").
@@ -412,10 +413,6 @@ const productPicks: Record<string, { kicker: string; title: string; intro: strin
   'memorial-plaques': { kicker: 'Memorial plaques', title: 'Memorial plaques, shown with example wording.', intro: 'From a short bench dedication to a family memorial with an engraved portrait. Open any plaque for its sizes, finishes and a sample proof.',
     // Wall memorials on wood with the scalloped border, two of them on our workshop bench (owner msgs 6001, 6085).
     slugs: ['brushed-stainless-210x148-rect-dark-wood-plaque', 'aged-brass-400x300-rect-light-wood-plaque', 'polished-brass-250x150-oval-plaque', 'polished-stainless-210x297-rect-dark-wood-plaque', 'aged-brass-148x210-rect-dark-wood-plaque', 'polished-brass-200x150-rect-light-wood-plaque', 'polished-brass-148x210-rect-light-wood-plaque', 'brushed-stainless-150x50-rect-plaque'] },
-  'brass-plaques': { kicker: 'Brass plaques', title: 'Brass plaques, shown in place.', intro: 'Brushed, polished, orbital and aged brass, with and without wood backing. Open any plaque for its sizes, backing options and a sample proof.',
-    slugs: ['polished-brass-300x200-rect-plaque', 'brushed-brass-297x210-rect-dark-wood-plaque', 'aged-brass-400x300-rect-plaque', 'brushed-brass-250x150-oval-plaque', 'brushed-brass-210x297-rect-light-wood-plaque', 'polished-brass-250x150-oval-plaque', 'orbital-brass-matt-lacquer-400x300-rect-plaque', 'aged-brass-210x148-rect-plaque'] },
-  'stainless-steel-plaques': { kicker: 'Stainless steel plaques', title: 'Stainless steel plaques, shown in place.', intro: 'Brushed and polished stainless steel, with and without wood backing, each shown with its own example wording.',
-    slugs: ['brushed-stainless-400x300-rect-plaque', 'polished-stainless-250x150-oval-plaque', 'brushed-stainless-297x210-rect-dark-wood-plaque', 'brushed-stainless-200x200-circle-plaque', 'polished-stainless-200x50-rect-plaque', 'polished-stainless-148x210-rect-light-wood-plaque', 'brushed-stainless-300x200-rect-plaque', 'polished-stainless-148x210-rect-plaque'] },
   'custom-plaques': { kicker: 'Ovals, circles and larger plaques', title: 'More shapes, shown in place.', intro: 'Standard ovals, circles and large plaques, each with its own example wording. For anything else, send us the size and shape on WhatsApp.',
     slugs: ['polished-stainless-250x150-oval-plaque', 'polished-brass-200x200-circle-plaque', 'brushed-brass-250x150-oval-plaque', 'aged-brass-200x200-circle-plaque', 'polished-brass-250x150-oval-plaque', 'brushed-brass-200x200-circle-plaque', 'orbital-brass-matt-lacquer-250x150-oval-plaque', 'aged-brass-400x300-rect-plaque'] },
   // Each with a fuller dedication on a real bench, newer and older, photographed from in front the way a visitor sees

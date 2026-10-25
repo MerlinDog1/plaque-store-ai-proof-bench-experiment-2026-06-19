@@ -615,13 +615,13 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-brass-297x210-rect-dark-wood-plaque": {
   "lines": [
-   "Millbrook Cricket Club",
-   "PAVILION",
-   "Opened on 14 May 2025",
-   "by club president Alan Fairweather",
-   "Built with the support of our members"
+   "In loving memory of",
+   "FRANK & JOAN",
+   "HOLLIS",
+   "Frank 1928 – 2009",
+   "Joan 1931 – 2020"
   ],
-  "use": "an opening plaque"
+  "use": "a memorial plaque"
  },
  "brushed-brass-297x210-rect-light-wood-plaque": {
   "lines": [
@@ -877,13 +877,12 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-stainless-200x150-rect-light-wood-plaque": {
   "lines": [
-   "Congratulations",
-   "DAN & ELLA",
-   "on your wedding day",
-   "14 June 2025",
-   "Love from Mum and Dad"
+   "In loving memory of",
+   "SKYE",
+   "2010 – 2024",
+   "Our faithful friend"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a pet memorial"
  },
  "brushed-brass-200x150-rect-dark-wood-plaque": {
   "lines": [
@@ -1236,11 +1235,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-brass-210x148-rect-plaque": {
   "lines": [
-   "In memory of",
-   "FRED & ELSIE BOND",
-   "married 1950",
-   "who are remembered here",
-   "with love from their family"
+   "In loving memory of",
+   "ELSIE BOND",
+   "1925 – 2014"
   ],
   "use": "a memorial plaque"
  },
@@ -1269,12 +1266,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "In loving memory of",
    "JAMES ORMEROD",
    "1941 – 2019",
-   "Signalman, volunteer and friend,",
-   "who kept this little station running",
-   "for forty happy years"
+   "Forever in our hearts"
   ],
-  "use": "a memorial plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "brushed-stainless-148x210-rect-plaque": {
   "lines": [
@@ -1359,14 +1353,13 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-stainless-297x210-rect-plaque": {
   "lines": [
-   "This wall was rebuilt",
-   "by the volunteers of",
-   "MILLBROOK",
-   "HERITAGE TRUST",
-   "2023",
-   "using the original bricks of 1832"
+   "In loving memory of",
+   "PETER & JUNE",
+   "WALKER",
+   "Peter 1930 – 2015",
+   "June 1933 – 2022"
   ],
-  "use": "a heritage plaque"
+  "use": "a memorial plaque"
  },
  "brushed-brass-297x210-rect-plaque": {
   "lines": [
@@ -1392,15 +1385,12 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "orbital-brass-matt-lacquer-297x210-rect-plaque": {
   "lines": [
-   "In memory of",
-   "GEORGE ALFRED",
-   "WINTERBOTTOM",
-   "1925 – 2016",
-   "Farmer of Lower Slad for 60 years",
-   "and his wife Dorothy"
+   "This pavilion was",
+   "officially opened by",
+   "JEAN HARPER MBE",
+   "on 12 April 2025"
   ],
-  "use": "a memorial plaque",
-  "portrait": true
+  "use": "an opening plaque"
  },
  "aged-brass-297x210-rect-plaque": {
   "lines": [
@@ -1518,11 +1508,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-brass-200x150-rect-plaque": {
   "lines": [
-   "Welcome to",
-   "HOLLY HOUSE",
-   "Built 1902",
-   "Home of the Wilson family",
-   "Please ring the bell"
+   "HOLLY",
+   "HOUSE"
   ],
   "use": "a house or building name"
  },
@@ -1679,7 +1666,7 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-stainless-250x150-oval-plaque": {
   "lines": [
-   "In memory of",
+   "In loving memory of",
    "LILIAN BOYD",
    "1928 – 2017"
   ],

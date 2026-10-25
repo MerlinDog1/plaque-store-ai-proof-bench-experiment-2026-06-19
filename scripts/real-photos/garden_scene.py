@@ -159,7 +159,8 @@ def bilinear(img, u, v, chunk=500_000):
 def guide(p, out_dir):
     g, s = p['guide'], p['surface']
     o = garden.OFFERS[p['offer']]
-    pw, ph = o['width'], o['height']
+    # A wood-backed plaque's stencil includes its board, 12.5 mm larger than the plate on every side.
+    pw, ph = o['width'] + (25 if o['wood'] else 0), o['height'] + (25 if o['wood'] else 0)
     xc, yc = s['plaque_at']
     W, H = g['size'][0] * SS, g['size'][1] * SS
     f_px = g['lens'] / (36 if W > H else 24) * W  # full-frame focal length; square frames use the 24 mm height

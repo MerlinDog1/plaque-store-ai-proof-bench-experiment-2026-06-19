@@ -1131,7 +1131,7 @@ const cataloguePhotoVersions: Record<string, number> = {
   'a5-brushed-steel-personalised-plaque': 2,
   // Version 2: real-looking photos with new example wording and a setting from each plaque's story (owner msg 6056);
   // version 3: redone at their true thickness (owner msg 6085).
-  'aged-brass-210x148-rect-plaque': 3,
+  'aged-brass-210x148-rect-plaque': 4, // version 4: the brass page's aged tile, plain wording, no portrait (msg 6281)
   'polished-brass-250x150-oval-plaque': 3,
   'polished-stainless-148x210-rect-plaque': 3,
   'polished-brass-297x210-rect-plaque': 3,
@@ -1164,6 +1164,15 @@ const cataloguePhotoVersions: Record<string, number> = {
   'brushed-brass-200x200-circle-plaque': 2,
   'orbital-brass-matt-lacquer-300x200-rect-plaque': 2,
   'orbital-brass-matt-lacquer-200x150-rect-plaque': 2,
+  // The brass and stainless pages' top photos and finish tiles, made the same way (owner msgs 6270, 6281). The A5
+  // brushed brass page shows a square crop of the brass page's top photo.
+  'brushed-brass-210x148-rect-plaque': 2,
+  'brushed-brass-297x210-rect-dark-wood-plaque': 2,
+  'polished-brass-200x150-rect-plaque': 2,
+  'orbital-brass-matt-lacquer-297x210-rect-plaque': 2,
+  'brushed-stainless-250x150-oval-plaque': 2,
+  'polished-stainless-297x210-rect-plaque': 2,
+  'polished-stainless-200x150-rect-light-wood-plaque': 2,
 };
 const cataloguePhotoFor = (slug: string) => `/site-images/catalogue-photo/${slug}.webp${(cataloguePhotoVersions[slug] || 1) > 1 ? `?v=${cataloguePhotoVersions[slug]}` : ''}`;
 /** The 600 px copy of a catalogue photo, keeping any ?v= version. */
