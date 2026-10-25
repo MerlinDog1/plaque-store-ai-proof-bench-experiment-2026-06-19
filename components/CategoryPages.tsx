@@ -1,5 +1,5 @@
 import React from 'react';
-import { merchantProducts, type ProductFamily } from '../services/commerce';
+import { merchantProducts, photo600, type ProductFamily } from '../services/commerce';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { ContactLink } from './ContactOptions';
 import { MemorialMaterialLinks, memorialInscriptions } from './MemorialGuide';
@@ -17,7 +17,11 @@ import { SizeLinksFold, type ExampleItem, type LandingConfig } from './CategoryL
 // long and two courses tall, A4 one and a half bricks and three courses.
 const memorial = '/site-images/memorial';
 const category = '/site-images/category';
-const photo = (slug: string) => `/site-images/catalogue-photo/${slug}-600.webp`;
+// The 600 px catalogue photo with its ?v= version, so phones that kept an older copy of a redrawn photo fetch the new one.
+const photo = (slug: string) => {
+  const item = merchantProducts.find(entry => entry.slug === slug);
+  return item?.photo ? photo600(item.photo) : `/site-images/catalogue-photo/${slug}-600.webp`;
+};
 const seeThis = (slug: string) => <a href={`/${slug}`}>See this plaque</a>;
 const related = (content: React.ReactNode) => <p className="memorial-material-links cat-related">{content}</p>;
 const brassMaterials = ['brushed-brass', 'polished-brass', 'orbital-brass-matt-lacquer', 'aged-brass'];
@@ -360,7 +364,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           kicker: 'Shapes and sizes',
           title: 'Choose a shape.',
           routes: [
-            { href: '/aged-brass-250x150-oval-plaque', title: 'Oval', image: photo('aged-brass-250x150-oval-plaque'), alt: 'Oval aged brass plaque reading Grandad’s Garden, made with love, on a white rendered wall', priceSlug: 'aged-brass-250x150-oval-plaque' },
+            { href: '/aged-brass-250x150-oval-plaque', title: 'Oval', image: photo('aged-brass-250x150-oval-plaque'), alt: 'Oval aged brass plaque reading Grandad’s Garden in cream lettering, on a sage-green garden shed', priceSlug: 'aged-brass-250x150-oval-plaque' },
             { href: '/brushed-stainless-200x200-circle-plaque', title: 'Circle', image: photo('brushed-stainless-200x200-circle-plaque'), alt: 'Round brushed stainless steel plaque reading Welcome to the Old School, 1874', priceSlug: 'brushed-stainless-200x200-circle-plaque' },
             { href: '/orbital-brass-matt-lacquer-400x300-rect-plaque', title: 'Large', image: photo('orbital-brass-matt-lacquer-400x300-rect-plaque'), alt: 'Large orbital brass plaque with a scalloped border recording the consecration of a churchyard extension, on a stone wall', priceSlug: 'orbital-brass-matt-lacquer-400x300-rect-plaque' },
             { href: '/portrait-plaques', title: 'With a portrait', image: `${memorial}/portrait-bramble-v3.webp`, alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel on an oak board, on our workshop bench after its final polish', priceSlug: 'a5-brushed-steel-personalised-plaque' },
