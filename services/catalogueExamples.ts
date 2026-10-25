@@ -357,13 +357,12 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-brass-210x148-rect-light-wood-plaque": {
   "lines": [
-   "This room is dedicated to",
-   "DR PETER LANE",
-   "Headteacher of Oakfield School",
-   "1988 – 2012",
-   "who taught us to love reading"
+   "This cherry tree was planted",
+   "in loving memory of",
+   "JIM PARTRIDGE",
+   "1947 – 2025"
   ],
-  "use": "a dedication plaque"
+  "use": "a tree or garden dedication"
  },
  "polished-brass-210x148-rect-dark-wood-plaque": {
   "lines": [
@@ -726,11 +725,7 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "In loving memory of",
    "DAVID",
    "OKAFOR",
-   "1951 – 2020",
-   "He built this summerhouse",
-   "and spent every evening here",
-   "with a book and a brew.",
-   "Dad, we still save your seat"
+   "1951 – 2020"
   ],
   "use": "a memorial plaque"
  },
@@ -1213,11 +1208,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  "aged-brass-400x300-rect-light-wood-plaque": {
   "lines": [
    "In loving memory of",
-   "BOB CUTHBERT",
+   "BOB",
+   "CUTHBERT",
    "1938 – 2022",
-   "Founder member of Millbrook Cricket Club,",
-   "who built this pavilion with his own hands",
-   "and kept the tea urn going for fifty summers.",
    "Always one of us"
   ],
   "use": "a memorial plaque"

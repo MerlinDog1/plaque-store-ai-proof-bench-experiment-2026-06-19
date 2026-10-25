@@ -619,10 +619,10 @@ export const seoLandingPages: SeoLandingPage[] = [
     relatedProductSlug: 'memorial-plaques',
     proofCta: 'Start a garden plaque proof',
     examples: [
-      { title: 'Mum’s apple tree.', copy: 'A5 brushed brass on an oak board and black steel ground stake, at the foot of the tree.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-apple.webp', alt: 'Brushed brass memorial plaque for Joan Hargreaves on an oak board and black steel ground stake beside a young apple tree in blossom' },
-      { title: 'A magnolia to sit beside.', copy: 'A5 brushed stainless steel on an oak board and ground stake, in the border.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-magnolia.webp', alt: 'Brushed stainless steel memorial plaque for David Rowlands on an oak board and ground stake beside a young magnolia in flower' },
-      { title: 'A silver birch for Biscuit.', copy: 'A5 brushed stainless steel with a scalloped border, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-birch.webp', alt: 'Stainless steel pet memorial plaque for Biscuit the spaniel, with a scalloped border, on an oak board and ground stake beside a young silver birch' },
-      { title: 'Mum’s acer.', copy: 'A5 brushed stainless steel on an oak board and ground stake, in the bark mulch.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-acer.webp', alt: 'Brushed stainless steel memorial plaque for Claire Watson on an oak board and ground stake beneath a young red Japanese acer' },
+      { title: 'An apple tree for Pauline.', copy: 'A5 aged brass with cream lettering, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-apple-v2.webp', alt: 'Aged brass tree plaque reading This apple tree was planted in loving memory of Pauline Hargreaves, 1940 to 2023, on an oak board and ground stake beside a young apple tree' },
+      { title: 'An oak on the village green.', copy: 'A5 brushed stainless steel with a scalloped border, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-oak-v2.webp', alt: 'Brushed stainless steel tree plaque reading This oak was planted in memory of Kathleen Ellis, 1942 to 2024, on an oak board and ground stake beside a young oak in a tree guard' },
+      { title: 'A school’s tree for a teacher.', copy: 'A5 polished stainless steel on an oak board and ground stake, on the school field.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-school-v2.webp', alt: 'Polished stainless steel tree plaque reading This tree was planted by the children of Ashfield Primary School in memory of Mrs Long, on an oak board and ground stake' },
+      { title: 'A silver birch for Moss.', copy: 'A5 polished brass on an oak board and ground stake, in the bark mulch.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-birch-v2.webp', alt: 'Polished brass pet memorial plaque reading In loving memory of Moss, 2009 to 2023, forever by our side, on an oak board and ground stake beside a young silver birch' },
     ],
     sections: [
       {
@@ -700,7 +700,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     seoTitle: 'Memorial Tree Plaques UK | Engraved Tree Dedication Plaques | InstaPlaque',
     seoDescription: 'Personalised memorial tree plaques in brass or stainless steel, on an oak board and black steel ground stake beside the tree. Free proof, or we design it on WhatsApp.',
     heroCopy: 'Planting a tree is a living way to remember someone. Mark it with a plaque in their name, in brass or stainless steel on a solid oak board with a black steel ground stake that stands beside the tree, never fixed to it. See a free online proof, or send us your words on WhatsApp and we’ll design it for you.',
-    image: '/site-images/tree-plaque-photos/memorial-tree-plaque-cherry-sq.webp',
+    image: '/site-images/tree-plaque-photos/memorial-tree-plaque-cherry-v2-sq.webp',
     relatedProductSlug: 'memorial-plaques',
     proofCta: 'Start a tree plaque proof',
     sections: [
@@ -710,16 +710,11 @@ export const seoLandingPages: SeoLandingPage[] = [
       { title: 'Check first if the tree is in a public place', copy: 'Parks, churchyards, schools and cemeteries usually have rules for memorial trees and plaques. Ask the site manager or council about the permitted size, material, wording and fixing before ordering; many councils run their own tree dedication schemes. Approving our proof does not replace their permission.' },
     ],
     examples: [
-      { title: 'A cherry tree for Grandad.', copy: 'A5 brushed brass on an oak board, on a black steel ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-cherry.webp', alt: 'Brushed brass memorial plaque for Jim Partridge on an oak board and black steel ground stake beside a young flowering cherry tree' },
-      { title: 'An oak on the village green.', copy: 'A5 brushed stainless steel with a scalloped border, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-oak.webp', alt: 'Brushed stainless steel memorial plaque for Margaret Ellis, with a scalloped border, on an oak board and ground stake beside a young oak in autumn' },
-      { title: 'Mum’s apple tree.', copy: 'A5 brushed brass on an oak board and ground stake, at the foot of the tree.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-apple.webp', alt: 'Brushed brass memorial plaque for Joan Hargreaves on an oak board and black steel ground stake beside a young apple tree in blossom' },
-      { title: 'A school’s tree for a much-loved teacher.', copy: 'A5 brushed stainless steel on an oak board and ground stake, on the school field.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-school.webp', alt: 'Brushed stainless steel plaque from Ashfield Primary School in memory of a teacher, on an oak board and ground stake beside a newly planted tree' },
-      { title: 'A rowan for Grandpa Ted.', copy: 'A5 brushed brass with a scalloped border, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-rowan.webp', alt: 'Brushed brass memorial plaque for Grandpa Ted, with a scalloped border, on an oak board and ground stake beside a young rowan with orange berries' },
-      { title: 'A magnolia to sit beside.', copy: 'A5 brushed stainless steel on an oak board and ground stake, in the border.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-magnolia.webp', alt: 'Brushed stainless steel memorial plaque for David Rowlands on an oak board and ground stake beside a young magnolia in flower' },
-      { title: 'Planted together.', copy: 'A5 brushed brass on an oak board, its ground stake pushed into the fresh soil.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-sapling.webp', alt: 'Brushed brass memorial plaque for Lucy May Bennett on an oak board and ground stake beside a newly planted sapling, with gardening gloves and a trowel on the soil' },
-      { title: 'A silver birch for Biscuit.', copy: 'A5 brushed stainless steel with a scalloped border, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-birch.webp', alt: 'Stainless steel pet memorial plaque for Biscuit the spaniel, with a scalloped border, on an oak board and ground stake beside a young silver birch' },
-      { title: 'A community orchard.', copy: 'A5 brushed brass on an oak board and ground stake, at the first tree in the row.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-orchard.webp', alt: 'Brushed brass dedication plaque for the Roy Atkins Orchard on an oak board and ground stake beside a young fruit tree on an allotment' },
-      { title: 'Mum’s acer.', copy: 'A5 brushed stainless steel on an oak board and ground stake, in the bark mulch.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-acer.webp', alt: 'Brushed stainless steel memorial plaque for Claire Watson on an oak board and ground stake beneath a young red Japanese acer' },
+      { title: 'A cherry tree for Jim.', copy: 'A5 brushed brass with a scalloped border, on an oak board and black steel ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-cherry-v2.webp', alt: 'Brushed brass tree plaque reading This cherry tree was planted in loving memory of Jim Partridge, 1947 to 2025, on an oak board and black steel ground stake beside a young cherry tree in blossom' },
+      { title: 'An apple tree for Pauline.', copy: 'A5 aged brass with cream lettering, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-apple-v2.webp', alt: 'Aged brass tree plaque reading This apple tree was planted in loving memory of Pauline Hargreaves, 1940 to 2023, on an oak board and ground stake beside a young apple tree' },
+      { title: 'An oak on the village green.', copy: 'A5 brushed stainless steel with a scalloped border, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-oak-v2.webp', alt: 'Brushed stainless steel tree plaque reading This oak was planted in memory of Kathleen Ellis, 1942 to 2024, on an oak board and ground stake beside a young oak in a tree guard' },
+      { title: 'A school’s tree for a teacher.', copy: 'A5 polished stainless steel on an oak board and ground stake, on the school field.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-school-v2.webp', alt: 'Polished stainless steel tree plaque reading This tree was planted by the children of Ashfield Primary School in memory of Mrs Long, on an oak board and ground stake' },
+      { title: 'A silver birch for Moss.', copy: 'A5 polished brass on an oak board and ground stake, in the bark mulch.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-birch-v2.webp', alt: 'Polished brass pet memorial plaque reading In loving memory of Moss, 2009 to 2023, forever by our side, on an oak board and ground stake beside a young silver birch' },
     ],
     faqs: [
       { question: 'Can I fix a plaque to a tree?', answer: 'We recommend not fixing it to the tree itself. Screws and wire damage a growing tree and the bark grows over them. Stand the plaque beside the tree on an oak board and black steel ground stake (ask us on WhatsApp), or fix it to a short post, a nearby wall or a fence.' },
@@ -1141,8 +1136,8 @@ const cataloguePhotoVersions: Record<string, number> = {
   'brushed-stainless-150x50-rect-plaque': 3,
   // Round 2 (owner msg 6085): true thickness, wall memorials on wood with the scalloped border, workshop shots.
   'brushed-stainless-210x148-rect-dark-wood-plaque': 2,
-  'aged-brass-400x300-rect-light-wood-plaque': 2,
-  'polished-stainless-210x297-rect-dark-wood-plaque': 2,
+  'aged-brass-400x300-rect-light-wood-plaque': 3,
+  'polished-stainless-210x297-rect-dark-wood-plaque': 3,
   'aged-brass-148x210-rect-dark-wood-plaque': 2,
   'polished-brass-200x150-rect-light-wood-plaque': 2,
   // The bench page's picks, redone the same way with fuller dedications (owner msg 6132); version 3 from a coded
@@ -1181,6 +1176,9 @@ const cataloguePhotoVersions: Record<string, number> = {
   'brushed-stainless-400x300-rect-dark-wood-plaque': 2,
   'brushed-stainless-200x200-circle-plaque': 2,
   'orbital-brass-matt-lacquer-400x300-rect-plaque': 2,
+  // The tree page's top photo (the A5 brushed brass on light oak shows a square crop of it), and the memorial page's
+  // two story-style picks redone with plain wording (owner msgs 6270, 6281, 6313).
+  'brushed-brass-210x148-rect-light-wood-plaque': 2,
 };
 const cataloguePhotoFor = (slug: string) => `/site-images/catalogue-photo/${slug}.webp${(cataloguePhotoVersions[slug] || 1) > 1 ? `?v=${cataloguePhotoVersions[slug]}` : ''}`;
 /** The 600 px copy of a catalogue photo, keeping any ?v= version. */

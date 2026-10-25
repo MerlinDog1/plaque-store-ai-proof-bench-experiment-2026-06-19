@@ -50,7 +50,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           routes: [
             { href: '/bench-plaques', title: 'On a bench', image: `${memorial}/route-bench.webp`, alt: 'Polished brass memorial plaque on a wooden bench, reading Peter John Wilson, please sit awhile, enjoy the view', priceSlug: 'bench-plaques' },
             { href: '/garden-plaques', title: 'In the garden', image: `${category}/route-garden-stone-v4.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore, who made this garden together, fixed to a large garden boulder among lady’s mantle, catmint and roses', priceSlug: 'garden-plaques' },
-            { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree-v3.webp`, alt: 'Close-up of a brushed brass tree memorial plaque for Jim Partridge on an oak board and black ground stake beside a young cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
+            { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree-v4.webp`, alt: 'Close-up of a brushed brass tree plaque reading This cherry tree was planted in loving memory of Jim Partridge, on an oak board and black ground stake beside a young cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
             { href: '/polished-brass-150x50-rect-plaque', title: 'At a grave', image: `${memorial}/route-grave-cross-v2.webp`, alt: 'Small polished brass name plate for Alice May Grant screwed to the arm of a temporary oak cross in a village churchyard, with white and yellow flowers', priceSlug: 'polished-brass-150x50-rect-plaque' },
           ],
           more: <>On a wall, in a church or somewhere else? {ask('Ask us on WhatsApp')} and we’ll suggest a size and fixings. For a grave, check the cemetery’s rules first.</>,
@@ -130,7 +130,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           routes: [
             { href: '/brushed-brass-200x150-rect-plaque', title: 'On a stone', image: `${category}/route-garden-stone-v4.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore, who made this garden together, fixed to a large garden boulder among lady’s mantle, catmint and roses', priceSlug: 'brushed-brass-200x150-rect-plaque' },
             { href: '/orbital-brass-matt-lacquer-200x150-rect-plaque', title: 'On a fence', image: `${category}/route-garden-fence-v2.webp`, alt: 'Orbital brass pet memorial plaque reading In loving memory of Biscuit, 2006 to 2024, our gentle cat, on a weathered timber garden fence above lavender', priceSlug: 'orbital-brass-matt-lacquer-200x150-rect-plaque' },
-            { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree-v3.webp`, alt: 'Close-up of a brushed brass tree memorial plaque for Jim Partridge on an oak board and black ground stake beside a young cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
+            { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree-v4.webp`, alt: 'Close-up of a brushed brass tree plaque reading This cherry tree was planted in loving memory of Jim Partridge, on an oak board and black ground stake beside a young cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
             { href: '/bench-plaques', title: 'On a bench', image: `${memorial}/route-bench.webp`, alt: 'Polished brass memorial plaque on a wooden bench, reading Peter John Wilson, please sit awhile, enjoy the view', priceSlug: 'bench-plaques' },
           ],
           more: <>On a wall, a gate or a shed? {ask('Ask us on WhatsApp')} and we’ll suggest a size and fixings.</>,
@@ -269,8 +269,9 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Memorial tree plaques',
         note: product.heroNote || 'A tree that grows, and their name beside it.',
         hero: {
-          base: `${category}/tree-hero`,
-          alt: 'Brushed brass memorial plaque reading This cherry tree was planted in loving memory of Jim Partridge, on an oak board and black steel ground stake beside a young cherry tree in blossom',
+          // Plain wording (owner msgs 6270, 6313); also the memorial and garden pages' "By a tree" tile.
+          base: `${category}/tree-hero-v2`,
+          alt: 'Brushed brass memorial plaque with a scalloped border reading This cherry tree was planted in loving memory of Jim Partridge, 1947 to 2025, on an oak board and black steel ground stake beside a young cherry tree in blossom',
           caption: <>Shown: A5 brushed brass on an oak board, {priceOf('brushed-brass-210x148-rect-light-wood-plaque')}, with a ground stake (ask us). {seeThis('brushed-brass-210x148-rect-light-wood-plaque')}</>,
         },
         priceNote: 'A5 stainless steel plate, with engraving and UK delivery; the oak board and stake cost extra',
@@ -298,9 +299,9 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           intro: 'Most start with a dedication, then the name, the years and a short line about them.',
           inscriptions: [
             { title: 'A memorial tree', lines: ['This cherry tree was planted', 'in loving memory of', 'Jim Partridge', '1947 – 2025'] },
-            { title: 'Planted for', lines: ['Planted for', 'Grandpa Ted', '1938 – 2024', 'who taught us the name', 'of every tree'] },
+            { title: 'Planted for', lines: ['Planted for', 'Grandpa Ted', '1938 – 2024'] },
             { title: 'A school tree', lines: ['This tree was planted', 'by the children of', 'Ashfield Primary School', 'in memory of Mrs Long'] },
-            { title: 'For a pet', lines: ['This silver birch', 'is for', 'Biscuit', 'our beautiful spaniel'] },
+            { title: 'For a pet', lines: ['In loving memory of', 'Moss', '2009 – 2023', 'Forever by our side'] },
           ],
         },
         related: related(<>See <a href="/garden-plaques">garden plaques</a>, <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">memorial wording ideas</a>.</>),
