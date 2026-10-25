@@ -1,5 +1,28 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Prices at a glance: staged, awaiting the owner's yes — 25 October 2026, about 22:30 UTC
+
+- **What it is:**
+  - The homepage gets a table of 6 sizes × stainless steel / brass / aged brass, in place of "Brass or stainless
+    steel?", and "from £58.50" in the top line.
+  - Every category page's sizes are priced in all three metals.
+  - On phones, the hero price moves above the photo.
+  - Details: `docs/price-glance-2026-10-25.md`.
+- **Branch:** `codex/instaplaque-price-glance-20261025` (`05d669d`), based on the live switch release below.
+- **Staged** as `instaplaque-k902y8x8f`. All checks pass. **NOT live.**
+
+## Owner's own browsers left out of the stats: LIVE — 25 October 2026, 21:37 UTC
+
+- **What it is:** `?internal=on` marks a browser and `?internal=off` undoes it. A marked browser loads no Google tag,
+  Meta pixel or Vercel analytics, and reports no Google purchase; its PostHog events are `is_test`. Details:
+  `docs/internal-traffic-2026-10-25.md`.
+- **Branch:** `codex/instaplaque-internal-traffic-20261025` (`5c5babb`, docs `8451cb8`).
+- **Live** as dpl_64YpihETGZ6BWVKsSUYDu9ELuSKT (instaplaque-gvt8wqavd, `index-_-XqXkr5.js`).
+  - `verify_live.py` passes.
+  - The live switch check shows 0 Google, 0 Vercel and 0 Meta from a marked browser, with only test-marked PostHog
+    events.
+- **Rollback:** dpl_2xRXbiQMMK3ZNt3GeJYLGcaNjW2p (the ground stake release).
+
 ## Designer ground stake, and the tree page points to it — 25 October 2026, 18:57 UTC
 
 - **Why:**
