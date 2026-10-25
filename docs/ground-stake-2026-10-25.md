@@ -82,7 +82,60 @@ The owner set those prices: "on a wooden backing board with ground stake- add £
   - **Not clicked through:** the 3D view (WebGL is too heavy beside a 2 GB gateway here) and the AI
     preview (a paid Gemini call). Both changes are small and were reviewed by hand.
 
+## Tree page points to the designer (owner msg 6394, "Make that change then put it live")
+
+- The tree page no longer says "ask us for the stake on WhatsApp":
+  - **Top photo caption:** "… on an oak board, £X, plus £35 for the ground stake."
+  - **Price note:** "the oak board and the £35 ground stake are extra".
+  - **"Beside the tree" intro:** "Add both in the designer’s Backing step; the stake is £35. Design one on a board
+    and stake."
+  - **Sizes note:** "… and the ground stake adds £35: design one on a board and stake."
+  - **"Fix it beside the tree" section:** "In the designer, add the oak board and then the stake (£35) at the
+    Backing step."
+  - **FAQ "Can I fix a plaque to a tree?":** "(add both in the designer’s Backing step; the stake is £35)", the same
+    in its FAQ schema.
+  - The £35 comes from `GROUND_STAKE_PRICE`, so the copy follows the price.
+- **"Design one on a board and stake"** links to `/design?backing=stake` (`DESIGN_WITH_STAKE_HREF` in
+  `services/groundStake.ts`).
+  - On arrival, `App.tsx` opens the designer the way the page's "Design online" does: the memorial preset, which
+    is A5 brushed stainless with caps and a double border, on the wording step.
+  - That preset is shown on the light oak board (bevel edge) with the stake, at £190, the Nicola order's price.
+  - The parameter is then dropped from the address, so a reload or a later edit keeps the customer's own choices.
+  - Proof (`?proof=`) and checkout (`?order=`) links take precedence.
+  - The /design page's canonical stays `/design`.
+- The tree page's own "Design online" still opens on the plain A5 plate its from-price is for (owner msg 5906).
+
+## Release
+
+- Branch `codex/instaplaque-ground-stake-20261025`: `e2f2fc7` (stake), `2b350f3` (tree page), docs.
+  It is based on the live QR release `b381cdf`.
+- **Candidate:** `instaplaque-2si40x3v9` (dpl_2xRXbiQMMK3ZNt3GeJYLGcaNjW2p). The Vercel build and postbuild checks
+  passed.
+- **Browser checks on the candidate,** all passing (`run_check.sh "/design /tree-memorial-plaques" tree treephone
+  desktop three`):
+  - **Tree page, computer and iPhone:**
+    - none of the old wording is on the page or in its schema;
+    - all six new texts are there, with two links;
+    - the link opens /design and drops the parameter;
+    - the designer shows the board with the stake drawn, £190, on the wording step, with the Backing step showing
+      "Added £35";
+    - no page errors.
+  - **Designer, computer:** the full stake run above passes again.
+  - **3D proof:** with SwiftShader WebGL, it renders the board on one square black stake behind and below it
+    (`BoxGeometry` 30 × 30 mm, group centred), with no page errors. Screenshot inspected.
+- **Live** at 18:57:13 UTC on 25 Oct: `vercel promote` set `instaplaque.co.uk` to dpl_2xRXbiQMMK3ZNt3GeJYLGcaNjW2p,
+  with bundle `index-D5_H_vMM.js` and CSS `index-DoULLCw3.css`. The candidate's tested HTML named the same bundle.
+- **Live checks:**
+  - `verify_live.py` (`BUNDLE=index-D5_H_vMM.js`) passes: 175 product pages, and all 771 linked assets are identical
+    to `public/`.
+  - The live browser run (`run_live.sh tree desktop`, with the API, Vercel insights and analytics blocked) passes
+    the tree page, the link and the full stake run.
+- **IndexNow:** told about `/tree-memorial-plaques` only (HTTP 200). The sitemaps and the feed are unchanged.
+- **Rollback:** dpl_JDHcpsNf3gxTY6m5ZuQmBzAwtPrQ, the WhatsApp QR release. With `VERCEL_ORG_ID` and
+  `VERCEL_PROJECT_ID` set, run `vercel promote https://instaplaque-d69xdmlx7-dullaghan31-3959s-projects.vercel.app
+  --yes`. Orders placed with a stake would still be charged and made correctly after a rollback: the stake stays
+  on the stored order. Only the option disappears.
+
 ## Not changed
 
 - Plaque prices, board prices, delivery, production times, the Merchant feed and the product pages.
-- The tree page still says "ask us for the stake on WhatsApp". It could now point to the designer.

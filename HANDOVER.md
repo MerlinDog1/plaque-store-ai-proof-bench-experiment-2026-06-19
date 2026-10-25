@@ -1,5 +1,31 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Designer ground stake, and the tree page points to it — 25 October 2026, 18:57 UTC
+
+- **Why:**
+  - The owner (msg 6378): "Add a ground stake on the backing section of designer but only show it if they have
+    already selected a backing board… Just show it like in Nicolas order".
+  - Then (msg 6394), about the tree page's "ask us on WhatsApp for the stake": "Make that change then put it live".
+- **What changed:**
+  - In the designer's Backing step, a "Ground stake +£35" option appears once a wood board is added, and goes when
+    the board goes.
+  - It is drawn under the board in 2D and 3D. The plaque's own SVG, and with it every proof and production file,
+    is unchanged.
+  - The server prices and verifies it: `GROUND_STAKE_PRICE` and `hasGroundStake` in `services/checkoutPolicy.mjs`,
+    with `productionSpec.groundStake`.
+  - It shows in the checkout, the owner's order emails, the admin "Backing" row, the proof PDF and the AI preview
+    prompt.
+  - The tree page now says to add the stake in the designer, and links to `/design?backing=stake`. That opens the
+    A5 plaque on the oak board and stake at £190, the Nicola order's price.
+- **Branch:** `codex/instaplaque-ground-stake-20261025`, pushed. It is based on the live WhatsApp QR release
+  `b381cdf` (see `docs/whatsapp-qr-desktop-2026-10-25.md`).
+- **Live:** dpl_2xRXbiQMMK3ZNt3GeJYLGcaNjW2p (instaplaque-2si40x3v9, `index-D5_H_vMM.js`).
+  - The candidate passed browser checks on computer, iPhone and 3D.
+  - Live: `verify_live.py` and the live browser run pass.
+- **Rollback:** `vercel promote` to dpl_JDHcpsNf3gxTY6m5ZuQmBzAwtPrQ (the QR release).
+- **Details and checks:** `docs/ground-stake-2026-10-25.md`. Earlier 25 Oct releases (category pages, menu,
+  product pages, QR) are described in `docs/*-2026-10-25.md`.
+
 ## Homepage tidy: each thing once — 24 October 2026, about 10:05 UTC
 
 - **Why:** in msg 5860 the owner sent phone screenshots of the hero category tiles and of "Find your plaque.", and said: "This like repeats on the homepage like right next to each other. Low key feel like home page is a bit of a cluster fuck now huh?"
