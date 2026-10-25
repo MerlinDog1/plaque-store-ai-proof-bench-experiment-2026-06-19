@@ -1173,6 +1173,14 @@ const cataloguePhotoVersions: Record<string, number> = {
   'brushed-stainless-250x150-oval-plaque': 2,
   'polished-stainless-297x210-rect-plaque': 2,
   'polished-stainless-200x150-rect-light-wood-plaque': 2,
+  // The opening and custom pages' plaques, made the same way; the A4 brushed stainless page shows a square crop of the
+  // opening page's top photo.
+  'brushed-stainless-297x210-rect-plaque': 2,
+  'brushed-stainless-297x210-rect-light-wood-plaque': 2,
+  'brushed-brass-300x200-rect-light-wood-plaque': 2,
+  'brushed-stainless-400x300-rect-dark-wood-plaque': 2,
+  'brushed-stainless-200x200-circle-plaque': 2,
+  'orbital-brass-matt-lacquer-400x300-rect-plaque': 2,
 };
 const cataloguePhotoFor = (slug: string) => `/site-images/catalogue-photo/${slug}.webp${(cataloguePhotoVersions[slug] || 1) > 1 ? `?v=${cataloguePhotoVersions[slug]}` : ''}`;
 /** The 600 px copy of a catalogue photo, keeping any ?v= version. */

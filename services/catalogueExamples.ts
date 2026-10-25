@@ -584,10 +584,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  "brushed-stainless-297x210-rect-light-wood-plaque": {
   "lines": [
    "THE ARTHUR LEE",
-   "READING ROOM",
-   "Opened on 9 September 2024",
-   "by Councillor Mary Okafor",
-   "Ashby Road Library"
+   "ROOM",
+   "Opened on 9 September 2024"
   ],
   "use": "an opening plaque"
  },
@@ -1019,10 +1017,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-brass-300x200-rect-light-wood-plaque": {
   "lines": [
-   "THE NEW",
-   "CLUBHOUSE",
+   "THE CLUBHOUSE",
    "was officially opened by",
-   "the Mayor of Kingsmead",
+   "Mark Dawson",
    "on 7 September 2024"
   ],
   "use": "an opening plaque"
@@ -1091,11 +1088,11 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-stainless-400x300-rect-dark-wood-plaque": {
   "lines": [
-   "THE WILLIAM",
-   "ASHDOWN LIBRARY",
-   "was opened on 12 January 2025",
-   "by his granddaughter, Clare Ashdown",
-   "Knowledge is the key that opens every door"
+   "MILL LANE",
+   "SURGERY",
+   "was officially opened by",
+   "Dr Helen Price",
+   "on 2 June 2025"
   ],
   "use": "an opening plaque"
  },
@@ -1343,13 +1340,13 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-stainless-297x210-rect-plaque": {
   "lines": [
-   "THE GARDEN OF",
-   "REMEMBRANCE",
-   "was dedicated on 11 November 2024",
-   "by the Revd Sarah Pike",
-   "Remember them"
+   "THE MEADOWS",
+   "COMMUNITY HUB",
+   "was officially opened by",
+   "Councillor Anne Fielding",
+   "on 14 March 2026"
   ],
-  "use": "a tree or garden dedication"
+  "use": "an opening plaque"
  },
  "polished-stainless-297x210-rect-plaque": {
   "lines": [
@@ -1642,14 +1639,13 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "orbital-brass-matt-lacquer-400x300-rect-plaque": {
   "lines": [
-   "This churchyard extension",
-   "was consecrated by",
-   "THE BISHOP",
-   "OF WELLMOUTH",
-   "on 4 October 2024",
-   "I am the resurrection and the life"
+   "In loving memory of",
+   "GEORGE & MARY",
+   "FENTON",
+   "George 1925 – 2008",
+   "Mary 1928 – 2019"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "aged-brass-400x300-rect-plaque": {
   "lines": [
@@ -1718,7 +1714,6 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-stainless-200x200-circle-plaque": {
   "lines": [
-   "Welcome to",
    "THE OLD",
    "SCHOOL",
    "1874"

@@ -312,8 +312,9 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Opening plaques',
         note: product.heroNote || 'Mark the occasion clearly.',
         hero: {
-          base: `${category}/opening-hero-v2`,
-          alt: 'Brushed stainless steel opening plaque reading The Meadows Community Hub was officially opened by Councillor Jean Mitchell, Mayor of Westbrook, 14 March 2026, on pale limestone cladding beside the glass entrance of a new community centre',
+          // From a coded layout of the cladding, with plain wording (owner msgs 6270, 6281).
+          base: `${category}/opening-hero-v3`,
+          alt: 'Brushed stainless steel opening plaque reading The Meadows Community Hub was officially opened by Councillor Anne Fielding on 14 March 2026, on pale limestone cladding beside a dark grey door frame',
           caption: <>Shown: A4 brushed stainless steel, the plaque priced below. {seeThis('brushed-stainless-297x210-rect-plaque')}</>,
         },
         priceNote: 'A4 stainless steel, with engraving, fixings and UK delivery',
@@ -340,8 +341,8 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           inscriptions: [
             { title: 'A building opening', lines: ['Riverside Community Centre', 'officially opened by', '[Name and title]', 'on [Day Month Year]'] },
             { title: 'Recognising support', lines: ['The Reading Garden', 'created with the generous', 'support of [Supporter]', 'Opened [Day Month Year]'] },
-            { title: 'A new room', lines: ['The Willow Room', 'Opened on 21 June 2025', 'by the Mayor of Ashby'] },
-            { title: 'A club', lines: ['The New Clubhouse', 'was officially opened by', 'the Mayor of Kingsmead', '7 September 2024'] },
+            { title: 'A new room', lines: ['The Arthur Lee Room', 'Opened on 9 September 2024'] },
+            { title: 'A club', lines: ['The Clubhouse', 'was officially opened by', 'Mark Dawson', 'on 7 September 2024'] },
           ],
           link: { href: '/contact', label: 'Discuss a deadline, logo or crest' },
         },
@@ -354,8 +355,9 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Custom plaques',
         note: 'Ovals, circles, larger sizes and your own ideas.',
         hero: {
-          base: `${category}/custom-hero-v2`,
-          alt: 'Oval brushed stainless steel house sign reading Hawthorn House, built 1898, on the white-painted brick wall of a cottage beside a sage-green front door',
+          // From a coded layout of the wall, with just the house name (owner msgs 6270, 6281).
+          base: `${category}/custom-hero-v3`,
+          alt: 'Oval brushed stainless steel house sign reading Hawthorn House on the red brick wall of a cottage beside a sage-green door frame',
           caption: <>Shown: a 250 × 150 mm oval in brushed stainless steel, the plaque priced below. {seeThis('brushed-stainless-250x150-oval-plaque')}</>,
         },
         price: { label: `from ${priceOf('brushed-stainless-250x150-oval-plaque')}`, slug: 'brushed-stainless-250x150-oval-plaque' },
@@ -365,8 +367,8 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           title: 'Choose a shape.',
           routes: [
             { href: '/aged-brass-250x150-oval-plaque', title: 'Oval', image: photo('aged-brass-250x150-oval-plaque'), alt: 'Oval aged brass plaque reading Grandad’s Garden in cream lettering, on a sage-green garden shed', priceSlug: 'aged-brass-250x150-oval-plaque' },
-            { href: '/brushed-stainless-200x200-circle-plaque', title: 'Circle', image: photo('brushed-stainless-200x200-circle-plaque'), alt: 'Round brushed stainless steel plaque reading Welcome to the Old School, 1874', priceSlug: 'brushed-stainless-200x200-circle-plaque' },
-            { href: '/orbital-brass-matt-lacquer-400x300-rect-plaque', title: 'Large', image: photo('orbital-brass-matt-lacquer-400x300-rect-plaque'), alt: 'Large orbital brass plaque with a scalloped border recording the consecration of a churchyard extension, on a stone wall', priceSlug: 'orbital-brass-matt-lacquer-400x300-rect-plaque' },
+            { href: '/brushed-stainless-200x200-circle-plaque', title: 'Circle', image: photo('brushed-stainless-200x200-circle-plaque'), alt: 'Round brushed stainless steel house sign reading The Old School, 1874, on a grey stone wall', priceSlug: 'brushed-stainless-200x200-circle-plaque' },
+            { href: '/orbital-brass-matt-lacquer-400x300-rect-plaque', title: 'Large', image: photo('orbital-brass-matt-lacquer-400x300-rect-plaque'), alt: 'Large orbital brass memorial plaque with a scalloped border for George and Mary Fenton, on an old stone garden wall', priceSlug: 'orbital-brass-matt-lacquer-400x300-rect-plaque' },
             { href: '/portrait-plaques', title: 'With a portrait', image: `${memorial}/portrait-bramble-v3.webp`, alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel on an oak board, on our workshop bench after its final polish', priceSlug: 'a5-brushed-steel-personalised-plaque' },
           ],
           more: <>Another shape, or a size up to 600 mm? {ask('Send us the measurements on WhatsApp')} for a free quote. Made a design in ChatGPT? <a href="/ai-plaque-design">We’ll make it real</a>.</>,
@@ -387,9 +389,9 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           intro: 'A short line suits an oval or a circle; save longer lists for a larger plate.',
           inscriptions: [
             { title: 'A house name', lines: ['Apple Tree', 'Cottage'] },
-            { title: 'For a pet', lines: ['Here lies', 'Willow', 'The sweetest cat', '2005 – 2023'] },
-            { title: 'An honours board', lines: ['Past Presidents', '2016 – 2018 Frank Morley', '2018 – 2020 Ian Ferris', '2020 – 2022 Joy Abbott'] },
-            { title: 'A local history', lines: ['In this house lived', 'Dr Emily Hart', 'pioneering country doctor', '1871 – 1949'] },
+            { title: 'For a pet', lines: ['In loving memory of', 'Willow', '2005 – 2023'] },
+            { title: 'A family memorial', lines: ['In loving memory of', 'George & Mary Fenton', 'George 1925 – 2008', 'Mary 1928 – 2019'] },
+            { title: 'A school or club', lines: ['The Old School', '1874'] },
           ],
           link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
         },

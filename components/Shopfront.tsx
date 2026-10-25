@@ -402,7 +402,7 @@ function LandingExamples({ examples, kicker, title }: { examples: LandingExample
 // Picks for the category pages: real catalogue pages with their photos. Each mixes metals, finishes, borders, shapes
 // and wood backings, settings that make sense for the wording, and nothing shown twice on a page (owner msg 5927).
 // Phones show the first four, so those four are the most varied.
-// The brass and stainless pages have no picks: their four finish tiles are the plaques shown (owner msg 6270).
+// The brass, stainless and custom pages have no picks: their four tiles are the plaques shown (owner msg 6270).
 const productPicks: Record<string, { kicker: string; title: string; intro: string; slugs: string[] }> = {
   // Four picks, each one photographed on the wall, shed or gate it is fixed to, so every photo on the page is one the
   // owner has seen (owner msg 6270: "too many [images] realistically for me to root out the bad ones").
@@ -413,14 +413,13 @@ const productPicks: Record<string, { kicker: string; title: string; intro: strin
   'memorial-plaques': { kicker: 'Memorial plaques', title: 'Memorial plaques, shown with example wording.', intro: 'From a short bench dedication to a family memorial with an engraved portrait. Open any plaque for its sizes, finishes and a sample proof.',
     // Wall memorials on wood with the scalloped border, two of them on our workshop bench (owner msgs 6001, 6085).
     slugs: ['brushed-stainless-210x148-rect-dark-wood-plaque', 'aged-brass-400x300-rect-light-wood-plaque', 'polished-brass-250x150-oval-plaque', 'polished-stainless-210x297-rect-dark-wood-plaque', 'aged-brass-148x210-rect-dark-wood-plaque', 'polished-brass-200x150-rect-light-wood-plaque', 'polished-brass-148x210-rect-light-wood-plaque', 'brushed-stainless-150x50-rect-plaque'] },
-  'custom-plaques': { kicker: 'Ovals, circles and larger plaques', title: 'More shapes, shown in place.', intro: 'Standard ovals, circles and large plaques, each with its own example wording. For anything else, send us the size and shape on WhatsApp.',
-    slugs: ['polished-stainless-250x150-oval-plaque', 'polished-brass-200x200-circle-plaque', 'brushed-brass-250x150-oval-plaque', 'aged-brass-200x200-circle-plaque', 'polished-brass-250x150-oval-plaque', 'brushed-brass-200x200-circle-plaque', 'orbital-brass-matt-lacquer-250x150-oval-plaque', 'aged-brass-400x300-rect-plaque'] },
   // Each with a fuller dedication on a real bench, newer and older, photographed from in front the way a visitor sees
   // it, with the plaque square on the top rail (owner msgs 6132, 6149, 6152); one on our workshop bench.
   'bench-plaques': { kicker: 'Bench plaques', title: 'Bench plaques, shown on a bench.', intro: 'Each bench plaque is shown on a real bench with its own example dedication: newer benches and old favourites, from a seafront promenade to a churchyard. One is on our workshop bench, just polished.',
     slugs: ['brushed-stainless-150x50-rect-plaque', 'brushed-brass-225x75-rect-plaque', 'polished-stainless-200x50-rect-plaque', 'aged-brass-150x75-rect-plaque', 'polished-brass-150x65-rect-plaque', 'orbital-brass-matt-lacquer-150x75-rect-plaque', 'brushed-stainless-150x75-rect-plaque', 'polished-stainless-225x65-rect-plaque'] },
-  'opening-plaques': { kicker: 'Opening and dedication plaques', title: 'Openings, shown with example wording.', intro: 'Buildings, rooms, clubs, schools and gardens, in brass and stainless steel, with and without wood backing. Open any plaque for its sizes and a sample proof.',
-    slugs: ['brushed-stainless-297x210-rect-plaque', 'brushed-stainless-297x210-rect-light-wood-plaque', 'brushed-brass-300x200-rect-light-wood-plaque', 'aged-brass-210x148-rect-dark-wood-plaque', 'orbital-brass-matt-lacquer-210x297-rect-dark-wood-plaque', 'brushed-stainless-400x300-rect-dark-wood-plaque', 'brushed-brass-400x300-rect-plaque', 'orbital-brass-matt-lacquer-300x200-rect-plaque'] },
+  // Four openings, each photographed where it is fixed; the pavilion is the brass page's orbital tile (owner msg 6281).
+  'opening-plaques': { kicker: 'Opening and dedication plaques', title: 'Openings, shown with example wording.', intro: 'Rooms, clubs, surgeries and pavilions, in brass and stainless steel, with and without wood backing. Open any plaque for its sizes and a sample proof.',
+    slugs: ['brushed-stainless-297x210-rect-light-wood-plaque', 'brushed-brass-300x200-rect-light-wood-plaque', 'brushed-stainless-400x300-rect-dark-wood-plaque', 'orbital-brass-matt-lacquer-297x210-rect-plaque'] },
 };
 
 // Phones: "what's your plaque for?" routes with photos straight under the headline,
