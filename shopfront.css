@@ -1324,6 +1324,108 @@
 .shop-whatsapp-icon {
   flex: none;
 }
+
+/* Computers: the WhatsApp QR window (owner msg 6356). It sits on document.body, so its fonts are set here. */
+.shop-wa-panel {
+  width: calc(100% - 32px);
+  max-width: 360px;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--shop-paper, #f8f6ef);
+  color: var(--shop-ink, #203b32);
+  box-shadow: 0 12px 44px #0005;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.shop-wa-panel::backdrop {
+  background: rgba(20, 32, 27, 0.5);
+}
+.shop-wa-panel-body {
+  position: relative;
+  padding: 28px 28px 22px;
+  text-align: center;
+}
+.shop-wa-panel h2 {
+  margin: 0 0 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+.shop-wa-panel p {
+  margin: 0 0 14px;
+  color: var(--shop-muted, #62695f);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.shop-wa-panel-qr {
+  display: grid;
+  place-items: center;
+  width: 220px;
+  height: 220px;
+  margin: 4px auto 14px;
+  padding: 10px;
+  border: 1px solid var(--shop-line, #d9ddd2);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--shop-muted, #62695f);
+  font-size: 13px;
+}
+.shop-wa-panel-qr img {
+  display: block;
+  width: 220px;
+  height: 220px;
+  image-rendering: pixelated;
+}
+.shop-wa-panel-number strong {
+  color: var(--shop-ink, #203b32);
+  white-space: nowrap;
+}
+.shop-wa-panel-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+.shop-wa-panel-actions .shop-wa-panel-open {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border-radius: 2px;
+  background: #0f7d70;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.shop-wa-panel-actions .shop-wa-panel-open:hover {
+  background: #0b6a5f;
+}
+.shop-wa-panel-actions .shop-wa-panel-email {
+  color: var(--shop-ink, #203b32);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.shop-wa-panel-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  background: none;
+  color: var(--shop-muted, #62695f);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+.shop-wa-panel-close:hover {
+  color: var(--shop-ink, #203b32);
+}
 .shopfront .shop-hero-note a {
   text-decoration: underline;
 }

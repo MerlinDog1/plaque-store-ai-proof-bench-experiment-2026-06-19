@@ -207,7 +207,8 @@ export function startSiteAnalytics(): void {
       || event.defaultPrevented || event.detail > 1 || !allowed() || !pagePath()) return;
     const link = (event.target as Element)?.closest?.('a[href]');
     const href = link?.getAttribute('href') || '';
-    if (!link) return;
+    // The WhatsApp QR window's own link: the contact was recorded when the window opened.
+    if (!link || link.hasAttribute('data-contact-counted')) return;
     let channel = /^mailto:/i.test(href) ? 'email' : /^tel:/i.test(href) ? 'phone' : '';
     if (!channel) {
       try {

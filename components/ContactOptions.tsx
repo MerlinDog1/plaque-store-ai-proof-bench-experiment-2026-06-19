@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { businessContact } from '../services/shopInformation';
+import { trackSiteEvent } from '../services/posthogAnalytics';
 
 type Channel = 'whatsapp' | 'email';
 
@@ -18,6 +20,15 @@ function contactHref(channel: Channel, subject: string, reference?: string): str
     : `mailto:${businessContact.email}?subject=${encodeURIComponent(`Plaque enquiry${reference ? ` — ${reference}` : ''}`)}&body=${encodeURIComponent(message)}`;
 }
 
+// Computers (a mouse or trackpad, not a phone or tablet). Most people's WhatsApp is on their phone, and on a computer
+// wa.me only offers the desktop app or WhatsApp Web, which most people have not set up (owner msg 6356).
+function onComputer(): boolean {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  if (/Mobi|Android|iPhone|iPad|iPod|Tablet/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) return false;
+  return typeof window.matchMedia === 'function' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+}
+
 export function ContactLink({ channel, placement, subject = 'a plaque', className, children }: {
   channel: Channel;
   placement: Placement;
@@ -26,6 +37,7 @@ export function ContactLink({ channel, placement, subject = 'a plaque', classNam
   children: React.ReactNode;
 }) {
   const lastActivation = useRef<{ at: number; reference?: string }>({ at: 0 });
+  const [qrPanel, setQrPanel] = useState<{ reference?: string } | null>(null);
   const prepareLink = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (event.defaultPrevented || (event.button !== 0 && event.button !== 1)) return;
     // A reference is created only when the customer opens a conversation.
@@ -36,20 +48,96 @@ export function ContactLink({ channel, placement, subject = 'a plaque', classNam
     lastActivation.current = { at: now, reference };
     event.currentTarget.href = contactHref(channel, subject, reference);
     if (reference) event.currentTarget.dataset.contactReference = reference;
+    // On a computer, a plain click on WhatsApp shows a QR code to scan with the phone instead. A middle, Ctrl or
+    // Cmd click still opens WhatsApp in a new tab.
+    if (channel === 'whatsapp' && event.type === 'click' && event.button === 0
+      && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && onComputer()) {
+      event.preventDefault();
+      // The document-level listener skips cancelled clicks, so the contact is recorded here (only with consent).
+      trackSiteEvent('contact_clicked', { channel, placement, contact_reference: reference || '' });
+      setQrPanel({ reference });
+      return;
+    }
     // The existing document-level analytics listener records the safe reference
     // after this handler, only if the visitor has opted in.
   };
   return (
-    <a
-      href={contactHref(channel, subject)}
-      className={className}
-      data-contact-placement={placement}
-      onClick={prepareLink}
-      onAuxClick={prepareLink}
-      {...(channel === 'whatsapp' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+    <>
+      <a
+        href={contactHref(channel, subject)}
+        className={className}
+        data-contact-placement={placement}
+        onClick={prepareLink}
+        onAuxClick={prepareLink}
+        {...(channel === 'whatsapp' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      >
+        {children}
+      </a>
+      {qrPanel && <WhatsAppQrPanel subject={subject} placement={placement} reference={qrPanel.reference} onClosed={() => setQrPanel(null)} />}
+    </>
+  );
+}
+
+// The QR window for computers: the code opens WhatsApp on the customer's phone with the usual message, reference
+// included, so chats still match the page and ad they came from. The qrcode library loads only when it is needed.
+function WhatsAppQrPanel({ subject, placement, reference, onClosed }: {
+  subject: string;
+  placement: Placement;
+  reference?: string;
+  onClosed: () => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [qr, setQr] = useState('');
+  const href = contactHref('whatsapp', subject, reference);
+  const close = () => {
+    const node = dialog.current;
+    if (node?.open && typeof node.close === 'function') node.close();
+    else onClosed();
+  };
+  useEffect(() => {
+    const node = dialog.current;
+    if (node && !node.open) {
+      try { node.showModal(); } catch { node.setAttribute('open', ''); }
+    }
+    let live = true;
+    import('qrcode')
+      .then(({ default: QRCode }) => QRCode.toString(href, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#111111', light: '#ffffff' } }))
+      .then(svg => { if (live) setQr(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`); })
+      .catch(() => { /* The number and the links below still work. */ });
+    return () => { live = false; };
+  }, [href]);
+  return createPortal(
+    <dialog
+      ref={dialog}
+      className="shop-wa-panel"
+      aria-labelledby="shop-wa-panel-title"
+      onClose={onClosed}
+      onClick={event => { if (event.target === dialog.current) close(); }}
     >
-      {children}
-    </a>
+      <div className="shop-wa-panel-body">
+        <button type="button" className="shop-wa-panel-close" aria-label="Close" onClick={close}>×</button>
+        <h2 id="shop-wa-panel-title">Message us on WhatsApp</h2>
+        <p>Scan the code with your phone’s camera. WhatsApp opens with a message ready to send.</p>
+        <div className="shop-wa-panel-qr">
+          {qr
+            ? <img src={qr} width={220} height={220} alt="QR code that opens a WhatsApp chat with InstaPlaque on your phone" />
+            : <span>Loading the code…</span>}
+        </div>
+        <p className="shop-wa-panel-number">Or message <strong>{businessContact.whatsapp}</strong> from your phone.</p>
+        <div className="shop-wa-panel-actions">
+          {/* Already recorded when this window opened, so the analytics listener skips it (data-contact-counted). */}
+          <a className="shop-wa-panel-open" href={href} target="_blank" rel="noopener noreferrer" data-contact-counted=""
+            onClick={() => window.setTimeout(close, 0)}>
+            Open WhatsApp on this computer <span aria-hidden="true">↗</span>
+          </a>
+          <a className="shop-wa-panel-email" href={contactHref('email', subject, reference)} data-contact-placement={placement}
+            {...(reference ? { 'data-contact-reference': reference } : {})}>
+            Email us instead
+          </a>
+        </div>
+      </div>
+    </dialog>,
+    document.body,
   );
 }
 
