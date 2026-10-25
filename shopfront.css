@@ -1360,6 +1360,8 @@
   line-height: 1.5;
 }
 .shop-wa-panel-qr {
+  /* 220px inside the padding and border, so the 220px code fits (the site's reset is border-box). */
+  box-sizing: content-box;
   display: grid;
   place-items: center;
   width: 220px;
