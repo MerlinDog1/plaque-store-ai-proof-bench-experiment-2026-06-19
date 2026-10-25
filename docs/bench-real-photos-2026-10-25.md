@@ -187,6 +187,35 @@ Files:
 - The six bench picks and Mary's photo: `?v=3`.
 - None of rounds 2–4 had gone live before this release, so they reuse those file names.
 
+Round 4 went live at about 10:30 UTC as `dpl_2mrncD7S4CHGu6B5FTW6y53dXtfG`.
+
+## Round 5: level plaques (owner msg 6214)
+
+After seeing Stan's coded input the owner asked:
+
+> Right so why wonky on imagen?
+
+The tilt came from the guide, not Codex. The guide camera used a world yaw of 12–18° and a world pitch of 10–14°, aimed
+at a backrest that leans back 10–12°. That combination makes every rail and plaque edge slope across the frame:
+2.1–3.7° on the seven guides. It is correct perspective, but in a tight close-up with nothing level to judge by, the
+plaque reads as crooked. Codex reproduced it faithfully.
+
+The fix is in `bench_scene.py`, used by guides with `level=True`:
+- The camera is placed in the plaque's own frame: along its long edge, up its face and out of its face.
+- `pitch_rel=0` keeps it square to the leaning-back backrest, so in world terms it looks down 10–12°.
+- Its up vector is the face's up, and `Camera.level()` rolls it so the plaque's long edge runs exactly horizontally
+  through the centre of view.
+- The guide JSON records `plaque_tilt_deg`. All seven are now 0.0°.
+- Tom & Betty and the Reverend are square-on; the others keep a gentle 8–10° angle, where the plaque only narrows
+  towards the far end.
+- Each brief says the plaque sits perfectly level, with its top and bottom edges never tilted or sloping.
+
+Mary Quinn's workshop shot has no guide and was not affected.
+
+All 14 versions sat level on their guide outlines and were word-perfect.
+- **Kept:** v1 of each, except v2 for Tom & Betty, which has no frame bracket showing under the slat.
+- **Files:** top photo `category/bench-hero-v4`; the six bench picks `?v=4`; Mary's photo stays `?v=3`.
+
 ## Checks
 
 - Static render: the bench page has 13 images and none are missing.

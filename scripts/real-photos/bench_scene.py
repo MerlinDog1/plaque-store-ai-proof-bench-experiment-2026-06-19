@@ -137,13 +137,20 @@ def normal(q):
 
 
 class Camera:
-    def __init__(self, pos, target, f_px, w, h, cx, cy):
+    def __init__(self, pos, target, f_px, w, h, cx, cy, up=(0, 1, 0)):
         self.pos, self.f, self.w, self.h, self.cx, self.cy = np.array(pos, float), f_px, w, h, cx, cy
         fwd = np.array(target, float) - self.pos
         self.fwd = fwd / np.linalg.norm(fwd)
-        r = np.cross([0, 1, 0], self.fwd)
+        r = np.cross(np.asarray(up, float), self.fwd)
         self.right = r / np.linalg.norm(r)
         self.up = np.cross(self.fwd, self.right)
+
+    def level(self, axis):
+        """Roll the camera about its view axis so the world direction `axis` (the plaque's long edge) runs exactly
+        horizontally across the frame through the centre of view."""
+        angle = math.atan2(float(axis @ self.up), float(axis @ self.right))
+        c, s = math.cos(angle), math.sin(angle)
+        self.right, self.up = c * self.right + s * self.up, -s * self.right + c * self.up
 
     def to_cam(self, p):
         d = np.asarray(p, float) - self.pos
@@ -275,10 +282,26 @@ def guide(p, out_dir, json_only=False):
     # Lens: focal length as on a full-frame camera; square frames use the 24 mm height as their width.
     f_px = g['lens'] / (36 if W > H else 24) * W
     centre = plaque_face.mean(0)
-    yaw, pitch = math.radians(g['yaw']), math.radians(g['pitch'])
+    yaw = math.radians(g['yaw'])
     d = f_px * pw * math.cos(yaw) / (g['frac'] * W)
-    pos = centre + d * np.array([math.sin(yaw) * math.cos(pitch), math.sin(pitch), -math.cos(yaw) * math.cos(pitch)])
-    cam = Camera(pos, centre, f_px, W, H, g.get('cx', 0.5) * W, g.get('cy', 0.5) * H)
+    if g.get('level'):
+        # Round 5 (owner msg 6214, "why wonky?"): the camera moves around the plaque's own axes (along its long edge,
+        # up its face, out of its face) and is rolled so the plaque's long edges run level across the photo. A world
+        # yaw and pitch at a backrest that leans back made every edge slope 2-4 degrees, which read as a crooked plaque.
+        along = plaque_face[1] - plaque_face[0]
+        along = along / np.linalg.norm(along)
+        upface = plaque_face[0] - plaque_face[3]
+        upface = upface / np.linalg.norm(upface)
+        out = np.cross(upface, along)
+        rise = math.radians(g.get('pitch_rel', 0))
+        pos = centre + d * (math.cos(rise) * math.cos(yaw) * out + math.cos(rise) * math.sin(yaw) * along
+                            + math.sin(rise) * upface)
+        cam = Camera(pos, centre, f_px, W, H, g.get('cx', 0.5) * W, g.get('cy', 0.5) * H, up=upface)
+        cam.level(along)
+    else:
+        pitch = math.radians(g['pitch'])
+        pos = centre + d * np.array([math.sin(yaw) * math.cos(pitch), math.sin(pitch), -math.cos(yaw) * math.cos(pitch)])
+        cam = Camera(pos, centre, f_px, W, H, g.get('cx', 0.5) * W, g.get('cy', 0.5) * H)
     out_dir.mkdir(exist_ok=True)
     if not json_only:
         metal = METAL_EDGE['stainless' if 'stainless' in o['material'] else 'brass']
@@ -289,12 +312,19 @@ def guide(p, out_dir, json_only=False):
         Image.fromarray(img).resize((W // SS, H // SS), Image.LANCZOS).save(out_dir / f"{p['id']}.png")
     corners = (cam.project(cam.to_cam(plaque_face)) / SS).round(1).tolist()
     rail = (cam.project(cam.to_cam(rail_face)) / SS).round(1).tolist()
+    (tlx, tly), (trx, try_), (brx, bry), (blx, bly) = corners
+    tilt = math.degrees(math.atan2((try_ + bry) / 2 - (tly + bly) / 2, (trx + brx) / 2 - (tlx + blx) / 2))
     info = {'id': p['id'], 'size': [W // SS, H // SS], 'camera_distance_mm': round(d), 'lens_mm': g['lens'],
-            'yaw': g['yaw'], 'pitch': g['pitch'], 'plaque_corners_tl_tr_br_bl': corners,
+            'yaw': g['yaw'], 'pitch': g.get('pitch'), 'pitch_rel': g.get('pitch_rel'), 'level': bool(g.get('level')),
+            'plaque_tilt_deg': round(tilt, 2),
+            # How far the camera looks down, in the world: the backrest leans back, so a camera square to it looks down.
+            'camera_looks_down_deg': round(math.degrees(math.asin(max(-1.0, min(1.0, float(-cam.fwd[1]))))), 1),
+            'plaque_corners_tl_tr_br_bl': corners,
             'rail_face_corners_tl_tr_br_bl': rail,
             'plaque_width_frac': round((max(c[0] for c in corners) - min(c[0] for c in corners)) / (W // SS), 3)}
     (out_dir / f"{p['id']}.json").write_text(json.dumps(info, indent=1))
-    print(p['id'], 'camera', round(d), 'mm away; plaque spans', info['plaque_width_frac'], 'of the width')
+    print(p['id'], 'camera', round(d), 'mm away; looks down', info['camera_looks_down_deg'], 'deg; plaque spans',
+          info['plaque_width_frac'], 'of the width; tilt', info['plaque_tilt_deg'], 'deg')
 
 
 if __name__ == '__main__':

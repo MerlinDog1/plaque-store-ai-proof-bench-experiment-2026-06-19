@@ -1147,14 +1147,15 @@ const cataloguePhotoVersions: Record<string, number> = {
   'polished-brass-200x150-rect-light-wood-plaque': 2,
   // The bench page's picks, redone the same way with fuller dedications (owner msg 6132); version 3 from a coded
   // 3D layout of each bench, plaque square on the top rail, plain settings, newer benches (owner msgs 6149-6154),
-  // with the simpler "In loving memory of", name and dates wording (msgs 6189-6192).
-  'brushed-brass-225x75-rect-plaque': 3,
-  'polished-stainless-200x50-rect-plaque': 3,
-  'aged-brass-150x75-rect-plaque': 3,
+  // with the simpler "In loving memory of", name and dates wording (msgs 6189-6192); version 4 with each plaque
+  // level in the frame (msg 6214). Mary Quinn's workshop shot has no bench and stays at 3.
+  'brushed-brass-225x75-rect-plaque': 4,
+  'polished-stainless-200x50-rect-plaque': 4,
+  'aged-brass-150x75-rect-plaque': 4,
   'polished-brass-150x65-rect-plaque': 3,
-  'orbital-brass-matt-lacquer-150x75-rect-plaque': 3,
-  'brushed-stainless-150x75-rect-plaque': 3,
-  'polished-stainless-225x65-rect-plaque': 3,
+  'orbital-brass-matt-lacquer-150x75-rect-plaque': 4,
+  'brushed-stainless-150x75-rect-plaque': 4,
+  'polished-stainless-225x65-rect-plaque': 4,
 };
 const cataloguePhotoFor = (slug: string) => `/site-images/catalogue-photo/${slug}.webp${(cataloguePhotoVersions[slug] || 1) > 1 ? `?v=${cataloguePhotoVersions[slug]}` : ''}`;
 /** The 600 px copy of a catalogue photo, keeping any ?v= version. */

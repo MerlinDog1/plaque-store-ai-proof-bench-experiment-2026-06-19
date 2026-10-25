@@ -77,7 +77,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Personalised bench plaques',
         note: 'A small place for a lasting memory.',
         hero: {
-          base: `${category}/bench-hero-v3`,
+          base: `${category}/bench-hero-v4`,
           alt: 'Brushed stainless steel bench plaque reading In loving memory of George Holland, 1931 to 2021, screwed to the middle of the top rail of a new teak bench on a grassy hilltop',
           caption: <>Shown: brushed stainless steel, 150 × 50 mm, the plaque priced below. {seeThis('brushed-stainless-150x50-rect-plaque')}</>,
         },

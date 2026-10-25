@@ -120,7 +120,7 @@ PHOTOS = [
          story='George Holland walked the hills above his village every day of his retirement and always stopped to rest '
                'at the top. His family put a new bench there in his memory, facing the view he loved.',
          lines=[('intro', 'In loving memory of'), ('name', 'GEORGE HOLLAND'), ('date', '1931 – 2021')],
-         guide=dict(size=[1024, 683], lens=70, yaw=-16, pitch=12, frac=0.55, cx=0.5, cy=0.5,
+         guide=dict(size=[1024, 683], lens=70, yaw=-10, pitch_rel=0, level=True, frac=0.55, cx=0.5, cy=0.5,
                     bench=dict(GARDEN, L=1800, rail_h=100)),
          bench='a new-looking solid teak garden bench, only a year or two old: smooth honey-brown timber just starting to '
                'silver at the edges, a thick top rail on the backrest with vertical slats below it, and arms',
@@ -134,7 +134,7 @@ PHOTOS = [
          story='Lily Chambers walked her dog along the river every morning for sixty years and always stopped at this '
                'spot. Her neighbours put a bench there for her.',
          lines=[('intro', 'In loving memory of'), ('name', 'LILY CHAMBERS'), ('date', '1929 – 2019')],
-         guide=dict(size=[1024, 1024], lens=85, yaw=18, pitch=10, frac=0.8, bench=dict(GARDEN)),
+         guide=dict(size=[1024, 1024], lens=85, yaw=10, pitch_rel=0, level=True, frac=0.8, bench=dict(GARDEN)),
          bench='a solid oak bench that has stood by the river for years: weathered to a soft grey-brown, with fine cracks '
                'and a few patches of pale lichen, a thick top rail with vertical slats below it, and arms',
          facing='The bench faces the river, so the river is behind the camera and is NOT in the photo: no water, no weir, '
@@ -148,7 +148,7 @@ PHOTOS = [
                'sat on this bench to watch the fishing boats come home.',
          lines=[('intro', 'In loving memory of'), ('name', 'TOM & BETTY HARRIS'), ('date', 'Tom 1932 – 2016 · Betty 1935 – 2021'),
                 ('body', 'Together again')],
-         guide=dict(size=[1024, 1024], lens=85, yaw=-14, pitch=12, frac=0.8, bench=dict(MODERN)),
+         guide=dict(size=[1024, 1024], lens=85, yaw=0, pitch_rel=0, level=True, frac=0.8, bench=dict(MODERN)),
          bench='a newer seafront bench: smooth hardwood slats with a clear oiled finish on a slim black powder-coated '
                'steel frame, with no arms',
          facing='The bench faces the sea, so the sea and the harbour are behind the camera and are NOT in the photo: no '
@@ -161,7 +161,7 @@ PHOTOS = [
          story='Alice Grant bowled for her village bowls club for more than forty years. The club put a bench beside the '
                'green in her memory.',
          lines=[('intro', 'In loving memory of'), ('name', 'ALICE GRANT'), ('date', '1933 – 2021')],
-         guide=dict(size=[1024, 1024], lens=85, yaw=15, pitch=14, frac=0.75, bench=dict(PARK, L=1500)),
+         guide=dict(size=[1024, 1024], lens=85, yaw=8, pitch_rel=0, level=True, frac=0.75, bench=dict(PARK, L=1500)),
          bench='a newly painted dark green wooden bench with three wide back slats and black cast-iron ends with arms',
          facing='The bench faces the bowling green, so the green is behind the camera and is NOT in the photo: no lawn, '
                 'no bowls anywhere behind the bench.',
@@ -187,7 +187,7 @@ PHOTOS = [
          story='John Penrose taught half the village to sail at the sailing club on the lake. The members put a bench on the '
                'bank where he used to sit and watch the races.',
          lines=[('intro', 'In loving memory of'), ('name', 'JOHN PENROSE'), ('date', '1946 – 2022'), ('body', 'Fair winds and following seas')],
-         guide=dict(size=[1024, 1024], lens=85, yaw=-12, pitch=10, frac=0.75, bench=dict(GARDEN)),
+         guide=dict(size=[1024, 1024], lens=85, yaw=-10, pitch_rel=0, level=True, frac=0.75, bench=dict(GARDEN)),
          bench='an old iroko bench weathered to silver-grey, with a thick top rail on the backrest, vertical slats below it '
                'and arms',
          facing='The bench faces the lake where he watched the races, so the lake is behind the camera and is NOT in the '
@@ -200,7 +200,7 @@ PHOTOS = [
          story="Stan Bailey was the keeper of his town's Victorian park for thirty years. The friends of the park put a "
                "bench by the bandstand for him.",
          lines=[('intro', 'In loving memory of'), ('name', 'STAN BAILEY'), ('date', '1939 – 2020')],
-         guide=dict(size=[1024, 1024], lens=85, yaw=16, pitch=12, frac=0.75, bench=dict(PARK)),
+         guide=dict(size=[1024, 1024], lens=85, yaw=10, pitch_rel=0, level=True, frac=0.75, bench=dict(PARK)),
          bench='a fairly new park bench: smooth hardwood slats with a clear finish on black-painted cast-iron ends with arms',
          facing='The bench faces the bandstand and its flower beds, so they are behind the camera and are NOT in the photo.',
          behind='a tarmac path, black iron railings and the trunks of old plane trees, softly out of focus',
@@ -212,7 +212,7 @@ PHOTOS = [
                'and talk. The parish put a bench in the churchyard in his memory.',
          lines=[('intro', 'In loving memory of'), ('name', 'REVD JOHN ASHWORTH'), ('date', '1929 – 2012'),
                 ('body', '“Come ye apart and rest a while” Mark 6:31')],
-         guide=dict(size=[1024, 1024], lens=85, yaw=-15, pitch=12, frac=0.8, bench=dict(GARDEN, rail_h=100)),
+         guide=dict(size=[1024, 1024], lens=85, yaw=0, pitch_rel=0, level=True, frac=0.8, bench=dict(GARDEN, rail_h=100)),
          bench='an old oak bench weathered to silver-grey with a few patches of lichen: a thick top rail on the backrest, '
                'vertical slats below it, and arms',
          facing='The bench looks out across the churchyard, so that view is behind the camera.',
@@ -296,12 +296,27 @@ def prompts(round_tag='r4'):
         what = ('A real, unretouched photograph of a memorial bench plaque in place, for a UK plaque maker\'s website.'
                 if p.get('hero') else 'A real, unretouched photograph of a memorial bench plaque in place, for its product '
                 'page on a UK plaque maker\'s website.')
-        side = 'left' if g['yaw'] < 0 else 'right'
-        above = 'a little above the rail, looking slightly down at it' if g['pitch'] >= 10 else 'at about the height of the rail'
-        camera = (f"exactly as in the layout render: close to the bench, a little to its {side}, with the camera {above}, "
-                  f"{g['lens']} mm lens, about {round(info['camera_distance_mm'] / 10)} cm from the plaque. The plaque fills "
-                  f"about {round(info['plaque_width_frac'] * 100)}% of the width of the photo; the whole plaque is sharp and every "
-                  f"line of the wording is readable; the background is softly out of focus.")
+        if g.get('level'):
+            # Round 5 (owner msg 6214): the camera is square to the leaning-back backrest, so it looks slightly down,
+            # and the plaque sits level in the frame.
+            where = ('straight in front of the plaque, square-on to it' if g['yaw'] == 0 else
+                     f"a little to the {'left' if g['yaw'] < 0 else 'right'} of the plaque, at a gentle angle of about "
+                     f"{abs(g['yaw'])} degrees")
+            camera = (f"exactly as in the layout render: close to the bench, {where}, with the camera square to the "
+                      f"tilted-back backrest, so it looks slightly down at it; {g['lens']} mm lens, about "
+                      f"{round(info['camera_distance_mm'] / 10)} cm from the plaque. The plaque fills about "
+                      f"{round(info['plaque_width_frac'] * 100)}% of the width of the photo. The plaque sits perfectly level "
+                      f"in the photo: its top and bottom edges run straight across the frame, never tilted or sloping"
+                      + ('' if g['yaw'] == 0 else ', and only narrow slightly towards the far end') + '. The whole plaque is '
+                      'sharp and every line of the wording is readable; the background is softly out of focus.')
+        else:
+            side = 'left' if g['yaw'] < 0 else 'right'
+            above = ('a little above the rail, looking slightly down at it' if g['pitch'] >= 10
+                     else 'at about the height of the rail')
+            camera = (f"exactly as in the layout render: close to the bench, a little to its {side}, with the camera {above}, "
+                      f"{g['lens']} mm lens, about {round(info['camera_distance_mm'] / 10)} cm from the plaque. The plaque fills "
+                      f"about {round(info['plaque_width_frac'] * 100)}% of the width of the photo; the whole plaque is sharp and "
+                      f"every line of the wording is readable; the background is softly out of focus.")
         parts = [head, f'{what} {p["story"]} {REAL_LOOK} {PLAIN}', GUIDE,
                  'The bench: ' + p['bench'] + '. ' + (NEW_BENCH if p.get('new') else BENCH),
                  'The plaque: ' + plaque(o, border), METAL.format(finish=FINISH[o['material']]), THIN,
