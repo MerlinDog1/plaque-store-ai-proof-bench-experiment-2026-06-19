@@ -1146,11 +1146,12 @@ const cataloguePhotoVersions: Record<string, number> = {
   'aged-brass-148x210-rect-dark-wood-plaque': 2,
   'polished-brass-200x150-rect-light-wood-plaque': 2,
   // The bench page's picks, redone the same way with fuller dedications (owner msg 6132); version 3 from a coded
-  // 3D layout of each bench, plaque square on the top rail, plain settings, newer benches (owner msgs 6149-6154).
+  // 3D layout of each bench, plaque square on the top rail, plain settings, newer benches (owner msgs 6149-6154),
+  // with the simpler "In loving memory of", name and dates wording (msgs 6189-6192).
   'brushed-brass-225x75-rect-plaque': 3,
   'polished-stainless-200x50-rect-plaque': 3,
   'aged-brass-150x75-rect-plaque': 3,
-  'polished-brass-150x65-rect-plaque': 2,
+  'polished-brass-150x65-rect-plaque': 3,
   'orbital-brass-matt-lacquer-150x75-rect-plaque': 3,
   'brushed-stainless-150x75-rect-plaque': 3,
   'polished-stainless-225x65-rect-plaque': 3,

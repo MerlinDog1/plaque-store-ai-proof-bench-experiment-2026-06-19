@@ -63,8 +63,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
   "lines": [
    "In loving memory of",
    "TOM & BETTY HARRIS",
-   "who sat here every evening",
-   "to watch the boats come home"
+   "Tom 1932 – 2016 · Betty 1935 – 2021",
+   "Together again"
   ],
   "use": "a memorial bench dedication"
  },
@@ -110,10 +110,10 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-stainless-225x65-rect-plaque": {
   "lines": [
-   "In memory of",
+   "In loving memory of",
    "REVD JOHN ASHWORTH",
-   "Vicar of this parish 1975 – 1998,",
-   "who always had time to sit and listen"
+   "1929 – 2012",
+   "“Come ye apart and rest a while” Mark 6:31"
   ],
   "use": "a memorial bench dedication"
  },
@@ -169,11 +169,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-brass-225x75-rect-plaque": {
   "lines": [
-   "This bench is in memory of",
+   "In loving memory of",
    "LILY CHAMBERS",
-   "1929 – 2019",
-   "who walked by this river every morning",
-   "and always stopped here to say hello"
+   "1929 – 2019"
   ],
   "use": "a memorial bench dedication"
  },
@@ -206,11 +204,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-stainless-150x75-rect-plaque": {
   "lines": [
-   "In memory of",
+   "In loving memory of",
    "STAN BAILEY",
-   "1939 – 2020",
-   "Park keeper here for thirty years,",
-   "who loved every inch of it"
+   "1939 – 2020"
   ],
   "use": "a memorial bench dedication"
  },
@@ -243,11 +239,10 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "orbital-brass-matt-lacquer-150x75-rect-plaque": {
   "lines": [
-   "In memory of",
+   "In loving memory of",
    "JOHN PENROSE",
    "1946 – 2022",
-   "who taught half the village to sail",
-   "Gone sailing"
+   "Fair winds and following seas"
   ],
   "use": "a memorial bench dedication"
  },
@@ -255,9 +250,7 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
   "lines": [
    "In loving memory of",
    "ALICE GRANT",
-   "1933 – 2021",
-   "who bowled on this green",
-   "for forty happy summers"
+   "1933 – 2021"
   ],
   "use": "a memorial bench dedication"
  },
@@ -287,11 +280,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-brass-150x65-rect-plaque": {
   "lines": [
-   "Remembering",
+   "In loving memory of",
    "MARY QUINN",
-   "1938 – 2022",
-   "who grew the finest sweet peas",
-   "on these allotments for fifty years"
+   "1938 – 2022"
   ],
   "use": "a memorial bench dedication"
  },

@@ -51,6 +51,6 @@ for (const offer of merchantOffers) {
   }
   assert.ok(html.includes('class="shop-spec-list"') && html.includes(`${offer.productionDays} working days`), `Specification on ${offer.slug}`);
   assert.ok((html.match(/class="shop-catalogue-links"/g) || []).length >= 1, `Variant links on ${offer.slug}`);
-  assert.ok(html.includes(`href="/samples/products/${offer.slug}.pdf?v=5"`) && existsSync(`dist/samples/products/${offer.slug}.pdf`), `Sample proof PDF for ${offer.slug}`);
+  assert.ok(html.includes(`href="/samples/products/${offer.slug}.pdf?v=6"`) && existsSync(`dist/samples/products/${offer.slug}.pdf`), `Sample proof PDF for ${offer.slug}`);
 }
 console.log(`Product policies: ${productCount} physical offers across ${pageCount} pages pass shipping, returns, production/transit separation and weekday checks; free designer unchanged. Every product page has its photo, specification, variant links and sample proof.`);

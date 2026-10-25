@@ -36,7 +36,7 @@ const library: Array<{ id: string; title: string; intro: string; examples: Examp
   ] },
   { id: 'bench', title: 'For a memorial bench', intro: 'Bench plates are small: three or four short lines read best from a little distance.', examples: [
     { size: '150 × 50 mm', lines: ['In loving memory of', 'JOAN PARRY', 'who loved this garden and all of us'] },
-    { size: '225 × 75 mm', lines: ['This bench is in memory of', 'LILY CHAMBERS', '1929 – 2019', 'who walked by this river every morning', 'and always stopped here to say hello'] },
+    { size: '225 × 75 mm', lines: ['In loving memory of', 'LILY CHAMBERS', '1929 – 2019'] },
     { size: '200 × 50 mm', lines: ['In loving memory of', 'FRANK & IRIS DAVIES', 'Enjoy the view as they did'] },
     { size: '150 × 50 mm', lines: ['Remembering', 'BILL HUGHES', 'Rest here awhile'] },
   ] },

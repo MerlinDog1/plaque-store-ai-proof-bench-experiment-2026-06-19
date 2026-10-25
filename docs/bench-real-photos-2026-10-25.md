@@ -135,10 +135,57 @@ The owner's verdict on the round-2 samples:
   overlay and plaque sheets.
 - **Kept.** v1 of each, except v2 for Revd Ashworth, whose lighter reflections read better.
 
+Round 3 was shown to the owner but never released.
+
+## Round 4: simple wording (owner msgs 6186, 6189, 6192)
+
+The owner liked round 3 ("they look better generally") but not the wording:
+
+> I just don't like the text now I think. Its just not very human.
+
+> for these I'd just have in loving memory, name dates and for like a quarter of them another line. Like a bible
+> quote for the Reverend something about resting or sitting etc. Penrose can have a line about sailing. George needs
+> dates.
+
+> Put together again on Tom and Betty but yes proceed
+
+The rule is now "In loving memory of", the name and the dates. Three plaques get one more line:
+
+| Plaque | Wording |
+| --- | --- |
+| Top photo (150 × 50, brushed stainless) | In loving memory of / GEORGE HOLLAND / 1931 – 2021 |
+| Lily Chambers (225 × 75, brushed brass) | In loving memory of / LILY CHAMBERS / 1929 – 2019 |
+| Tom & Betty Harris (200 × 50, polished stainless) | In loving memory of / TOM & BETTY HARRIS / Tom 1932 – 2016 · Betty 1935 – 2021 / Together again |
+| Alice Grant (150 × 75, aged brass) | In loving memory of / ALICE GRANT / 1933 – 2021 |
+| Mary Quinn (150 × 65, polished brass, workshop) | In loving memory of / MARY QUINN / 1938 – 2022 |
+| John Penrose (150 × 75, orbital brass) | In loving memory of / JOHN PENROSE / 1946 – 2022 / Fair winds and following seas |
+| Stan Bailey (150 × 75, brushed stainless) | In loving memory of / STAN BAILEY / 1939 – 2020 |
+| Revd John Ashworth (225 × 65, polished stainless) | In loving memory of / REVD JOHN ASHWORTH / 1929 – 2012 / “Come ye apart and rest a while” Mark 6:31 |
+
+Other changes in this round:
+
+- **Aged brass.** The owner said "Aged brass is intentionally aged ... It's aged but not old". The brief now
+  describes a brand-new plate with a deliberate, even antique finish: never weathered, tarnished, blotchy or worn.
+- **Top photo spacing.** With only three short lines, George's name grew close to the end screws. The hero preset
+  sets `inscriptionScale` 0.86 for more room. The stencil tool now honours a preset's own `inscriptionScale`: see
+  `output/stencil-app/entry.tsx`, with `stencil.js` patched to match.
+- **Products.** The seven products got new example wording, flat drawings, thumbnails and sample PDFs. Feed images
+  and PDF links are now `?v=6`.
+- **Matching text elsewhere.**
+  - `wordingFit` for 150 × 50
+  - the wording guide's Lily example
+  - the stainless page's bench example (Tom & Betty)
+- **Mary Quinn's workshop shot** was remade from its flat drawing with the round-3 rules for a thin plate and real
+  metal. The first two versions gave her plate a bevelled, raised rim and stood it up. The retry (`-r4b`) spells
+  out "no bevel, no chamfer, no raised or stepped rim" and "lies completely flat, face up". Its v2 has a flat
+  1.5 mm sheet and a plain tin; v1 was rejected for lettering on the polish tin.
+- **Kept.** v1 of each bench photo, except v2 for Revd Ashworth; Mary's is `-r4b` v2. All 14 bench versions sat on
+  their guide outlines and were word-perfect.
+
 Files:
 - Top photo: `category/bench-hero-v3`.
-- The six picks: photos `?v=3`.
-- Wording, drawings and PDFs: unchanged from round 1.
+- The six bench picks and Mary's photo: `?v=3`.
+- None of rounds 2–4 had gone live before this release, so they reuse those file names.
 
 ## Checks
 

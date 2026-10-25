@@ -78,7 +78,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         note: 'A small place for a lasting memory.',
         hero: {
           base: `${category}/bench-hero-v3`,
-          alt: 'Brushed stainless steel bench plaque reading In loving memory of George Holland, who walked these hills and loved this view, screwed to the middle of the top rail of a new teak bench on a grassy hilltop',
+          alt: 'Brushed stainless steel bench plaque reading In loving memory of George Holland, 1931 to 2021, screwed to the middle of the top rail of a new teak bench on a grassy hilltop',
           caption: <>Shown: brushed stainless steel, 150 × 50 mm, the plaque priced below. {seeThis('brushed-stainless-150x50-rect-plaque')}</>,
         },
         priceNote: '150 × 50 mm stainless steel, with engraving, screws and UK delivery',
@@ -247,7 +247,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           inscriptions: [
             { title: 'A community garden', lines: ['Welcome to', 'Brambledown', 'Community Garden', 'Opened 5 May 2024'] },
             { title: 'A memorial', lines: ['In loving memory of', 'Alan Vaughan', '1944 – 2021', 'Forever in our hearts'] },
-            { title: 'A bench', lines: ['In loving memory of', 'Tom & Betty Harris', 'who sat here every evening', 'to watch the boats come home'] },
+            { title: 'A bench', lines: ['In loving memory of', 'Tom & Betty Harris', 'Tom 1932 – 2016 · Betty 1935 – 2021', 'Together again'] },
             { title: 'A thank you', lines: ['Presented to', 'Katherine Doyle', 'in grateful thanks', 'for 30 years'] },
           ],
           link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },

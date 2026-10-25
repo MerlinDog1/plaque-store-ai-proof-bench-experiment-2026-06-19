@@ -39,7 +39,9 @@ MATERIAL = {
     'polished-stainless': 'mirror-polished stainless steel: bright silver that reflects its surroundings in soft, believable bands, with no brush grain',
     'brushed-brass': 'brushed brass: warm satin gold with a fine horizontal brushed grain and low glare',
     'polished-brass': 'polished brass: bright, mirror-like warm gold that reflects its surroundings',
-    'aged-brass': 'mid aged brass: warm brown-gold with an even, intentional factory patina, smooth, clean and low-glare',
+    'aged-brass': ('aged brass: a brand-new plate given a deliberate, even antique finish at the factory, a uniform warm '
+                   'brown-gold, smooth, clean and low-glare; it looks new and well made, never weathered, tarnished, blotchy, '
+                   'worn or old'),
     'orbital-brass-matt-lacquer': 'orbital-finished brass under a matt lacquer: muted straw-gold with a very fine, dense, non-directional swirl finish like a satin haze, flatter than brushed brass, low glare and never mirror-like',
 }
 REAL_LOOK = ('Shot on a full-frame camera, natural light, true-to-life colours, a little natural grain, no filters, no HDR, '
@@ -76,7 +78,9 @@ FINISH = {
     'polished-stainless': 'a true mirror that reflects the real sky and surroundings behind the camera, softly distorted, '
                           'with the lettering crisp on top',
     'brushed-brass': 'fine parallel brushed lines that glow warm gold where the light crosses them',
-    'aged-brass': 'a soft, even brown-gold patina with gentle variation and warmer highlights',
+    'polished-brass': 'a bright, mirror-like warm gold that reflects the window and the room, softly distorted, with '
+                      'the lettering crisp on top',
+    'aged-brass': 'a smooth, even, deliberately applied antique tone with a soft satin sheen, the same all over',
     'orbital-brass-matt-lacquer': 'a fine, dense swirl texture under a satin lacquer that glints softly',
 }
 FACING = ('The plaque is on the front of the backrest, facing the same way as someone sitting on the bench, so this photo '
@@ -109,11 +113,13 @@ PARK = dict(back='slats', L=1800, top=860, slats=[120, 95, 95], recline=12, arms
 MODERN = dict(back='slats', L=1800, top=820, slats=[95, 85, 85], recline=10, arms=False, end_w=30, leg=30)
 
 PHOTOS = [
-    dict(id='bench-hero', offer='brushed-stainless-150x50-rect-plaque', overrides=SINGLE, hero=True, new=True,
+    # The hero's three short lines make a wide name that crowds the end screws on a 150 x 50 plate: a slightly smaller
+    # inscription leaves clear metal around them (the hero is not a catalogue example, so no product drawing changes).
+    dict(id='bench-hero', offer='brushed-stainless-150x50-rect-plaque', overrides={'inscriptionScale': 0.86}, hero=True,
+         new=True,
          story='George Holland walked the hills above his village every day of his retirement and always stopped to rest '
                'at the top. His family put a new bench there in his memory, facing the view he loved.',
-         lines=[('intro', 'In loving memory of'), ('name', 'GEORGE HOLLAND'), ('body', 'who walked these hills'),
-                ('body', 'and loved this view')],
+         lines=[('intro', 'In loving memory of'), ('name', 'GEORGE HOLLAND'), ('date', '1931 – 2021')],
          guide=dict(size=[1024, 683], lens=70, yaw=-16, pitch=12, frac=0.55, cx=0.5, cy=0.5,
                     bench=dict(GARDEN, L=1800, rail_h=100)),
          bench='a new-looking solid teak garden bench, only a year or two old: smooth honey-brown timber just starting to '
@@ -127,8 +133,7 @@ PHOTOS = [
     dict(id='brushed-brass-225x75-rect-plaque', offer='brushed-brass-225x75-rect-plaque', overrides=SINGLE,
          story='Lily Chambers walked her dog along the river every morning for sixty years and always stopped at this '
                'spot. Her neighbours put a bench there for her.',
-         lines=[('intro', 'This bench is in memory of'), ('name', 'LILY CHAMBERS'), ('date', '1929 – 2019'),
-                ('body', 'who walked by this river every morning'), ('body', 'and always stopped here to say hello')],
+         lines=[('intro', 'In loving memory of'), ('name', 'LILY CHAMBERS'), ('date', '1929 – 2019')],
          guide=dict(size=[1024, 1024], lens=85, yaw=18, pitch=10, frac=0.8, bench=dict(GARDEN)),
          bench='a solid oak bench that has stood by the river for years: weathered to a soft grey-brown, with fine cracks '
                'and a few patches of pale lichen, a thick top rail with vertical slats below it, and arms',
@@ -141,8 +146,8 @@ PHOTOS = [
     dict(id='polished-stainless-200x50-rect-plaque', offer='polished-stainless-200x50-rect-plaque', overrides=SINGLE, new=True,
          story='Tom and Betty Harris retired to the seaside and walked the promenade arm in arm every evening. They always '
                'sat on this bench to watch the fishing boats come home.',
-         lines=[('intro', 'In loving memory of'), ('name', 'TOM & BETTY HARRIS'), ('body', 'who sat here every evening'),
-                ('body', 'to watch the boats come home')],
+         lines=[('intro', 'In loving memory of'), ('name', 'TOM & BETTY HARRIS'), ('date', 'Tom 1932 – 2016 · Betty 1935 – 2021'),
+                ('body', 'Together again')],
          guide=dict(size=[1024, 1024], lens=85, yaw=-14, pitch=12, frac=0.8, bench=dict(MODERN)),
          bench='a newer seafront bench: smooth hardwood slats with a clear oiled finish on a slim black powder-coated '
                'steel frame, with no arms',
@@ -155,8 +160,7 @@ PHOTOS = [
     dict(id='aged-brass-150x75-rect-plaque', offer='aged-brass-150x75-rect-plaque', overrides=SCALLOP, new=True,
          story='Alice Grant bowled for her village bowls club for more than forty years. The club put a bench beside the '
                'green in her memory.',
-         lines=[('intro', 'In loving memory of'), ('name', 'ALICE GRANT'), ('date', '1933 – 2021'),
-                ('body', 'who bowled on this green'), ('body', 'for forty happy summers')],
+         lines=[('intro', 'In loving memory of'), ('name', 'ALICE GRANT'), ('date', '1933 – 2021')],
          guide=dict(size=[1024, 1024], lens=85, yaw=15, pitch=14, frac=0.75, bench=dict(PARK, L=1500)),
          bench='a newly painted dark green wooden bench with three wide back slats and black cast-iron ends with arms',
          facing='The bench faces the bowling green, so the green is behind the camera and is NOT in the photo: no lawn, '
@@ -168,10 +172,10 @@ PHOTOS = [
     dict(id='polished-brass-150x65-rect-plaque', offer='polished-brass-150x65-rect-plaque', overrides=DOUBLE, wip=True,
          story="Mary Quinn's bench plaque on our workshop bench, just polished, before it went to the allotment society "
                "that put a bench on the plots in her memory.",
-         lines=[('intro', 'Remembering'), ('name', 'MARY QUINN'), ('date', '1938 – 2022'),
-                ('body', 'who grew the finest sweet peas'), ('body', 'on these allotments for fifty years')],
-         scene='The finished plaque lies flat on the clean white workbench, just polished, with the four small brass screws '
-               'that will fix it to her bench laid neatly beside it. ' + WORKSHOP,
+         lines=[('intro', 'In loving memory of'), ('name', 'MARY QUINN'), ('date', '1938 – 2022')],
+         scene='The finished plaque lies completely flat, face up, directly on the clean white workbench (not propped up, '
+               'not standing, not leaning on anything), just polished, with the four small brass screws that will fix it to '
+               'her bench laid neatly beside it. ' + WORKSHOP,
          camera='a close macro detail shot, 100 mm macro lens at f/4: the camera is about 30 cm from the plaque and low, '
                 'about 25 degrees above the bench, looking along it diagonally from its lower-left corner. The whole plaque '
                 'and all its wording fill most of the frame; the name is pin-sharp and the far corner falls gently out of '
@@ -182,8 +186,7 @@ PHOTOS = [
          overrides=SINGLE,
          story='John Penrose taught half the village to sail at the sailing club on the lake. The members put a bench on the '
                'bank where he used to sit and watch the races.',
-         lines=[('intro', 'In memory of'), ('name', 'JOHN PENROSE'), ('date', '1946 – 2022'),
-                ('body', 'who taught half the village to sail'), ('small', 'Gone sailing')],
+         lines=[('intro', 'In loving memory of'), ('name', 'JOHN PENROSE'), ('date', '1946 – 2022'), ('body', 'Fair winds and following seas')],
          guide=dict(size=[1024, 1024], lens=85, yaw=-12, pitch=10, frac=0.75, bench=dict(GARDEN)),
          bench='an old iroko bench weathered to silver-grey, with a thick top rail on the backrest, vertical slats below it '
                'and arms',
@@ -196,8 +199,7 @@ PHOTOS = [
     dict(id='brushed-stainless-150x75-rect-plaque', offer='brushed-stainless-150x75-rect-plaque', overrides=SINGLE, new=True,
          story="Stan Bailey was the keeper of his town's Victorian park for thirty years. The friends of the park put a "
                "bench by the bandstand for him.",
-         lines=[('intro', 'In memory of'), ('name', 'STAN BAILEY'), ('date', '1939 – 2020'),
-                ('body', 'Park keeper here for thirty years,'), ('body', 'who loved every inch of it')],
+         lines=[('intro', 'In loving memory of'), ('name', 'STAN BAILEY'), ('date', '1939 – 2020')],
          guide=dict(size=[1024, 1024], lens=85, yaw=16, pitch=12, frac=0.75, bench=dict(PARK)),
          bench='a fairly new park bench: smooth hardwood slats with a clear finish on black-painted cast-iron ends with arms',
          facing='The bench faces the bandstand and its flower beds, so they are behind the camera and are NOT in the photo.',
@@ -208,8 +210,8 @@ PHOTOS = [
     dict(id='polished-stainless-225x65-rect-plaque', offer='polished-stainless-225x65-rect-plaque', overrides=DOUBLE,
          story='The Revd John Ashworth was vicar of his village parish for twenty-three years and always had time to stop '
                'and talk. The parish put a bench in the churchyard in his memory.',
-         lines=[('intro', 'In memory of'), ('name', 'REVD JOHN ASHWORTH'), ('body', 'Vicar of this parish 1975 – 1998,'),
-                ('body', 'who always had time to sit and listen')],
+         lines=[('intro', 'In loving memory of'), ('name', 'REVD JOHN ASHWORTH'), ('date', '1929 – 2012'),
+                ('body', '“Come ye apart and rest a while” Mark 6:31')],
          guide=dict(size=[1024, 1024], lens=85, yaw=-15, pitch=12, frac=0.8, bench=dict(GARDEN, rail_h=100)),
          bench='an old oak bench weathered to silver-grey with a few patches of lichen: a thick top rail on the backrest, '
                'vertical slats below it, and arms',
@@ -246,17 +248,47 @@ def designer():
     print(len(items), 'designer stencils to render')
 
 
-def prompts(round_tag='r3'):
-    """Prompts for the photos with a 3D guide (run bench_scene.py first; it records the camera distance). Round 3 (owner
-    msg 6162): closer and flatter on, a plainly 1.5 mm plate with square edges, and real metal."""
+WIP_THIN = ('Thickness must be true to life. The metal plate is a thin, flat 1.5 mm sheet, about as thick as a coin. Its '
+            'polished face is completely flat and runs right out to the outer edge, which is cut plain and square: there is '
+            'NO bevel, NO chamfer, NO raised or stepped rim, NO moulded frame and NO second layer of metal around the edge. '
+            'The only lines near the edge are the thin black engraved border lines on the face itself. Lying flat on the '
+            'bench, the plate\'s edge shows only as a hairline of bright metal, never as a slab, step or block.')
+WIP_ENDING = ('It must look like a real photograph of a real, physical object: real reflections of the workshop in the '
+              'metal, the same light falling on the plate and the bench, real texture everywhere. Not a 3D render, not an '
+              'illustration, not a composite, not a pasted-on graphic. Avoid perfectly even lighting on the plate, '
+              'plastic-looking metal, exaggerated thickness, oversaturated colours, readable brand names, extra or '
+              'misspelled text, logos, watermarks, people or hands.')
+
+
+def wip_prompt(p, o, border):
+    """The workshop shot: no bench to model, so the flat designer drawing is the layout guide (round 1's method) with
+    round 3's closer, thin-plate and real-metal rules."""
+    return '\n\n'.join([
+        'Output: one SQUARE 1:1 photograph (equal width and height).',
+        'A real, unretouched photograph taken in our small UK plaque workshop, for this plaque\'s product page. '
+        + p['story'] + ' ' + REAL_LOOK,
+        LAYOUT, 'The plaque: ' + plaque(o, border), METAL.format(finish=FINISH[o['material']]), WIP_THIN,
+        'The wording, exactly as in the artwork, and nothing else legible anywhere in the photo:\n' + lines_text(p['lines']),
+        'Where it is: ' + p['scene'], 'Camera: ' + p['camera'], 'Scale: ' + p['scale'], WIP_ENDING])
+
+
+def prompts(round_tag='r4'):
+    """Prompts for the photos with a 3D guide (run bench_scene.py first; it records the camera distance), and for the
+    workshop shot from its flat drawing. Round 3 (owner msg 6162): closer and flatter on, a plainly 1.5 mm plate with
+    square edges, and real metal. Round 4 (owner msgs 6186-6192): simple wording, aged brass deliberately aged."""
     out = HERE / 'prompts'
     out.mkdir(exist_ok=True)
     jobs = []
     for p in PHOTOS:
-        if not p.get('guide'):
-            continue
         o = OFFERS[p['offer']]
         border = p['overrides'].get('borderStyle', o['borderStyle'])
+        if p.get('wip'):
+            jid = p['id'] + '-' + round_tag
+            (out / f'{jid}.txt').write_text(wip_prompt(p, o, border))
+            jobs.append({'id': jid, 'ref': str(HERE / 'refs' / f"{p['id']}.png"), 'size': '2048x2048', 'versions': 2})
+            continue
+        if not p.get('guide'):
+            continue
         info = json.loads((HERE / 'guides' / f"{p['id']}.json").read_text())
         g = p['guide']
         head = ('Output: one landscape 3:2 photograph.' if p.get('hero')

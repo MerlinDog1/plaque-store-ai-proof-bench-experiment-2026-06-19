@@ -36,7 +36,7 @@ export function wordingFit(offer: Offer) {
   if (shape === 'circle') return 'three or four short centred lines, such as a name and dates, or a short dedication';
   if (isBench(offer)) {
     // The bench page's photos carry four or five lines (owner msg 6132), still at least 5.6 mm tall.
-    if (width === 150 && height === 50) return 'three or four short lines: a name and a few words, such as "who walked these hills and loved this view"';
+    if (width === 150 && height === 50) return 'three or four short lines: "In loving memory of", a name and the dates, with room for one short line more';
     if (width === 200 && height === 50) return 'three or four lines, with room for two names on one line, such as "TOM & BETTY HARRIS"';
     if (width === 200 && height === 100) return 'four or five lines: a name, dates and a short tribute';
     if (height >= 75) return 'four or five short lines: a name, dates and a sentence of tribute';
