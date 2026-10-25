@@ -1,6 +1,6 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Prices at a glance: staged, awaiting the owner's yes — 25 October 2026, about 22:30 UTC
+## Prices at a glance: LIVE — 25 October 2026, 22:10 UTC
 
 - **What it is:**
   - The homepage gets a table of 6 sizes × stainless steel / brass / aged brass, in place of "Brass or stainless
@@ -9,7 +9,13 @@
   - On phones, the hero price moves above the photo.
   - Details: `docs/price-glance-2026-10-25.md`.
 - **Branch:** `codex/instaplaque-price-glance-20261025` (`05d669d`), based on the live switch release below.
-- **Staged** as `instaplaque-k902y8x8f`. All checks pass. **NOT live.**
+- **Live** as dpl_ArHjbD1APPwCh2v82YFsTZt5XhZV (instaplaque-k902y8x8f, `index-BoTQ0FU8.js`), on the owner's "Put it
+  live" (msg 6463).
+  - The live HTML tables on all 9 pages pass.
+  - `verify_live.py` passes.
+  - A live phone check of / and /memorial-plaques passes.
+  - IndexNow was pinged for the 9 pages.
+- **Rollback:** dpl_64YpihETGZ6BWVKsSUYDu9ELuSKT (the switch release).
 
 ## Owner's own browsers left out of the stats: LIVE — 25 October 2026, 21:37 UTC
 

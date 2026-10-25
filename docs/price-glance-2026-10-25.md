@@ -63,3 +63,26 @@
 - The bench page and the clean section pictures were shot from the prerendered pages with JavaScript off
   (`shoot_static.cjs`). With the gateway at about 2.1 GB, a full app run on a third page tripped the account memory
   watchdog.
+
+## Release
+
+- **Promoted:** the owner said "Put it live" (msg 6463). `vercel promote` set `instaplaque.co.uk` to
+  dpl_ArHjbD1APPwCh2v82YFsTZt5XhZV (instaplaque-k902y8x8f) at 22:10:19 UTC on 25 Oct.
+  - Production was still the switch release I had promoted at 21:37, so nothing newer was overwritten.
+  - The live pages serve `index-BoTQ0FU8.js`, the same bundle named in the tested candidate's HTML. www returns 308
+    to the apex.
+- **Live checks, all passing:**
+  - `check_static.mjs` with `CACHE=live-cache` (the live HTML fetched with curl): all 9 tables, every price linking
+    to its plaque at that plaque's price. The homepage top line reads "Free proof · UK delivery · from £58.50",
+    "Prices at a glance" is present, and "Brass or stainless steel?" is gone.
+  - `verify_live.py` (`BUNDLE=index-BoTQ0FU8.js`): 175 product pages and 771 linked assets identical to `public/`;
+    sitemaps, feed and IndexNow key are fine.
+  - `run_live.sh phone / /memorial-plaques`, the real app on an iPhone 13 with analytics answered locally:
+    - first visit shows the price above the cookie notice ("from £58.50" at the top of the homepage, "from £95.50"
+      at 328 px on the memorial page);
+    - the tables match;
+    - nothing is wider than the screen;
+    - no page errors.
+- **IndexNow:** told about the homepage and the 8 category pages (HTTP 200).
+- **Rollback:** dpl_64YpihETGZ6BWVKsSUYDu9ELuSKT (the switch release). With `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`
+  set, run `vercel promote https://instaplaque-gvt8wqavd-dullaghan31-3959s-projects.vercel.app --yes`.
