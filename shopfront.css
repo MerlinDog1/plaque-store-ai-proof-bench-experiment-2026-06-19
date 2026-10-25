@@ -2483,9 +2483,10 @@
   color: var(--shop-muted);
 }
 
-/* Photos in place (the tree page): five across on computers, a sideways row on phones. */
+/* Photos in place (the tree page): four across on computers, a sideways row on phones (four examples since the
+   owner's msg 6270: every photo one the owner has seen). */
 .cat-scroll-row.cat-examples-row {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 .shopfront .cat-examples-row img {
   height: auto;
