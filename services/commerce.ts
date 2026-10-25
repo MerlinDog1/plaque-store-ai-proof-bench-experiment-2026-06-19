@@ -1156,6 +1156,14 @@ const cataloguePhotoVersions: Record<string, number> = {
   'orbital-brass-matt-lacquer-150x75-rect-plaque': 4,
   'brushed-stainless-150x75-rect-plaque': 4,
   'polished-stainless-225x65-rect-plaque': 4,
+  // The garden page's picks and its fence tile's plaque, from coded layouts of the wall, fence, shed or gate they are
+  // fixed to, with the simpler wording (owner msgs 6189, 6229, 6281). The fence plaque's page shows a square crop of
+  // the tile.
+  'polished-stainless-210x148-rect-plaque': 2,
+  'aged-brass-250x150-oval-plaque': 2,
+  'brushed-brass-200x200-circle-plaque': 2,
+  'orbital-brass-matt-lacquer-300x200-rect-plaque': 2,
+  'orbital-brass-matt-lacquer-200x150-rect-plaque': 2,
 };
 const cataloguePhotoFor = (slug: string) => `/site-images/catalogue-photo/${slug}.webp${(cataloguePhotoVersions[slug] || 1) > 1 ? `?v=${cataloguePhotoVersions[slug]}` : ''}`;
 /** The 600 px copy of a catalogue photo, keeping any ?v= version. */

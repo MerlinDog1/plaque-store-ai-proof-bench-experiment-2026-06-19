@@ -403,8 +403,10 @@ function LandingExamples({ examples, kicker, title }: { examples: LandingExample
 // and wood backings, settings that make sense for the wording, and nothing shown twice on a page (owner msg 5927).
 // Phones show the first four, so those four are the most varied.
 const productPicks: Record<string, { kicker: string; title: string; intro: string; slugs: string[] }> = {
-  'garden-plaques': { kicker: 'Garden plaques', title: 'Popular garden plaques.', intro: 'Each plaque is shown with its own example wording. Open one to see its sizes, finishes and a sample proof.',
-    slugs: ['brushed-stainless-148x210-rect-plaque', 'aged-brass-250x150-oval-plaque', 'orbital-brass-matt-lacquer-210x297-rect-plaque', 'polished-brass-400x300-rect-plaque', 'polished-stainless-210x148-rect-plaque', 'brushed-brass-200x200-circle-plaque', 'orbital-brass-matt-lacquer-300x200-rect-plaque', 'polished-stainless-400x300-rect-plaque'] },
+  // Four picks, each one photographed on the wall, shed or gate it is fixed to, so every photo on the page is one the
+  // owner has seen (owner msg 6270: "too many [images] realistically for me to root out the bad ones").
+  'garden-plaques': { kicker: 'Garden plaques', title: 'Popular garden plaques.', intro: 'Each plaque is shown where it was fixed, with its own example wording. Open one to see its sizes, finishes and a sample proof.',
+    slugs: ['polished-stainless-210x148-rect-plaque', 'aged-brass-250x150-oval-plaque', 'brushed-brass-200x200-circle-plaque', 'orbital-brass-matt-lacquer-300x200-rect-plaque'] },
   'tree-memorial-plaques': { kicker: 'Without a board or stake', title: 'Plaques for a tree, a hedge or an orchard.', intro: 'Without wood backing, these are made for outdoors: on a wall, a stone or a post beside the tree. Each is shown with its own example wording.',
     slugs: ['brushed-stainless-200x150-rect-plaque', 'polished-brass-210x148-rect-plaque', 'orbital-brass-matt-lacquer-200x200-circle-plaque', 'polished-stainless-210x297-rect-plaque', 'polished-brass-148x210-rect-plaque', 'aged-brass-297x210-rect-plaque', 'orbital-brass-matt-lacquer-300x200-rect-plaque', 'polished-brass-400x300-rect-plaque'] },
   'memorial-plaques': { kicker: 'Memorial plaques', title: 'Memorial plaques, shown with example wording.', intro: 'From a short bench dedication to a family memorial with an engraved portrait. Open any plaque for its sizes, finishes and a sample proof.',

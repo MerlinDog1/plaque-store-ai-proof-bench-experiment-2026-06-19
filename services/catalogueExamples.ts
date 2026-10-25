@@ -1230,12 +1230,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
   "lines": [
    "In loving memory of",
    "ELIZABETH WARD",
-   "1934 – 2020",
-   "Her garden was her joy",
-   "Always in our thoughts"
+   "1934 – 2020"
   ],
-  "use": "a memorial plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "brushed-brass-210x148-rect-plaque": {
   "lines": [
@@ -1531,11 +1528,10 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "orbital-brass-matt-lacquer-200x150-rect-plaque": {
   "lines": [
-   "In memory of",
+   "In loving memory of",
    "BISCUIT",
-   "Our gentle cat",
    "2006 – 2024",
-   "Sunbathing forever"
+   "Our gentle cat"
   ],
   "use": "a pet memorial"
  },
@@ -1596,9 +1592,7 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
   "lines": [
    "This garden is dedicated to",
    "THE NURSES",
-   "of Slad Valley Hospital",
-   "1948 – 2008",
-   "Thank you for caring"
+   "of Slad Valley Hospital"
   ],
   "use": "a dedication plaque"
  },
@@ -1730,9 +1724,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "aged-brass-250x150-oval-plaque": {
   "lines": [
-   "Grandad's",
-   "GARDEN",
-   "Made with love, 2024"
+   "GRANDAD'S",
+   "GARDEN"
   ],
   "use": "a tree or garden dedication"
  },
@@ -1759,8 +1752,7 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "In loving memory of",
    "MAY",
    "ATHERTON",
-   "1924 – 2019",
-   "Forever loved"
+   "1924 – 2019"
   ],
   "use": "a memorial plaque"
  },

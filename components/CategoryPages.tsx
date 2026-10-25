@@ -113,8 +113,10 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Personalised garden plaques',
         note: product.heroNote || 'A dedication for a favourite place.',
         hero: {
-          base: `${category}/garden-hero-v2`,
-          alt: 'Brushed stainless steel garden plaque with a scalloped border, reading This garden was planted in loving memory of Susan Marsh, on a white-painted brick cottage garden wall above blue and pink hydrangeas',
+          // From a coded layout of the wall, so the plaque is level and true to size against the bricks (owner msgs
+          // 5959, 6214), with the simpler wording (msgs 6189, 6229).
+          base: `${category}/garden-hero-v3`,
+          alt: 'Brushed stainless steel garden plaque with a scalloped border, reading In loving memory of Susan Marsh, 1951 to 2022, on an old red brick garden wall beside a climbing rose',
           caption: <>Shown: A5 brushed stainless steel, the plaque priced below. {seeThis('a5-brushed-steel-personalised-plaque')}</>,
         },
         priceNote: 'A5 stainless steel, with engraving, fixings and UK delivery',
@@ -123,7 +125,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           title: 'Where in the garden?',
           routes: [
             { href: '/brushed-brass-200x150-rect-plaque', title: 'On a stone', image: `${category}/route-garden-stone-v4.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore, who made this garden together, fixed to a large garden boulder among lady’s mantle, catmint and roses', priceSlug: 'brushed-brass-200x150-rect-plaque' },
-            { href: '/orbital-brass-matt-lacquer-200x150-rect-plaque', title: 'On a fence', image: `${category}/route-garden-fence.webp`, alt: 'Orbital brass pet memorial plaque for Biscuit the cat on a weathered wooden garden fence with climbing roses, lavender and daisies', priceSlug: 'orbital-brass-matt-lacquer-200x150-rect-plaque' },
+            { href: '/orbital-brass-matt-lacquer-200x150-rect-plaque', title: 'On a fence', image: `${category}/route-garden-fence-v2.webp`, alt: 'Orbital brass pet memorial plaque reading In loving memory of Biscuit, 2006 to 2024, our gentle cat, on a weathered timber garden fence above lavender', priceSlug: 'orbital-brass-matt-lacquer-200x150-rect-plaque' },
             { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree-v3.webp`, alt: 'Close-up of a brushed brass tree memorial plaque for Jim Partridge on an oak board and black ground stake beside a young cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
             { href: '/bench-plaques', title: 'On a bench', image: `${memorial}/route-bench.webp`, alt: 'Polished brass memorial plaque on a wooden bench, reading Peter John Wilson, please sit awhile, enjoy the view', priceSlug: 'bench-plaques' },
           ],
