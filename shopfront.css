@@ -2849,3 +2849,211 @@
     scroll-snap-align: start;
   }
 }
+
+/* Prices by size and metal (owner msgs 6430 and 6436): the homepage table and every category page's sizes. The
+   plate outlines reuse .cat-size-plate. */
+.price-table-wrap {
+  margin-top: 28px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--shop-line);
+  border-radius: 3px;
+}
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.price-table-caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.price-table th,
+.price-table td {
+  padding: 12px 16px;
+  border-top: 1px solid var(--shop-line);
+  text-align: center;
+  vertical-align: middle;
+}
+.price-table thead th {
+  width: 17%;
+  padding-top: 14px;
+  padding-bottom: 12px;
+  border-top: 0;
+  background: #f4f2ea;
+  color: var(--shop-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+.price-table thead th:first-child {
+  width: auto;
+}
+.price-table thead th:first-child,
+.price-table tbody th {
+  text-align: left;
+}
+.price-swatch {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-right: 7px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+  vertical-align: -1px;
+}
+.price-swatch.is-steel {
+  background: linear-gradient(135deg, #f1f2ef, #a9afa7);
+}
+.price-swatch.is-brass {
+  background: linear-gradient(135deg, #f2d88b, #b98a2f);
+}
+.price-swatch.is-aged {
+  background: linear-gradient(135deg, #a8855a, #574024);
+}
+.price-table-size {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.price-table-stage {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  justify-content: center;
+  width: 64px;
+  aspect-ratio: 4 / 3;
+}
+.price-table-stage .cat-size-plate::before {
+  inset: 2px;
+}
+.price-table-text {
+  min-width: 0;
+}
+.price-table-name {
+  display: block;
+  color: var(--shop-ink);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.price-table-dims {
+  display: block;
+  color: var(--shop-ink);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.price-table-fits {
+  display: block;
+  margin-top: 2px;
+  color: var(--shop-muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.shopfront .price-table td a {
+  display: block;
+  padding: 8px 0;
+  color: var(--shop-ink);
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.shopfront .price-table td a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.price-table tbody tr:hover {
+  background: #faf9f5;
+}
+.shopfront .shop-home-prices .shop-smallprint {
+  max-width: 760px;
+  margin-top: 16px;
+}
+.shop-home-prices-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 28px;
+  margin-top: 22px;
+}
+.shopfront .cat-sizes .shop-smallprint {
+  margin-top: 16px;
+}
+@media (max-width: 720px) {
+  .price-table-wrap {
+    margin-top: 18px;
+  }
+  .price-table th,
+  .price-table td {
+    padding: 10px 4px;
+  }
+  .price-table thead th {
+    width: 64px;
+    padding-top: 10px;
+    padding-bottom: 8px;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+  .price-table thead th:first-child,
+  .price-table tbody th {
+    padding-left: 10px;
+  }
+  .price-swatch {
+    display: block;
+    margin: 0 auto 4px;
+  }
+  .price-table thead th:first-child .price-swatch {
+    display: none;
+  }
+  .price-table-size {
+    gap: 8px;
+  }
+  .price-table-stage {
+    width: 30px;
+  }
+  .price-table-stage .cat-size-plate::before,
+  .price-table-stage .cat-size-plate::after {
+    display: none;
+  }
+  .price-table-name {
+    font-size: 13.5px;
+  }
+  .price-table-dims {
+    font-size: 12.5px;
+  }
+  .price-table-fits {
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+  .price-table-wrap.is-compact .price-table-fits {
+    display: none;
+  }
+  .shopfront .price-table td a {
+    padding: 10px 0;
+    font-size: 14.5px;
+  }
+  .shop-home-prices-links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .shop-home-prices-links .shop-button {
+    justify-content: center;
+  }
+  .shop-home-prices-links .shop-text-link {
+    align-self: center;
+  }
+  /* Phones: the price above the photo (owner msg 6436), so the photo needs the gap the price used to have. */
+  .shopfront .cat-hero-photo-inline {
+    margin: 4px -24px 16px;
+  }
+}

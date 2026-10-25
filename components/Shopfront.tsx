@@ -6,6 +6,7 @@ import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
+import { PriceTable, a5BoardPrice, groundStakePrice, homePriceSizes, priceTableIncludes } from './PriceTable';
 import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
 import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogue.mjs';
 import { WordingLibrary } from './WordingGuide';
@@ -504,6 +505,32 @@ function HomeWays({ onStartDesign, onRequestDesign }: { onStartDesign?: () => vo
   );
 }
 
+/** "Prices at a glance": six sizes in stainless steel, brass and aged brass, each price opening that plaque. */
+function HomePrices() {
+  return (
+    <section className="shop-section shop-home-prices" id="prices">
+      <div className="shop-section-heading">
+        <div>
+          <p className="shop-kicker">Sizes and prices</p>
+          <h2>Prices at a glance.</h2>
+        </div>
+        <p>
+          Warm brass or clean silver stainless steel, with engraving, fixings and UK delivery in every price. Tap a
+          price to see that plaque.
+        </p>
+      </div>
+      <PriceTable sizes={homePriceSizes} caption="Plaque prices by size and metal." compact />
+      <p className="shop-smallprint">
+        {priceTableIncludes} A wood backing board adds {a5BoardPrice} to an A5 plaque, and a ground stake {groundStakePrice} more.
+      </p>
+      <div className="shop-home-prices-links">
+        <a className="shop-button" href="/plaque-sizes">See every size and price</a>
+        <a className="shop-text-link" href="/materials">Compare materials &amp; finishes ↗</a>
+      </div>
+    </section>
+  );
+}
+
 export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: () => void; onRequestDesign?: () => void }) {
   const benchProduct = productFamilies.find(product => product.slug === 'bench-plaques')!;
   return (
@@ -511,7 +538,10 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
       <section className="shop-hero">
         <div className="shop-hero-copy">
           {/* Say what we sell first; the slogan becomes the tagline (owner msg 5132). */}
-          <p className="shop-kicker">Free proof · UK delivery included</p>
+          {/* A price on a phone's first screen (owner msg 6430: "price is kind of hidden a bit"). */}
+          <p className="shop-kicker">
+            Free proof · UK delivery · <TrackedPrice value={displayedPriceValue(benchProduct.startingFrom)} product={benchProduct.slug}>{benchProduct.startingFrom}</TrackedPrice>
+          </p>
           <h1 className="shop-hero-title">Personalised brass &amp; stainless steel plaques</h1>
           <p className="shop-hero-tagline">Some words deserve to <em>stay.</em></p>
           <p className="shop-intro">
@@ -560,49 +590,13 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           </figcaption>
         </figure>
       </section>
-      {/* Owner msg 5860 ("This like repeats on the homepage"): each thing once. Categories, then the two
-          ways to order, then quality and metals. */}
+      {/* Owner msg 5860 ("This like repeats on the homepage"): each thing once. Prices by size and metal (owner msg
+          6430), which also does the old "Brass or stainless steel?" section's job; then categories, the two ways to
+          order, and quality. */}
+      <HomePrices />
       <ShopCollections />
       <HomeWays onStartDesign={onStartDesign} onRequestDesign={onRequestDesign} />
       <HomeQualitySection />
-      <section className="shop-section shop-materials">
-        <div>
-          <p className="shop-kicker">Choose your material</p>
-          <h2>
-            Brass or stainless steel?
-          </h2>
-          <p>
-            Choose the warmth of brass or the clean silver tone of stainless
-            steel. Explore brushed, polished and aged finishes, with optional
-            wood backing for suitable plaques.
-          </p>
-          <a className="shop-text-link" href="/materials">
-            Compare materials & finishes ↗
-          </a>
-        </div>
-        <div className="shop-material-images">
-          <figure>
-            <img
-              src="/site-images/home-gallery-aged-brass-wood.webp"
-              alt="Aged brass plaque design with dark wood backing"
-              width="1200"
-              height="1200"
-              loading="lazy"
-            />
-            <figcaption>Brass · warm & traditional</figcaption>
-          </figure>
-          <figure>
-            <img
-              src="/site-images/home-gallery-oval-steel.webp"
-              alt="Oval stainless steel plaque design"
-              width="1200"
-              height="1200"
-              loading="lazy"
-            />
-            <figcaption>Stainless steel · clean & contemporary</figcaption>
-          </figure>
-        </div>
-      </section>
       {/* What a designer-made proof looks like, then the AI and portrait routes (owner msg 5178). */}
       <ProofPdfShowcase id="home-proof" />
       <HomeAiSection />

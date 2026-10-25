@@ -6,6 +6,7 @@ import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { offerSizeLabel } from './CatalogueDetails';
 import { DesignLink, ProductPicks } from './Shopfront';
+import { PriceTable, priceTableIncludes } from './PriceTable';
 
 // Category landing sections, phone first. The memorial plaques page was built from them first (owner msg 5876,
 // 24 Oct 2026: "make memorial page amazing and then use as yardstick to measure against other pages"), then every
@@ -62,13 +63,14 @@ export function CategoryHero({ product, title, note, image, price, priceNote, tr
         <p className="shop-kicker">Free proof · UK delivery included</p>
         <h1>{title}</h1>
         <p className="cat-hero-note">{note}</p>
-        <HeroPhoto image={image} className="cat-hero-photo-inline" />
+        {/* The price before the photo, so a phone's first screen shows it above the cookie notice (owner msg 6436). */}
         <p className="cat-hero-buy">
           <strong className="shop-product-price">
             <TrackedPrice value={displayedPriceValue(shown.label)} product={shown.slug}>{shown.label}</TrackedPrice>
           </strong>
           <span>{priceNote}</span>
         </p>
+        <HeroPhoto image={image} className="cat-hero-photo-inline" />
         <div className="shop-hero-choices">
           <DesignLink onStart={onLaunch}>Design online</DesignLink>
           <ContactLink channel="whatsapp" placement="hero" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
@@ -109,29 +111,16 @@ export function PlaceRoutes({ id, kicker, title, routes, more }: { id?: string; 
 
 export type SizeStep = { slug: string; label: string; widthMm: number; heightMm: number; fits: string; shape?: 'oval' | 'circle' };
 
-export function SizeLadder({ id, kicker, title, intro, sizes, note, more }: { id?: string; kicker: string; title: string; intro: string; sizes: SizeStep[]; note: React.ReactNode; more?: React.ReactNode }) {
-  const widest = Math.max(...sizes.map(size => size.widthMm));
+/** Four sizes, each in stainless steel, brass and aged brass (owner msg 6436: brass prices were only in the designer),
+ * every price linking to that exact plaque. */
+export function SizeLadder({ id, kicker, title, intro, sizes, note, more }: { id?: string; kicker: string; title: string; intro: string; sizes: SizeStep[]; note?: React.ReactNode; more?: React.ReactNode }) {
   return (
     <section className="shop-section cat-sizes" id={id} aria-labelledby="cat-sizes-heading">
       <p className="shop-kicker">{kicker}</p>
       <h2 id="cat-sizes-heading">{title}</h2>
       <p className="cat-section-intro">{intro}</p>
-      <ul className="cat-sizes-list">
-        {sizes.map(size => (
-          <li key={size.slug}>
-            <a href={`/${size.slug}`}>
-              {/* Each plate is drawn to scale against the largest size. */}
-              <span className="cat-size-stage" aria-hidden="true">
-                <span className={size.shape ? `cat-size-plate is-${size.shape}` : 'cat-size-plate'} style={{ width: `${(size.widthMm / widest) * 100}%`, aspectRatio: `${size.widthMm} / ${size.heightMm}` }} />
-              </span>
-              <span className="cat-size-label">{size.label}</span>
-              <span className="cat-size-fits">{size.fits}</span>
-              <strong><Price slug={size.slug} bare /></strong>
-            </a>
-          </li>
-        ))}
-      </ul>
-      <p className="shop-smallprint">{note}</p>
+      <PriceTable sizes={sizes} caption={`${title} Prices by size and metal.`} />
+      <p className="shop-smallprint">{priceTableIncludes}{note && <> {note}</>}</p>
       {more}
     </section>
   );
@@ -314,7 +303,7 @@ export type LandingConfig = {
   trust?: string[];
   routes?: { kicker: string; title: string; routes: PlaceRoute[]; more?: React.ReactNode };
   examples?: { kicker: string; title: string; intro?: React.ReactNode; items: ExampleItem[] };
-  sizes: { kicker?: string; title: string; intro: string; sizes: SizeStep[]; note: React.ReactNode; more?: React.ReactNode };
+  sizes: { kicker?: string; title: string; intro: string; sizes: SizeStep[]; note?: React.ReactNode; more?: React.ReactNode };
   steps?: [string, string][];
   portraits?: boolean;
   proofCopy?: string;
