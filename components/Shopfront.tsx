@@ -319,7 +319,7 @@ export function ProductPicks({ slugs, kicker, title, intro, id, className }: { s
         {items.map(item => (
           <li key={item.slug}>
             <a href={`/${item.slug}`}>
-              <img src={item.photo ? photo600(item.photo) : item.image} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+              <img src={item.photo ? photo600(item.photo) : item.merchantOffer ? item.image + merchantImageQuery : item.image} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
               <span>{item.title}</span>
               <strong>{item.startingFrom}</strong>
             </a>
@@ -364,7 +364,7 @@ export function ShopBySize() {
                 if (!item) return null;
                 return (
                   <li key={offer.slug}><a href={`/${offer.slug}`}>
-                    <img src={item.photo ? photo600(item.photo) : item.image} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+                    <img src={item.photo ? photo600(item.photo) : item.merchantOffer ? item.image + merchantImageQuery : item.image} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
                     <span>{offer.label}{offer.format === 'Bench' ? ` · ${offer.size}` : ''}</span><strong>{item.startingFrom}</strong>
                   </a></li>
                 );
@@ -708,7 +708,10 @@ export function ShopProduct({
         // redrawn design (new example wording) is fetched fresh, not shown from an old cached copy.
         { src: product.image + merchantImageQuery, thumbSrcSet: `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`, alt: `${product.title}: flat design view`, label: 'Flat design view' },
       ]
-    : [{ src: heroImage, alt: heroAlt, label: product.title }];
+    : product.merchantOffer
+      // No photo the owner has seen (services/vettedPhotos.mjs, owner msg 6270): show the exact flat drawing.
+      ? [{ src: product.image + merchantImageQuery, srcSet: `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`, alt: heroAlt, label: 'Flat design view' }]
+      : [{ src: heroImage, alt: heroAlt, label: product.title }];
   // No AI/illustration labels on product images (owner msg 5231).
   const heroCaption = product.merchantOffer
     ? 'Shown with an example inscription. Your wording replaces it.'

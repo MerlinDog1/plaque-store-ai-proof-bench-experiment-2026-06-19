@@ -14,48 +14,48 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  "polished-stainless-150x50-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "BILL HUGHES",
-   "who walked here every day"
+   "KEN LOMAX",
+   "1922 – 2018"
   ],
   "use": "a memorial bench dedication"
  },
  "brushed-brass-150x50-rect-plaque": {
   "lines": [
-   "Remembering",
-   "PETER WALSH",
-   "who loved this view"
+   "In loving memory of",
+   "JOYCE DUNN",
+   "1934 – 2008"
   ],
   "use": "a memorial bench dedication"
  },
  "polished-brass-150x50-rect-plaque": {
   "lines": [
-   "Sit awhile with",
-   "NANCY BELL",
-   "1941 – 2022"
+   "In loving memory of",
+   "VICTOR HOLLINS",
+   "1933 – 2015"
   ],
   "use": "a memorial bench dedication"
  },
  "orbital-brass-matt-lacquer-150x50-rect-plaque": {
   "lines": [
-   "In memory of",
-   "GEORGE KEMP",
-   "Rest here awhile"
+   "In loving memory of",
+   "DOROTHY NAYLOR",
+   "1941 – 2012"
   ],
   "use": "a memorial bench dedication"
  },
  "aged-brass-150x50-rect-plaque": {
   "lines": [
-   "In happy memory of",
-   "RAY FOSTER",
-   "who fed the ducks here"
+   "In loving memory of",
+   "HENRY LAMBERT",
+   "1934 – 2013"
   ],
   "use": "a memorial bench dedication"
  },
  "brushed-stainless-200x50-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "ALAN & JUNE REEVES",
-   "Together again"
+   "FREDERICK PICKERING",
+   "1932 – 2008"
   ],
   "use": "a memorial bench dedication"
  },
@@ -70,41 +70,42 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-brass-200x50-rect-plaque": {
   "lines": [
-   "Donated in memory of",
-   "KEITH ANDREWS",
-   "a true friend of this park"
+   "In loving memory of",
+   "KEITH & NORA SCHOFIELD",
+   "Keith 1942 – 2016 · Nora 1943 – 2013"
   ],
   "use": "a memorial bench dedication"
  },
  "polished-brass-200x50-rect-plaque": {
   "lines": [
-   "In memory of",
-   "SHEILA & DEREK COX",
-   "married in this church in 1961"
+   "In loving memory of",
+   "VALERIE INGRAM",
+   "1948 – 2022"
   ],
   "use": "a memorial bench dedication"
  },
  "orbital-brass-matt-lacquer-200x50-rect-plaque": {
   "lines": [
-   "In memory of",
-   "PAT & JIM O'NEILL",
-   "who loved this garden"
+   "In loving memory of",
+   "COLIN & SHEILA ACKROYD",
+   "Colin 1946 – 2021 · Sheila 1942 – 2010"
   ],
   "use": "a memorial bench dedication"
  },
  "aged-brass-200x50-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "FRANK & IRIS DAVIES",
-   "Enjoy the view as they did"
+   "LEONARD TANNER",
+   "1928 – 2013"
   ],
   "use": "a memorial bench dedication"
  },
  "brushed-stainless-225x65-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "DOROTHY MASON",
-   "who sat here and fed the birds"
+   "EILEEN PORTER",
+   "1925 – 2009",
+   "Sit and rest awhile"
   ],
   "use": "a memorial bench dedication"
  },
@@ -119,51 +120,49 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-brass-225x65-rect-plaque": {
   "lines": [
-   "In memory of",
-   "MAUREEN TAYLOR",
-   "whose garden gave us so much joy"
+   "In loving memory of",
+   "LESLIE WHITWORTH",
+   "1938 – 2011"
   ],
   "use": "a memorial bench dedication"
  },
  "polished-brass-225x65-rect-plaque": {
   "lines": [
-   "Take a seat with",
-   "HARRY & JOAN BROOK",
-   "who walked here for forty years"
+   "In loving memory of",
+   "GWEN DUNN",
+   "1935 – 2020"
   ],
   "use": "a memorial bench dedication"
  },
  "orbital-brass-matt-lacquer-225x65-rect-plaque": {
   "lines": [
-   "In memory of",
-   "COLIN MATTHEWS",
-   "who watched the boats come home"
+   "In loving memory of",
+   "JACK GREENWOOD",
+   "1942 – 2011"
   ],
   "use": "a memorial bench dedication"
  },
  "aged-brass-225x65-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "EILEEN JARVIS",
-   "a bell ringer here for fifty years"
+   "JANET LAMBERT",
+   "1950 – 2013"
   ],
   "use": "a memorial bench dedication"
  },
  "brushed-stainless-225x75-rect-plaque": {
   "lines": [
-   "In memory of",
-   "JEAN ELLIS",
-   "1936 – 2023",
-   "who loved to sit here and watch the world go by"
+   "In loving memory of",
+   "WILLIAM BISHOP",
+   "1933 – 2021"
   ],
   "use": "a memorial bench dedication"
  },
  "polished-stainless-225x75-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "MICHAEL TREVAN",
-   "1948 – 2022",
-   "Fisherman, father and friend"
+   "PHYLLIS GOODWIN",
+   "1923 – 2020"
   ],
   "use": "a memorial bench dedication"
  },
@@ -177,28 +176,26 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-brass-225x75-rect-plaque": {
   "lines": [
-   "In memory of",
-   "ARTHUR & MAY DIXON",
-   "married here in 1956",
-   "Together always"
+   "In loving memory of",
+   "SHIRLEY PLATT",
+   "1947 – 2024"
   ],
   "use": "a memorial bench dedication"
  },
  "orbital-brass-matt-lacquer-225x75-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "BRIAN HOLLOWAY",
-   "1951 – 2024",
-   "Keen gardener and much-missed friend"
+   "MAUREEN FAIRBAIRN",
+   "1924 – 2016",
+   "Sit and rest awhile"
   ],
   "use": "a memorial bench dedication"
  },
  "aged-brass-225x75-rect-plaque": {
   "lines": [
-   "In memory of",
-   "GWEN PRITCHARD",
-   "1940 – 2021",
-   "She loved this view of the bay"
+   "In loving memory of",
+   "LESLIE SENIOR",
+   "1939 – 2021"
   ],
   "use": "a memorial bench dedication"
  },
@@ -213,27 +210,25 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  "polished-stainless-150x75-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "EDNA WOOD",
-   "1925 – 2018",
-   "Rest awhile"
+   "MABEL RILEY",
+   "1938 – 2016",
+   "Sit and rest awhile"
   ],
   "use": "a memorial bench dedication"
  },
  "brushed-brass-150x75-rect-plaque": {
   "lines": [
-   "In memory of",
-   "ROSE ATKINS",
-   "1944 – 2023",
-   "Her garden, her joy"
+   "In loving memory of",
+   "RITA OSBORNE",
+   "1950 – 2015"
   ],
   "use": "a memorial bench dedication"
  },
  "polished-brass-150x75-rect-plaque": {
   "lines": [
-   "In memory of",
-   "KEN & VAL ROSS",
-   "who walked here",
-   "every Sunday"
+   "In loving memory of",
+   "EDNA SHAW",
+   "1938 – 2023"
   ],
   "use": "a memorial bench dedication"
  },
@@ -256,25 +251,26 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-stainless-150x65-rect-plaque": {
   "lines": [
-   "In memory of",
-   "SALLY FINCH",
-   "who loved her roses"
+   "In loving memory of",
+   "NORMA BRADSHAW",
+   "1922 – 2009",
+   "Sit and rest awhile"
   ],
   "use": "a memorial bench dedication"
  },
  "polished-stainless-150x65-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "ROY TURNER",
-   "who walked here daily"
+   "ERIC MASON",
+   "1936 – 2020"
   ],
   "use": "a memorial bench dedication"
  },
  "brushed-brass-150x65-rect-plaque": {
   "lines": [
-   "In memory of",
-   "DAVID LLOYD",
-   "who loved the sea"
+   "In loving memory of",
+   "ROBERT BOWEN",
+   "1928 – 2013"
   ],
   "use": "a memorial bench dedication"
  },
@@ -288,17 +284,17 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "orbital-brass-matt-lacquer-150x65-rect-plaque": {
   "lines": [
-   "In memory of",
-   "OWEN PRICE",
-   "churchwarden and friend"
+   "In loving memory of",
+   "BRENDA SLATER",
+   "1927 – 2021"
   ],
   "use": "a memorial bench dedication"
  },
  "aged-brass-150x65-rect-plaque": {
   "lines": [
-   "In happy memory of",
-   "BARBARA COLE",
-   "who brightened every day"
+   "In loving memory of",
+   "GLADYS PRYCE",
+   "1929 – 2023"
   ],
   "use": "a memorial bench dedication"
  },
@@ -315,45 +311,39 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-stainless-210x148-rect-light-wood-plaque": {
   "lines": [
-   "To the glory of God",
-   "and in memory of",
-   "EMILY CARTER",
-   "1928 – 2016",
-   "who arranged the flowers here",
-   "for over forty years"
+   "In loving memory of",
+   "DOUGLAS LOWE",
+   "1922 – 2012"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-stainless-210x148-rect-dark-wood-plaque": {
   "lines": [
-   "These books were given",
-   "in memory of",
-   "HELEN PARSONS",
-   "who loved this library",
-   "1950 – 2022"
+   "In loving memory of",
+   "MARJORIE & GERALD",
+   "PRYCE",
+   "Marjorie 1931 – 2013",
+   "Gerald 1930 – 2007"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "polished-stainless-210x148-rect-light-wood-plaque": {
   "lines": [
-   "Presented to",
-   "SARAH OKONJO",
-   "on her retirement",
-   "with thanks for 32 years",
-   "Hilltop Surgery 1992 – 2024"
+   "In loving memory of",
+   "ALBERT WALSH",
+   "1926 – 2018"
   ],
-  "use": "a presentation or celebration plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "brushed-brass-210x148-rect-dark-wood-plaque": {
   "lines": [
-   "Welcome to",
-   "IVY COTTAGE",
-   "Built 1868",
-   "Home of the Bennett family",
-   "since 1987"
+   "In loving memory of",
+   "RAYMOND & SHIRLEY",
+   "WESTON",
+   "Raymond 1949 – 2021",
+   "Shirley 1948 – 2020"
   ],
-  "use": "a house or building name"
+  "use": "a memorial plaque"
  },
  "brushed-brass-210x148-rect-light-wood-plaque": {
   "lines": [
@@ -366,147 +356,119 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-brass-210x148-rect-dark-wood-plaque": {
   "lines": [
-   "This hymn board",
-   "was given in memory of",
-   "VERA COLLINS",
-   "1924 – 2016",
-   "who loved to sing"
+   "In loving memory of",
+   "VALERIE DIXON",
+   "1948 – 2017"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-brass-210x148-rect-light-wood-plaque": {
   "lines": [
-   "In thanksgiving for the life of",
-   "WINIFRED SHAW",
-   "1930 – 2022",
-   "who sang in this choir",
-   "for sixty years"
+   "In loving memory of",
+   "CHRISTINE",
+   "WESTON",
+   "1927 – 2016"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "orbital-brass-matt-lacquer-210x148-rect-dark-wood-plaque": {
   "lines": [
-   "Club Captain",
-   "ROBERT HAYWARD",
-   "2019 – 2025",
-   "with thanks from all the members",
-   "Millbrook Golf Club"
+   "In loving memory of",
+   "CHARLIE",
+   "2010 – 2021",
+   "Our faithful friend"
   ],
-  "use": "a presentation or celebration plaque",
-  "portrait": true
+  "use": "a pet memorial"
  },
  "orbital-brass-matt-lacquer-210x148-rect-light-wood-plaque": {
   "lines": [
-   "Honorary Life Member",
-   "DEREK WINTERS",
-   "for forty years of service",
-   "to Riverside Bowls Club",
-   "Presented 2025"
+   "In loving memory of",
+   "SANDRA HOLT",
+   "1922 – 2013",
+   "Loved and remembered"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "aged-brass-210x148-rect-dark-wood-plaque": {
   "lines": [
-   "THE ELSIE MORGAN",
-   "READING ROOM",
-   "Opened on 3 March 2025",
-   "by the Friends of Westbrook Library"
+   "In loving memory of",
+   "FREDA BARLOW",
+   "1942 – 2024"
   ],
-  "use": "an opening plaque"
+  "use": "a memorial plaque"
  },
  "aged-brass-210x148-rect-light-wood-plaque": {
   "lines": [
-   "Presented to",
-   "ANN KEMPSON",
-   "on her retirement after 35 years",
-   "at Hollybank Primary School",
-   "1989 – 2024"
+   "THE CLIFFORD",
+   "ACKROYD ROOM",
+   "Opened on 22 March 2025"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "an opening plaque"
  },
  "brushed-stainless-148x210-rect-dark-wood-plaque": {
   "lines": [
-   "To the glory of God",
-   "and in memory of",
-   "ALBERT",
-   "PENNINGTON",
-   "1919 – 2004",
-   "Organist of",
-   "this church",
-   "1950 – 1995"
+   "In loving memory of",
+   "MAURICE",
+   "UNWIN",
+   "1923 – 2015",
+   "Forever in our hearts"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "brushed-stainless-148x210-rect-light-wood-plaque": {
   "lines": [
-   "The altar frontal",
-   "was given in memory of",
-   "JOYCE",
-   "LAMBERT",
-   "1935 – 2020",
-   "by her family"
+   "In loving memory of",
+   "SHEILA",
+   "SUTTON",
+   "1935 – 2021"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-stainless-148x210-rect-dark-wood-plaque": {
   "lines": [
-   "These shelves were",
-   "given in memory of",
-   "IRIS",
-   "CAMPBELL",
-   "1940 – 2023",
-   "who loved",
-   "a good book"
+   "In loving memory of",
+   "HENRY",
+   "SHARPE",
+   "1934 – 2017",
+   "Always in our thoughts"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "polished-stainless-148x210-rect-light-wood-plaque": {
   "lines": [
-   "Presented to",
-   "MARTIN",
-   "OYELARAN",
-   "to mark 25 years",
-   "of service",
-   "Northgate Fire Station",
-   "1999 – 2024"
+   "In loving memory of",
+   "WALTER",
+   "CROWTHER",
+   "1923 – 2017"
   ],
-  "use": "a presentation or celebration plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "brushed-brass-148x210-rect-dark-wood-plaque": {
   "lines": [
-   "Bless this house",
-   "THE PATEL",
-   "FAMILY",
-   "Rajesh, Meera,",
-   "Anaya and Dev",
-   "2019"
+   "In loving memory of",
+   "KEITH",
+   "POLLARD",
+   "1944 – 2010"
   ],
-  "use": "a house or building name"
+  "use": "a memorial plaque"
  },
  "brushed-brass-148x210-rect-light-wood-plaque": {
   "lines": [
-   "This room is",
-   "dedicated to",
-   "GRACE",
+   "In loving memory of",
+   "NORMA",
    "OSBORNE",
-   "Librarian",
-   "1971 – 2008",
-   "who opened books for all"
+   "1934 – 2008"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "polished-brass-148x210-rect-dark-wood-plaque": {
   "lines": [
-   "In thanksgiving for",
-   "the ministry of",
-   "THE REVD",
-   "ANNE KING",
-   "Vicar 2003 – 2025",
-   "from the people",
-   "of this parish"
+   "In loving memory of",
+   "COLIN",
+   "STOKES",
+   "1941 – 2009"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-brass-148x210-rect-light-wood-plaque": {
   "lines": [
@@ -522,26 +484,20 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "orbital-brass-matt-lacquer-148x210-rect-dark-wood-plaque": {
   "lines": [
-   "Ladies' Singles",
-   "Champion 2025",
-   "SUSAN",
-   "BRADLEY",
-   "Kingsmead",
-   "Bowls Club"
+   "In loving memory of",
+   "GORDON",
+   "GREGORY",
+   "1939 – 2020"
   ],
-  "use": "a presentation or celebration plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "orbital-brass-matt-lacquer-148x210-rect-light-wood-plaque": {
   "lines": [
-   "Presented to",
-   "GEOFF",
-   "MARSDEN",
-   "Groundsman",
-   "1985 – 2025",
-   "Millbrook Cricket Club"
+   "THE ART",
+   "ROOM",
+   "Opened on 20 June 2023"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "an opening plaque"
  },
  "aged-brass-148x210-rect-dark-wood-plaque": {
   "lines": [
@@ -557,28 +513,22 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "aged-brass-148x210-rect-light-wood-plaque": {
   "lines": [
-   "Presented to",
-   "JOHN",
-   "ABERNETHY",
-   "on his retirement",
-   "with thanks for",
-   "40 years' service",
-   "Thornley & Co. 1985 – 2025"
+   "In loving memory of",
+   "CLIFFORD",
+   "RAMSDEN",
+   "1929 – 2012"
   ],
-  "use": "a presentation or celebration plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "brushed-stainless-297x210-rect-dark-wood-plaque": {
   "lines": [
-   "Presented to",
-   "KATHERINE",
-   "DOYLE",
-   "in grateful thanks for 30 years",
-   "as Practice Manager",
-   "Riverside Medical Centre 1995 – 2025"
+   "In loving memory of",
+   "TREVOR",
+   "CHADWICK",
+   "1929 – 2022",
+   "Always in our thoughts"
   ],
-  "use": "a presentation or celebration plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "brushed-stainless-297x210-rect-light-wood-plaque": {
   "lines": [
@@ -590,25 +540,19 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-stainless-297x210-rect-dark-wood-plaque": {
   "lines": [
-   "To the glory of God",
-   "and in memory of",
-   "HENRY JAMES",
-   "LISTER",
-   "1918 – 1999",
-   "This window was restored",
-   "by his grandchildren, 2024"
+   "In loving memory of",
+   "DOUGLAS SENIOR",
+   "1939 – 2017"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-stainless-297x210-rect-light-wood-plaque": {
   "lines": [
-   "The organ was restored in 2023",
-   "in memory of",
-   "FRANCES ELLIOTT",
-   "Organist of this church",
-   "for forty-two years"
+   "In loving memory of",
+   "DAISY",
+   "2008 – 2024"
   ],
-  "use": "a church dedication"
+  "use": "a pet memorial"
  },
  "brushed-brass-297x210-rect-dark-wood-plaque": {
   "lines": [
@@ -622,103 +566,77 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-brass-297x210-rect-light-wood-plaque": {
   "lines": [
-   "Presented to",
-   "LINDA",
-   "FAIRCLOUGH",
-   "Honorary Secretary 2005 – 2025",
-   "with heartfelt thanks",
-   "from the members of Kingsmead Bowls Club"
+   "In loving memory of",
+   "MARJORIE",
+   "SLATER",
+   "1944 – 2021"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "polished-brass-297x210-rect-dark-wood-plaque": {
   "lines": [
-   "Welcome to",
-   "THE COACH HOUSE",
-   "Built 1874",
-   "Lovingly restored by",
-   "Paul and Fiona Grant",
-   "2022"
+   "In loving memory of",
+   "KENNETH ABBOTT",
+   "1936 – 2013"
   ],
-  "use": "a house or building name"
+  "use": "a memorial plaque"
  },
  "polished-brass-297x210-rect-light-wood-plaque": {
   "lines": [
-   "This library was given in memory of",
-   "DR ELEANOR",
-   "WEBB",
-   "1946 – 2021",
-   "Physician, reader and friend",
-   "by her colleagues at St Luke's"
+   "THE AUDREY",
+   "GODFREY ROOM",
+   "Opened on 21 February 2024"
   ],
-  "use": "a dedication plaque"
+  "use": "an opening plaque"
  },
  "orbital-brass-matt-lacquer-297x210-rect-dark-wood-plaque": {
   "lines": [
-   "These books are dedicated to",
-   "THOMAS REID",
-   "who read to the children here",
-   "every Saturday for twenty years",
-   "1998 – 2018"
+   "In loving memory of",
+   "EDNA WADE",
+   "1933 – 2015"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "orbital-brass-matt-lacquer-297x210-rect-light-wood-plaque": {
   "lines": [
-   "Happy 90th birthday",
-   "NANA PEGGY",
-   "With love from all your family",
-   "12 August 2025",
-   "children, grandchildren and great-grandchildren"
+   "In loving memory of",
+   "SYLVIA BROOK",
+   "1940 – 2013"
   ],
-  "use": "a presentation or celebration plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "aged-brass-297x210-rect-dark-wood-plaque": {
   "lines": [
-   "The bells of this church",
-   "were recast and rehung in 2024",
-   "in memory of",
-   "ERIC SHEPHERD",
-   "Tower Captain 1979 – 2023"
+   "In loving memory of",
+   "RITA RIDLEY",
+   "1928 – 2011"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "aged-brass-297x210-rect-light-wood-plaque": {
   "lines": [
-   "In loving memory of",
-   "LEONARD",
-   "BROOKS",
-   "1929 – 2015",
-   "who served this church faithfully",
-   "Sidesman for fifty years"
+   "THE GARDEN ROOM",
+   "Opened on 17 April 2024"
   ],
-  "use": "a church dedication"
+  "use": "an opening plaque"
  },
  "brushed-stainless-210x297-rect-dark-wood-plaque": {
   "lines": [
-   "Presented to",
-   "ELAINE",
-   "FERGUSON",
-   "in recognition of",
-   "25 years as a",
-   "school governor",
-   "St Anne's Primary School"
+   "In loving memory of",
+   "JOYCE",
+   "HOLT",
+   "1949 – 2024"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "brushed-stainless-210x297-rect-light-wood-plaque": {
   "lines": [
-   "This room is",
-   "dedicated to",
-   "MAURICE",
-   "DELANEY",
-   "1934 – 2020",
-   "Bookseller",
-   "of this town",
-   "for fifty years"
+   "In loving memory of",
+   "OLIVE",
+   "PLATT",
+   "1926 – 2021"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "polished-stainless-210x297-rect-dark-wood-plaque": {
   "lines": [
@@ -731,142 +649,109 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-stainless-210x297-rect-light-wood-plaque": {
   "lines": [
-   "In memory of",
-   "AGNES",
-   "WHITTAKER",
-   "1915 – 2012",
-   "Sunday school",
-   "teacher here",
-   "for 60 years"
+   "In loving memory of",
+   "BARRY",
+   "BARKER",
+   "1932 – 2022"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "brushed-brass-210x297-rect-dark-wood-plaque": {
   "lines": [
-   "Honorary Life Member",
-   "GARETH",
-   "RHYS",
-   "Player, coach",
-   "and chairman",
-   "1972 – 2025",
-   "Millbrook Rugby Club"
+   "In loving memory of",
+   "CHRISTINE",
+   "POLLARD",
+   "1945 – 2018"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "brushed-brass-210x297-rect-light-wood-plaque": {
   "lines": [
-   "Club Champion",
-   "2025",
-   "PRIYA",
-   "SHARMA",
-   "Ladies' Singles",
-   "Kingsmead Tennis Club"
+   "In loving memory of",
+   "JASPER",
+   "2009 – 2024"
   ],
-  "use": "a presentation or celebration plaque",
-  "portrait": true
+  "use": "a pet memorial"
  },
  "polished-brass-210x297-rect-dark-wood-plaque": {
   "lines": [
-   "Welcome to",
-   "ROSE",
-   "COTTAGE",
-   "Built 1790",
-   "Home of the",
-   "Thornbury family",
-   "since 1964"
+   "In loving memory of",
+   "TILLY",
+   "2012 – 2024",
+   "Always by our side"
   ],
-  "use": "a house or building name"
+  "use": "a pet memorial"
  },
  "polished-brass-210x297-rect-light-wood-plaque": {
   "lines": [
-   "These shelves were given",
-   "in memory of",
-   "DOUGLAS",
-   "PEARCE",
-   "1939 – 2022",
-   "who never stopped",
-   "reading"
+   "In loving memory of",
+   "JANET",
+   "RIDLEY",
+   "1946 – 2009",
+   "Forever in our hearts"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "orbital-brass-matt-lacquer-210x297-rect-dark-wood-plaque": {
   "lines": [
-   "THE",
-   "WILLOW",
+   "THE ERIC",
+   "PICKERING",
    "ROOM",
-   "Opened on 21 June 2025",
-   "by the Mayor of Ashby",
-   "Councillor Helen Price"
+   "Opened on 13 November 2025"
   ],
   "use": "an opening plaque"
  },
  "orbital-brass-matt-lacquer-210x297-rect-light-wood-plaque": {
   "lines": [
-   "Presented to",
-   "DR SANJAY",
-   "MEHTA",
-   "with grateful thanks",
-   "from his patients",
-   "1990 – 2025",
-   "Brookfield Surgery"
+   "In loving memory of",
+   "FREDA & CYRIL",
+   "WREN",
+   "Freda 1941 – 2009",
+   "Cyril 1942 – 2015"
   ],
-  "use": "a presentation or celebration plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "aged-brass-210x297-rect-dark-wood-plaque": {
   "lines": [
-   "In thanksgiving",
-   "for the life of",
-   "EDITH",
-   "HAYES",
-   "1931 – 2024",
-   "Churchwarden",
-   "1988 – 2024",
-   "and friend to all"
+   "In loving memory of",
+   "GILLIAN",
+   "CARTWRIGHT",
+   "1936 – 2019"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "aged-brass-210x297-rect-light-wood-plaque": {
   "lines": [
-   "This font cover",
-   "was given in memory of",
-   "THOMAS",
-   "LINDLEY",
-   "1920 – 2010",
-   "the carpenter",
-   "who made it"
+   "THE QUIET",
+   "ROOM",
+   "Opened on 11 April 2023"
   ],
-  "use": "a church dedication"
+  "use": "an opening plaque"
  },
  "brushed-stainless-200x150-rect-dark-wood-plaque": {
   "lines": [
-   "The Easter flowers",
-   "are given each year in memory of",
-   "DORA PHILLIPS",
-   "1926 – 2015",
-   "who loved this church"
+   "In loving memory of",
+   "PAMELA ABBOTT",
+   "1922 – 2008"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "brushed-stainless-200x150-rect-light-wood-plaque": {
   "lines": [
-   "In memory of",
-   "NIGEL HARTLEY",
-   "Treasurer of this parish",
-   "1990 – 2022",
-   "Faithful in all things"
+   "In loving memory of",
+   "KEN MARLOW",
+   "1943 – 2021"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-stainless-200x150-rect-dark-wood-plaque": {
   "lines": [
-   "The children's corner",
-   "was given in memory of",
-   "AMY DRAPER",
-   "1979 – 2021",
-   "who loved stories"
+   "In loving memory of",
+   "POPPY",
+   "2011 – 2024",
+   "Our best friend"
   ],
-  "use": "a dedication plaque"
+  "use": "a pet memorial"
  },
  "polished-stainless-200x150-rect-light-wood-plaque": {
   "lines": [
@@ -879,33 +764,27 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-brass-200x150-rect-dark-wood-plaque": {
   "lines": [
-   "Presented to",
-   "CAROL HUNT",
-   "for 20 years of kindness",
-   "as our lollipop lady",
-   "Westfield Infant School"
+   "In loving memory of",
+   "BERYL GODFREY",
+   "1943 – 2012"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "brushed-brass-200x150-rect-light-wood-plaque": {
   "lines": [
-   "This reading chair",
-   "is in memory of",
-   "LEN FORSYTH",
-   "1931 – 2020",
-   "Sit, read, enjoy"
+   "In loving memory of",
+   "BARNEY",
+   "2006 – 2024"
   ],
-  "use": "a dedication plaque"
+  "use": "a pet memorial"
  },
  "polished-brass-200x150-rect-dark-wood-plaque": {
   "lines": [
-   "To the glory of God",
-   "THE CHANCEL",
-   "was restored by",
-   "the people of this parish",
-   "2024"
+   "In loving memory of",
+   "NORA JARVIS",
+   "1926 – 2017"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-brass-200x150-rect-light-wood-plaque": {
   "lines": [
@@ -920,95 +799,81 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "orbital-brass-matt-lacquer-200x150-rect-dark-wood-plaque": {
   "lines": [
-   "Presented to",
-   "PAT O'BRIEN",
-   "Club Secretary",
-   "2008 – 2025",
-   "Riverside Bowls Club"
+   "THE STUDIO",
+   "Opened on 23 October 2023"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "an opening plaque"
  },
  "orbital-brass-matt-lacquer-200x150-rect-light-wood-plaque": {
   "lines": [
-   "Most Improved Player",
-   "OLIVER",
-   "BRENNAN",
-   "Under 12s, 2025",
-   "Millbrook Juniors FC"
+   "In loving memory of",
+   "WALTER & OLIVE",
+   "RAMSDEN",
+   "Walter 1922 – 2017",
+   "Olive 1917 – 2002"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "aged-brass-200x150-rect-dark-wood-plaque": {
   "lines": [
-   "In memory of",
-   "BERYL FOX",
-   "who ran this library",
-   "with kindness and care",
-   "1962 – 1998"
+   "In loving memory of",
+   "PAMELA NAYLOR",
+   "1925 – 2009"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "aged-brass-200x150-rect-light-wood-plaque": {
   "lines": [
-   "With love to",
-   "GRANDMA JOY",
-   "on her 80th birthday",
-   "3 April 2025",
-   "From all your grandchildren"
+   "THE GILLIAN",
+   "GREENWOOD ROOM",
+   "Opened on 14 April 2024"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "an opening plaque"
  },
  "brushed-stainless-300x200-rect-dark-wood-plaque": {
   "lines": [
-   "Presented to",
-   "GRAHAM TULLY",
-   "on his retirement after 38 years",
-   "with thanks from all your colleagues",
-   "Northgate Engineering 1987 – 2025"
+   "In loving memory of",
+   "ALAN OLDFIELD",
+   "1939 – 2011",
+   "Loved and remembered"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "brushed-stainless-300x200-rect-light-wood-plaque": {
   "lines": [
-   "THE HOLLINS",
-   "ROOM",
-   "This study room was funded by",
-   "the Hollins Charitable Trust",
-   "2025",
-   "Please work quietly"
+   "In loving memory of",
+   "ALBERT",
+   "WHITELEY",
+   "1925 – 2007"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "polished-stainless-300x200-rect-dark-wood-plaque": {
   "lines": [
    "In loving memory of",
-   "FR MICHAEL BURKE",
-   "Parish priest 1986 – 2016",
-   "1939 – 2020",
-   "May he rest in peace"
+   "FREDERICK",
+   "FENBY",
+   "1949 – 2023",
+   "Loved and remembered"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-stainless-300x200-rect-light-wood-plaque": {
   "lines": [
-   "This plaque records",
-   "THE BELL RINGERS",
-   "who rang a full peal",
-   "for the Coronation",
-   "6 May 2023"
+   "In loving memory of",
+   "RONALD ROYLE",
+   "1935 – 2012"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "brushed-brass-300x200-rect-dark-wood-plaque": {
   "lines": [
-   "In memory of",
-   "STEVE NOLAN",
-   "Captain, coach and friend",
-   "This scoreboard was given by his teammates",
-   "1961 – 2022"
+   "In loving memory of",
+   "BERNARD",
+   "WHITWORTH",
+   "1947 – 2019"
   ],
-  "use": "a presentation or celebration plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "brushed-brass-300x200-rect-light-wood-plaque": {
   "lines": [
@@ -1021,65 +886,52 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-brass-300x200-rect-dark-wood-plaque": {
   "lines": [
-   "Happy golden anniversary",
-   "PAUL & DIANE",
-   "Fifty wonderful years",
-   "20 July 1975 – 20 July 2025",
-   "With love from Sam, Kate and Josh"
+   "In loving memory of",
+   "GORDON & EILEEN",
+   "INGRAM",
+   "Gordon 1931 – 2024",
+   "Eileen 1932 – 2011"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "polished-brass-300x200-rect-light-wood-plaque": {
   "lines": [
-   "These books were given by",
-   "THE ROTARY CLUB",
-   "of Ashby and District",
-   "2024",
-   "Read and pass it on"
+   "In loving memory of",
+   "EDITH PRATT",
+   "1950 – 2013"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "orbital-brass-matt-lacquer-300x200-rect-dark-wood-plaque": {
   "lines": [
-   "In memory of",
-   "SIOBHAN KELLY",
-   "Poet and friend of this library",
-   "1968 – 2022",
-   "Her words live on"
+   "In loving memory of",
+   "MABEL YATES",
+   "1944 – 2020"
   ],
-  "use": "a dedication plaque",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "orbital-brass-matt-lacquer-300x200-rect-light-wood-plaque": {
   "lines": [
-   "Welcome to",
-   "THE GRANARY",
-   "Built 1823",
-   "Converted with love by",
-   "Ben and Laura Kerr"
+   "THE BARBARA",
+   "NASH ROOM",
+   "Opened on 3 July 2025"
   ],
-  "use": "a house or building name"
+  "use": "an opening plaque"
  },
  "aged-brass-300x200-rect-dark-wood-plaque": {
   "lines": [
-   "To the glory of God",
-   "this window was given",
-   "in memory of",
-   "ROBERT ELLINGHAM",
-   "1910 – 1987",
-   "Churchwarden 1950 – 1980"
+   "In loving memory of",
+   "NORMAN TANNER",
+   "1940 – 2017"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "aged-brass-300x200-rect-light-wood-plaque": {
   "lines": [
-   "In loving memory of",
-   "MARY ANNE FOLEY",
-   "who taught in the Sunday school",
-   "for over forty years",
-   "1932 – 2018"
+   "THE FAMILY ROOM",
+   "Opened on 19 March 2023"
   ],
-  "use": "a church dedication"
+  "use": "an opening plaque"
  },
  "brushed-stainless-400x300-rect-dark-wood-plaque": {
   "lines": [
@@ -1093,117 +945,95 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-stainless-400x300-rect-light-wood-plaque": {
   "lines": [
-   "This house was built in 1906 for",
-   "DR ARTHUR",
-   "KNIGHT",
-   "the village doctor, and his family",
-   "Restored 2021",
-   "by Neil and Rachel Ford"
+   "In loving memory of",
+   "BERYL",
+   "WALSH",
+   "1949 – 2013",
+   "Loved and remembered"
   ],
-  "use": "a heritage plaque"
+  "use": "a memorial plaque"
  },
  "polished-stainless-400x300-rect-dark-wood-plaque": {
   "lines": [
-   "CLUB CHAMPIONS",
-   "2021 Daniel Hart",
-   "2022 Amira Saleh",
-   "2023 Tom Becker",
-   "2024 Lucy Barnes",
-   "2025 Ravi Chandra",
-   "Millbrook Golf Club"
+   "In loving memory of",
+   "WINIFRED",
+   "RIGBY",
+   "1941 – 2008"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "polished-stainless-400x300-rect-light-wood-plaque": {
   "lines": [
-   "This clubhouse was opened on",
-   "18 April 2025",
-   "by",
-   "RACHEL HOLLAND",
-   "former club captain",
-   "Kingsmead Rowing Club"
+   "In loving memory of",
+   "BARRY",
+   "NEWMAN",
+   "1930 – 2024",
+   "Loved and remembered"
   ],
-  "use": "an opening plaque"
+  "use": "a memorial plaque"
  },
  "brushed-brass-400x300-rect-dark-wood-plaque": {
   "lines": [
-   "To the glory of God",
-   "and in thankful memory of",
-   "ARTHUR GEORGE",
-   "FENWICK",
-   "1912 – 1998",
-   "Organist and choirmaster",
-   "of this church for 52 years"
+   "In loving memory of",
+   "GRAHAM & THELMA",
+   "LAWSON",
+   "Graham 1928 – 2014",
+   "Thelma 1923 – 2005"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "brushed-brass-400x300-rect-light-wood-plaque": {
   "lines": [
-   "The restoration of this church",
-   "was completed in 2024",
-   "THANKS BE",
-   "TO GOD",
-   "and to all who gave so generously",
-   "St Mary's Church Restoration Appeal"
+   "In loving memory of",
+   "PEGGY",
+   "MITCHELL",
+   "1947 – 2020"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-brass-400x300-rect-dark-wood-plaque": {
   "lines": [
-   "In memory of",
-   "PROFESSOR",
-   "ALAN BRIERLEY",
-   "1931 – 2019",
-   "Historian of this town",
-   "who gave his books to this library",
-   "Ashby Road Library"
+   "THE LIBRARY",
+   "Opened on 24 September 2025"
   ],
-  "use": "a dedication plaque"
+  "use": "an opening plaque"
  },
  "polished-brass-400x300-rect-light-wood-plaque": {
   "lines": [
-   "THE BARN",
-   "Built 1760",
-   "Converted to a family home",
-   "by Tom and Isla Greaves",
-   "2018",
-   "Mind your head on the beams"
+   "In loving memory of",
+   "MAVIS & BERNARD",
+   "OLDFIELD",
+   "Mavis 1923 – 2018",
+   "Bernard 1920 – 2013"
   ],
-  "use": "a house or building name"
+  "use": "a memorial plaque"
  },
  "orbital-brass-matt-lacquer-400x300-rect-dark-wood-plaque": {
   "lines": [
-   "Presented to",
-   "JANET ROWLANDS",
-   "in grateful recognition of",
-   "27 years as Headteacher",
-   "of Brookfield Primary School",
-   "1998 – 2025",
-   "From the staff, pupils and governors"
+   "In loving memory of",
+   "CYRIL",
+   "STOKES",
+   "1933 – 2008"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "orbital-brass-matt-lacquer-400x300-rect-light-wood-plaque": {
   "lines": [
-   "THE SNUG",
-   "A quiet room for reading,",
-   "thinking and talking",
-   "Given by the Old Pupils' Association",
-   "2025"
+   "In loving memory of",
+   "ROY",
+   "BURTON",
+   "1939 – 2019"
   ],
-  "use": "a dedication plaque"
+  "use": "a memorial plaque"
  },
  "aged-brass-400x300-rect-dark-wood-plaque": {
   "lines": [
-   "PAST PRESIDENTS",
-   "2016 – 2018 Frank Morley",
-   "2018 – 2020 Ian Ferris",
-   "2020 – 2022 Joy Abbott",
-   "2022 – 2024 Keith Lowe",
-   "2024 – Helen Tranter",
-   "Riverside Bowls Club"
+   "In loving memory of",
+   "ROY",
+   "HODGSON",
+   "1940 – 2006"
   ],
-  "use": "a presentation or celebration plaque"
+  "use": "a memorial plaque"
  },
  "aged-brass-400x300-rect-light-wood-plaque": {
   "lines": [
@@ -1233,23 +1063,24 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-brass-210x148-rect-plaque": {
   "lines": [
-   "This oak tree was planted",
-   "in memory of",
-   "TOM HENSHAW",
-   "1958 – 2023",
-   "Grow tall and strong"
+   "This tree was planted",
+   "in loving memory of",
+   "DOROTHY",
+   "CARTWRIGHT",
+   "1939 – 2007"
   ],
   "use": "a tree or garden dedication"
  },
  "orbital-brass-matt-lacquer-210x148-rect-plaque": {
   "lines": [
-   "BRAMBLE",
-   "Our faithful friend",
-   "2008 – 2022",
-   "Forever chasing rabbits"
+   "In loving memory of",
+   "JACK & BRENDA",
+   "GOODWIN",
+   "Jack 1946 – 2020",
+   "Brenda 1943 – 2017",
+   "Together again"
   ],
-  "use": "a pet memorial",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "aged-brass-210x148-rect-plaque": {
   "lines": [
@@ -1262,74 +1093,59 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-stainless-148x210-rect-plaque": {
   "lines": [
-   "This rose garden",
-   "was planted for",
-   "ANNIE",
-   "FLETCHER",
-   "1936 – 2021",
-   "who grew roses",
-   "all her life"
+   "This cherry tree was planted",
+   "in loving memory of",
+   "EDITH",
+   "NEWMAN",
+   "1922 – 2016"
   ],
   "use": "a tree or garden dedication"
  },
  "polished-stainless-148x210-rect-plaque": {
   "lines": [
-   "In loving memory of",
-   "HAROLD",
-   "JENKINS",
-   "1930 – 2018",
-   "Club captain, patient coach",
-   "and always first to the bar.",
-   "He bowled here for sixty years"
-  ],
-  "use": "a memorial plaque",
-  "portrait": true
- },
- "brushed-brass-148x210-rect-plaque": {
-  "lines": [
-   "In memory of",
-   "CANON",
-   "PAUL WEBBER",
-   "1944 – 2022",
-   "Rector of this parish",
-   "1981 – 2009"
-  ],
-  "use": "a church dedication"
- },
- "polished-brass-148x210-rect-plaque": {
-  "lines": [
-   "This apple tree",
-   "was planted by",
-   "THE PUPILS",
-   "OF CLASS 4",
-   "March 2024",
-   "Fernhill",
-   "Primary School"
+   "This rowan was planted",
+   "in loving memory of",
+   "DOREEN",
+   "WATTS",
+   "1934 – 2007"
   ],
   "use": "a tree or garden dedication"
  },
- "orbital-brass-matt-lacquer-148x210-rect-plaque": {
+ "brushed-brass-148x210-rect-plaque": {
   "lines": [
-   "MOLLY",
-   "Our beautiful",
-   "springer spaniel",
-   "2010 – 2024",
+   "In loving memory of",
+   "TESS",
+   "2010 – 2021"
+  ],
+  "use": "a pet memorial"
+ },
+ "polished-brass-148x210-rect-plaque": {
+  "lines": [
+   "In loving memory of",
+   "LUNA",
+   "2007 – 2023",
    "Always by our side"
   ],
   "use": "a pet memorial"
  },
- "aged-brass-148x210-rect-plaque": {
+ "orbital-brass-matt-lacquer-148x210-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "BEATRICE",
-   "ANNE HOLT",
-   "1922 – 2017",
-   "She started our Thursday",
-   "lunch club and ran it here",
-   "for thirty-one years"
+   "GLADYS",
+   "REEVES",
+   "1942 – 2007"
   ],
-  "use": "a memorial plaque",
-  "portrait": true
+  "use": "a memorial plaque"
+ },
+ "aged-brass-148x210-rect-plaque": {
+  "lines": [
+   "This oak was planted",
+   "in loving memory of",
+   "KENNETH",
+   "TATTERSALL",
+   "1950 – 2018"
+  ],
+  "use": "a tree or garden dedication"
  },
  "brushed-stainless-297x210-rect-plaque": {
   "lines": [
@@ -1353,23 +1169,18 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "brushed-brass-297x210-rect-plaque": {
   "lines": [
-   "THE OLD",
-   "BAKEHOUSE",
-   "Bread was baked here",
-   "from 1879 to 1958"
+   "In loving memory of",
+   "PIPER",
+   "2010 – 2023",
+   "Our best friend"
   ],
-  "use": "a heritage plaque"
+  "use": "a pet memorial"
  },
  "polished-brass-297x210-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "CHARLOTTE MAY",
-   "PEMBERTON",
-   "1931 – 2021",
-   "Headmistress of this school",
-   "from 1968 to 1991, who planted",
-   "this rose garden with her pupils.",
-   "Given with love by her former pupils"
+   "PHYLLIS DALE",
+   "1926 – 2011"
   ],
   "use": "a memorial plaque"
  },
@@ -1384,115 +1195,91 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "aged-brass-297x210-rect-plaque": {
   "lines": [
-   "This hedge was planted",
-   "by the people of",
-   "LONG BRAMPTON",
-   "to mark the Coronation",
-   "6 May 2023"
+   "In loving memory of",
+   "GEOFFREY HURST",
+   "1936 – 2013"
   ],
-  "use": "a tree or garden dedication"
+  "use": "a memorial plaque"
  },
  "brushed-stainless-210x297-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "WALTER",
-   "GREENWOOD",
-   "1921 – 2014",
-   "Soldier, farmer",
-   "and churchwarden",
-   "Rest in peace"
+   "ROBERT",
+   "ILLINGWORTH",
+   "1937 – 2008"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "polished-stainless-210x297-rect-plaque": {
   "lines": [
-   "This orchard was planted",
-   "in memory of",
-   "JACK",
-   "THORNTON",
-   "1950 – 2022",
-   "who taught us all",
-   "to grow things"
+   "In loving memory of",
+   "VERA",
+   "CHAPMAN",
+   "1940 – 2013"
   ],
-  "use": "a tree or garden dedication"
+  "use": "a memorial plaque"
  },
  "brushed-brass-210x297-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "PIP",
-   "Jack Russell terrier",
-   "and the best dog",
-   "in the world",
-   "2007 – 2023",
-   "Sleep well, old friend"
+   "VICTOR",
+   "HODGSON",
+   "1942 – 2017",
+   "Forever in our hearts"
   ],
-  "use": "a pet memorial"
+  "use": "a memorial plaque"
  },
  "polished-brass-210x297-rect-plaque": {
   "lines": [
-   "Remembering",
-   "THE FALLEN",
-   "OF THIS PARISH",
-   "1914 – 1918",
-   "1939 – 1945",
-   "We will remember them"
+   "In loving memory of",
+   "GWEN & TREVOR",
+   "GREGORY",
+   "Gwen 1946 – 2009",
+   "Trevor 1945 – 2019"
   ],
-  "use": "a church dedication"
+  "use": "a memorial plaque"
  },
  "orbital-brass-matt-lacquer-210x297-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "ROSEMARY",
-   "ASHCROFT",
-   "1938 – 2023",
-   "Gardener, artist",
-   "and much-loved mum",
-   "This garden was hers"
+   "VERA",
+   "MASON",
+   "1947 – 2011"
   ],
-  "use": "a tree or garden dedication",
-  "portrait": true
+  "use": "a memorial plaque"
  },
  "aged-brass-210x297-rect-plaque": {
   "lines": [
-   "On this site stood",
-   "THE",
-   "RED LION",
-   "coaching inn",
-   "1742 – 1961",
-   "where travellers",
-   "changed horses",
-   "on the London road",
-   "Weldon History Society"
+   "In loving memory of",
+   "MURIEL",
+   "GARSIDE",
+   "1934 – 2012"
   ],
-  "use": "a heritage plaque"
+  "use": "a memorial plaque"
  },
  "brushed-stainless-200x150-rect-plaque": {
   "lines": [
-   "This cherry tree was planted",
-   "in memory of",
-   "SOPHIE CLARKE",
-   "1985 – 2023",
-   "Blossom every spring"
+   "In loving memory of",
+   "MOLLY CLEGG",
+   "1926 – 2021"
   ],
-  "use": "a tree or garden dedication"
+  "use": "a memorial plaque"
  },
  "polished-stainless-200x150-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "NORMAN BIRCH",
-   "1937 – 2022",
-   "who loved this garden",
-   "and everyone in it"
+   "GEOFFREY ROWE",
+   "1940 – 2019",
+   "Loved and remembered"
   ],
   "use": "a memorial plaque"
  },
  "brushed-brass-200x150-rect-plaque": {
   "lines": [
-   "In memory of",
-   "IVY & SID MOORE",
-   "whose ashes rest here together",
-   "in the garden they loved",
-   "Loved and remembered always"
+   "In loving memory of",
+   "MOLLY HURST",
+   "1930 – 2011",
+   "Forever in our hearts"
   ],
   "use": "a memorial plaque"
  },
@@ -1515,55 +1302,47 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  "aged-brass-200x150-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "EDWARD LANGLEY",
-   "1928 – 2019",
-   "Stonemason",
-   "who built this wall",
-   "Rest easy, Dad"
+   "DOREEN DIXON",
+   "1936 – 2009"
   ],
   "use": "a memorial plaque"
  },
  "brushed-stainless-300x200-rect-plaque": {
   "lines": [
-   "In loving memory of",
-   "ALAN VAUGHAN",
-   "1944 – 2021",
-   "Crew member and coxswain",
-   "of this lifeboat station for 32 years",
-   "Placed by his wife, his children and his crew"
+   "THE",
+   "BOATHOUSE",
+   "was officially opened by",
+   "Derek Townsend",
+   "on 2 April 2025"
   ],
-  "use": "a memorial plaque"
+  "use": "an opening plaque"
  },
  "polished-stainless-300x200-rect-plaque": {
   "lines": [
-   "This garden was created",
-   "by the residents of",
-   "CHURCH LANE",
-   "to mark the Millennium",
-   "1 January 2000"
+   "THE SCOUT",
+   "HUT",
+   "was officially opened by",
+   "Anthony Mitchell",
+   "on 22 May 2023"
   ],
-  "use": "a tree or garden dedication"
+  "use": "an opening plaque"
  },
  "brushed-brass-300x200-rect-plaque": {
   "lines": [
-   "Welcome to",
-   "SEA VIEW",
-   "Bed and breakfast",
-   "Est. 1998",
-   "Proprietors Mike and Lynn Carey"
+   "In loving memory of",
+   "MEG",
+   "2008 – 2019",
+   "Our faithful friend"
   ],
-  "use": "a house or building name"
+  "use": "a pet memorial"
  },
  "polished-brass-300x200-rect-plaque": {
   "lines": [
-   "In proud memory of",
-   "PTE WILLIAM DEAN",
-   "Royal Warwickshire Regiment",
-   "killed in action 1 July 1916",
-   "aged 19"
+   "In loving memory of",
+   "BONNIE",
+   "2012 – 2024"
   ],
-  "use": "a memorial plaque",
-  "portrait": true
+  "use": "a pet memorial"
  },
  "orbital-brass-matt-lacquer-300x200-rect-plaque": {
   "lines": [
@@ -1575,58 +1354,48 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "aged-brass-300x200-rect-plaque": {
   "lines": [
-   "This wall marks the site of",
-   "THE OLD FORGE",
-   "1810 – 1953",
-   "where the Hobbs family",
-   "shod horses for three generations"
+   "In loving memory of",
+   "DEREK WREN",
+   "1947 – 2009"
   ],
-  "use": "a heritage plaque"
+  "use": "a memorial plaque"
  },
  "brushed-stainless-400x300-rect-plaque": {
   "lines": [
-   "This memorial garden",
-   "is dedicated to the people of",
-   "NETHERCOMBE",
-   "who lost their lives",
-   "in the Second World War",
-   "1939 – 1945",
-   "Their name liveth for evermore"
+   "In loving memory of",
+   "ALFRED & WINIFRED",
+   "LOMAX",
+   "Alfred 1924 – 2014",
+   "Winifred 1926 – 2001",
+   "Reunited"
   ],
-  "use": "a heritage plaque"
+  "use": "a memorial plaque"
  },
  "polished-stainless-400x300-rect-plaque": {
   "lines": [
-   "Welcome to",
-   "BRAMBLEDOWN",
-   "COMMUNITY GARDEN",
-   "Created by local volunteers",
-   "for everyone to enjoy",
-   "Opened 5 May 2024",
-   "Please close the gate behind you"
+   "In loving memory of",
+   "GRAHAM & CAROL",
+   "WAINWRIGHT",
+   "Graham 1935 – 2009",
+   "Carol 1940 – 2018"
   ],
-  "use": "a tree or garden dedication"
+  "use": "a memorial plaque"
  },
  "brushed-brass-400x300-rect-plaque": {
   "lines": [
-   "This wall was built in 1952",
-   "by the boys of",
-   "ST JOHN'S SCHOOL",
-   "and rebuilt in 2024",
-   "by their grandchildren",
-   "Bricks laid by hand, then and now"
+   "In loving memory of",
+   "SYLVIA",
+   "SHAW",
+   "1924 – 2010"
   ],
   "use": "a memorial plaque"
  },
  "polished-brass-400x300-rect-plaque": {
   "lines": [
    "In loving memory of",
-   "MAJOR",
-   "HUGH CARRINGTON",
-   "1919 – 2006",
-   "who gave this garden",
-   "to the village",
-   "Enjoy it as he did"
+   "RONALD",
+   "WHITELEY",
+   "1932 – 2020"
   ],
   "use": "a memorial plaque"
  },
@@ -1642,16 +1411,13 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "aged-brass-400x300-rect-plaque": {
   "lines": [
-   "In this house lived",
-   "DR EMILY HART",
-   "pioneering country doctor",
-   "1871 – 1949",
-   "who cared for this valley",
-   "for fifty years",
-   "Placed by the Combe Valley Society"
+   "This tree was planted",
+   "in loving memory of",
+   "BARBARA",
+   "LOWE",
+   "1946 – 2016"
   ],
-  "use": "a heritage plaque",
-  "portrait": true
+  "use": "a tree or garden dedication"
  },
  "brushed-stainless-250x150-oval-plaque": {
   "lines": [
@@ -1663,20 +1429,18 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-stainless-250x150-oval-plaque": {
   "lines": [
-   "In memory of",
-   "TOBY",
-   "our loyal friend",
-   "2009 – 2024"
+   "In loving memory of",
+   "BEN",
+   "2007 – 2018"
   ],
-  "use": "a pet memorial",
-  "portrait": true
+  "use": "a pet memorial"
  },
  "brushed-brass-250x150-oval-plaque": {
   "lines": [
-   "APPLE TREE",
-   "COTTAGE"
+   "LARCH",
+   "HOUSE"
   ],
-  "use": "a tree or garden dedication"
+  "use": "a house or building name"
  },
  "polished-brass-250x150-oval-plaque": {
   "lines": [
@@ -1691,10 +1455,10 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "orbital-brass-matt-lacquer-250x150-oval-plaque": {
   "lines": [
-   "Remembering",
-   "FATHER",
-   "PAT HEALY",
-   "1930 – 2015"
+   "In loving memory of",
+   "RAYMOND CLEGG",
+   "1929 – 2019",
+   "Much loved Dad and Grandad"
   ],
   "use": "a memorial plaque"
  },
@@ -1715,10 +1479,10 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-stainless-200x200-circle-plaque": {
   "lines": [
-   "In memory of",
-   "JOHN",
-   "MERCER",
-   "1937 – 2021"
+   "In loving memory of",
+   "MAUREEN",
+   "HAMMOND",
+   "1926 – 2007"
   ],
   "use": "a memorial plaque"
  },
@@ -1733,29 +1497,26 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-brass-200x200-circle-plaque": {
   "lines": [
-   "Here lies",
-   "WILLOW",
-   "The sweetest cat",
-   "2005 – 2023"
+   "In loving memory of",
+   "ROSIE",
+   "2009 – 2022"
   ],
   "use": "a pet memorial"
  },
  "orbital-brass-matt-lacquer-200x200-circle-plaque": {
   "lines": [
-   "Planted by",
-   "YEAR 6",
-   "Fernhill Primary",
-   "July 2024"
+   "In loving memory of",
+   "ALAN WADE",
+   "1945 – 2021",
+   "Much loved Dad and Grandad"
   ],
-  "use": "a tree or garden dedication"
+  "use": "a memorial plaque"
  },
  "aged-brass-200x200-circle-plaque": {
   "lines": [
-   "In loving memory of",
-   "HILDA",
-   "FRANCIS",
-   "1921 – 2014"
+   "FERN",
+   "COTTAGE"
   ],
-  "use": "a memorial plaque"
+  "use": "a house or building name"
  }
 };

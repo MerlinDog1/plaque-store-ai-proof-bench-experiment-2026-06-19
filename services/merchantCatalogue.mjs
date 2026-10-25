@@ -69,5 +69,6 @@ export const merchantOffers = entries;
 // memorial page's eight products got new example wording, owner msg 6056; v=4 for the second round, msg 6085; v=5 for
 // the bench page's seven, msg 6132; v=6 when they took the simpler wording, msgs 6189-6192; v=7 for the garden page's
 // picks and fence plaque, msg 6281; v=8 for the brass and stainless pages' plaques; v=9 for the opening and custom
-// pages'; v=10 for the tree page and the memorial page's redone picks). Product pages use it too.
-export const merchantImageQuery = '?v=10';
+// pages'; v=10 for the tree page and the memorial page's redone picks; v=11 for the plain wording on the other 138
+// product pages, msg 6326). Product pages use it too.
+export const merchantImageQuery = '?v=11';

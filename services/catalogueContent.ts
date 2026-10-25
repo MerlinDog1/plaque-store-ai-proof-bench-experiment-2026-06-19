@@ -1,5 +1,6 @@
 import { merchantOffers } from './merchantCatalogue.mjs';
 import { catalogueExamples, CatalogueExample } from './catalogueExamples';
+import { vettedCataloguePhotos } from './vettedPhotos.mjs';
 
 // Product-specific copy for the 175 exact catalogue pages (owner msg 5736, 23 Oct 2026: "Make all
 // pages better so they climb Google more"). Every page used to carry the same ~900 words with only
@@ -10,6 +11,8 @@ type Offer = (typeof merchantOffers)[number];
 
 const offerBySlug = new Map(merchantOffers.map(offer => [offer.slug, offer]));
 const offerFor = (slug: string) => offerBySlug.get(slug);
+/** "photo" where the page shows a photo the owner has seen, "drawing" where it shows the flat design view. */
+export const pictureWord = (slug: string) => (vettedCataloguePhotos.has(slug) ? 'photo' : 'drawing');
 
 export function exampleFor(slug: string): CatalogueExample | undefined {
   return catalogueExamples[slug];
@@ -114,7 +117,7 @@ export function productFaqs(slug: string): ProductFaq[] {
   if (!offer) return [];
   const example = exampleFor(slug);
   const size = sizeName(offer);
-  const lines = example ? ` The example in the photo has ${example.lines.length} lines.` : '';
+  const lines = example ? ` The example in the ${pictureWord(slug)} has ${example.lines.length} lines.` : '';
   return [
     { question: `How much wording fits on ${an(size)} ${size} plaque?`, answer: `This size takes ${wordingFit(offer)}.${lines} If your proof looks crowded, choose a larger size rather than smaller lettering.` },
     { question: `Can ${an(finish(offer))} ${finish(offer)} plaque${offer.preset.wood ? ' with wood backing' : ''} go outside?`, answer: outdoorAnswer(offer) },
@@ -129,7 +132,7 @@ export function productIntro(slug: string) {
   const offer = offerFor(slug);
   if (!offer) return '';
   const example = exampleFor(slug);
-  const shown = example ? ` The photo shows it as ${example.use}${example.portrait ? ' with an engraved portrait' : ''}; your own wording replaces it.` : '';
+  const shown = example ? ` The ${pictureWord(slug)} shows it as ${example.use}${example.portrait ? ' with an engraved portrait' : ''}; your own wording replaces it.` : '';
   const size = sizeName(offer);
   return `${an(size) === 'an' ? 'An' : 'A'} ${size} ${shapeWord(offer)}${finish(offer)} plaque${backing(offer)}: ${suits(offer)}. It takes ${wordingFit(offer)}.${shown} See a free proof before you pay, or send us your words on WhatsApp and we'll design it for you.`;
 }

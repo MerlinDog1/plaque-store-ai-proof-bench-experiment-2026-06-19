@@ -8,6 +8,7 @@ import {
   TextColor,
 } from '../types';
 import { estimatePlaquePrice } from './pricing';
+import { vettedCataloguePhotos } from './vettedPhotos.mjs';
 import {
   getCheckoutPriceBreakdown,
   getCheckoutQuoteReasons,
@@ -1195,9 +1196,9 @@ export const merchantProducts: ProductFamily[] = merchantOffers.map(item => cata
   slug: item.slug, title: item.title, shortTitle: item.materialCue === 'stainless' ? 'Stainless' : 'Brass',
   eyebrow: 'Made to order', materialCue: item.materialCue as ProductFamily['materialCue'],
   image: item.image, imageKind: item.imageKind as 'ai' | 'render', merchantOffer: true,
-  // Realistic photos made by scripts/generate-merchant-photos.mjs (owner msg 5231); the two
-  // offers that already use a photo-style image keep it.
-  photo: item.imageKind === 'render' || cataloguePhotoVersions[item.slug] ? cataloguePhotoFor(item.slug) : undefined,
+  // Realistic photos (owner msg 5231), now only the ones the owner has seen (services/vettedPhotos.mjs, msg 6270); the
+  // others show the flat drawing. The two older photo-style offers keep their own image.
+  photo: vettedCataloguePhotos.has(item.slug) ? cataloguePhotoFor(item.slug) : undefined,
   merchantMaterial: item.label, productionDays: item.productionDays,
   description: item.description, seoIntro: item.description, seoTitle: `${item.title} UK | InstaPlaque`,
   seoDescription: `${item.size} ${item.label.toLowerCase()} plaque${item.preset.wood ? ` with ${item.preset.woodTone} wood backing` : ''}. Add your wording, check a free proof and order with UK delivery included.`,

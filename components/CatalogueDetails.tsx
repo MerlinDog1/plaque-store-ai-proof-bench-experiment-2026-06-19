@@ -1,7 +1,7 @@
 import React from 'react';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { merchantProducts } from '../services/commerce';
-import { exampleFor, ideasFor, isPortraitSize } from '../services/catalogueContent';
+import { exampleFor, ideasFor, isPortraitSize, pictureWord } from '../services/catalogueContent';
 import { ContactLink, WhatsAppIcon } from './ContactOptions';
 
 // Catalogue product pages (owner msg 5231, review 21 Oct 2026): a real specification where the
@@ -18,7 +18,7 @@ const bySize = (a: Offer, b: Offer) => a.preset.width * a.preset.height - b.pres
 
 // ?v= changes whenever the sample PDFs are redrawn, so browsers that opened an older copy fetch the new one.
 export function samplePdfFor(slug: string) {
-  return `/samples/products/${slug}.pdf?v=10`;
+  return `/samples/products/${slug}.pdf?v=11`;
 }
 
 /** Short size name, e.g. "150 × 50 mm bench", "A5 landscape", "250 × 150 mm oval". */
@@ -108,10 +108,10 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
     <>
       {example && (
         <section className="shop-section shop-wording-examples shop-product-example" aria-labelledby="product-example-heading">
-          <p className="shop-kicker">The example in the photo</p>
+          <p className="shop-kicker">The example in the {pictureWord(offer.slug)}</p>
           <h2 id="product-example-heading">Shown as {example.use}.</h2>
           <p>
-            The photo shows this {offerSizeLabel(offer)} plaque with invented example wording{example.portrait ? ' and an engraved portrait' : ''}.
+            The {pictureWord(offer.slug)} shows this {offerSizeLabel(offer)} plaque with invented example wording{example.portrait ? ' and an engraved portrait' : ''}.
             Your own words replace it, laid out to fit the plate, and you see the proof before you pay.
             {example.portrait ? ' Portraits are drawn from a favourite photo of a person or pet that you send us.' : ''}
           </p>

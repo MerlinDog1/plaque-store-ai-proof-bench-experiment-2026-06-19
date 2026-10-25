@@ -2,7 +2,8 @@
 // lists fewer URLs than the exact-product catalogue).
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
-import { merchantOffers } from '../services/merchantCatalogue.mjs';
+import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogue.mjs';
+import { vettedCataloguePhotos } from '../services/vettedPhotos.mjs';
 import { checkProductPolicies, checkReturnPolicy, checkDigitalOffer, schemaObjects, schemasFromHtml } from './lib/product-policy-checks.mjs';
 
 let productCount = 0;
@@ -43,14 +44,18 @@ for (const page of ['index.html', 'memorial-plaques/index.html', 'bench-plaques/
 const { existsSync } = await import('node:fs');
 for (const offer of merchantOffers) {
   const html = await readFile(`dist/${offer.slug}/index.html`, 'utf8');
-  if (offer.imageKind === 'render') {
+  if (offer.imageKind === 'render' && vettedCataloguePhotos.has(offer.slug)) {
     const photo = `/site-images/catalogue-photo/${offer.slug}.webp`;
     // Redrawn photos carry ?v=N (services/commerce.ts), so match the path up to any version.
     assert.ok(html.includes(`src="${photo}"`) || html.includes(`src="${photo}?v=`), `Photo on ${offer.slug}`);
     for (const file of [photo, photo.replace('.webp', '-600.webp'), offer.image.replace('/merchant/', '/merchant/thumbs/').replace('.jpg', '.webp')]) assert.ok(existsSync(`dist${file}`), `Missing ${file}`);
+  } else if (offer.imageKind === 'render') {
+    // No photo the owner has seen: the page leads with the exact flat drawing and links no unchecked photo.
+    assert.ok(html.includes(`src="${offer.image}${merchantImageQuery}"`), `Flat drawing on ${offer.slug}`);
+    assert.ok(!html.includes(`/site-images/catalogue-photo/${offer.slug}`), `Unchecked photo linked on ${offer.slug}`);
   }
   assert.ok(html.includes('class="shop-spec-list"') && html.includes(`${offer.productionDays} working days`), `Specification on ${offer.slug}`);
   assert.ok((html.match(/class="shop-catalogue-links"/g) || []).length >= 1, `Variant links on ${offer.slug}`);
-  assert.ok(html.includes(`href="/samples/products/${offer.slug}.pdf?v=10"`) && existsSync(`dist/samples/products/${offer.slug}.pdf`), `Sample proof PDF for ${offer.slug}`);
+  assert.ok(html.includes(`href="/samples/products/${offer.slug}.pdf?v=11"`) && existsSync(`dist/samples/products/${offer.slug}.pdf`), `Sample proof PDF for ${offer.slug}`);
 }
 console.log(`Product policies: ${productCount} physical offers across ${pageCount} pages pass shipping, returns, production/transit separation and weekday checks; free designer unchanged. Every product page has its photo, specification, variant links and sample proof.`);
