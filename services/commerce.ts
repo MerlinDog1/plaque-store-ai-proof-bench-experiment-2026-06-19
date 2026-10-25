@@ -660,7 +660,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     sections: [],
     faqs: [
       { question: 'What do you write on a memorial plaque?', answer: 'Most memorial plaques have an opening line such as “In loving memory of”, the name, the years, and one short line about the person, such as “who loved this garden”. You can add who it is from on a final, smaller line.' },
-      { question: 'How many words fit on a memorial plaque?', answer: 'A 150 × 50 mm bench plaque fits two or three short lines. An A5 plaque fits five or six lines and an A4 plaque seven to ten. If it looks crowded, choose a larger plaque rather than smaller lettering.' },
+      { question: 'How many words fit on a memorial plaque?', answer: 'A 150 × 50 mm bench plaque fits three or four short lines. An A5 plaque fits five or six lines and an A4 plaque seven to ten. If it looks crowded, choose a larger plaque rather than smaller lettering.' },
       { question: 'Should I include the dates?', answer: 'It is up to you. Years are enough for most plaques, such as 1942 – 2024. Full dates suit a church or formal plaque, and some families leave dates out altogether.' },
       { question: 'Can you help me with the wording?', answer: 'Yes. Send us what you have on WhatsApp, even just a name and a few notes, and we’ll suggest wording and send a free proof, usually within 3 working hours.' },
     ],

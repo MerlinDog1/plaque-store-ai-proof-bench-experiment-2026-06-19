@@ -34,9 +34,9 @@ const library: Array<{ id: string; title: string; intro: string; examples: Examp
     { size: 'A5', lines: ['In memory of', 'STEVE NOLAN', '1961 – 2022', 'Captain, coach and friend'] },
     { size: 'A5', lines: ['Remembering', 'ROSE ATKINS', 'who made this allotment bloom', 'Planted by her friends, 2025'] },
   ] },
-  { id: 'bench', title: 'For a memorial bench', intro: 'Bench plates are small: two or three short lines read best from a little distance.', examples: [
-    { size: '150 × 50 mm', lines: ['In memory of', 'JOAN PARRY', 'who loved her garden'] },
-    { size: '225 × 75 mm', lines: ['This bench is in memory of', 'LILY CHAMBERS', '1929 – 2019', 'who never missed a morning walk'] },
+  { id: 'bench', title: 'For a memorial bench', intro: 'Bench plates are small: three or four short lines read best from a little distance.', examples: [
+    { size: '150 × 50 mm', lines: ['In loving memory of', 'JOAN PARRY', 'who loved this garden and all of us'] },
+    { size: '225 × 75 mm', lines: ['This bench is in memory of', 'LILY CHAMBERS', '1929 – 2019', 'who walked by this river every morning', 'and always stopped here to say hello'] },
     { size: '200 × 50 mm', lines: ['In loving memory of', 'FRANK & IRIS DAVIES', 'Enjoy the view as they did'] },
     { size: '150 × 50 mm', lines: ['Remembering', 'BILL HUGHES', 'Rest here awhile'] },
   ] },

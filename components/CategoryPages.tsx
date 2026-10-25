@@ -247,7 +247,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           inscriptions: [
             { title: 'A community garden', lines: ['Welcome to', 'Brambledown', 'Community Garden', 'Opened 5 May 2024'] },
             { title: 'A memorial', lines: ['In loving memory of', 'Alan Vaughan', '1944 – 2021', 'Forever in our hearts'] },
-            { title: 'A bench', lines: ['In memory of', 'Tom & Betty Harris', 'who loved to watch the sea'] },
+            { title: 'A bench', lines: ['In loving memory of', 'Tom & Betty Harris', 'who sat here every evening', 'to watch the boats come home'] },
             { title: 'A thank you', lines: ['Presented to', 'Katherine Doyle', 'in grateful thanks', 'for 30 years'] },
           ],
           link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
