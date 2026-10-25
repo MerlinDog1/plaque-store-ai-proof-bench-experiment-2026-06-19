@@ -724,8 +724,9 @@ export function ShopProduct({
         <a href="/">Home</a>
         <span>/</span>
         {parentCategory && <><a href={`/${parentCategory.slug}`}>{parentCategory.title}</a><span>/</span></>}
-        {category && <><a href={`/${category.slug}`}>{category.title}</a><span>/</span></>}
-        <span>{product.title}</span>
+        {category && <><a href={`/${category.slug}`}>{category.title}</a><span className="shop-crumb-last-sep">/</span></>}
+        {/* Phones drop the plaque's own name here: it is the heading just below, and the trail fits on one line. */}
+        <span className={category ? 'shop-crumb-current' : undefined}>{product.title}</span>
       </div>
       <section className="shop-product-hero">
         <ProductGallery images={heroImages} caption={heroCaption} sizes="(max-width: 720px) 92vw, 560px" />
