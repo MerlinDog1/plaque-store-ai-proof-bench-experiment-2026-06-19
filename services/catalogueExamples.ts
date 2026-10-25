@@ -61,9 +61,10 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
  },
  "polished-stainless-200x50-rect-plaque": {
   "lines": [
-   "In memory of",
+   "In loving memory of",
    "TOM & BETTY HARRIS",
-   "who loved to watch the sea"
+   "who sat here every evening",
+   "to watch the boats come home"
   ],
   "use": "a memorial bench dedication"
  },
@@ -111,7 +112,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
   "lines": [
    "In memory of",
    "REVD JOHN ASHWORTH",
-   "Vicar of this parish 1975 – 1998"
+   "Vicar of this parish 1975 – 1998,",
+   "who always had time to sit and listen"
   ],
   "use": "a memorial bench dedication"
  },
@@ -170,7 +172,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "This bench is in memory of",
    "LILY CHAMBERS",
    "1929 – 2019",
-   "who never missed a morning walk"
+   "who walked by this river every morning",
+   "and always stopped here to say hello"
   ],
   "use": "a memorial bench dedication"
  },
@@ -206,7 +209,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "In memory of",
    "STAN BAILEY",
    "1939 – 2020",
-   "who loved this park"
+   "Park keeper here for thirty years,",
+   "who loved every inch of it"
   ],
   "use": "a memorial bench dedication"
  },
@@ -242,6 +246,7 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "In memory of",
    "JOHN PENROSE",
    "1946 – 2022",
+   "who taught half the village to sail",
    "Gone sailing"
   ],
   "use": "a memorial bench dedication"
@@ -251,7 +256,8 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
    "In loving memory of",
    "ALICE GRANT",
    "1933 – 2021",
-   "Forever in our hearts"
+   "who bowled on this green",
+   "for forty happy summers"
   ],
   "use": "a memorial bench dedication"
  },
@@ -283,7 +289,9 @@ export const catalogueExamples: Record<string, CatalogueExample> = {
   "lines": [
    "Remembering",
    "MARY QUINN",
-   "a lifelong gardener"
+   "1938 – 2022",
+   "who grew the finest sweet peas",
+   "on these allotments for fifty years"
   ],
   "use": "a memorial bench dedication"
  },

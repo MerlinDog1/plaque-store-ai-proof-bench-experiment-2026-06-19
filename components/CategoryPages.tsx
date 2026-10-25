@@ -77,8 +77,8 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         title: 'Personalised bench plaques',
         note: 'A small place for a lasting memory.',
         hero: {
-          base: `${category}/bench-hero`,
-          alt: 'Brushed stainless steel bench plaque reading In loving memory of George Holland, who loved this view, screwed to the backrest of a weathered teak bench on a hilltop above a green valley',
+          base: `${category}/bench-hero-v2`,
+          alt: 'Brushed stainless steel bench plaque reading In loving memory of George Holland, who walked these hills and loved this view, screwed to the backrest of a weathered teak bench at the top of a hill above a green valley',
           caption: <>Shown: brushed stainless steel, 150 × 50 mm, the plaque priced below. {seeThis('brushed-stainless-150x50-rect-plaque')}</>,
         },
         priceNote: '150 × 50 mm stainless steel, with engraving, screws and UK delivery',
@@ -96,7 +96,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         },
         wording: {
           title: 'Bench plaque wording ideas.',
-          intro: 'A bench plaque has room for two or three short lines: a name, perhaps the years, and a few words about them.',
+          intro: 'A bench plaque has room for three to five short lines: a name, perhaps the years, and a sentence about them.',
           inscriptions: [
             { title: 'A short remembrance', lines: ['In loving memory of', 'Margaret Ellis', '1942–2024', 'Always in our hearts'] },
             { title: 'A favourite place', lines: ['For David', 'Who loved this view', 'And everyone who shared it'] },
