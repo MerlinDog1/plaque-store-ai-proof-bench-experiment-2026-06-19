@@ -17,6 +17,7 @@ import {
   materialStories,
   SeoLandingPage,
   seoLandingPages,
+  categoryParentFor,
 } from "../services/commerce";
 
 export const shopFaqs = [
@@ -713,11 +714,13 @@ export function ShopProduct({
     ? 'Shown with an example inscription. Your wording replaces it.'
     : 'Finish and optional backing affect the final price.';
   const category = product.merchantOffer ? productCategoryFor(product) : null;
+  const parentCategory = categoryParentFor(category ? category.slug : product.slug);
   return (
     <div className="shopfront" data-prerendered="true">
       <div className="shop-breadcrumb">
         <a href="/">Home</a>
         <span>/</span>
+        {parentCategory && <><a href={`/${parentCategory.slug}`}>{parentCategory.title}</a><span>/</span></>}
         {category && <><a href={`/${category.slug}`}>{category.title}</a><span>/</span></>}
         <span>{product.title}</span>
       </div>

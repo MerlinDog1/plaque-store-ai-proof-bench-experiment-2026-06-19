@@ -1,5 +1,5 @@
 import React from 'react';
-import { merchantProducts, productFamilies, seoLandingPages, type ProductFamily } from '../services/commerce';
+import { merchantProducts, productFamilies, seoLandingPages, type ProductFamily, categoryParentFor } from '../services/commerce';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
@@ -352,6 +352,7 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
   onRequestDesign?: () => void;
 }) {
   const subject = plaqueSubject(product.shortTitle);
+  const parent = categoryParentFor(product.slug);
   const id = (name: string) => `${config.prefix}-${name}`;
   const { hero, routes, examples, sizes, wording } = config;
   return (
@@ -359,6 +360,7 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
       <div className="shop-breadcrumb">
         <a href="/">Home</a>
         <span>/</span>
+        {parent && <><a href={`/${parent.slug}`}>{parent.title}</a><span>/</span></>}
         <span>{product.title}</span>
       </div>
       <CategoryHero

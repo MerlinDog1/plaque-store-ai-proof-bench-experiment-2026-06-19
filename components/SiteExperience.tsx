@@ -1,6 +1,6 @@
 import React, { lazy, useEffect, useRef, useState } from 'react';
 const PlaquePreview = lazy(() => import('./PlaquePreview'));
-import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies, seoLandingPages } from '../services/commerce';
+import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies, seoLandingPages, categoryParentFor } from '../services/commerce';
 import { PlaqueState } from '../types';
 import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportActions';
 import { SeoRankTracker } from './SeoRankTracker';
@@ -884,6 +884,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
         ...(selectedProduct.merchantOffer ? [productSchema(selectedProduct)] : []),
         breadcrumbSchema([
           { name: 'Home', url: siteBaseUrl },
+          ...[categoryParentFor(selectedProduct.merchantOffer ? productCategoryFor(selectedProduct).slug : selectedProduct.slug)].filter(Boolean).map(parent => ({ name: parent!.title, url: `${siteBaseUrl}/${parent!.slug}` })),
           ...(selectedProduct.merchantOffer ? [productCategoryFor(selectedProduct)].map(category => ({ name: category.title, url: `${siteBaseUrl}/${category.slug}` })) : []),
           { name: selectedProduct.title, url: `${siteBaseUrl}/${selectedProduct.slug}` },
         ]),
@@ -900,6 +901,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
         landingPageSchema(selectedLanding),
         breadcrumbSchema([
           { name: 'Home', url: siteBaseUrl },
+          ...[categoryParentFor(selectedLanding.slug)].filter(Boolean).map(parent => ({ name: parent!.title, url: `${siteBaseUrl}/${parent!.slug}` })),
           { name: selectedLanding.title, url: `${siteBaseUrl}/${selectedLanding.slug}` },
         ]),
         faqSchema(mergeFaqs(selectedLanding.faqs, shopFaqs).slice(0, 6)),

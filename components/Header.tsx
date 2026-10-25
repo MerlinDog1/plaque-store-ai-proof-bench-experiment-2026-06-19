@@ -100,13 +100,18 @@ export const Header: React.FC<Props> = ({
         <a className="shop-header-brand" href="/">
           Insta<span>Plaque</span>
         </a>
+        {/* Garden and brass are the two pages Google shows most (architecture review, owner msg 6264). Narrower
+            screens drop the shop-nav-mid links; phones get every link in one row that scrolls sideways. */}
         <nav aria-label="Main navigation">
           <a href="/memorial-plaques">Memorial</a>
           <a href="/bench-plaques">Bench</a>
+          <a href="/garden-plaques">Garden</a>
+          <a href="/tree-memorial-plaques" className="shop-nav-mid">Tree</a>
           <a href="/opening-plaques">Openings</a>
-          <a href="/portrait-plaques">Portraits</a>
-          <a href="/materials" className="shop-nav-wide">Materials</a>
-          <a href="/contact">Get in touch</a>
+          <a href="/brass-plaques">Brass</a>
+          <a href="/stainless-steel-plaques" className="shop-nav-mid">Stainless</a>
+          <a href="/portrait-plaques" className="shop-nav-mid">Portraits</a>
+          <a href="/contact" className="shop-nav-contact">Get in touch</a>
         </nav>
         <a
           className="shop-header-cta"

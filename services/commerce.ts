@@ -1115,6 +1115,13 @@ export const materialStories = [
 // (owner msg 5927, 24 Oct 2026: tree, orchard and hedge plaques shown with no tree, orchard or hedge, a pet's
 // "Here lies" on a house wall). The A5 stainless plaque had only a studio picture; it now has an in-place photo.
 // Version 3: redrawn again with the plaque at its true size against bricks, stones and posts (owner msg 5959).
+// The middle step in breadcrumbs (owner msg 6264, the architecture review): bench, garden and tree plaques sit under
+// memorial plaques, as the memorial page's "Where will it go?" tiles already show.
+const memorialParent = { slug: 'memorial-plaques', title: 'Memorial plaques' };
+export function categoryParentFor(slug: string): { slug: string; title: string } | undefined {
+  return ['bench-plaques', 'garden-plaques', 'tree-memorial-plaques'].includes(slug) ? memorialParent : undefined;
+}
+
 const cataloguePhotoVersions: Record<string, number> = {
   'brushed-stainless-200x150-rect-plaque': 3,
   'polished-brass-210x148-rect-plaque': 3,

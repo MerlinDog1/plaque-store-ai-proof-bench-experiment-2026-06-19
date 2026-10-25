@@ -579,9 +579,12 @@ for (const page of indexablePages) {
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: siteBaseUrl },
-          ...(category ? [{ '@type': 'ListItem', position: 2, name: category.title, item: `${siteBaseUrl}/${category.slug}` }] : []),
-          { '@type': 'ListItem', position: category ? 3 : 2, name: page.productType, item: url },
+          ...[
+            { name: 'Home', item: siteBaseUrl },
+            ...[catalogue.categoryParentFor(category ? category.slug : page.slug)].filter(Boolean).map(parent => ({ name: parent.title, item: `${siteBaseUrl}/${parent.slug}` })),
+            ...(category ? [{ name: category.title, item: `${siteBaseUrl}/${category.slug}` }] : []),
+            { name: page.productType, item: url },
+          ].map((entry, index) => ({ '@type': 'ListItem', position: index + 1, ...entry })),
         ],
       },
       faqSchema(page.faqs),
@@ -612,8 +615,11 @@ for (const page of indexableLandingPages) {
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: siteBaseUrl },
-          { '@type': 'ListItem', position: 2, name: page.pageName, item: url },
+          ...[
+            { name: 'Home', item: siteBaseUrl },
+            ...[catalogue.categoryParentFor(page.slug)].filter(Boolean).map(parent => ({ name: parent.title, item: `${siteBaseUrl}/${parent.slug}` })),
+            { name: page.pageName, item: url },
+          ].map((entry, index) => ({ '@type': 'ListItem', position: index + 1, ...entry })),
         ],
       },
       faqSchema(page.faqs),
