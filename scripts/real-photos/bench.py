@@ -2,13 +2,30 @@
 off. How many pages did last search ad campaign directly link too? Those will be the pics to fix the next with the same
 level of care and detail"). The bench page was the pilot campaign's second-busiest ad landing page.
 
-Each plaque has a back story, fuller wording that still fits its small plate, its own designer drawing as a layout guide,
-a real-photo brief, the true 1.5 mm plate thickness and a bench that suits the story. One is on our workshop bench.
-The top photo shows the plaque the page's "from" price is for (brushed stainless 150 x 50 mm).
-The first pick (brushed stainless 150 x 50, Joan Parry) was redone for the memorial page and is kept.
+Each plaque has a back story and fuller wording that still fits its small plate. The top photo shows the plaque the
+page's "from" price is for (brushed stainless 150 x 50). The first pick (brushed stainless 150 x 50, Joan Parry) was
+redone for the memorial page and is kept.
+
+Round 1 used each plaque's flat designer drawing as the layout guide. The owner's feedback on it (msgs 6149, 6152, 6154):
+- "backgrounds on most is just way too much, too dramatic. Really wants to be more no descript right and throw in some
+  newer looking benches."
+- "If you gonna take from an angle you need to make sure plaque lines up with bench and also check positioning on bench
+  always."
+- "if someone say somewhere to watch something etc the bench would be looking out towards that great view so our picture
+  would not contain that great view"
+- "could you even potentially code the angle? And the rough bench outline so image model was less likely to make shit up?"
+So round 2 (every photo with a `guide`) gives Codex a rough 3D render from bench_scene.py instead: a simple bench model
+with the plaque's drawing on the front of its top rail, centred and lined up, seen from a fixed camera. The bench faces
+its view; the camera stands in front of it, so the background is the plain, ordinary place behind the bench. Half the
+benches are newer. Mary Quinn's workshop shot is round 1 and stays.
 
 Usage: python3 -I bench.py designer   -> designer-wording.json (stencils for render.cjs)
-       python3 -I bench.py prompts    -> prompts/<id>.txt and jobs.json (refs/ must hold the metal-screw stencils)
+       python3 -I bench_scene.py      -> guides/<id>.png (the 3D layout renders)
+       python3 -I bench.py prompts r3 -> prompts/<id>-r3.txt and jobs-r3.json for the guided photos
+Round 3 (owner msg 6162, on the round-2 samples): "Low key feel like you want to me closer to the plaque and also plaque
+is 1.5mm thick, it needs to look like real metal also": the camera is closer and flatter on (the plaque fills 55% of
+the top photo and 75-80% of the product photos), the plate has square-cut edges with no rim, the guide no longer
+outlines the plate, and every brief describes how its metal finish catches the light.
 """
 import json
 import sys
@@ -27,8 +44,12 @@ MATERIAL = {
 }
 REAL_LOOK = ('Shot on a full-frame camera, natural light, true-to-life colours, a little natural grain, no filters, no HDR, '
              'no retouching.')
-THIN = ('Thickness must be true to life. The metal plate is a thin 1.5 mm sheet, about as thick as a coin: at this angle '
-        'its edge shows only as a fine bright line, never as a visible slab, step or raised panel. The plate is screwed '
+PLAIN = ('It should look like an ordinary, honest photo that someone took of the bench on an ordinary day: a plain, '
+         'everyday background and soft, natural light, not a postcard, not a sunset, nothing dramatic.')
+THIN = ('Thickness must be true to life. The metal plate is a thin 1.5 mm sheet, about as thick as a coin, with square-cut '
+        'edges: no bevel, no raised rim and no frame around its outer edge (the engraved border on its face stays). At this '
+        'angle its edge shows at most as a '
+        'hairline of bright metal along one side, never as a visible slab, step or raised panel. The plate is screwed '
         'straight onto the timber and sits flat and tight against it, with no gap, no frame and no backing board. The '
         'screw heads are small and low, only 2-3 mm proud of the plate.')
 LAYOUT = ('The attached image is our flat design artwork of this exact plaque, seen straight on. It is a layout guide, not a '
@@ -37,14 +58,39 @@ LAYOUT = ('The attached image is our flat design artwork of this exact plaque, s
           'the plate, the same border and the same screw positions. Do not copy the artwork\'s flat colours, outlines, even '
           'lighting or straight-on view: the photo shows the real materials, in real light, from the camera position '
           'described below.')
-BENCH = ('The bench is real, used timber: real grain, small cracks and checks, a little lichen or wear where people sit, '
-         'and the plaque\'s own small shadow on the wood where the light falls.')
+GUIDE = ('The attached image is a rough 3D layout render of this exact scene, made by us from measurements. It fixes the '
+         'composition. Keep exactly: the camera position and viewing angle, the perspective, the bench\'s shape and its '
+         'place and size in the frame, and the plaque exactly where it is: in the middle of the top rail of the backrest, '
+         'lined up with the rail, flat against it, at exactly that size, position and angle. The plaque\'s wording, '
+         'border and screws are drawn on it from our design artwork: keep that layout exactly, with the same line breaks '
+         'and letter sizes. The render\'s flat grey surfaces, plain grey ground and empty sky are only placeholders: give '
+         'the bench the real materials described below and put the real setting described below behind it. Do not copy '
+         'the render\'s flat colours, flat shading or empty background. The plaque in the render is our flat design artwork '
+         'laid onto the model: in the photo it is real, solid metal, as described below, never a flat print.')
+METAL = ('Real metal: the plate catches the light unevenly, the way real metal does, with a soft bright sheen across part of '
+         'it, slightly darker tones elsewhere and the fine texture of its finish visible up close ({finish}). The engraved '
+         'letters are cut into the metal, with tiny bright edges. It must never look like a printed sticker, a flat-coloured '
+         'graphic or plastic.')
+FINISH = {
+    'brushed-stainless': 'fine parallel brushed lines that shimmer where the light crosses them',
+    'polished-stainless': 'a true mirror that reflects the real sky and surroundings behind the camera, softly distorted, '
+                          'with the lettering crisp on top',
+    'brushed-brass': 'fine parallel brushed lines that glow warm gold where the light crosses them',
+    'aged-brass': 'a soft, even brown-gold patina with gentle variation and warmer highlights',
+    'orbital-brass-matt-lacquer': 'a fine, dense swirl texture under a satin lacquer that glints softly',
+}
+FACING = ('The plaque is on the front of the backrest, facing the same way as someone sitting on the bench, so this photo '
+          'is taken from in front of the bench, looking back at it. {facing}')
+BENCH = ('The bench is real, used timber: real grain, small cracks and checks, a little wear where people sit, and the '
+         'plaque\'s own small shadow on the wood where the light falls.')
+NEW_BENCH = ('The bench is real timber, fairly new and well kept: real grain, crisp edges, only the faint marks of use, and '
+             'the plaque\'s own small shadow on the wood where the light falls.')
 ENDING = ('It must look like a real photograph of a real, physical object: real reflections of the surroundings in the '
           'metal, light falling on the plate, the bench and the setting in exactly the same way, real texture in the wood '
           'grain and the setting. Not a 3D render, not an illustration, not a composite, not a pasted-on graphic. Avoid '
           'perfectly even lighting on the plate, plastic-looking metal or wood, oversized screw heads, a plaque that is too '
-          'big for the bench, exaggerated thickness, oversaturated colours, readable brand names, extra or misspelled text, '
-          'logos, watermarks, people or hands.')
+          'big for the bench or does not line up with the rail, exaggerated thickness, oversaturated colours, readable '
+          'brand names, extra or misspelled text, logos, watermarks, people or hands.')
 WORKSHOP = ('Behind the plaque our small UK workshop melts into a soft, creamy bokeh: a folded pale grey polishing cloth and '
             'a crumpled white cotton rag just behind one side, a round tin of metal polish far too blurred for any label to '
             'be read, and further back shelving with metal sheets and wooden boards, a bright window and small round '
@@ -56,64 +102,69 @@ SINGLE = {}
 DOUBLE = {'border': True, 'borderStyle': 'double'}
 SCALLOP = {'border': True, 'borderStyle': 'scalloped'}
 
-# id, offer (the product), border overrides, back story, wording, setting, camera and scale. The hero is 3:2 (published
-# as a 4:3 crop); the products are square catalogue photos.
+# Bench models for bench_scene.py (mm). 'splats': a thick top rail with vertical slats below (garden bench);
+# 'slats': wide horizontal back slats, the plaque on the top one (park and seafront benches).
+GARDEN = dict(back='splats', L=1500, top=860, rail_h=110, recline=12, arms=True)
+PARK = dict(back='slats', L=1800, top=860, slats=[120, 95, 95], recline=12, arms=True, end_w=40, leg=40)
+MODERN = dict(back='slats', L=1800, top=820, slats=[95, 85, 85], recline=10, arms=False, end_w=30, leg=30)
+
 PHOTOS = [
-    dict(id='bench-hero', offer='brushed-stainless-150x50-rect-plaque', overrides=SINGLE, hero=True,
+    dict(id='bench-hero', offer='brushed-stainless-150x50-rect-plaque', overrides=SINGLE, hero=True, new=True,
          story='George Holland walked the hills above his village every day of his retirement and always stopped to rest '
-               'at the top. His family put a bench there in his memory.',
+               'at the top. His family put a new bench there in his memory, facing the view he loved.',
          lines=[('intro', 'In loving memory of'), ('name', 'GEORGE HOLLAND'), ('body', 'who walked these hills'),
                 ('body', 'and loved this view')],
-         scene='The plaque is screwed to the middle of the top rail of the backrest of a weathered, silver-grey teak bench '
-               'that stands on the grass at the top of a hill beside a footpath. Beyond the bench the hillside falls away to '
-               'a wide green valley of small fields, hedgerows and a distant village, softly blurred. Low, golden evening '
-               'sun from the left warms the teak and catches the fine brushed grain of the steel.',
-         camera='standing in front of the bench, a little to the right: about 60 cm from the plaque at the height of the top '
-                'rail, 50 mm lens at f/4, looking along the backrest at about 20 degrees. The plaque is pin-sharp, just left '
-                'of the centre of the frame, and fills about 40% of the frame width; more of the backrest, a little of the '
-                'seat and the far end of the bench fall gently out of focus. Every line of the wording is readable.',
-         scale='The plaque is only 150 x 50 mm, a little longer and much slimmer than a mobile phone. The top rail of the '
-               'backrest is about 100 mm tall, so the plaque covers only the middle half of the rail\'s height, with teak '
-               'showing above and below it, and the bench is about 1.8 m long, twelve times the length of the plaque.'),
+         guide=dict(size=[1024, 683], lens=70, yaw=-16, pitch=12, frac=0.55, cx=0.5, cy=0.5,
+                    bench=dict(GARDEN, L=1800, rail_h=100)),
+         bench='a new-looking solid teak garden bench, only a year or two old: smooth honey-brown timber just starting to '
+               'silver at the edges, a thick top rail on the backrest with vertical slats below it, and arms',
+         facing='The bench faces out over the valley George loved, so that view is behind the camera and is NOT in the '
+                'photo: no valley, no fields, no distant village anywhere.',
+         behind='an ordinary grassy hilltop with a scruffy hawthorn hedge and a plain, pale sky, softly out of focus',
+         light='soft, even daylight under thin high cloud, with gentle shadows',
+         scale='The plaque is only 150 x 50 mm, a little longer and much slimmer than a mobile phone; the top rail is '
+               'about 100 mm tall, so teak shows above and below it.'),
     dict(id='brushed-brass-225x75-rect-plaque', offer='brushed-brass-225x75-rect-plaque', overrides=SINGLE,
          story='Lily Chambers walked her dog along the river every morning for sixty years and always stopped at this '
-               'spot by the weir. Her neighbours put a bench there for her.',
+               'spot. Her neighbours put a bench there for her.',
          lines=[('intro', 'This bench is in memory of'), ('name', 'LILY CHAMBERS'), ('date', '1929 – 2019'),
                 ('body', 'who walked by this river every morning'), ('body', 'and always stopped here to say hello')],
-         scene='The plaque is screwed to the middle of the top rail of a dark, weathered oak bench on a riverside path in a '
-               'small town park. Beyond the bench, softly blurred, a slow river, the white water of a low weir and willows '
-               'on the far bank. Early morning: soft, low sunlight with a little mist over the water and dew on the grass.',
-         camera='a close, low oblique view: 85 mm lens at f/5.6, about 40 cm from the plaque, at the height of the rail and '
-                'about 30 degrees to the left of square-on, looking along the rail, which runs gently across the frame. The '
-                'whole plaque is sharp and fills about 70% of the frame width; every line of the wording is readable.',
-         scale='The plaque is 225 x 75 mm, about the length of a dinner knife. The top rail is about 110 mm tall, so dark oak '
-               'shows above and below the plaque.'),
-    dict(id='polished-stainless-200x50-rect-plaque', offer='polished-stainless-200x50-rect-plaque', overrides=SINGLE,
+         guide=dict(size=[1024, 1024], lens=85, yaw=18, pitch=10, frac=0.8, bench=dict(GARDEN)),
+         bench='a solid oak bench that has stood by the river for years: weathered to a soft grey-brown, with fine cracks '
+               'and a few patches of pale lichen, a thick top rail with vertical slats below it, and arms',
+         facing='The bench faces the river, so the river is behind the camera and is NOT in the photo: no water, no weir, '
+                'no bridge anywhere.',
+         behind='a strip of uncut grass, a plain hawthorn hedge and a couple of willows, softly out of focus',
+         light='soft, bright morning daylight; the timber is still slightly damp with dew',
+         scale='The plaque is 225 x 75 mm, about the length of a dinner knife; the top rail is about 110 mm tall, so oak '
+               'shows above and below it.'),
+    dict(id='polished-stainless-200x50-rect-plaque', offer='polished-stainless-200x50-rect-plaque', overrides=SINGLE, new=True,
          story='Tom and Betty Harris retired to the seaside and walked the promenade arm in arm every evening. They always '
                'sat on this bench to watch the fishing boats come home.',
          lines=[('intro', 'In loving memory of'), ('name', 'TOM & BETTY HARRIS'), ('body', 'who sat here every evening'),
                 ('body', 'to watch the boats come home')],
-         scene='The plaque is screwed to the top rail of the backrest of a traditional seafront bench on a Victorian '
-               'promenade: weathered hardwood slats held by ornate cast-iron ends painted deep green. Behind the bench, '
-               'softly blurred, the promenade railings, the calm sea and a small harbour wall with a few fishing boats. '
-               'Warm early-evening light from the side; the mirror-polished steel reflects soft bands of sky and sea.',
-         camera='at the height of the rail, about 50 cm from the plaque and slightly to the right, at a gentle angle of '
-                'about 15 degrees. The plaque fills about 60% of the frame width; the slats and the edge of one green iron '
-                'bench end are in shot.',
-         scale='The plaque is 200 x 50 mm, about the length of a pencil. The top rail is about 95 mm tall, so the plaque '
-               'covers only the middle half of its height, with timber showing above and below it.'),
-    dict(id='aged-brass-150x75-rect-plaque', offer='aged-brass-150x75-rect-plaque', overrides=SCALLOP,
+         guide=dict(size=[1024, 1024], lens=85, yaw=-14, pitch=12, frac=0.8, bench=dict(MODERN)),
+         bench='a newer seafront bench: smooth hardwood slats with a clear oiled finish on a slim black powder-coated '
+               'steel frame, with no arms',
+         facing='The bench faces the sea, so the sea and the harbour are behind the camera and are NOT in the photo: no '
+                'water, no beach, no boats anywhere. The mirror-polished steel only reflects the bright sky.',
+         behind='the plain paved promenade, a low painted wall and a grass bank, softly out of focus',
+         light='bright, slightly hazy afternoon daylight',
+         scale='The plaque is 200 x 50 mm, about the length of a pencil; the top back slat is about 95 mm tall, so '
+               'timber shows above and below it.'),
+    dict(id='aged-brass-150x75-rect-plaque', offer='aged-brass-150x75-rect-plaque', overrides=SCALLOP, new=True,
          story='Alice Grant bowled for her village bowls club for more than forty years. The club put a bench beside the '
                'green in her memory.',
          lines=[('intro', 'In loving memory of'), ('name', 'ALICE GRANT'), ('date', '1933 – 2021'),
                 ('body', 'who bowled on this green'), ('body', 'for forty happy summers')],
-         scene='The plaque is screwed to the middle of the top rail of a honey-coloured teak bench beside a village bowling '
-               'green. Behind, softly blurred: the short, striped green with a few woods resting on it, a low hedge and '
-               'the white-painted timber clubhouse with its little veranda. Warm, soft summer afternoon sun.',
-         camera='standing, looking slightly down at the bench back from about 60 cm, at about 20 degrees to one side. The '
-                'plaque fills about 55% of the frame width; the whole plaque is sharp.',
-         scale='The plaque is 150 x 75 mm, about the size of a mobile phone lying on its side. The top rail is about 110 mm '
-               'tall, so teak shows above and below the plaque.'),
+         guide=dict(size=[1024, 1024], lens=85, yaw=15, pitch=14, frac=0.75, bench=dict(PARK, L=1500)),
+         bench='a newly painted dark green wooden bench with three wide back slats and black cast-iron ends with arms',
+         facing='The bench faces the bowling green, so the green is behind the camera and is NOT in the photo: no lawn, '
+                'no bowls anywhere behind the bench.',
+         behind='a neatly clipped privet hedge and the plain white-painted wall of the clubhouse, softly out of focus',
+         light='soft summer afternoon light, a little hazy',
+         scale='The plaque is 150 x 75 mm, about the size of a mobile phone lying on its side; the top back slat is about '
+               '120 mm tall, so painted wood shows above and below it.'),
     dict(id='polished-brass-150x65-rect-plaque', offer='polished-brass-150x65-rect-plaque', overrides=DOUBLE, wip=True,
          story="Mary Quinn's bench plaque on our workshop bench, just polished, before it went to the allotment society "
                "that put a bench on the plots in her memory.",
@@ -130,42 +181,44 @@ PHOTOS = [
     dict(id='orbital-brass-matt-lacquer-150x75-rect-plaque', offer='orbital-brass-matt-lacquer-150x75-rect-plaque',
          overrides=SINGLE,
          story='John Penrose taught half the village to sail at the sailing club on the lake. The members put a bench on the '
-               'bank above the slipway, where he used to sit and watch the races.',
+               'bank where he used to sit and watch the races.',
          lines=[('intro', 'In memory of'), ('name', 'JOHN PENROSE'), ('date', '1946 – 2022'),
                 ('body', 'who taught half the village to sail'), ('small', 'Gone sailing')],
-         scene='The plaque is screwed to the middle of the top rail of a weathered iroko bench on the grassy bank of a small '
-               'sailing club beside a lake. Behind, softly blurred: white sailing dinghies drawn up on the slipway, the '
-               'bright water and wooded hills beyond. Bright, breezy daylight with high cloud.',
-         camera='at the height of the rail, about 45 cm from the plaque, slightly to the left, at a gentle angle of about '
-                '15 degrees. The plaque fills about 55% of the frame width; the grain of the weathered iroko is sharp '
-                'around it.',
-         scale='The plaque is 150 x 75 mm, about the size of a mobile phone lying on its side. The top rail is about 110 mm '
-               'tall, so timber shows above and below the plaque.'),
-    dict(id='brushed-stainless-150x75-rect-plaque', offer='brushed-stainless-150x75-rect-plaque', overrides=SINGLE,
+         guide=dict(size=[1024, 1024], lens=85, yaw=-12, pitch=10, frac=0.75, bench=dict(GARDEN)),
+         bench='an old iroko bench weathered to silver-grey, with a thick top rail on the backrest, vertical slats below it '
+               'and arms',
+         facing='The bench faces the lake where he watched the races, so the lake is behind the camera and is NOT in the '
+                'photo: no water, no boats, no masts anywhere.',
+         behind='rough grass, a post-and-rail fence and a few trees, softly out of focus',
+         light='bright, breezy daylight with high cloud',
+         scale='The plaque is 150 x 75 mm, about the size of a mobile phone lying on its side; the top rail is about 110 mm '
+               'tall, so timber shows above and below it.'),
+    dict(id='brushed-stainless-150x75-rect-plaque', offer='brushed-stainless-150x75-rect-plaque', overrides=SINGLE, new=True,
          story="Stan Bailey was the keeper of his town's Victorian park for thirty years. The friends of the park put a "
                "bench by the bandstand for him.",
          lines=[('intro', 'In memory of'), ('name', 'STAN BAILEY'), ('date', '1939 – 2020'),
                 ('body', 'Park keeper here for thirty years,'), ('body', 'who loved every inch of it')],
-         scene='The plaque is screwed to the middle of the top rail of a classic park bench with slats painted dark green, '
-               'a little worn, and cast-iron ends, in a Victorian town park. Behind, softly blurred: the bandstand, a '
-               'bright flower bed and old plane trees. Dappled sunlight through the trees falls across the bench and over '
-               'part of the plaque.',
-         camera='at the height of the rail, about 45 cm from the plaque, slightly to the right, at a gentle angle of about '
-                '15 degrees. The plaque fills about 55% of the frame width.',
-         scale='The plaque is 150 x 75 mm, about the size of a mobile phone lying on its side. The top rail is about 110 mm '
-               'tall, so painted timber shows above and below the plaque.'),
+         guide=dict(size=[1024, 1024], lens=85, yaw=16, pitch=12, frac=0.75, bench=dict(PARK)),
+         bench='a fairly new park bench: smooth hardwood slats with a clear finish on black-painted cast-iron ends with arms',
+         facing='The bench faces the bandstand and its flower beds, so they are behind the camera and are NOT in the photo.',
+         behind='a tarmac path, black iron railings and the trunks of old plane trees, softly out of focus',
+         light='soft daylight with a little dappled shade from the plane trees',
+         scale='The plaque is 150 x 75 mm, about the size of a mobile phone lying on its side; the top back slat is about '
+               '120 mm tall, so timber shows above and below it.'),
     dict(id='polished-stainless-225x65-rect-plaque', offer='polished-stainless-225x65-rect-plaque', overrides=DOUBLE,
          story='The Revd John Ashworth was vicar of his village parish for twenty-three years and always had time to stop '
                'and talk. The parish put a bench in the churchyard in his memory.',
          lines=[('intro', 'In memory of'), ('name', 'REVD JOHN ASHWORTH'), ('body', 'Vicar of this parish 1975 – 1998,'),
                 ('body', 'who always had time to sit and listen')],
-         scene='The plaque is screwed to the middle of the top rail of an oak bench in a quiet village churchyard, under an '
-               'old yew. Behind, softly blurred: the stone church porch and lichen-covered headstones in long grass. Soft, '
-               'bright overcast light; the mirror-polished steel reflects the pale sky and dark yew in soft bands.',
-         camera='standing, about 60 cm away, looking slightly down at the bench back at about 20 degrees to one side. The '
-                'plaque fills about 65% of the frame width; every line of the wording is readable.',
-         scale='The plaque is 225 x 65 mm, about the length of a dinner knife. The top rail is about 100 mm tall, so oak '
-               'shows above and below the plaque.'),
+         guide=dict(size=[1024, 1024], lens=85, yaw=-15, pitch=12, frac=0.8, bench=dict(GARDEN, rail_h=100)),
+         bench='an old oak bench weathered to silver-grey with a few patches of lichen: a thick top rail on the backrest, '
+               'vertical slats below it, and arms',
+         facing='The bench looks out across the churchyard, so that view is behind the camera.',
+         behind='the plain flint-and-stone churchyard wall and a dark yew hedge, softly out of focus; the mirror-polished '
+                'steel reflects the pale sky',
+         light='soft, bright overcast light',
+         scale='The plaque is 225 x 65 mm, about the length of a dinner knife; the top rail is about 100 mm tall, so oak '
+               'shows above and below it.'),
 ]
 
 
@@ -193,34 +246,46 @@ def designer():
     print(len(items), 'designer stencils to render')
 
 
-def prompts():
+def prompts(round_tag='r3'):
+    """Prompts for the photos with a 3D guide (run bench_scene.py first; it records the camera distance). Round 3 (owner
+    msg 6162): closer and flatter on, a plainly 1.5 mm plate with square edges, and real metal."""
     out = HERE / 'prompts'
     out.mkdir(exist_ok=True)
     jobs = []
     for p in PHOTOS:
+        if not p.get('guide'):
+            continue
         o = OFFERS[p['offer']]
         border = p['overrides'].get('borderStyle', o['borderStyle'])
-        if p.get('hero'):
-            head = 'Output: one landscape 3:2 photograph.'
-            what = 'A real, unretouched photograph of a memorial bench plaque in place, for a UK plaque maker\'s website.'
-        elif p.get('wip'):
-            head = 'Output: one SQUARE 1:1 photograph (equal width and height).'
-            what = 'A real, unretouched photograph taken in our small UK plaque workshop, for this plaque\'s product page.'
-        else:
-            head = 'Output: one SQUARE 1:1 photograph (equal width and height).'
-            what = ('A real, unretouched photograph of a memorial bench plaque in place, for its product page on a UK '
-                    'plaque maker\'s website.')
-        parts = [head, f'{what} {p["story"]} {REAL_LOOK}', LAYOUT, 'The plaque: ' + plaque(o, border), THIN,
+        info = json.loads((HERE / 'guides' / f"{p['id']}.json").read_text())
+        g = p['guide']
+        head = ('Output: one landscape 3:2 photograph.' if p.get('hero')
+                else 'Output: one SQUARE 1:1 photograph (equal width and height).')
+        what = ('A real, unretouched photograph of a memorial bench plaque in place, for a UK plaque maker\'s website.'
+                if p.get('hero') else 'A real, unretouched photograph of a memorial bench plaque in place, for its product '
+                'page on a UK plaque maker\'s website.')
+        side = 'left' if g['yaw'] < 0 else 'right'
+        above = 'a little above the rail, looking slightly down at it' if g['pitch'] >= 10 else 'at about the height of the rail'
+        camera = (f"exactly as in the layout render: close to the bench, a little to its {side}, with the camera {above}, "
+                  f"{g['lens']} mm lens, about {round(info['camera_distance_mm'] / 10)} cm from the plaque. The plaque fills "
+                  f"about {round(info['plaque_width_frac'] * 100)}% of the width of the photo; the whole plaque is sharp and every "
+                  f"line of the wording is readable; the background is softly out of focus.")
+        parts = [head, f'{what} {p["story"]} {REAL_LOOK} {PLAIN}', GUIDE,
+                 'The bench: ' + p['bench'] + '. ' + (NEW_BENCH if p.get('new') else BENCH),
+                 'The plaque: ' + plaque(o, border), METAL.format(finish=FINISH[o['material']]), THIN,
                  'The wording, exactly as in the artwork, and nothing else legible anywhere in the photo:\n'
                  + lines_text(p['lines']),
-                 'Where it is: ' + p['scene'] + ('' if p.get('wip') else ' ' + BENCH),
-                 'Camera: ' + p['camera'], 'Scale: ' + p['scale'], ENDING]
-        (out / f'{p["id"]}.txt').write_text('\n\n'.join(parts))
-        jobs.append({'id': p['id'], 'ref': str(HERE / 'refs' / f'{p["id"]}.png'),
+                 'Which way it faces: ' + FACING.format(facing=p['facing']),
+                 'Behind the bench: ' + p['behind'] + '.',
+                 'Light: ' + p['light'] + '.',
+                 'Camera: ' + camera, 'Scale: ' + p['scale'], ENDING]
+        jid = p['id'] + '-' + round_tag
+        (out / f'{jid}.txt').write_text('\n\n'.join(parts))
+        jobs.append({'id': jid, 'ref': str(HERE / 'guides' / f"{p['id']}.png"),
                      'size': '1536x1024' if p.get('hero') else '2048x2048', 'versions': 2})
-    (HERE / 'jobs.json').write_text(json.dumps(jobs, indent=1))
+    (HERE / f'jobs-{round_tag}.json').write_text(json.dumps(jobs, indent=1))
     print(len(jobs), 'jobs,', sum(j['versions'] for j in jobs), 'images')
 
 
 if __name__ == '__main__':
-    {'designer': designer, 'prompts': prompts}[sys.argv[1]]()
+    {'designer': designer, 'prompts': prompts}[sys.argv[1]](*sys.argv[2:])

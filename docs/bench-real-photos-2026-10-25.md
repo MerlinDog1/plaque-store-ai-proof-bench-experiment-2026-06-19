@@ -77,6 +77,69 @@ The memorial page's method (see `docs/memorial-real-photos-2026-10-24.md`), with
    - `feed_layouts.cjs` for the drawings and PDF layouts, then `publish-codex-photos.py thumbs`
    - `product_proof.py` + `render_products.mjs` for the PDFs
 
+## Round 2: coded bench layouts (owner msgs 6149, 6152, 6154)
+
+Round 1 went live at 08:24 UTC. The owner's feedback on it:
+
+> Yeah backgrounds on most is just way too much, too dramatic. Really wants to be more no descript right and throw in
+> some newer looking benches. If you gonna take from an angle you need to make sure plaque lines up with bench and also
+> check positioning on bench always
+
+> Also if someone say somewhere to watch something etc the bench would be looking out towards that great view so our
+> picture would not contain that great view make sense
+
+> I mean could you even potentially code the angle? And the rough bench outline so image model was less likely to make
+> shit up?
+
+So the top photo and six picks were remade from a coded 3D layout. Mary Quinn's workshop shot and Joan Parry's pick
+(signed off with the memorial page) stay.
+
+- **The guide** comes from `scripts/real-photos/bench_scene.py`, a small numpy z-buffer renderer.
+  - It renders a plain clay model of the bench: a garden bench with a thick top rail and vertical slats, a park bench
+    with wide back slats on cast-iron ends, or a modern slatted bench on a steel frame. Every bench has the right
+    recline.
+  - The plaque's own designer drawing (screws repainted as metal) is mapped in perspective onto the middle of the top
+    rail. It is centred on the rail and lined up with it. The script refuses a plaque taller than the rail allows.
+  - The camera is set by lens, side angle, height and the share of the frame the plaque fills. Edges are outlined and
+    the background is left plain.
+  - It also records where the plaque's corners land in the frame.
+- **Codex** gets the guide in place of the flat drawing. The `GUIDE` paragraph in `bench.py` says to keep the camera,
+  perspective, bench outline and the plaque's exact place and angle, and to replace the grey placeholders with real
+  materials and the setting.
+- **Which way the bench faces.** Each bench faces its view, and the plaque is on the front of the backrest. So the
+  photo looks back at the bench, and the view the wording talks about is behind the camera. Behind each bench is only
+  an ordinary hedge, wall, path or fence, in soft daylight. Polished plates reflect the sky.
+- **Benches.** Four are newer (teak, oiled hardwood on a steel frame, freshly painted, clear-finished park bench) and
+  three are old (oak, iroko, oak).
+- **The check.** `overlay.py` draws the guide's plaque outline over each photo. A version is kept only if the plaque
+  sits on that outline: square on the rail and in the right place.
+
+Round 2 was shown to the owner but never released.
+
+## Round 3: closer, 1.5 mm, real metal (owner msg 6162)
+
+The owner's verdict on the round-2 samples:
+
+> Low key feel like you want to me closer to the plaque and also plaque is 1.5mm thick, it needs to look like real
+> metal also
+
+- **Closer and flatter on.** The plaque fills about 55% of the top photo (70 mm lens, about 50 cm away) and 75–80% of
+  each product photo (85 mm lens, 65–95 cm away). The side angle is 12–18° and the camera is 10–14° above the rail.
+- **Thin plate.** `THIN` now says square-cut edges with no bevel, rim or frame around the outer edge, while the
+  engraved border on the face stays. The guide no longer outlines the plate, because an outline can read as a frame.
+  At full size the plate edge is a hairline of about 1.5 mm.
+- **Real metal.** A `METAL` paragraph says how each finish catches the light: brushed lines that shimmer, a mirror
+  that reflects the real sky, a soft even patina, a fine swirl under lacquer. It adds that the plate is never a flat
+  print.
+- **Checks.** All 14 versions sat on their guide outlines and were word-perfect. `review_round.py r3` makes the
+  overlay and plaque sheets.
+- **Kept.** v1 of each, except v2 for Revd Ashworth, whose lighter reflections read better.
+
+Files:
+- Top photo: `category/bench-hero-v3`.
+- The six picks: photos `?v=3`.
+- Wording, drawings and PDFs: unchanged from round 1.
+
 ## Checks
 
 - Static render: the bench page has 13 images and none are missing.

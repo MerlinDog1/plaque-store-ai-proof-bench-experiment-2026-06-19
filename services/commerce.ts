@@ -1145,15 +1145,15 @@ const cataloguePhotoVersions: Record<string, number> = {
   'polished-stainless-210x297-rect-dark-wood-plaque': 2,
   'aged-brass-148x210-rect-dark-wood-plaque': 2,
   'polished-brass-200x150-rect-light-wood-plaque': 2,
-  // The bench page's picks, redone the same way with fuller dedications and a bench that suits each story
-  // (owner msg 6132).
-  'brushed-brass-225x75-rect-plaque': 2,
-  'polished-stainless-200x50-rect-plaque': 2,
-  'aged-brass-150x75-rect-plaque': 2,
+  // The bench page's picks, redone the same way with fuller dedications (owner msg 6132); version 3 from a coded
+  // 3D layout of each bench, plaque square on the top rail, plain settings, newer benches (owner msgs 6149-6154).
+  'brushed-brass-225x75-rect-plaque': 3,
+  'polished-stainless-200x50-rect-plaque': 3,
+  'aged-brass-150x75-rect-plaque': 3,
   'polished-brass-150x65-rect-plaque': 2,
-  'orbital-brass-matt-lacquer-150x75-rect-plaque': 2,
-  'brushed-stainless-150x75-rect-plaque': 2,
-  'polished-stainless-225x65-rect-plaque': 2,
+  'orbital-brass-matt-lacquer-150x75-rect-plaque': 3,
+  'brushed-stainless-150x75-rect-plaque': 3,
+  'polished-stainless-225x65-rect-plaque': 3,
 };
 const cataloguePhotoFor = (slug: string) => `/site-images/catalogue-photo/${slug}.webp${(cataloguePhotoVersions[slug] || 1) > 1 ? `?v=${cataloguePhotoVersions[slug]}` : ''}`;
 /** The 600 px copy of a catalogue photo, keeping any ?v= version. */

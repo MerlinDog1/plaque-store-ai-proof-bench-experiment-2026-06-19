@@ -62,7 +62,7 @@ SECTIONS = [
 # Plaque wording on photos that are not catalogue photos (from the stencils they were made from).
 SAYS = {
     '/site-images/category/memorial-hero-v4.webp': 'IN LOVING MEMORY OF / MARGARET ROWLEY / 1936 – 2023 / Mum, Nan and dear friend, / who loved this garden in every season. / Forever in our hearts',
-    '/site-images/category/bench-hero-v2.webp': 'In loving memory of / GEORGE HOLLAND / who walked these hills / and loved this view',
+    '/site-images/category/bench-hero-v3.webp': 'In loving memory of / GEORGE HOLLAND / who walked these hills / and loved this view',
     '/site-images/category/garden-hero-v2.webp': 'This garden was planted / in loving memory of / SUSAN MARSH / 1951 – 2022 / Where she was happiest',
     '/site-images/category/brass-hero-v2.webp': 'In memory of / FRED & ELSIE BOND / married 1950 / who are remembered here / with love from their family',
     '/site-images/category/stainless-hero.webp': 'Welcome to / THE RIVERSIDE / GARDEN / A community space for everyone / Opened 2026',
@@ -77,7 +77,7 @@ SAYS = {
 
 TITLES = {
     '/site-images/category/memorial-hero-v4.webp': 'Memorial page · top photo',
-    '/site-images/category/bench-hero-v2.webp': 'Bench page · top photo',
+    '/site-images/category/bench-hero-v3.webp': 'Bench page · top photo',
     '/site-images/category/garden-hero-v2.webp': 'Garden page · top photo',
     '/site-images/category/brass-hero-v2.webp': 'Brass page · top photo',
     '/site-images/category/stainless-hero.webp': 'Stainless page · top photo',
