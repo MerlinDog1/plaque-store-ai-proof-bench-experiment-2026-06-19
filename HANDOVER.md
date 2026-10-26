@@ -1,6 +1,6 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Tree page priced on the oak board and ground stake: STAGED, not live — 26 October 2026
+## Tree page priced on the oak board and ground stake: LIVE — 26 October 2026, 09:17 UTC
 
 - **Why:** the owner (msg 6506) asked for the tree page to show that each plaque has a board, and to include the stake,
   "because you kinda need it for this product".
@@ -15,9 +15,11 @@
 - **Candidate:** `instaplaque-5rlsj2we1` (dpl_8cNFnsp71iWeN1vUAWXiqq55y6pD, `index-BaBqo9MQ.js`).
   - The build and postbuild checks pass.
   - The static HTML check of 9 pages and the browser check on computer and iPhone pass.
-- **With the release:** run `scripts/tree-ad-price-20261026.py apply` in the ads project. The tree ad still says "Tree
-  Plaques From £95.50". Validated, not applied.
-- **Live** is still dpl_ArHjbD1APPwCh2v82YFsTZt5XhZV.
+- **Live:** promoted at 09:17 UTC on the owner's "yeah go live" (msg 6519). The live HTML check, `verify_live.py` and
+  IndexNow pass. The live bundle is byte-identical to the browser-checked one.
+- **Tree ad:** `scripts/tree-ad-price-20261026.py apply` ran at 09:20 UTC. It now says "Tree Plaques From £190" and
+  "Oak Board & Stake Included", and Google approved it within minutes.
+- **Rollback:** promote dpl_ArHjbD1APPwCh2v82YFsTZt5XhZV (instaplaque-k902y8x8f), then run the ad script's `undo`.
 
 ## Prices at a glance: LIVE — 25 October 2026, 22:10 UTC
 

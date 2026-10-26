@@ -98,16 +98,28 @@ Plaques From £95.50" and "Oak Board & Stake Options".
 - `validate` passed on 26 Oct.
 - `apply` refuses to run until the live page shows £190.
 - `undo` restores the old headlines; run it together with a site rollback.
+- **Applied** at 09:20:17 UTC on 26 Oct, after the release: the read-back shows "Tree Plaques From £190" and "Oak
+  Board & Stake Included", with the other 13 headlines, the 4 descriptions and the URL unchanged. Google's review
+  finished within minutes: APPROVED (REVIEWED). The group's other ad (829423213885) is paused, and no other enabled
+  ad or sitelink quotes a tree price.
 
 ## Release
 
-Not live yet: awaiting the owner's go. Then:
-
-1. Check production is still dpl_ArHjbD1APPwCh2v82YFsTZt5XhZV.
-2. Promote: `vercel promote https://instaplaque-5rlsj2we1-dullaghan31-3959s-projects.vercel.app --yes`, with
-   `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` set.
-3. Run `check_static.mjs` against the live HTML (`CACHE=live-cache`) and `verify_live.py` with the new bundle.
-4. Apply the ad change.
-5. Ping IndexNow for the tree, memorial and garden pages.
-
-Rollback: promote dpl_ArHjbD1APPwCh2v82YFsTZt5XhZV (instaplaque-k902y8x8f), then run the ad script's `undo`.
+- **Promoted:** the owner said "yeah go live i like iot" (msg 6519). `vercel promote` set `instaplaque.co.uk` to
+  dpl_8cNFnsp71iWeN1vUAWXiqq55y6pD (instaplaque-5rlsj2we1) at 09:17 UTC on 26 Oct.
+  - Production was still dpl_ArHjbD1APPwCh2v82YFsTZt5XhZV, so nothing newer was overwritten.
+  - All 9 live pages serve `index-BaBqo9MQ.js`. It and `index-Co8x8iq_.css` are byte-identical to the files the
+    browser check ran on, so that check stands for the live site; no second browser run was made (the account was
+    at 3.4 GiB).
+- **Live checks, all passing:**
+  - `check_static.mjs` with `CACHE=live-cache` (the live HTML fetched with curl): the tree table's 12 board-and-stake
+    prices and their designer links, the new wording, the memorial and garden tiles "from £190", and the other 7
+    pages' tables unchanged.
+  - `verify_live.py` (`BUNDLE=index-BaBqo9MQ.js`): 175 product pages and 771 linked assets identical to `public/`;
+    sitemaps, feed (175 items), redirects and the IndexNow key are fine.
+  - `/design` and a designer link from the table both return 200 with the new bundle.
+- **Google Ads:** the tree ad change above.
+- **IndexNow:** told about the tree, memorial and garden pages (HTTP 200).
+- **Rollback:** with `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` set, run
+  `vercel promote https://instaplaque-k902y8x8f-dullaghan31-3959s-projects.vercel.app --yes`
+  (dpl_ArHjbD1APPwCh2v82YFsTZt5XhZV), then `python3 -I scripts/tree-ad-price-20261026.py undo` in the ads project.
