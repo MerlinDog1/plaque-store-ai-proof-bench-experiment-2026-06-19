@@ -793,15 +793,14 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
         const stakeLength = dims.totalHeight * 0.45 + dims.stakeVisible;
         const stakeY = -dims.totalHeight / 2 - dims.stakeVisible + stakeLength / 2;
         const sheet = dims.stakeThickness;
-        const face = new THREE.Mesh(
-          new THREE.BoxGeometry(dims.stakeSize, stakeLength, sheet),
-          new THREE.MeshStandardMaterial({ color: 0x1c1e20, roughness: 0.6, metalness: 0.3 }),
-        );
+        // Seen straight on, the inside of the L is edge-on, and its depth could bleed through the board as a hairline;
+        // pushing the stake's depth back keeps the part behind the board hidden.
+        const stakeMaterial = () => new THREE.MeshStandardMaterial({
+          color: 0x1c1e20, roughness: 0.6, metalness: 0.3, polygonOffset: true, polygonOffsetFactor: 4, polygonOffsetUnits: 4,
+        });
+        const face = new THREE.Mesh(new THREE.BoxGeometry(dims.stakeSize, stakeLength, sheet), stakeMaterial());
         face.position.set(0, stakeY, -dims.woodDepth - sheet / 2);
-        const side = new THREE.Mesh(
-          new THREE.BoxGeometry(sheet, stakeLength, dims.stakeSize - sheet),
-          new THREE.MeshStandardMaterial({ color: 0x1c1e20, roughness: 0.6, metalness: 0.3 }),
-        );
+        const side = new THREE.Mesh(new THREE.BoxGeometry(sheet, stakeLength, dims.stakeSize - sheet), stakeMaterial());
         side.position.set(-dims.stakeSize / 2 + sheet / 2, stakeY, -dims.woodDepth - sheet - (dims.stakeSize - sheet) / 2);
         face.name = 'ground-stake-face';
         side.name = 'ground-stake-side';
