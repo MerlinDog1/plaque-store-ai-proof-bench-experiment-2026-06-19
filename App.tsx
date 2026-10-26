@@ -1619,7 +1619,7 @@ const App: React.FC = () => {
                 <span className="designer-live-indicator">Live preview</span>
               </div>
               <div className="designer-stage-caption no-print"><strong>{state.width} × {state.height} mm</strong><span>{proofSpecTrail}</span></div>
-              <div className="proofbench-proof-pad">
+              <div className="proofbench-proof-pad ph-no-capture">
                 <div className="proofbench-svg-preview">
                   <PlaquePreview ref={svgRef} state={state} activeStep={activeStep} inscription={inscriptionPrompt} />
                 </div>

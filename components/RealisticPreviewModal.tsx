@@ -24,7 +24,7 @@ export const RealisticPreviewModal: React.FC<Props> = ({ isOpen, onClose, imageU
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="realistic-preview-title">
+    <div className="ph-no-capture fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="realistic-preview-title">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative bg-[#fffaf0] border border-[rgba(84, 72, 52, 0.16)] rounded-lg w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">

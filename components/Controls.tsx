@@ -1454,7 +1454,7 @@ export const Controls: React.FC<Props> = ({
           >
             <span className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#efe4d1]">
               {portraitPreviewUrl ? (
-                <img src={portraitPreviewUrl} alt="Uploaded artwork" className="h-full w-full object-contain" />
+                <img src={portraitPreviewUrl} alt="Uploaded artwork" className="ph-no-capture h-full w-full object-contain" />
               ) : (
                 <span className="text-3xl font-light text-[#7d9188]">+</span>
               )}
@@ -1507,7 +1507,7 @@ export const Controls: React.FC<Props> = ({
                   >
                     <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#efe4d1]">
                       {state.etchmasterStyleReferenceUrl ? (
-                        <img src={state.etchmasterStyleReferenceUrl} alt="EtchMaster style reference" className="h-full w-full object-contain" />
+                        <img src={state.etchmasterStyleReferenceUrl} alt="EtchMaster style reference" className="ph-no-capture h-full w-full object-contain" />
                       ) : (
                         <span className="text-2xl font-light text-[#7d9188]">+</span>
                       )}
@@ -2484,7 +2484,7 @@ export const Controls: React.FC<Props> = ({
 
           {showAdminProofTools && adminProofToolsOpen && state.conceptImageUrl && (
             <div className="overflow-hidden rounded-lg border border-[rgba(84, 72, 52, 0.14)] bg-[#fffaf0] p-2">
-              <img src={state.conceptImageUrl} alt="AI design concept" className="h-auto w-full rounded-lg object-contain" />
+              <img src={state.conceptImageUrl} alt="AI design concept" className="ph-no-capture h-auto w-full rounded-lg object-contain" />
             </div>
           )}
         </section>

@@ -99,12 +99,12 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
         <p>{receipt ? 'We’ll email your proof within 3 working hours. No payment has been taken.' : review ? 'Check the details, then send your request to our design team.' : 'Tell us about your plaque. We’ll arrange the design and email your proof within 3 working hours for you to review, with a payment link when you’re happy to proceed.'}</p>
       </header>
       <div className="request-layout">
-        {receipt ? <section className="request-card" role="status"><h2>Thank you, {draft.name}.</h2><p>Your request is with our design team. Your proof will be sent to <strong>{draft.email}</strong>.</p><p>Reference: <strong>{receipt}</strong></p><p>If you need to correct anything, <a href="/contact">contact us</a> and quote this reference. Please don’t submit the same request again.</p><button type="button" className="shop-button" onClick={onBack}>Back to home</button></section> : review ? <section className="request-card request-summary" aria-label="Request summary">
+        {receipt ? <section className="request-card ph-mask" role="status"><h2>Thank you, {draft.name}.</h2><p>Your request is with our design team. Your proof will be sent to <strong>{draft.email}</strong>.</p><p>Reference: <strong>{receipt}</strong></p><p>If you need to correct anything, <a href="/contact">contact us</a> and quote this reference. Please don’t submit the same request again.</p><button type="button" className="shop-button" onClick={onBack}>Back to home</button></section> : review ? <section className="request-card request-summary ph-mask" aria-label="Request summary">
           <h2>Check your details</h2>
           <dl>{[['Size', draft.size], ['Shape', draft.shape], ['Material', draft.material], ['Wood backing', draft.wood], ['Fixings', draft.fixing], ['Where it will go', draft.use || 'Not specified'], ['Name', draft.name], ['Email', draft.email]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
           <h3>Exact plaque wording</h3><p className="request-exact">{draft.wording}</p>
           <h3>Design notes</h3><p className="request-exact">{draft.notes || 'Let the designer suggest a suitable layout.'}</p>
-          {file && <><h3>Reference image</h3><p>{file.name} — included with your request</p>{fileUrl && <img className="request-image" src={fileUrl} alt="Your selected reference" />}</>}
+          {file && <><h3>Reference image</h3><p>{file.name} — included with your request</p>{fileUrl && <img className="request-image ph-no-capture" src={fileUrl} alt="Your selected reference" />}</>}
           <p>No payment is taken with this request. By sending it, you agree that we may use your details and reference image to prepare your proof and contact you about the design. <a href="/privacy">Privacy policy</a>.</p>
           {submissionError && <p role="alert">{submissionError} <a href="/contact">Contact us</a></p>}
           <button type="button" className="shop-button" disabled={sending} onClick={sendRequest}>{sending ? 'Sending request…' : 'Send my design request'}</button>
@@ -135,7 +135,7 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
             }} /></label>
             <p id="reference-note">An example you like, a sketch, a design you made with ChatGPT or another AI tool, or artwork you’d like included. It is sent to our design team only when you submit your request.</p>
             {fileError && <p role="alert">{fileError}</p>}
-            {file && <div>{fileUrl && <img className="request-image" src={fileUrl} alt="Your selected reference" />}<p>{file.name}</p><button className="shop-text-link" type="button" onClick={() => { setFile(null); if (fileInput.current) fileInput.current.value = ''; }}>Remove image</button></div>}
+            {file && <div>{fileUrl && <img className="request-image ph-no-capture" src={fileUrl} alt="Your selected reference" />}<p className="ph-mask">{file.name}</p><button className="shop-text-link" type="button" onClick={() => { setFile(null); if (fileInput.current) fileInput.current.value = ''; }}>Remove image</button></div>}
           </fieldset>
           <fieldset><legend>3. Where should we send your proof?</legend>
             <label>Your name<input required pattern={'.*\\S.*'} title="Please enter your name" autoComplete="name" value={draft.name} maxLength={120} onChange={event => update('name', event.target.value)} /></label>

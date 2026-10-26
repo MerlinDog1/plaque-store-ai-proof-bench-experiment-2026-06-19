@@ -5,6 +5,11 @@ import { businessContact } from './shopInformation';
 // Public ingestion token, NOT a personal/API management credential.
 const projectToken = 'phc_txLFAUv88ttyLLTKgi3arQ7428Jy5XSQEtGFm6jYrYxJ';
 export const ANALYTICS_CONSENT_KEY = 'instaplaque-analytics-consent-v1';
+// Session recordings (owner msg 6565, 26 Oct 2026): only for visitors who accepted analytics once the cookie notice
+// and policies described recordings. An earlier "yes" stays analytics-only until the visitor accepts again.
+export const REPLAY_CONSENT_KEY = 'instaplaque-replay-consent-v1';
+// Sent whenever analytics consent changes, so the session recorder can start or stop with it.
+export const ANALYTICS_STATE_CHANGED = 'instaplaque:analytics-state-changed';
 const sessionKey = 'instaplaque-analytics-session-v1';
 const purchasesKey = 'instaplaque-analytics-purchases-v1';
 const qaKey = 'instaplaque-analytics-qa';
@@ -36,19 +41,40 @@ export function analyticsConsent(): string | null {
   catch { return null; }
 }
 export function setAnalyticsConsent(allow: boolean): void {
-  try { localStorage.setItem(ANALYTICS_CONSENT_KEY, allow ? 'yes' : 'no'); } catch { /* Fail closed. */ }
+  try {
+    localStorage.setItem(ANALYTICS_CONSENT_KEY, allow ? 'yes' : 'no');
+    localStorage.setItem(REPLAY_CONSENT_KEY, allow ? 'yes' : 'no');
+  } catch { /* Fail closed. */ }
   consentChanged();
+}
+function replayConsent(): boolean {
+  try { return localStorage.getItem(REPLAY_CONSENT_KEY) === 'yes'; } catch { return false; }
 }
 function allowed(): boolean {
   return hosts.has(location.hostname) && location.protocol === 'https:' && analyticsConsent() === 'yes';
 }
-function pagePath(): string | null {
-  const path = location.pathname.replace(/\/$/, '') || '/';
+/** The public page a URL shows, or null for private links (proof, order, checkout, admin) and unknown paths. */
+export function publicPagePath(url: URL): string | null {
+  const path = url.pathname.replace(/\/$/, '') || '/';
   // Private links never become pageviews, even if their path is normally public.
-  const params = new URL(location.href).searchParams;
+  const params = url.searchParams;
   if (['proof', 'order', 'session_id'].some(key => params.has(key))) return null;
   if (/admin|checkout|order|proof/i.test(params.get('view') || '')) return null;
   return publicPaths.has(path) ? path : null;
+}
+function pagePath(): string | null {
+  return publicPagePath(new URL(location.href));
+}
+// Visit IDs are UUIDv7 (they start with their creation time), so the session recorder can use the same ID: PostHog
+// accepts a recording session ID only in that form. Our ip_* events then link to the visit's recording.
+function uuidv7(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  const ms = Date.now();
+  for (let i = 0; i < 6; i += 1) bytes[i] = Math.floor(ms / 2 ** (8 * (5 - i))) % 256;
+  bytes[6] = (bytes[6] & 0x0f) | 0x70;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 function campaignLabel(value: string | null): string {
   // Campaign labels only, never click IDs, search terms, URLs or free-form text.
@@ -90,7 +116,7 @@ function getSession(): Session {
     } catch { /* Ignore corrupt/old storage. */ }
   }
   if (!session || now - session.last > 30 * 60_000 || session.isTest !== isTest) {
-    session = { id: crypto.randomUUID(), last: now, attribution: attribution(), seen: [], isTest };
+    session = { id: uuidv7(), last: now, attribution: attribution(), seen: [], isTest };
     lastPage = '';
   }
   session.last = now;
@@ -188,11 +214,20 @@ export function trackSitePage(): void {
   const product = page.slice(1);
   if (products.has(product)) void capture('product_viewed', { page, product }, current);
 }
+/** The visit to record, or null: recordings need the recording-era consent, a public page, and not the owner's own
+ * browser. QA sessions are recorded (to test it); their ip_* events are marked is_test as usual. */
+export function replayVisit(): string | null {
+  if (!allowed() || !replayConsent() || !pagePath() || isInternalBrowser()) return null;
+  return getSession().id;
+}
 function consentChanged(): void {
-  if (analyticsConsent() === 'yes') { trackSitePage(); return; }
-  pending.forEach(controller => controller.abort()); pending.clear();
-  session = undefined; lastPage = '';
-  try { localStorage.removeItem(sessionKey); localStorage.removeItem(purchasesKey); } catch { /* No storage access. */ }
+  if (analyticsConsent() === 'yes') trackSitePage();
+  else {
+    pending.forEach(controller => controller.abort()); pending.clear();
+    session = undefined; lastPage = '';
+    try { localStorage.removeItem(sessionKey); localStorage.removeItem(purchasesKey); } catch { /* No storage access. */ }
+  }
+  try { window.dispatchEvent(new Event(ANALYTICS_STATE_CHANGED)); } catch { /* Recording is optional. */ }
 }
 export function startSiteAnalytics(): void {
   if (started) return;

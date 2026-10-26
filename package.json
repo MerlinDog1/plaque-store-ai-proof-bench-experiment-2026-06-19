@@ -16,6 +16,7 @@
     "check:admin-orders": "node scripts/check-admin-order-list.mjs",
     "check:analytics-redaction": "node scripts/check-analytics-redaction.mjs",
     "check:posthog": "node scripts/check-posthog-analytics.cjs",
+    "check:replay": "node scripts/check-session-replay.cjs",
     "check:google-purchase": "node scripts/check-google-purchase.cjs",
     "check:google-consent": "node scripts/check-google-consent.mjs",
     "check:bold-toggle": "node scripts/check-bold-toggle.cjs",

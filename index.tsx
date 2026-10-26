@@ -7,6 +7,7 @@ import './shopfront.css';
 import './designer.css';
 import { redactAnalyticsEvent } from './services/analyticsPrivacy.mjs';
 import { analyticsConsent, startSiteAnalytics } from './services/posthogAnalytics';
+import { startSessionReplay } from './services/sessionReplay';
 import { OPTIONAL_AD_CONSENT_CHANGED, isInternalBrowser } from './services/metaPixel';
 import { applyInternalSwitch } from './services/internalTraffic';
 
@@ -28,6 +29,8 @@ const startVercelAnalytics = () => {
 startVercelAnalytics();
 window.addEventListener(OPTIONAL_AD_CONSENT_CHANGED, startVercelAnalytics);
 startSiteAnalytics();
+// Session recordings, only with analytics consent given once the policies described them (owner msg 6565).
+startSessionReplay();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

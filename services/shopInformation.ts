@@ -12,7 +12,7 @@ export const businessContact = {
   whatsappHref: 'https://wa.me/447464843841',
   madeIn: 'Made in the UK',
   updated: '21 October 2026',
-  privacyUpdated: '21 October 2026',
+  privacyUpdated: '26 October 2026',
 };
 
 // Portraits in Metal, our portrait studio. Links carry UTM tags so its analytics can show
