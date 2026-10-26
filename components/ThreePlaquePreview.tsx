@@ -28,6 +28,14 @@ const WOOD_BACKING_BEVEL_SIZE_MM = 8.4;
 const WOOD_BACKING_BEVEL_THICKNESS_MM = 5.25;
 const CAP_THICKNESS_MM = 1.25;
 const SCENE_PLAQUE_WIDTH = 3.4;
+// The plaque's resting pose in the view: leaning back a touch and turned very slightly.
+const VIEW_LEAN_X = -0.18;
+const VIEW_ROLL_Z = 0.015;
+// The ground stake below its bend (owner msg 6541: "fade it out in 3d so doesnt look like its short"): it shows a
+// quarter longer than the 2D proof's stake, solid for the first 35% below the board, then easing out to nothing.
+const GROUND_STAKE_SHAFT = 'ground-stake-shaft';
+const GROUND_STAKE_SHAFT_SHOWN = 1.25;
+const GROUND_STAKE_SHAFT_SOLID = 0.35;
 // Match the curved face and extruded rim; the default 12 produces a faceted edge.
 const PLAQUE_CURVE_SEGMENTS = 128;
 
@@ -423,10 +431,31 @@ async function makeSvgFaceTexture(sourceSvg: SVGSVGElement, crop?: TextureCrop, 
 function disposeMaterial(material: THREE.Material | THREE.Material[] | undefined) {
   const materials = Array.isArray(material) ? material : [material];
   materials.filter(Boolean).forEach((entry) => {
-    const maybeMapped = entry as THREE.Material & { map?: THREE.Texture };
+    const maybeMapped = entry as THREE.Material & { map?: THREE.Texture; alphaMap?: THREE.Texture };
     maybeMapped.map?.dispose();
+    maybeMapped.alphaMap?.dispose();
     entry?.dispose();
   });
+}
+
+// Opacity down the ground stake's shaft (white is solid): solid just below the board, then easing out to nothing at
+// its foot, as the 2D proof's stake fades where it goes into the ground. The canvas's top row is the top of the shaft.
+function makeGroundStakeFade() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 2;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    for (let step = 0; step <= 10; step += 1) {
+      const t = step / 10;
+      const shade = Math.round(255 * (1 - t * t * (3 - 2 * t)));
+      gradient.addColorStop(GROUND_STAKE_SHAFT_SOLID + (1 - GROUND_STAKE_SHAFT_SOLID) * t, `rgb(${shade}, ${shade}, ${shade})`);
+    }
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  return new THREE.CanvasTexture(canvas);
 }
 
 function makeShape(state: PlaqueState, width: number, height: number) {
@@ -672,8 +701,11 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
     let frame = 0;
     const animate = () => {
       frame = requestAnimationFrame(animate);
-      group.rotation.x = THREE.MathUtils.lerp(group.rotation.x, -0.18, 0.04);
-      group.rotation.z = THREE.MathUtils.lerp(group.rotation.z, 0.015, 0.04);
+      group.rotation.x = THREE.MathUtils.lerp(group.rotation.x, VIEW_LEAN_X, 0.04);
+      group.rotation.z = THREE.MathUtils.lerp(group.rotation.z, VIEW_ROLL_Z, 0.04);
+      // The plaque leans back on the ground stake's bent head; the stake itself goes straight down into the ground.
+      const stakeShaft = group.getObjectByName(GROUND_STAKE_SHAFT);
+      if (stakeShaft) stakeShaft.rotation.x = -group.rotation.x;
       controls.update();
       renderer.render(scene, camera);
     };
@@ -787,24 +819,42 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
       });
 
       if (dims.stakeVisible > 0) {
-        // Black steel ground stake behind the board, running up behind its lower half: 2 mm steel bent into an L
-        // (owner msgs 6523, 6532), its 30 mm face flat against the back of the board and the other side of the L
-        // pointing straight back from one edge. From the front it looks as before; tilted, it is thin sheet, not a post.
-        const stakeLength = dims.totalHeight * 0.45 + dims.stakeVisible;
-        const stakeY = -dims.totalHeight / 2 - dims.stakeVisible + stakeLength / 2;
+        // Black steel ground stake: 2 mm steel bent into an L (owner msgs 6523, 6532), its 30 mm face flat against the
+        // back of the board and the other side of the L pointing straight back from one edge. Its head runs up behind
+        // the lower half of the board and leans back with the plaque, "angled back a touch ... so as to present the
+        // plaque better" (owner msg 6541). At the foot of the board it bends, and the shaft goes straight down into the
+        // ground (kept upright in animate()), fading out rather than stopping short.
         const sheet = dims.stakeThickness;
+        const size = dims.stakeSize;
         // Seen straight on, the inside of the L is edge-on, and its depth could bleed through the board as a hairline;
         // pushing the stake's depth back keeps the part behind the board hidden.
-        const stakeMaterial = () => new THREE.MeshStandardMaterial({
-          color: 0x1c1e20, roughness: 0.6, metalness: 0.3, polygonOffset: true, polygonOffsetFactor: 4, polygonOffsetUnits: 4,
-        });
-        const face = new THREE.Mesh(new THREE.BoxGeometry(dims.stakeSize, stakeLength, sheet), stakeMaterial());
-        face.position.set(0, stakeY, -dims.woodDepth - sheet / 2);
-        const side = new THREE.Mesh(new THREE.BoxGeometry(sheet, stakeLength, dims.stakeSize - sheet), stakeMaterial());
-        side.position.set(-dims.stakeSize / 2 + sheet / 2, stakeY, -dims.woodDepth - sheet - (dims.stakeSize - sheet) / 2);
-        face.name = 'ground-stake-face';
-        side.name = 'ground-stake-side';
-        existingGroup.add(face, side);
+        const steel = { color: 0x1c1e20, roughness: 0.6, metalness: 0.3, polygonOffset: true, polygonOffsetFactor: 4, polygonOffsetUnits: 4 };
+        const addL = (parent: THREE.Group, length: number, centreY: number, material: () => THREE.Material | THREE.Material[]) => {
+          const face = new THREE.Mesh(new THREE.BoxGeometry(size, length, sheet), material());
+          face.position.set(0, centreY, -sheet / 2);
+          face.name = `${parent.name}-face`;
+          const side = new THREE.Mesh(new THREE.BoxGeometry(sheet, length, size - sheet), material());
+          side.position.set(-size / 2 + sheet / 2, centreY, -sheet - (size - sheet) / 2);
+          side.name = `${parent.name}-side`;
+          parent.add(face, side);
+        };
+        // Head and shaft both hinge on the bend, along the bottom edge of the back of the board.
+        const head = new THREE.Group();
+        head.name = 'ground-stake-head';
+        head.position.set(0, -dims.totalHeight / 2, -dims.woodDepth);
+        const headLength = dims.totalHeight * 0.45;
+        addL(head, headLength, headLength / 2, () => new THREE.MeshStandardMaterial(steel));
+        const shaft = new THREE.Group();
+        shaft.name = GROUND_STAKE_SHAFT;
+        shaft.position.copy(head.position);
+        shaft.rotation.x = -existingGroup.rotation.x;
+        const shaftLength = dims.stakeVisible * GROUND_STAKE_SHAFT_SHOWN;
+        const fading = new THREE.MeshStandardMaterial({ ...steel, transparent: true, alphaMap: makeGroundStakeFade() });
+        // Box faces +x, -x, top, foot, +z, -z: the top is hidden in the bend, and the foot has faded away.
+        addL(shaft, shaftLength, -shaftLength / 2, () => [
+          fading, fading, new THREE.MeshStandardMaterial(steel), new THREE.MeshBasicMaterial({ visible: false }), fading, fading,
+        ]);
+        existingGroup.add(head, shaft);
       }
     }
 
