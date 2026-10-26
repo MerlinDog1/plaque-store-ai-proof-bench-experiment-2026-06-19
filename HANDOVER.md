@@ -1,5 +1,24 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Tree page priced on the oak board and ground stake: STAGED, not live — 26 October 2026
+
+- **Why:** the owner (msg 6506) asked for the tree page to show that each plaque has a board, and to include the stake,
+  "because you kinda need it for this product".
+- **What changed:**
+  - The tree page's size table draws each plate on its oak board and stake, and prices both in: A5 £190 steel, £200
+    brass, £213 aged brass.
+  - Each price opens the designer on that plaque on the board and stake (`/design?backing=stake&plaque=<slug>`).
+  - Its from-price, "Design online", the photo caption and the memorial and garden "By a tree" tiles follow it.
+  - Details: `docs/tree-stake-prices-2026-10-26.md`.
+- **Branch:** `codex/instaplaque-tree-stake-prices-20261026` (`2b770cf`), based on the live prices-at-a-glance
+  release `5e996b2`.
+- **Candidate:** `instaplaque-5rlsj2we1` (dpl_8cNFnsp71iWeN1vUAWXiqq55y6pD, `index-BaBqo9MQ.js`).
+  - The build and postbuild checks pass.
+  - The static HTML check of 9 pages and the browser check on computer and iPhone pass.
+- **With the release:** run `scripts/tree-ad-price-20261026.py apply` in the ads project. The tree ad still says "Tree
+  Plaques From £95.50". Validated, not applied.
+- **Live** is still dpl_ArHjbD1APPwCh2v82YFsTZt5XhZV.
+
 ## Prices at a glance: LIVE — 25 October 2026, 22:10 UTC
 
 - **What it is:**
