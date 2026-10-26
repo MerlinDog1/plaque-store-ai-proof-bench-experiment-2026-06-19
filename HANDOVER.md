@@ -1,5 +1,28 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Session recordings in PostHog: LIVE — 26 October 2026, 12:26 UTC
+
+- **Why:** the owner (msg 6565): "can we set up recording for instaplaque also?". The PostHog project already
+  recorded the JFK pack site; InstaPlaque had no recorder and its policy said session replay was off.
+- **What changed:**
+  - `services/sessionReplay.ts` loads posthog-js only for visits `replayVisit()` allows: analytics consent given under
+    the new recording wording (`instaplaque-replay-consent-v1`), a public page, and not the owner's browser.
+  - It sends recording data only (`before_send` keeps `$snapshot`), masks all typed input, and blocks the plaque
+    preview, 3D view and uploaded or generated images (`ph-no-capture`).
+  - It masks the design request's review and receipt (`ph-mask`), and strips query strings from network timings.
+  - It stops before private URLs are pushed. Reject opts out and removes its storage.
+  - Visit IDs are now UUIDv7 and shared with the recorder, so `ip_*` events link to recordings.
+  - The cookie notice, privacy policy and cookie policy describe it. Privacy was last updated 26 October 2026.
+  - Details: `docs/session-replay-2026-10-26.md`.
+- **Checks:**
+  - `check:posthog` and the new `check:replay` (in CI) pass, as does tsc.
+  - The browser checks pass on the test copy: desktop, phone, the owner's browser and earlier consent.
+  - Live: the HTML check and `verify_live.py` pass. A live QA visit's recording appeared in PostHog under its visit ID.
+- **Branch:** `codex/instaplaque-session-replay-20261026` (`dafaf9d`, `1b582dd`), based on the live 3D stake release
+  `29c4522`.
+- **Live:** dpl_ogT7gvhE6aZ9EfUbRrLcb55ekVN9 (instaplaque-khphcqp8i, `index-B_3dEwRQ.js`).
+- **Rollback:** promote dpl_9JbKwkHiX4takXcyKpfxJAdfDvyp (instaplaque-hdusrgc6v).
+
 ## 3D ground stake fades out, head leans back: LIVE — 26 October 2026, 10:08 UTC
 
 - **Why:** the owner (msg 6541): "fade it out in 3d so doesnt look like its short"; "the stake head is like angled
