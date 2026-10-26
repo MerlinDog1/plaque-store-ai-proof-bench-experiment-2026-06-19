@@ -1,0 +1,27 @@
+/* Loaded after shopfront.css (index.tsx). PageSpeed fixes, 26 Oct 2026. */
+
+/* Muted brass text: #817349 measured 4.3:1 on the page cream, below WCAG AA's 4.5:1 (PageSpeed accessibility).
+   #786a42 is the same hue a shade darker: 4.9:1 on #f8f6ef, 4.75:1 on #f7f1e7. */
+.shop-hero h1 em,
+.shop-product-hero .shop-product-note,
+.shop-product-benefits li:before,
+.shop-header-brand span,
+.shopfront .shop-hero-tagline,
+.shop-ai-arrow,
+.shop-proof-pdf-list li:before,
+.shopfront .cat-hero-note {
+  color: #786a42;
+}
+
+/* Hero caption on desktop: opacity 0.65 gave 3.6:1 for 11 px text; 0.8 gives 5.2:1. */
+.shop-hero-image figcaption span:last-child {
+  opacity: 0.8;
+}
+
+/* Cookie banner on phones: one line per sentence (MetaConsent.tsx), so no single text block outweighs the page's own
+   heading as the Largest Contentful Paint. */
+@media (max-width: 720px) {
+  .cookie-banner-line {
+    display: block;
+  }
+}

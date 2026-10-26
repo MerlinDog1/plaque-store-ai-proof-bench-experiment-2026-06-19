@@ -1,5 +1,43 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Page speed and Google rich results (Claude): LIVE — 26 October 2026, 15:25 UTC
+
+- **Why:** the owner asked Claude (claude.ai, not Codex) to "fix and improve" PageSpeed and rich snippets, then to
+  "make every page better and faster and as much rich snippet stuff as is possible for everything".
+- **Read first:** Claude deployed straight to Vercel from the live deployment's own source. This branch holds exactly
+  that code. **Base every new task on this branch** (or merge it in first): a deploy from an older branch removes it.
+- **What changed:** see `docs/claude-speed-rich-results-2026-10-26.md`. In short:
+  - Google Fonts CSS replaced by inline Fontsource faces.
+  - The cookie banner is in the static HTML.
+  - The app starts after first paint.
+  - The Google tag loads after page load or first interaction.
+  - Photos come in responsive copies from Vercel Image Optimization (Vercel builds only).
+  - New build step `scripts/finalise-public-html.mjs` adds the schema:
+    - product variant groups (feed item_group_id) and product SKUs;
+    - breadcrumbs on every page;
+    - product ItemLists on category pages;
+    - Organization logo, contact point and return policy.
+  - The app keeps the build-time route schema on the first page view.
+  - Crawlable favicon files.
+  - AA contrast fixes.
+- **Branch:** `claude/instaplaque-speed-rich-results-20261026`, based on
+  `codex/instaplaque-session-replay-20261026` (`2f45423`). Every file it changes was byte-identical there to the source
+  of dpl_ogT7gvhE6aZ9EfUbRrLcb55ekVN9.
+- **Live:** dpl_DBVbnpjajLw2a1F3PKwMDLLSfDdq (instaplaque-dxg3rrhi3).
+- **PageSpeed after the changes (live, mobile / desktop):**
+  - Home: 96 / 100 (was 72 / 92).
+  - brushed-brass-150x50-rect-plaque: 97 / 100 (was 67 on mobile).
+  - bench-plaques: 96 / 100.
+  - Accessibility, best practices and SEO are 100 on all of them.
+- **Checks:**
+  - `npm run build` passes all postbuild checks, both plain and with `VERCEL=1`. `check-google-consent.mjs` was
+    updated for the deferred tag.
+  - `npm run typecheck` passes.
+  - Rich Results Test (live): product snippets, merchant listings, breadcrumbs and Organization are all valid.
+- **Deploying:** keep building on Vercel (`vercel deploy --prod`, not `--prebuilt`). `VERCEL=1` switches on the
+  `/_vercel/image` srcsets; a local or VPS build without it keeps plain image URLs.
+- **Rollback:** promote dpl_ogT7gvhE6aZ9EfUbRrLcb55ekVN9 (the session-replay release).
+
 ## Session recordings in PostHog: LIVE — 26 October 2026, 12:26 UTC
 
 - **Why:** the owner (msg 6565): "can we set up recording for instaplaque also?". The PostHog project already

@@ -5,6 +5,7 @@ import App from './App';
 import './index.css';
 import './shopfront.css';
 import './designer.css';
+import './shopfront-a11y.css';
 import { redactAnalyticsEvent } from './services/analyticsPrivacy.mjs';
 import { analyticsConsent, startSiteAnalytics } from './services/posthogAnalytics';
 import { startSessionReplay } from './services/sessionReplay';

@@ -13,6 +13,10 @@ export default defineConfig(() => {
         },
       },
       plugins: [react()],
+      // Vercel builds serve responsive photo copies through Vercel Image Optimization (services/imageUrls.ts).
+      define: {
+        __VERCEL_IMAGES__: JSON.stringify(process.env.VERCEL === '1'),
+      },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),

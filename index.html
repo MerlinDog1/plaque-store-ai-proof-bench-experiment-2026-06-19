@@ -66,10 +66,23 @@
       page_referrer: document.referrer ? new URL(document.referrer).origin : ''
     });
 
-    var googleTagScript = document.createElement('script');
-    googleTagScript.async = true;
-    googleTagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-18288208905';
-    document.head.appendChild(googleTagScript);
+    // The Google tag library (~350 KB with the GA4 container it fetches) loads after the page, not while it is being
+    // drawn: on the visitor's first tap, click, key or scroll, or 3.5 s after the page has loaded, whichever comes
+    // first. Everything above is already queued in dataLayer with its original time, so the page view, consent state
+    // and ad-click IDs are sent exactly as before, only once the library arrives (PageSpeed, 26 Oct 2026).
+    var googleTagLoaded = false;
+    var loadGoogleTag = function () {
+      if (googleTagLoaded) return;
+      googleTagLoaded = true;
+      var googleTagScript = document.createElement('script');
+      googleTagScript.async = true;
+      googleTagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-18288208905';
+      document.head.appendChild(googleTagScript);
+    };
+    ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (name) {
+      window.addEventListener(name, loadGoogleTag, { once: true, passive: true });
+    });
+    window.addEventListener('load', function () { setTimeout(loadGoogleTag, 3500); });
   }
 </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
