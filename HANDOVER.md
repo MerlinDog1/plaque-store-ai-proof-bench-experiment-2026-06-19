@@ -1,5 +1,21 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## 3D ground stake fades out, head leans back: LIVE — 26 October 2026, 10:08 UTC
+
+- **Why:** the owner (msg 6541): "fade it out in 3d so doesnt look like its short"; "the stake head is like angled
+  back a touch not totally straight so as to present the plaque better".
+- **What changed** (`components/ThreePlaquePreview.tsx` only):
+  - The stake's head leans back with the plaque, by the 3D view's usual 10° lean.
+  - Below a bend at the foot of the board, the shaft stands upright and fades out over its lower part.
+  - Plaques without a stake, the 2D drawings, photos, wording and prices are unchanged.
+  - Details: the follow-up section of `docs/stake-length-2026-10-26.md`.
+- **Branch:** `codex/instaplaque-stake-3d-fade-lean-20261026` (`40ec127`), based on the stake-length release `92776b6`.
+- **Live:** dpl_9JbKwkHiX4takXcyKpfxJAdfDvyp (instaplaque-hdusrgc6v, `index-DgR9BCsh.js`).
+  - On the test copy, the 3D check passes: head 10.25° back, shaft upright, opacity 255 → 0 with no hard edge.
+  - The designer and no-stake checks pass on the test copy too.
+  - Live: the HTML check and `verify_live.py` pass, and the tested files are byte-identical.
+- **Rollback:** promote dpl_Bcm4CG9NfcFS1PLsnkUr9WmTDjLL (instaplaque-9uru8t8h6).
+
 ## The ground stake as it really is: LIVE — 26 October 2026, 09:48 UTC
 
 - **Why:** the owner (msgs 6523, 6532): the stake is "just a 2mm thick kind of L shape bend thing - not these big

@@ -92,3 +92,71 @@ board-and-stake release (dpl_8cNFnsp71iWeN1vUAWXiqq55y6pD), so nothing newer was
 
 Rollback: with `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` set, run
 `vercel promote https://instaplaque-5rlsj2we1-dullaghan31-3959s-projects.vercel.app --yes`. No ad depends on this change.
+
+## Follow-up: the 3D stake fades out, and its head leans back (owner msg 6541)
+
+### Why
+
+After the release above the owner wrote (msg 6541): "great job - can we kind of fade it out in 3d so doesnt look like
+its short? also the stake head is like angled back a touch not totally straight so as to present the plaque better".
+
+In the 3D proof the stake stopped dead a little below the board, so it looked short. It also leaned back with the
+plaque, because the whole plaque leans back about 10° in the 3D view (`group.rotation.x` eases to -0.18). The real
+stake goes straight down into the ground, and its head is bent back so the plaque leans back.
+
+### What changed (`components/ThreePlaquePreview.tsx` only)
+
+- **Head and shaft.** The stake is now two L-shaped parts of 2 mm sheet with a 30 mm face, hinged on a bend along the
+  bottom edge of the back of the board.
+  - The head runs up behind the lower 45% of the board and leans back with it, by the view's lean of 10.3°, "a touch".
+  - The shaft hangs from the bend. `animate()` sets its `rotation.x` to the opposite of the plaque's lean every frame,
+    so it stands upright, also while the plaque eases into its lean.
+- **Fade.**
+  - The shaft shows 1.25 times the 2D proof's visible stake (`GROUND_STAKE_SHAFT_SHOWN`).
+  - Its sides use an alpha map (`makeGroundStakeFade`): solid for the first 35% below the board
+    (`GROUND_STAKE_SHAFT_SOLID`), then easing out (smoothstep) to nothing at its foot, like the 2D proof's stake going
+    into the ground.
+  - Its top face is solid and hidden in the bend. Its foot is not drawn.
+- **Unchanged:**
+  - the polygon offset against the hairline;
+  - the view's lean and turn, now named `VIEW_LEAN_X` and `VIEW_ROLL_Z`, at the same values;
+  - plaques without a stake.
+- `disposeMaterial` now disposes alpha maps as well as maps.
+- 2D drawings, photos, wording, prices and emails are unchanged.
+
+### Checks
+
+- `tsc -p output/tsconfig.stake.json` passes.
+- **Test copy** `instaplaque-hdusrgc6v` (dpl_9JbKwkHiX4takXcyKpfxJAdfDvyp, `index-DgR9BCsh.js`,
+  `ThreePlaquePreview-DYrWQFQw.js`): build and postbuild checks pass.
+  - `check_static.mjs` passes on 9 pages.
+  - `workspace/output/instaplaque-stake-3d-20261026/run_check.sh` with `check_fade.cjs` passes, in headless Chrome with
+    SwiftShader WebGL, once the plaque has settled into its lean:
+    - **designer:** as before: £190 on the board and stake, the 2D stake 30 mm wide, and the stake wording.
+    - **three:**
+      - the head leans back 10.25° with the plaque;
+      - the shaft is 0.84° from upright, which is the view's slight turn, and 0.00° back;
+      - both parts are 30 × 2 mm and 2 × 28 mm sheet;
+      - the head is solid;
+      - the shaft's sides fade, its top is solid and its foot is not drawn.
+    - **Opacity on the rendered canvas**, down the middle of the shaft (0 = the bend, 1 = the foot):
+      - 255 to 30%, then 249 at 40%, 168 at 60%, 113 at 70%, 17 at 90%, 3 at 97%, and 0 beyond;
+      - the largest step between samples is 13 of 255, so there is no hard edge.
+    - **plain:** a plaque without a board has no stake in 2D or 3D and keeps its usual lean.
+    - No page errors in any stage.
+  - Screenshots from the front, both sides and above (`shots/fade-3d-*.png`) show the bend, the fade and no hairline.
+
+### Release
+
+`vercel promote` set `instaplaque.co.uk` to dpl_9JbKwkHiX4takXcyKpfxJAdfDvyp (instaplaque-hdusrgc6v) at 10:08 UTC.
+Production was still dpl_Bcm4CG9NfcFS1PLsnkUr9WmTDjLL, so nothing newer was overwritten.
+
+- All 9 live pages serve `index-DgR9BCsh.js`. All 11 files the browser check loaded are byte-identical live,
+  including `ThreePlaquePreview-DYrWQFQw.js`, so that check stands for the live site.
+- `check_static.mjs` with `CACHE=live-cache` passes.
+- `verify_live.py` (`BUNDLE=index-DgR9BCsh.js`) passes: 175 product pages and 771 linked assets identical to
+  `public/`; sitemaps, feed, redirects and the IndexNow key are fine.
+- No page text changed, so IndexNow was not pinged.
+
+Rollback: with `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` set, run
+`vercel promote https://instaplaque-9uru8t8h6-dullaghan31-3959s-projects.vercel.app --yes` (dpl_Bcm4CG9N).
