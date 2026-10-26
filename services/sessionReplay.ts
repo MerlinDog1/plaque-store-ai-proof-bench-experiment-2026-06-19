@@ -54,6 +54,8 @@ export function replayConfig(visitId: string): Record<string, unknown> {
     capture_exceptions: false,
     disable_surveys: true,
     disable_session_recording: true,
+    // Opting out (withdrawn consent) also turns PostHog's storage off, so it is not written again.
+    opt_out_persistence_by_default: true,
     session_recording: {
       maskAllInputs: true,
       maskTextClass: 'ph-mask',
@@ -81,12 +83,7 @@ function stop(): void {
   try { window.posthog?.stopSessionRecording(); } catch { /* Recording must never interrupt shopping. */ }
 }
 
-// Withdrawn consent: stop sending and remove PostHog's own storage, as the cookie policy says.
-function forget(): void {
-  if (loaded && !optedOut) {
-    optedOut = true;
-    try { window.posthog?.opt_out_capturing(); } catch { /* Best effort. */ }
-  }
+function removeStorage(): void {
   for (const store of [localStorage, sessionStorage]) {
     try {
       for (let index = store.length - 1; index >= 0; index -= 1) {
@@ -95,6 +92,17 @@ function forget(): void {
       }
     } catch { /* No storage access. */ }
   }
+}
+
+// Withdrawn consent: stop sending and remove PostHog's own storage, as the cookie policy says. A write already under
+// way when the visitor rejects (the last recording batch) is swept up a moment later.
+function forget(): void {
+  if (loaded && !optedOut) {
+    optedOut = true;
+    try { window.posthog?.opt_out_capturing(); } catch { /* Best effort. */ }
+    window.setTimeout(() => { if (optedOut) removeStorage(); }, 3000);
+  }
+  removeStorage();
 }
 
 /** Start, keep or stop the recording to match consent and the current page. */
