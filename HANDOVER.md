@@ -1,5 +1,27 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Google Customer Reviews opt-in: LIVE — 26 October 2026, 16:32 UTC
+
+- **Why:** the owner (msg 6658): "Collect reviews after each delivery, through Google Customer Reviews - can you set
+  this up?".
+- **Read first:** this branch is Claude's speed release plus this change. **Base new work on
+  `codex/instaplaque-google-customer-reviews-20261026`**: a deploy from the speed branch alone removes the opt-in.
+- **What changed:** `services/googleCustomerReviews.ts`, run from the order confirmation page.
+  - Paid customer orders (not tests, not more than 48 hours after paying, not the owner's browser) get Google's survey
+    opt-in box for merchant 5859684800.
+  - The box carries the order number, email, delivery country and an estimated delivery date: production estimate +
+    1 delivery day + 2 spare working days, UK date.
+  - The privacy and cookie policies describe it.
+  - Details and the privacy probe: `docs/google-customer-reviews-2026-10-26.md`.
+- **Still needed from the owner:** in Merchant Center, Settings → Add-ons → Google Customer Reviews → Add, then sign
+  the agreement. There is no API for it. Until then Google's box shows nothing.
+- **Checks:**
+  - `npm run check:gcr` (new) passes.
+  - `scripts/check-google-customer-reviews-browser.mjs` (new) passes on the build and on the live site (`LIVE=1`).
+  - The build and all postbuild checks pass, as do `check:posthog`, `check:replay` and `verify_live.py`.
+- **Live:** dpl_47YaX9pvMhg1h5qtCKHumLdMLaiT (instaplaque-ovr62c0y3, `index-DkNBmYdZ.js`).
+- **Rollback:** promote dpl_DBVbnpjajLw2a1F3PKwMDLLSfDdq (instaplaque-dxg3rrhi3, the speed release).
+
 ## Page speed and Google rich results (Claude): LIVE — 26 October 2026, 15:25 UTC
 
 - **Why:** the owner asked Claude (claude.ai, not Codex) to "fix and improve" PageSpeed and rich snippets, then to

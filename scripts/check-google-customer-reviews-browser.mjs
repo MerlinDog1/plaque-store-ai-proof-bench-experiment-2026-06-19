@@ -3,12 +3,15 @@
 // other outside request is blocked. Checks a paid order gets one box with the right details and that the private
 // session ID reaches no outside address; that unpaid, test, reopened and owner's-browser visits get none; and that the
 // privacy and cookie pages describe it. Usage: npm run build, then node scripts/check-google-customer-reviews-browser.mjs
+// LIVE=1 loads the live site's own pages and files instead of dist/ (the order API and Google stay stand-ins, and
+// Vercel's analytics endpoints are blocked).
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { chromium } from 'playwright';
 
 const root = path.resolve('dist');
+const LIVE = process.env.LIVE === '1';
 const origin = 'https://instaplaque.co.uk';
 const GCR_SCRIPT = 'https://apis.google.com/js/platform.js?onload=renderOptIn';
 const SESSION = 'cs_live_synthetic123';
@@ -63,6 +66,8 @@ async function visit(order, { internal = false, route = '/order-confirmed', quer
     if (url.pathname.endsWith('/proof-image')) return json({ error: 'Test must not write proof' }, 500);
     if (url.pathname.startsWith('/api/orders/')) return json({ ok: true, order });
     if (url.pathname.startsWith('/api/')) return json({});
+    if (LIVE) return url.pathname.startsWith('/_vercel/insights') || url.pathname.startsWith('/_vercel/speed-insights')
+      ? request.abort() : request.continue();
     const name = ['/order-confirmed', '/privacy', '/cookies'].includes(url.pathname) && !(await exists(url.pathname))
       ? 'index.html' : (url.pathname.replace(/^\//, '').replace(/\/$/, '/index.html') || 'index.html');
     let file = path.resolve(root, name);
