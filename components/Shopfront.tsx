@@ -9,6 +9,7 @@ import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { PriceTable, a5BoardPrice, groundStakePrice, homePriceSizes, priceTableIncludes } from './PriceTable';
 import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
 import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogue.mjs';
+import { optimisedSrcSet } from '../services/imageUrls';
 import { WordingLibrary } from './WordingGuide';
 import { exampleFor } from '../services/catalogueContent';
 import {
@@ -186,6 +187,8 @@ export function ShopCollections() {
               <div className="shop-collection-image">
                 <img
                   src={collection.image}
+                  srcSet={optimisedSrcSet(collection.image, 1200, [320, 480, 640])}
+                  sizes={optimisedSrcSet(collection.image, 1200, [320]) ? '(max-width: 720px) 45vw, 282px' : undefined}
                   alt={`${title} design example`}
                   width="1200"
                   height="1200"
@@ -321,7 +324,7 @@ export function ProductPicks({ slugs, kicker, title, intro, id, className }: { s
         {items.map(item => (
           <li key={item.slug}>
             <a href={`/${item.slug}`}>
-              <img src={item.photo ? photo600(item.photo) : item.merchantOffer ? item.image + merchantImageQuery : item.image} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+              <img src={item.photo ? photo600(item.photo) : item.merchantOffer ? item.image + merchantImageQuery : item.image} {...cardImageSizes(item)} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
               <span>{item.title}</span>
               <strong>{item.startingFrom}</strong>
             </a>
@@ -366,7 +369,7 @@ export function ShopBySize() {
                 if (!item) return null;
                 return (
                   <li key={offer.slug}><a href={`/${offer.slug}`}>
-                    <img src={item.photo ? photo600(item.photo) : item.merchantOffer ? item.image + merchantImageQuery : item.image} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+                    <img src={item.photo ? photo600(item.photo) : item.merchantOffer ? item.image + merchantImageQuery : item.image} {...cardImageSizes(item)} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
                     <span>{offer.label}{offer.format === 'Bench' ? ` · ${offer.size}` : ''}</span><strong>{item.startingFrom}</strong>
                   </a></li>
                 );
@@ -580,6 +583,8 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
             <source media="(max-width: 720px)" srcSet="/site-images/home-route-bench-480.webp" />
             <img
               src="/site-images/home-gallery-brass-bench.webp"
+              srcSet={optimisedSrcSet('/site-images/home-gallery-brass-bench.webp', 1200, [640, 828, 1080])}
+              sizes={optimisedSrcSet('/site-images/home-gallery-brass-bench.webp', 1200, [640]) ? '50vw' : undefined}
               width="1200"
               height="1200"
               fetchPriority="high"
@@ -643,6 +648,14 @@ export function productCategoryFor(product: ProductFamily): { slug: string; titl
     : { slug: 'brass-plaques', title: 'Brass plaques' };
 }
 
+// Catalogue cards show at about 175 px on phones and 282 px on desktops; the 320/480 px copies replace the 600 px
+// photos and 1500 px feed drawings there (services/imageUrls.ts). Outside Vercel builds the markup is unchanged.
+function cardImageSizes(item: { photo?: string; merchantOffer?: unknown; image: string }) {
+  const srcSet = item.photo ? optimisedSrcSet(photo600(item.photo), 600, [320, 480])
+    : item.merchantOffer ? optimisedSrcSet(item.image + merchantImageQuery, 1500, [320, 480]) : undefined;
+  return srcSet ? { srcSet, sizes: '(max-width: 720px) 45vw, 282px' } : {};
+}
+
 type GalleryImage = { src: string; srcSet?: string; thumb?: string; thumbSrcSet?: string; alt: string; label: string };
 
 // Catalogue pages show the photo first and the flat design view (the feed image) as a second
@@ -701,11 +714,12 @@ export function ShopProduct({
         { src: product.photo, srcSet: `${photoSmall} 600w, ${product.photo} 1200w`, thumb: photoSmall, alt: heroAlt, label: 'Shown in place' },
         // The thumbnail keeps the feed image as its src; browsers pick the 160 px copy. Both carry the feed's ?v= so a
         // redrawn design (new example wording) is fetched fresh, not shown from an old cached copy.
-        { src: product.image + merchantImageQuery, thumbSrcSet: `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`, alt: `${product.title}: flat design view`, label: 'Flat design view' },
+        { src: product.image + merchantImageQuery, srcSet: optimisedSrcSet(product.image + merchantImageQuery, 1500, [480, 640, 750, 828, 1080]), thumbSrcSet: `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`, alt: `${product.title}: flat design view`, label: 'Flat design view' },
       ]
     : product.merchantOffer
       // No photo the owner has seen (services/vettedPhotos.mjs, owner msg 6270): show the exact flat drawing.
-      ? [{ src: product.image + merchantImageQuery, srcSet: `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`, alt: heroAlt, label: 'Flat design view' }]
+      // On Vercel the main image comes in 480-1080 px copies (a phone takes ~750 px instead of the 1500 px drawing).
+      ? [{ src: product.image + merchantImageQuery, srcSet: optimisedSrcSet(product.image + merchantImageQuery, 1500, [480, 640, 750, 828, 1080], `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`), alt: heroAlt, label: 'Flat design view' }]
       : [{ src: heroImage, alt: heroAlt, label: product.title }];
   // No AI/illustration labels on product images (owner msg 5231).
   const heroCaption = product.merchantOffer

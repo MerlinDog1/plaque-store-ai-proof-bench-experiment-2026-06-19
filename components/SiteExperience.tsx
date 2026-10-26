@@ -958,6 +958,19 @@ export const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selec
       ],
     };
 
+    // On the first page view the static HTML already carries this page's schema, finished at build time
+    // (scripts/finalise-public-html.mjs: product variant groups, SKUs, breadcrumbs, product lists). Keep it while it
+    // describes the current address, so Google's rendered page has the full markup; replace it after navigation.
+    const prerenderedSchema = document.getElementById('instaplaque-prerender-route-schema');
+    if (prerenderedSchema) {
+      let describesThisPage = false;
+      try {
+        describesThisPage = (JSON.parse(prerenderedSchema.textContent || '{}')['@graph'] || [])
+          .some((node: { '@type'?: string; url?: string }) => node['@type'] === 'WebPage' && node.url === url);
+      } catch { /* Unreadable: replace it below. */ }
+      if (describesThisPage) return;
+    }
+
     let schemaElement = document.getElementById('instaplaque-route-schema') as HTMLScriptElement | null;
     if (!schemaElement) {
       schemaElement = document.createElement('script');

@@ -1,4 +1,5 @@
 import React from 'react';
+import { optimisedSrcSet } from '../services/imageUrls';
 import { ContactLink, WhatsAppIcon } from './ContactOptions';
 import { portraitsInMetalLink } from '../services/shopInformation';
 
@@ -100,7 +101,9 @@ export function HomeQualitySection({ compact = false }: { compact?: boolean }) {
       <figure className="shop-quality-photo">
         <img
           src="/site-images/quality/real-etched-detail-1200.webp"
-          srcSet="/site-images/quality/real-etched-detail-600.webp 600w, /site-images/quality/real-etched-detail-1200.webp 1200w"
+          srcSet={optimisedSrcSet('/site-images/quality/real-etched-detail-1200.webp', 1200, [750, 1080],
+            '/site-images/quality/real-etched-detail-600.webp 600w, /site-images/quality/real-etched-detail-1200.webp 1200w',
+            ['/site-images/quality/real-etched-detail-600.webp 600w'])}
           sizes="(max-width: 720px) 92vw, 600px"
           width="1200"
           height="675"
