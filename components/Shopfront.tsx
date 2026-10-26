@@ -19,6 +19,7 @@ import {
   SeoLandingPage,
   seoLandingPages,
   categoryParentFor,
+  landingDesignProduct,
 } from "../services/commerce";
 
 export const shopFaqs = [
@@ -826,10 +827,8 @@ export function ShopLanding({
   onLaunch?: () => void;
   onRequestDesign?: () => void;
 }) {
-  const related =
-    productFamilies.find(
-      (product) => product.slug === landing.relatedProductSlug,
-    ) || productFamilies[0];
+  // The tree page's from-price includes the oak board and ground stake (owner msg 6506).
+  const related = landingDesignProduct(landing);
   return (
     <ShopProduct
       onLaunch={onLaunch}

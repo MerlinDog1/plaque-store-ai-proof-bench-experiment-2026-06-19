@@ -4,8 +4,8 @@ import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { ContactLink } from './ContactOptions';
 import { MemorialMaterialLinks, memorialInscriptions } from './MemorialGuide';
 import { SizeLinksFold, type ExampleItem, type LandingConfig } from './CategoryLanding';
-import { GROUND_STAKE_PRICE } from '../services/pricing';
-import { DESIGN_WITH_STAKE_HREF } from '../services/groundStake';
+import { DESIGN_WITH_STAKE_HREF, designWithStakeHref } from '../services/groundStake';
+import { formatGbp, onStakePrice } from './PriceTable';
 
 // What each category page shows, on the layout of the memorial page (owner msg 5876) and brought up to its standard
 // (msg 5927, 24 Oct 2026: "bring every other page up to that standard. Sense check each Pic and redo if dumb.
@@ -28,6 +28,11 @@ const seeThis = (slug: string) => <a href={`/${slug}`}>See this plaque</a>;
 const related = (content: React.ReactNode) => <p className="memorial-material-links cat-related">{content}</p>;
 const brassMaterials = ['brushed-brass', 'polished-brass', 'orbital-brass-matt-lacquer', 'aged-brass'];
 const priceOf = (slug: string) => merchantProducts.find(item => item.slug === slug)?.startingFrom || '';
+/** A catalogue plaque's price on the oak board and ground stake (the tree page, owner msg 6506). */
+const onStakePriceOf = (slug: string) => {
+  const offer = merchantOffers.find(item => item.slug === slug);
+  return offer ? formatGbp(onStakePrice(offer)) : '';
+};
 
 export function categoryLandingFor(product: ProductFamily, subject: string, examples: ExampleItem[] = []): LandingConfig | undefined {
   const ask = (text: string) => <ContactLink channel="whatsapp" placement="page" subject={subject}>{text}</ContactLink>;
@@ -273,27 +278,30 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           // Plain wording (owner msgs 6270, 6313); also the memorial and garden pages' "By a tree" tile.
           base: `${category}/tree-hero-v2`,
           alt: 'Brushed brass memorial plaque with a scalloped border reading This cherry tree was planted in loving memory of Jim Partridge, 1947 to 2025, on an oak board and black steel ground stake beside a young cherry tree in blossom',
-          // The ground stake is chosen in the designer's Backing step once there is a board (owner msgs 6378, 6394).
-          caption: <>Shown: A5 brushed brass on an oak board, {priceOf('brushed-brass-210x148-rect-light-wood-plaque')}, plus £{GROUND_STAKE_PRICE} for the ground stake. {seeThis('brushed-brass-210x148-rect-light-wood-plaque')}</>,
+          // Every tree price includes the oak board and ground stake (owner msg 6506), so the caption's link opens the
+          // designer on this plaque on both, at the price it names.
+          caption: <>Shown: A5 brushed brass on an oak board and ground stake, {onStakePriceOf('brushed-brass-210x148-rect-light-wood-plaque')}. <a href={designWithStakeHref('brushed-brass-210x148-rect-light-wood-plaque')}>Design this one</a></>,
         },
-        priceNote: `A5 stainless steel plate, with engraving and UK delivery; the oak board and the £${GROUND_STAKE_PRICE} ground stake are extra`,
+        // The from-price (landingDesignProduct) is this plaque on the board and stake; "Design online" opens on it.
+        priceNote: 'A5 stainless steel on an oak board and black steel ground stake, with engraving and UK delivery',
         examples: {
           kicker: 'Memorial tree plaques in place',
           title: 'Beside the tree, never fixed to it.',
-          intro: <>Each plate stands on an oak board on a black steel ground stake, pushed into the soil at the foot of the tree. Add both in the designer’s Backing step; the stake is £{GROUND_STAKE_PRICE}. <a href={DESIGN_WITH_STAKE_HREF}>Design one on a board and stake</a>.</>,
+          intro: <>Each plate stands on an oak board on a black steel ground stake, pushed into the soil at the foot of the tree. Both are included in every price on this page. <a href={DESIGN_WITH_STAKE_HREF}>Design one online</a>.</>,
           // The cherry tree is the top photo, so the row starts with the next one.
           items: examples.filter(example => !example.image.includes('-cherry')).map(example => ({ ...example, image: example.image.replace(/\.webp$/, '-900.webp') })),
         },
         sizes: {
           title: 'Choose a size for the tree.',
-          intro: 'A5 suits most memorial trees; choose A4 for a school, an orchard or several names. Each plate is drawn to scale.',
+          intro: 'Every price includes the oak board and the black steel ground stake. A5 suits most memorial trees; choose A4 for a school, an orchard or several names. Each is drawn to scale.',
+          mount: 'stake',
           sizes: [
             { slug: 'brushed-stainless-200x150-rect-plaque', label: '200 × 150 mm', widthMm: 200, heightMm: 150, fits: 'A name, dates and a line' },
             { slug: 'a5-brushed-steel-personalised-plaque', label: 'A5 · 210 × 148 mm', widthMm: 210, heightMm: 148, fits: 'A dedication, a name and a message' },
             { slug: 'brushed-stainless-200x200-circle-plaque', label: '200 mm round', widthMm: 200, heightMm: 200, fits: 'A short dedication', shape: 'circle' },
             { slug: 'brushed-stainless-297x210-rect-plaque', label: 'A4 · 297 × 210 mm', widthMm: 297, heightMm: 210, fits: 'A school, an orchard or several names' },
           ],
-          note: <>An oak board is priced on each plaque, and the ground stake adds £{GROUND_STAKE_PRICE}: <a href={DESIGN_WITH_STAKE_HREF}>design one on a board and stake</a>.</>,
+          note: <>Fixing it to a post, wall or fence instead? The plate alone is from {priceOf('brushed-stainless-200x150-rect-plaque')}: take the board and stake off at the designer’s Backing step.</>,
         },
         portraits: true,
         wording: {

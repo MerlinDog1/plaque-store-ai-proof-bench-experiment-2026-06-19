@@ -1,12 +1,12 @@
 import React from 'react';
-import { merchantProducts, productFamilies, seoLandingPages, type ProductFamily, categoryParentFor } from '../services/commerce';
+import { merchantProducts, productFamilies, seoLandingPages, type ProductFamily, categoryParentFor, landingDesignProduct } from '../services/commerce';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { offerSizeLabel } from './CatalogueDetails';
 import { DesignLink, ProductPicks } from './Shopfront';
-import { PriceTable, priceTableIncludes } from './PriceTable';
+import { PriceTable, priceTableIncludes, priceTableIncludesOnStake } from './PriceTable';
 
 // Category landing sections, phone first. The memorial plaques page was built from them first (owner msg 5876,
 // 24 Oct 2026: "make memorial page amazing and then use as yardstick to measure against other pages"), then every
@@ -15,10 +15,11 @@ import { PriceTable, priceTableIncludes } from './PriceTable';
 // the price is for, the price, both ways to order and photo routes; long guidance folds away. Shared blocks
 // (quality, sample proof, FAQs) are the homepage's own.
 
-/** The page a route leads to and its from-price: landing pages take their related product's price. */
+/** The page a route leads to and its from-price: landing pages take their related product's price (the tree page's
+ * with the oak board and ground stake, owner msg 6506). */
 function startingPrice(slug: string) {
   const landing = seoLandingPages.find(item => item.slug === slug);
-  const product = productFamilies.find(item => item.slug === (landing?.relatedProductSlug || slug));
+  const product = landing ? landingDesignProduct(landing) : productFamilies.find(item => item.slug === slug);
   return product ? { slug: product.slug, label: product.startingFrom } : null;
 }
 
@@ -112,15 +113,15 @@ export function PlaceRoutes({ id, kicker, title, routes, more }: { id?: string; 
 export type SizeStep = { slug: string; label: string; widthMm: number; heightMm: number; fits: string; shape?: 'oval' | 'circle' };
 
 /** Four sizes, each in stainless steel, brass and aged brass (owner msg 6436: brass prices were only in the designer),
- * every price linking to that exact plaque. */
-export function SizeLadder({ id, kicker, title, intro, sizes, note, more }: { id?: string; kicker: string; title: string; intro: string; sizes: SizeStep[]; note?: React.ReactNode; more?: React.ReactNode }) {
+ * every price linking to that exact plaque; on the tree page, on the oak board and ground stake (owner msg 6506). */
+export function SizeLadder({ id, kicker, title, intro, sizes, mount, note, more }: { id?: string; kicker: string; title: string; intro: string; sizes: SizeStep[]; mount?: 'stake'; note?: React.ReactNode; more?: React.ReactNode }) {
   return (
     <section className="shop-section cat-sizes" id={id} aria-labelledby="cat-sizes-heading">
       <p className="shop-kicker">{kicker}</p>
       <h2 id="cat-sizes-heading">{title}</h2>
       <p className="cat-section-intro">{intro}</p>
-      <PriceTable sizes={sizes} caption={`${title} Prices by size and metal.`} />
-      <p className="shop-smallprint">{priceTableIncludes}{note && <> {note}</>}</p>
+      <PriceTable sizes={sizes} mount={mount} caption={`${title} Prices by size and metal${mount === 'stake' ? ', on an oak board and ground stake' : ''}.`} />
+      <p className="shop-smallprint">{mount === 'stake' ? priceTableIncludesOnStake : priceTableIncludes}{note && <> {note}</>}</p>
       {more}
     </section>
   );
@@ -303,7 +304,8 @@ export type LandingConfig = {
   trust?: string[];
   routes?: { kicker: string; title: string; routes: PlaceRoute[]; more?: React.ReactNode };
   examples?: { kicker: string; title: string; intro?: React.ReactNode; items: ExampleItem[] };
-  sizes: { kicker?: string; title: string; intro: string; sizes: SizeStep[]; note?: React.ReactNode; more?: React.ReactNode };
+  /** mount 'stake': every price and drawing includes the oak board and ground stake (the tree page). */
+  sizes: { kicker?: string; title: string; intro: string; sizes: SizeStep[]; mount?: 'stake'; note?: React.ReactNode; more?: React.ReactNode };
   steps?: [string, string][];
   portraits?: boolean;
   proofCopy?: string;
@@ -371,7 +373,7 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
       {routes && <PlaceRoutes id={id('places')} kicker={routes.kicker} title={routes.title} routes={routes.routes} more={routes.more} />}
       {examples && <ExamplesRow id={id('examples')} kicker={examples.kicker} title={examples.title} intro={examples.intro} items={examples.items} />}
       {picks && <ProductPicks {...picks} id={id('picks')} className="cat-picks" />}
-      <SizeLadder id={id('sizes')} kicker={sizes.kicker || 'Sizes and prices'} title={sizes.title} intro={sizes.intro} sizes={sizes.sizes} note={sizes.note} more={sizes.more} />
+      <SizeLadder id={id('sizes')} kicker={sizes.kicker || 'Sizes and prices'} title={sizes.title} intro={sizes.intro} sizes={sizes.sizes} mount={sizes.mount} note={sizes.note} more={sizes.more} />
       <OrderSteps
         id="how-it-works"
         kicker="How it works"

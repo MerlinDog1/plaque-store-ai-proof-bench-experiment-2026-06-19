@@ -1,6 +1,7 @@
 import React from 'react';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
-import { GROUND_STAKE_PRICE, estimateWoodAddOn } from '../services/pricing';
+import { GROUND_STAKE_PRICE, GROUND_STAKE_WIDTH_MM, WOOD_BACKING_EXTRA_MM, estimatePlaquePrice, estimateWoodAddOn } from '../services/pricing';
+import { designWithStakeHref, groundStakeVisibleMm, onBoardAndStake } from '../services/groundStake';
 import { Material, Shape, type PlaqueState } from '../types';
 import { TrackedPrice } from './TrackedPrice';
 
@@ -44,6 +45,36 @@ export const formatGbp = (price: number) => price.toLocaleString('en-GB', {
 
 /** One sentence for every price table: what the prices include, and which finishes share a column. */
 export const priceTableIncludes = 'Prices include engraving, fixings and UK delivery. Mirror steel and polished or orbital brass cost the brass price.';
+export const priceTableIncludesOnStake = 'Prices include the oak board, the black steel ground stake, engraving, fixings and UK delivery. Mirror steel and polished or orbital brass cost the brass price.';
+
+/** The tree page's prices (owner msg 6506): the plaque on the light oak board with the ground stake, priced as the
+ * designer and the server price it. */
+export const onStakePrice = (offer: Offer) => estimatePlaquePrice(onBoardAndStake(offer.preset as Partial<PlaqueState>) as PlaqueState);
+
+// The board is WOOD_BACKING_EXTRA_MM larger than the plate each way, with the stake's visible part below it, as in
+// the designer's preview.
+const mountOf = (size: PriceTableSize) => {
+  const board = { w: size.widthMm + WOOD_BACKING_EXTRA_MM, h: size.heightMm + WOOD_BACKING_EXTRA_MM };
+  return { board, stakeMm: groundStakeVisibleMm(board.h) };
+};
+
+/** A plate drawn to scale on its oak board and ground stake; `span` is the largest board width or board-and-stake
+ * height in the table, so every drawing shares one scale and the stakes stand on one ground line. */
+function MountedPlate({ size, span }: { size: PriceTableSize; span: number }) {
+  const { board, stakeMm } = mountOf(size);
+  const margin = WOOD_BACKING_EXTRA_MM / 2;
+  const across = `${(margin / board.w) * 100}%`;
+  const down = `${(margin / board.h) * 100}%`;
+  const shape = size.shape ? ` is-${size.shape}` : '';
+  return (
+    <span className="price-table-mount" style={{ width: `${(board.w / span) * 100}%`, aspectRatio: `${board.w} / ${board.h + stakeMm}` }}>
+      <span className={`price-table-board${shape}`} style={{ aspectRatio: `${board.w} / ${board.h}` }}>
+        <span className={`cat-size-plate${shape}`} style={{ top: down, bottom: down, left: across, right: across }} />
+      </span>
+      <span className="price-table-stake" style={{ width: `${(GROUND_STAKE_WIDTH_MM / board.w) * 100}%` }} />
+    </span>
+  );
+}
 
 /** The wood backing board for an A5 plaque, the size most people choose a board for. */
 export const a5BoardPrice = formatGbp(estimateWoodAddOn({
@@ -51,16 +82,24 @@ export const a5BoardPrice = formatGbp(estimateWoodAddOn({
 } as PlaqueState));
 export const groundStakePrice = formatGbp(GROUND_STAKE_PRICE);
 
-export function PriceTable({ sizes, caption, compact = false }: {
+export function PriceTable({ sizes, caption, compact = false, mount }: {
   sizes: PriceTableSize[];
   /** Read out by screen readers before the table. */
   caption: string;
   /** Phones: leave out the "what fits" lines (the homepage table). */
   compact?: boolean;
+  /** 'stake': each plate on the oak board and ground stake, priced with both, each price opening the designer on
+   * that plaque on the board and stake (the tree page, owner msg 6506). */
+  mount?: 'stake';
 }) {
+  const onStake = mount === 'stake';
   const widest = Math.max(...sizes.map(size => size.widthMm));
+  const span = Math.max(...sizes.map(size => {
+    const { board, stakeMm } = mountOf(size);
+    return Math.max(board.w, board.h + stakeMm);
+  }));
   return (
-    <div className={compact ? 'price-table-wrap is-compact' : 'price-table-wrap'}>
+    <div className={`price-table-wrap${compact ? ' is-compact' : ''}${onStake ? ' is-on-stake' : ''}`}>
       <table className="price-table">
         <caption className="price-table-caption">{caption}</caption>
         <thead>
@@ -84,7 +123,8 @@ export function PriceTable({ sizes, caption, compact = false }: {
                   <span className="price-table-size">
                     {/* Each plate drawn to scale against the largest in the table. */}
                     <span className="price-table-stage" aria-hidden="true">
-                      <span className={size.shape ? `cat-size-plate is-${size.shape}` : 'cat-size-plate'} style={{ width: `${(size.widthMm / widest) * 100}%`, aspectRatio: `${size.widthMm} / ${size.heightMm}` }} />
+                      {onStake ? <MountedPlate size={size} span={span} />
+                        : <span className={size.shape ? `cat-size-plate is-${size.shape}` : 'cat-size-plate'} style={{ width: `${(size.widthMm / widest) * 100}%`, aspectRatio: `${size.widthMm} / ${size.heightMm}` }} />}
                     </span>
                     <span className="price-table-text">
                       <span className="price-table-name">{name}</span>
@@ -96,11 +136,12 @@ export function PriceTable({ sizes, caption, compact = false }: {
                 {columns.map(column => {
                   const offer = offerFor(size, column.material);
                   if (!offer) return <td key={column.key}>–</td>;
-                  const price = formatGbp(offer.price);
+                  const amount = onStake ? onStakePrice(offer) : offer.price;
+                  const price = formatGbp(amount);
                   return (
                     <td key={column.key}>
-                      <a href={`/${offer.slug}`} aria-label={`${size.label}, ${column.label.toLowerCase()}: ${price}`}>
-                        <TrackedPrice value={offer.price} product={offer.slug}>{price}</TrackedPrice>
+                      <a href={onStake ? designWithStakeHref(offer.slug) : `/${offer.slug}`} aria-label={`${size.label}, ${column.label.toLowerCase()}${onStake ? ' on an oak board and ground stake' : ''}: ${price}`}>
+                        <TrackedPrice value={amount} product={offer.slug}>{price}</TrackedPrice>
                       </a>
                     </td>
                   );

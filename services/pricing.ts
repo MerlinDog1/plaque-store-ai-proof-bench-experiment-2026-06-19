@@ -7,7 +7,7 @@ import {
   hasGroundStake as hasGroundStakeFromPolicy,
 } from './checkoutPolicy.mjs';
 
-export { GROUND_STAKE_PRICE, GROUND_STAKE_WIDTH_MM } from './checkoutPolicy.mjs';
+export { GROUND_STAKE_PRICE, GROUND_STAKE_WIDTH_MM, WOOD_BACKING_EXTRA_MM } from './checkoutPolicy.mjs';
 
 export function hasGroundStake(state: Partial<PlaqueState> | null | undefined) {
   return hasGroundStakeFromPolicy(state);

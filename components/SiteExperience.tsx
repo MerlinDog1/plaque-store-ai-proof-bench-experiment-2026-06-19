@@ -1,6 +1,6 @@
 import React, { lazy, useEffect, useRef, useState } from 'react';
 const PlaquePreview = lazy(() => import('./PlaquePreview'));
-import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies, seoLandingPages, categoryParentFor } from '../services/commerce';
+import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies, seoLandingPages, categoryParentFor, landingDesignProduct } from '../services/commerce';
 import { PlaqueState } from '../types';
 import { createCorelPdfBlob, downloadCorelPdf, svgToProofPngBase64 } from '../services/exportActions';
 import { SeoRankTracker } from './SeoRankTracker';
@@ -2755,7 +2755,7 @@ export function SiteExperience(props: SiteProps) {
   } else if (props.view === 'product') {
     page = <ShopProduct product={props.selectedProduct} onRequestDesign={() => props.onNavigate('design-request', props.selectedProduct.slug)} onLaunch={() => props.onLaunchProduct(props.selectedProduct)} />;
   } else if (props.view === 'landing') {
-    page = <ShopLanding landing={props.selectedLanding} onRequestDesign={() => props.onNavigate('design-request', props.selectedLanding.relatedProductSlug)} onLaunch={() => props.onLaunchProduct(productFamilies.find(product => product.slug === props.selectedLanding.relatedProductSlug) || productFamilies[0])} />;
+    page = <ShopLanding landing={props.selectedLanding} onRequestDesign={() => props.onNavigate('design-request', props.selectedLanding.relatedProductSlug)} onLaunch={() => props.onLaunchProduct(landingDesignProduct(props.selectedLanding))} />;
   } else if (props.view === 'materials') {
     page = <ShopMaterials />;
   } else if (props.view === 'how') {

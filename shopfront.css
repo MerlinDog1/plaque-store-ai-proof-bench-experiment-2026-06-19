@@ -3057,3 +3057,40 @@
     margin: 4px -24px 16px;
   }
 }
+
+/* The tree page's sizes (owner msg 6506): each plate drawn to scale on its oak board, with the visible part of the
+   black steel ground stake below it, every stake standing on one ground line. */
+.price-table-wrap.is-on-stake .price-table-stage {
+  aspect-ratio: 1;
+}
+.price-table-mount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+}
+.price-table-board {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 100%;
+  border-radius: 2px;
+  background: linear-gradient(100deg, #b4834f 0%, #d8ae78 34%, #c08f58 63%, #ddb784 100%);
+  box-shadow: inset 0 0 0 1px rgba(96, 60, 26, 0.45), 0 2px 5px rgba(32, 59, 50, 0.22);
+}
+.price-table-board.is-circle,
+.price-table-board.is-oval {
+  border-radius: 50%;
+}
+.price-table-board .cat-size-plate {
+  position: absolute;
+  box-shadow: inset 0 0 0 1px #a4a8a0, 0 1px 2px rgba(40, 24, 8, 0.35);
+}
+.price-table-stake {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: linear-gradient(90deg, #0b0c0d, #3b3f43 30%, #1f2225 58%, #090a0b);
+  -webkit-mask-image: linear-gradient(#000 60%, transparent);
+  mask-image: linear-gradient(#000 60%, transparent);
+}
