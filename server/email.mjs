@@ -186,7 +186,7 @@ const woodDetails = (order) => {
   const tone = state.woodTone === "light" ? "Light wood" : "Dark wood";
   const edge = state.woodEdge ? `${labelFromSlug(state.woodEdge)} edge` : "";
   const size = boardWidth && boardHeight ? `${boardWidth} x ${boardHeight} mm board` : "";
-  const stake = state.groundStake === true ? "with black steel ground stake (30 mm square)" : "";
+  const stake = state.groundStake === true ? "with black steel ground stake (2 mm L-shaped, 30 mm wide, 23.5 in long)" : "";
   return [tone, edge, size, stake].filter(Boolean).join(", ");
 };
 

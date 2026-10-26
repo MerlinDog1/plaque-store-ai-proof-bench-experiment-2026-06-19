@@ -25,7 +25,7 @@ import {
 import type { GenerationPhase } from '../services/geminiService';
 import { BENCH_SAFE_MARGIN_PERCENT, DEFAULT_SAFE_MARGIN_PERCENT, SAFE_MARGIN_PRESETS, getSafeMarginMm, getSafeMarginsMm, getSafeMarginPercent } from '../services/safeMargin';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
-import { GROUND_STAKE_PRICE, estimatePlaqueBasePrice, estimateWoodAddOn, hasGroundStake } from '../services/pricing';
+import { GROUND_STAKE_LENGTH, GROUND_STAKE_PRICE, estimatePlaqueBasePrice, estimateWoodAddOn, hasGroundStake } from '../services/pricing';
 import { isOnePoundTestPlaque } from '../services/onePoundTestPlaque.mjs';
 import { OwnerTestCheckout } from './OwnerTestCheckout';
 
@@ -1856,7 +1856,7 @@ export const Controls: React.FC<Props> = ({
                 <div>
                   <div className="text-sm font-black">Ground stake</div>
                   <div className="text-xs text-[#6a746d]">
-                    A black steel stake fixed to the back of the board, so the plaque stands in a lawn or flower bed, or beside a tree. Adds {formatPrice(GROUND_STAKE_PRICE)}.
+                    A black steel stake, {GROUND_STAKE_LENGTH} long, fixed to the back of the board, so the plaque stands in a lawn or flower bed, or beside a tree. Adds {formatPrice(GROUND_STAKE_PRICE)}.
                   </div>
                 </div>
                 <button

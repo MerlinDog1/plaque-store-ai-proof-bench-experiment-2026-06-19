@@ -7,7 +7,7 @@ import {
   Shape,
   TextColor,
 } from '../types';
-import { estimatePlaquePrice } from './pricing';
+import { GROUND_STAKE_LENGTH, estimatePlaquePrice } from './pricing';
 import { onBoardAndStake } from './groundStake';
 import { vettedCataloguePhotos } from './vettedPhotos.mjs';
 import {
@@ -714,7 +714,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     mount: 'stake',
     proofCta: 'Start a tree plaque proof',
     sections: [
-      { title: 'Fix it beside the tree, not to it', copy: 'Screws and wire damage a growing tree, and the bark slowly swallows anything fixed to it. Stand the plaque beside it instead: we fix the plate to a solid oak board on a chunky black steel ground stake that pushes straight into the soil at the foot of the tree, as in the photos below. Our tree plaque prices include the board and the stake, and the designer starts with both. A short post, a nearby wall or a fence work too.' },
+      { title: 'Fix it beside the tree, not to it', copy: `Screws and wire damage a growing tree, and the bark slowly swallows anything fixed to it. Stand the plaque beside it instead: we fix the plate to a solid oak board on a black steel ground stake, ${GROUND_STAKE_LENGTH} long, that pushes straight into the soil at the foot of the tree, as in the photos below. Our tree plaque prices include the board and the stake, and the designer starts with both. A short post, a nearby wall or a fence work too.` },
       { title: 'Choose a size for the words and the setting', copy: 'A 200 × 150 mm plaque suits a name, dates and a line about them. A5 (210 × 148 mm) is the most popular size for a memorial tree, with room for a dedication such as “This cherry tree was planted in loving memory of”. Choose A4 (297 × 210 mm) for a school, a community orchard or several names, or a round plaque for a short dedication.' },
       { title: 'Pick a finish that suits the garden', copy: 'Stainless steel keeps its silver colour outdoors. Brass is warm and traditional and slowly mellows outside; aged brass starts darker and keeps developing gently. An oak backing board suits a sheltered spot in the garden; in an open, exposed position choose a metal plaque without backing.' },
       { title: 'Check first if the tree is in a public place', copy: 'Parks, churchyards, schools and cemeteries usually have rules for memorial trees and plaques. Ask the site manager or council about the permitted size, material, wording and fixing before ordering; many councils run their own tree dedication schemes. Approving our proof does not replace their permission.' },

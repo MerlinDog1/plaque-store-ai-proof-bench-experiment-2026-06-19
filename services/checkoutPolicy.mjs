@@ -16,7 +16,11 @@ const WOOD_PRICE_MATCH_TOLERANCE_MM = 0.55;
 // Black steel ground stake fixed to the back of the wood board, as on the Nicola order: the owner's
 // flat £35 add-on on top of the board (Telegram msgs 5360, 5395, 6378).
 export const GROUND_STAKE_PRICE = 35;
+// The stake itself (owner msgs 6523, 6532): "just a 2mm thick kind of L shape bend thing", not a solid post. Its
+// face is 30 mm across, as drawn. It is 23.5 in long, which the wording gives rather than the drawings.
 export const GROUND_STAKE_WIDTH_MM = 30;
+export const GROUND_STAKE_THICKNESS_MM = 2;
+export const GROUND_STAKE_LENGTH = "600 mm (23.5 in)";
 
 const onePoundTestPlaqueEnabled = () => (
   String(globalThis.process?.env?.ONE_POUND_TEST_PLAQUE_ENABLED || "").toLowerCase() === "true"

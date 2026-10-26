@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Fixing, Material, PlaqueState, Shape } from '../types';
 import { outlinePreviewTextLayer } from '../services/exportService';
 import { getFixingPositions } from '../services/fixingGeometry';
-import { GROUND_STAKE_WIDTH_MM, hasGroundStake } from '../services/pricing';
+import { GROUND_STAKE_THICKNESS_MM, GROUND_STAKE_WIDTH_MM, hasGroundStake } from '../services/pricing';
 import { groundStakeVisibleMm } from '../services/groundStake';
 
 interface Props {
@@ -478,6 +478,7 @@ function getSceneDimensions(state: PlaqueState) {
     capDepth: CAP_THICKNESS_MM * unitPerMm,
     stakeVisible: stakeVisibleMm * unitPerMm,
     stakeSize: GROUND_STAKE_WIDTH_MM * unitPerMm,
+    stakeThickness: GROUND_STAKE_THICKNESS_MM * unitPerMm,
     totalWidthMm,
     totalHeightMm,
   };
@@ -786,18 +787,25 @@ export const ThreePlaquePreview: React.FC<Props> = ({ state, activeStep, inscrip
       });
 
       if (dims.stakeVisible > 0) {
-        // Black steel ground stake on a bracket behind the board, running up behind its lower half.
+        // Black steel ground stake behind the board, running up behind its lower half: 2 mm steel bent into an L
+        // (owner msgs 6523, 6532), its 30 mm face flat against the back of the board and the other side of the L
+        // pointing straight back from one edge. From the front it looks as before; tilted, it is thin sheet, not a post.
         const stakeLength = dims.totalHeight * 0.45 + dims.stakeVisible;
-        const stake = new THREE.Mesh(
-          new THREE.BoxGeometry(dims.stakeSize, stakeLength, dims.stakeSize),
+        const stakeY = -dims.totalHeight / 2 - dims.stakeVisible + stakeLength / 2;
+        const sheet = dims.stakeThickness;
+        const face = new THREE.Mesh(
+          new THREE.BoxGeometry(dims.stakeSize, stakeLength, sheet),
           new THREE.MeshStandardMaterial({ color: 0x1c1e20, roughness: 0.6, metalness: 0.3 }),
         );
-        stake.position.set(
-          0,
-          -dims.totalHeight / 2 - dims.stakeVisible + stakeLength / 2,
-          -dims.woodDepth - dims.stakeSize / 2,
+        face.position.set(0, stakeY, -dims.woodDepth - sheet / 2);
+        const side = new THREE.Mesh(
+          new THREE.BoxGeometry(sheet, stakeLength, dims.stakeSize - sheet),
+          new THREE.MeshStandardMaterial({ color: 0x1c1e20, roughness: 0.6, metalness: 0.3 }),
         );
-        existingGroup.add(stake);
+        side.position.set(-dims.stakeSize / 2 + sheet / 2, stakeY, -dims.woodDepth - sheet - (dims.stakeSize - sheet) / 2);
+        face.name = 'ground-stake-face';
+        side.name = 'ground-stake-side';
+        existingGroup.add(face, side);
       }
     }
 
