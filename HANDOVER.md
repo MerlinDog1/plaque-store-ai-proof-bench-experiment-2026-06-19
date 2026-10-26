@@ -15,7 +15,8 @@
   - The cookie notice, privacy policy and cookie policy describe it. Privacy was last updated 26 October 2026.
   - Details: `docs/session-replay-2026-10-26.md`.
 - **Checks:**
-  - `check:posthog` and the new `check:replay` (in CI) pass, as does tsc.
+  - `check:posthog` and the new `check:replay` pass, as does tsc. `check:replay` is not in CI yet: the GitHub login
+    can't change workflow files, so the one-line CI patch is saved in `workspace/output/instaplaque-session-replay-20261026/`.
   - The browser checks pass on the test copy: desktop, phone, the owner's browser and earlier consent.
   - Live: the HTML check and `verify_live.py` pass. A live QA visit's recording appeared in PostHog under its visit ID.
 - **Branch:** `codex/instaplaque-session-replay-20261026` (`dafaf9d`, `1b582dd`), based on the live 3D stake release

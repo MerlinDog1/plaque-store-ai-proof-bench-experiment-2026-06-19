@@ -71,13 +71,17 @@ QA sessions are recorded (to test it). Their `ip_*` events carry `is_test` as be
   - `ip_*` events carry the visit as `$session_id`;
   - recording consent set by Accept;
   - no recording on private links, for the owner's browser, after withdrawal, or with only an earlier consent.
-- `npm run check:replay` (new, `scripts/check-session-replay.cjs`, also in CI) passes. It runs the real
+- `npm run check:replay` (new, `scripts/check-session-replay.cjs`) passes. It runs the real
   `sessionReplay.ts` and `posthogAnalytics.ts` with a stand-in posthog-js and checks:
   - it loads once, and only with recording consent;
   - every privacy setting, including `before_send` passing only `$snapshot` and network URLs losing their queries;
   - it stops before `/checkout` or `?proof=` URLs are pushed and restarts on public ones;
   - the owner's browser, preview hosts, private full loads and earlier consent are excluded;
   - withdrawal opts out and removes only PostHog's storage.
+- It is not in CI yet: GitHub refused the push of `.github/workflows/ci.yml`, because this machine's GitHub login has
+  no `workflow` scope. The one-line change (`npm run check:replay` after `check:posthog`) is saved as
+  `workspace/output/instaplaque-session-replay-20261026/ci-check-replay.patch`. Apply it with a login that has that
+  scope.
 - `tsc -p output/tsconfig.stake.json` passes.
 - **Real built app in headless Chrome**: `workspace/output/instaplaque-session-replay-20261026/run_check.sh` with
   `check_replay.cjs`, on test copy `instaplaque-khphcqp8i`.
