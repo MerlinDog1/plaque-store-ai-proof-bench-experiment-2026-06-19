@@ -1,5 +1,24 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## The ground stake as it really is: LIVE — 26 October 2026, 09:48 UTC
+
+- **Why:** the owner (msgs 6523, 6532): the stake is "just a 2mm thick kind of L shape bend thing - not these big
+  chunky thing", 23.5 in long, "just put that in the description"; "you had the width ok", so the photos stay.
+- **What changed:**
+  - The wording gives the length, 600 mm (23.5 in), in the designer's stake option and the tree page's "Fix it
+    beside the tree", which no longer says "chunky".
+  - The 3D proof draws 2 mm sheet bent into an L (30 mm face) instead of a solid 30 mm post.
+  - The owner's order emails say "2 mm L-shaped, 30 mm wide, 23.5 in long", not "30 mm square".
+  - The 2D drawings, the photos and the AI preview prompt are unchanged.
+  - Details: `docs/stake-length-2026-10-26.md`.
+- **Branch:** `codex/instaplaque-slim-stake-20261026` (`9da66c5`, 3D hairline fix `5d0badb`), based on the live tree
+  board-and-stake release `1a802f8`.
+- **Live:** dpl_Bcm4CG9NfcFS1PLsnkUr9WmTDjLL (instaplaque-9uru8t8h6, `index-BKV4C7q8.js`).
+  - The test copy's checks pass: static HTML, designer and 3D in Chrome, emails, server checkout.
+  - The live HTML check and `verify_live.py` pass, and IndexNow was pinged.
+  - The live files are byte-identical to the tested ones.
+- **Rollback:** promote dpl_8cNFnsp71iWeN1vUAWXiqq55y6pD (instaplaque-5rlsj2we1). No ad depends on it.
+
 ## Tree page priced on the oak board and ground stake: LIVE — 26 October 2026, 09:17 UTC
 
 - **Why:** the owner (msg 6506) asked for the tree page to show that each plaque has a board, and to include the stake,
