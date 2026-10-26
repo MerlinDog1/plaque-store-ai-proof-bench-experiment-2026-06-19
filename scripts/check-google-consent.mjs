@@ -17,15 +17,19 @@ for (const file of files) {
   assert.equal(scripts.filter(script => script[1].includes('function updateGoogleConsent()')).length, 1);
   assert.doesNotMatch(bootstrap, /ga-disable|googleTagsStarted/);
 
-  function run({ url = origin, consent = null, storageThrows = false, referrer = '', internal = null } = {}) {
+  // run() fires the page's load event (and the 3.5 s timer after it) unless pageLoaded is false; beforeLoad records
+  // how many loaders were added while the page was still being drawn.
+  function run({ url = origin, consent = null, storageThrows = false, referrer = '', internal = null, pageLoaded = true } = {}) {
     const appended = [], listeners = new Map(), map = new Map([[consentKey, consent], ['instaplaque-internal-v1', internal]]);
-    const context = { URL, Date, location: new URL(url), addEventListener(name, listener) { listeners.set(name, listener); },
+    const context = { URL, Date, location: new URL(url), setTimeout: callback => callback(), addEventListener(name, listener) { listeners.set(name, listener); },
       localStorage: { getItem(key) { if (storageThrows) throw Error('Storage blocked'); return map.get(key) ?? null; } },
       document: { referrer, createElement: () => ({}), head: { appendChild(script) { appended.push(script); } } } };
     context.window = context;
     vm.runInNewContext(bootstrap, context);
+    const beforeLoad = appended.length;
+    if (pageLoaded) listeners.get('load')?.();
     const queue = () => Array.from(context.dataLayer, args => Array.from(args));
-    return { context, appended, queue, map, listeners };
+    return { context, appended, queue, map, listeners, beforeLoad };
   }
   function checkConsent(entry, action, state) {
     assert.deepEqual(entry.slice(0, 2), ['consent', action]);
@@ -40,6 +44,7 @@ for (const file of files) {
     checkConsent(h.queue()[3], 'update', consent === 'yes' ? 'granted' : 'denied');
     assert.equal(h.queue()[4][0], 'js');
     assert.deepEqual(h.queue().filter(args => args[0] === 'config').map(args => args[1]), ['AW-18288208905', 'G-FKP17EXNBX']);
+    assert.equal(h.beforeLoad, 0, 'The Google tag library must not load while the page is being drawn');
     assert.equal(h.appended.length, 1, 'Public loader must not wait for consent');
     assert.equal(h.appended[0].src, 'https://www.googletagmanager.com/gtag/js?id=AW-18288208905');
     assert.equal(h.appended[0].async, true);
@@ -56,6 +61,14 @@ for (const file of files) {
     checkConsent(h.queue().at(-1), 'update', 'denied');
     assert.equal(h.appended.length, 1, 'Consent changes must not duplicate loaders');
     assert.equal(h.queue().filter(args => args[0] === 'config').length, 2);
+  }
+  // A tap, key or scroll loads the library before the page-load timer; neither path loads it twice.
+  for (const name of ['pointerdown', 'keydown', 'scroll', 'touchstart']) {
+    const h = run({ pageLoaded: false });
+    assert.equal(h.appended.length, 0, name);
+    h.listeners.get(name)();
+    h.listeners.get('load')();
+    assert.equal(h.appended.length, 1, name);
   }
   const blockedStorage = run({ storageThrows: true });
   assert.equal(blockedStorage.appended.length, 1);
@@ -96,5 +109,5 @@ for (const file of files) {
   assert.equal(adConfig.page_referrer, 'https://www.google.com');
   assert.equal(ga.page_referrer, origin);
   assert.equal(h.context.location.href, url, 'Redacting GA4 must not rewrite the click-bearing browser URL');
-  console.log(`PASS ${file}: consent ordering, public loading, saved/late consent, revocation, storage failure, private/preview exclusions, owner's own browsers excluded, one loader, URL redaction and ad-click IDs kept`);
+  console.log(`PASS ${file}: consent ordering, public loading, saved/late consent, revocation, storage failure, private/preview exclusions, owner's own browsers excluded, one loader after page load or first interaction, URL redaction and ad-click IDs kept`);
 }
