@@ -1,11 +1,11 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Designer wording step: CANDIDATE, not live — 27 October 2026
+## Designer wording step: LIVE — 27 October 2026, 21:08 UTC
 
 - **Why:** the owner (msg 6884): the Generate button is hidden on a phone, the step doesn't say "just paste your words
   and the AI does the rest", and asked for a percentage on the plaque while it works. Not the built-in layout.
-- **Branch:** `codex/instaplaque-designer-wording-20261027`, based on this live branch (deb50df). Base new work on it
-  only if it goes live; until then keep basing on `codex/instaplaque-google-customer-reviews-20261026`.
+- **Read first:** **base new work on `codex/instaplaque-designer-wording-20261027`**. It is the Google Customer Reviews
+  branch (deb50df) plus this change; a deploy from an older branch removes it.
 - **What changed:** the wording step's footer button is "Design my plaque" until there is a current layout; plain
   "just type your words" copy; an estimated percentage over the plaque by real stage; solid buttons in the review
   checklist. Follow-up (msg 6902): title "Just type your words", box "No layout needed", and a quiet "Or we can design
@@ -16,7 +16,9 @@
 - **Candidate:** instaplaque-b8vdvugof (dpl_F6osRRkzwag6cRMa3FooGwL1r9XQ, with the msg 6902 follow-up). The earlier
   instaplaque-3o0j9j905 (dpl_pXQ7J7nq) passed a real AI layout at phone size; the follow-up changed only copy and the
   WhatsApp line.
-- **Live:** unchanged (dpl_47YaX9pv). Promote the candidate only when the owner says so.
+- **Live:** promoted on the owner's go-ahead (msg 6911): dpl_F6osRRkzwag6cRMa3FooGwL1r9XQ (instaplaque-b8vdvugof,
+  `index-CzAcsBAj.js`) on both domains. A real AI layout on the live site at phone size passed (26 s, four lines).
+- **Rollback:** promote dpl_47YaX9pvMhg1h5qtCKHumLdMLaiT (instaplaque-ovr62c0y3, the Google Customer Reviews release).
 
 ## Google Customer Reviews opt-in: LIVE — 26 October 2026, 16:32 UTC
 

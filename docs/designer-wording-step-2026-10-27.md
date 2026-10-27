@@ -95,6 +95,20 @@ do all this on what's app for you".
   https://instaplaque-b8vdvugof-dullaghan31-3959s-projects.vercel.app (dpl_F6osRRkzwag6cRMa3FooGwL1r9XQ), commit a508cad.
   Vercel's build and postbuild checks passed; both domains still on dpl_47YaX9pv. Phone screenshots on it: the wording
   and Size steps show the new title and the WhatsApp line (wa.me/447464843841, placement `designer`); no page errors.
-- **Next:** promote only on the owner's go-ahead (`vercel promote https://instaplaque-b8vdvugof-dullaghan31-3959s-projects.vercel.app --yes`,
-  with `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` set), then check both domains. Rollback: promote dpl_47YaX9pvMhg1h5qtCKHumLdMLaiT
-  (instaplaque-ovr62c0y3).
+- **LIVE: 27 October 2026, 21:08:53 UTC** (owner msg 6911 "Yeah go live"). Before promoting, production was still
+  dpl_47YaX9pv and no newer deployment or branch existed. `vercel promote` of instaplaque-b8vdvugof took 4 s; both
+  instaplaque.co.uk and www point to dpl_F6osRRkzwag6cRMa3FooGwL1r9XQ (`vercel inspect`), www redirects to the apex.
+- **Live checks:**
+  - /design serves `index-CzAcsBAj.js`, the same bundle as the candidate; its chunks contain the new text and no longer
+    contain "Generate layout" or "Words that matter".
+  - Browser check on the live site (browser marked with `?internal=on`, analytics hosts blocked, every /api call except
+    the AI proxy refused): at 390 and 1440 px the title, "No layout needed", the WhatsApp line (wa.me/447464843841) and
+    the on-screen "Design my plaque" button are present, with no page errors. One real AI layout at 390 px: "In memory
+    of Albert Hughes 1935 – 2019 Forever in our thoughts" went 2 % → 24 % "Checking your spelling" → 29–66 %
+    "Designing your layout" and arrived after 26 s as four lines (In memory of / Albert Hughes / 1935 – 2019 / Forever
+    in our thoughts); the footer then read "Continue to review". Two AI proxy calls, nothing else.
+  - `output/instaplaque-overnight-20261024/verify_live.py` (Cody's VPS, read-only) with `BUNDLE=index-CzAcsBAj.js`:
+    RESULT PASS. Home serves the bundle; category, wording and contact pages 200; sitemaps (24 + 175 URLs); feed 175
+    items; all 175 product pages fetched and their 633 linked assets identical to `public/`.
+- **Rollback:** `vercel promote https://instaplaque-ovr62c0y3-dullaghan31-3959s-projects.vercel.app --yes` (dpl_47YaX9pv),
+  with `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` set.
