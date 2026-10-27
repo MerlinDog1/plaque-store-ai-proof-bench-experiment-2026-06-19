@@ -4,7 +4,9 @@
 // - the main button says "Design my plaque", is on screen without scrolling and makes the layout;
 // - the percentage sits over the plaque preview, follows the real stage (spelling, layout, retry), never goes
 //   backwards, stays under 100 until the layout arrives, and restarts for a layout change;
-// - waiting longer sends no extra request; reduced motion stops the sheen; failures keep the previous proof.
+// - waiting longer sends no extra request; reduced motion stops the sheen; failures keep the previous proof;
+// - the step title repeats the plaque's guide text, and the quiet WhatsApp offer (owner msg 6902) is on screen on the
+//   design steps, carries the designer placement, and is not on the review step.
 import assert from 'node:assert/strict';
 import { mkdirSync } from 'node:fs';
 import { chromium } from '@playwright/test';
@@ -34,6 +36,14 @@ try {
   await page.getByRole('button',{name:'Reject',exact:true}).click(); // the cookie banner covers the footer until answered
   await page.getByRole('button',{name:'Go to Text',exact:true}).click();
   await page.waitForFunction(t=>document.querySelector('#inscription-wording-input')?.value===t,wording);
+  await page.getByRole('heading',{name:'Just type your words',exact:true}).waitFor();
+  await page.getByText('No layout needed',{exact:true}).waitFor();
+  const wa=page.locator('.designer-whatsapp-line');
+  assert.equal((await wa.innerText()).trim(),'Or we can design it all for you on WhatsApp');
+  assert.equal(await wa.getAttribute('data-contact-placement'),'designer');
+  assert.match(await wa.getAttribute('href'),/^https:\/\/wa\.me\/447464843841\?text=/);
+  const waBox=await wa.boundingBox();
+  assert.ok(waBox && waBox.y>=0 && waBox.y+waBox.height<=height,'The WhatsApp offer is on screen without scrolling');
   const action=page.getByTestId('designer-footer-action');
   assert.equal((await action.innerText()).trim(),'Design my plaque');
   const actionBox=await action.boundingBox();
@@ -84,9 +94,14 @@ try {
   await overlay.waitFor({state:'detached'});
   await page.getByText(/Your previous proof is unchanged/).waitFor();
   assert.equal(await page.locator('#ai-text-layer').innerHTML(),before);
+  await page.getByRole('button',{name:'Go to Size/Shape',exact:true}).click();
+  await page.locator('.designer-whatsapp-line').waitFor();
+  await page.getByRole('button',{name:'Go to Proof',exact:true}).click();
+  await page.getByRole('heading',{name:'Your final review',exact:true}).waitFor();
+  assert.equal(await page.locator('.designer-whatsapp-line').count(),0,'No WhatsApp offer on the review step');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   assert.deepEqual(errors,[]);
-  console.log(`${width}px: button in view, progress over the plaque by stage (${spelling}% → ${designing}% → ${retry}%), no extra calls, reduced motion, completion, restart for edits and failure preservation passed`);
+  console.log(`${width}px: button in view, progress over the plaque by stage (${spelling}% → ${designing}% → ${retry}%), no extra calls, reduced motion, completion, restart for edits, failure preservation and the WhatsApp offer passed`);
   await page.close();
  }
 }finally{await browser.close();}

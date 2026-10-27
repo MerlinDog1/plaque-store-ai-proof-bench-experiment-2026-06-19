@@ -8,7 +8,9 @@
   only if it goes live; until then keep basing on `codex/instaplaque-google-customer-reviews-20261026`.
 - **What changed:** the wording step's footer button is "Design my plaque" until there is a current layout; plain
   "just type your words" copy; an estimated percentage over the plaque by real stage; solid buttons in the review
-  checklist. Details, claims and checks: `docs/designer-wording-step-2026-10-27.md`.
+  checklist. Follow-up (msg 6902): title "Just type your words", box "No layout needed", and a quiet "Or we can design
+  it all for you on WhatsApp" line on every design step (placement `designer`). Details, claims and checks:
+  `docs/designer-wording-step-2026-10-27.md`.
 - **Checks:** scoped `tsc` (`tsconfig.check.json`), `npm run build` with postbuild checks, `check-layout-progress.mjs`
   (rewritten) and `check-generation-timeout-ui.mjs` pass.
 - **Candidate:** instaplaque-3o0j9j905 (dpl_pXQ7J7nqSwy46vbDMEXtMNwFoVfR); a real AI layout on it passed at phone size.

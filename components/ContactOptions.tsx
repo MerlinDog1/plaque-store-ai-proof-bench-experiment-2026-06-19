@@ -10,7 +10,7 @@ export function plaqueSubject(shortTitle: string): string {
   const noun = shortTitle === 'Stainless' ? 'stainless steel' : /^A\d$/.test(shortTitle) ? shortTitle : shortTitle.toLowerCase();
   return `${/^([aeiou]|A\d)/i.test(noun) ? 'an' : 'a'} ${noun} plaque`;
 }
-type Placement = 'hero' | 'mobile_bar' | 'contact' | 'footer' | 'page';
+type Placement = 'hero' | 'mobile_bar' | 'contact' | 'footer' | 'page' | 'designer';
 
 function contactHref(channel: Channel, subject: string, reference?: string): string {
   // A short, natural opener for every page (owner msg 5156); the greeting message does the guiding.

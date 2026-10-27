@@ -128,7 +128,7 @@ function safeProperties(input: Properties): Properties {
   const enums: Record<string, string[]> = {
     step: ['size', 'material', 'colour', 'fixings', 'backing', 'wording', 'review'],
     format: ['pdf', 'svg'], method: ['ai', 'manual'], channel: ['email', 'phone', 'whatsapp'],
-    placement: ['hero', 'mobile_bar', 'contact', 'footer', 'page'],
+    placement: ['hero', 'mobile_bar', 'contact', 'footer', 'page', 'designer'],
     price_context: ['starting', 'configured'],
     shape: ['rect', 'oval', 'circle', 'heart'],
     material: ['brushed-brass', 'orbital-brass-matt-lacquer', 'polished-brass', 'aged-brass', 'brushed-stainless', 'polished-stainless'],

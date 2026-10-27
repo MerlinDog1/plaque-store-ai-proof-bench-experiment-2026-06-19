@@ -1886,10 +1886,10 @@ export const Controls: React.FC<Props> = ({
               </div>
               <div className="min-w-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f2d688]">
-                  Just type your words
+                  No layout needed
                 </p>
                 <p className="mt-2 text-xs leading-5 text-[#aab8b0]">
-                  Type or paste them any way you like. No need to set out the lines: our AI designer arranges them for you and shows your finished plaque in about 30–60 seconds.
+                  Our AI designer lays them out for you. Type or paste them any way you like, and your finished plaque appears in about 30–60 seconds.
                 </p>
               </div>
             </div>

@@ -239,7 +239,7 @@
       serif;
     letter-spacing: -0.8px;
   }
-  .designer-mode .proofbench-customiser-head > p:last-child {
+  .designer-mode .proofbench-customiser-head > .designer-step-description {
     max-width: 300px;
     color: var(--designer-muted);
     font-size: 12px;
@@ -938,7 +938,7 @@
     font-size: 25px;
     margin-bottom: 0;
   }
-  .designer-mode .proofbench-customiser-head > p:last-child {
+  .designer-mode .proofbench-customiser-head > .designer-step-description {
     display: none;
   }
   .designer-mode .proofbench-customiser .controls-instrument {
@@ -1257,3 +1257,21 @@
   font-size: 13px;
 }
 .designer-mode .controls-instrument button.designer-checklist-action:hover { background: #355845; }
+
+/* Low-key offer on each design step: we can do the whole design on WhatsApp (owner msg 6902). */
+.designer-mode .proofbench-customiser-head .designer-whatsapp-line {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 32px; margin-top: 8px;
+  color: #3d5a46; font-size: 12.5px; line-height: 1.35;
+  text-decoration: none;
+}
+.designer-mode .proofbench-customiser-head .designer-whatsapp-line span {
+  text-decoration: underline; text-decoration-color: #3d5a4659; text-underline-offset: 3px;
+}
+.designer-mode .proofbench-customiser-head .designer-whatsapp-line:hover span { text-decoration-color: currentColor; }
+.designer-mode .proofbench-customiser-head .designer-whatsapp-line .shop-whatsapp-icon {
+  flex: none; width: 16px; height: 16px; color: #1f8a4c;
+}
+@media screen and (max-width: 767px) {
+  .designer-mode .proofbench-customiser-head .designer-whatsapp-line { min-height: 30px; margin-top: 4px; font-size: 12px; }
+}

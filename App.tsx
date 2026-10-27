@@ -6,6 +6,7 @@ import { trackSiteEvent, trackSitePage } from './services/posthogAnalytics';
 import { publicRouteWithGoogleClick } from './services/googleClickNavigation';
 import { LayoutProgressOverlay, useLayoutProgress } from './components/LayoutProgress';
 import { SparkleIcon } from './components/SparkleIcon';
+import { ContactLink, WhatsAppIcon } from './components/ContactOptions';
 import { DesignRequest } from './components/DesignRequest';
 import { DesignerGuideDialog } from './components/DesignerGuide';
 import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
@@ -1393,8 +1394,9 @@ const App: React.FC = () => {
   // --- Render ---
   const steps = ['Size/Shape', 'Material', 'Colour', 'Fixings and border', 'Wood', 'Text', 'Proof'];
   const stepShortLabels = ['Size', 'Material', 'Colour', 'Fixings', 'Backing', 'Wording', 'Review'];
-  const stepTitles = ['Choose your size', 'Find your finish', 'Make it stand out', 'The finishing touches', 'Add a wood backing', 'Words that matter', 'Your final review'];
-  const stepDescriptions = ['A little dedication or a larger tribute. Find the right fit.', 'Explore brass and stainless steel finishes.', 'Choose the colour of your engraved wording.', 'Choose a border and how your plaque will be mounted.', 'An optional frame for your words.', 'Type your words. Our AI designer does the rest.', 'Check every detail before placing your order.'];
+  // The wording step's title repeats the plaque's guide text, so the AI layout is the first thing said (owner msg 6902).
+  const stepTitles = ['Choose your size', 'Find your finish', 'Make it stand out', 'The finishing touches', 'Add a wood backing', 'Just type your words', 'Your final review'];
+  const stepDescriptions = ['A little dedication or a larger tribute. Find the right fit.', 'Explore brass and stainless steel finishes.', 'Choose the colour of your engraved wording.', 'Choose a border and how your plaque will be mounted.', 'An optional frame for your words.', 'Names, dates, a favourite line: anything you like.', 'Check every detail before placing your order.'];
   const canGoBack = activeStep > 0;
   const canGoNext = activeStep < steps.length - 1;
   const showMaterialPrices = hasSelectedSize && selectedProduct.slug !== 'custom-plaques';
@@ -1578,7 +1580,13 @@ const App: React.FC = () => {
               <div className="proofbench-customiser-head">
                 <p className="designer-eyebrow">Make it yours <span>Step {activeStep + 1} of 7</span></p>
                 <h2>{stepTitles[activeStep]}</h2>
-                <p>{stepDescriptions[activeStep]}</p>
+                <p className="designer-step-description">{stepDescriptions[activeStep]}</p>
+                {/* A quiet way out on every design step: we can do the whole design over WhatsApp (owner msg 6902). */}
+                {activeStep < steps.length - 1 && (
+                  <ContactLink channel="whatsapp" placement="designer" className="designer-whatsapp-line">
+                    <WhatsAppIcon /><span>Or we can design it all for you on WhatsApp</span>
+                  </ContactLink>
+                )}
               </div>
               <div className="proofbench-control-scroll" ref={controlsScrollRef}>
                 <Controls

@@ -79,7 +79,7 @@ try {
   page.on('dialog', dialog => dialog.accept());
   await page.goto(`${base}/bench-plaques`);
   await page.getByRole('link', { name: 'Design bench plaque', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Words that matter' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Just type your words' })).toBeVisible();
   await expect(page.locator('.designer-price strong')).toHaveText('£58.50');
   const wording = 'In loving memory of\nÉlodie O’Neill\n1948–2026\nAlways in our hearts';
   await page.locator('#inscription-wording-input').fill(wording);

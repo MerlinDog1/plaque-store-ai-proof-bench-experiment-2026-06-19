@@ -40,6 +40,24 @@ on Cody's VPS, scripts `designer_journeys.py` and `recording_taps.py`):
 - **Review checklist.** "Finish these steps before checkout" items are solid dark buttons ("Design your plaque layout →",
   "Update your layout →") instead of pale text a visitor tapped around.
 
+## Follow-up: the plaque's words in the panel, and WhatsApp (owner msg 6902)
+
+The owner, with a phone screenshot of the candidate and an arrow from the plaque's guide text to the "Words that matter"
+heading: "Use this text to reinforce message of its AI auto layout. Lowkey also what a thing on designer to say hey we can
+do all this on what's app for you".
+
+- **The panel repeats the plaque.** The wording step's title is now "Just type your words" (was "Words that matter"); the
+  box under it reads "No layout needed" and "Our AI designer lays them out for you. Type or paste them any way you like,
+  and your finished plaque appears in about 30–60 seconds." On computers the line under the title reads "Names, dates, a
+  favourite line: anything you like." (phones hide that line, as before).
+- **A quiet WhatsApp offer on every design step** (not on Review): "Or we can design it all for you on WhatsApp", a small
+  underlined line with the WhatsApp glyph under the step title. It is the site's own `ContactLink` (placement
+  `designer`), so it gets a contact ref, opens the QR window on computers, and is counted like the other WhatsApp
+  buttons; `services/posthogAnalytics.ts` now accepts the `designer` placement. The message it opens is the site's usual
+  "Hi InstaPlaque, I'm interested in a plaque (ref …)".
+- The phone-only rule that hides the step description now targets `.designer-step-description` instead of
+  `p:last-child`, so the new line after it stays visible.
+
 ## Checks
 
 - `tsc --noEmit -p tsconfig.check.json` passes (14 s). `tsconfig.check.json` is the normal config without `dist/`,
@@ -50,6 +68,9 @@ on Cody's VPS, scripts `designer_journeys.py` and `recording_taps.py`):
   footer button is on screen and makes the layout; the percentage is on top of the plaque and inside the preview;
   24 % during the spelling check, 85 % in layout, never backwards, retry and edit restart; no extra request while
   waiting; reduced motion; failure keeps the previous proof; no horizontal overflow; no page errors.
+- The follow-up adds to `check-layout-progress.mjs`: the new title and box text, the WhatsApp line's text, placement,
+  wa.me link and position on screen at both widths, present on Size and absent on Review. `check-posthog-analytics.cjs`
+  and `check-session-replay.cjs` pass.
 - `scripts/check-generation-timeout-ui.mjs` passes all 8 cases (2 widths × slow success, server deadline, platform
   timeout, browser deadline).
 - Other scripts that pressed "Generate layout" now press the first "Design my plaque" button.
