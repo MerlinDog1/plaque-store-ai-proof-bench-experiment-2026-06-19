@@ -91,6 +91,10 @@ do all this on what's app for you".
   arrived after 19 s as four lines (lead-in, name, dates, closing line); the footer then read "Continue to review".
   Visits to *.vercel.app are not tracked. The test sent the CLI's protection-bypass header to the candidate only and
   never printed it.
-- **Next:** promote only on the owner's go-ahead (`vercel promote https://instaplaque-3o0j9j905-dullaghan31-3959s-projects.vercel.app --yes`,
+- **Candidate with the follow-up (msg 6902), the one to promote:**
+  https://instaplaque-b8vdvugof-dullaghan31-3959s-projects.vercel.app (dpl_F6osRRkzwag6cRMa3FooGwL1r9XQ), commit a508cad.
+  Vercel's build and postbuild checks passed; both domains still on dpl_47YaX9pv. Phone screenshots on it: the wording
+  and Size steps show the new title and the WhatsApp line (wa.me/447464843841, placement `designer`); no page errors.
+- **Next:** promote only on the owner's go-ahead (`vercel promote https://instaplaque-b8vdvugof-dullaghan31-3959s-projects.vercel.app --yes`,
   with `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` set), then check both domains. Rollback: promote dpl_47YaX9pvMhg1h5qtCKHumLdMLaiT
   (instaplaque-ovr62c0y3).
