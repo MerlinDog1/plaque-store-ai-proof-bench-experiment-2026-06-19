@@ -64,8 +64,8 @@ fs.mkdirSync(out,{recursive:true});
  await page.goto(base+'/design?proof=layout-quality-'+c.id);
  await page.getByRole('button',{name:'Go to Text',exact:true}).click();
  await page.waitForFunction(text=>document.querySelector('#inscription-wording-input')?.value===text,c.text);
- if(!replay){await page.getByRole('button',{name:'Generate layout',exact:true}).click();
- await page.waitForFunction(()=>!document.querySelector('#inscription-wording-input')?.disabled && [...document.querySelectorAll('button')].some(b=>b.textContent==='Regenerate' || b.textContent==='Generate layout'),{}, {timeout:180000});}
+ if(!replay){await page.getByRole('button',{name:'Design my plaque',exact:true}).first().click();
+ await page.waitForFunction(()=>!document.querySelector('#inscription-wording-input')?.disabled && [...document.querySelectorAll('button')].some(b=>b.textContent==='Regenerate' || b.textContent==='Design my plaque'),{}, {timeout:180000});}
  await page.evaluate(()=>document.fonts.ready);await page.waitForTimeout(1100);
  record.svg=await page.locator('#ai-text-layer').innerHTML();
  record.measurements=await page.locator('#ai-text-layer').evaluate(el=>{

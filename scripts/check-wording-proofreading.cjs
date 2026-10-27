@@ -22,7 +22,7 @@ const assert=require('node:assert/strict');
    await page.getByRole('button',{name:/A4 landscape/}).click();
    await page.getByRole('button',{name:'Go to Text',exact:true}).click();
    await page.locator('#inscription-wording-input').fill('forevr remebered\n2026');
-   await page.getByRole('button',{name:'Generate layout',exact:true}).click();
+   await page.getByRole('button',{name:'Design my plaque',exact:true}).first().click();
    if(mode==='stale'){await waiting;await page.locator('#inscription-wording-input').fill('My new wording');}
    if(mode==='success'){
     await page.getByRole('button',{name:'Go to Text',exact:true}).click();

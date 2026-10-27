@@ -28,6 +28,7 @@ import { isBenchPlaqueFormat } from '../services/plaqueRules';
 import { GROUND_STAKE_LENGTH, GROUND_STAKE_PRICE, estimatePlaqueBasePrice, estimateWoodAddOn, hasGroundStake } from '../services/pricing';
 import { isOnePoundTestPlaque } from '../services/onePoundTestPlaque.mjs';
 import { OwnerTestCheckout } from './OwnerTestCheckout';
+import { SparkleIcon } from './SparkleIcon';
 
 const MATERIAL_LABELS: Record<Material, string> = {
   [Material.BrushedBrass]: 'Brushed brass',
@@ -177,7 +178,7 @@ const STEP_COPY = [
   {
     eyebrow: 'Step 6 of 7',
     title: 'Text',
-    detail: 'Enter the tribute text and choose a style. The layout assistant fits it to the available space.',
+    detail: 'Type or paste your words. Our AI designer lays them out to fit the plaque.',
   },
   {
     eyebrow: 'Step 7 of 7',
@@ -204,6 +205,8 @@ interface Props {
   onGeneratedSvgContentChange: (svgContent: string, style?: DesignStyle) => boolean;
   isGenerating: boolean;
   generationPhase: GenerationPhase;
+  /** Estimated progress of the layout being made, 0–100 (LayoutProgress.tsx). */
+  layoutPercent?: number;
   onMemorialImageUpload: (file: File) => void;
   onStyleReferenceUpload: (file: File) => void;
   onGenerateMemorialImage: () => void;
@@ -449,6 +452,7 @@ export const Controls: React.FC<Props> = ({
   onGeneratedSvgContentChange,
   isGenerating,
   generationPhase,
+  layoutPercent = 0,
   onMemorialImageUpload,
   onStyleReferenceUpload,
   onGenerateMemorialImage,
@@ -1882,10 +1886,10 @@ export const Controls: React.FC<Props> = ({
               </div>
               <div className="min-w-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f2d688]">
-                  Your inscription
+                  Just type your words
                 </p>
                 <p className="mt-2 text-xs leading-5 text-[#aab8b0]">
-                  Type your wording exactly as it should appear. We’ll arrange the layout for you.
+                  Type or paste them any way you like. No need to set out the lines: our AI designer arranges them for you and shows your finished plaque in about 30–60 seconds.
                 </p>
               </div>
             </div>
@@ -1907,7 +1911,7 @@ export const Controls: React.FC<Props> = ({
                 }}
                 spellCheck
                 aria-describedby="inscription-proofreading-note"
-                placeholder="Type the words you want on the plaque..."
+                placeholder="For example: In loving memory of Margaret Wilson 1942 – 2024 Always in our hearts"
                 className={`${fieldClass} mt-1 min-h-[150px] max-h-[300px] resize-none overflow-auto normal-case leading-6 tracking-normal`}
               />
             </div>
@@ -1915,24 +1919,19 @@ export const Controls: React.FC<Props> = ({
 
           {!isIterating && (
           <div className="grid gap-2">
-            <p id="inscription-proofreading-note" className="text-xs leading-5 text-[#6a746d]">We check spelling and capitalisation when you generate. Review the corrected wording, especially names and dates, before ordering.</p>
+            <p id="inscription-proofreading-note" className="text-xs leading-5 text-[#6a746d]">We fix obvious typos and stray capitals only. Please check names and dates on the finished plaque.</p>
             <button
               onClick={() => {
                 setManualTextOpen(false);
                 submitPrompt();
               }}
               disabled={isGenerating || !prompt.trim()}
-              className="min-h-[52px] rounded-lg bg-[#f2d688] px-4 py-3 text-sm font-black text-[#1b231f] transition disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="design-layout-button"
+              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-lg bg-[#f2d688] px-4 py-3 text-sm font-black text-[#1b231f] transition disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isGenerating
-                ? generationPhase === 'concept'
-                  ? 'Preparing wording...'
-                  : generationPhase === 'transcribe'
-                    ? 'Fitting your layout...'
-                    : 'Working...'
-                : isIterating
-                  ? 'Regenerate'
-                  : 'Generate layout'}
+                ? `Designing… ${layoutPercent}%`
+                : <><SparkleIcon />Design my plaque</>}
             </button>
           </div>
           )}
@@ -2120,7 +2119,7 @@ export const Controls: React.FC<Props> = ({
                   <li key={item.label}>
                     <button
                       onClick={() => onGoToStep(item.step)}
-                      className="w-full rounded-lg border border-[#c6932e]/45 bg-[#efe4d1] px-3 py-2 text-left text-xs font-black text-[#e8c875] transition hover:bg-[#fffaf0]"
+                      className="designer-checklist-action w-full rounded-lg px-3 py-2 text-left text-xs font-black transition"
                     >
                       {item.label} <span aria-hidden="true">→</span>
                     </button>

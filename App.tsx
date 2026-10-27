@@ -4,7 +4,8 @@ import { trackMetaCheckout } from './services/metaPixel';
 import { OPTIONAL_AD_CONSENT_CHANGED } from './services/metaPixel';
 import { trackSiteEvent, trackSitePage } from './services/posthogAnalytics';
 import { publicRouteWithGoogleClick } from './services/googleClickNavigation';
-import { LayoutProgress } from './components/LayoutProgress';
+import { LayoutProgressOverlay, useLayoutProgress } from './components/LayoutProgress';
+import { SparkleIcon } from './components/SparkleIcon';
 import { DesignRequest } from './components/DesignRequest';
 import { DesignerGuideDialog } from './components/DesignerGuide';
 import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
@@ -261,6 +262,7 @@ const App: React.FC = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [realisticReferenceImage, setRealisticReferenceImage] = useState<string | null>(null);
   const [generationPhase, setGenerationPhase] = useState<GenerationPhase>(null);
+  const layoutProgress = useLayoutProgress(isGeneratingLayout, generationPhase);
   const [isProofExpanded, setIsProofExpanded] = useState(false);
   const [memorialSourceImage, setMemorialSourceImage] = useState<string | null>(null);
   const [showLayoutRegenToast, setShowLayoutRegenToast] = useState(false);
@@ -960,7 +962,7 @@ const App: React.FC = () => {
   const readinessWarnings = React.useMemo(() => {
     const warnings: string[] = [];
     if (!state.generatedSvgContent) {
-      warnings.push('Generate your inscription layout. The preview is still showing guide text.');
+      warnings.push('Design your plaque layout. The preview is still showing guide text.');
     }
     if (state.generatedSvgContent && !hasCurrentLayout) {
       warnings.push('Your wording or layout options have changed. Generate a fresh proof before ordering.');
@@ -1007,10 +1009,10 @@ const App: React.FC = () => {
   const readinessItems = [
     {
       label: hasCurrentLayout
-        ? 'Inscription layout is generated'
+        ? 'Your layout is ready'
         : state.generatedSvgContent
-          ? 'Regenerate your inscription layout'
-          : 'Generate your inscription layout',
+          ? 'Update your layout'
+          : 'Design your plaque layout',
       ready: hasCurrentLayout,
       step: 5,
     },
@@ -1392,13 +1394,33 @@ const App: React.FC = () => {
   const steps = ['Size/Shape', 'Material', 'Colour', 'Fixings and border', 'Wood', 'Text', 'Proof'];
   const stepShortLabels = ['Size', 'Material', 'Colour', 'Fixings', 'Backing', 'Wording', 'Review'];
   const stepTitles = ['Choose your size', 'Find your finish', 'Make it stand out', 'The finishing touches', 'Add a wood backing', 'Words that matter', 'Your final review'];
-  const stepDescriptions = ['A little dedication or a larger tribute. Find the right fit.', 'Explore brass and stainless steel finishes.', 'Choose the colour of your engraved wording.', 'Choose a border and how your plaque will be mounted.', 'An optional frame for your words.', 'Add your inscription, then create a layout.', 'Check every detail before placing your order.'];
+  const stepDescriptions = ['A little dedication or a larger tribute. Find the right fit.', 'Explore brass and stainless steel finishes.', 'Choose the colour of your engraved wording.', 'Choose a border and how your plaque will be mounted.', 'An optional frame for your words.', 'Type your words. Our AI designer does the rest.', 'Check every detail before placing your order.'];
   const canGoBack = activeStep > 0;
   const canGoNext = activeStep < steps.length - 1;
   const showMaterialPrices = hasSelectedSize && selectedProduct.slug !== 'custom-plaques';
 
   const goBack = () => setActiveStep(step => Math.max(0, step - 1));
   const goNext = () => setActiveStep(step => Math.min(steps.length - 1, step + 1));
+  // On the wording step the main button makes the layout until there is a current one (owner msg 6884): on a phone
+  // it is the only button in view, and "Continue" used to skip the layout altogether.
+  const wordingStepAction = activeStep === 5 && !hasCurrentLayout
+    ? isGeneratingLayout
+      ? { label: `Designing… ${layoutProgress.percent}%`, disabled: true, onClick: () => undefined }
+      : {
+        label: state.generatedSvgContent ? 'Update my layout' : 'Design my plaque',
+        disabled: false,
+        onClick: () => {
+          const wording = inscriptionPrompt.trim();
+          if (wording) {
+            void handleGenerateLayout(wording);
+            return;
+          }
+          const input = document.getElementById('inscription-wording-input');
+          input?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          input?.focus();
+        },
+      }
+    : null;
   const goToProof = () => {
     setCurrentView('plaque');
     setActiveStep(steps.length - 1);
@@ -1577,6 +1599,7 @@ const App: React.FC = () => {
                   onGeneratedSvgContentChange={handleGeneratedSvgContentChange}
                   isGenerating={isGeneratingLayout}
                   generationPhase={generationPhase}
+                  layoutPercent={layoutProgress.percent}
                   onMemorialImageUpload={handleMemorialImageUpload}
                   onStyleReferenceUpload={handleStyleReferenceUpload}
                   onGenerateMemorialImage={handleGenerateMemorialImage}
@@ -1607,7 +1630,11 @@ const App: React.FC = () => {
               </div>
               <div className="designer-step-footer">
                 <button type="button" onClick={goBack} disabled={!canGoBack} className="designer-back">← Back</button>
-                {canGoNext ? (
+                {wordingStepAction ? (
+                  <button type="button" onClick={wordingStepAction.onClick} disabled={wordingStepAction.disabled} className="designer-continue designer-continue--design" data-testid="designer-footer-action">
+                    {!wordingStepAction.disabled && <SparkleIcon />}{wordingStepAction.label}
+                  </button>
+                ) : canGoNext ? (
                   <button type="button" onClick={goNext} className="designer-continue">Continue to {stepShortLabels[activeStep + 1].toLowerCase()} <span aria-hidden="true">→</span></button>
                 ) : <span className="designer-review-note">Made to your design</span>}
               </div>
@@ -1623,6 +1650,7 @@ const App: React.FC = () => {
                 <div className="proofbench-svg-preview">
                   <PlaquePreview ref={svgRef} state={state} activeStep={activeStep} inscription={inscriptionPrompt} />
                 </div>
+                {isGeneratingLayout && <LayoutProgressOverlay progress={layoutProgress} />}
                 {isProofExpanded && (
                   <Suspense
                     fallback={(
@@ -1661,7 +1689,6 @@ const App: React.FC = () => {
       {currentView === 'plaque' && <DesignerGuideDialog isOpen={isDesignerGuideOpen} onClose={() => setIsDesignerGuideOpen(false)} />}
       {currentView !== 'admin' && <MetaConsent />}
 
-      {isGeneratingLayout && <LayoutProgress phase={generationPhase} />}
       <div className="no-print">
         <RealisticPreviewModal
           isOpen={modalOpen}

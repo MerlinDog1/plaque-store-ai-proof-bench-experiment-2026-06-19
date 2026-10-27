@@ -35,16 +35,16 @@ try {
         await page.getByRole('button', { name: /A4 landscape/ }).click();
         await page.getByRole('button', { name: 'Go to Text', exact: true }).click();
         await page.locator('#inscription-wording-input').fill(wording);
-        await page.getByRole('button', { name: 'Generate layout', exact: true }).click();
+        await page.getByRole('button', { name: 'Design my plaque', exact: true }).first().click();
         const card = page.getByTestId('layout-progress');
         if (mode === 'slow-success' || mode === 'browser-deadline') {
           await card.waitFor();
           await expectPending();
-          await page.clock.fastForward(mode === 'browser-deadline' ? TEXT_PROXY_TIMEOUT_MS + 1000 : 35_000);
+          await page.clock.fastForward(mode === 'browser-deadline' ? TEXT_PROXY_TIMEOUT_MS + 1000 : 46_000);
         }
         if (mode === 'slow-success') {
           assert.equal(calls, 2, 'One proofread + one layout, no duplicate while waiting');
-          await page.getByText(/Still working\. Some layouts take longer/).waitFor();
+          await page.getByText(/Still working\. Some layouts take a little longer/).waitFor();
           const prompt = pending.request().postDataJSON().contents;
           const root = prompt.match(/<svg xmlns="http:\/\/www.w3.org\/2000\/svg" width="[^"]+" height="[^"]+" viewBox="[^"]+">/)[0];
           await pending.fulfill({ json: { text: JSON.stringify({
@@ -61,7 +61,7 @@ try {
           await page.clock.fastForward(60_000);
           assert.equal(calls, 1, 'No automatic repeat after a timeout');
           assert.equal(await page.locator('#inscription-wording-input').inputValue(), wording);
-          assert.equal(await page.getByRole('button', { name: 'Generate layout', exact: true }).isEnabled(), true, 'Manual retry remains available');
+          assert.equal(await page.getByRole('button', { name: 'Design my plaque', exact: true }).first().isEnabled(), true, 'Manual retry remains available');
         }
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
         assert.deepEqual(errors, []);

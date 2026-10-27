@@ -1191,19 +1191,69 @@
   }
 }
 
-/* Visible beside the action on desktop and above the mobile navigation. */
-.layout-progress-card {
-  position: fixed; z-index: 90; right: 20px; bottom: 24px;
-  width: min(420px, calc(100vw - 32px)); padding: 16px;
+/* The AI designer's progress, shown over the plaque itself (owner msg 6884). */
+.layout-progress-overlay {
+  /* Above the preview viewport (z-index 10), inside the stage. */
+  position: absolute; inset: 0; z-index: 20;
+  display: grid; place-items: center;
+  padding: 8px; overflow: hidden;
+  background: rgb(249 249 244 / 0.55);
+  backdrop-filter: blur(1.5px);
+}
+.layout-progress-sheen {
+  position: absolute; inset: -20% -60%;
+  background: linear-gradient(100deg, transparent 35%, rgb(255 255 255 / 0.6) 50%, transparent 65%);
+  animation: layout-progress-sheen 2.4s ease-in-out infinite;
+}
+@keyframes layout-progress-sheen { from { transform: translateX(-45%); } to { transform: translateX(45%); } }
+.layout-progress-badge {
+  position: relative;
+  width: min(340px, 100%);
+  padding: 14px 16px 12px;
   border: 1px solid #d7b66a; border-radius: 14px;
   background: #15271f; color: #fff9e9;
-  box-shadow: 0 8px 32px #0004;
+  box-shadow: 0 10px 30px #0003;
 }
-.layout-progress-heading { display: flex; align-items: flex-start; gap: 12px; }
-.layout-progress-heading strong { display: block; font-size: 15px; line-height: 1.4; }
-.layout-progress-heading p { margin: 5px 0 0; font-size: 13px; line-height: 1.5; color: #e1e9e3; }
-.layout-progress-spinner { flex: none; width: 22px; height: 22px; margin-top: 2px; border: 3px solid #ffffff35; border-top-color: #f2d688; border-radius: 50%; animation: layout-progress-spin 1s linear infinite; }
-.layout-progress-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 5px 12px; margin-top: 12px; font-size: 12px; line-height: 1.4; color: #e1e9e3; }
-@keyframes layout-progress-spin { to { transform: rotate(360deg); } }
-@media (max-width: 767px) { .layout-progress-card { right: 16px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); } }
-@media (prefers-reduced-motion: reduce) { .layout-progress-spinner { animation: none; } }
+.layout-progress-top { display: flex; align-items: center; gap: 12px; }
+.layout-progress-percent {
+  flex: none; min-width: 3.1ch;
+  font: 600 30px/1 Georgia, "Times New Roman", serif;
+  font-variant-numeric: tabular-nums; color: #f2d688;
+}
+.layout-progress-words strong { display: block; font-size: 14px; line-height: 1.3; }
+.layout-progress-words p { margin: 3px 0 0; font-size: 12px; line-height: 1.4; color: #e1e9e3; }
+.layout-progress-bar { height: 6px; margin-top: 10px; border-radius: 6px; background: #ffffff24; overflow: hidden; }
+.layout-progress-bar span {
+  display: block; height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, #d7b66a, #f2d688);
+  transition: width 0.25s linear;
+}
+.layout-progress-badge small { display: block; margin-top: 8px; font-size: 11px; line-height: 1.4; color: #cfd9d2; }
+@media (max-width: 767px) {
+  .layout-progress-overlay { padding: 2px; }
+  .layout-progress-badge { padding: 10px 12px; border-radius: 12px; }
+  .layout-progress-percent { font-size: 24px; }
+  .layout-progress-words strong { font-size: 13px; }
+  .layout-progress-words p { font-size: 11px; }
+  .layout-progress-bar { margin-top: 8px; }
+  .layout-progress-badge small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .layout-progress-sheen { display: none; animation: none; }
+  .layout-progress-bar span { transition: none; }
+}
+
+/* The wording step's main button makes the layout until there is one (owner msg 6884). */
+.designer-continue.designer-continue--design { gap: 8px; }
+.designer-continue:disabled { cursor: progress; opacity: 0.85; }
+.designer-sparkle { flex: none; width: 16px; height: 16px; }
+.designer-continue--design .designer-sparkle { color: #f2d688; }
+
+/* "Finish these steps before checkout": each step is a real button. */
+.designer-mode .controls-instrument button.designer-checklist-action {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: 44px;
+  border: 1px solid #243d33; background: #243d33; color: #fffdf5;
+  font-size: 13px;
+}
+.designer-mode .controls-instrument button.designer-checklist-action:hover { background: #355845; }

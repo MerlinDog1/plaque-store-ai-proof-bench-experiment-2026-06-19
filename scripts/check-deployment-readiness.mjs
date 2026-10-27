@@ -83,7 +83,7 @@ try {
   await expect(page.locator('.designer-price strong')).toHaveText('£58.50');
   const wording = 'In loving memory of\nÉlodie O’Neill\n1948–2026\nAlways in our hearts';
   await page.locator('#inscription-wording-input').fill(wording);
-  await page.getByRole('button', { name: 'Generate layout', exact: true }).click();
+  await page.getByRole('button', { name: 'Design my plaque', exact: true }).first().click();
   await expect(page.locator('#ai-text-layer text')).toHaveCount(4);
   await page.getByRole('button', { name: 'Tweak manually', exact: true }).click();
   await page.getByRole('button', { name: 'Toggle bold for Élodie O’Neill', exact: true }).click();
@@ -126,7 +126,7 @@ try {
   await page.getByRole('button', { name: 'Go to Text', exact: true }).click();
   await page.locator('#inscription-wording-input').fill(wording.replace('Always', 'Forever'));
   await page.getByRole('button', { name: 'Go to Proof', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Regenerate your inscription layout', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Update your layout', exact: true })).toBeVisible();
   await expect(checkout).toBeDisabled();
   const staleUrl = await downloadProof('draft-mobile');
   assert.equal(savedProof.metadata.layoutIsCurrent, false);
@@ -135,7 +135,7 @@ try {
   await reopenedDraft.goto(staleUrl);
   await expect(reopenedDraft.locator('#inscription-wording-input')).toHaveValue(wording.replace('Always', 'Forever'));
   await reopenedDraft.getByRole('button', { name: 'Go to Proof', exact: true }).click();
-  await expect(reopenedDraft.getByRole('button', { name: 'Regenerate your inscription layout', exact: true })).toBeVisible();
+  await expect(reopenedDraft.getByRole('button', { name: 'Update your layout', exact: true })).toBeVisible();
   await expect(reopenedDraft.getByRole('button', { name: 'Continue to secure checkout', exact: true })).toBeDisabled();
   assert(await reopenedDraft.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Mobile designer must not overflow.');
   await reopenedDraft.screenshot({ path: `${output}/mobile-review.png` });

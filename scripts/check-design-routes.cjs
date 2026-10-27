@@ -18,7 +18,7 @@ const fs = require('node:fs/promises');
    assert.equal(await page.getByText('How would you like to design?',{exact:true}).count(),0);
    assert.equal(await page.locator('#design-brief').count(),0);
    await page.locator('#inscription-wording-input').fill('THE OLD MILL\nRESTORED 2026');
-   await page.getByRole('button',{name:'Generate layout',exact:true}).click();
+   await page.getByRole('button',{name:'Design my plaque',exact:true}).first().click();
    while(!pending) await page.waitForTimeout(20);
    const initialRoot=String(pending.request().postDataJSON().contents).match(/<svg xmlns="http:\/\/www.w3.org\/2000\/svg" width="[^"]+" height="[^"]+" viewBox="[^"]+">/)[0];
    const initialSvg=initialRoot+'<text x="0" y="-10" text-anchor="middle" font-family="Lato" font-size="18" fill="currentColor">THE OLD MILL</text><text x="0" y="20" text-anchor="middle" font-family="Lato" font-size="14" fill="currentColor">RESTORED 2026</text></svg>';

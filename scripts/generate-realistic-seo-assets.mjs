@@ -266,7 +266,7 @@ const generateAsset = async (browser, config, asset) => {
     await selectMaterial(page, material);
     await clickStep(page, 'Text');
     await page.locator('#inscription-wording-input').fill(wording);
-    await page.getByRole('button', { name: /^Generate layout$/i }).click();
+    await page.getByRole('button', { name: /^Design my plaque$/i }).first().click();
     await page.getByText('Choose a look').waitFor({ timeout: 220000 });
     await clickStep(page, 'Proof');
     await page.getByRole('button', { name: /Admin tools/i }).click();

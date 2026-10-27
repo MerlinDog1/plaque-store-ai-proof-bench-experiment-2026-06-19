@@ -1,5 +1,18 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Designer wording step: CANDIDATE, not live — 27 October 2026
+
+- **Why:** the owner (msg 6884): the Generate button is hidden on a phone, the step doesn't say "just paste your words
+  and the AI does the rest", and asked for a percentage on the plaque while it works. Not the built-in layout.
+- **Branch:** `codex/instaplaque-designer-wording-20261027`, based on this live branch (deb50df). Base new work on it
+  only if it goes live; until then keep basing on `codex/instaplaque-google-customer-reviews-20261026`.
+- **What changed:** the wording step's footer button is "Design my plaque" until there is a current layout; plain
+  "just type your words" copy; an estimated percentage over the plaque by real stage; solid buttons in the review
+  checklist. Details, claims and checks: `docs/designer-wording-step-2026-10-27.md`.
+- **Checks:** scoped `tsc` (`tsconfig.check.json`), `npm run build` with postbuild checks, `check-layout-progress.mjs`
+  (rewritten) and `check-generation-timeout-ui.mjs` pass.
+- **Live:** unchanged (dpl_47YaX9pv). Promote the candidate only when the owner says so.
+
 ## Google Customer Reviews opt-in: LIVE — 26 October 2026, 16:32 UTC
 
 - **Why:** the owner (msg 6658): "Collect reviews after each delivery, through Google Customer Reviews - can you set

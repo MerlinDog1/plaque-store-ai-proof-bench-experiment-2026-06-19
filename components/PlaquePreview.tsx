@@ -600,17 +600,19 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
     </g>
   `;
   const wordsTypography = WORDS_DRAFT_TYPOGRAPHY[state.designStyle];
+  // Guide text on the wording step: what to do now, and that the AI designer does the layout (owner msg 6884).
+  const hasWords = !!inscription?.trim();
   const wordsPromptContent = `
     <g>
       <text y="-42" text-anchor="middle" font-family="${wordsTypography.titleFont}" font-weight="${wordsTypography.titleWeight}" font-size="19" letter-spacing="${wordsTypography.titleSpacing}" fill="#2b1d0e">
-        <tspan x="0" dy="0">CHOOSE YOUR</tspan>
-        <tspan x="0" dy="23">TEXT AND LAYOUT</tspan>
+        <tspan x="0" dy="0">${hasWords ? 'YOUR WORDS' : 'JUST TYPE'}</tspan>
+        <tspan x="0" dy="23">${hasWords ? 'ARE READY' : 'YOUR WORDS'}</tspan>
       </text>
       <path d="M -66 -8 L 66 -8" stroke="#2b1d0e" stroke-width="0.5" opacity="0.4"/>
-      <text y="13" text-anchor="middle" font-family="${wordsTypography.titleFont}" font-weight="${wordsTypography.titleWeight}" font-size="13" letter-spacing="${wordsTypography.titleSpacing}" fill="#2b1d0e">ENTER YOUR TEXT</text>
+      <text y="13" text-anchor="middle" font-family="${wordsTypography.titleFont}" font-weight="${wordsTypography.titleWeight}" font-size="${hasWords ? 11 : 13}" letter-spacing="${wordsTypography.titleSpacing}" fill="#2b1d0e">${hasWords ? 'PRESS DESIGN MY PLAQUE' : 'NO LAYOUT NEEDED'}</text>
       <text y="35" text-anchor="middle" font-family="${wordsTypography.bodyFont}" font-weight="700" font-size="8.5" letter-spacing="${wordsTypography.bodySpacing}" fill="#4a3c2a">
-        <tspan x="0" dy="0">OUR LAYOUT ASSISTANT</tspan>
-        <tspan x="0" dy="13">WILL TAKE CARE OF THE REST</tspan>
+        <tspan x="0" dy="0">OUR AI DESIGNER WILL</tspan>
+        <tspan x="0" dy="13">LAY THEM OUT FOR YOU</tspan>
       </text>
     </g>
   `;

@@ -48,7 +48,7 @@ const generated='<text x="0" y="-24" text-anchor="middle" font-family="EB Garamo
  await page.goto(base+'/design?proof=overloaded-test');
  await page.getByRole('button',{name:'Go to Text',exact:true}).click();
  await page.waitForFunction(text=>document.querySelector('#inscription-wording-input')?.value===text,text);
- await page.getByRole('button',{name:'Generate layout',exact:true}).click();
+ await page.getByRole('button',{name:'Design my plaque',exact:true}).first().click();
  await page.getByRole('status').filter({hasText:'We could not fit this wording'}).waitFor();
  assert.equal(await page.locator('#inscription-wording-input').inputValue(),text);
  assert.equal(await page.getByRole('button',{name:'Tweak manually',exact:true}).count(),0);

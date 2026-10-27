@@ -12,7 +12,7 @@ const fs=require('node:fs');
  await page.getByRole('button',{name:/150 x 50 mm/}).click();
  await page.getByRole('button',{name:'Go to Text',exact:true}).click();
  await page.locator('#inscription-wording-input').fill('IN CHERISHED MEMORY OF\nPETER JOHN WILSON\n1939–2021');
- await page.getByRole('button',{name:'Generate layout',exact:true}).click();
+ await page.getByRole('button',{name:'Design my plaque',exact:true}).first().click();
  await page.getByRole('button',{name:'Tweak manually',exact:true}).waitFor();
  const generationCalls=modelCalls;
  await page.getByRole('button',{name:/^Go to Fix/ }).click();
