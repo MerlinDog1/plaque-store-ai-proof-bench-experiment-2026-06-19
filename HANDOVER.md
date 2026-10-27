@@ -11,6 +11,7 @@
   checklist. Details, claims and checks: `docs/designer-wording-step-2026-10-27.md`.
 - **Checks:** scoped `tsc` (`tsconfig.check.json`), `npm run build` with postbuild checks, `check-layout-progress.mjs`
   (rewritten) and `check-generation-timeout-ui.mjs` pass.
+- **Candidate:** instaplaque-3o0j9j905 (dpl_pXQ7J7nqSwy46vbDMEXtMNwFoVfR); a real AI layout on it passed at phone size.
 - **Live:** unchanged (dpl_47YaX9pv). Promote the candidate only when the owner says so.
 
 ## Google Customer Reviews opt-in: LIVE — 26 October 2026, 16:32 UTC

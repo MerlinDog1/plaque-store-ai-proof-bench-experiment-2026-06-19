@@ -60,5 +60,16 @@ on Cody's VPS, scripts `designer_journeys.py` and `recording_taps.py`):
 
 - Branch `codex/instaplaque-designer-wording-20261027`, based on `codex/instaplaque-google-customer-reviews-20261026`
   (deb50df, live as dpl_47YaX9pv).
-- Not live. A candidate link for the owner to try comes from `vercel deploy --prod --skip-domain`; promote only on the
-  owner's go-ahead. Rollback after a promotion: promote dpl_47YaX9pvMhg1h5qtCKHumLdMLaiT (instaplaque-ovr62c0y3).
+- **Candidate (not live):** built on Vercel with `vercel deploy --prod --skip-domain`:
+  https://instaplaque-3o0j9j905-dullaghan31-3959s-projects.vercel.app (dpl_pXQ7J7nqSwy46vbDMEXtMNwFoVfR). Vercel's
+  build and every postbuild check passed. It opens for someone signed in to Vercel. instaplaque.co.uk and www still
+  point to dpl_47YaX9pv (checked with `vercel inspect`); only the project's own `instaplaque-…-projects.vercel.app`
+  alias moved to the candidate, as with earlier candidates.
+- **Real run on the candidate** at 390 px, one genuine AI layout: the one-line wording "In loving memory of Margaret
+  Wilson 1942 – 2024 Always in our hearts" showed 5 % "Checking your spelling", 36 % "Designing your layout", and
+  arrived after 19 s as four lines (lead-in, name, dates, closing line); the footer then read "Continue to review".
+  Visits to *.vercel.app are not tracked. The test sent the CLI's protection-bypass header to the candidate only and
+  never printed it.
+- **Next:** promote only on the owner's go-ahead (`vercel promote https://instaplaque-3o0j9j905-dullaghan31-3959s-projects.vercel.app --yes`,
+  with `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` set), then check both domains. Rollback: promote dpl_47YaX9pvMhg1h5qtCKHumLdMLaiT
+  (instaplaque-ovr62c0y3).
