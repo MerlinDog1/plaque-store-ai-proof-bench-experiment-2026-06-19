@@ -55,3 +55,24 @@
   - Reduced motion: poster, no autoplay, and the play button works.
   - Computers (`/`, `/brass-plaques`): the film is 400 px wide beside its copy, with no overflow.
 - Screenshots at 390 and 1440 px are in `output/promo-video-section/` (not committed).
+
+## Release
+
+- **Candidate:** built on Vercel with `vercel deploy --prod --skip-domain` from commit de1477f:
+  https://instaplaque-j69fq1m7u-dullaghan31-3959s-projects.vercel.app (dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy,
+  `index-eAQF_wEa.js`). Vercel's build and every postbuild check passed. Through `vercel curl` (protection bypass sent to
+  the candidate only, never printed): `/` and `/memorial-plaques` had the section, the tree page didn't, and the film was
+  byte-identical to the repository, `video/mp4`, `public, max-age=31536000, immutable`.
+- **LIVE: 28 October 2026, 08:30:13 UTC** (owner msg 6977). Before promoting, production was still
+  dpl_2tbktHyiKAX62KXH3DZ9AGxZ2fse and no newer deployment existed. `vercel promote` took 3 s; instaplaque.co.uk and www
+  point to dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (`vercel inspect`); www returns 308 to the apex.
+- **Live checks:**
+  - Plain HTTP: `/`, memorial, bench, brass, stainless steel and garden have the section and `index-eAQF_wEa.js`; the
+    tree page and `/design` don't have the section.
+  - The film and poster are byte-identical to `public/videos/`; a range request returns 206.
+  - `BASE=https://instaplaque.co.uk node scripts/check-promo-video.mjs`: RESULT PASS (all six checks), with Google,
+    Meta, PostHog and Vercel analytics aborted and consent refused.
+  - `verify_live.py` (`BUNDLE=index-eAQF_wEa.js`): RESULT PASS, with 633 product-page assets identical to `public/`.
+- **Rollback:** `vercel promote https://instaplaque-qxw1hjk89-dullaghan31-3959s-projects.vercel.app --yes --scope
+  dullaghan31-3959s-projects`, with `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` set. That is the production-times release
+  (dpl_2tbktHyiKAX62KXH3DZ9AGxZ2fse), identical apart from this section.

@@ -1,6 +1,6 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Promo film after the hero (homepage and category pages): STAGED — 28 October 2026
+## Promo film after the hero (homepage and category pages): LIVE — 28 October 2026, 08:30 UTC
 
 - **Why:** the owner (msg 6977, "Yeah do all 3"): a silent loop of the new promo film near the top of the homepage and
   the Google ad landing pages.
@@ -10,8 +10,11 @@
   the tree page (all oak board and stake, 10–15 days, and the film says 5). The 4:5 film (1.27 MB) and its poster are in
   `public/videos/`, cached for a year. Nothing loads before the film is near the screen; it plays muted only while on
   screen, has a pause button, and never autoplays with reduced motion. Details: `docs/promo-video-2026-10-28.md`.
-- **Checks:** scoped `tsc`, `npm run build` with postbuild checks, and `scripts/check-promo-video.mjs` (new) on the local
-  build all pass.
+- **Checks:** scoped `tsc`, `npm run build` with postbuild checks, and `scripts/check-promo-video.mjs` (new) pass on the
+  local build and on the live site.
+- **Live:** promoted on the owner's go (msg 6977): dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (instaplaque-j69fq1m7u,
+  `index-eAQF_wEa.js`) on both domains. This branch is now the live source; base new work on it.
+- **Rollback:** promote dpl_2tbktHyiKAX62KXH3DZ9AGxZ2fse (instaplaque-qxw1hjk89, the production-times release).
 
 ## Production times by size, fixings in the order emails: LIVE — 28 October 2026, 06:48 UTC
 
