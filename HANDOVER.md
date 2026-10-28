@@ -1,6 +1,6 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Promo film at the top, buttons glowing in turn: STAGED, not live — 28 October 2026
+## Promo film at the top, buttons glowing in turn, video schema and /video: STAGED, not live — 28 October 2026
 
 - **Why:** the owner (msg 6986): the film at the top of the page, with "Design online" glowing while it shows the
   designer and "Design on WhatsApp" while it shows the chat.
@@ -10,8 +10,13 @@
   hero. While the film plays, the cued button gets a gold ring. Details: `docs/promo-video-2026-10-28.md`.
 - **Checks:** scoped `tsc`, the build with postbuild checks, and the rewritten `scripts/check-promo-video.mjs` all pass
   locally.
-- **Not live:** candidate instaplaque-844r6bzyp (dpl_99DTUXDvZuUy6Yibw8ASAsqrVGnk, `index-Bdw47sbu.js`) is staged and waits for
-  the owner's go. Promote steps and rollback are in the doc.
+- **Video schema and watch page (owner msg 6988), same branch:**
+  - `/video` is a watch page with the film leading, a timestamped written version, VideoObject, og:video and a video
+    sitemap entry.
+  - The film's facts live in `services/promoVideo.mjs`, and the hero captions link to `/video`.
+  - Details: `docs/promo-video-2026-10-28.md`.
+- **Not live:** waits for the owner's go. The candidate that includes the watch page is recorded in the doc and
+  supersedes instaplaque-844r6bzyp.
 
 ## Promo film after the hero (homepage and category pages): LIVE — 28 October 2026, 08:30 UTC
 

@@ -7,7 +7,9 @@
 // - it plays muted on screen and pauses off screen; its button pauses and plays it;
 // - while it plays, "Design online" glows during the designer, "Design on WhatsApp" during the chat, both at the end;
 //   paused, nothing glows; with reduced motion it doesn't play by itself and the glow doesn't pulse;
-// - the category's own photo follows the hero; the tree page (all oak board and stake, 10-15 days) keeps its photo hero.
+// - the category's own photo follows the hero; the tree page (all oak board and stake, 10-15 days) keeps its photo hero;
+// - the watch page /video (owner msg 6988): the film leads, its source and VideoObject are in the static HTML, the
+//   buttons under it glow in turn, and the sitemap entry and thumbnails are served.
 // Usage: BASE=https://instaplaque.co.uk node scripts/check-promo-video.mjs
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
@@ -48,7 +50,7 @@ async function open(path, { phone = true, reducedMotion = 'no-preference' } = {}
 // The film copy this screen shows, the hero's two buttons, and what is glowing.
 const state = page => page.evaluate(() => {
   const video = [...document.querySelectorAll('.promo-film-player')].find(v => v.getClientRects().length > 0);
-  const hero = document.querySelector('.shop-hero, .cat-hero');
+  const hero = document.querySelector('.shop-hero, .cat-hero, .watch-hero');
   const design = hero?.querySelector('.shop-hero-choices > a[href="/design"]');
   const whatsapp = hero?.querySelector('.shop-hero-choices > a[data-contact-placement="hero"]');
   const box = el => el && (({ top, bottom, left, right, width, height }) => ({ top: top + window.scrollY, bottom: bottom + window.scrollY, left, right, width, height }))(el.getBoundingClientRect());
@@ -64,7 +66,7 @@ const state = page => page.evaluate(() => {
     designAnimation: design && getComputedStyle(design).animationName,
     label: video.parentElement.querySelector('.promo-film-toggle')?.getAttribute('aria-label'),
     film: box(video),
-    copy: box(document.querySelector('.shop-hero-copy, .cat-hero-copy')),
+    copy: box(document.querySelector('.shop-hero-copy, .cat-hero-copy, .watch-head')),
     buttons: box(hero.querySelector('.shop-hero-choices')),
     overflow: document.documentElement.scrollWidth > window.innerWidth,
     // The film's resource must start after the page's load event.
@@ -154,6 +156,46 @@ for (const path of ['/', '/brass-plaques']) {
     }
   });
 }
+
+await check('/video phone: watch page with the film first, its source and VideoObject in the HTML, buttons under it glowing in turn', async () => {
+  const { context, page, html } = await open('/video');
+  try {
+    assert.ok(html.includes('src="/videos/instaplaque-design-in-seconds-20261028.mp4"') && html.includes('"@type":"VideoObject"') && html.includes('property="og:video"'), 'static HTML must have the video source, VideoObject and og:video');
+    let s = await state(page);
+    assert.ok(s && !s.overflow, 'no film, or the page overflows');
+    assert.ok(s.film.top < 420 && s.film.width >= 330, `film is not leading the page (${s.film.top}, ${s.film.width})`);
+    assert.ok(s.buttons.top > s.film.bottom && s.buttons.top - s.film.bottom < 110 && s.buttons.bottom < 844, `buttons not straight under the film on the first screen (${s.film.bottom} -> ${s.buttons.top}..${s.buttons.bottom})`);
+    assert.ok(!s.paused && s.muted, 'not playing muted');
+    await glowCycle(page);
+    s = await state(page);
+    assert.equal(s.loaded, 1, 'more than one copy of the film loaded');
+    assert.ok(await page.locator('#whats-in-the-video li').count() === 7, 'written version must list the 7 moments');
+  } finally {
+    await context.close();
+  }
+});
+
+await check('/video computer: film large on the left, heading and buttons beside it', async () => {
+  const { context, page } = await open('/video', { phone: false });
+  try {
+    const s = await state(page);
+    assert.ok(s && !s.overflow && s.film.left < s.copy.left && s.film.width >= 440 && s.film.top < 260 && !s.paused, `layout ${JSON.stringify({ film: s?.film, copy: s?.copy })}`);
+  } finally {
+    await context.close();
+  }
+});
+
+await check('video sitemap entry and thumbnails are served; the film pages link to the watch page', async () => {
+  const sitemap = await (await fetch(BASE + '/sitemap.xml')).text();
+  assert.ok(sitemap.includes('xmlns:video=') && sitemap.includes('<loc>https://instaplaque.co.uk/video</loc>') && sitemap.includes('<video:content_loc>https://instaplaque.co.uk/videos/instaplaque-design-in-seconds-20261028.mp4</video:content_loc>'), 'video sitemap entry');
+  for (const ratio of ['16x9', '4x3', '1x1']) {
+    const response = await fetch(`${BASE}/videos/instaplaque-design-in-seconds-20261028-${ratio}.jpg`);
+    assert.ok(response.ok && /image\/jpeg/.test(response.headers.get('content-type') || ''), `thumbnail ${ratio}: ${response.status} ${response.headers.get('content-type')}`);
+  }
+  for (const path of ['/', '/bench-plaques']) {
+    assert.ok((await (await fetch(BASE + path)).text()).includes('href="/video"'), `${path} does not link to /video`);
+  }
+});
 
 await check('film leads the ad pages with their photo after it; the tree page keeps its photo', async () => {
   for (const path of ['/bench-plaques', '/garden-plaques', '/stainless-steel-plaques', '/memorial-plaques', '/brass-plaques']) {

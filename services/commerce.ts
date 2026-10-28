@@ -41,6 +41,7 @@ export type SiteView =
   | 'returns'
   | 'portraits'
   | 'ai-design'
+  | 'video'
   | 'plaque';
 
 export interface ProductFamily {

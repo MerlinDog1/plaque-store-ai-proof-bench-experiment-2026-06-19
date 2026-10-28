@@ -74,6 +74,7 @@ const routeViews: Partial<Record<string, SiteView>> = {
   '/design': 'plaque',
   '/portrait-plaques': 'portraits',
   '/ai-plaque-design': 'ai-design',
+  '/video': 'video',
 };
 
 const viewRoutes: Partial<Record<SiteView, string>> = {
@@ -94,6 +95,7 @@ const viewRoutes: Partial<Record<SiteView, string>> = {
   plaque: '/design',
   portraits: '/portrait-plaques',
   'ai-design': '/ai-plaque-design',
+  video: '/video',
 };
 
 const productRouteSlugs = new Set(productFamilies.map((product) => product.slug));

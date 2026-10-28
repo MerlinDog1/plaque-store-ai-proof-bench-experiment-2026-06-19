@@ -132,3 +132,64 @@
   3. Run `BASE=https://instaplaque.co.uk node scripts/check-promo-video.mjs` and `verify_live.py` with
      `BUNDLE=index-Bdw47sbu.js`.
   - Rollback: promote dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (instaplaque-j69fq1m7u).
+
+## Video schema and a watch page (owner msg 6988): STAGED with the hero film, not live
+
+- **Why:** the owner (msg 6988): "also we have all the bells and whistles video schema that goes with this?" There was
+  none.
+- **Google's rules, read on 28 Oct 2026** (developers.google.com/search/docs/appearance/video and
+  /structured-data/video):
+  - Video results, Video mode and key moments come only from a **watch page**, whose main purpose is one video. A
+    homepage or product page where the video complements the content isn't one.
+  - VideoObject needs `name`, `thumbnailUrl` and `uploadDate`. `contentUrl`, `description` and `duration` are
+    recommended.
+  - Thumbnails must be crawlable and at a stable URL, and the same across all metadata. A video sitemap entry belongs only
+    on the page where the video is the main content.
+- **What changed:**
+  - `services/promoVideo.mjs` (new) holds the film's facts in one place. That covers the name, description, disclosure,
+    footnote, file, poster, thumbnails, duration, the first-publication date (2026-10-28T08:30:13Z, the first release)
+    and the seven on-screen moments. It also builds the VideoObject (`promoVideoObject`) and the sitemap entry
+    (`promoVideoSitemapEntry`).
+  - **`/video`, the watch page** (`ShopVideoPage` in `components/PromoVideo.tsx`):
+    - The film leads it, large: 480 px beside the heading and buttons on computers. On phones it sits under the heading,
+      with the buttons straight under the film. The buttons glow as on the heroes.
+    - The `<video>` source is in the static HTML. `preload="none"` still means nothing downloads until it plays.
+    - A timestamped written version, "What's in the video.", lists the seven moments with the on-screen text. This is the
+      text alternative for a video with no sound (WCAG 1.2.1).
+    - It uses the app's `video` view (`App.tsx`, `SiteExperience.tsx`, `SiteView`) and PostHog's public paths.
+  - **Structured data** on `/video`:
+    - WebPage, VideoObject (name, description with the disclosure, four thumbnails, uploadDate, `PT22S`, contentUrl,
+      encodingFormat, inLanguage, isFamilyFriendly, creator/publisher, transcript) and a BreadcrumbList.
+    - No FAQPage, since the page shows no FAQs (`scripts/prerender-product-pages.mjs`).
+    - The validator.schema.org check of the built page reported 0 errors and 0 warnings.
+  - **Open Graph:** the share image is the 16:9 thumbnail, plus `og:video`, `og:video:secure_url`, `og:video:type`,
+    `og:video:width` and `og:video:height`.
+  - **Video sitemap:** `/video` is in `sitemap.xml` with `video:thumbnail_loc` (the 16:9 thumbnail), title, description,
+    content_loc, duration 22, publication_date, family_friendly, requires_subscription and live. The urlset gains the
+    video namespace. The build fails if `public/sitemap.xml` changes shape.
+  - **Thumbnails:** `public/videos/instaplaque-design-in-seconds-20261028-{16x9,4x3,1x1}.jpg` (1920×1080, 1440×1080
+    and 1080×1080). Each is the film's frame at 1 s, full height, centred on a blurred copy of itself.
+  - **Links:** the hero film captions on the homepage and category pages link to `/video` ("Watch it larger, with a
+    written version").
+  - **Sitemap dates:** `lastmod` is 2026-10-28 for the pages this release changes (home, memorial, bench, brass,
+    stainless steel, custom, garden, opening) and for /terms, which changed with this morning's production-times
+    release.
+- **Not used:**
+  - Key moments (Clip/SeekToAction): pointless for a 22-second film.
+  - `embedUrl`: there's no separate player page.
+  - `interactionStatistic`: there are no view counts to report.
+- **Checks:**
+  - `scripts/check-live-seo.mjs` (postbuild) now asserts:
+    - the watch page's VideoObject fields, breadcrumb and no FAQPage;
+    - its heading, video source and written version;
+    - og:video and og:image;
+    - the video sitemap entry and namespace;
+    - that every video file and thumbnail is in dist, and robots.txt doesn't block `/videos`;
+    - the hero links to `/video`;
+    - 25 sitemap URLs.
+  - `scripts/check-promo-video.mjs` adds three checks:
+    - `/video` on a phone: the film leads, the buttons sit straight under it on the first screen and glow in turn, and the
+      written version has 7 moments;
+    - `/video` on a computer;
+    - the sitemap entry, the three thumbnails as `image/jpeg`, and the hero links.
+  - Scoped `tsc`, the build with every postbuild check, and the browser check (9 of 9) all pass locally.

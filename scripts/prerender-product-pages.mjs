@@ -4,16 +4,18 @@ import React from 'react';
 import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogue.mjs';
 import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
 import { defaultShareImagePath, shareImagePathFor } from '../services/shareImages.mjs';
+import { promoVideo, promoVideoObject, promoVideoPath, promoVideoSitemapEntry } from '../services/promoVideo.mjs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 
 // Render the same shop components used in the browser, rather than a second
 // abbreviated version of the catalogue that drifts away from the visible page.
 const renderer = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom' });
-let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage, designer, DesignRequest, initialState, QuotePage, features;
+let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage, designer, DesignRequest, initialState, QuotePage, features, promoFilm;
 try {
   shop = await renderer.ssrLoadModule('/components/Shopfront.tsx');
   features = await renderer.ssrLoadModule('/components/FeaturePages.tsx');
+  promoFilm = await renderer.ssrLoadModule('/components/PromoVideo.tsx');
   guides = await renderer.ssrLoadModule('/components/ShopGuides.tsx');
   designer = await renderer.ssrLoadModule('/components/DesignerGuide.tsx');
   DesignRequest = (await renderer.ssrLoadModule('/components/DesignRequest.tsx')).DesignRequest;
@@ -325,6 +327,23 @@ const productListSchema = () => ({
 const routePages = [
   { slug: 'portrait-plaques', ...features.portraitPage, schema: [...features.portraitSchema] },
   { slug: 'ai-plaque-design', ...features.aiDesignPage, schema: [...features.aiDesignSchema] },
+  // The promo film's watch page (owner msg 6988): VideoObject from services/promoVideo.mjs; its 16:9 thumbnail is the
+  // share image, and the page gets Open Graph video tags below.
+  {
+    slug: promoVideoPath.slice(1),
+    ...promoFilm.videoPage,
+    image: promoVideo.thumbnails.wide,
+    schema: [
+      promoVideoObject(siteBaseUrl),
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: siteBaseUrl },
+          { '@type': 'ListItem', position: 2, name: 'Video', item: `${siteBaseUrl}${promoVideoPath}` },
+        ],
+      },
+    ],
+  },
   { slug: 'design-request', title: 'Have Us Design Your Plaque | InstaPlaque', description: 'Tell us your wording and plaque preferences. Review a personally prepared proof before payment.' },
   {
     slug: 'about',
@@ -473,9 +492,10 @@ const writePrerenderedPage = async ({
   const url = `${siteBaseUrl}${pathPart}`;
   const product = catalogue.productFamilies.find(item => item.slug === slug);
   const landing = catalogue.seoLandingPages.find(item => item.slug === slug);
-  const featurePage = { 'portrait-plaques': [features.ShopPortraitPlaques, features.portraitFaqs], 'ai-plaque-design': [features.ShopAiDesign, features.aiDesignFaqs] }[slug];
+  const featurePage = { 'portrait-plaques': [features.ShopPortraitPlaques, features.portraitFaqs], 'ai-plaque-design': [features.ShopAiDesign, features.aiDesignFaqs], video: [promoFilm.ShopVideoPage, null] }[slug];
   const contentComponent = !slug ? shop.ShopHome : product ? shop.ShopProduct : landing ? shop.ShopLanding : featurePage ? featurePage[0] : ['returns-and-cancellations','terms','privacy','cookies'].includes(slug) ? LegalPlaceholderPage : slug === 'quote' ? QuotePage : slug === 'design-request' ? DesignRequest : slug === 'about' ? guides.ShopAbout : slug === 'contact' ? guides.ShopContact : slug === 'materials' ? shop.ShopMaterials : ['how-it-works', 'faq'].includes(slug) ? shop.ShopHelp : null;
-  if (contentComponent && !['about', 'contact', 'returns-and-cancellations', 'terms', 'privacy', 'cookies','design-request','quote'].includes(slug)) {
+  // FAQPage only where FAQs are shown: the watch page has none.
+  if (contentComponent && !['about', 'contact', 'returns-and-cancellations', 'terms', 'privacy', 'cookies','design-request','quote', 'video'].includes(slug)) {
     const visibleFaqs = featurePage ? featurePage[1] : slug === 'faq' ? shop.helpFaqs : !(product || landing) ? shop.shopFaqs : [...(product || landing).faqs, ...shop.shopFaqs]
       .filter((item, index, list) => list.findIndex(other => other.question === item.question) === index).slice(0, 6);
     schema = schema.filter(item => item['@type'] !== 'FAQPage');
@@ -493,6 +513,16 @@ const writePrerenderedPage = async ({
   // Branded share cards for home and the indexable category pages; the schema keeps the photo.
   const ogImage = shareImagePathFor(slug) ? `${siteBaseUrl}${shareImagePathFor(slug)}` : image ? `${siteBaseUrl}${image}` : shareImage;
   html = replaceTag(html, /<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${ogImage}" />`);
+  if (pathPart === promoVideoPath) {
+    // Open Graph is one of the video metadata sources Google reads; same file and size as the VideoObject.
+    const file = `${siteBaseUrl}${promoVideo.file}`;
+    html = html.replace(`<meta property="og:image" content="${ogImage}" />`, `<meta property="og:image" content="${ogImage}" />
+  <meta property="og:video" content="${file}" />
+  <meta property="og:video:secure_url" content="${file}" />
+  <meta property="og:video:type" content="video/mp4" />
+  <meta property="og:video:width" content="${promoVideo.width}" />
+  <meta property="og:video:height" content="${promoVideo.height}" />`);
+  }
   html = replaceTag(html, /<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${escapeAttr(description)}" />`);
   html = replaceTag(html, /<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${ogImage}" />`);
@@ -688,4 +718,11 @@ const productSitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns
 }).join("\n")}\n</urlset>\n`;
 await writeFile(path.join(distDir, "sitemap-products.xml"), productSitemapXml);
 const editorialSitemap = await readFile(path.join(process.cwd(), 'public/sitemap.xml'), 'utf8');
-await writeFile(path.join(distDir, 'sitemap.xml'), editorialSitemap.replace('</urlset>', '  <url><loc>https://instaplaque.co.uk/design-request</loc></url>\n</urlset>'));
+// The watch page goes in with Google's video sitemap tags (owner msg 6988), so the urlset gains the video namespace.
+const imageNamespace = 'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">';
+if (!editorialSitemap.includes(imageNamespace) || editorialSitemap.includes(`<loc>${siteBaseUrl}${promoVideoPath}</loc>`)) {
+  throw new Error('public/sitemap.xml: unexpected urlset, or the watch page is already listed');
+}
+await writeFile(path.join(distDir, 'sitemap.xml'), editorialSitemap
+  .replace(imageNamespace, 'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">')
+  .replace('</urlset>', `  <url><loc>https://instaplaque.co.uk/design-request</loc></url>\n${promoVideoSitemapEntry(siteBaseUrl)}\n</urlset>`));

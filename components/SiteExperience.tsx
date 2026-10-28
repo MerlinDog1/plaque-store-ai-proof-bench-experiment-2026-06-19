@@ -8,6 +8,8 @@ import { ShopHome, ShopProduct, ShopLanding, ShopMaterials, ShopHelp, ShopFooter
 import { ShopAbout, ShopContact, aboutPage } from './ShopGuides';
 import { ShopAiDesign, ShopPortraitPlaques, aiDesignFaqs, aiDesignPage, aiDesignSchema, portraitFaqs, portraitPage, portraitSchema } from './FeaturePages';
 import { designerPage } from './DesignerGuide';
+import { ShopVideoPage, videoPage } from './PromoVideo';
+import { promoVideo, promoVideoObject, promoVideoPath } from '../services/promoVideo.mjs';
 import { businessContact } from '../services/shopInformation';
 import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
 import { trackGooglePurchase, OPTIONAL_AD_CONSENT_CHANGED } from '../services/googlePurchase';
@@ -666,6 +668,7 @@ const routePathForView = (view: SiteView) => {
     plaque: '/design',
     portraits: '/portrait-plaques',
     'ai-design': '/ai-plaque-design',
+    video: '/video',
   };
   return paths[view] || '/';
 };
@@ -810,6 +813,7 @@ const seoConfigForView = (view: SiteView, selectedProduct: ProductFamily, select
   }
   if (view === 'portraits') return { ...portraitPage, path: routePath, schema: [...portraitSchema, faqSchema(portraitFaqs)] };
   if (view === 'ai-design') return { ...aiDesignPage, path: routePath, schema: [...aiDesignSchema, faqSchema(aiDesignFaqs)] };
+  if (view === 'video') return { ...videoPage, path: routePath, schema: [promoVideoObject(siteBaseUrl), breadcrumbSchema([{ name: 'Home', url: siteBaseUrl }, { name: 'Video', url: `${siteBaseUrl}${promoVideoPath}` }])] };
   if (view === 'faq') {
     return {
       title: 'Custom Plaque FAQs UK | InstaPlaque',
@@ -936,7 +940,7 @@ export const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selec
     setMetaContent('meta[property="og:description"]', config.description);
     setMetaContent('meta[property="og:url"]', url);
     const routeSlug = view === 'product' ? selectedProduct.slug : view === 'landing' ? selectedLanding.slug : undefined;
-    const routeImage = view === 'product' ? selectedProduct.image : view === 'landing' ? selectedLanding.image : undefined;
+    const routeImage = view === 'product' ? selectedProduct.image : view === 'landing' ? selectedLanding.image : view === 'video' ? promoVideo.thumbnails.wide : undefined;
     const shareImage = new URL(shareImagePathFor(routeSlug) || routeImage || defaultShareImagePath, siteBaseUrl).href;
     setMetaContent('meta[property="og:image"]', shareImage);
     setMetaContent('meta[name="twitter:title"]', config.title);
@@ -2787,6 +2791,8 @@ export function SiteExperience(props: SiteProps) {
     page = <ShopPortraitPlaques />;
   } else if (props.view === 'ai-design') {
     page = <ShopAiDesign />;
+  } else if (props.view === 'video') {
+    page = <ShopVideoPage onStartDesign={props.onStartDesign} />;
   } else if (props.view === 'quote') {
     page = <QuotePage onStartDesign={props.onStartDesign} />;
   } else if (props.view === 'checkout') {
