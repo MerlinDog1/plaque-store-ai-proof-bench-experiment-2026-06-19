@@ -118,3 +118,17 @@
   - The local check needs a server with HTTP Range support, or Chrome can't seek in the video. Vercel has it; Python's
     `http.server` doesn't.
 - Phone and computer recordings, and screenshots, are in `output/hero-film-preview/` (not committed).
+- **Candidate (not live):** built on Vercel with `vercel deploy --prod --skip-domain` from dae7435:
+  https://instaplaque-844r6bzyp-dullaghan31-3959s-projects.vercel.app (dpl_99DTUXDvZuUy6Yibw8ASAsqrVGnk,
+  `index-Bdw47sbu.js`).
+  - Vercel's build and every postbuild check passed.
+  - Through `vercel curl`: `/` and `/memorial-plaques` have the film in the hero; the memorial photo follows the hero; the
+    tree page still has its photo hero and no film.
+  - instaplaque.co.uk is still dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (`vercel inspect`, before and after).
+- **To go live (on the owner's go):**
+  1. Check production is still dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy.
+  2. Run `vercel promote https://instaplaque-844r6bzyp-dullaghan31-3959s-projects.vercel.app --yes --scope
+     dullaghan31-3959s-projects`, with `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` set.
+  3. Run `BASE=https://instaplaque.co.uk node scripts/check-promo-video.mjs` and `verify_live.py` with
+     `BUNDLE=index-Bdw47sbu.js`.
+  - Rollback: promote dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (instaplaque-j69fq1m7u).

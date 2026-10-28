@@ -10,7 +10,8 @@
   hero. While the film plays, the cued button gets a gold ring. Details: `docs/promo-video-2026-10-28.md`.
 - **Checks:** scoped `tsc`, the build with postbuild checks, and the rewritten `scripts/check-promo-video.mjs` all pass
   locally.
-- **Not live:** it waits for the owner's go.
+- **Not live:** candidate instaplaque-844r6bzyp (dpl_99DTUXDvZuUy6Yibw8ASAsqrVGnk, `index-Bdw47sbu.js`) is staged and waits for
+  the owner's go. Promote steps and rollback are in the doc.
 
 ## Promo film after the hero (homepage and category pages): LIVE — 28 October 2026, 08:30 UTC
 
