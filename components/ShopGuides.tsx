@@ -24,12 +24,12 @@ export function ShopTurnaround() {
       </div>
       <div>
         <dl className="shop-timing-list">
-          <div><dt>Standard size and finish</dt><dd>Estimated 5 working days</dd></div>
-          <div><dt>Standard size in aged brass</dt><dd>Estimated 7 working days</dd></div>
-          <div><dt>A4 or A5 with wood backing</dt><dd>Estimated 10 working days</dd></div>
-          <div><dt>Custom sizes and other wood-backed plaques</dt><dd>Estimated 15 working days</dd></div>
+          <div><dt>Any shape up to 600 × 400 mm</dt><dd>Estimated 5 working days</dd></div>
+          <div><dt>Aged brass</dt><dd>Estimated 7 working days</dd></div>
+          <div><dt>Wood backing, up to A4 (297 × 210 mm)</dt><dd>Estimated 10 working days</dd></div>
+          <div><dt>Wood backing above A4, or larger than 600 × 400 mm</dt><dd>Estimated 15 working days</dd></div>
         </dl>
-        <p>The designer shows the estimate for your selected combination before checkout. These are production estimates; delivery time is additional.</p>
+        <p>The times don’t add together: if more than one applies, the longest is your estimate. The designer shows the estimate for your plaque before checkout. These are production estimates; delivery time is additional.</p>
         <article><h3>UK delivery is included</h3><p>Standard plaque prices include engraving, standard fixings and UK delivery. This includes Northern Ireland, the Highlands and islands, with no regional postage surcharge. Contact us before ordering for delivery outside the UK.</p><p>{deliveryServiceDescription}</p></article>
         <article><h3>Ordering for an opening or ceremony?</h3><p>Send your required arrival date, delivery postcode, size and wording before placing the order. Allow time for everyone involved to approve the proof. A production estimate is not a guaranteed event delivery date.</p></article>
       </div>

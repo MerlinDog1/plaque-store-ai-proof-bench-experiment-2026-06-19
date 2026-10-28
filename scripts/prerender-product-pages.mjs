@@ -31,7 +31,7 @@ const shareImage = `${siteBaseUrl}${defaultShareImagePath}`;
 
 const homeFaqs = [
   ['Is my proof really free?', 'Yes. Your proof is 100% free with no account, no sign up and no obligation to buy. If you need time to decide, download the proof PDF and use the link inside it to come back later.'],
-  ['How much does a custom plaque cost?', 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.'],
+  ['How much does a custom plaque cost?', 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size; plaques larger than 600 × 400 mm take longer to make.'],
   ['Can I preview my plaque before ordering?', 'Yes. Add your wording, choose the material and size, then review a free proof before you pay. You can keep editing until the layout, wording and finish look right.'],
   ['What size is a bench plaque?', 'The compact bench plaque format starts at 150 x 50 mm for short inscriptions. Larger standard bench plaques are available, and custom sizes, oval plaques and circular plaques can be made up to our maximum size.'],
   ['Which material is best for an outdoor plaque?', 'Brushed stainless steel is clean and restrained for exposed outdoor settings. Brass gives a warmer traditional look, and aged brass is hand-patinated for more character.'],

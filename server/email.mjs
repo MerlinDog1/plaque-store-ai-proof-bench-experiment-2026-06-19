@@ -1,4 +1,5 @@
 import { sanitizeSvgMarkup } from "../services/svgSanitizer.mjs";
+import { getProductionEstimate } from "../services/productionTime.mjs";
 
 const resendApiKey = process.env.RESEND_API_KEY || "";
 const fromEmail = process.env.ORDER_EMAIL_FROM || "InstaPlaque <orders@instaplaque.co.uk>";
@@ -160,10 +161,7 @@ const turnaroundDaysForOrder = (order) => {
   const metadataDays = Number(order.metadata?.turnaroundWorkingDays || order.metadata?.turnaroundDays || 0);
   if (Number.isFinite(metadataDays) && metadataDays > 0) return metadataDays;
   const state = stateForOrder(order);
-  if (state.wood) return state.width <= 420 && state.height <= 297 ? 10 : 15;
-  if (state.width > 600 || state.height > 400) return 15;
-  if (String(state.material || "").includes("aged")) return 7;
-  return 5;
+  return state.width && state.height ? getProductionEstimate(state).days : 5;
 };
 
 const dueDateText = (order) => {
@@ -188,6 +186,24 @@ const woodDetails = (order) => {
   const size = boardWidth && boardHeight ? `${boardWidth} x ${boardHeight} mm board` : "";
   const stake = state.groundStake === true ? "with black steel ground stake (2 mm L-shaped, 30 mm wide, 23.5 in long)" : "";
   return [tone, edge, size, stake].filter(Boolean).join(", ");
+};
+
+// The fixings as made (owner msg 6947). Holes follow services/fixingGeometry.ts getFixingPositions: caps go in the
+// corners from 80 mm tall, screws when 4 holes are chosen, otherwise one at each end (each side on curved shapes);
+// hearts, hidden adhesive and no fixings have none.
+const fixingDetails = (order) => {
+  const state = stateForOrder(order);
+  const fixing = String(state.fixing || "");
+  if (fixing === "vhb") return "Hidden adhesive (VHB tape), no holes";
+  if (fixing === "none") return "No fixings, no holes";
+  if (fixing !== "screws" && fixing !== "caps") return "Not recorded";
+  if (state.shape === "heart") return "No holes (heart shape)";
+  const recorded = Number(state.fixingHoleCount);
+  if (fixing === "screws" && recorded !== 2 && recorded !== 4) return "Domed cross-head screws (hole count not recorded)";
+  const corners = state.shape === "rect" && (fixing === "screws" ? recorded === 4 : Number(state.height) >= 80);
+  const where = corners ? "one in each corner" : state.shape === "rect" ? "one at each end" : "one at each side";
+  const type = fixing === "caps" ? `Decorative caps, Ø${Number(state.capSize) || 10} mm` : "Domed cross-head screws";
+  return `${type}, ${corners ? 4 : 2} holes (${where})`;
 };
 
 const plaqueSizeText = (order) => {
@@ -506,6 +522,7 @@ export const buildEmail = (template, order, extra = {}) => {
         <strong>Due:</strong> ${dueDateText(order)}<br>
         <strong>Size:</strong> ${plaqueSizeText(order)}<br>
         <strong>Material:</strong> ${material}<br>
+        <strong>Fixings:</strong> ${fixingDetails(order)}<br>
         <strong>Wood:</strong> ${woodDetails(order)}</p>
         <h2>Customer address</h2>
         ${address.length ? `<p>${address.map(escapeHtml).join("<br>")}</p>` : "<p>No shipping address stored yet.</p>"}
@@ -520,6 +537,7 @@ export const buildEmail = (template, order, extra = {}) => {
         `Due: ${dueDateText(order)}`,
         plaqueSizeText(order) ? `Size: ${plaqueSizeText(order)}` : "",
         material ? `Material: ${material}` : "",
+        `Fixings: ${fixingDetails(order)}`,
         `Wood: ${woodDetails(order)}`,
         "Customer address:",
         address.length ? address.join("\n") : "No shipping address stored yet.",
@@ -545,6 +563,7 @@ export const buildEmail = (template, order, extra = {}) => {
         <strong>Due:</strong> ${dueDateText(order)}<br>
         <strong>Size:</strong> ${plaqueSizeText(order)}<br>
         <strong>Material:</strong> ${material}<br>
+        <strong>Fixings:</strong> ${fixingDetails(order)}<br>
         <strong>Wood:</strong> ${woodDetails(order)}</p>
         <h2>Customer address</h2>
         ${address.length ? `<p>${address.map(escapeHtml).join("<br>")}</p>` : "<p>No shipping address stored yet.</p>"}
@@ -560,6 +579,7 @@ export const buildEmail = (template, order, extra = {}) => {
         `Due: ${dueDateText(order)}`,
         plaqueSizeText(order) ? `Size: ${plaqueSizeText(order)}` : "",
         material ? `Material: ${material}` : "",
+        `Fixings: ${fixingDetails(order)}`,
         `Wood: ${woodDetails(order)}`,
         "Customer address:",
         address.length ? address.join("\n") : "No shipping address stored yet.",

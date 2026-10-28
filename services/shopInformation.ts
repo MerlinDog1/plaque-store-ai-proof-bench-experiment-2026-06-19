@@ -11,7 +11,7 @@ export const businessContact = {
   whatsapp: '07464 843841',
   whatsappHref: 'https://wa.me/447464843841',
   madeIn: 'Made in the UK',
-  updated: '21 October 2026',
+  updated: '28 October 2026',
   privacyUpdated: '26 October 2026',
 };
 
@@ -29,6 +29,6 @@ export function portraitsInMetalLink(path: string, campaign: string, content: st
 
 export const productionTiming = {
   summary: 'Standard production: estimated 5 working days',
-  qualification: 'From proof approval and payment. Aged finishes, wood backing and custom options take longer.',
-  faq: 'Standard production is estimated at 5 working days from proof approval and payment. Standard aged-brass plaques are estimated at 7 working days; A4/A5 with wood backing at 10; custom sizes and other wood-backed plaques at 15. Your selected options determine the estimate shown before checkout. These are production estimates, with delivery time additional. Contact us before ordering for a fixed event date.',
+  qualification: 'From proof approval and payment. Aged brass, wood backing and plaques larger than 600 × 400 mm take longer.',
+  faq: 'Most plaques are estimated at 5 working days from proof approval and payment, in any shape up to 600 × 400 mm. Aged brass is estimated at 7 working days; wood backing at 10 working days up to A4 (297 × 210 mm) and 15 above that; plaques larger than 600 × 400 mm at 15. The times don’t add together: the longest that applies is your estimate. Your selected options determine the estimate shown before checkout. These are production estimates, with delivery time additional. Contact us before ordering for a fixed event date.',
 };

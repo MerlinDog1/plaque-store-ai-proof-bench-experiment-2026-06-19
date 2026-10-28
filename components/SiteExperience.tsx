@@ -501,7 +501,7 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
     sections: [
       { title: 'Orders and proofs', copy: 'You create and approve a digital proof before payment. By approving the proof, you confirm that the wording, layout, material, size, fixings and any wood backing are correct for production.' },
       { title: 'Prices and payment', copy: 'Prices are shown in pounds sterling. Payment is taken securely by Stripe. UK delivery is included unless stated otherwise before checkout. We are not VAT registered.' },
-      { title: 'Production and delivery', copy: 'Estimated production times are shown before checkout and run from proof approval and payment. Standard orders are usually estimated at 5 working days; aged brass, custom sizes and wood-backed plaques may take longer.' },
+      { title: 'Production and delivery', copy: 'Estimated production times are shown before checkout and run from proof approval and payment. Most plaques are estimated at 5 working days; aged brass, wood-backed plaques and plaques larger than 600 × 400 mm take longer.' },
       { title: 'Customer details', copy: 'You must provide accurate contact and delivery details at checkout. We may contact you if an order detail needs checking before production or dispatch.' },
       { title: 'Faults and support', copy: 'Your statutory rights are not affected. If goods are faulty, damaged, not as described or not made with reasonable care, contact us as soon as possible so we can put things right.' },
       { title: 'Contact', copy: `${businessContact.email} · ${businessContact.phone} · ${businessContact.address}` },
@@ -600,7 +600,7 @@ const homeFaqs: FaqItem[] = [
   },
   {
     question: 'How much does a custom plaque cost?',
-    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size and may need a longer turnaround.',
+    answer: 'Standard UK plaque prices are shown before checkout, including engraving, standard fixings and UK delivery. Bench plaques start from £58.50, A5 plaques from £95.50 and A4 plaques from £145. Custom sizes are available up to our maximum size; plaques larger than 600 × 400 mm take longer to make.',
   },
   {
     question: 'Can I preview my plaque before ordering?',
@@ -632,11 +632,11 @@ const homeFaqs: FaqItem[] = [
   },
   {
     question: 'What if I need a custom size or shape?',
-    answer: 'Start with a custom plaque proof for non-standard sizes, oval plaques or circular plaques. Custom sizes are available up to our maximum size and may need a longer turnaround. We are not currently accepting supplied artwork.',
+    answer: 'Start with a custom plaque proof for non-standard sizes, oval plaques or circular plaques. Custom sizes and shapes up to 600 × 400 mm take the same time as standard sizes; larger plaques take 15 working days. We are not currently accepting supplied artwork.',
   },
   {
     question: 'How quickly can my plaque be made?',
-    answer: 'Standard orders are usually estimated at 5 working days from approved proof and payment. Aged brass, custom sizes, circles, ovals and wood backing may take longer and will be shown or confirmed before checkout.',
+    answer: 'Most plaques are estimated at 5 working days from approved proof and payment, in any shape up to 600 × 400 mm. Aged brass takes 7 working days; wood backing 10 up to A4 and 15 above that; larger plaques 15. The estimate for your plaque is shown before checkout.',
   },
   {
     question: 'Are aged brass patinas identical?',

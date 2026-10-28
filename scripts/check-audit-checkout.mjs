@@ -37,9 +37,11 @@ for (const [state, days] of [
   [{width:210,height:148,shape:'rect',material:'brushed-stainless'},5],
   [{width:210,height:148,shape:'rect',material:'aged-brass'},7],
   [{width:148,height:210,shape:'rect',wood:true},10],
-  [{width:200,height:200,shape:'circle'},15],
-  [{width:250,height:150,shape:'oval'},15],
-  [{width:200,height:100,shape:'rect'},15],
+  [{width:200,height:200,shape:'circle'},5],
+  [{width:250,height:150,shape:'oval'},5],
+  [{width:200,height:100,shape:'rect'},5],
+  [{width:600,height:500,shape:'rect'},15],
+  [{width:400,height:300,shape:'rect',wood:true},15],
 ]) { assert.equal(getProductionEstimate(state).days,days); assert.equal(getProductionEstimate(state).deliveryDays,days+1); }
 
 const payload = { requestId:'00000000-0000-4000-8000-000000000123', email:'fixture@example.com',

@@ -1,5 +1,17 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Production times by size, fixings in the order emails — 28 October 2026
+
+- **Why:** the owner (msg 6947): any shape within 600 × 400 mm 5 working days, aged brass 7, wood backing 10 up to A4
+  and 15 above, the longest that applies (15 at most); and add a fixings line to the order email.
+- **Branch:** `codex/instaplaque-production-times-20261028`, based on the live designer branch (7c7d075). Base new work
+  on it once it is live.
+- **What changed:** `services/productionTime.mjs` is the one rule (designer, checkout, Stripe, catalogue/feed, email
+  fallback); 25 of 175 catalogue offers get shorter times; "Fixings" line in the new-paid-order and production-pack
+  emails; timing list, FAQ and terms copy. Details and checks: `docs/production-times-2026-10-28.md`.
+- **Checks:** new `check-production-time.mjs` and `check-custom-size-turnaround.mjs`, updated `check-audit-checkout.mjs`,
+  build with postbuild checks, scoped `tsc`.
+
 ## Designer wording step: LIVE — 27 October 2026, 21:08 UTC
 
 - **Why:** the owner (msg 6884): the Generate button is hidden on a phone, the step doesn't say "just paste your words

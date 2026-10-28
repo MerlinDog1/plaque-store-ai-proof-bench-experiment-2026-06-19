@@ -1,4 +1,5 @@
 import { estimatePlaquePrice } from './checkoutPolicy.mjs';
+import { getProductionEstimate } from './productionTime.mjs';
 
 // Exact advertised variants, not every possible bespoke size or inscription.
 // Stable IDs preserve Google's history when catalogue copy changes.
@@ -39,7 +40,7 @@ function add(material, label, cue, colour, width, height, format, shape = 'rect'
     textColor: material === 'aged-brass' ? 'cream' : 'black', reverseEtch: false,
     ageIntensity: 0.5, designStyle: 'auto', safeMargin: 10,
   };
-  const productionDays = wood ? (format.startsWith('A4') || format.startsWith('A5') ? 10 : 15) : shape !== 'rect' ? 15 : material === 'aged-brass' ? 7 : 5;
+  const productionDays = getProductionEstimate(preset).days;
   const title = `Personalised ${label.toLowerCase()} ${bench ? 'bench ' : ''}${shape !== 'rect' ? shapeLabel + ' ' : ''}plaque ${size}${backing}`;
   const description = `${size} ${shapeLabel} ${label.toLowerCase()} plaque${backing}. ${preset.fixingHoleCount} ${preset.fixing === 'caps' ? 'decorative fixing caps' : 'screw fixings'}, ${preset.textColor} paint-filled etched lettering${wood ? '' : ', no wood backing'}. Your wording and proof approval included. UK delivery included. Estimated production ${productionDays} working days after proof approval and payment.`;
   entries.push({slug, title, description, label, materialCue: cue, colour, size, format, image, imageKind, productionDays, preset, price: estimatePlaquePrice(preset), groupId: `plaque-${shape}-${bench ? 'screws' : 'caps'}-${woodTone || 'metal'}`});
@@ -55,8 +56,7 @@ for (const [material, label, cue, colour] of merchantFinishes) {
 // Keep the already-submitted polished brass offer, with unchanged ID/image/configuration.
 add('polished-brass', 'Polished brass', 'brass', 'gold', 200, 100, 'Bench');
 const legacy = entries[entries.length - 1];
-Object.assign(legacy, {slug: 'polished-brass-bench-plaque-200x100', image: '/site-images/merchant-brass-bench.webp', imageKind: 'ai', productionDays: 15});
-legacy.description = legacy.description.replace('production 5 working', 'production 15 working');
+Object.assign(legacy, {slug: 'polished-brass-bench-plaque-200x100', image: '/site-images/merchant-brass-bench.webp', imageKind: 'ai'});
 const shortMaterials = { 'brushed-stainless': 'bs', 'polished-stainless': 'ps', 'brushed-brass': 'bb', 'polished-brass': 'pb', 'orbital-brass-matt-lacquer': 'ob', 'aged-brass': 'ab' };
 for (const entry of entries) {
   const originalId = `instaplaque-${entry.slug}`;

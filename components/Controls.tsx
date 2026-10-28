@@ -136,17 +136,9 @@ const BENCH_SIZE_PRESETS: SizePreset[] = [
 
 const MIN_CUSTOM_DIMENSION_MM = 50;
 const MAX_CUSTOM_DIMENSION_MM = 600;
-const CUSTOM_FAST_TURNAROUND_WIDTH_MM = 600;
-const CUSTOM_FAST_TURNAROUND_HEIGHT_MM = 400;
 const getDefaultCapSize = (width: number, height: number, shape: Shape) => {
   if (shape === Shape.Heart) return 10;
   return Math.max(width, height) >= 297 && Math.min(width, height) >= 210 ? 15 : 10;
-};
-
-const fitsCustomFastTurnaround = (width: number, height: number) => {
-  const longest = Math.max(width, height);
-  const shortest = Math.min(width, height);
-  return longest <= CUSTOM_FAST_TURNAROUND_WIDTH_MM && shortest <= CUSTOM_FAST_TURNAROUND_HEIGHT_MM;
 };
 
 const STEP_COPY = [
@@ -589,9 +581,9 @@ export const Controls: React.FC<Props> = ({
       : BORDER_STYLE_OPTIONS
   ), [isBenchPlaque]);
   const shapeLabel = state.shape === Shape.Circle ? 'Circle' : state.shape === Shape.Oval ? 'Oval' : 'Rectangle';
-  const customFastTurnaround = fitsCustomFastTurnaround(state.width, state.height) && !state.wood;
-  const customLongTurnaround = !customFastTurnaround;
-  const customTurnaroundLabel = `Production: ${getProductionEstimate(state).days} working days`;
+  // The custom-size step flags anything over the usual 5 working days (services/productionTime.mjs).
+  const customTurnaroundDays = getProductionEstimate(state).days;
+  const customTurnaroundLabel = `Production: ${customTurnaroundDays} working days`;
 
   useEffect(() => {
     setCustomWidthInput(String(state.width));
@@ -636,12 +628,12 @@ export const Controls: React.FC<Props> = ({
       setTurnaroundToast(null);
       return;
     }
-    if (activeStep !== 0 || sizeMode !== 'custom' || !customLongTurnaround) return;
+    if (activeStep !== 0 || sizeMode !== 'custom' || customTurnaroundDays <= 5) return;
     const message = getProductionEstimate(state).label;
     setTurnaroundToast(message);
     const timer = window.setTimeout(() => setTurnaroundToast(null), 4200);
     return () => window.clearTimeout(timer);
-  }, [activeStep, customLongTurnaround, sizeMode]);
+  }, [activeStep, customTurnaroundDays, sizeMode]);
 
   const update = (key: keyof PlaqueState, value: any) => {
     if (activeStep === 0 && (key === 'width' || key === 'height' || key === 'shape')) {
