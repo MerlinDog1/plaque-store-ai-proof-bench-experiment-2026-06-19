@@ -9,9 +9,11 @@ import { formatGbp, onStakePrice } from './PriceTable';
 
 // What each category page shows, on the layout of the memorial page (owner msg 5876) and brought up to its standard
 // (msg 5927, 24 Oct 2026: "bring every other page up to that standard. Sense check each Pic and redo if dumb.
-// Remember to use mixture of materials, borders, woods etc"). Each top photo shows the plaque its "from" price is
-// for, and "Design online" opens on that plaque (the product presets in services/commerce.ts), so the price does not
-// jump (owner msg 5906). Photos: scripts/publish-category-page-images.py and publish-memorial-page-images.py.
+// Remember to use mixture of materials, borders, woods etc"). Each page's "from" price is the cheapest plaque it sells
+// (owner msg 7009, 28 Oct 2026: "our from price still seems way high always"; scripts/check-from-prices.mjs). "Design
+// online" opens on the plaque in the top photo (the product presets in services/commerce.ts), usually a larger one,
+// and the note beside the price gives its price too, so the price does not jump unannounced (owner msg 5906). Photos:
+// scripts/publish-category-page-images.py and publish-memorial-page-images.py.
 
 // Scale (owner msg 5959, 24 Oct: "Scale kinda f'd on this one" about the opening hero): the built-in preview draws a
 // plaque about 2-3 times too big against bricks and doors. Heroes show the plaque against large or irregular surfaces
@@ -28,6 +30,16 @@ const seeThis = (slug: string) => <a href={`/${slug}`}>See this plaque</a>;
 const related = (content: React.ReactNode) => <p className="memorial-material-links cat-related">{content}</p>;
 const brassMaterials = ['brushed-brass', 'polished-brass', 'orbital-brass-matt-lacquer', 'aged-brass'];
 const priceOf = (slug: string) => merchantProducts.find(item => item.slug === slug)?.startingFrom || '';
+/** The cheapest catalogue plaque in these finishes, without wood backing or on the given wood: where a finish tile
+ * leads and the from-price it shows, so the next page shows the same price (owner msg 7009). The tiles' photos show
+ * the finish on larger plaques. */
+const cheapestIn = (materials: string[], woodTone?: 'light' | 'dark') => [...merchantOffers]
+  .filter(offer => materials.includes(offer.preset.material) && (woodTone ? offer.preset.wood && offer.preset.woodTone === woodTone : !offer.preset.wood))
+  .sort((a, b) => a.price - b.price)[0].slug;
+const finishRoute = (title: string, materials: string[], image: string, alt: string, woodTone?: 'light' | 'dark') => {
+  const slug = cheapestIn(materials, woodTone);
+  return { href: `/${slug}`, title, image, alt, priceSlug: slug };
+};
 /** A catalogue plaque's price on the oak board and ground stake (the tree page, owner msg 6506). */
 const onStakePriceOf = (slug: string) => {
   const offer = merchantOffers.find(item => item.slug === slug);
@@ -49,7 +61,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           alt: 'Brushed stainless steel memorial plaque on a dark walnut board, reading In loving memory of Margaret Rowley, 1936 to 2023, Mum, Nan and dear friend, who loved this garden in every season, on an old brick garden wall beside a pink climbing rose',
           caption: <>Shown: A5 brushed stainless steel on a dark walnut board, {priceOf('brushed-stainless-210x148-rect-dark-wood-plaque')}; without the board, {priceOf('a5-brushed-steel-personalised-plaque')}. {seeThis('brushed-stainless-210x148-rect-dark-wood-plaque')}</>,
         },
-        priceNote: 'A5 stainless steel, with engraving, fixings and UK delivery',
+        priceNote: `150 × 50 mm stainless steel, or A5 for ${priceOf('a5-brushed-steel-personalised-plaque')}, with engraving, fixings and UK delivery`,
         // Four distinct settings (owner msg 5906); wall plaques are the hero and the picks below.
         routes: {
           kicker: 'Choose by setting',
@@ -129,7 +141,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           alt: 'Brushed stainless steel garden plaque with a scalloped border, reading In loving memory of Susan Marsh, 1951 to 2022, on an old red brick garden wall beside a climbing rose',
           caption: <>Shown: A5 brushed stainless steel, {priceOf('a5-brushed-steel-personalised-plaque')}. {seeThis('a5-brushed-steel-personalised-plaque')}</>,
         },
-        priceNote: 'A5 stainless steel, with engraving, fixings and UK delivery',
+        priceNote: `150 × 50 mm stainless steel, or A5 for ${priceOf('a5-brushed-steel-personalised-plaque')}, with engraving, fixings and UK delivery`,
         routes: {
           kicker: 'Choose by setting',
           title: 'Where in the garden?',
@@ -182,15 +194,16 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           alt: 'Brushed brass memorial plaque with a scalloped border, reading In loving memory of Elsie Bond, 1925 to 2014, on an old honey-coloured Cotswold stone cottage wall',
           caption: <>Shown: A5 brushed brass, {priceOf('brushed-brass-210x148-rect-plaque')}. {seeThis('brushed-brass-210x148-rect-plaque')}</>,
         },
-        priceNote: 'A5 brushed brass, with engraving, fixings and UK delivery',
+        priceNote: `150 × 50 mm brushed brass, or A5 for ${priceOf('brushed-brass-210x148-rect-plaque')}, with engraving, fixings and UK delivery`,
         routes: {
           kicker: 'Four brass finishes',
           title: 'Choose your brass.',
           routes: [
-            { href: '/brushed-brass-297x210-rect-dark-wood-plaque', title: 'Brushed brass', image: photo('brushed-brass-297x210-rect-dark-wood-plaque'), alt: 'A4 brushed brass memorial plaque for Frank and Joan Hollis on a dark walnut board, with a scalloped border, on an old red brick garden wall', priceSlug: 'brushed-brass-297x210-rect-dark-wood-plaque' },
-            { href: '/polished-brass-200x150-rect-plaque', title: 'Polished brass', image: photo('polished-brass-200x150-rect-plaque'), alt: 'Polished brass house sign reading Holly House on a white-painted brick wall beside a green front door', priceSlug: 'polished-brass-200x150-rect-plaque' },
-            { href: '/orbital-brass-matt-lacquer-297x210-rect-plaque', title: 'Orbital brass', image: photo('orbital-brass-matt-lacquer-297x210-rect-plaque'), alt: 'A4 orbital brass plaque on cedar boards, reading This pavilion was officially opened by Jean Harper MBE on 12 April 2025', priceSlug: 'orbital-brass-matt-lacquer-297x210-rect-plaque' },
-            { href: '/aged-brass-210x148-rect-plaque', title: 'Aged brass', image: photo('aged-brass-210x148-rect-plaque'), alt: 'A5 aged brass memorial plaque for James Ormerod with cream lettering on a grey limestone wall', priceSlug: 'aged-brass-210x148-rect-plaque' },
+            // Each finish from its cheapest plaque (owner msg 7009); they had shown the photographed plaque's price.
+            finishRoute('Brushed brass', ['brushed-brass'], photo('brushed-brass-297x210-rect-dark-wood-plaque'), 'A4 brushed brass memorial plaque for Frank and Joan Hollis on a dark walnut board, with a scalloped border, on an old red brick garden wall'),
+            finishRoute('Polished brass', ['polished-brass'], photo('polished-brass-200x150-rect-plaque'), 'Polished brass house sign reading Holly House on a white-painted brick wall beside a green front door'),
+            finishRoute('Orbital brass', ['orbital-brass-matt-lacquer'], photo('orbital-brass-matt-lacquer-297x210-rect-plaque'), 'A4 orbital brass plaque on cedar boards, reading This pavilion was officially opened by Jean Harper MBE on 12 April 2025'),
+            finishRoute('Aged brass', ['aged-brass'], photo('aged-brass-210x148-rect-plaque'), 'A5 aged brass memorial plaque for James Ormerod with cream lettering on a grey limestone wall'),
           ],
           more: <>Not sure which? <a href="/materials">Compare the finishes</a>, or {ask('ask us on WhatsApp')}.</>,
         },
@@ -231,15 +244,16 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           alt: 'Brushed stainless steel house sign reading The Old Dairy on black-stained timber cladding beside an oak door frame',
           caption: <>Shown: A5 brushed stainless steel, {priceOf('a5-brushed-steel-personalised-plaque')}. {seeThis('a5-brushed-steel-personalised-plaque')}</>,
         },
-        priceNote: 'A5 stainless steel, with engraving, fixings and UK delivery',
+        priceNote: `150 × 50 mm stainless steel, or A5 for ${priceOf('a5-brushed-steel-personalised-plaque')}, with engraving, fixings and UK delivery`,
         routes: {
           kicker: 'Finish and backing',
           title: 'Brushed, polished or on wood.',
           routes: [
-            { href: '/brushed-stainless-250x150-oval-plaque', title: 'Brushed', image: photo('brushed-stainless-250x150-oval-plaque'), alt: 'Oval brushed stainless steel memorial plaque for Lilian Boyd on an old red brick garden wall', priceSlug: 'brushed-stainless-250x150-oval-plaque' },
-            { href: '/polished-stainless-297x210-rect-plaque', title: 'Polished', image: photo('polished-stainless-297x210-rect-plaque'), alt: 'A4 polished stainless steel memorial plaque for Peter and June Walker on a stone garden wall, reflecting the sky', priceSlug: 'polished-stainless-297x210-rect-plaque' },
-            { href: '/polished-stainless-200x150-rect-light-wood-plaque', title: 'On light oak', image: photo('polished-stainless-200x150-rect-light-wood-plaque'), alt: 'Polished stainless steel pet memorial plaque for Skye on a light oak board, on a blue-grey garden shed', priceSlug: 'polished-stainless-200x150-rect-light-wood-plaque' },
-            { href: '/brushed-stainless-210x148-rect-dark-wood-plaque', title: 'On dark wood', image: photo('brushed-stainless-210x148-rect-dark-wood-plaque'), alt: 'Brushed stainless steel memorial plaque for Margaret Rowley on a dark walnut board, with a scalloped border', priceSlug: 'brushed-stainless-210x148-rect-dark-wood-plaque' },
+            // Each finish or backing from its cheapest plaque (owner msg 7009); they had shown the photographed plaque's price.
+            finishRoute('Brushed', ['brushed-stainless'], photo('brushed-stainless-250x150-oval-plaque'), 'Oval brushed stainless steel memorial plaque for Lilian Boyd on an old red brick garden wall'),
+            finishRoute('Polished', ['polished-stainless'], photo('polished-stainless-297x210-rect-plaque'), 'A4 polished stainless steel memorial plaque for Peter and June Walker on a stone garden wall, reflecting the sky'),
+            finishRoute('On light oak', ['brushed-stainless', 'polished-stainless'], photo('polished-stainless-200x150-rect-light-wood-plaque'), 'Polished stainless steel pet memorial plaque for Skye on a light oak board, on a blue-grey garden shed', 'light'),
+            finishRoute('On dark wood', ['brushed-stainless', 'polished-stainless'], photo('brushed-stainless-210x148-rect-dark-wood-plaque'), 'Brushed stainless steel memorial plaque for Margaret Rowley on a dark walnut board, with a scalloped border', 'dark'),
           ],
           more: <>Wood backing suits indoors or a sheltered spot; metal on its own is made for outdoors. <a href="/materials">Compare the finishes</a>.</>,
         },
@@ -282,8 +296,9 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           // designer on this plaque on both, at the price it names.
           caption: <>Shown: A5 brushed brass on an oak board and ground stake, {onStakePriceOf('brushed-brass-210x148-rect-light-wood-plaque')}. <a href={designWithStakeHref('brushed-brass-210x148-rect-light-wood-plaque')}>Design this one</a></>,
         },
-        // The from-price (landingDesignProduct) is this plaque on the board and stake; "Design online" opens on it.
-        priceNote: 'A5 stainless steel on an oak board and black steel ground stake, with engraving and UK delivery',
+        // The from-price (landingDesignProduct) is the 200 × 150 mm plate on the board and stake; "Design online" opens
+        // on A5 on both.
+        priceNote: `200 × 150 mm stainless steel on an oak board and black steel ground stake, or A5 for ${onStakePriceOf('a5-brushed-steel-personalised-plaque')}, with engraving and UK delivery`,
         examples: {
           kicker: 'Memorial tree plaques in place',
           title: 'Beside the tree, never fixed to it.',
@@ -328,7 +343,8 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           alt: 'Brushed stainless steel opening plaque reading The Meadows Community Hub was officially opened by Councillor Anne Fielding on 14 March 2026, on pale limestone cladding beside a dark grey door frame',
           caption: <>Shown: A4 brushed stainless steel, {priceOf('brushed-stainless-297x210-rect-plaque')}. {seeThis('brushed-stainless-297x210-rect-plaque')}</>,
         },
-        priceNote: 'A4 stainless steel, with engraving, fixings and UK delivery',
+        // The from-price is A5 (landingDesignProduct); "Design online" opens on A4.
+        priceNote: `A5 stainless steel, or A4, the usual size for an opening, for ${priceOf('brushed-stainless-297x210-rect-plaque')}, with engraving, fixings and UK delivery`,
         sizes: {
           title: 'Choose a size for the occasion.',
           intro: 'A4 gives a heading, the opening person and the date room to breathe. Each plate is drawn to scale.',

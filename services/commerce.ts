@@ -98,6 +98,9 @@ export interface SeoLandingPage {
   /** 'stake': the page sells its plaques on the oak board and ground stake, so "Design online" starts there and the
    * from-price includes both (the tree page, owner msg 6506). */
   mount?: 'stake';
+  /** The plaque the from-price is for, where the page sells a smaller one than "Design online" opens on: a from-price
+   * is always the cheapest plaque on its page (owner msg 7009, 28 Oct 2026). */
+  from?: Pick<PlaqueState, 'width' | 'height' | 'material' | 'shape'>;
 }
 
 export interface PriceBreakdown {
@@ -217,7 +220,9 @@ export const productFamilies: ProductFamily[] = [
     title: 'Memorial plaques',
     shortTitle: 'Memorial',
     eyebrow: 'Custom remembrance plaques',
-    startingFrom: startingFromFor({ width: 210, height: 148, material: Material.BrushedSteel, shape: Shape.Rect }),
+    // The cheapest plaque on the page, a 150 × 50 mm plate (owner msg 7009, 28 Oct 2026: "our from price still seems way
+    // high always"). "Design online" still opens on A5 (the preset below), and the hero's note gives its price.
+    startingFrom: startingFromFor({ width: 150, height: 50, material: Material.BrushedSteel, shape: Shape.Rect }),
     materialCue: 'brass',
     image: '/site-images/home-gallery-aged-brass-wood.webp',
     description: 'Custom memorial plaques for graves, gardens, benches and remembrance walls, checked in a proof before production.',
@@ -245,8 +250,9 @@ export const productFamilies: ProductFamily[] = [
     relatedSearches: ['memorial plaques UK', 'brass memorial plaques', 'custom remembrance plaques', 'garden memorial plaques'],
     bestFor: ['Names, dates and tribute wording', 'Garden and wall memorials', 'Brass or stainless steel finishes', 'Optional wood backing'],
     proofPrompt: 'In loving memory of\nArthur James Williams\nA devoted husband, father and grandfather\n1938 - 2026',
-    // "Design online" opens on the plaque the from-price is for: A5 brushed stainless steel without wood
-    // backing (owner msg 5906, 24 Oct 2026). It opened on brass with dark wood at £165 under "from £95.50".
+    // "Design online" opens on A5 brushed stainless steel without wood backing (owner msg 5906, 24 Oct 2026: it had
+    // opened on brass with dark wood at £165 under "from £95.50"). A 150 × 50 mm plate is too small for most memorial
+    // wording, so it stays A5 although the from-price is the plate's; the hero's note names both prices (owner msg 7009).
     // The garden and other pages that borrow this product start there too; the tree page adds the oak board and
     // ground stake to it (landingDesignProduct, owner msg 6506).
     preset: {
@@ -267,7 +273,7 @@ export const productFamilies: ProductFamily[] = [
     faqs: [
       {
         question: 'How much does a memorial plaque cost?',
-        answer: `A5 stainless steel memorial plaques without wood backing are available ${startingFromFor({ width: 210, height: 148, material: Material.BrushedSteel, shape: Shape.Rect })}. Engraving, standard fixings and UK delivery are included. Brass, selected finishes, larger sizes and wood backing can change the price; the designer shows the total before checkout. Compact bench plaques are a smaller option for short inscriptions.`,
+        answer: `Memorial plaques start ${startingFromFor({ width: 150, height: 50, material: Material.BrushedSteel, shape: Shape.Rect })} for a 150 × 50 mm stainless steel plate, with room for a name and dates. An A5 stainless steel memorial plaque without wood backing is ${formatRetailPrice(schemaPriceFor({ width: 210, height: 148, material: Material.BrushedSteel, shape: Shape.Rect }))}. Engraving, standard fixings and UK delivery are included. Brass, selected finishes, larger sizes and wood backing can change the price; the designer shows the total before checkout.`,
       },
       {
         question: 'What should I write on a memorial plaque?',
@@ -358,7 +364,8 @@ export const productFamilies: ProductFamily[] = [
     title: 'Brass plaques',
     shortTitle: 'Brass',
     eyebrow: 'Brushed, polished or aged brass',
-    startingFrom: startingFromFor({ width: 210, height: 148, material: Material.BrushedBrass, shape: Shape.Rect }),
+    // The cheapest brass plaque, 150 × 50 mm (owner msg 7009); "Design online" opens on A5 brushed brass.
+    startingFrom: startingFromFor({ width: 150, height: 50, material: Material.BrushedBrass, shape: Shape.Rect }),
     materialCue: 'brass',
     image: '/site-images/home-gallery-brass-bench.webp',
     description: 'Custom engraved brass plaques for memorials, benches, openings and presentation pieces.',
@@ -410,7 +417,8 @@ export const productFamilies: ProductFamily[] = [
     title: 'Stainless steel plaques',
     shortTitle: 'Stainless',
     eyebrow: 'Brushed or polished stainless',
-    startingFrom: startingFromFor({ width: 210, height: 148, material: Material.BrushedSteel, shape: Shape.Rect }),
+    // The cheapest stainless steel plaque, 150 × 50 mm (owner msg 7009); "Design online" opens on A5.
+    startingFrom: startingFromFor({ width: 150, height: 50, material: Material.BrushedSteel, shape: Shape.Rect }),
     materialCue: 'stainless',
     image: '/site-images/home-carousel-steel-wall.webp',
     description: 'Custom stainless steel plaques for outdoor, wall, bench and contemporary memorial use.',
@@ -713,6 +721,8 @@ export const seoLandingPages: SeoLandingPage[] = [
     relatedProductSlug: 'memorial-plaques',
     // Every tree plaque is priced on the oak board and ground stake (owner msg 6506: "you kinda need it for this product").
     mount: 'stake',
+    // From the 200 × 150 mm plate, the smallest on the page; "Design online" opens on A5 (owner msg 7009).
+    from: { width: 200, height: 150, material: Material.BrushedSteel, shape: Shape.Rect },
     proofCta: 'Start a tree plaque proof',
     sections: [
       { title: 'Fix it beside the tree, not to it', copy: `Screws and wire damage a growing tree, and the bark slowly swallows anything fixed to it. Stand the plaque beside it instead: we fix the plate to a solid oak board on a black steel ground stake, ${GROUND_STAKE_LENGTH} long, that pushes straight into the soil at the foot of the tree, as in the photos below. Our tree plaque prices include the board and the stake, and the designer starts with both. A short post, a nearby wall or a fence work too.` },
@@ -748,6 +758,8 @@ export const seoLandingPages: SeoLandingPage[] = [
     heroCopy: 'Create an opening plaque for a school, building or community space. Arrange the venue name, opening person and date in a free online proof, with the price shown before payment. Start with A4 for formal wording and check any fixed ceremony deadline with us before ordering.',
     image: '/site-images/home-gallery-brass-community.webp',
     relatedProductSlug: 'a4-plaques',
+    // From A5, the smallest on the page; "Design online" opens on A4, the usual size for an opening (owner msg 7009).
+    from: { width: 210, height: 148, material: Material.BrushedSteel, shape: Shape.Rect },
     proofCta: 'Start an opening plaque proof',
     sections: [
       {
@@ -1247,13 +1259,17 @@ export function getLandingPageBySlug(slug: string | null | undefined) {
     ?? seoLandingPages[0];
 }
 
-/** The plaque a landing page's "Design online" opens on, with its from-price: the related product, or on the tree
- * page that product on the oak board and ground stake (owner msg 6506), so the price does not jump (msg 5906). */
+/** The plaque a landing page's "Design online" opens on, with the page's from-price: the related product, or on the
+ * tree page that product on the oak board and ground stake (owner msg 6506). The from-price is the page's cheapest
+ * plaque (`from`, owner msg 7009), which the hero's note tells apart from the one the designer opens on (msg 5906). */
 export function landingDesignProduct(landing: SeoLandingPage): ProductFamily {
   const related = productFamilies.find((product) => product.slug === landing.relatedProductSlug) ?? productFamilies[0];
-  if (landing.mount !== 'stake') return related;
-  const preset = onBoardAndStake(related.preset);
-  return { ...related, preset, startingFrom: `from ${formatRetailPrice(estimatePlaquePrice(preset as PlaqueState))}` };
+  if (landing.mount !== 'stake' && !landing.from) return related;
+  const preset = landing.mount === 'stake' ? onBoardAndStake(related.preset) : related.preset;
+  // The from-price: the page's cheapest plaque (landing.from), on the board and stake where the page sells them so.
+  const cheapest = landing.from ? { ...related.preset, ...landing.from, wood: false } : related.preset;
+  const priced = landing.mount === 'stake' ? onBoardAndStake(cheapest) : cheapest;
+  return { ...related, preset, startingFrom: `from ${formatRetailPrice(estimatePlaquePrice(priced as PlaqueState))}` };
 }
 
 export function getQuoteReasons(state: PlaqueState, inscription: string) {

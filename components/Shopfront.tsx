@@ -175,9 +175,8 @@ export function ShopCollections() {
       <div className="shop-collections">
         {collections.map((collection) => {
           const landing = seoLandingPages.find((item) => item.slug === collection.slug);
-          const product = productFamilies.find(
-            (item) => item.slug === (landing?.relatedProductSlug || collection.slug),
-          )!;
+          // A landing page's own from-price, its cheapest plaque (owner msg 7009), not its related product's.
+          const product = landing ? landingDesignProduct(landing) : productFamilies.find((item) => item.slug === collection.slug)!;
           const title = landing?.title || product.title;
           return (
             <a
@@ -443,7 +442,8 @@ function HeroRoutes() {
       <div className="shop-hero-routes-grid">
         {collections.map((collection) => {
           const landing = seoLandingPages.find((item) => item.slug === collection.slug);
-          const product = productFamilies.find((item) => item.slug === (landing?.relatedProductSlug || collection.slug))!;
+          // The page's own from-price, as on the page (owner msg 7009).
+          const product = landing ? landingDesignProduct(landing) : productFamilies.find((item) => item.slug === collection.slug)!;
           const title = (landing?.title || product.title).replace(/\s+plaques?$/i, '');
           return (
             <a className="shop-hero-route" href={`/${collection.slug}`} key={collection.slug}>
