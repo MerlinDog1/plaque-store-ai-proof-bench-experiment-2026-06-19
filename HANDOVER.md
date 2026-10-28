@@ -1,16 +1,22 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Production times by size, fixings in the order emails — 28 October 2026
+## Production times by size, fixings in the order emails: LIVE — 28 October 2026, 06:48 UTC
 
 - **Why:** the owner (msg 6947): any shape within 600 × 400 mm 5 working days, aged brass 7, wood backing 10 up to A4
   and 15 above, the longest that applies (15 at most); and add a fixings line to the order email.
-- **Branch:** `codex/instaplaque-production-times-20261028`, based on the live designer branch (7c7d075). Base new work
-  on it once it is live.
+- **Branch:** `codex/instaplaque-production-times-20261028`, based on the designer wording branch (7c7d075). This is
+  now the live source; base new work on it.
 - **What changed:** `services/productionTime.mjs` is the one rule (designer, checkout, Stripe, catalogue/feed, email
   fallback); 25 of 175 catalogue offers get shorter times; "Fixings" line in the new-paid-order and production-pack
   emails; timing list, FAQ and terms copy. Details and checks: `docs/production-times-2026-10-28.md`.
 - **Checks:** new `check-production-time.mjs` and `check-custom-size-turnaround.mjs`, updated `check-audit-checkout.mjs`,
   build with postbuild checks, scoped `tsc`.
+- **Live:** promoted on the owner's instruction (msg 6947): dpl_2tbktHyiKAX62KXH3DZ9AGxZ2fse (instaplaque-qxw1hjk89,
+  `index-DEaUd31m.js`) on both domains.
+  - `verify_live.py` passed.
+  - The live feed has exactly the 25 expected handling-time changes, and no price or title changes.
+  - Product pages show the new days.
+- **Rollback:** promote dpl_F6osRRkzwag6cRMa3FooGwL1r9XQ (instaplaque-b8vdvugof, the designer wording release).
 
 ## Designer wording step: LIVE — 27 October 2026, 21:08 UTC
 

@@ -1,5 +1,25 @@
 # Production times by size, and fixings in the order emails (28 October 2026)
 
+## Live
+
+- Promoted at 06:48 UTC on 28 Oct, as the owner instructed (msg 6947): instaplaque-qxw1hjk89
+  (dpl_2tbktHyiKAX62KXH3DZ9AGxZ2fse, `index-DEaUd31m.js`). Both domains checked with `vercel inspect`.
+- Live checks:
+  - `verify_live.py` with `BUNDLE=index-DEaUd31m.js` passed: 175 product pages, 633 linked assets identical to `public/`,
+    the feed and the sitemaps.
+  - The live feed against the 25 Oct copy: the same 175 ids; 25 handling times changed (15→10: 12, 15→5: 11, 15→7: 2);
+    no price or title changed; the 24 changed descriptions all go with a days change.
+  - Product pages: the stainless 250 × 150 oval and 200 × 200 circle say 5 working days; the 200 × 150 on dark wood
+    says 10. `/design` and `/terms` serve the new bundle, and the terms say "28 October 2026".
+  - The browser check didn't run on the live site: the account was at 3.9 GiB, over the 3 GiB rule for heavy jobs.
+    Instead, the live `Controls-B9KPpPX9.js` matches the locally tested `Controls-CFTQ4jyP.js` byte for byte once
+    chunk names are normalised, and the live main bundle carries the new rule's notes.
+- Rollback: `vercel promote https://instaplaque-b8vdvugof-dullaghan31-3959s-projects.vercel.app --yes --scope
+  dullaghan31-3959s-projects`, with `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` set. That is the designer wording release,
+  dpl_F6osRRkzwag6cRMa3FooGwL1r9XQ.
+- Orders already paid keep the days saved at checkout. The 100 × 50 order above stays due 17 Nov; the owner will send it
+  out earlier.
+
 ## Why
 
 A £59 order for a brushed brass 100 × 50 mm plaque (paid 27 Oct, 23:12 UTC) was due 15 working days later, on 17 Nov,
