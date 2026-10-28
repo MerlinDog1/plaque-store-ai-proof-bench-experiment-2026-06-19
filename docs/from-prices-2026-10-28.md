@@ -88,3 +88,27 @@ projects/instaplaque-google-ads-memorial-20261009). Once this is live, the memor
      memorial, garden and stainless "From £58.50", brass "From £63.50", tree "From £187.50".
   - Rollback: promote dpl_QCbB8CX9ekQjg63py3Za3i6goQsG (instaplaque-gz1ge8cbh), then run the ads script's `undo` if
     the ads were changed.
+
+## LIVE — 28 October 2026, 11:00 UTC (owner msg 7015, "go")
+
+- Pre-flight: production was still dpl_QCbB8CX9ekQjg63py3Za3i6goQsG, and no newer deployment or branch existed.
+- Promoted instaplaque-3ao2t833a at 11:00:02 UTC (`vercel promote`, 3 s). instaplaque.co.uk and www point to
+  dpl_3Kf1w2qQ6q6WCopG4nokYR28zfaV (`vercel inspect`); the homepage serves `index-urC02j3R.js`.
+- `BASE=https://instaplaque.co.uk node scripts/check-from-prices.mjs`: RESULT PASS, 45 checks, 0 failures. The same
+  check found 13 failures on the previous release.
+- `verify_live.py` (`BUNDLE=index-urC02j3R.js`): RESULT PASS. It covers 175 product pages, 633 assets identical to
+  `public/`, both sitemaps (25 and 175 URLs) and the feed (175 items).
+- No browser check: the account was at 3.8 GiB, over the 3 GiB limit for starting a browser job.
+- **Google Ads, applied 11:00:31 UTC** (`scripts/lower-from-prices-20261028.py` in
+  projects/instaplaque-google-ads-memorial-20261009, commit d330158):
+  - It first confirmed that each landing page shows the new price, then sent a validateOnly request, then all five
+    changes in one request.
+  - Pinned headlines changed: memorial, garden and stainless "From £58.50", brass "From £63.50", tree "From £187.50".
+    Each stays pinned to position 2.
+  - The read-back matched. Google's status shows all five as approved.
+  - Unchanged: bench (£58.50), graves (£63.50, as in its description) and the two portrait ads (£95.50).
+  - The previous headlines are saved in output/instaplaque-ads-plan-20261025/lower-from-prices-20261028-state.json.
+- **Rollback:**
+  1. Promote dpl_QCbB8CX9ekQjg63py3Za3i6goQsG (instaplaque-gz1ge8cbh).
+  2. Run `python3 -I scripts/lower-from-prices-20261028.py undo`, so the ads don't quote prices the pages no longer
+     show.

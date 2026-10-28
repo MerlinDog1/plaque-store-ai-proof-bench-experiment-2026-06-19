@@ -1,6 +1,6 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## From-prices are each page's cheapest plaque: STAGED, not live — 28 October 2026
+## From-prices are each page's cheapest plaque: LIVE — 28 October 2026, 11:00 UTC
 
 - **Why:** the owner (msg 7009): "our from price still seems way high always" (the stainless page said from £95.50; its
   150 × 50 mm plate is £58.50).
@@ -13,8 +13,12 @@
   - Details: `docs/from-prices-2026-10-28.md`.
 - **Check:** `scripts/check-from-prices.mjs` (new, in postbuild). It fails 13 ways on the current live site.
 - **Checks:** CI typecheck passes; Vercel postbuild passes, including the new check; the candidate's pages pass it.
-- **Not live:** candidate instaplaque-3ao2t833a (dpl_3Kf1w2qQ6q6WCopG4nokYR28zfaV) waits for the owner's go. The Google
-  Ads price headlines change only after this is live (`scripts/lower-from-prices-20261028.py` in the ads checkout).
+- **Live (owner msg 7015):** dpl_3Kf1w2qQ6q6WCopG4nokYR28zfaV (instaplaque-3ao2t833a, `index-urC02j3R.js`) on both
+  domains. `check-from-prices.mjs` on live and `verify_live.py` pass. This branch is now the live source; base new work
+  on it.
+- **Ads:** the memorial, garden, stainless, brass and tree ads' pinned price headlines now match the pages
+  (`scripts/lower-from-prices-20261028.py` in the ads checkout, applied 11:00 UTC).
+- **Rollback:** promote dpl_QCbB8CX9ekQjg63py3Za3i6goQsG, then run that script's `undo`.
 
 ## Promo film watch tracking in PostHog: LIVE — 28 October 2026, 10:24 UTC
 
