@@ -12,7 +12,9 @@
   - The homepage tiles show each page's own price.
   - Details: `docs/from-prices-2026-10-28.md`.
 - **Check:** `scripts/check-from-prices.mjs` (new, in postbuild). It fails 13 ways on the current live site.
-- **Not live:** waits for the owner's go. The Google Ads price headlines change only after this is live.
+- **Checks:** CI typecheck passes; Vercel postbuild passes, including the new check; the candidate's pages pass it.
+- **Not live:** candidate instaplaque-3ao2t833a (dpl_3Kf1w2qQ6q6WCopG4nokYR28zfaV) waits for the owner's go. The Google
+  Ads price headlines change only after this is live (`scripts/lower-from-prices-20261028.py` in the ads checkout).
 
 ## Promo film watch tracking in PostHog: LIVE — 28 October 2026, 10:24 UTC
 

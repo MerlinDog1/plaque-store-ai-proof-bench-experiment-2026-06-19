@@ -64,3 +64,27 @@ Against the live site before this change it reports 13 failures: 6 heroes and 7 
 Each search ad's pinned "From £" headline quotes its landing page's hero price (scripts/pin-prices-20261026.py in
 projects/instaplaque-google-ads-memorial-20261009). Once this is live, the memorial, garden and stainless ads can say
 £58.50, brass £63.50 and tree £187.50. Each edit goes back to Google's review. That needs the owner's go.
+
+## Checks and candidate
+
+- CI (draft PR #22, base: the live source): the typecheck passes. CI then stops at `check:google-purchase` ("Public pages
+  retain one loader"), which fails the same way on the live source and isn't touched here.
+- Vercel's build passed every postbuild check, including the new one (RESULT PASS).
+- **Candidate (not live):** built with `vercel deploy --prod --skip-domain` from 41e495a:
+  https://instaplaque-3ao2t833a-dullaghan31-3959s-projects.vercel.app (dpl_3Kf1w2qQ6q6WCopG4nokYR28zfaV, `index-urC02j3R.js`).
+  - The pages fetched through `vercel curl` pass `DIST=<them> node scripts/check-from-prices.mjs` (8 heroes, 8 finish
+    tiles and every other tile).
+  - The hero lines and the memorial FAQ read as in the table above.
+  - instaplaque.co.uk is still dpl_QCbB8CX9ekQjg63py3Za3i6goQsG (`vercel inspect`).
+  - Not run: a local build or browser check. The account was at 3.8 GiB, over the 3 GiB limit for heavy jobs.
+- **To go live (on the owner's go):**
+  1. Check production is still dpl_QCbB8CX9ekQjg63py3Za3i6goQsG.
+  2. Run `vercel promote https://instaplaque-3ao2t833a-dullaghan31-3959s-projects.vercel.app --yes --scope
+     dullaghan31-3959s-projects`.
+  3. Run `BASE=https://instaplaque.co.uk node scripts/check-from-prices.mjs` and `verify_live.py` with
+     `BUNDLE=index-urC02j3R.js`.
+  4. Ads: in projects/instaplaque-google-ads-memorial-20261009, run
+     `python3 -I scripts/lower-from-prices-20261028.py validate`, then `apply`. It changes five pinned headlines:
+     memorial, garden and stainless "From £58.50", brass "From £63.50", tree "From £187.50".
+  - Rollback: promote dpl_QCbB8CX9ekQjg63py3Za3i6goQsG (instaplaque-gz1ge8cbh), then run the ads script's `undo` if
+    the ads were changed.
