@@ -212,3 +212,18 @@
   4. Afterwards, the owner can submit the sitemap again in Search Console, or Cody can ping it. Search Console for
      InstaPlaque isn't shared with Cody's service account.
   - Rollback: promote dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (instaplaque-j69fq1m7u).
+- **LIVE (owner msg 7004, "ok push all this live"):** promoted instaplaque-rd8msp6l3 at 10:08:33 UTC on 28 Oct.
+  - Pre-flight: production was still dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy, and no newer deployment or branch existed.
+  - `vercel promote` took 3 s. instaplaque.co.uk and www point to dpl_4MYqFi8ExJbiX9DRCwz4MVyTU9EP (`vercel inspect`);
+    www returns 308 to the apex.
+  - `verify_live.py` (`BUNDLE=index-BPx8Mq_0.js`): RESULT PASS. It covers 175 product pages, 633 assets identical to
+    `public/`, both sitemaps (25 and 175 URLs) and the feed (175 items).
+  - Live HTTP checks pass:
+    - the homepage and memorial page lead with the film and link to `/video`;
+    - `/video` has the video source, VideoObject and og:video;
+    - the sitemap has the video entry, and the three thumbnails are `image/jpeg`;
+    - the video answers range requests (206);
+    - the tree page keeps its photo.
+  - The browser check (`check-promo-video.mjs`) wasn't run against the live site. The account was at 3.9 GiB, over the
+    3 GiB limit for starting a browser job. The same build passed it locally (9 of 9) before it was staged.
+  - Rollback: promote dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (instaplaque-j69fq1m7u).
