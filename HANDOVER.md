@@ -1,5 +1,17 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Promo film at the top, buttons glowing in turn: STAGED, not live — 28 October 2026
+
+- **Why:** the owner (msg 6986): the film at the top of the page, with "Design online" glowing while it shows the
+  designer and "Design on WhatsApp" while it shows the chat.
+- **Branch:** `codex/instaplaque-hero-film-20261028`, based on the live promo-film release (f4d52a5).
+- **What changed:** the film replaces the hero photo on the homepage and the category pages, except the tree page. It
+  sits beside the copy on computers and straight under the two buttons on phones. The category's photo follows the
+  hero. While the film plays, the cued button gets a gold ring. Details: `docs/promo-video-2026-10-28.md`.
+- **Checks:** scoped `tsc`, the build with postbuild checks, and the rewritten `scripts/check-promo-video.mjs` all pass
+  locally.
+- **Not live:** it waits for the owner's go.
+
 ## Promo film after the hero (homepage and category pages): LIVE — 28 October 2026, 08:30 UTC
 
 - **Why:** the owner (msg 6977, "Yeah do all 3"): a silent loop of the new promo film near the top of the homepage and

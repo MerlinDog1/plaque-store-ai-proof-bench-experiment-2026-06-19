@@ -7,7 +7,7 @@ import { HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { offerSizeLabel } from './CatalogueDetails';
 import { DesignLink, ProductPicks } from './Shopfront';
 import { PriceTable, priceTableIncludes, priceTableIncludesOnStake } from './PriceTable';
-import { PromoVideoSection } from './PromoVideo';
+import { PromoFilmFigure } from './PromoVideo';
 
 // Category landing sections, phone first. The memorial plaques page was built from them first (owner msg 5876,
 // 24 Oct 2026: "make memorial page amazing and then use as yardstick to measure against other pages"), then every
@@ -35,22 +35,27 @@ function Price({ slug, bare = false }: { slug: string; bare?: boolean }) {
 
 type HeroImage = { src: string; srcSet: string; alt: string; caption?: React.ReactNode };
 
-function HeroPhoto({ image, className }: { image: HeroImage; className: string }) {
+function HeroPhoto({ image, className, below = false }: { image: HeroImage; className: string; below?: boolean }) {
   // Phones show it inline under the headline, desktops beside the copy. Identical src, srcset and sizes,
-  // so the browser downloads one file and React emits one preload.
+  // so the browser downloads one file and React emits one preload. Where the promo film has the hero (owner msg
+  // 6986), the photo comes straight after it instead (below), loaded as it nears the screen.
   return (
     <figure className={`cat-hero-photo ${className}`}>
-      <img src={image.src} srcSet={image.srcSet} sizes="(max-width: 720px) 100vw, 620px" width="1600" height="1200" fetchPriority="high" alt={image.alt} />
+      {below
+        ? <img src={image.src} srcSet={image.srcSet} sizes="(max-width: 720px) 100vw, 760px" width="1600" height="1200" loading="lazy" decoding="async" alt={image.alt} />
+        : <img src={image.src} srcSet={image.srcSet} sizes="(max-width: 720px) 100vw, 620px" width="1600" height="1200" fetchPriority="high" alt={image.alt} />}
       {image.caption && <figcaption>{image.caption}</figcaption>}
     </figure>
   );
 }
 
-export function CategoryHero({ product, title, note, image, price, priceNote, trust, onLaunch, onRequestDesign }: {
+export function CategoryHero({ product, title, note, image, film = false, price, priceNote, trust, onLaunch, onRequestDesign }: {
   product: ProductFamily;
   title: string;
   note: string;
   image: HeroImage;
+  /** The promo film instead of the photo (owner msg 6986): beside the copy on computers, under the buttons on phones. */
+  film?: boolean;
   /** A from-price other than the category's own (the custom page has no standard price; it shows its ovals'). */
   price?: { label: string; slug: string };
   priceNote: string;
@@ -72,13 +77,14 @@ export function CategoryHero({ product, title, note, image, price, priceNote, tr
           </strong>
           <span>{priceNote}</span>
         </p>
-        <HeroPhoto image={image} className="cat-hero-photo-inline" />
+        {!film && <HeroPhoto image={image} className="cat-hero-photo-inline" />}
         <div className="shop-hero-choices">
           <DesignLink onStart={onLaunch}>Design online</DesignLink>
           <ContactLink channel="whatsapp" placement="hero" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
             <WhatsAppIcon /> Design on WhatsApp
           </ContactLink>
         </div>
+        {film && <PromoFilmFigure className="cat-hero-film-inline" />}
         <p className="shop-hero-design-request">
           Prefer us to design it? <a href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Send us your words – free proof</a>
         </p>
@@ -86,8 +92,17 @@ export function CategoryHero({ product, title, note, image, price, priceNote, tr
           {trust.map(item => <li key={item}>{item}</li>)}
         </ul>
       </div>
-      <HeroPhoto image={image} className="cat-hero-photo-side" />
+      {film ? <PromoFilmFigure className="cat-hero-film-side" /> : <HeroPhoto image={image} className="cat-hero-photo-side" />}
     </section>
+  );
+}
+
+/** The category's own photo, straight after a hero that has the film: the exact plaque, with its price and link. */
+export function ShownPhoto({ image }: { image: HeroImage }) {
+  return (
+    <div className="cat-shown">
+      <HeroPhoto image={image} className="cat-shown-photo" below />
+    </div>
   );
 }
 
@@ -347,6 +362,15 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
   const parent = categoryParentFor(product.slug);
   const id = (name: string) => `${config.prefix}-${name}`;
   const { hero, routes, examples, sizes, wording } = config;
+  // The film says "Made in 5 working days*", so it leads every category page except the tree page, where every plaque
+  // is on an oak board and stake (10–15 working days); that page keeps its photo at the top.
+  const film = sizes.mount !== 'stake';
+  const heroImage: HeroImage = {
+    src: `${hero.base}-1200.webp`,
+    srcSet: `${hero.base}-800.webp 800w, ${hero.base}-1200.webp 1200w, ${hero.base}-1600.webp 1600w`,
+    alt: hero.alt,
+    caption: hero.caption,
+  };
   return (
     <div className="shopfront cat-page" data-prerendered="true">
       <div className="shop-breadcrumb">
@@ -359,21 +383,15 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
         product={product}
         title={config.title}
         note={config.note}
-        image={{
-          src: `${hero.base}-1200.webp`,
-          srcSet: `${hero.base}-800.webp 800w, ${hero.base}-1200.webp 1200w, ${hero.base}-1600.webp 1600w`,
-          alt: hero.alt,
-          caption: hero.caption,
-        }}
+        image={heroImage}
+        film={film}
         price={config.price}
         priceNote={config.priceNote}
         trust={config.trust || defaultTrust}
         onLaunch={onLaunch}
         onRequestDesign={onRequestDesign}
       />
-      {/* The promo film after the hero (owner msg 6977), except where every plaque is on an oak board and stake: the
-          film says "Made in 5 working days*", and those take 10–15. */}
-      {sizes.mount !== 'stake' && <PromoVideoSection id={id('video')} />}
+      {film && <ShownPhoto image={heroImage} />}
       {routes && <PlaceRoutes id={id('places')} kicker={routes.kicker} title={routes.title} routes={routes.routes} more={routes.more} />}
       {examples && <ExamplesRow id={id('examples')} kicker={examples.kicker} title={examples.title} intro={examples.intro} items={examples.items} />}
       {picks && <ProductPicks {...picks} id={id('picks')} className="cat-picks" />}

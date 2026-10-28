@@ -76,3 +76,45 @@
 - **Rollback:** `vercel promote https://instaplaque-qxw1hjk89-dullaghan31-3959s-projects.vercel.app --yes --scope
   dullaghan31-3959s-projects`, with `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` set. That is the production-times release
   (dpl_2tbktHyiKAX62KXH3DZ9AGxZ2fse), identical apart from this section.
+
+## Film at the top, buttons glowing in turn (owner msg 6986): STAGED, not live
+
+- **Why:** the owner (msg 6986): "would the video work better at the top of the page? imagine the button for design
+  online glows as video plays that and then the whats app one does?"
+- **Branch:** `codex/instaplaque-hero-film-20261028`, based on the live promo-film release (f4d52a5).
+- **What changed:**
+  - `components/PromoVideo.tsx`:
+    - `PromoFilm` now has the poster in the static HTML and adds a high-priority preload for it.
+    - The 1.3 MB video is requested only after the page's load event, once the film is near the screen. A hidden copy
+      never loads.
+    - Reduced motion or Save-Data: no autoplay.
+    - While the film plays on screen, it sets `data-promo-cue` on the page's `.shopfront`, from `promoCueAt()`: `design`
+      until the chat (frame 332), `whatsapp` until the end card (frame 566), then `both`. Paused or off screen, the
+      attribute is removed.
+    - `PromoFilmFigure` adds the small print as a caption.
+    - The separate "See it in 20 seconds" section is gone.
+  - **Homepage:** the film replaces the bench photo beside the copy on computers. On phones it sits straight under the
+    two buttons.
+  - **Category pages** (`CategoryHero` with `film`): the film replaces the hero photo, again beside the copy on
+    computers and under the buttons on phones.
+    - The category's own photo and its "Shown: …" caption follow the hero (`ShownPhoto`, lazy-loaded).
+    - The tree page keeps its photo at the top and has no film, as before.
+  - `shopfront.css`: `.promo-film*` and the hero slots.
+    - The cued hero buttons, and the phone bar's once it is up, get a gold ring (`#d6aa52`).
+    - The ring pulses (`promo-cue`) only for visitors who haven't asked for less motion.
+  - `scripts/check-live-seo.mjs`: the homepage hero assertion now looks for the film and its poster instead of the bench
+    photo.
+- **Checks:**
+  - Scoped `tsc` passes.
+  - `npm run build` passes with all postbuild checks.
+  - `scripts/check-promo-video.mjs`, rewritten for the hero: RESULT PASS on the local build. It checks:
+    - phones (`/`, `/memorial-plaques`): the film is straight under the buttons, all on the first screen;
+    - the poster is in the static HTML, and the video is requested after the load event by one copy only;
+    - it plays muted; "Design online" glows at 5 s, "Design on WhatsApp" at 14 s and both at 20 s;
+    - pausing, or scrolling it away, stops the glow;
+    - reduced motion: no autoplay, and a steady ring once played;
+    - computers (`/`, `/brass-plaques`): the film is beside the copy and glows the same way;
+    - the photo follows the hero on five ad pages, and the tree page is unchanged.
+  - The local check needs a server with HTTP Range support, or Chrome can't seek in the video. Vercel has it; Python's
+    `http.server` doesn't.
+- Phone and computer recordings, and screenshots, are in `output/hero-film-preview/` (not committed).

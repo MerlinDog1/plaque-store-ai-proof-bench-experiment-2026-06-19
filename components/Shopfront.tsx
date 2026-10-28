@@ -5,7 +5,7 @@ import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, P
 import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
-import { PromoVideoSection } from './PromoVideo';
+import { PromoFilmFigure } from './PromoVideo';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { PriceTable, a5BoardPrice, groundStakePrice, homePriceSizes, priceTableIncludes } from './PriceTable';
 import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
@@ -559,6 +559,8 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
               <WhatsAppIcon /> Design on WhatsApp
             </ContactLink>
           </div>
+          {/* The promo film at the top (owner msg 6986): on phones straight under the two buttons it lights up. */}
+          <PromoFilmFigure className="shop-hero-film-inline" />
           {/* Customers increasingly arrive with an AI mock-up (owner msg 5156). */}
           <p className="shop-hero-ai-note">
             Made a design in ChatGPT? <ContactLink channel="whatsapp" placement="hero" subject="a plaque">Send us the picture</ContactLink> and we’ll make it real.
@@ -577,28 +579,9 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           <a className="shop-text-link shop-hero-how" href="#how-it-works">See how the designer works</a>
           <ProductionNote />
         </div>
-        <figure className="shop-hero-image">
-          {/* Hidden on phones, which show the route tiles: point phones at the bench tile they
-              already load, so the 1200 px photo isn't fetched for nothing (review 21 Oct). */}
-          <picture>
-            <source media="(max-width: 720px)" srcSet="/site-images/home-route-bench-480.webp" />
-            <img
-              src="/site-images/home-gallery-brass-bench.webp"
-              srcSet={optimisedSrcSet('/site-images/home-gallery-brass-bench.webp', 1200, [640, 828, 1080])}
-              sizes={optimisedSrcSet('/site-images/home-gallery-brass-bench.webp', 1200, [640]) ? '50vw' : undefined}
-              width="1200"
-              height="1200"
-              fetchPriority="high"
-              alt="Brass memorial plaque on a wooden bench in a garden"
-            />
-          </picture>
-          <figcaption>
-            <span>A name. A memory. A place to pause.</span>
-          </figcaption>
-        </figure>
+        {/* Computers: the promo film beside the buttons, where the bench photo was (owner msg 6986). */}
+        <PromoFilmFigure className="shop-hero-film-side" />
       </section>
-      {/* The promo film, right after the hero (owner msg 6977). */}
-      <PromoVideoSection />
       {/* Owner msg 5860 ("This like repeats on the homepage"): each thing once. Prices by size and metal (owner msg
           6430), which also does the old "Brass or stainless steel?" section's job; then categories, the two ways to
           order, and quality. */}

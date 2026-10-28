@@ -66,7 +66,8 @@ assert(home.includes('Find your plaque.') && home.includes('Your words. Your app
 assert(home.includes('from £58.50'), 'Homepage is missing its visible starting price');
 assert(home.includes('rel="canonical" href="https://instaplaque.co.uk/"'), 'Homepage canonical is missing');
 assert(home.includes('hreflang="en-GB" href="https://instaplaque.co.uk/"'), 'Homepage en-GB alternate is missing');
-assert(home.includes('home-gallery-brass-bench.webp'), 'Shop hero image is missing');
+// The hero's picture is the promo film (owner msg 6986), with its poster in the static HTML.
+assert(home.includes('class="promo-film-player"') && home.includes('poster="/videos/instaplaque-design-in-seconds-20261028-poster.webp"'), 'Shop hero film is missing');
 assert(robots.includes('Sitemap: https://instaplaque.co.uk/sitemap.xml'), 'robots.txt sitemap declaration is missing');
 
 for (const route of ['about', 'memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques', 'garden-plaques', 'opening-plaques', 'portrait-plaques', 'ai-plaque-design', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording']) {
