@@ -112,3 +112,6 @@ projects/instaplaque-google-ads-memorial-20261009). Once this is live, the memor
   1. Promote dpl_QCbB8CX9ekQjg63py3Za3i6goQsG (instaplaque-gz1ge8cbh).
   2. Run `python3 -I scripts/lower-from-prices-20261028.py undo`, so the ads don't quote prices the pages no longer
      show.
+- **Small follow-up for the next release:** `public/sitemap.xml` still gives `/tree-memorial-plaques` a lastmod of
+  2026-10-24, although its from-price changed in this release. Set it to 2026-10-28 with the next site change. The
+  other changed pages already say 2026-10-28.
