@@ -24,7 +24,7 @@ function startingPrice(slug: string) {
   return product ? { slug: product.slug, label: product.startingFrom } : null;
 }
 
-/** "from £95.50" everywhere, or the bare amount where the exact configuration is named (bare). Category
+/** "from £58.50" everywhere, or the bare amount where the exact configuration is named (bare). Category
  * products carry "from …" and exact catalogue products a plain price, so normalise both. */
 function Price({ slug, bare = false }: { slug: string; bare?: boolean }) {
   const price = startingPrice(slug);

@@ -1,5 +1,19 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## From-prices are each page's cheapest plaque: STAGED, not live — 28 October 2026
+
+- **Why:** the owner (msg 7009): "our from price still seems way high always" (the stainless page said from £95.50; its
+  150 × 50 mm plate is £58.50).
+- **Branch:** `codex/instaplaque-from-prices-20261028`, based on the live source (a9bc414).
+- **What changed:**
+  - Hero from-prices: memorial, garden and stainless £58.50; brass £63.50; tree £187.50; opening £95.50.
+  - "Design online" still opens on A5 (A4 on the opening page), and each hero note names that price too.
+  - The brass and stainless finish tiles show and lead to each finish's cheapest plaque.
+  - The homepage tiles show each page's own price.
+  - Details: `docs/from-prices-2026-10-28.md`.
+- **Check:** `scripts/check-from-prices.mjs` (new, in postbuild). It fails 13 ways on the current live site.
+- **Not live:** waits for the owner's go. The Google Ads price headlines change only after this is live.
+
 ## Promo film watch tracking in PostHog: LIVE — 28 October 2026, 10:24 UTC
 
 - **Why:** the owner (msg 7004): "track video views percentage in posthog".

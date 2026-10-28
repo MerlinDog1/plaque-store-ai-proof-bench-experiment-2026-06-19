@@ -45,7 +45,7 @@ const pages = [
     slug: 'memorial-plaques',
     title: 'Memorial Plaques UK | Brass & Stainless Steel Remembrance Plaques',
     description: 'Create a custom memorial plaque for a grave, garden, bench or remembrance wall. Choose brass or stainless steel and approve a proof before ordering.',
-    price: 95.5,
+    price: 58.5,
     image: '/site-images/plaque-hero-memorial-wall-desktop.jpg',
     productType: 'Memorial plaques',
     faqs: [
@@ -69,7 +69,7 @@ const pages = [
     slug: 'brass-plaques',
     title: 'Brass Plaques UK | Custom Engraved Brass Plaques',
     description: 'Custom brass plaques for memorials, benches, openings and presentation use. Choose brushed, polished, orbital or aged brass and approve a proof online.',
-    price: 105.5,
+    price: 63.5,
     image: '/site-images/home-gallery-brass-bench.webp',
     productType: 'Brass plaques',
     faqs: [
@@ -81,7 +81,7 @@ const pages = [
     slug: 'stainless-steel-plaques',
     title: 'Stainless Steel Plaques UK | Outdoor Metal Plaques Made to Order',
     description: 'Custom stainless steel plaques for outdoor, wall, bench and memorial use. Choose brushed or polished stainless and approve your proof before payment.',
-    price: 95.5,
+    price: 58.5,
     image: '/site-images/home-carousel-steel-wall.webp',
     productType: 'Stainless steel plaques',
     faqs: [
