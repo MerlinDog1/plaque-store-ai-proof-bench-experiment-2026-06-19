@@ -7,6 +7,7 @@ import { HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { offerSizeLabel } from './CatalogueDetails';
 import { DesignLink, ProductPicks } from './Shopfront';
 import { PriceTable, priceTableIncludes, priceTableIncludesOnStake } from './PriceTable';
+import { PromoVideoSection } from './PromoVideo';
 
 // Category landing sections, phone first. The memorial plaques page was built from them first (owner msg 5876,
 // 24 Oct 2026: "make memorial page amazing and then use as yardstick to measure against other pages"), then every
@@ -370,6 +371,9 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
         onLaunch={onLaunch}
         onRequestDesign={onRequestDesign}
       />
+      {/* The promo film after the hero (owner msg 6977), except where every plaque is on an oak board and stake: the
+          film says "Made in 5 working days*", and those take 10–15. */}
+      {sizes.mount !== 'stake' && <PromoVideoSection id={id('video')} />}
       {routes && <PlaceRoutes id={id('places')} kicker={routes.kicker} title={routes.title} routes={routes.routes} more={routes.more} />}
       {examples && <ExamplesRow id={id('examples')} kicker={examples.kicker} title={examples.title} intro={examples.intro} items={examples.items} />}
       {picks && <ProductPicks {...picks} id={id('picks')} className="cat-picks" />}

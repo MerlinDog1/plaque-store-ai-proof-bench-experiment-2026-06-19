@@ -5,6 +5,7 @@ import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, P
 import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
+import { PromoVideoSection } from './PromoVideo';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { PriceTable, a5BoardPrice, groundStakePrice, homePriceSizes, priceTableIncludes } from './PriceTable';
 import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
@@ -596,6 +597,8 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
           </figcaption>
         </figure>
       </section>
+      {/* The promo film, right after the hero (owner msg 6977). */}
+      <PromoVideoSection />
       {/* Owner msg 5860 ("This like repeats on the homepage"): each thing once. Prices by size and metal (owner msg
           6430), which also does the old "Brass or stainless steel?" section's job; then categories, the two ways to
           order, and quality. */}
