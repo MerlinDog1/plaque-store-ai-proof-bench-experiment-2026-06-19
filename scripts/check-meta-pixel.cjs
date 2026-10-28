@@ -4,7 +4,7 @@ function setup(consent,url='https://instaplaque.co.uk/checkout') { const map=new
 const order={total:95.5,stripeSimulation:{provider:'stripe',mode:'live',checkoutSessionId:'synthetic-session',checkoutUrl:'https://checkout.stripe.com/test'}};
 let x=setup();assert.equal(x.m.trackMetaCheckout(order),false);assert.equal(x.scripts.length,0);
 x.m.setMetaConsent(true);assert.equal(x.scripts.length,1);assert.equal(x.m.trackMetaCheckout(order),true);assert.equal(x.m.trackMetaCheckout(order),false);
-const events=x.c.window.fbq.queue;const checkout=events.find(e=>e[2]==='InitiateCheckout');assert.equal(checkout[1],'2766586460430567');assert.equal(checkout[3].value,95.5);assert.equal(JSON.stringify(events).includes('synthetic-session'),false);
+const events=x.c.window.fbq.queue;const checkout=events.find(e=>e[2]==='InitiateCheckout');assert.equal(checkout[1],'4216755011787795');assert.equal(checkout[3].value,95.5);assert.equal(JSON.stringify(events).includes('synthetic-session'),false);
 x.m.setMetaConsent(false);assert.equal(x.m.trackMetaCheckout({...order,stripeSimulation:{...order.stripeSimulation,checkoutSessionId:'second'}}),false);
 for (const url of ['https://instaplaque.co.uk/proof/private','https://instaplaque.co.uk/?proof=secret','https://instaplaque.co.uk/order/private','https://instaplaque.co.uk/?view=admin']) {x=setup('yes',url);assert.equal(x.m.enableMeta(),false);assert.equal(x.scripts.length,0);}
 // The owner's own browsers (?internal=on, owner msg 6422) never load the pixel or report a checkout.

@@ -1,4 +1,6 @@
-export const META_PIXEL_ID = '2766586460430567';
+// InstaPlaque's own dataset, made in the INSTAPLAQUE ad account on 28 Oct 2026 (owner msg 7132). The old 2766586460430567
+// sits in another portfolio and was never connected to InstaPlaque's ads; PIM's landing page still uses it.
+export const META_PIXEL_ID = '4216755011787795';
 export const META_CONSENT_KEY = 'instaplaque-meta-consent';
 export const OPTIONAL_AD_CONSENT_CHANGED = 'instaplaque:optional-ad-consent-changed';
 // The owner's own browsers are left out of every statistic (owner msg 6422, 25 Oct 2026: "Is there a way to hide my
