@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { preload } from 'react-dom';
 import { promoVideo, promoVideoMoments, promoVideoPath, promoVideoTime } from '../services/promoVideo.mjs';
+import { trackSiteEvent } from '../services/posthogAnalytics';
+import { watchPromoFilm } from '../services/promoVideoTracking';
 import { ContactLink, MobileContactBar, WhatsAppIcon } from './ContactOptions';
 import { DesignLink } from './Shopfront';
 
@@ -27,8 +29,9 @@ const quiet = () => {
 
 /** The silent looping film. The poster (55 kB, the film's own first second) is in the static HTML, so it paints with the
  * page; the 1.3 MB video is requested only after the page has finished loading and only once the film is near the
- * screen (a hidden copy, e.g. the computer one on a phone, never loads). It plays only while on screen and has its own
- * pause button (WCAG 2.2.2). While it plays, the page's .shopfront carries data-promo-cue for the buttons to glow.
+ * screen (a hidden copy, e.g. the computer one on a phone, never loads). It plays only while on screen and the tab is
+ * showing, and has its own pause button (WCAG 2.2.2). While it plays, the page's .shopfront carries data-promo-cue for
+ * the buttons to glow. PostHog hears how far it plays (services/promoVideoTracking.ts).
  * On the watch page (eager) the film is the page, so its source is in the static HTML for search engines; preload="none"
  * still means nothing is downloaded until it plays. */
 export function PromoFilm({ eager = false }: { eager?: boolean }) {
@@ -37,8 +40,10 @@ export function PromoFilm({ eager = false }: { eager?: boolean }) {
   const video = useRef<HTMLVideoElement>(null);
   const [near, setNear] = useState(eager);
   const [onScreen, setOnScreen] = useState(false);
+  const [showing, setShowing] = useState(true); // the tab is visible
   const [stopped, setStopped] = useState<boolean | null>(null); // the visitor's choice; null until they make one
   const [playing, setPlaying] = useState(false);
+  const tapped = useRef(false); // the visitor pressed play, so it didn't start by itself
 
   useEffect(() => {
     const element = frame.current;
@@ -67,14 +72,28 @@ export function PromoFilm({ eager = false }: { eager?: boolean }) {
     return () => { approach.disconnect(); view.disconnect(); cancelLoad(); };
   }, []);
 
+  // A film in a background tab isn't being watched, so it waits for the tab to show (and doesn't count as watched).
+  useEffect(() => {
+    const update = () => setShowing(document.visibilityState !== 'hidden');
+    update();
+    document.addEventListener('visibilitychange', update);
+    return () => document.removeEventListener('visibilitychange', update);
+  }, []);
+
   useEffect(() => {
     const element = video.current;
     if (!element || !near) return;
     element.muted = true; // the property, which autoplay rules check (React doesn't always set the attribute)
-    const wanted = onScreen && (stopped === null ? !quiet() : !stopped);
+    const wanted = onScreen && showing && (stopped === null ? !quiet() : !stopped);
     if (wanted) element.play().catch(() => setPlaying(false));
     else element.pause();
-  }, [near, onScreen, stopped]);
+  }, [near, onScreen, showing, stopped]);
+
+  useEffect(() => {
+    const element = video.current;
+    if (!element) return;
+    return watchPromoFilm(element, promoVideo.id, (event, properties, onceKey) => trackSiteEvent(event, properties, onceKey), () => tapped.current);
+  }, []);
 
   useEffect(() => {
     const element = video.current;
@@ -117,7 +136,7 @@ export function PromoFilm({ eager = false }: { eager?: boolean }) {
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       />
-      <button type="button" className="promo-film-toggle" onClick={() => setStopped(playing)} aria-label={playing ? 'Pause the video' : 'Play the video'}>
+      <button type="button" className="promo-film-toggle" onClick={() => { if (!playing) tapped.current = true; setStopped(playing); }} aria-label={playing ? 'Pause the video' : 'Play the video'}>
         {playing ? (
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" /></svg>
         ) : (

@@ -8,6 +8,8 @@
 export const promoVideoPath = '/video';
 
 export const promoVideo = {
+  // The film's name in PostHog's watch events (services/promoVideoTracking.ts). A new cut gets a new one, as its files do.
+  id: 'design-in-seconds-20261028',
   name: 'Design your plaque in seconds',
   // Shown on the watch page, and used as its meta description, the VideoObject description and the sitemap entry.
   description: 'See how to design a plaque with InstaPlaque in 22 seconds. Type your words into our online designer and our AI lays them out on the plaque, then swap between four metal finishes. Or send your words on WhatsApp and we’ll design it for you, with a free PDF proof and a link to order.',

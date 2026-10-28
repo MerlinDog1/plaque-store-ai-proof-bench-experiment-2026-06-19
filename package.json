@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit",
     "check:admin-orders": "node scripts/check-admin-order-list.mjs",
     "check:analytics-redaction": "node scripts/check-analytics-redaction.mjs",
-    "check:posthog": "node scripts/check-posthog-analytics.cjs",
+    "check:posthog": "node scripts/check-posthog-analytics.cjs && node scripts/check-promo-video-tracking.cjs",
     "check:replay": "node scripts/check-session-replay.cjs",
     "check:gcr": "node scripts/check-google-customer-reviews.cjs",
     "check:google-purchase": "node scripts/check-google-purchase.cjs",

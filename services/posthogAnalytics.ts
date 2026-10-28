@@ -20,7 +20,9 @@ const publicPaths = new Set(['/', '/design', '/design-request', '/about', '/mate
 const events = new Set(['visit', 'page_viewed', 'product_viewed', 'designer_started', 'designer_step_viewed', 'wording_started',
   'layout_requested', 'layout_generated', 'layout_failed', 'proof_download_requested', 'proof_download_prepared', 'proof_download_failed',
   'proof_saved', 'proof_email_requested', 'proof_emailed', 'proof_email_failed', 'checkout_requested', 'checkout_started', 'checkout_failed', 'purchase_completed',
-  'enquiry_started', 'enquiry_reviewed', 'enquiry_submission_requested', 'enquiry_submitted', 'enquiry_failed', 'contact_clicked', 'price_viewed']);
+  'enquiry_started', 'enquiry_reviewed', 'enquiry_submission_requested', 'enquiry_submitted', 'enquiry_failed', 'contact_clicked', 'price_viewed',
+  // How far the promo film plays (services/promoVideoTracking.ts). PostHog only: they aren't funnel steps for GA4.
+  'video_started', 'video_progress']);
 // These are observations of the funnel, not confirmed leads or purchases.
 // Account-side Ads conversion settings must keep contact taps secondary.
 const googleFunnelEvents = new Set(['designer_started', 'designer_step_viewed', 'wording_started', 'price_viewed',
@@ -140,6 +142,10 @@ function safeProperties(input: Properties): Properties {
   }
   if (typeof input.product === 'string' && products.has(input.product)) result.product = input.product;
   if (typeof input.contact_reference === 'string' && /^IP-[A-F0-9]{10}$/.test(input.contact_reference)) result.contact_reference = input.contact_reference;
+  // The promo film's watch events: which film (services/promoVideo.mjs id), how far it played, and whether it started by itself.
+  if (typeof input.video === 'string' && /^[a-z0-9-]{1,64}$/.test(input.video)) result.video = input.video;
+  if (typeof input.percent === 'number' && [25, 50, 75, 100].includes(input.percent)) result.percent = input.percent;
+  if (typeof input.autoplay === 'boolean') result.autoplay = input.autoplay;
   for (const key of ['width_mm', 'height_mm']) {
     if (typeof input[key] === 'number' && Number.isFinite(input[key]) && input[key] > 0 && input[key] <= 3000) result[key] = input[key];
   }
