@@ -1,6 +1,25 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Promo film at the top, buttons glowing in turn, video schema and /video: STAGED, not live — 28 October 2026
+## Promo film watch tracking in PostHog: LIVE — 28 October 2026, 10:24 UTC
+
+- **Why:** the owner (msg 7004): "track video views percentage in posthog".
+- **Branch:** `codex/instaplaque-video-tracking-20261028`, based on the hero film release below. This branch is now the
+  live source; base new work on it. Draft PR #21 exists only for CI.
+- **What changed:**
+  - PostHog gets `ip_video_started` (with `autoplay`) and `ip_video_progress` (`percent` 25/50/75/100), once per visit
+    and page, with analytics consent only, never to GA4.
+  - The film also pauses while its tab is hidden.
+  - The privacy notice lists it (updated 28 October 2026).
+  - Details: `docs/promo-video-2026-10-28.md`.
+- **Checks:** `npm run check:posthog` (now including `scripts/check-promo-video-tracking.cjs`) passes locally and in CI,
+  as does the CI typecheck. Vercel's build passes every postbuild check. No browser run: the account was over 3 GiB.
+- **Known failure, older than this change:** `check:google-purchase` fails in CI and locally ("Public pages retain one
+  loader"). None of its inputs changed here; it likely dates from the 26 Oct page-speed change to `index.html`.
+- **Live:** dpl_QCbB8CX9ekQjg63py3Za3i6goQsG (instaplaque-gz1ge8cbh, `index-M8D_2WTP.js`) on both domains; live HTTP
+  checks and `verify_live.py` pass. The first real phone visit (10:25 UTC) sent started, 25/50/75/100% on time.
+- **Rollback:** promote dpl_4MYqFi8ExJbiX9DRCwz4MVyTU9EP (instaplaque-rd8msp6l3).
+
+## Promo film at the top, buttons glowing in turn, video schema and /video: LIVE — 28 October 2026, 10:08 UTC
 
 - **Why:** the owner (msg 6986): the film at the top of the page, with "Design online" glowing while it shows the
   designer and "Design on WhatsApp" while it shows the chat.
@@ -15,9 +34,9 @@
     sitemap entry.
   - The film's facts live in `services/promoVideo.mjs`, and the hero captions link to `/video`.
   - Details: `docs/promo-video-2026-10-28.md`.
-- **Not live:** candidate instaplaque-rd8msp6l3 (dpl_4MYqFi8ExJbiX9DRCwz4MVyTU9EP, `index-BPx8Mq_0.js`) has the hero film,
-  the glow and `/video`. It supersedes instaplaque-844r6bzyp and waits for the owner's go. Promote steps and rollback
-  are in the doc.
+- **Live (owner msg 7004):** instaplaque-rd8msp6l3 (dpl_4MYqFi8ExJbiX9DRCwz4MVyTU9EP, `index-BPx8Mq_0.js`) was promoted
+  at 10:08:33 UTC; `verify_live.py` and live HTTP checks pass. The tracking release above replaced it at 10:24.
+- **Rollback:** promote dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (instaplaque-j69fq1m7u, the film after the hero).
 
 ## Promo film after the hero (homepage and category pages): LIVE — 28 October 2026, 08:30 UTC
 
