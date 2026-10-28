@@ -227,3 +227,57 @@
   - The browser check (`check-promo-video.mjs`) wasn't run against the live site. The account was at 3.9 GiB, over the
     3 GiB limit for starting a browser job. The same build passed it locally (9 of 9) before it was staged.
   - Rollback: promote dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (instaplaque-j69fq1m7u).
+
+## Watch tracking in PostHog: LIVE — 28 October 2026, 10:24 UTC
+
+- **Why:** the owner (msg 7004): "track video views percentage in posthog or whatever".
+- **Branch:** `codex/instaplaque-video-tracking-20261028`, based on the hero film release (627e529), which was the live
+  source. Draft PR #21 (base: the hero film branch) exists only to run CI.
+- **Events** go to PostHog EU project 303026 through `trackSiteEvent`. So they're sent only with analytics consent and
+  only on public pages, never go to GA4, and are marked `is_test` from the owner's own browsers (`?internal=on`).
+  - `ip_video_started`: the film started playing. `autoplay` is true when it started by itself, and false when the
+    visitor pressed play (reduced motion, Save-Data, or autoplay blocked, e.g. iPhone Low Power Mode).
+  - `ip_video_progress`: the film played to `percent` 25, 50, 75 or 100. 100 means it reached its last half second
+    (the still end card) or looped back to the start.
+  - Both carry `video` (`design-in-seconds-20261028`, `promoVideo.id`; a new cut gets a new id), plus the usual `page`,
+    source/medium/campaign, device and `is_test`.
+  - Each is sent at most once per visit and page. The visit keeps the keys `video:<path>:<started|25|50|75|100>`.
+- **What "watched" means:** the film plays only while at least 35% of it is on screen and its tab is showing. It has no
+  seek bar, so how far it has played is how far it got on someone's screen. Because it autoplays, `ip_video_started`
+  counts films that started playing on screen, not deliberate plays.
+- **Small behaviour change:** the film now also pauses while its tab is hidden and resumes when the tab shows again.
+  Before, that was up to the browser.
+- **Code:**
+  - `services/promoVideoTracking.ts` (new): `watchPromoFilm` and `promoMilestonesAt`.
+  - `components/PromoVideo.tsx`: attaches the tracker, adds the tab check, and flags a press of the play button.
+  - `services/posthogAnalytics.ts`: allows `video_started` and `video_progress`, with only `video` (a slug), `percent`
+    (25/50/75/100) and `autoplay` (true/false).
+  - `services/promoVideo.mjs`: the film's `id`.
+- **Privacy:** the privacy notice's list of what PostHog measures now includes "how much of our video plays". Privacy
+  updated 28 October 2026, and the sitemap's `/privacy` lastmod matches.
+- **Checks:**
+  - `npm run check:posthog` also runs `scripts/check-promo-video-tracking.cjs` (new). It plays a stand-in `<video>` the
+    way browsers report it and checks:
+    - one start (autoplay or tapped);
+    - 25/50/75/100% once each, in order, with the loop and `ended` counting as the end;
+    - nothing while paused or seeking, before the length is known, or after unmount;
+    - per-page keys.
+  - `scripts/check-posthog-analytics.cjs` adds the watch events: no events before consent, once per key, private values
+    dropped, odd values filtered out, never sent to GA4, and `is_test` for the owner's browsers.
+  - Both pass locally and in CI (run 40671556175), and the full `tsc` typecheck passes in CI. CI then stopped at
+    `check:google-purchase` ("Public pages retain one loader"). That failure is older than this change: it fails the
+    same way locally, and none of its inputs (`index.html`, `services/googlePurchase.ts`, `public/google-purchase.js`)
+    changed. It probably dates from the 26 Oct page-speed change to `index.html`, so it needs its own fix.
+  - Vercel's build passed with every postbuild check. `vercel curl` showed the candidate's bundle has the events, film
+    id and tab check, `/privacy` has the new wording and date, and the sitemap has the new lastmod.
+  - **No browser run:** the account was at 3.7–3.9 GiB, over the 3 GiB limit for starting a browser job. The first real
+    events in PostHog are the in-browser proof. `scripts/check-promo-video.mjs` doesn't cover tracking: analytics only
+    run on https://instaplaque.co.uk, so a local build can't send them.
+- **Live:** promoted instaplaque-gz1ge8cbh (dpl_QCbB8CX9ekQjg63py3Za3i6goQsG, `index-M8D_2WTP.js`) at 10:24:22 UTC. Both
+  domains point to it (`vercel inspect`). Live HTTP checks pass: the new bundle is served with the events, `/privacy`
+  has the wording, the sitemap has the lastmod, and the homepage film and `/video` VideoObject are unchanged.
+  `verify_live.py` (`BUNDLE=index-M8D_2WTP.js`): RESULT PASS (175 product pages, 633 assets identical, sitemaps, feed).
+- **Report:** `output/instaplaque-ads-plan-20261025/posthog_video.py` in Cody's workspace (read-only HogQL; `--tests`
+  shows QA events). In PostHog itself: Trends, event `ip_video_progress`, broken down by `percent`, with `is_test` not
+  true; or a funnel from `ip_video_started` through `ip_video_progress` at 25, 50, 75 and 100.
+- **Rollback:** promote dpl_4MYqFi8ExJbiX9DRCwz4MVyTU9EP (instaplaque-rd8msp6l3, the hero film release).
