@@ -16,7 +16,7 @@
 - **Known failure, older than this change:** `check:google-purchase` fails in CI and locally ("Public pages retain one
   loader"). None of its inputs changed here; it likely dates from the 26 Oct page-speed change to `index.html`.
 - **Live:** dpl_QCbB8CX9ekQjg63py3Za3i6goQsG (instaplaque-gz1ge8cbh, `index-M8D_2WTP.js`) on both domains; live HTTP
-  checks and `verify_live.py` pass.
+  checks and `verify_live.py` pass. The first real phone visit (10:25 UTC) sent started, 25/50/75/100% on time.
 - **Rollback:** promote dpl_4MYqFi8ExJbiX9DRCwz4MVyTU9EP (instaplaque-rd8msp6l3).
 
 ## Promo film at the top, buttons glowing in turn, video schema and /video: LIVE — 28 October 2026, 10:08 UTC

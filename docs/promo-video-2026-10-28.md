@@ -277,6 +277,9 @@
   domains point to it (`vercel inspect`). Live HTTP checks pass: the new bundle is served with the events, `/privacy`
   has the wording, the sitemap has the lastmod, and the homepage film and `/video` VideoObject are unchanged.
   `verify_live.py` (`BUNDLE=index-M8D_2WTP.js`): RESULT PASS (175 product pages, 633 assets identical, sitemaps, feed).
+- **First real events (the in-browser proof):** a phone (Chrome, Corby, direct, not marked as a test) at 10:25:43 UTC.
+  On the homepage: started (autoplay) at 10:25:43.0, then 25% at +5.7 s, 50% at +11.0 s, 75% at +16.6 s and 100% at
+  +21.6 s, matching the film's 21.93 s. Then on `/video`: started at 10:26:20 and 25% at +5.7 s.
 - **Report:** `output/instaplaque-ads-plan-20261025/posthog_video.py` in Cody's workspace (read-only HogQL; `--tests`
   shows QA events). In PostHog itself: Trends, event `ip_video_progress`, broken down by `percent`, with `is_test` not
   true; or a funnel from `ip_video_started` through `ip_video_progress` at 25, 50, 75 and 100.
