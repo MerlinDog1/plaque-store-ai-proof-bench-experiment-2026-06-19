@@ -1,5 +1,23 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Meta pixel: own dataset + private Purchase event: LIVE — 28 October 2026, about 15:20 UTC
+
+- **Why:** the owner (msgs 7126, 7132) asked whether conversion tracking was set up for the new Facebook/Instagram
+  ads. The old pixel (2766586460430567) sat in a portfolio InstaPlaque's ads can't use and sent no purchases.
+- **Branch:** `codex/instaplaque-meta-purchase-20261028`, based on the live source (from-prices). This branch is now
+  the live source; base new work on it. Draft PR #23 exists only for CI.
+- **What changed:** pixel `4216755011787795` (made in the INSTAPLAQUE ad account); one `Purchase` per paid live order
+  through a same-origin event-only frame, like the Google one; cookie details mention paid orders; tree page
+  sitemap lastmod. Details: `docs/meta-pixel-purchase-2026-10-28.md`.
+- **Checks:** `check-meta-purchase.cjs` (new) and `check-meta-pixel.cjs` run in postbuild and pass; CI typecheck
+  passes (`check:google-purchase` fails as on the live source); live browser checks
+  `check-meta-pixel-live.mjs` and `check-meta-purchase-live.mjs` pass with Meta's endpoint blocked;
+  `check-from-prices` on live and `verify_live.py` pass.
+- **Live:** dpl_BqgnQ2WuCgQUn6YEVTjuoufxcQp9 (instaplaque-8a1hhfvyy, `index-N6efz1TY.js`).
+- **Rollback:** promote dpl_3Kf1w2qQ6q6WCopG4nokYR28zfaV and set the Meta ad set back to `LINK_CLICKS`.
+- **Deploy note:** link this checkout to the `instaplaque` project first (copy projects/instaplaque/.vercel/project.json);
+  without it, `vercel deploy --yes` creates a new project (it did: `instaplaque-contact-followups`, unused).
+
 ## From-prices are each page's cheapest plaque: LIVE — 28 October 2026, 11:00 UTC
 
 - **Why:** the owner (msg 7009): "our from price still seems way high always" (the stainless page said from £95.50; its

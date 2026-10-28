@@ -13,6 +13,7 @@ import { promoVideo, promoVideoObject, promoVideoPath } from '../services/promoV
 import { businessContact } from '../services/shopInformation';
 import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
 import { trackGooglePurchase, OPTIONAL_AD_CONSENT_CHANGED } from '../services/googlePurchase';
+import { trackMetaPurchase } from '../services/metaPurchase';
 import { trackPostHogPurchase } from '../services/posthogAnalytics';
 import { offerGoogleCustomerReviews } from '../services/googleCustomerReviews';
 import { isOnePoundTestPlaque } from '../services/onePoundTestPlaque.mjs';
@@ -536,7 +537,7 @@ const legalPages: Partial<Record<SiteView, LegalPage>> = {
       { title: 'Analytics and marketing', copy: 'Before you accept, or if you reject optional cookies, Google Analytics and Google Ads receive limited cookieless measurement signals on public pages to help us understand whether our ads work. Google does not store or read analytics or advertising cookies, or build an advertising profile from these signals. If you accept, Google can use analytics and advertising cookies to measure visits and advertising performance. Your choice is remembered separately from your design and order details.' },
       { title: 'Other optional analytics', copy: 'With your permission, PostHog and Vercel Web Analytics measure visits and how the website is used. PostHog uses a random browsing identifier, renewed after 30 minutes of inactivity, stored in your browser. With the same permission, PostHog also records sessions on public pages and in the designer; its recorder keeps that identifier and its settings in your browser’s local storage, not in cookies. Recordings hide what you type, your plaque preview and uploaded or generated images, and are deleted after 30 days. A hashed purchase reference is kept locally for up to 90 days to avoid counting the same purchase twice. Withdrawing analytics consent stops these services and removes PostHog analytics storage. Google returns to limited cookieless measurement.' },
       { title: 'Purchase measurement', copy: 'With your permission, Google Analytics measures confirmed purchases using their value, currency and a pseudonymous transaction reference. We also store that reference locally to avoid reporting the same purchase again. Use Cookie settings on this page to allow or withdraw permission for this purchase measurement.' },
-      { title: 'Facebook advertising', copy: 'With your permission, Meta Pixel measures public-page visits and successful starts of live Stripe checkout. We send checkout value and currency, not your inscription, name, email or proof. Meta may process browser and device information. Use Cookie settings on this Cookie details page to allow or withdraw consent. Private proof and order links are excluded.' },
+      { title: 'Facebook advertising', copy: 'With your permission, Meta Pixel measures public-page visits, successful starts of live Stripe checkout and paid orders. We send the checkout or order value and currency, not your inscription, name, email or proof. Meta may process browser and device information. Use Cookie settings on this Cookie details page to allow or withdraw consent. Private proof and order links are excluded.' },
       { title: 'Google Customer Reviews', copy: 'After you pay, the order confirmation page loads Google’s optional review-survey box from Google. We do not set any cookies or storage for it. Google may receive or use its own cookies when the box loads or when you answer it, as on Google’s own sites.' },
       { title: 'Managing cookies', copy: 'Use Cookie settings on this page to accept or reject optional analytics and advertising, including withdrawing an earlier choice. Rejecting optional tracking does not prevent designing or ordering a plaque. You can also block or delete cookies in your browser settings, although essential proof, checkout or admin storage is needed for those features.' },
     ],
@@ -1871,7 +1872,7 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
 
   useEffect(() => {
     if (!order) return;
-    const track = () => { void trackGooglePurchase(order); void trackPostHogPurchase(order); };
+    const track = () => { void trackGooglePurchase(order); void trackPostHogPurchase(order); void trackMetaPurchase(order); };
     track();
     window.addEventListener(OPTIONAL_AD_CONSENT_CHANGED, track);
     return () => window.removeEventListener(OPTIONAL_AD_CONSENT_CHANGED, track);

@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/check-vercel-runtime.mjs && npm exec -- vite build && node scripts/prerender-product-pages.mjs && node scripts/finalise-public-html.mjs",
-    "postbuild": "node scripts/check-google-consent.mjs index.html dist/index.html dist/design/index.html dist/memorial-plaques/index.html && npm run check:live-seo && npm run check:designer-seo && npm run check:product-policies && node scripts/check-merchant-catalogue.mjs && node scripts/check-merchant-feed.mjs && node scripts/check-designer-seo-ci.mjs && node scripts/check-from-prices.mjs",
+    "postbuild": "node scripts/check-google-consent.mjs index.html dist/index.html dist/design/index.html dist/memorial-plaques/index.html && npm run check:live-seo && npm run check:designer-seo && npm run check:product-policies && node scripts/check-merchant-catalogue.mjs && node scripts/check-merchant-feed.mjs && node scripts/check-designer-seo-ci.mjs && node scripts/check-from-prices.mjs && node scripts/check-meta-pixel.cjs && node scripts/check-meta-purchase.cjs",
     "check:vercel-runtime": "node scripts/check-vercel-runtime.mjs",
     "typecheck": "tsc --noEmit",
     "check:admin-orders": "node scripts/check-admin-order-list.mjs",
@@ -32,6 +32,8 @@
     "check:pricing": "node scripts/check-pricing.cjs",
     "check:live-seo": "node scripts/check-live-seo.mjs",
     "check:from-prices": "node scripts/check-from-prices.mjs",
+    "check:meta-pixel": "node scripts/check-meta-pixel.cjs",
+    "check:meta-purchase": "node scripts/check-meta-purchase.cjs",
     "check:designer-seo": "node scripts/check-designer-seo.mjs",
     "check:designer-seo-browser": "node scripts/check-designer-seo-browser.mjs",
     "check:product-policies": "node scripts/check-product-policies.mjs",
