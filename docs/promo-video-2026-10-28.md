@@ -193,3 +193,22 @@
     - `/video` on a computer;
     - the sitemap entry, the three thumbnails as `image/jpeg`, and the hero links.
   - Scoped `tsc`, the build with every postbuild check, and the browser check (9 of 9) all pass locally.
+- **Candidate (not live), superseding instaplaque-844r6bzyp:** built on Vercel with `vercel deploy --prod
+  --skip-domain` from ecf4c8e: https://instaplaque-rd8msp6l3-dullaghan31-3959s-projects.vercel.app
+  (dpl_4MYqFi8ExJbiX9DRCwz4MVyTU9EP, `index-BPx8Mq_0.js`).
+  - Vercel's build and every postbuild check passed, including the new watch page assertions.
+  - Through `vercel curl`:
+    - `/` and `/memorial-plaques` have the hero film and link to `/video`; the tree page has neither.
+    - `/video` has the film, VideoObject and og:video.
+    - `sitemap.xml` has 25 URLs, the video namespace and one `<video:video>` entry.
+    - All three thumbnails return 200 `image/jpeg`.
+  - instaplaque.co.uk is still dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (`vercel inspect`, before and after).
+- **To go live (on the owner's go):** same steps as above, with this candidate.
+  1. Check production is still dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy.
+  2. Run `vercel promote https://instaplaque-rd8msp6l3-dullaghan31-3959s-projects.vercel.app --yes --scope
+     dullaghan31-3959s-projects`.
+  3. Run `BASE=https://instaplaque.co.uk node scripts/check-promo-video.mjs` and `verify_live.py` with
+     `BUNDLE=index-BPx8Mq_0.js`.
+  4. Afterwards, the owner can submit the sitemap again in Search Console, or Cody can ping it. Search Console for
+     InstaPlaque isn't shared with Cody's service account.
+  - Rollback: promote dpl_8xt1RFoJw5E2h4Dz5sNuQE7qLWPy (instaplaque-j69fq1m7u).

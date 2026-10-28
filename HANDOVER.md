@@ -15,8 +15,9 @@
     sitemap entry.
   - The film's facts live in `services/promoVideo.mjs`, and the hero captions link to `/video`.
   - Details: `docs/promo-video-2026-10-28.md`.
-- **Not live:** waits for the owner's go. The candidate that includes the watch page is recorded in the doc and
-  supersedes instaplaque-844r6bzyp.
+- **Not live:** candidate instaplaque-rd8msp6l3 (dpl_4MYqFi8ExJbiX9DRCwz4MVyTU9EP, `index-BPx8Mq_0.js`) has the hero film,
+  the glow and `/video`. It supersedes instaplaque-844r6bzyp and waits for the owner's go. Promote steps and rollback
+  are in the doc.
 
 ## Promo film after the hero (homepage and category pages): LIVE — 28 October 2026, 08:30 UTC
 
