@@ -3345,3 +3345,18 @@
     gap: 12px;
   }
 }
+
+
+/* Product pages, owner msg 7596 (29 Oct 2026): folded detail, and the film under the hero. */
+.shopfront .shop-fold { border-top: 1px solid var(--shop-line); margin: 16px 0 0; }
+.shopfront .shop-fold > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px 2px; font-weight: 700; color: var(--shop-ink); }
+.shopfront .shop-fold > summary::-webkit-details-marker { display: none; }
+.shopfront .shop-fold > summary::after { content: '+'; font-size: 1.4em; font-weight: 400; line-height: 1; color: var(--shop-muted); }
+.shopfront .shop-fold[open] > summary::after { content: '\2013'; }
+.shopfront .shop-fold > summary:focus-visible { outline: 2px solid var(--shop-ink); outline-offset: 2px; }
+.shopfront .shop-spec-fold { margin-top: 0; align-self: start; }
+.shopfront .shop-product-film { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 400px); gap: 32px; align-items: center; }
+.shopfront .shop-product-film .promo-film-figure { margin: 0; }
+@media (max-width: 720px) {
+  .shopfront .shop-product-film { grid-template-columns: 1fr; gap: 18px; }
+}

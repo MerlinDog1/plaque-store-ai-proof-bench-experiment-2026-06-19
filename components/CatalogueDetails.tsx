@@ -120,14 +120,22 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
               <h3>On this plaque</h3>
               <blockquote>{example.lines.map((line, index) => <React.Fragment key={index}>{index > 0 && <br />}{line}</React.Fragment>)}</blockquote>
             </article>
-            {ideas.map(idea => (
-              <article key={idea.slug}>
-                <h3>Another idea: {idea.use.replace(/^an? /, '')}</h3>
-                <blockquote>{idea.lines.map((line, index) => <React.Fragment key={index}>{index > 0 && <br />}{line}</React.Fragment>)}</blockquote>
-                <p className="shop-smallprint">Shown on <a href={`/${idea.slug}`}>{idea.label}</a></p>
-              </article>
-            ))}
           </div>
+          {ideas.length > 0 && (
+            // Owner msg 7596: folded, so a phone shows the plaque's own example and then the film and specification.
+            <details className="shop-fold">
+              <summary>More wording ideas</summary>
+              <div className="shop-inscription-grid">
+                {ideas.map(idea => (
+                  <article key={idea.slug}>
+                    <h3>Another idea: {idea.use.replace(/^an? /, '')}</h3>
+                    <blockquote>{idea.lines.map((line, index) => <React.Fragment key={index}>{index > 0 && <br />}{line}</React.Fragment>)}</blockquote>
+                    <p className="shop-smallprint">Shown on <a href={`/${idea.slug}`}>{idea.label}</a></p>
+                  </article>
+                ))}
+              </div>
+            </details>
+          )}
           <p>
             Not sure what to write? <ContactLink channel="whatsapp" placement="page" subject={`a ${offer.size} plaque`}><WhatsAppIcon /> Send us a few words on WhatsApp</ContactLink> and we will suggest a layout, or see our <a href="/memorial-plaques#memorial-wording">memorial wording examples</a>.
           </p>
@@ -169,15 +177,20 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
             See a sample proof for this plaque (PDF) ↗
           </a>
         </div>
-        <dl className="shop-spec-list">
-          {specs.map(([term, value]) => (
-            <div key={term}><dt>{term}</dt><dd>{value}</dd></div>
-          ))}
-        </dl>
+        <details className="shop-fold shop-spec-fold">
+          <summary>Full specification</summary>
+          <dl className="shop-spec-list">
+            {specs.map(([term, value]) => (
+              <div key={term}><dt>{term}</dt><dd>{value}</dd></div>
+            ))}
+          </dl>
+        </details>
       </section>
       <nav className="shop-section shop-catalogue-compare" aria-label="Compare sizes, finishes and backing">
         <p className="shop-kicker">Compare</p>
         <h2>Other sizes and finishes.</h2>
+        <details className="shop-fold">
+        <summary>Sizes, finishes and prices</summary>
         <div className="shop-catalogue-grid">
           <SizeLinks title={`${offer.label}${p.wood ? `, ${backingLabel(offer).toLowerCase()}` : ''}: other sizes`} offers={otherSizes} />
           {(otherFinishes.length > 0 || otherBackings.length > 0) && <div className="shop-catalogue-links">
@@ -199,6 +212,7 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
             </>}
           </div>}
         </div>
+        </details>
       </nav>
     </>
   );

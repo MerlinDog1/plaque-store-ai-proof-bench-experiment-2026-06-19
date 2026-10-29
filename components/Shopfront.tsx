@@ -642,7 +642,28 @@ function cardImageSizes(item: { photo?: string; merchantOffer?: unknown; image: 
   return srcSet ? { srcSet, sizes: '(max-width: 720px) 45vw, 282px' } : {};
 }
 
-type GalleryImage = { src: string; srcSet?: string; thumb?: string; thumbSrcSet?: string; alt: string; label: string };
+type GalleryImage = { src: string; srcSet?: string; thumb?: string; thumbSrcSet?: string; alt: string; label: string; caption?: string };
+
+// Owner msg 7596 (29 Oct 2026): product pages get more real pictures. The finish close-up is the photograph of the
+// actual finish from the materials page (and the wood board's, when there is one), never an AI scene.
+const finishPhotos: Record<string, string> = {
+  'brushed-stainless': 'brushed-stainless', 'polished-stainless': 'polished-stainless', 'brushed-brass': 'brushed-brass',
+  'polished-brass': 'polished-brass', 'orbital-brass-matt-lacquer': 'orbital-brass', 'aged-brass': 'aged-brass',
+};
+function finishImagesFor(slug: string): GalleryImage[] {
+  const offer = merchantOffers.find(item => item.slug === slug);
+  if (!offer) return [];
+  const images: GalleryImage[] = [];
+  const file = finishPhotos[offer.preset.material];
+  if (file) images.push({ src: `/materials/slider/${file}.webp`, thumb: `/materials/thumbs/${file}.webp`, alt: `${offer.label}: the finish, close up`, label: 'The finish, close up',
+    caption: `${offer.label}, close up: the finish your plaque is made in.` });
+  if (offer.preset.wood) {
+    const wood = offer.preset.woodTone === 'dark' ? 'dark' : 'light';
+    images.push({ src: `/materials/slider/${wood}-wood.webp`, thumb: `/materials/thumbs/${wood}-wood.webp`, alt: `${wood === 'dark' ? 'Dark' : 'Light'} wood backing board, close up`, label: 'The wood board, close up',
+      caption: `${wood === 'dark' ? 'Dark' : 'Light'} wood backing board, close up.` });
+  }
+  return images;
+}
 
 // Catalogue pages show the photo first and the flat design view (the feed image) as a second
 // image, so the Merchant Center image is still on the landing page.
@@ -661,7 +682,7 @@ function ProductGallery({ images, caption, className, sizes }: { images: Gallery
           ))}
         </div>
       )}
-      <figcaption>{caption}</figcaption>
+      <figcaption>{image.caption || caption}</figcaption>
     </figure>
   );
 }
@@ -707,6 +728,7 @@ export function ShopProduct({
       // On Vercel the main image comes in 480-1080 px copies (a phone takes ~750 px instead of the 1500 px drawing).
       ? [{ src: product.image + merchantImageQuery, srcSet: optimisedSrcSet(product.image + merchantImageQuery, 1500, [480, 640, 750, 828, 1080], `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`), alt: heroAlt, label: 'Flat design view' }]
       : [{ src: heroImage, alt: heroAlt, label: product.title }];
+  if (product.merchantOffer) heroImages.push(...finishImagesFor(product.slug));
   // No AI/illustration labels on product images (owner msg 5231).
   const heroCaption = product.merchantOffer
     ? 'Shown with an example inscription. Your wording replaces it.'
@@ -754,15 +776,42 @@ export function ShopProduct({
           <p className="shop-hero-note">
             Free online designer & proof · No account needed · Or <ContactLink channel="email" placement="hero">email us</ContactLink>
           </p>
-          <p className="shop-product-description">{product.seoIntro || product.description}</p>
           {product.productionDays ? <aside className="shop-production-note"><strong>Estimated production: {product.productionDays} working days</strong><p>After proof approval and payment. Delivery time is additional; UK delivery is included.</p><a href="/how-it-works">Production and delivery details</a></aside> : <ProductionNote />}
-          <ul className="shop-product-benefits">
-            {product.bestFor.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
+          {product.merchantOffer ? (
+            // Owner msg 7596: less to scroll past on a phone; the words stay on the page for search engines.
+            <details className="shop-fold">
+              <summary>About this plaque</summary>
+              <p className="shop-product-description">{product.seoIntro || product.description}</p>
+              <ul className="shop-product-benefits">
+                {product.bestFor.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </details>
+          ) : (
+            <>
+              <p className="shop-product-description">{product.seoIntro || product.description}</p>
+              <ul className="shop-product-benefits">
+                {product.bestFor.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </section>
+      {product.merchantOffer && (
+        // Owner msg 7596: the film on every product page, straight after the price and buttons.
+        <section className="shop-section shop-product-film" aria-labelledby="product-film-heading">
+          <div>
+            <p className="shop-kicker">See how it works</p>
+            <h2 id="product-film-heading">Type your words. Our AI does the layout.</h2>
+            <p>The designer opens on this plaque. Type or paste your wording and it is laid out to fit in about a minute, then you see the proof before you pay.</p>
+            <DesignLink onStart={onLaunch}>Design online</DesignLink>
+          </div>
+          <PromoFilmFigure className="shop-product-film-figure" />
+        </section>
+      )}
       {product.merchantOffer ? <MerchantProductDetails slug={product.slug} /> : product.seoSections?.length === 0 ? null : <section className="shop-section shop-buying-guide">
         <div>
           <p className="shop-kicker">Size, wording and fitting</p>
