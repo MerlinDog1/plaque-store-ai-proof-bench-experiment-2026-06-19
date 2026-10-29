@@ -7,6 +7,7 @@ import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './Co
 import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { PromoFilm, PromoFilmFigure } from './PromoVideo';
 import { promoVideo, promoVideoPath } from '../services/promoVideo.mjs';
+import { hasNewProductLayout } from '../services/productLayout';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { PriceTable, a5BoardPrice, groundStakePrice, homePriceSizes, priceTableIncludes } from './PriceTable';
 import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
@@ -729,7 +730,8 @@ export function ShopProduct({
       // On Vercel the main image comes in 480-1080 px copies (a phone takes ~750 px instead of the 1500 px drawing).
       ? [{ src: product.image + merchantImageQuery, srcSet: optimisedSrcSet(product.image + merchantImageQuery, 1500, [480, 640, 750, 828, 1080], `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`), alt: heroAlt, label: 'Flat design view' }]
       : [{ src: heroImage, alt: heroAlt, label: product.title }];
-  if (product.merchantOffer) heroImages.push(...finishImagesFor(product.slug));
+  const newLayout = Boolean(product.merchantOffer) && hasNewProductLayout(product.slug);
+  if (newLayout) heroImages.push(...finishImagesFor(product.slug));
   // No AI/illustration labels on product images (owner msg 5231).
   const heroCaption = product.merchantOffer
     ? 'Shown with an example inscription. Your wording replaces it.'
@@ -746,7 +748,7 @@ export function ShopProduct({
         {/* Phones drop the plaque's own name here: it is the heading just below, and the trail fits on one line. */}
         <span className={category ? 'shop-crumb-current' : undefined}>{product.title}</span>
       </div>
-      <section className="shop-product-hero">
+      <section className={newLayout ? 'shop-product-hero shop-product-hero-v2' : 'shop-product-hero'}>
         <ProductGallery images={heroImages} caption={heroCaption} sizes="(max-width: 720px) 92vw, 560px" />
         <div>
           <p className="shop-kicker">Free proof · UK delivery included</p>
@@ -778,7 +780,7 @@ export function ShopProduct({
             Free online designer & proof · No account needed · Or <ContactLink channel="email" placement="hero">email us</ContactLink>
           </p>
           {product.productionDays ? <aside className="shop-production-note"><strong>Estimated production: {product.productionDays} working days</strong><p>After proof approval and payment. Delivery time is additional; UK delivery is included.</p><a href="/how-it-works">Production and delivery details</a></aside> : <ProductionNote />}
-          {product.merchantOffer ? (
+          {newLayout ? (
             // Owner msg 7596: less to scroll past on a phone; the words stay on the page for search engines.
             <details className="shop-fold">
               <summary>About this plaque</summary>
@@ -801,8 +803,8 @@ export function ShopProduct({
           )}
         </div>
       </section>
-      {product.merchantOffer && (
-        // Owner msg 7596: the film on every product page, straight after the price and buttons.
+      {newLayout && (
+        // Owner msg 7596: the film on the product page, straight after the price and buttons.
         <section className="shop-section shop-product-film" aria-labelledby="product-film-heading">
           <div className="shop-product-film-text">
             <p className="shop-kicker">See how it works</p>

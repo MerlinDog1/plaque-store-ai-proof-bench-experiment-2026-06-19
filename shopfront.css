@@ -3366,8 +3366,8 @@
 
 /* Owner msg 7598: big buttons for both on product pages, and the homepage's glow while the film plays (the design button
    during the designer, WhatsApp during the chat, both on the end card), in the hero and beside the film. */
-.shopfront .shop-product-hero .shop-hero-choices > a { min-height: 56px; }
-@media (min-width: 721px) { .shopfront .shop-product-hero .shop-hero-choices > a { font-size: 17px; } }
+.shopfront .shop-product-hero-v2 .shop-hero-choices > a { min-height: 56px; }
+@media (min-width: 721px) { .shopfront .shop-product-hero-v2 .shop-hero-choices > a { font-size: 17px; } }
 .shopfront .shop-film-choices { margin-top: 18px; }
 .shopfront .shop-film-choices > a { min-height: 62px; font-size: 18px; padding-inline: 24px; }
 @media (max-width: 720px) {
@@ -3375,16 +3375,16 @@
   .shopfront .shop-film-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .shopfront .shop-film-choices > a { width: 100%; min-height: 58px; font-size: 15px; padding-inline: 10px; justify-content: center; }
 }
-.shopfront[data-promo-cue="design"] :is(.shop-product-hero, .shop-product-film) .shop-hero-choices > a[href="/design"],
-.shopfront[data-promo-cue="whatsapp"] :is(.shop-product-hero, .shop-product-film) .shop-hero-choices > a.shop-hero-choice-whatsapp,
-.shopfront[data-promo-cue="both"] :is(.shop-product-hero, .shop-product-film) .shop-hero-choices > a {
+.shopfront[data-promo-cue="design"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a[href="/design"],
+.shopfront[data-promo-cue="whatsapp"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a.shop-hero-choice-whatsapp,
+.shopfront[data-promo-cue="both"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a {
   outline: 3px solid #d6aa52;
   outline-offset: 2px;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .shopfront[data-promo-cue="design"] :is(.shop-product-hero, .shop-product-film) .shop-hero-choices > a[href="/design"],
-  .shopfront[data-promo-cue="whatsapp"] :is(.shop-product-hero, .shop-product-film) .shop-hero-choices > a.shop-hero-choice-whatsapp,
-  .shopfront[data-promo-cue="both"] :is(.shop-product-hero, .shop-product-film) .shop-hero-choices > a {
+  .shopfront[data-promo-cue="design"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a[href="/design"],
+  .shopfront[data-promo-cue="whatsapp"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a.shop-hero-choice-whatsapp,
+  .shopfront[data-promo-cue="both"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a {
     animation: promo-cue 1.4s ease-out infinite;
   }
 }

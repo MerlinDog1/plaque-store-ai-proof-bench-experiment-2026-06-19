@@ -3,6 +3,7 @@ import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { merchantProducts } from '../services/commerce';
 import { exampleFor, ideasFor, isPortraitSize, pictureWord } from '../services/catalogueContent';
 import { ContactLink, WhatsAppIcon } from './ContactOptions';
+import { hasNewProductLayout } from '../services/productLayout';
 
 // Catalogue product pages (owner msg 5231, review 21 Oct 2026): a real specification where the
 // empty "Choose the size and finish." block was, and links between sizes, finishes and backings
@@ -104,6 +105,45 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
   ];
   const example = exampleFor(offer.slug);
   const ideas = ideasFor(offer.slug);
+  // The new layout (services/productLayout.ts) folds the longer lists away; other pages keep them open as before.
+  const compact = hasNewProductLayout(offer.slug);
+  const ideaCards = ideas.map(idea => (
+    <article key={idea.slug}>
+      <h3>Another idea: {idea.use.replace(/^an? /, '')}</h3>
+      <blockquote>{idea.lines.map((line, index) => <React.Fragment key={index}>{index > 0 && <br />}{line}</React.Fragment>)}</blockquote>
+      <p className="shop-smallprint">Shown on <a href={`/${idea.slug}`}>{idea.label}</a></p>
+    </article>
+  ));
+  const specList = (
+    <dl className="shop-spec-list">
+      {specs.map(([term, value]) => (
+        <div key={term}><dt>{term}</dt><dd>{value}</dd></div>
+      ))}
+    </dl>
+  );
+  const compareGrid = (
+    <div className="shop-catalogue-grid">
+      <SizeLinks title={`${offer.label}${p.wood ? `, ${backingLabel(offer).toLowerCase()}` : ''}: other sizes`} offers={otherSizes} />
+      {(otherFinishes.length > 0 || otherBackings.length > 0) && <div className="shop-catalogue-links">
+        {otherFinishes.length > 0 && <>
+          <h3>{offerSizeLabel(offer)}: other finishes</h3>
+          <ul>
+            {otherFinishes.map(item => (
+              <li key={item.slug}><a href={`/${item.slug}`}>{item.label}</a> <span>{priceFor(item.slug)}</span></li>
+            ))}
+          </ul>
+        </>}
+        {otherBackings.length > 0 && <>
+          <h3>Backing</h3>
+          <ul>
+            {otherBackings.map(item => (
+              <li key={item.slug}><a href={`/${item.slug}`}>{backingLabel(item)}</a> <span>{priceFor(item.slug)}</span></li>
+            ))}
+          </ul>
+        </>}
+      </div>}
+    </div>
+  );
   return (
     <>
       {example && (
@@ -120,20 +160,13 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
               <h3>On this plaque</h3>
               <blockquote>{example.lines.map((line, index) => <React.Fragment key={index}>{index > 0 && <br />}{line}</React.Fragment>)}</blockquote>
             </article>
+            {!compact && ideaCards}
           </div>
-          {ideas.length > 0 && (
+          {compact && ideas.length > 0 && (
             // Owner msg 7596: folded, so a phone shows the plaque's own example and then the film and specification.
             <details className="shop-fold">
               <summary>More wording ideas</summary>
-              <div className="shop-inscription-grid">
-                {ideas.map(idea => (
-                  <article key={idea.slug}>
-                    <h3>Another idea: {idea.use.replace(/^an? /, '')}</h3>
-                    <blockquote>{idea.lines.map((line, index) => <React.Fragment key={index}>{index > 0 && <br />}{line}</React.Fragment>)}</blockquote>
-                    <p className="shop-smallprint">Shown on <a href={`/${idea.slug}`}>{idea.label}</a></p>
-                  </article>
-                ))}
-              </div>
+              <div className="shop-inscription-grid">{ideaCards}</div>
             </details>
           )}
           <p>
@@ -177,42 +210,12 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
             See a sample proof for this plaque (PDF) ↗
           </a>
         </div>
-        <details className="shop-fold shop-spec-fold">
-          <summary>Full specification</summary>
-          <dl className="shop-spec-list">
-            {specs.map(([term, value]) => (
-              <div key={term}><dt>{term}</dt><dd>{value}</dd></div>
-            ))}
-          </dl>
-        </details>
+        {compact ? <details className="shop-fold shop-spec-fold"><summary>Full specification</summary>{specList}</details> : specList}
       </section>
       <nav className="shop-section shop-catalogue-compare" aria-label="Compare sizes, finishes and backing">
         <p className="shop-kicker">Compare</p>
         <h2>Other sizes and finishes.</h2>
-        <details className="shop-fold">
-        <summary>Sizes, finishes and prices</summary>
-        <div className="shop-catalogue-grid">
-          <SizeLinks title={`${offer.label}${p.wood ? `, ${backingLabel(offer).toLowerCase()}` : ''}: other sizes`} offers={otherSizes} />
-          {(otherFinishes.length > 0 || otherBackings.length > 0) && <div className="shop-catalogue-links">
-            {otherFinishes.length > 0 && <>
-              <h3>{offerSizeLabel(offer)}: other finishes</h3>
-              <ul>
-                {otherFinishes.map(item => (
-                  <li key={item.slug}><a href={`/${item.slug}`}>{item.label}</a> <span>{priceFor(item.slug)}</span></li>
-                ))}
-              </ul>
-            </>}
-            {otherBackings.length > 0 && <>
-              <h3>Backing</h3>
-              <ul>
-                {otherBackings.map(item => (
-                  <li key={item.slug}><a href={`/${item.slug}`}>{backingLabel(item)}</a> <span>{priceFor(item.slug)}</span></li>
-                ))}
-              </ul>
-            </>}
-          </div>}
-        </div>
-        </details>
+        {compact ? <details className="shop-fold"><summary>Sizes, finishes and prices</summary>{compareGrid}</details> : compareGrid}
       </nav>
     </>
   );
