@@ -807,7 +807,13 @@ export function ShopProduct({
             <p className="shop-kicker">See how it works</p>
             <h2 id="product-film-heading">Type your words. Our AI does the layout.</h2>
             <p>The designer opens on this plaque. Type or paste your wording and it is laid out to fit in about a minute, then you see the proof before you pay.</p>
-            <DesignLink onStart={onLaunch}>Design online</DesignLink>
+            {/* Owner msg 7598: a real big call to action for both, glowing in turn with the film as on the homepage. */}
+            <div className="shop-hero-choices shop-film-choices">
+              <DesignLink onStart={onLaunch}>Design online</DesignLink>
+              <ContactLink channel="whatsapp" placement="page" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
+                <WhatsAppIcon /> Design on WhatsApp
+              </ContactLink>
+            </div>
           </div>
           <PromoFilmFigure className="shop-product-film-figure" />
         </section>
