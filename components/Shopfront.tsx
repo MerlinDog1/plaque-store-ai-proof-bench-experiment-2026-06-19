@@ -779,6 +779,8 @@ export function ShopProduct({
           <p className="shop-hero-note">
             Free online designer & proof · No account needed · Or <ContactLink channel="email" placement="hero">email us</ContactLink>
           </p>
+          {/* Other pages keep the description above the production note, as before. */}
+          {!newLayout && <p className="shop-product-description">{product.seoIntro || product.description}</p>}
           {product.productionDays ? <aside className="shop-production-note"><strong>Estimated production: {product.productionDays} working days</strong><p>After proof approval and payment. Delivery time is additional; UK delivery is included.</p><a href="/how-it-works">Production and delivery details</a></aside> : <ProductionNote />}
           {newLayout ? (
             // Owner msg 7596: less to scroll past on a phone; the words stay on the page for search engines.
@@ -792,14 +794,11 @@ export function ShopProduct({
               </ul>
             </details>
           ) : (
-            <>
-              <p className="shop-product-description">{product.seoIntro || product.description}</p>
-              <ul className="shop-product-benefits">
-                {product.bestFor.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </>
+            <ul className="shop-product-benefits">
+              {product.bestFor.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           )}
         </div>
       </section>
