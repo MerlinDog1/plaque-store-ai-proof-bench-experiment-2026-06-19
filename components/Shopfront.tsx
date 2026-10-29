@@ -5,7 +5,8 @@ import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, P
 import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
-import { PromoFilmFigure } from './PromoVideo';
+import { PromoFilm, PromoFilmFigure } from './PromoVideo';
+import { promoVideo, promoVideoPath } from '../services/promoVideo.mjs';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { PriceTable, a5BoardPrice, groundStakePrice, homePriceSizes, priceTableIncludes } from './PriceTable';
 import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
@@ -803,19 +804,23 @@ export function ShopProduct({
       {product.merchantOffer && (
         // Owner msg 7596: the film on every product page, straight after the price and buttons.
         <section className="shop-section shop-product-film" aria-labelledby="product-film-heading">
-          <div>
+          <div className="shop-product-film-text">
             <p className="shop-kicker">See how it works</p>
             <h2 id="product-film-heading">Type your words. Our AI does the layout.</h2>
             <p>The designer opens on this plaque. Type or paste your wording and it is laid out to fit in about a minute, then you see the proof before you pay.</p>
-            {/* Owner msg 7598: a real big call to action for both, glowing in turn with the film as on the homepage. */}
+          </div>
+          {/* Owner msgs 7598 and 7614: the buttons straight under the film on phones (as on /video), so the one glowing
+              for what the film shows is in sight while it plays; the film's small print goes under the buttons. */}
+          <figure className="promo-film-figure shop-product-film-figure"><PromoFilm /></figure>
+          <div className="shop-film-cta">
             <div className="shop-hero-choices shop-film-choices">
               <DesignLink onStart={onLaunch}>Design online</DesignLink>
               <ContactLink channel="whatsapp" placement="page" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
                 <WhatsAppIcon /> Design on WhatsApp
               </ContactLink>
             </div>
+            <p className="shop-smallprint">{promoVideo.disclosure} {promoVideo.footnote} <a href={promoVideoPath}>Watch it larger, with a written version</a></p>
           </div>
-          <PromoFilmFigure className="shop-product-film-figure" />
         </section>
       )}
       {product.merchantOffer ? <MerchantProductDetails slug={product.slug} /> : product.seoSections?.length === 0 ? null : <section className="shop-section shop-buying-guide">

@@ -3355,10 +3355,13 @@
 .shopfront .shop-fold[open] > summary::after { content: '\2013'; }
 .shopfront .shop-fold > summary:focus-visible { outline: 2px solid var(--shop-ink); outline-offset: 2px; }
 .shopfront .shop-spec-fold { margin-top: 0; align-self: start; }
-.shopfront .shop-product-film { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 400px); gap: 32px; align-items: center; }
-.shopfront .shop-product-film .promo-film-figure { margin: 0; }
+.shopfront .shop-product-film { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 400px); grid-template-areas: 'text film' 'cta film'; column-gap: 40px; row-gap: 8px; }
+.shopfront .shop-product-film-text { grid-area: text; align-self: end; }
+.shopfront .shop-product-film .promo-film-figure { grid-area: film; margin: 0; align-self: center; }
+.shopfront .shop-film-cta { grid-area: cta; align-self: start; }
+.shopfront .shop-film-cta .shop-smallprint { margin-top: 12px; }
 @media (max-width: 720px) {
-  .shopfront .shop-product-film { grid-template-columns: 1fr; gap: 18px; }
+  .shopfront .shop-product-film { grid-template-columns: 1fr; grid-template-areas: 'text' 'film' 'cta'; row-gap: 14px; }
 }
 
 /* Owner msg 7598: big buttons for both on product pages, and the homepage's glow while the film plays (the design button
@@ -3368,8 +3371,9 @@
 .shopfront .shop-film-choices { margin-top: 18px; }
 .shopfront .shop-film-choices > a { min-height: 62px; font-size: 18px; padding-inline: 24px; }
 @media (max-width: 720px) {
-  .shopfront .shop-film-choices { display: grid; grid-template-columns: 1fr; gap: 12px; }
-  .shopfront .shop-film-choices > a { width: 100%; justify-content: center; }
+  /* Side by side under the film on phones, so both are in sight while it plays and each glows in turn. */
+  .shopfront .shop-film-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .shopfront .shop-film-choices > a { width: 100%; min-height: 58px; font-size: 15px; padding-inline: 10px; justify-content: center; }
 }
 .shopfront[data-promo-cue="design"] :is(.shop-product-hero, .shop-product-film) .shop-hero-choices > a[href="/design"],
 .shopfront[data-promo-cue="whatsapp"] :is(.shop-product-hero, .shop-product-film) .shop-hero-choices > a.shop-hero-choice-whatsapp,
