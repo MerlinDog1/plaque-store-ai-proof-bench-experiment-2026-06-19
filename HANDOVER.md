@@ -1,6 +1,6 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Product pages v3 (photo first, "we make anything", photo rows): PREVIEW ONLY — 30 October 2026, ~00:30 UTC
+## Product pages v3 (photo first, "we make anything", photo rows): PREVIEW ONLY — 30 October 2026, ~23:45 UTC
 
 - **Why:** the owner (msg 8065) after reviewing the catalogue pages row by row: say in the first seconds that any size,
   finish or wording is made; photo rows of more sizes in the finish and other finishes in the size; drop the text
@@ -12,7 +12,9 @@
   the details folded. Design online links are `/design?plaque=<slug>` (App.tsx opens that plaque before hydration).
   Shorter cookie notice. Details: `docs/product-page-v3-2026-10-30.md`.
 - **Checks:** tsc and the full local build with postbuild checks pass; the Vercel preview build's postbuild checks pass;
-  `/design?plaque=` opens the right plaque and price.
+  `/design?plaque=` opens the right plaque and price; `check-merchant-browser.cjs` passes on all 175 pages at desktop
+  width and its 35 phone pages (local build, 3 chunks). Screenshots of the preview itself: workspace
+  `output/instaplaque-page-review-20261030/out-preview/`.
 - **Preview:** https://instaplaque-lar3wb91d-dullaghan31-3959s-projects.vercel.app (Vercel login needed; Preview
   environment variables, so don't take orders on it).
 - **To release:** only on the owner's go. Build with `vercel deploy --prod --skip-domain`, check, then promote; rollback

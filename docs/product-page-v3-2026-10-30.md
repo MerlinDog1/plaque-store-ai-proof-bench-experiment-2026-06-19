@@ -58,7 +58,15 @@ Details and settings". It still names the recordings, so analytics consent given
   workspace `output/instaplaque-page-review-20261030/out-v3/`.
 - `/design?plaque=<slug>` opens the right plaque, price and size for 3 products; plain `/design` still opens A5 £95.50
   (`output/instaplaque-page-review-20261030/check_design_param.cjs`).
-- `scripts/check-merchant-browser.cjs` on all 175 pages against the local build: see the release notes.
+- `scripts/check-merchant-browser.cjs` against the local build, run in 3 chunks (one Chrome for all 175 pages was
+  oom-killed at the 1 GiB job cap): all 175 pages at 1440 px and the script's 35 phone pages at 390 px (every 7th
+  page plus every non-rectangular shape) pass: price, lead photo, no sideways overflow, production days in the hero,
+  and Design online opens the designer at the same price, fixings and size (210 checks). Runner and per-chunk
+  results: workspace `output/instaplaque-page-review-20261030/merchant-check/`.
+- Screenshots of the Vercel preview itself (phone: brushed stainless 150 × 65 bench, brushed stainless 200 × 150 dark
+  wood; desktop: polished brass 300 × 200 dark wood): workspace `output/instaplaque-page-review-20261030/out-preview/`,
+  taken by `shots_preview.sh` there (the preview's protection-bypass value goes to the preview origin only and is
+  never printed). The small round button on the right edge is Vercel's preview toolbar, not part of the site.
 
 ## Known
 
