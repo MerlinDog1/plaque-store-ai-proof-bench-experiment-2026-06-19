@@ -11,6 +11,9 @@ const {chromium}=require('playwright');const fs=require('node:fs');
   const cases=(width===1440?merchantOffers:merchantOffers.filter((o,i)=>i%7===0||o.preset.shape!=='rect')).filter(o=>!only||only.has(o.slug));
   for(const o of cases){
    await p.goto(base+'/'+o.slug,{waitUntil:'domcontentloaded',timeout:60000});await p.locator('.shop-product-price').waitFor();
+   // The app replaces the prerendered hero when it mounts (it is gone for 25-90 ms), and the prerendered button is a plain
+   // /design link until then; check the page React owns, so no read lands in that gap.
+   await p.waitForFunction(()=>{const a=document.querySelector('.shop-product-hero a.shop-button');return !!a&&Object.keys(a).some(k=>k.startsWith('__react'))},null,{timeout:20000});
    await p.waitForFunction(()=>document.querySelector('.shop-product-hero img')?.complete,null,{timeout:20000});
    const actual=Number((await p.locator('.shop-product-price').innerText()).replace(/[^\d.]/g,''));if(actual!==o.price)throw Error('Page price '+o.slug);
    // Studio photo first (owner msg 7966), else the photo the owner has seen, else the flat drawing; the feed image stays
@@ -23,8 +26,6 @@ const {chromium}=require('playwright');const fs=require('node:fs');
    if(!await img.evaluate(async i=>{const f=new Image();f.src=i.currentSrc||i.src;await f.decode();return f.naturalWidth>=500}))throw Error('Small/broken image '+o.slug);
    if(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('Page overflow '+o.slug);
    const text=await p.locator('.shop-product-hero').innerText();if(!text.includes(`${o.productionDays} working days`))throw Error('Production '+o.slug);
-   // The prerendered button is a plain /design link until React hydrates it with the product's preset; click after that.
-   await p.waitForFunction(()=>{const a=document.querySelector('.shop-product-hero a.shop-button');return !!a&&Object.keys(a).some(k=>k.startsWith('__react'))},null,{timeout:20000});
    await p.locator('.shop-product-hero a.shop-button').first().click();
    await p.locator('.designer-price strong').waitFor();
    const checkoutPrice=Number((await p.locator('.designer-price strong').innerText()).replace(/[^\d.]/g,''));if(checkoutPrice!==o.price)throw Error('Designer price '+o.slug+': '+checkoutPrice);
