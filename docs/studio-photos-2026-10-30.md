@@ -58,6 +58,19 @@ wrongly is re-judged in the ledger by eye with a note and no charge, never regen
 | Batch 6 (`batch-b6-run.json`: 20 + the batch 4 retry) | 20 of 21 (polished brass 148 × 210 on light wood failed twice, an easel then a softbox in shot, retried in batch 7) | dpl_BR2t7famYuraRKjU9XuKPi2UTJy4 (instaplaque-ml4fkz1h7, `index-FrvLk0Ah.js`) | 30 Oct 19:28 | dpl_4SPrU38DTfA3N2QRTChe213Ng14V |
 | Batch 7 (`batch-b7-run.json`: 20 + the batch 6 retry) | 21 of 21 | dpl_HTqhXUMVxXJZMr12F41LtyaLeRqj (instaplaque-6dlhptdvm, `index-CSPfq57Z.js`) | 30 Oct 19:53 | dpl_BR2t7famYuraRKjU9XuKPi2UTJy4 |
 | Batch 8 (`batch-b8.json`, the round and oval plates) | 11 of 13 (orbital brass round 200 × 200 held back by eye: a spun, turned grain with a bright cone instead of the matt orbital haze; polished stainless 400 × 300 on light wood failed twice, then twice more in `batch-b9-run.json`; both retried in `batch-b10-run.json`) | dpl_Gc3XsAhVHDbRu4qfXbLZAAtAKZgZ (instaplaque-axk4f1esl, `index-BHQV5tou.js`) | 30 Oct 20:08 | dpl_HTqhXUMVxXJZMr12F41LtyaLeRqj |
+| Last redos (`batch-b10-run.json`, `batch-b11-run.json`) | 2 of 2 (polished stainless 400 × 300 on light wood v6, orbital brass round 200 × 200 v5) | dpl_sU9UTr4ZoqiSngGZXdnoZuWtRDbx (instaplaque-5vb35oan3, `index-CCY4XCzT.js`) | 30 Oct 20:42 | dpl_Gc3XsAhVHDbRu4qfXbLZAAtAKZgZ |
+
+**Where it ended (30 Oct, 20:42):** 167 of 175 product pages lead with a studio photo; all 175 passed
+`check-merchant-browser.cjs` (run in 3 chunks of 59: one browser for all 175 outgrows the 1 GiB job cap). Without one:
+
+- Six thin strips the image model keeps drawing too short (or with screws over the border): polished brass,
+  polished stainless and aged brass 200 × 50, brushed stainless 150 × 50 and 225 × 65 (2-4 tries each), and brushed
+  stainless 200 × 50 (left out after the other 4:1 strips failed). They need a different approach, not more tries.
+- The A5 brushed steel plaque and the polished brass bench plaque 200 × 100: their feed images are already photographs
+  (`imageKind: 'ai'`), so they were never in the drawing-replacement batches; the A5 leads with its signed-off photo.
+
+Cost on the Supatedorders Vertex ledger (`ledger-vertex.jsonl`, every studio photo made on Vertex since 30 Oct 14:02):
+$23.63 for 234 images.
 
 Rollback: `vercel promote <rollback id> --yes --scope dullaghan31-3959s-projects`. To drop one photo, remove its
 slug from `services/studioPhotos.mjs` and redeploy (the page falls back to its previous picture).
