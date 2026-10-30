@@ -16,9 +16,10 @@ const {chromium}=require('playwright');const fs=require('node:fs');
    await p.waitForFunction(()=>{const a=document.querySelector('.shop-product-hero a.shop-button');return !!a&&Object.keys(a).some(k=>k.startsWith('__react'))},null,{timeout:20000});
    await p.waitForFunction(()=>document.querySelector('.shop-product-hero img')?.complete,null,{timeout:20000});
    const actual=Number((await p.locator('.shop-product-price').innerText()).replace(/[^\d.]/g,''));if(actual!==o.price)throw Error('Page price '+o.slug);
-   // Studio photo first (owner msg 7966), else the photo the owner has seen, else the flat drawing; the feed image stays
-   // on the page as a later gallery image.
-   const img=p.locator('.shop-product-hero figure > img').first();const lead=studioPhotos.has(o.slug)?`/site-images/studio-photo/${o.slug}.webp`:o.imageKind==='render'&&vettedCataloguePhotos.has(o.slug)?`/site-images/catalogue-photo/${o.slug}.webp`:o.image;
+   // Studio photo first (owner msg 7966), else the photo the owner has seen (any image kind, as services/commerce.ts
+   // picks it: the A5 steel plaque's feed image is an AI scene), else the feed image; the feed image stays on the page
+   // as a later gallery image.
+   const img=p.locator('.shop-product-hero figure > img').first();const lead=studioPhotos.has(o.slug)?`/site-images/studio-photo/${o.slug}.webp`:vettedCataloguePhotos.has(o.slug)?`/site-images/catalogue-photo/${o.slug}.webp`:o.image;
    // Redrawn photos and drawings carry ?v=N (services/commerce.ts, merchantCatalogue.mjs).
    if((await img.getAttribute('src')).split('?')[0]!==lead)throw Error('Image mismatch '+o.slug);
    if(lead!==o.image&&!await p.locator(`.shop-product-hero .shop-product-thumbs img[src^="${o.image}"]`).count())throw Error('Feed image not on page '+o.slug);
