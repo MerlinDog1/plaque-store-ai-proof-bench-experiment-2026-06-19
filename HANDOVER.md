@@ -1,5 +1,23 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Product pages v3 (photo first, "we make anything", photo rows): PREVIEW ONLY — 30 October 2026, ~00:30 UTC
+
+- **Why:** the owner (msg 8065) after reviewing the catalogue pages row by row: say in the first seconds that any size,
+  finish or wording is made; photo rows of more sizes in the finish and other finishes in the size; drop the text
+  wording examples; the film on every page.
+- **Branch:** `codex/instaplaque-product-page-v3-20261030`, based on the live source
+  (`codex/instaplaque-studio-photos-20261030` at 277ba40). Not merged, not live.
+- **What changed:** `services/productLayout.ts` turns the 29 Oct layout on for every catalogue page, now with the photo
+  first on phones, the "Any size, finish or wording…" line, the film, `ProductPhotoRows`, design-for-you moved up and
+  the details folded. Design online links are `/design?plaque=<slug>` (App.tsx opens that plaque before hydration).
+  Shorter cookie notice. Details: `docs/product-page-v3-2026-10-30.md`.
+- **Checks:** tsc and the full local build with postbuild checks pass; the Vercel preview build's postbuild checks pass;
+  `/design?plaque=` opens the right plaque and price.
+- **Preview:** https://instaplaque-lar3wb91d-dullaghan31-3959s-projects.vercel.app (Vercel login needed; Preview
+  environment variables, so don't take orders on it).
+- **To release:** only on the owner's go. Build with `vercel deploy --prod --skip-domain`, check, then promote; rollback
+  is the live deployment at the time.
+
 ## Studio photos on the product pages, in batches: LIVE (first 20) — 30 October 2026, 15:35 UTC
 
 - **Why:** the owner (msg 7966): "do batches and update the website for relevant pages each batch", after approving
