@@ -1,5 +1,22 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Studio photos on the product pages, in batches: LIVE (first 20) — 30 October 2026, 15:35 UTC
+
+- **Why:** the owner (msg 7966): "do batches and update the website for relevant pages each batch", after approving
+  studio shots made with the designer's own realistic preview (msgs 7739-7939).
+- **Branch:** `codex/instaplaque-studio-photos-20261030`, based on the live product-page release (c72c38d). This branch
+  is now the live source; base new work on it.
+- **What changed:** `services/studioPhotos.mjs` lists products with a checked studio photo. Their pages lead with it,
+  then any signed-off in-place photo, then the flat drawing; cards that showed the drawing show it instead. The feed's
+  image_link stays the drawing; the photo is an extra image and is in the product sitemap. Files are tagged IPTC
+  trainedAlgorithmicMedia. Details, pipeline and per-batch release table: `docs/studio-photos-2026-10-30.md`.
+- **Checks:** postbuild `check-product-policies.mjs` (new studio-photo checks) and all other postbuild checks pass
+  locally and on Vercel; `check-merchant-browser.cjs` (updated) 25/25 on the local build; home, category and other
+  product pages identical to live apart from asset hashes; `verify_studio_live.py` and `verify_live.py` pass on live.
+- **Live:** dpl_AMZz5o9XoDh5saD2hU74mD5rvEjq (instaplaque-rcj72p6kq, `index-B9d3Z3kt.js`). Later batches are added to
+  the table in the doc.
+- **Rollback:** promote dpl_8HeMejLdG48U8XTAEzTLF4DuwHtB (the product-page release).
+
 ## Meta pixel: own dataset + private Purchase event: LIVE — 28 October 2026, about 15:20 UTC
 
 - **Why:** the owner (msgs 7126, 7132) asked whether conversion tracking was set up for the new Facebook/Instagram
