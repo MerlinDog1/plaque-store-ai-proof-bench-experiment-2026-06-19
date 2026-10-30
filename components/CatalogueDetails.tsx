@@ -32,6 +32,29 @@ export function offerSizeLabel(offer: Offer) {
 
 const backingLabel = (offer: Offer) => (!offer.preset.wood ? 'No backing' : offer.preset.woodTone === 'dark' ? 'Dark wood backing' : 'Light wood backing');
 
+/** The photo rows on a catalogue page (owner msg 8065, 30 Oct 2026: "show a row more plaques in this finish. Another
+ *  row different finishes in that same size"): the other sizes in this finish and backing, then this size in the
+ *  other finishes and backings. Each card links to that plaque's page. */
+export function catalogueRowsFor(slug: string) {
+  const offer = offerFor(slug);
+  if (!offer) return null;
+  const p = offer.preset;
+  const sizes = merchantOffers.filter(item => item.preset.material === p.material && sameBacking(item, offer) && item.slug !== offer.slug).sort(bySize);
+  const finishes = merchantOffers.filter(item => sameSize(item, offer) && sameBacking(item, offer) && item.preset.material !== p.material
+    && (item.format === 'Bench') === (offer.format === 'Bench'));
+  const backings = merchantOffers.filter(item => sameSize(item, offer) && item.preset.material === p.material && !sameBacking(item, offer));
+  const board = p.wood ? ` on ${p.woodTone === 'dark' ? 'dark' : 'light'} wood` : '';
+  return {
+    sizesTitle: `More sizes in ${offer.label.toLowerCase()}${board}`,
+    sizes: sizes.map(item => ({ slug: item.slug, label: offerSizeLabel(item), price: priceFor(item.slug) })),
+    finishesTitle: `${offerSizeLabel(offer)} in other finishes`,
+    finishes: [
+      ...finishes.map(item => ({ slug: item.slug, label: item.label, price: priceFor(item.slug) })),
+      ...backings.map(item => ({ slug: item.slug, label: `${item.label}, ${backingLabel(item).toLowerCase()}`, price: priceFor(item.slug) })),
+    ],
+  };
+}
+
 const finishNotes: Record<string, string> = {
   'brushed-stainless': 'Brushed stainless steel has a satin silver face with a fine linear grain. It is clean and restrained for outdoor bench plaques, public spaces and contemporary settings.',
   'polished-stainless': 'Polished stainless steel is bright and reflective: crisp for modern plaques where a polished look matters.',
@@ -146,7 +169,9 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
   );
   return (
     <>
-      {example && (
+      {/* The new layout drops the text-only wording cards (owner msg 8065: "Do the text examples add much"): the photo
+          shows the example wording and the hero says we lay out any wording. */}
+      {example && !compact && (
         <section className="shop-section shop-wording-examples shop-product-example" aria-labelledby="product-example-heading">
           <p className="shop-kicker">The example in the {pictureWord(offer.slug)}</p>
           <h2 id="product-example-heading">Shown as {example.use}.</h2>
@@ -199,24 +224,47 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
           </div>
         </section>
       )}
-      <section className="shop-section shop-buying-guide shop-product-spec">
-        <div>
-          <p className="shop-kicker">Size, finish and fitting</p>
-          <h2>What you get.</h2>
-          <p>{finishNotes[p.material]}</p>
-          <p>{sizeTip(offer)}</p>
-          {p.wood && <p>Wood backing suits indoor or sheltered displays.</p>}
-          <a className="shop-text-link" href={samplePdfFor(offer.slug)} target="_blank" rel="noopener">
-            See a sample proof for this plaque (PDF) ↗
-          </a>
-        </div>
-        {compact ? <details className="shop-fold shop-spec-fold"><summary>Full specification</summary>{specList}</details> : specList}
-      </section>
-      <nav className="shop-section shop-catalogue-compare" aria-label="Compare sizes, finishes and backing">
-        <p className="shop-kicker">Compare</p>
-        <h2>Other sizes and finishes.</h2>
-        {compact ? <details className="shop-fold"><summary>Sizes, finishes and prices</summary>{compareGrid}</details> : compareGrid}
-      </nav>
+      {compact ? (
+        // New layout: one heading and the sample proof in sight, the rest folded (the photo rows above replace the
+        // size and finish price lists).
+        <section className="shop-section shop-buying-guide shop-product-spec shop-product-spec-compact">
+          <div>
+            <p className="shop-kicker">Size, finish and fitting</p>
+            <h2>What you get.</h2>
+            <a className="shop-text-link" href={samplePdfFor(offer.slug)} target="_blank" rel="noopener">
+              See a sample proof for this plaque (PDF) ↗
+            </a>
+          </div>
+          <details className="shop-fold shop-spec-fold">
+            <summary>Full details: size, finish, fixings and production</summary>
+            <p>{finishNotes[p.material]}</p>
+            <p>{sizeTip(offer)}</p>
+            {p.wood && <p>Wood backing suits indoor or sheltered displays.</p>}
+            {specList}
+          </details>
+        </section>
+      ) : (
+        <>
+          <section className="shop-section shop-buying-guide shop-product-spec">
+            <div>
+              <p className="shop-kicker">Size, finish and fitting</p>
+              <h2>What you get.</h2>
+              <p>{finishNotes[p.material]}</p>
+              <p>{sizeTip(offer)}</p>
+              {p.wood && <p>Wood backing suits indoor or sheltered displays.</p>}
+              <a className="shop-text-link" href={samplePdfFor(offer.slug)} target="_blank" rel="noopener">
+                See a sample proof for this plaque (PDF) ↗
+              </a>
+            </div>
+            {specList}
+          </section>
+          <nav className="shop-section shop-catalogue-compare" aria-label="Compare sizes, finishes and backing">
+            <p className="shop-kicker">Compare</p>
+            <h2>Other sizes and finishes.</h2>
+            {compareGrid}
+          </nav>
+        </>
+      )}
     </>
   );
 }

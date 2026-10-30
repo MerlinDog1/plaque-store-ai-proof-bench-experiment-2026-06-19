@@ -7,10 +7,10 @@ import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './Co
 import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
 import { PromoFilm, PromoFilmFigure } from './PromoVideo';
 import { promoVideo, promoVideoPath } from '../services/promoVideo.mjs';
-import { hasNewProductLayout } from '../services/productLayout';
+import { designHrefFor, hasNewProductLayout } from '../services/productLayout';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { PriceTable, a5BoardPrice, groundStakePrice, homePriceSizes, priceTableIncludes } from './PriceTable';
-import { MerchantProductDetails, CatalogueSizeLinks, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
+import { MerchantProductDetails, CatalogueSizeLinks, catalogueRowsFor, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
 import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogue.mjs';
 import { optimisedSrcSet } from '../services/imageUrls';
 import { WordingLibrary } from './WordingGuide';
@@ -127,15 +127,18 @@ export function DesignLink({
   onStart,
   children = "Design your plaque",
   className = "",
+  href = "/design",
 }: {
   onStart?: () => void;
   children?: React.ReactNode;
   className?: string;
+  /** Catalogue pages pass designHrefFor(slug), so a tap before the script loads opens that plaque. */
+  href?: string;
 }) {
   return (
     <a
       className={`shop-button ${className}`}
-      href="/design"
+      href={href}
       onClick={
         onStart
           ? (event) => {
@@ -697,6 +700,48 @@ function ProductGallery({ images, caption, className, sizes }: { images: Gallery
   );
 }
 
+// Owner msg 8065 (30 Oct 2026): Shopping shows whichever size Google picks, so a catalogue page shows the other sizes
+// in its finish and the other finishes in its size as photo rows, in place of the text-only price lists. The studio
+// photo where there is one, so a row looks alike; otherwise the in-place photo or the flat drawing.
+function rowImage(item: ProductFamily) {
+  const photo = item.studioPhoto || item.photo;
+  const src = photo ? photo600(photo) : item.image + merchantImageQuery;
+  const srcSet = optimisedSrcSet(src, photo ? 600 : 1500, [320, 480]);
+  return srcSet ? { src, srcSet, sizes: '(max-width: 720px) 42vw, 190px' } : { src };
+}
+
+function ProductPhotoRows({ slug }: { slug: string }) {
+  const rows = catalogueRowsFor(slug);
+  if (!rows || (!rows.sizes.length && !rows.finishes.length)) return null;
+  const row = (id: string, title: string, cards: Array<{ slug: string; label: string; price: string }>) => {
+    const items = cards.map(card => ({ card, item: productFamilies.find(product => product.slug === card.slug) }))
+      .filter((entry): entry is { card: typeof cards[number]; item: ProductFamily } => Boolean(entry.item));
+    if (!items.length) return null;
+    return (
+      <nav className="shop-photo-row" aria-labelledby={id}>
+        <h2 id={id}>{title}</h2>
+        <ul>
+          {items.map(({ card, item }) => (
+            <li key={card.slug}>
+              <a href={`/${card.slug}`}>
+                <img {...rowImage(item)} alt={item.title} width="600" height="600" loading="lazy" decoding="async" />
+                <span>{card.label}</span>
+                <strong>{card.price}</strong>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    );
+  };
+  return (
+    <section className="shop-section shop-photo-rows" aria-label="Other sizes and finishes">
+      {row('photo-row-sizes', rows.sizesTitle, rows.sizes)}
+      {row('photo-row-finishes', rows.finishesTitle, rows.finishes)}
+    </section>
+  );
+}
+
 export function ShopProduct({
   product,
   onLaunch,
@@ -749,6 +794,7 @@ export function ShopProduct({
       : [{ src: heroImage, alt: heroAlt, label: product.title }];
   const newLayout = Boolean(product.merchantOffer) && hasNewProductLayout(product.slug);
   if (newLayout) heroImages.push(...finishImagesFor(product.slug));
+  const designHref = product.merchantOffer ? designHrefFor(product.slug) : '/design';
   // No AI/illustration labels on product images (owner msg 5231).
   const heroCaption = product.merchantOffer
     ? 'Shown with an example inscription. Your wording replaces it.'
@@ -765,23 +811,34 @@ export function ShopProduct({
         {/* Phones drop the plaque's own name here: it is the heading just below, and the trail fits on one line. */}
         <span className={category ? 'shop-crumb-current' : undefined}>{product.title}</span>
       </div>
-      <section className={newLayout ? 'shop-product-hero shop-product-hero-v2' : 'shop-product-hero'}>
+      <section className={newLayout ? 'shop-product-hero shop-product-hero-v2 shop-product-hero-v3' : 'shop-product-hero'}>
         <ProductGallery images={heroImages} caption={heroCaption} sizes="(max-width: 720px) 92vw, 560px" />
         <div>
+          {/* New layout, phones: the photo first, as in the Shopping ad they tapped (owner msg 8065). Same sizes as the
+              desktop figure, so React emits one image preload, not two. */}
+          {newLayout && <ProductGallery className="shop-product-inline-image" images={heroImages} caption={heroCaption} sizes="(max-width: 720px) 92vw, 560px" />}
           <p className="shop-kicker">Free proof · UK delivery included</p>
           <h1 className={product.merchantOffer ? 'shop-product-title-long' : undefined}>{heroTitles[product.slug] || product.title}</h1>
-          <p className="shop-product-note">
-            {product.heroNote || collection?.note || "A plaque made for the words that matter."}
-          </p>
+          {newLayout ? (
+            // Owner msg 8065: "How we go let someone know in first few seconds of visit have you in the right place?"
+            // Shopping shows whichever size Google picks, so say straight away that any size, finish or wording is made.
+            <p className="shop-product-note shop-product-promise">
+              Any size, finish or wording. We’ll make it, and you see a free proof before you pay.
+            </p>
+          ) : (
+            <p className="shop-product-note">
+              {product.heroNote || collection?.note || "A plaque made for the words that matter."}
+            </p>
+          )}
           {/* Phones: the product photo stays near the top while the copy comes first. */}
           {/* Same sizes as the desktop figure, so React emits one image preload, not two. */}
-          <ProductGallery className="shop-product-inline-image" images={heroImages} caption={heroCaption} sizes="(max-width: 720px) 92vw, 560px" />
+          {!newLayout && <ProductGallery className="shop-product-inline-image" images={heroImages} caption={heroCaption} sizes="(max-width: 720px) 92vw, 560px" />}
           {/* Phones: price and the choices straight under the photo (owner msg 5231). */}
           <strong className="shop-product-price">
             <TrackedPrice value={displayedPriceValue(product.startingFrom)} product={product.slug}>{product.startingFrom}</TrackedPrice>
           </strong>
           <div className="shop-hero-choices">
-            <DesignLink onStart={onLaunch}>Design online</DesignLink>
+            <DesignLink onStart={onLaunch} href={designHref}>Design online</DesignLink>
             <ContactLink channel="whatsapp" placement="hero" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
               <WhatsAppIcon /> Design on WhatsApp
             </ContactLink>
@@ -832,7 +889,7 @@ export function ShopProduct({
           <figure className="promo-film-figure shop-product-film-figure"><PromoFilm /></figure>
           <div className="shop-film-cta">
             <div className="shop-hero-choices shop-film-choices">
-              <DesignLink onStart={onLaunch}>Design online</DesignLink>
+              <DesignLink onStart={onLaunch} href={designHref}>Design online</DesignLink>
               <ContactLink channel="whatsapp" placement="page" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
                 <WhatsAppIcon /> Design on WhatsApp
               </ContactLink>
@@ -841,6 +898,9 @@ export function ShopProduct({
           </div>
         </section>
       )}
+      {newLayout && <ProductPhotoRows slug={product.slug} />}
+      {/* New layout: "we'll make anything" straight after the sizes and finishes, before the details. */}
+      {newLayout && <CustomAnything subject={plaqueSubject(product.shortTitle)} />}
       {product.merchantOffer ? <MerchantProductDetails slug={product.slug} /> : product.seoSections?.length === 0 ? null : <section className="shop-section shop-buying-guide">
         <div>
           <p className="shop-kicker">Size, wording and fitting</p>
@@ -877,21 +937,22 @@ export function ShopProduct({
       {product.slug === 'memorial-plaque-wording' && <WordingLibrary />}
       {!product.merchantOffer && !['bench-plaques', 'opening-plaques', 'tree-memorial-plaques'].includes(product.slug) && <ShopProcess />}
       {['garden-plaques', 'tree-memorial-plaques'].includes(product.slug) && <GardenAdvice />}
-      <CustomAnything subject={plaqueSubject(product.shortTitle)} />
-      {/* Catalogue pages: wording and fitting help, not the opening-plaque route (review 21 Oct). */}
-      <CollectionLinks slug={product.merchantOffer ? 'catalogue' : product.slug} />
+      {!newLayout && <CustomAnything subject={plaqueSubject(product.shortTitle)} />}
+      {/* Catalogue pages: wording and fitting help, not the opening-plaque route (review 21 Oct). The new layout leaves
+          it to the footer's guide links. */}
+      {!newLayout && <CollectionLinks slug={product.merchantOffer ? 'catalogue' : product.slug} />}
       <ShopFaq faqs={faqs} />
       <section className="shop-closing">
         <h2>Put your words in place.</h2>
         <p>Create your layout and see the price before you pay.</p>
         <div className="shop-closing-choices">
-          <DesignLink onStart={onLaunch} className="shop-button-light" />
+          <DesignLink onStart={onLaunch} className="shop-button-light" href={designHref} />
           <ContactLink channel="whatsapp" placement="page" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
             <WhatsAppIcon /> Design on WhatsApp
           </ContactLink>
         </div>
       </section>
-      <MobileContactBar subject={plaqueSubject(product.shortTitle)} onDesign={onLaunch} />
+      <MobileContactBar subject={plaqueSubject(product.shortTitle)} onDesign={onLaunch} designHref={designHref} />
     </div>
   );
 }

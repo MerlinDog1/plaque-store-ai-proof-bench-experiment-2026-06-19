@@ -1263,6 +1263,24 @@ const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Catalogue pages' "Design online" links ("/design?plaque=<slug>", services/productLayout.ts): a tap before the
+  // product page's script has loaded opens the designer on that plaque at its price, not on the default A5 plaque.
+  // Ground-stake, proof and checkout links are handled above or elsewhere.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (window.location.pathname !== '/design' || params.get(DESIGN_WITH_STAKE_PARAM.name) === DESIGN_WITH_STAKE_PARAM.value
+      || params.get('proof') || params.get('order')) return;
+    const plaque = params.get(DESIGN_PLAQUE_PARAM);
+    const product = plaque ? productFamilies.find(item => item.merchantOffer && item.slug === plaque) : undefined;
+    if (!product) return;
+    handleLaunchProduct(product);
+    params.delete(DESIGN_PLAQUE_PARAM);
+    const rest = params.toString();
+    window.history.replaceState(window.history.state, '', `/design${rest ? `?${rest}` : ''}${window.location.hash}`);
+    // Once, on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const persistCheckoutOrder = (order: MockOrder) => {
     setMockOrders(prev => {
       const next = [order, ...prev.filter(savedOrder => savedOrder.id !== order.id)];

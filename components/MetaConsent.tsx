@@ -9,12 +9,10 @@ export function MetaConsent() {
     ? <button type="button" onClick={() => setOpen(true)}>Cookie settings</button>
     : null;
   return <section role="dialog" aria-label="Cookie preferences" className="cookie-banner">
-    <strong>Cookies</strong>
-    {/* One span per sentence: on phones each is its own line (shopfront-a11y.css), so no single text block outweighs the
-        page's own heading as the Largest Contentful Paint. The wording is unchanged. */}
-    <p><span className="cookie-banner-line">We use optional analytics and advertising cookies and storage to understand visits, use of the designer and how our ads perform.</span>{' '}
-      <span className="cookie-banner-line">With analytics, we also record how pages and the designer are used, with anything you type hidden.</span>{' '}
-      <span className="cookie-banner-line">You can accept or reject them, and change your choice later in Cookie settings. <a href="/cookies">Cookie details</a>.</span></p>
+    {/* Shorter since 30 Oct 2026 (owner msg 8065 review): on a phone the old three-sentence notice covered a product
+        page's price and buttons. One short sentence keeps the purposes, the recordings (so analytics consent given here
+        still covers them: REPLAY_CONSENT_KEY in services/posthogAnalytics.ts) and the link to the full details and settings; it is too small to outweigh the page's own heading as the Largest Contentful Paint. */}
+    <p><span className="cookie-banner-line"><strong>Cookies:</strong> may we use optional analytics cookies, which record how pages and the designer are used (typing hidden), and ad cookies? <a href="/cookies">Details and settings</a></span></p>
     <div className="cookie-banner-actions">
       <button type="button" onClick={() => choose(true)}>Accept</button>
       <button type="button" onClick={() => choose(false)}>Reject</button>

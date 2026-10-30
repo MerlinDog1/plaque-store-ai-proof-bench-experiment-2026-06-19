@@ -168,7 +168,7 @@ export function ContactOptions({ subject = 'a plaque' }: { subject?: string }) {
   );
 }
 
-export function MobileContactBar({ subject = 'a plaque', onDesign, showDesign = true }: { subject?: string; onDesign?: () => void; showDesign?: boolean }) {
+export function MobileContactBar({ subject = 'a plaque', onDesign, showDesign = true, designHref = '/design' }: { subject?: string; onDesign?: () => void; showDesign?: boolean; designHref?: string }) {
   // Phones: the bar stays out of the way while the page's own buttons are on screen, then
   // slides up once they scroll off the top, with a one-off glow on WhatsApp (owner msg 5196).
   const bar = useRef<HTMLElement>(null);
@@ -198,7 +198,7 @@ export function MobileContactBar({ subject = 'a plaque', onDesign, showDesign = 
   return (
     <nav ref={bar} className={className} aria-label={showDesign ? 'Design your plaque or ask us for help' : 'Ask us for help'}
       onAnimationEnd={event => { if (event.animationName === 'shop-bar-glow') setHighlight(false); }}>
-      {showDesign && <a href="/design" className="shop-mobile-design" onClick={event => {
+      {showDesign && <a href={designHref} className="shop-mobile-design" onClick={event => {
         if (onDesign && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
           event.preventDefault();
           onDesign();

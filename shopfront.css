@@ -3375,16 +3375,83 @@
   .shopfront .shop-film-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .shopfront .shop-film-choices > a { width: 100%; min-height: 58px; font-size: 15px; padding-inline: 10px; justify-content: center; }
 }
-.shopfront[data-promo-cue="design"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a[href="/design"],
+.shopfront[data-promo-cue="design"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a[href^="/design"],
 .shopfront[data-promo-cue="whatsapp"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a.shop-hero-choice-whatsapp,
 .shopfront[data-promo-cue="both"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a {
   outline: 3px solid #d6aa52;
   outline-offset: 2px;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .shopfront[data-promo-cue="design"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a[href="/design"],
+  .shopfront[data-promo-cue="design"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a[href^="/design"],
   .shopfront[data-promo-cue="whatsapp"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a.shop-hero-choice-whatsapp,
   .shopfront[data-promo-cue="both"] :is(.shop-product-hero-v2, .shop-product-film) .shop-hero-choices > a {
     animation: promo-cue 1.4s ease-out infinite;
   }
 }
+
+/* Product pages, owner msg 8065 (30 Oct 2026): on phones the photo comes first, as in the Shopping ad; then a line
+   that says any size, finish or wording is made; then photo rows of the other sizes and finishes. */
+@media (max-width: 720px) {
+  .shopfront .shop-product-hero-v3 .shop-product-inline-image { margin: 0 0 14px; }
+  .shopfront .shop-product-hero-v3 .shop-product-inline-image figcaption { margin-top: 4px; }
+  .shopfront .shop-product-hero-v3 .shop-product-thumbs { margin-top: 6px; }
+  .shopfront .shop-product-hero-v3 h1.shop-product-title-long { font-size: 24px; line-height: 1.12; }
+}
+.shopfront .shop-product-hero .shop-product-promise {
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--shop-ink);
+}
+@media (max-width: 720px) {
+  .shopfront .shop-product-hero .shop-product-promise { font-size: 16px; margin: 8px 0 0; }
+}
+.shopfront .shop-photo-rows { display: grid; gap: 34px; }
+/* min-width 0: otherwise the row's full width of cards sets the column width and the heading runs off the screen. */
+.shopfront .shop-photo-rows > *, .shopfront .shop-photo-row { min-width: 0; }
+.shopfront .shop-photo-row h2 { font-size: clamp(22px, 2.4vw, 30px); line-height: 1.15; margin: 0 0 14px; }
+.shopfront .shop-photo-row ul {
+  list-style: none;
+  margin: 0;
+  padding: 2px 2px 12px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 190px;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+.shopfront .shop-photo-row li { scroll-snap-align: start; }
+.shopfront .shop-photo-row a { display: grid; gap: 6px; color: inherit; text-decoration: none; }
+.shopfront .shop-photo-row img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #efebe1;
+}
+.shopfront .shop-photo-row span { font-size: 14px; line-height: 1.3; }
+.shopfront .shop-photo-row strong { font-size: 15px; font-weight: 600; }
+.shopfront .shop-photo-row a:hover span { text-decoration: underline; }
+.shopfront .shop-photo-row a:focus-visible { outline: 2px solid var(--shop-ink); outline-offset: 3px; border-radius: 6px; }
+@media (max-width: 720px) {
+  .shopfront .shop-photo-rows { gap: 26px; }
+  .shopfront .shop-photo-row h2 { font-size: 22px; }
+  /* About two and a half cards in view, so the row reads as one you can swipe. */
+  .shopfront .shop-photo-row ul { grid-auto-columns: 42%; gap: 10px; margin-right: -16px; padding-right: 16px; }
+}
+/* Computers: the cards wrap onto more lines instead of scrolling sideways, so none is hidden past the edge. */
+@media (min-width: 721px) {
+  .shopfront .shop-photo-row ul { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); grid-auto-columns: auto; overflow: visible; row-gap: 22px; }
+}
+.shopfront .shop-product-spec-compact { align-items: start; }
+.shopfront .shop-product-spec-compact .shop-spec-fold > p { margin: 4px 0 12px; max-width: 640px; }
+
+/* Shorter cookie notice (30 Oct 2026): the title runs into the first sentence. */
+.cookie-banner p { margin-top: 0; }
+
