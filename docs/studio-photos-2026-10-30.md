@@ -27,6 +27,10 @@ Supatedorders Google Cloud route, "another 15"), 7966 ("do batches and update th
 4. `finish_batch.py LIST SINCE OUTDIR`: true proportions (`fix_shape.py`, not for angled wood shots), square 1600 px
    (`pad_square.py`), compare sheets. Every photo is then checked by eye before publishing.
 
+Products sold without a border (`output/catalogue-wording/border-styles.json` `border: false`) are briefed and checked
+for no border line (batch 1 found the check still asking them for the preset's double rule). A photo the check failed
+wrongly is re-judged in the ledger by eye with a note and no charge, never regenerated.
+
 ## Checks
 
 - `check-product-policies.mjs` (postbuild): every listed page leads with its studio photo, all three files exist and
@@ -40,6 +44,7 @@ Supatedorders Google Cloud route, "another 15"), 7966 ("do batches and update th
 | Batch | Photos | Deployment | Live (UTC) | Rollback |
 | --- | --- | --- | --- | --- |
 | First 20 (5 approved + 15) | 20 | dpl_AMZz5o9XoDh5saD2hU74mD5rvEjq (instaplaque-rcj72p6kq, `index-B9d3Z3kt.js`) | 30 Oct 15:35 | dpl_8HeMejLdG48U8XTAEzTLF4DuwHtB |
+| Batch 1 (`batch-b1.json`) | 18 of 20 (polished brass 200 × 50 and brushed stainless 400 × 300 on dark wood retried in batch 2) | dpl_HmPAwVZWVNQuCkw9a1PMeSHErZ9q (instaplaque-q569kv964, `index-DzJJBsQm.js`) | 30 Oct 16:21 | dpl_AMZz5o9XoDh5saD2hU74mD5rvEjq |
 
 Rollback: `vercel promote <rollback id> --yes --scope dullaghan31-3959s-projects`. To drop one photo, remove its
 slug from `services/studioPhotos.mjs` and redeploy (the page falls back to its previous picture).
