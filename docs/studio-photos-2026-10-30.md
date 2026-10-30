@@ -56,6 +56,7 @@ wrongly is re-judged in the ledger by eye with a note and no charge, never regen
 | Batch 4 (`batch-b4.json`) | 18 of 20 (brushed brass 148 × 210 on dark wood failed twice, a softbox in shot; brushed brass 210 × 297 on light wood held back by eye for a hard light streak behind it, retried in batch 5) | dpl_2oYaGf23ugiDuZJe77exQNrWwqNv (instaplaque-6z6u0v6z3, `index-UEWmYL9g.js`) | 30 Oct 18:30 | dpl_F6FuTXhLZhGgrWGg9DqYbjhohR97 |
 | Batch 5 (`batch-b5-run.json`: 19 of `batch-b5.json` without the 4:1 brushed stainless 200 × 50, + the batch 4 retry) | 19 of 20 (brushed stainless 225 × 65 failed twice, screws over the border then drawn 2.84:1, on hold with the thin strips) | dpl_4SPrU38DTfA3N2QRTChe213Ng14V (instaplaque-hq308n5z5, `index-DPinTCvU.js`) | 30 Oct 18:56 | dpl_2oYaGf23ugiDuZJe77exQNrWwqNv |
 | Batch 6 (`batch-b6-run.json`: 20 + the batch 4 retry) | 20 of 21 (polished brass 148 × 210 on light wood failed twice, an easel then a softbox in shot, retried in batch 7) | dpl_BR2t7famYuraRKjU9XuKPi2UTJy4 (instaplaque-ml4fkz1h7, `index-FrvLk0Ah.js`) | 30 Oct 19:28 | dpl_4SPrU38DTfA3N2QRTChe213Ng14V |
+| Batch 7 (`batch-b7-run.json`: 20 + the batch 6 retry) | 21 of 21 | dpl_HTqhXUMVxXJZMr12F41LtyaLeRqj (instaplaque-6dlhptdvm, `index-CSPfq57Z.js`) | 30 Oct 19:53 | dpl_BR2t7famYuraRKjU9XuKPi2UTJy4 |
 
 Rollback: `vercel promote <rollback id> --yes --scope dullaghan31-3959s-projects`. To drop one photo, remove its
 slug from `services/studioPhotos.mjs` and redeploy (the page falls back to its previous picture).
