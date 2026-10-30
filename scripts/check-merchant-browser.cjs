@@ -23,6 +23,8 @@ const {chromium}=require('playwright');const fs=require('node:fs');
    if(!await img.evaluate(async i=>{const f=new Image();f.src=i.currentSrc||i.src;await f.decode();return f.naturalWidth>=500}))throw Error('Small/broken image '+o.slug);
    if(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('Page overflow '+o.slug);
    const text=await p.locator('.shop-product-hero').innerText();if(!text.includes(`${o.productionDays} working days`))throw Error('Production '+o.slug);
+   // The prerendered button is a plain /design link until React hydrates it with the product's preset; click after that.
+   await p.waitForFunction(()=>{const a=document.querySelector('.shop-product-hero a.shop-button');return !!a&&Object.keys(a).some(k=>k.startsWith('__react'))},null,{timeout:20000});
    await p.locator('.shop-product-hero a.shop-button').first().click();
    await p.locator('.designer-price strong').waitFor();
    const checkoutPrice=Number((await p.locator('.designer-price strong').innerText()).replace(/[^\d.]/g,''));if(checkoutPrice!==o.price)throw Error('Designer price '+o.slug+': '+checkoutPrice);
