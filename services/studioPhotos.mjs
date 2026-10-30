@@ -100,6 +100,7 @@ export const studioPhotos = new Map([
   ['orbital-brass-matt-lacquer-200x150-rect-dark-wood-plaque', '2026-10-30'],
   ['orbital-brass-matt-lacquer-200x150-rect-light-wood-plaque', '2026-10-30'],
   ['orbital-brass-matt-lacquer-200x150-rect-plaque', '2026-10-30'],
+  ['orbital-brass-matt-lacquer-200x200-circle-plaque', '2026-10-30'],
   ['orbital-brass-matt-lacquer-200x50-rect-plaque', '2026-10-30'],
   ['orbital-brass-matt-lacquer-210x148-rect-dark-wood-plaque', '2026-10-30'],
   ['orbital-brass-matt-lacquer-210x148-rect-light-wood-plaque', '2026-10-30'],
@@ -173,6 +174,7 @@ export const studioPhotos = new Map([
   ['polished-stainless-300x200-rect-light-wood-plaque', '2026-10-30'],
   ['polished-stainless-300x200-rect-plaque', '2026-10-30'],
   ['polished-stainless-400x300-rect-dark-wood-plaque', '2026-10-30'],
+  ['polished-stainless-400x300-rect-light-wood-plaque', '2026-10-30'],
   ['polished-stainless-400x300-rect-plaque', '2026-10-30'],
 ]);
 
