@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import React from 'react';
 import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogue.mjs';
+import { studioPhotos } from '../services/studioPhotos.mjs';
 import { merchantPolicyOrganization, productOfferPolicies } from '../services/merchantPolicies.mjs';
 import { defaultShareImagePath, shareImagePathFor } from '../services/shareImages.mjs';
 import { promoVideo, promoVideoObject, promoVideoPath, promoVideoSitemapEntry } from '../services/promoVideo.mjs';
@@ -289,7 +290,7 @@ const indexableProductSlugs = new Set([
   'custom-plaques',
 ]);
 const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording']);
-const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.seoTitle, description: product.seoDescription, feedTitle: product.feedTitle || product.seoTitle, feedDescription: product.feedDescription || product.seoDescription, photo: product.photo, price: product.schemaStartingPrice, productionDays: product.productionDays, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
+const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.seoTitle, description: product.seoDescription, feedTitle: product.feedTitle || product.seoTitle, feedDescription: product.feedDescription || product.seoDescription, photo: product.photo, studioPhoto: product.studioPhoto, price: product.schemaStartingPrice, productionDays: product.productionDays, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
 const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)).map(page => {
   // Keep the revised memorial search metadata and illustration identical to
   // the hydrated page; the catalogue is the source for both representations.
@@ -672,8 +673,8 @@ const feedItems = merchantFeedPages.map((page) => {
       <g:structured_description><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.feedDescription)}</g:content></g:structured_description>
 
       <g:link>${url}</g:link>
-      <g:image_link>${imageUrl}</g:image_link>${page.photo ? `
-      <g:additional_image_link>${siteBaseUrl}${page.photo}</g:additional_image_link>` : ''}
+      <g:image_link>${imageUrl}</g:image_link>${[page.studioPhoto, page.photo].filter(Boolean).map(photo => `
+      <g:additional_image_link>${siteBaseUrl}${photo}</g:additional_image_link>`).join('')}
       <g:brand>InstaPlaque</g:brand>
       <g:material>${escapeAttr(offer.label)}</g:material>
       <g:color>${escapeAttr(offer.colour)}</g:color>
@@ -710,11 +711,13 @@ ${feedItems}
 await writeFile(path.join(distDir, 'google-merchant-feed.xml'), feedXml);
 
 // Exact catalogue variants get their own sitemap for Search Console reporting.
-// Each product URL lists its photo and flat design image, with the date its content last changed.
+// Each product URL lists its photos and flat design image, with the date its content last changed (a page whose studio
+// photo went up later takes that date, services/studioPhotos.mjs).
 const productsLastmod = '2026-10-24';
 const productSitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${merchantPages.map(page => {
-  const images = [page.photo, page.image && page.image + merchantImageQuery].filter(Boolean).map(src => `<image:image><image:loc>${escapeAttr(siteBaseUrl + src)}</image:loc><image:title>${escapeAttr(page.productType)}</image:title></image:image>`).join('');
-  return `  <url><loc>${escapeAttr(`${siteBaseUrl}/${page.slug}`)}</loc><lastmod>${productsLastmod}</lastmod>${images}</url>`;
+  const lastmod = [productsLastmod, studioPhotos.get(page.slug) || ''].sort().at(-1);
+  const images = [page.studioPhoto, page.photo, page.image && page.image + merchantImageQuery].filter(Boolean).map(src => `<image:image><image:loc>${escapeAttr(siteBaseUrl + src)}</image:loc><image:title>${escapeAttr(page.productType)}</image:title></image:image>`).join('');
+  return `  <url><loc>${escapeAttr(`${siteBaseUrl}/${page.slug}`)}</loc><lastmod>${lastmod}</lastmod>${images}</url>`;
 }).join("\n")}\n</urlset>\n`;
 await writeFile(path.join(distDir, "sitemap-products.xml"), productSitemapXml);
 const editorialSitemap = await readFile(path.join(process.cwd(), 'public/sitemap.xml'), 'utf8');

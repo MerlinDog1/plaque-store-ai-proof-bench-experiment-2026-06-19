@@ -1,6 +1,7 @@
 import { merchantOffers } from './merchantCatalogue.mjs';
 import { catalogueExamples, CatalogueExample } from './catalogueExamples';
 import { vettedCataloguePhotos } from './vettedPhotos.mjs';
+import { studioPhotos } from './studioPhotos.mjs';
 
 // Product-specific copy for the 175 exact catalogue pages (owner msg 5736, 23 Oct 2026: "Make all
 // pages better so they climb Google more"). Every page used to carry the same ~900 words with only
@@ -11,8 +12,8 @@ type Offer = (typeof merchantOffers)[number];
 
 const offerBySlug = new Map(merchantOffers.map(offer => [offer.slug, offer]));
 const offerFor = (slug: string) => offerBySlug.get(slug);
-/** "photo" where the page shows a photo the owner has seen, "drawing" where it shows the flat design view. */
-export const pictureWord = (slug: string) => (vettedCataloguePhotos.has(slug) ? 'photo' : 'drawing');
+/** "photo" where the page leads with a photo (studio or one the owner has seen), "drawing" where it shows the flat design view. */
+export const pictureWord = (slug: string) => (vettedCataloguePhotos.has(slug) || studioPhotos.has(slug) ? 'photo' : 'drawing');
 
 export function exampleFor(slug: string): CatalogueExample | undefined {
   return catalogueExamples[slug];

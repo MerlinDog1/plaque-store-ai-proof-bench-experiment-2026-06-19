@@ -1,6 +1,6 @@
 const {chromium}=require('playwright');const fs=require('node:fs');
 (async()=>{
- const {merchantOffers}=await import('../services/merchantCatalogue.mjs');
+ const {merchantOffers}=await import('../services/merchantCatalogue.mjs');const {studioPhotos}=await import('../services/studioPhotos.mjs');const {vettedCataloguePhotos}=await import('../services/vettedPhotos.mjs');
  const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/opt/google/chrome/chrome',args:['--no-sandbox']});
  const base=process.env.APP_URL||'http://127.0.0.1:4210'; const results=[];
  for(const width of [1440,390]){
@@ -13,11 +13,12 @@ const {chromium}=require('playwright');const fs=require('node:fs');
    await p.goto(base+'/'+o.slug,{waitUntil:'domcontentloaded',timeout:60000});await p.locator('.shop-product-price').waitFor();
    await p.waitForFunction(()=>document.querySelector('.shop-product-hero img')?.complete,null,{timeout:20000});
    const actual=Number((await p.locator('.shop-product-price').innerText()).replace(/[^\d.]/g,''));if(actual!==o.price)throw Error('Page price '+o.slug);
-   // Catalogue photo first; the feed image stays on the page as the second gallery image.
-   const img=p.locator('.shop-product-hero figure > img').first();const catalogue=`/site-images/catalogue-photo/${o.slug}.webp`;const photo=o.imageKind==='render'||require('fs').existsSync('public'+catalogue)?catalogue:o.image;
-   // Redrawn photos carry ?v=N (services/commerce.ts).
-   if((await img.getAttribute('src')).split('?')[0]!==photo)throw Error('Image mismatch '+o.slug);
-   if(o.imageKind==='render'&&!await p.locator(`.shop-product-hero .shop-product-thumbs img[src="${o.image}"]`).count())throw Error('Feed image not on page '+o.slug);
+   // Studio photo first (owner msg 7966), else the photo the owner has seen, else the flat drawing; the feed image stays
+   // on the page as a later gallery image.
+   const img=p.locator('.shop-product-hero figure > img').first();const lead=studioPhotos.has(o.slug)?`/site-images/studio-photo/${o.slug}.webp`:o.imageKind==='render'&&vettedCataloguePhotos.has(o.slug)?`/site-images/catalogue-photo/${o.slug}.webp`:o.image;
+   // Redrawn photos and drawings carry ?v=N (services/commerce.ts, merchantCatalogue.mjs).
+   if((await img.getAttribute('src')).split('?')[0]!==lead)throw Error('Image mismatch '+o.slug);
+   if(lead!==o.image&&!await p.locator(`.shop-product-hero .shop-product-thumbs img[src^="${o.image}"]`).count())throw Error('Feed image not on page '+o.slug);
    // With srcset, naturalWidth is scaled by sizes; measure the pixels of the file the browser chose.
    if(!await img.evaluate(async i=>{const f=new Image();f.src=i.currentSrc||i.src;await f.decode();return f.naturalWidth>=500}))throw Error('Small/broken image '+o.slug);
    if(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('Page overflow '+o.slug);

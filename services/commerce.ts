@@ -10,6 +10,7 @@ import {
 import { GROUND_STAKE_LENGTH, estimatePlaquePrice } from './pricing';
 import { onBoardAndStake } from './groundStake';
 import { vettedCataloguePhotos } from './vettedPhotos.mjs';
+import { studioPhotoPath, studioPhotos } from './studioPhotos.mjs';
 import {
   getCheckoutPriceBreakdown,
   getCheckoutQuoteReasons,
@@ -62,6 +63,8 @@ export interface ProductFamily {
   imageKind?: 'ai' | 'render';
   /** Product page photo (1200 px webp, with a -600 version); the feed and schema keep `image`. */
   photo?: string;
+  /** Studio photo on a plain backdrop (services/studioPhotos.mjs), 1200 px webp with -600 and thumbs/ copies. */
+  studioPhoto?: string;
   /** Catalogue pages: a line under the title, and the Google Shopping title and description. */
   heroNote?: string;
   feedTitle?: string;
@@ -1221,6 +1224,8 @@ export const merchantProducts: ProductFamily[] = merchantOffers.map(item => cata
   // Realistic photos (owner msg 5231), now only the ones the owner has seen (services/vettedPhotos.mjs, msg 6270); the
   // others show the flat drawing. The two older photo-style offers keep their own image.
   photo: vettedCataloguePhotos.has(item.slug) ? cataloguePhotoFor(item.slug) : undefined,
+  // Studio photos (owner msg 7966) lead the product page, ahead of any in-place photo and the flat design view.
+  studioPhoto: studioPhotos.has(item.slug) ? studioPhotoPath(item.slug) : undefined,
   merchantMaterial: item.label, productionDays: item.productionDays,
   description: item.description, seoIntro: item.description, seoTitle: `${item.title} UK | InstaPlaque`,
   seoDescription: `${item.size} ${item.label.toLowerCase()} plaque${item.preset.wood ? ` with ${item.preset.woodTone} wood backing` : ''}. Add your wording, check a free proof and order with UK delivery included.`,

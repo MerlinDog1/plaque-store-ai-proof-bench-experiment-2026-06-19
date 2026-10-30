@@ -326,7 +326,7 @@ export function ProductPicks({ slugs, kicker, title, intro, id, className }: { s
         {items.map(item => (
           <li key={item.slug}>
             <a href={`/${item.slug}`}>
-              <img src={item.photo ? photo600(item.photo) : item.merchantOffer ? item.image + merchantImageQuery : item.image} {...cardImageSizes(item)} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+              <img src={cardImageSrc(item)} {...cardImageSizes(item)} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
               <span>{item.title}</span>
               <strong>{item.startingFrom}</strong>
             </a>
@@ -371,7 +371,7 @@ export function ShopBySize() {
                 if (!item) return null;
                 return (
                   <li key={offer.slug}><a href={`/${offer.slug}`}>
-                    <img src={item.photo ? photo600(item.photo) : item.merchantOffer ? item.image + merchantImageQuery : item.image} {...cardImageSizes(item)} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+                    <img src={cardImageSrc(item)} {...cardImageSizes(item)} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
                     <span>{offer.label}{offer.format === 'Bench' ? ` · ${offer.size}` : ''}</span><strong>{item.startingFrom}</strong>
                   </a></li>
                 );
@@ -636,10 +636,18 @@ export function productCategoryFor(product: ProductFamily): { slug: string; titl
     : { slug: 'brass-plaques', title: 'Brass plaques' };
 }
 
+// Cards keep the in-place photo where there is one; otherwise the studio photo (owner msg 7966), otherwise the drawing.
+const cardPhoto = (item: { photo?: string; studioPhoto?: string }) => item.photo || item.studioPhoto;
+const cardImageSrc = (item: { photo?: string; studioPhoto?: string; merchantOffer?: unknown; image: string }) => {
+  const photo = cardPhoto(item);
+  return photo ? photo600(photo) : item.merchantOffer ? item.image + merchantImageQuery : item.image;
+};
+
 // Catalogue cards show at about 175 px on phones and 282 px on desktops; the 320/480 px copies replace the 600 px
 // photos and 1500 px feed drawings there (services/imageUrls.ts). Outside Vercel builds the markup is unchanged.
-function cardImageSizes(item: { photo?: string; merchantOffer?: unknown; image: string }) {
-  const srcSet = item.photo ? optimisedSrcSet(photo600(item.photo), 600, [320, 480])
+function cardImageSizes(item: { photo?: string; studioPhoto?: string; merchantOffer?: unknown; image: string }) {
+  const photo = cardPhoto(item);
+  const srcSet = photo ? optimisedSrcSet(photo600(photo), 600, [320, 480])
     : item.merchantOffer ? optimisedSrcSet(item.image + merchantImageQuery, 1500, [320, 480]) : undefined;
   return srcSet ? { srcSet, sizes: '(max-width: 720px) 45vw, 282px' } : {};
 }
@@ -718,17 +726,26 @@ export function ShopProduct({
   const heroAlt = example ? `${product.title}, engraved with the example wording “${example.lines.slice(0, 3).join(' ')}”${example.portrait ? ' and a portrait' : ''}`
     : product.merchantOffer ? `${product.title}, shown with an example inscription` : product.title;
   const photoSmall = product.photo ? photo600(product.photo) : undefined;
+  const drawingThumbs = `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`;
+  // The thumbnail keeps the feed image as its src; browsers pick the 160 px copy. Both carry the feed's ?v= so a
+  // redrawn design (new example wording) is fetched fresh, not shown from an old cached copy.
+  const drawingAfterPhoto: GalleryImage = { src: product.image + merchantImageQuery, srcSet: optimisedSrcSet(product.image + merchantImageQuery, 1500, [480, 640, 750, 828, 1080]), thumbSrcSet: drawingThumbs, alt: `${product.title}: flat design view`, label: 'Flat design view' };
+  // Owner msg 7966: the studio photo leads; the in-place photo (if any) and the flat design view follow it.
+  const studioImage: GalleryImage | undefined = product.studioPhoto
+    ? { src: product.studioPhoto, srcSet: `${photo600(product.studioPhoto)} 600w, ${product.studioPhoto} 1200w`, thumb: product.studioPhoto.replace('/studio-photo/', '/studio-photo/thumbs/'), alt: heroAlt, label: 'Studio photo' }
+    : undefined;
   const heroImages: GalleryImage[] = product.photo
     ? [
+        ...(studioImage ? [studioImage] : []),
         { src: product.photo, srcSet: `${photoSmall} 600w, ${product.photo} 1200w`, thumb: photoSmall, alt: heroAlt, label: 'Shown in place' },
-        // The thumbnail keeps the feed image as its src; browsers pick the 160 px copy. Both carry the feed's ?v= so a
-        // redrawn design (new example wording) is fetched fresh, not shown from an old cached copy.
-        { src: product.image + merchantImageQuery, srcSet: optimisedSrcSet(product.image + merchantImageQuery, 1500, [480, 640, 750, 828, 1080]), thumbSrcSet: `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`, alt: `${product.title}: flat design view`, label: 'Flat design view' },
+        drawingAfterPhoto,
       ]
+    : studioImage
+      ? [studioImage, drawingAfterPhoto]
     : product.merchantOffer
       // No photo the owner has seen (services/vettedPhotos.mjs, owner msg 6270): show the exact flat drawing.
       // On Vercel the main image comes in 480-1080 px copies (a phone takes ~750 px instead of the 1500 px drawing).
-      ? [{ src: product.image + merchantImageQuery, srcSet: optimisedSrcSet(product.image + merchantImageQuery, 1500, [480, 640, 750, 828, 1080], `${product.image.replace('/merchant/', '/merchant/thumbs/').replace(/\.jpg$/, '.webp')}${merchantImageQuery} 160w, ${product.image}${merchantImageQuery} 1500w`), alt: heroAlt, label: 'Flat design view' }]
+      ? [{ src: product.image + merchantImageQuery, srcSet: optimisedSrcSet(product.image + merchantImageQuery, 1500, [480, 640, 750, 828, 1080], drawingThumbs), alt: heroAlt, label: 'Flat design view' }]
       : [{ src: heroImage, alt: heroAlt, label: product.title }];
   const newLayout = Boolean(product.merchantOffer) && hasNewProductLayout(product.slug);
   if (newLayout) heroImages.push(...finishImagesFor(product.slug));

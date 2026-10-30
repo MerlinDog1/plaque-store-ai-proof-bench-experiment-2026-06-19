@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogue.mjs';
 import { vettedCataloguePhotos } from '../services/vettedPhotos.mjs';
+import { studioPhotos } from '../services/studioPhotos.mjs';
 import { checkProductPolicies, checkReturnPolicy, checkDigitalOffer, schemaObjects, schemasFromHtml } from './lib/product-policy-checks.mjs';
 
 let productCount = 0;
@@ -41,21 +42,38 @@ for (const page of ['index.html', 'memorial-plaques/index.html', 'bench-plaques/
   assert.equal([...schemaObjects(graph)].filter(item => item['@type'] === 'Product').length, 0, `No Product schema on ${page}`);
 }
 // Catalogue pages (review fixes 21 Oct): a photo, a specification, links between variants and a sample proof PDF.
-const { existsSync } = await import('node:fs');
+const { existsSync, readFileSync } = await import('node:fs');
+const productSitemap = await readFile('dist/sitemap-products.xml', 'utf8');
+const feed = await readFile('dist/google-merchant-feed.xml', 'utf8');
 for (const offer of merchantOffers) {
   const html = await readFile(`dist/${offer.slug}/index.html`, 'utf8');
+  const studio = studioPhotos.has(offer.slug) ? `/site-images/studio-photo/${offer.slug}.webp` : null;
+  if (studio) {
+    // The studio photo leads the page (owner msg 7966), and every copy of it is marked as AI-made in its IPTC metadata,
+    // which Google requires for Merchant Center images. It is an extra Shopping image; the drawing stays the main one.
+    assert.ok(html.includes(`src="${studio}"`), `Studio photo leads ${offer.slug}`);
+    for (const file of [studio, studio.replace('.webp', '-600.webp'), studio.replace('/studio-photo/', '/studio-photo/thumbs/')]) {
+      assert.ok(existsSync(`dist${file}`), `Missing ${file}`);
+      assert.ok(readFileSync(`dist${file}`).includes('digitalsourcetype/trainedAlgorithmicMedia'), `No IPTC AI tag in ${file}`);
+    }
+    assert.ok(html.includes(`${offer.image}${merchantImageQuery}`), `Flat drawing still on ${offer.slug}`);
+    assert.ok(productSitemap.includes(`<image:loc>https://instaplaque.co.uk${studio}</image:loc>`), `Studio photo in the product sitemap for ${offer.slug}`);
+    assert.ok(feed.includes(`<g:additional_image_link>https://instaplaque.co.uk${studio}</g:additional_image_link>`), `Studio photo in the feed for ${offer.slug}`);
+  }
   if (offer.imageKind === 'render' && vettedCataloguePhotos.has(offer.slug)) {
     const photo = `/site-images/catalogue-photo/${offer.slug}.webp`;
-    // Redrawn photos carry ?v=N (services/commerce.ts), so match the path up to any version.
-    assert.ok(html.includes(`src="${photo}"`) || html.includes(`src="${photo}?v=`), `Photo on ${offer.slug}`);
+    // Redrawn photos carry ?v=N (services/commerce.ts), so match the path up to any version. Behind a studio photo the
+    // in-place photo is the second gallery image, so only its 600 px thumbnail is in the markup.
+    assert.ok(html.includes(`src="${photo}"`) || html.includes(`src="${photo}?v=`) || (studio && html.includes(`src="${photo.replace('.webp', '-600.webp')}`)), `Photo on ${offer.slug}`);
     for (const file of [photo, photo.replace('.webp', '-600.webp'), offer.image.replace('/merchant/', '/merchant/thumbs/').replace('.jpg', '.webp')]) assert.ok(existsSync(`dist${file}`), `Missing ${file}`);
   } else if (offer.imageKind === 'render') {
-    // No photo the owner has seen: the page leads with the exact flat drawing and links no unchecked photo.
-    assert.ok(html.includes(`src="${offer.image}${merchantImageQuery}"`), `Flat drawing on ${offer.slug}`);
+    // No photo the owner has seen: the page leads with its studio photo or the exact flat drawing, and links no
+    // unchecked photo.
+    assert.ok(studio || html.includes(`src="${offer.image}${merchantImageQuery}"`), `Flat drawing on ${offer.slug}`);
     assert.ok(!html.includes(`/site-images/catalogue-photo/${offer.slug}`), `Unchecked photo linked on ${offer.slug}`);
   }
   assert.ok(html.includes('class="shop-spec-list"') && html.includes(`${offer.productionDays} working days`), `Specification on ${offer.slug}`);
   assert.ok((html.match(/class="shop-catalogue-links"/g) || []).length >= 1, `Variant links on ${offer.slug}`);
   assert.ok(html.includes(`href="/samples/products/${offer.slug}.pdf?v=11"`) && existsSync(`dist/samples/products/${offer.slug}.pdf`), `Sample proof PDF for ${offer.slug}`);
 }
-console.log(`Product policies: ${productCount} physical offers across ${pageCount} pages pass shipping, returns, production/transit separation and weekday checks; free designer unchanged. Every product page has its photo, specification, variant links and sample proof.`);
+console.log(`Product policies: ${productCount} physical offers across ${pageCount} pages pass shipping, returns, production/transit separation and weekday checks; free designer unchanged. Every product page has its photo, specification, variant links and sample proof; ${studioPhotos.size} lead with a tagged studio photo.`);
