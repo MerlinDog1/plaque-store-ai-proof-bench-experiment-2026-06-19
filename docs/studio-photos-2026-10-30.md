@@ -24,7 +24,8 @@ Supatedorders Google Cloud route, "another 15"), 7966 ("do batches and update th
 3. `run-batch-vertex.sh LIST` (with `BUDGET_USD` on the whole `ledger-vertex.jsonl`): the site's own
    `generateRealisticView` on Supatedorders Vertex (supated-orders-bot, gemini-3.1-flash-image, 2K), each image read
    back by the text model and checked for wording, border, fixings, shape, support and backdrop. `vertex-shim.mjs`
-   fetches a fresh gcloud token and repeats the call when a token runs out mid-chunk (a 401 cost batch 2 one product).
+   fetches a fresh gcloud token and repeats the call when a token runs out mid-chunk (a 401 cost batch 2 one product;
+   batch 3 renewed twice without losing any).
 4. `finish_batch.py LIST SINCE OUTDIR`: true proportions (`fix_shape.py`, not for angled wood shots), square 1600 px
    (`pad_square.py`), compare sheets. Every photo is then checked by eye before publishing.
 
@@ -36,11 +37,13 @@ wrongly is re-judged in the ledger by eye with a note and no charge, never regen
 
 - `check-product-policies.mjs` (postbuild): every listed page leads with its studio photo, all three files exist and
   carry the IPTC tag, the drawing is still on the page, the feed and product sitemap list the photo.
-- `check-merchant-browser.cjs`: lead image is studio photo, else signed-off photo, else drawing. It clicks Design only
-  after React hydrates the button: the prerendered link is a plain `/design`, so an early click opens the default A5
-  designer (£95.50) instead of the product.
+- `check-merchant-browser.cjs`: lead image is studio photo, else signed-off photo, else drawing. It checks nothing until
+  React owns the product hero: the app replaces the prerendered hero when it mounts (gone for 25-90 ms, live too), so a
+  read in that gap finds no thumbnails (batch 3), and the prerendered Design link is a plain `/design` until then, so an
+  early click opens the default A5 designer (£95.50) instead of the product.
 - Release check: `output/studio-shots-20261029/site-diff/verify_studio_live.py` (live pages, byte-identical files,
-  tags, feed, sitemap) and `verify_live.py`.
+  tags, feed, sitemap) and `verify_live.py`. Both retry a dropped connection twice and print `RETRY` (the VPS saw a few
+  resets from the live site on 30 Oct; an HTTP error is never retried).
 
 ## Releases
 
@@ -49,6 +52,7 @@ wrongly is re-judged in the ledger by eye with a note and no charge, never regen
 | First 20 (5 approved + 15) | 20 | dpl_AMZz5o9XoDh5saD2hU74mD5rvEjq (instaplaque-rcj72p6kq, `index-B9d3Z3kt.js`) | 30 Oct 15:35 | dpl_8HeMejLdG48U8XTAEzTLF4DuwHtB |
 | Batch 1 (`batch-b1.json`) | 18 of 20 (polished brass 200 × 50 and brushed stainless 400 × 300 on dark wood retried in batch 2) | dpl_HmPAwVZWVNQuCkw9a1PMeSHErZ9q (instaplaque-q569kv964, `index-DzJJBsQm.js`) | 30 Oct 16:21 | dpl_AMZz5o9XoDh5saD2hU74mD5rvEjq |
 | Batch 2 (`batch-b2-run.json`: 20 + the 2 batch 1 retries) | 17 of 22 (polished brass 400 × 300 held back by eye for a blurred reflection and polished stainless 148 × 210 on dark wood lost to an expired token, both retried in batch 3; polished brass 200 × 50, polished stainless 200 × 50 and brushed stainless 150 × 50 drawn too short, left for a different approach) | dpl_9CqqEUhEejrrzoGtge82m2c3tebn (instaplaque-mdznf6y0m, `index-7F9eLkre.js`) | 30 Oct 17:03 | dpl_HmPAwVZWVNQuCkw9a1PMeSHErZ9q |
+| Batch 3 (`batch-b3-run.json`: 20 + the 2 batch 2 retries) | 21 of 22 (aged brass 200 × 50 drawn about 3.2:1 instead of 4:1, left with the other thin strips) | dpl_F6FuTXhLZhGgrWGg9DqYbjhohR97 (instaplaque-6h62dlwru, `index-DkugMOWZ.js`) | 30 Oct 18:14 | dpl_9CqqEUhEejrrzoGtge82m2c3tebn |
 
 Rollback: `vercel promote <rollback id> --yes --scope dullaghan31-3959s-projects`. To drop one photo, remove its
 slug from `services/studioPhotos.mjs` and redeploy (the page falls back to its previous picture).
