@@ -69,21 +69,25 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
 (async () => {
   for (const url of [returnUrl, origin + '/order-confirmed', origin + '/admin',
     origin + '/proof/private', origin + '/?proof=private', origin + '/?view=checkout']) {
-    const scripts = [], window = { location: new URL(url), addEventListener() {} };
+    const scripts = [], listeners = new Map(), window = { location: new URL(url), addEventListener: (name, fn) => listeners.set(name, fn) };
     const context = { window, location: window.location, localStorage: { getItem: key => key === 'instaplaque-internal-v1' ? null : 'yes' }, URL, Date, document: { referrer: '', createElement: () => ({}),
       head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
     vm.runInNewContext(bootstrap, context);
+    assert.equal(scripts.length, 0, 'No Google library before the first interaction');
+    listeners.get('pointerdown')?.();
     assert.equal(scripts.length, 0, url + ' must not load Google on a private document');
     assert.equal(window.dataLayer.some(args => ['js', 'config', 'event'].includes(args[0])), false,
       'Private pages may queue consent settings but never configure a destination or send events');
   }
   {
-    const scripts = [], window = { location: new URL(origin + '/brass-plaques?utm_source=ad&untrusted=private#secret'), addEventListener() {} };
+    const scripts = [], listeners = new Map(), window = { location: new URL(origin + '/brass-plaques?utm_source=ad&untrusted=private#secret'), addEventListener: (name, fn) => listeners.set(name, fn) };
     const context = { window, location: window.location, localStorage: { getItem: key => key === 'instaplaque-internal-v1' ? null : 'yes' }, URL, Date, document: { referrer: origin + '/?proof=private',
       createElement: () => ({}), head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
     vm.runInNewContext(bootstrap, context);
+    assert.equal(scripts.length, 0, 'No Google library before the first interaction');
+    listeners.get('pointerdown')?.();
     assert.equal(scripts.length, 1, 'Public pages retain one loader');
     const configs = window.dataLayer.filter(args => args[0] === 'config');
     assert.equal(configs.length, 2);
@@ -93,11 +97,13 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
   }
   console.log('PASS private Google bootstrap exclusions and unchanged public GA4 URL redaction');
   for (const consent of [null, 'no']) {
-    const scripts = [], window = { location: new URL(origin), addEventListener() {} };
+    const scripts = [], listeners = new Map(), window = { location: new URL(origin), addEventListener: (name, fn) => listeners.set(name, fn) };
     const context = { window, location: window.location, localStorage: { getItem: () => consent }, URL, Date,
       document: { referrer: '', createElement: () => ({}), head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
     vm.runInNewContext(bootstrap, context);
+    assert.equal(scripts.length, 0, 'No Google library before the first interaction');
+    listeners.get('pointerdown')?.();
     assert.equal(scripts.length, 1, 'Advanced consent mode loads the public Google tag even without consent');
     const update = window.dataLayer.find(args => args[0] === 'consent' && args[1] === 'update');
     assert.equal(update[2].analytics_storage, 'denied');
