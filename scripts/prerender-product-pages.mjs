@@ -289,7 +289,13 @@ const indexableProductSlugs = new Set([
   'stainless-steel-plaques',
   'custom-plaques',
 ]);
-const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording']);
+const occasionSlugs = ['house-name-plaques', 'donor-recognition-plaques', 'church-plaques', 'professional-brass-plaques'];
+const indexableLandingSlugs = new Set(['garden-plaques', 'opening-plaques', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording', ...occasionSlugs]);
+// New categories share their metadata, image and FAQs with the hydrated page rather than duplicating copy here.
+landingPages.push(...catalogue.seoLandingPages.filter(page => occasionSlugs.includes(page.slug)).map(page => ({
+  slug: page.slug, title: page.seoTitle, description: page.seoDescription, image: page.image, pageName: page.title,
+  relatedSearches: page.relatedSearches, faqs: page.faqs.map(faq => [faq.question, faq.answer]),
+})));
 const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product.slug, title: product.seoTitle, description: product.seoDescription, feedTitle: product.feedTitle || product.seoTitle, feedDescription: product.feedDescription || product.seoDescription, photo: product.photo, studioPhoto: product.studioPhoto, price: product.schemaStartingPrice, productionDays: product.productionDays, image: product.image, productType: product.title, faqs: product.faqs.map(f => [f.question, f.answer]) }));
 const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)).map(page => {
   // Keep the revised memorial search metadata and illustration identical to

@@ -18,6 +18,7 @@ import {
 import { merchantOffers } from './merchantCatalogue.mjs';
 import { exampleFor, feedDescriptionFor, feedTitleFor, heroNote, productFaqs, productIntro, seoDescriptionFor, seoTitleFor } from './catalogueContent';
 import { productionTiming } from './shopInformation';
+import { occasionLandingPages } from './occasionLandingPages';
 import { BENCH_SAFE_MARGIN_PERCENT } from './safeMargin';
 
 export const DEFAULT_PRODUCT_SLUG = 'bench-plaques';
@@ -1060,6 +1061,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     ],
     relatedSearches: ['school opening plaques UK', 'school building plaques', 'classroom opening plaques', 'library opening plaques'],
   },
+  ...occasionLandingPages,
 ];
 
 export const materialStories = [
@@ -1145,7 +1147,9 @@ export const materialStories = [
 // memorial plaques, as the memorial page's "Where will it go?" tiles already show.
 const memorialParent = { slug: 'memorial-plaques', title: 'Memorial plaques' };
 export function categoryParentFor(slug: string): { slug: string; title: string } | undefined {
-  return ['bench-plaques', 'garden-plaques', 'tree-memorial-plaques'].includes(slug) ? memorialParent : undefined;
+  if (slug === 'professional-brass-plaques' || slug === 'house-name-plaques') return { slug: 'brass-plaques', title: 'Brass plaques' };
+  if (slug === 'donor-recognition-plaques') return { slug: 'opening-plaques', title: 'Opening plaques' };
+  return ['bench-plaques', 'garden-plaques', 'tree-memorial-plaques', 'church-plaques'].includes(slug) ? memorialParent : undefined;
 }
 
 const cataloguePhotoVersions: Record<string, number> = {

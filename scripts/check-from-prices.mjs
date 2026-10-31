@@ -13,8 +13,8 @@ import { merchantOffers } from '../services/merchantCatalogue.mjs';
 const BASE = process.env.BASE;
 const DIST = process.env.DIST || 'dist';
 const categories = ['memorial-plaques', 'bench-plaques', 'garden-plaques', 'brass-plaques', 'stainless-steel-plaques',
-  'tree-memorial-plaques', 'opening-plaques', 'custom-plaques'];
-const metalOf = slug => (slug === 'brass-plaques' ? 'brass' : 'stainless steel');
+  'tree-memorial-plaques', 'opening-plaques', 'custom-plaques', 'house-name-plaques', 'donor-recognition-plaques', 'church-plaques', 'professional-brass-plaques'];
+const metalOf = slug => (['brass-plaques', 'professional-brass-plaques'].includes(slug) ? 'brass' : 'stainless steel');
 const offerPrice = new Map(merchantOffers.map(offer => [offer.slug, offer.price]));
 
 async function page(slug) {

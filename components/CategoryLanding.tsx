@@ -49,10 +49,11 @@ function HeroPhoto({ image, className, below = false }: { image: HeroImage; clas
   );
 }
 
-export function CategoryHero({ product, title, note, image, film = false, price, priceNote, trust, onLaunch, onRequestDesign }: {
+export function CategoryHero({ product, title, note, intro, image, film = false, price, priceNote, trust, designHref, onLaunch, onRequestDesign }: {
   product: ProductFamily;
   title: string;
   note: string;
+  intro?: string;
   image: HeroImage;
   /** The promo film instead of the photo (owner msg 6986): beside the copy on computers, under the buttons on phones. */
   film?: boolean;
@@ -60,6 +61,7 @@ export function CategoryHero({ product, title, note, image, film = false, price,
   price?: { label: string; slug: string };
   priceNote: string;
   trust: string[];
+  designHref?: string;
   onLaunch?: () => void;
   onRequestDesign?: () => void;
 }) {
@@ -70,6 +72,7 @@ export function CategoryHero({ product, title, note, image, film = false, price,
         <p className="shop-kicker">Free proof · UK delivery included</p>
         <h1>{title}</h1>
         <p className="cat-hero-note">{note}</p>
+        {intro && <p className="cat-section-intro">{intro}</p>}
         {/* The price before the photo, so a phone's first screen shows it above the cookie notice (owner msg 6436). */}
         <p className="cat-hero-buy">
           <strong className="shop-product-price">
@@ -79,7 +82,7 @@ export function CategoryHero({ product, title, note, image, film = false, price,
         </p>
         {!film && <HeroPhoto image={image} className="cat-hero-photo-inline" />}
         <div className="shop-hero-choices">
-          <DesignLink onStart={onLaunch}>Design online</DesignLink>
+          <DesignLink onStart={onLaunch} href={designHref}>Design online</DesignLink>
           <ContactLink channel="whatsapp" placement="hero" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
             <WhatsAppIcon /> Design on WhatsApp
           </ContactLink>
@@ -233,12 +236,13 @@ export function QuestionsAndGuide({ id, guideId, intro, faqs, guide, subject, ch
 }
 
 /** How to order in three steps, with both ways to start: a phone-length version of the homepage's two cards. */
-export function OrderSteps({ id, kicker, title, steps, subject, onLaunch, onRequestDesign }: {
+export function OrderSteps({ id, kicker, title, steps, subject, designHref, onLaunch, onRequestDesign }: {
   id?: string;
   kicker: string;
   title: string;
   steps: [string, string][];
   subject: string;
+  designHref?: string;
   onLaunch?: () => void;
   onRequestDesign?: () => void;
 }) {
@@ -250,7 +254,7 @@ export function OrderSteps({ id, kicker, title, steps, subject, onLaunch, onRequ
         {steps.map(([heading, copy]) => <li key={heading}><strong>{heading}</strong><span>{copy}</span></li>)}
       </ol>
       <div className="shop-hero-choices">
-        <DesignLink onStart={onLaunch}>Design online</DesignLink>
+        <DesignLink onStart={onLaunch} href={designHref}>Design online</DesignLink>
         <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-button shop-hero-choice-whatsapp">
           <WhatsAppIcon /> Design on WhatsApp
         </ContactLink>
@@ -313,8 +317,12 @@ export type LandingConfig = {
   prefix: string;
   title: string;
   note: string;
-  /** Photo files `${base}-{800,1200,1600}.webp`, 4:3. */
-  hero: { base: string; alt: string; caption: React.ReactNode };
+  /** Existing category photo files (`base`) or an already-vetted catalogue photo (`src` and `srcSet`). */
+  hero: { base?: string; src?: string; srcSet?: string; alt: string; caption: React.ReactNode };
+  intro?: string;
+  film?: boolean;
+  designHref?: string;
+  notice?: React.ReactNode;
   price?: { label: string; slug: string };
   priceNote: string;
   trust?: string[];
@@ -363,11 +371,11 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
   const id = (name: string) => `${config.prefix}-${name}`;
   const { hero, routes, examples, sizes, wording } = config;
   // The film says "Made in 5 working days*", so it leads every category page except the tree page, where every plaque
-  // is on an oak board and stake (10–15 working days); that page keeps its photo at the top.
-  const film = sizes.mount !== 'stake';
+  // is on an oak board and stake (10–15 working days). New occasion pages explicitly choose their catalogue photo.
+  const film = config.film ?? (sizes.mount !== 'stake');
   const heroImage: HeroImage = {
-    src: `${hero.base}-1200.webp`,
-    srcSet: `${hero.base}-800.webp 800w, ${hero.base}-1200.webp 1200w, ${hero.base}-1600.webp 1600w`,
+    src: hero.src || `${hero.base}-1200.webp`,
+    srcSet: hero.srcSet || `${hero.base}-800.webp 800w, ${hero.base}-1200.webp 1200w, ${hero.base}-1600.webp 1600w`,
     alt: hero.alt,
     caption: hero.caption,
   };
@@ -383,15 +391,18 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
         product={product}
         title={config.title}
         note={config.note}
+        intro={config.intro}
         image={heroImage}
         film={film}
         price={config.price}
         priceNote={config.priceNote}
         trust={config.trust || defaultTrust}
+        designHref={config.designHref}
         onLaunch={onLaunch}
         onRequestDesign={onRequestDesign}
       />
       {film && <ShownPhoto image={heroImage} />}
+      {config.notice && <section className="shop-section">{config.notice}</section>}
       {routes && <PlaceRoutes id={id('places')} kicker={routes.kicker} title={routes.title} routes={routes.routes} more={routes.more} />}
       {examples && <ExamplesRow id={id('examples')} kicker={examples.kicker} title={examples.title} intro={examples.intro} items={examples.items} />}
       {picks && <ProductPicks {...picks} id={id('picks')} className="cat-picks" />}
@@ -402,6 +413,7 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
         title="Your words. Your approval."
         subject={subject}
         steps={config.steps || defaultSteps}
+        designHref={config.designHref}
         onLaunch={onLaunch}
         onRequestDesign={onRequestDesign}
       />
@@ -431,13 +443,13 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
         <h2>Put your words in place.</h2>
         <p>Create your layout and see the price before you pay, or send us your words and we’ll design it for you.</p>
         <div className="shop-closing-choices">
-          <DesignLink onStart={onLaunch} className="shop-button-light" />
+          <DesignLink onStart={onLaunch} className="shop-button-light" href={config.designHref} />
           <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
             <WhatsAppIcon /> Design on WhatsApp
           </ContactLink>
         </div>
       </section>
-      <MobileContactBar subject={subject} onDesign={onLaunch} />
+      <MobileContactBar subject={subject} onDesign={onLaunch} designHref={config.designHref} />
     </div>
   );
 }

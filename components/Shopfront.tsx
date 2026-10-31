@@ -1,6 +1,7 @@
 import React from "react";
 import { CategoryLandingPage } from './CategoryLanding';
 import { categoryLandingFor } from './CategoryPages';
+import { occasionProductPicks } from './OccasionCategoryPages';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
@@ -838,7 +839,7 @@ export function ShopProduct({
   // The category pages use the memorial page's phone-first layout (owner msgs 5876 and 5927, 24 Oct 2026).
   const landingConfig = categoryLandingFor(product, plaqueSubject(product.shortTitle), examples);
   if (landingConfig) {
-    return <CategoryLandingPage config={landingConfig} product={product} faqs={faqs} picks={productPicks[product.slug]} onLaunch={onLaunch} onRequestDesign={onRequestDesign} />;
+    return <CategoryLandingPage config={landingConfig} product={product} faqs={faqs} picks={occasionProductPicks[product.slug] || productPicks[product.slug]} onLaunch={onLaunch} onRequestDesign={onRequestDesign} />;
   }
   const heroImage = product.photo || collection?.image || materialProductImages[product.slug] || product.image;
   const example = product.merchantOffer ? exampleFor(product.slug) : undefined;

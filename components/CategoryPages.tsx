@@ -1,4 +1,5 @@
 import React from 'react';
+import { occasionCategoryLandingFor } from './OccasionCategoryPages';
 import { merchantProducts, photo600, type ProductFamily } from '../services/commerce';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { ContactLink } from './ContactOptions';
@@ -47,6 +48,8 @@ const onStakePriceOf = (slug: string) => {
 };
 
 export function categoryLandingFor(product: ProductFamily, subject: string, examples: ExampleItem[] = []): LandingConfig | undefined {
+  const occasion = occasionCategoryLandingFor(product);
+  if (occasion) return occasion;
   const ask = (text: string) => <ContactLink channel="whatsapp" placement="page" subject={subject}>{text}</ContactLink>;
   switch (product.slug) {
     case 'memorial-plaques':
@@ -91,7 +94,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           intro: 'Start with the name as you want it remembered, then dates if you wish and a few words of your own. These examples are starting points: change anything you like.',
           inscriptions: [...memorialInscriptions, { title: 'For a pet', lines: ['Bramble', '2011–2025', 'Our faithful friend,', 'forever by our side'] }],
         },
-        related: <MemorialMaterialLinks />,
+        related: <><MemorialMaterialLinks />{related(<>For an agreed church memorial or pew inscription, see <a href="/church-plaques">church pew and dedication plaques</a>.</>)}</>,
       };
 
     case 'bench-plaques':
@@ -230,7 +233,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           ],
           link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
         },
-        related: related(<>Compare with <a href="/stainless-steel-plaques">stainless steel plaques</a>, or see <a href="/memorial-plaques">memorial plaques</a>, <a href="/bench-plaques">bench plaques</a> and <a href="/opening-plaques">opening plaques</a>.</>),
+        related: related(<>Compare with <a href="/stainless-steel-plaques">stainless steel plaques</a>, or see <a href="/memorial-plaques">memorial plaques</a>, <a href="/bench-plaques">bench plaques</a> and <a href="/opening-plaques">opening plaques</a>. Naming a place? See <a href="/house-name-plaques">house name plaques</a> and <a href="/professional-brass-plaques">brass practice name plates</a>.</>),
       };
 
     case 'stainless-steel-plaques':
@@ -373,7 +376,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           ],
           link: { href: '/contact', label: 'Discuss a deadline, logo or crest' },
         },
-        related: related(<>See <a href="/brass-plaques">brass plaques</a> and <a href="/stainless-steel-plaques">stainless steel plaques</a>, or <a href="/how-it-works">how the free proof works</a> before your ceremony.</>),
+        related: related(<>See <a href="/brass-plaques">brass plaques</a> and <a href="/stainless-steel-plaques">stainless steel plaques</a>, or <a href="/how-it-works">how the free proof works</a> before your ceremony. Thanking supporters? See <a href="/donor-recognition-plaques">donor and recognition plaques</a>.</>),
       };
 
     case 'custom-plaques':
