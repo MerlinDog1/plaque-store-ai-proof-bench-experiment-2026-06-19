@@ -3,18 +3,18 @@ import { merchantProducts, productFamilies, seoLandingPages, type ProductFamily,
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
-import { HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
-import { offerSizeLabel } from './CatalogueDetails';
-import { DesignLink, ProductPicks } from './Shopfront';
+import { ProofPdfStack } from './FeatureSections';
+import { offerSizeLabel, samplePdfFor, sampleProofPageFor } from './CatalogueDetails';
+import { CustomAnything, DesignLink, ProductPicks } from './Shopfront';
 import { PriceTable, priceTableIncludes, priceTableIncludesOnStake } from './PriceTable';
-import { PromoFilmFigure } from './PromoVideo';
+import { promoVideoPath } from '../services/promoVideo.mjs';
 
 // Category landing sections, phone first. The memorial plaques page was built from them first (owner msg 5876,
 // 24 Oct 2026: "make memorial page amazing and then use as yardstick to measure against other pages"), then every
 // other category page (msg 5927: "bring every other page up to that standard"); the content of each page is in
 // CategoryPages.tsx. 93% of ad visitors were on phones, so the first screens give an in-place photo of the plaque
-// the price is for, the price, both ways to order and photo routes; long guidance folds away. Shared blocks
-// (quality, sample proof, FAQs) are the homepage's own.
+// the price is for, the price, both ways to order and photo routes; long guidance folds away. The 31 October
+// preview combines the ordering, metal and proof rows and reuses the product pages' made-to-order picture band.
 
 /** The page a route leads to and its from-price: landing pages take their related product's price (the tree page's
  * with the oak board and ground stake, owner msg 6506). */
@@ -35,28 +35,22 @@ function Price({ slug, bare = false }: { slug: string; bare?: boolean }) {
 
 type HeroImage = { src: string; srcSet: string; alt: string; caption?: React.ReactNode };
 
-function HeroPhoto({ image, className, below = false }: { image: HeroImage; className: string; below?: boolean }) {
-  // Phones show it inline under the headline, desktops beside the copy. Identical src, srcset and sizes,
-  // so the browser downloads one file and React emits one preload. Where the promo film has the hero (owner msg
-  // 6986), the photo comes straight after it instead (below), loaded as it nears the screen.
+function HeroPhoto({ image, className }: { image: HeroImage; className: string }) {
   return (
     <figure className={`cat-hero-photo ${className}`}>
-      {below
-        ? <img src={image.src} srcSet={image.srcSet} sizes="(max-width: 720px) 100vw, 760px" width="1600" height="1200" loading="lazy" decoding="async" alt={image.alt} />
-        : <img src={image.src} srcSet={image.srcSet} sizes="(max-width: 720px) 100vw, 620px" width="1600" height="1200" fetchPriority="high" alt={image.alt} />}
+      <img src={image.src} srcSet={image.srcSet} sizes="(max-width: 720px) 100vw, 620px" width="1600" height="1200" fetchPriority="high" alt={image.alt} />
       {image.caption && <figcaption>{image.caption}</figcaption>}
     </figure>
   );
 }
 
-export function CategoryHero({ product, title, note, image, film = false, price, priceNote, trust, onLaunch, onRequestDesign }: {
+export function CategoryHero({ product, title, note, image, photoFirst = false, price, priceNote, trust, onLaunch, onRequestDesign }: {
   product: ProductFamily;
   title: string;
   note: string;
   image: HeroImage;
-  /** The promo film instead of the photo (owner msg 6986): beside the copy on computers, under the buttons on phones. */
-  film?: boolean;
-  /** A from-price other than the category's own (the custom page has no standard price; it shows its ovals'). */
+  /** The seven formerly film-led pages lead with their plaque photo. The tree hero is unchanged. */
+  photoFirst?: boolean;
   price?: { label: string; slug: string };
   priceNote: string;
   trust: string[];
@@ -65,26 +59,26 @@ export function CategoryHero({ product, title, note, image, film = false, price,
 }) {
   const shown = price || { label: product.startingFrom, slug: product.slug };
   return (
-    <section className="cat-hero">
+    <section className={`cat-hero${photoFirst ? ' is-photo-first' : ''}`}>
       <div className="cat-hero-copy">
+        {photoFirst && <HeroPhoto image={image} className="cat-hero-photo-inline" />}
         <p className="shop-kicker">Free proof · UK delivery included</p>
         <h1>{title}</h1>
         <p className="cat-hero-note">{note}</p>
-        {/* The price before the photo, so a phone's first screen shows it above the cookie notice (owner msg 6436). */}
+        {photoFirst && <p className="cat-made-to-order">Any size, shape or wording, made to order.</p>}
         <p className="cat-hero-buy">
           <strong className="shop-product-price">
             <TrackedPrice value={displayedPriceValue(shown.label)} product={shown.slug}>{shown.label}</TrackedPrice>
           </strong>
           <span>{priceNote}</span>
         </p>
-        {!film && <HeroPhoto image={image} className="cat-hero-photo-inline" />}
+        {!photoFirst && <HeroPhoto image={image} className="cat-hero-photo-inline" />}
         <div className="shop-hero-choices">
           <DesignLink onStart={onLaunch}>Design online</DesignLink>
           <ContactLink channel="whatsapp" placement="hero" subject={plaqueSubject(product.shortTitle)} className="shop-button shop-hero-choice-whatsapp">
             <WhatsAppIcon /> Design on WhatsApp
           </ContactLink>
         </div>
-        {film && <PromoFilmFigure className="cat-hero-film-inline" />}
         <p className="shop-hero-design-request">
           Prefer us to design it? <a href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Send us your words – free proof</a>
         </p>
@@ -92,21 +86,12 @@ export function CategoryHero({ product, title, note, image, film = false, price,
           {trust.map(item => <li key={item}>{item}</li>)}
         </ul>
       </div>
-      {film ? <PromoFilmFigure className="cat-hero-film-side" /> : <HeroPhoto image={image} className="cat-hero-photo-side" />}
+      <HeroPhoto image={image} className="cat-hero-photo-side" />
     </section>
   );
 }
 
-/** The category's own photo, straight after a hero that has the film: the exact plaque, with its price and link. */
-export function ShownPhoto({ image }: { image: HeroImage }) {
-  return (
-    <div className="cat-shown">
-      <HeroPhoto image={image} className="cat-shown-photo" below />
-    </div>
-  );
-}
-
-export type PlaceRoute = { href: string; title: string; image: string; alt: string; priceSlug: string };
+export type PlaceRoute = { href: string; title: string; image: string; alt: string; priceSlug: string; priceGroup?: string; picturedHref?: string };
 
 export function PlaceRoutes({ id, kicker, title, routes, more }: { id?: string; kicker: string; title: string; routes: PlaceRoute[]; more?: React.ReactNode }) {
   return (
@@ -115,10 +100,13 @@ export function PlaceRoutes({ id, kicker, title, routes, more }: { id?: string; 
       <h2 id="cat-routes-heading">{title}</h2>
       <div className="cat-routes-grid">
         {routes.map(route => (
-          <a className="cat-route" href={route.href} key={route.title}>
-            <img src={route.image} alt={route.alt} width="600" height="450" loading="lazy" decoding="async" />
-            <span><strong>{route.title}</strong><small><Price slug={route.priceSlug} /></small></span>
-          </a>
+          <div className="cat-route-card" key={route.title}>
+            <a className="cat-route" href={route.href} data-price-group={route.priceGroup}>
+              <img src={route.image} alt={route.alt} width="600" height="450" loading="lazy" decoding="async" />
+              <span><strong>{route.title}</strong><small><Price slug={route.priceSlug} /></small></span>
+            </a>
+            {route.picturedHref && <a className="cat-route-pictured" href={route.picturedHref}>See the pictured plaque ↗</a>}
+          </div>
         ))}
       </div>
       {more && <p className="cat-routes-more">{more}</p>}
@@ -130,15 +118,21 @@ export type SizeStep = { slug: string; label: string; widthMm: number; heightMm:
 
 /** Four sizes, each in stainless steel, brass and aged brass (owner msg 6436: brass prices were only in the designer),
  * every price linking to that exact plaque; on the tree page, on the oak board and ground stake (owner msg 6506). */
-export function SizeLadder({ id, kicker, title, intro, sizes, mount, note, more }: { id?: string; kicker: string; title: string; intro: string; sizes: SizeStep[]; mount?: 'stake'; note?: React.ReactNode; more?: React.ReactNode }) {
+export function SizeLadder({ id, kicker, title, intro, sizes, mount, note, more, folded = false }: { id?: string; kicker: string; title: string; intro: string; sizes: SizeStep[]; mount?: 'stake'; note?: React.ReactNode; more?: React.ReactNode; folded?: boolean }) {
+  const prices = <>
+    <PriceTable sizes={sizes} mount={mount} caption={`${title} Prices by size and metal${mount === 'stake' ? ', on an oak board and ground stake' : ''}.`} />
+    <p className="shop-smallprint">{mount === 'stake' ? priceTableIncludesOnStake : priceTableIncludes}{note && <> {note}</>}</p>
+    {more}
+  </>;
   return (
     <section className="shop-section cat-sizes" id={id} aria-labelledby="cat-sizes-heading">
       <p className="shop-kicker">{kicker}</p>
       <h2 id="cat-sizes-heading">{title}</h2>
       <p className="cat-section-intro">{intro}</p>
-      <PriceTable sizes={sizes} mount={mount} caption={`${title} Prices by size and metal${mount === 'stake' ? ', on an oak board and ground stake' : ''}.`} />
-      <p className="shop-smallprint">{mount === 'stake' ? priceTableIncludesOnStake : priceTableIncludes}{note && <> {note}</>}</p>
-      {more}
+      {folded ? <details className="cat-guidance-fold cat-price-fold">
+        <summary>Compare sizes and metal prices <span aria-hidden="true">+</span></summary>
+        <div>{prices}</div>
+      </details> : prices}
     </section>
   );
 }
@@ -232,35 +226,31 @@ export function QuestionsAndGuide({ id, guideId, intro, faqs, guide, subject, ch
   );
 }
 
-/** How to order in three steps, with both ways to start: a phone-length version of the homepage's two cards. */
-export function OrderSteps({ id, kicker, title, steps, subject, onLaunch, onRequestDesign }: {
-  id?: string;
-  kicker: string;
-  title: string;
-  steps: [string, string][];
-  subject: string;
-  onLaunch?: () => void;
-  onRequestDesign?: () => void;
-}) {
+/** The former steps, metal and proof rows in one place, using this category's own example plaque PDF. */
+export function CategoryProof({ id, sampleSlug, steps, note }: { id: string; sampleSlug: string; steps: [string, string][]; note?: string }) {
+  const sample = merchantProducts.find(item => item.slug === sampleSlug)!;
+  const offer = merchantOffers.find(item => item.slug === sampleSlug);
+  const sampleLabel = offer ? `${offer.size} ${offer.label.toLowerCase()}` : sample.shortTitle;
   return (
-    <section className="shop-section cat-steps" id={id} aria-labelledby="cat-steps-heading">
-      <p className="shop-kicker">{kicker}</p>
-      <h2 id="cat-steps-heading">{title}</h2>
-      <ol className="cat-steps-list">
-        {steps.map(([heading, copy]) => <li key={heading}><strong>{heading}</strong><span>{copy}</span></li>)}
-      </ol>
-      <div className="shop-hero-choices">
-        <DesignLink onStart={onLaunch}>Design online</DesignLink>
-        <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-button shop-hero-choice-whatsapp">
-          <WhatsAppIcon /> Design on WhatsApp
-        </ContactLink>
+    <section className="shop-section cat-proof" id="how-it-works" aria-labelledby={`${id}-heading`}>
+      <div className="cat-proof-copy">
+        <p className="shop-kicker">Made in the UK · Free proof first</p>
+        <h2 id={`${id}-heading`}>Your words. Your approval.</h2>
+        <ol className="cat-proof-steps">
+          {steps.map(([heading, copy]) => <li key={heading}><strong>{heading}.</strong> {copy}</li>)}
+        </ol>
+        <p className="cat-proof-metal">Solid brass or stainless steel, laser cut to size, etched and infilled by hand. UK delivery included.</p>
+        <a className="shop-text-link" href={promoVideoPath}>See the online designer in action ↗</a>
       </div>
-      {/* "Make it clear we can make whatever you want" (owner msg 5736), once on the page. */}
-      <p className="cat-steps-more">
-        <strong>Can’t see exactly what you need? Tell us what you want. We’ll make it.</strong>{' '}
-        Any size, shape or wording, with a free proof, usually within 3 working hours.{' '}
-        <a href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Use the design form ↗</a>
-      </p>
+      <figure className="cat-proof-example" id={id}>
+        <ProofPdfStack href={samplePdfFor(sampleSlug)} sizes="(max-width: 720px) 62vw, 360px" label="Open this category’s sample proof (PDF)"
+          front={sampleProofPageFor(sampleSlug, 1, `Sample proof cover: ${sample.title}, with example wording`)}
+          back={sampleProofPageFor(sampleSlug, 2, `Measured drawing, finish and fixings for ${sample.title}`)} />
+        <figcaption>
+          <a href={samplePdfFor(sampleSlug)} target="_blank" rel="noopener">See the sample proof (PDF) ↗</a>
+          <span>{note || `${sampleLabel}. Your own wording replaces the example.`}</span>
+        </figcaption>
+      </figure>
     </section>
   );
 }
@@ -324,7 +314,8 @@ export type LandingConfig = {
   sizes: { kicker?: string; title: string; intro: string; sizes: SizeStep[]; mount?: 'stake'; note?: React.ReactNode; more?: React.ReactNode };
   steps?: [string, string][];
   portraits?: boolean;
-  proofCopy?: string;
+  sampleSlug: string;
+  sampleNote?: string;
   wording: { kicker?: string; title: string; intro: string; inscriptions: Inscription[]; link?: { href: string; label: string } };
   guide?: { title: string; copy: string }[];
   questionsIntro?: string;
@@ -333,9 +324,9 @@ export type LandingConfig = {
 
 const defaultTrust = ['Made in the UK', 'Infilled by hand', 'Free proof before you pay', 'No account needed'];
 const defaultSteps: [string, string][] = [
-  ['Add your words', 'Design it online, or send us the wording on WhatsApp and we’ll lay it out for you.'],
-  ['Check your free proof', 'Download the proof PDF to share with family, and change anything until it’s right.'],
-  ['Approve, then pay', 'We etch it into solid metal, infill it by hand and deliver it free in the UK.'],
+  ['Add your words', 'Design online, or send them on WhatsApp.'],
+  ['Check your proof', 'Every word, measurement and fixing, before you pay.'],
+  ['Approve, then we make it', 'Ask for changes until it’s right.'],
 ];
 const memorialImages = '/site-images/memorial';
 // Four portrait plaques with portraits drawn by Portraits in Metal's own process (owner msgs 5816, 5830), photographed in
@@ -348,8 +339,8 @@ const portraitCards: PortraitExample[] = [
   { src: `${memorialImages}/portrait-ron-pat-v3.webp`, alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on an oak board and ground stake under their apple tree', caption: 'Ron & Pat · under their apple tree' },
 ];
 
-/** One category page: hero, optional photo routes and examples, picks, sizes, how it works, optional portraits,
- * quality, sample proof, wording ideas, questions with the folded guide, and the closing buttons. */
+/** One category page: photo hero, routes and product choices, sizes, made-to-order gallery,
+ * compact ordering/proof row, optional portraits, wording ideas, questions and closing buttons. */
 export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, onRequestDesign }: {
   config: LandingConfig;
   product: ProductFamily;
@@ -362,9 +353,7 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
   const parent = categoryParentFor(product.slug);
   const id = (name: string) => `${config.prefix}-${name}`;
   const { hero, routes, examples, sizes, wording } = config;
-  // The film says "Made in 5 working days*", so it leads every category page except the tree page, where every plaque
-  // is on an oak board and stake (10–15 working days); that page keeps its photo at the top.
-  const film = sizes.mount !== 'stake';
+  const photoFirst = sizes.mount !== 'stake';
   const heroImage: HeroImage = {
     src: `${hero.base}-1200.webp`,
     srcSet: `${hero.base}-800.webp 800w, ${hero.base}-1200.webp 1200w, ${hero.base}-1600.webp 1600w`,
@@ -372,7 +361,7 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
     caption: hero.caption,
   };
   return (
-    <div className="shopfront cat-page" data-prerendered="true">
+    <div className="shopfront cat-page cat-page-v2" data-prerendered="true">
       <div className="shop-breadcrumb">
         <a href="/">Home</a>
         <span>/</span>
@@ -384,38 +373,33 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
         title={config.title}
         note={config.note}
         image={heroImage}
-        film={film}
+        photoFirst={photoFirst}
         price={config.price}
         priceNote={config.priceNote}
         trust={config.trust || defaultTrust}
         onLaunch={onLaunch}
         onRequestDesign={onRequestDesign}
       />
-      {film && <ShownPhoto image={heroImage} />}
+      {!photoFirst && <p className="cat-made-to-order cat-made-to-order-band">Any size, shape or wording, made to order.</p>}
       {routes && <PlaceRoutes id={id('places')} kicker={routes.kicker} title={routes.title} routes={routes.routes} more={routes.more} />}
       {examples && <ExamplesRow id={id('examples')} kicker={examples.kicker} title={examples.title} intro={examples.intro} items={examples.items} />}
-      {picks && <ProductPicks {...picks} id={id('picks')} className="cat-picks" />}
-      <SizeLadder id={id('sizes')} kicker={sizes.kicker || 'Sizes and prices'} title={sizes.title} intro={sizes.intro} sizes={sizes.sizes} mount={sizes.mount} note={sizes.note} more={sizes.more} />
-      <OrderSteps
-        id="how-it-works"
-        kicker="How it works"
-        title="Your words. Your approval."
-        subject={subject}
-        steps={config.steps || defaultSteps}
-        onLaunch={onLaunch}
-        onRequestDesign={onRequestDesign}
-      />
-      {config.portraits && <PortraitStrip
-        kicker="Add their portrait"
-        title="A favourite face, beside their name."
-        intro="Send us a photo of a person or a pet. Our Portraits in Metal studio draws it for engraving, with a free proof first."
-        portraits={portraitCards}
-        link={{ href: '/portrait-plaques', label: 'See portrait plaques' }}
-      />}
-      <HomeQualitySection compact />
-      <ProofPdfShowcase id={id('proof')} heading="Check every word before you pay." compact>
-        <p>{config.proofCopy || 'Before anything is made, you get a PDF proof with every measurement, the finish and the fixings. Share it with family and agree it together.'}</p>
-      </ProofPdfShowcase>
+      {picks && <ProductPicks {...picks} id={id('picks')} className="cat-picks" studioFirst />}
+      <SizeLadder id={id('sizes')} kicker={sizes.kicker || 'Sizes and prices'} title={sizes.title} intro={sizes.intro} sizes={sizes.sizes} mount={sizes.mount} note={sizes.note} more={sizes.more} folded={['brass-plaques', 'stainless-steel-plaques'].includes(product.slug)} />
+      <CustomAnything subject={subject} showcase compact />
+      <CategoryProof id={id('proof')} sampleSlug={config.sampleSlug} steps={config.steps || defaultSteps} note={config.sampleNote} />
+      {config.portraits && <section className="shop-section cat-portrait-option">
+        <details className="cat-guidance-fold">
+          <summary>Add a portrait from a photo <span aria-hidden="true">+</span></summary>
+          <div><PortraitStrip
+            kicker="Add their portrait"
+            title="A favourite face, beside their name."
+            intro="Send us a photo of a person or a pet. Our Portraits in Metal studio draws it for engraving, with a free proof first."
+            portraits={portraitCards}
+            link={{ href: '/portrait-plaques', label: 'See portrait plaques' }}
+          /></div>
+        </details>
+        <a className="shop-text-link" href="/portrait-plaques">Explore portrait plaques ↗</a>
+      </section>}
       <WordingIdeas
         id={id('wording')}
         kicker={wording.kicker || 'Finding the words'}
