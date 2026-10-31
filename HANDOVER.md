@@ -1,5 +1,32 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Product pages v3, the pictures band, each plaque's own proof and the designer-texture PDFs: LIVE — 31 October 2026, 08:05 UTC
+
+- **Why:** the owner's go (msg 8146) for everything on the v3 preview (msgs 8065, 8088, 8100, 8116, 8124; the three
+  PREVIEW sections below).
+- **Live:** dpl_uNxynWjiLaW1qAcaUHEEXaNKJgiq (instaplaque-jyygrmsuz, `index-CkaO0isp.js`), promoted 08:05:33 UTC from
+  commit 2a93dd5 on `codex/instaplaque-product-page-v3-20261030`. This branch is now the live source; base new work on
+  it.
+- **Release:** `vercel deploy --prod --skip-domain` (no files left to upload after the preview; the build and every
+  postbuild check passed), checked before promotion (4 pages, their PDFs and proof pictures, the home-page sample),
+  then `vercel promote`. Vercel's security checkpoint had blocked Contabo's API calls from about 07:44 to 08:01; the
+  release waited for it to clear. The bulk live checks ran from the OVH server, so this server's requests to Vercel
+  stayed low.
+- **Checks on live:** all 175 product pages have the pictures band and their own proof pictures (one stack, `?v=12`)
+  and PDF link, and all 350 proof pictures match the repo byte for byte; the home page links the new sample (`v=5`),
+  which matches the repo; www redirects to the apex. `verify_live.py`: 175 product pages, sitemaps and feed (175 each),
+  734 linked PDFs and photos byte-identical, redirects and IndexNow key file fine. `verify_studio_live.py`: 167 studio
+  photos pass. In a browser (phone, brushed stainless 150 × 65; computer, polished brass 300 × 200 dark wood): the band
+  once with 10 cards, phone swipe and computer wrap, no sideways overflow, the ask card opens WhatsApp, one proof
+  picture, the plaque's own, opening its PDF. Scripts and logs: workspace `output/instaplaque-custom-band-20261031/`
+  (`RELEASE-v3.md`, `check_deployment.sh`, `verify_v3_live.sh`, `live-checks/`, `shots-live/`).
+- **Unchanged:** production artwork PDFs, prices, the Merchant feed, checkout and API code.
+- **Known (owner not yet decided):** the film's end card "Made in 5 working days*" also shows on the 99 pages that take
+  7, 10 or 15 days (its footnote explains); on a first phone visit the cookie notice covers the price and buttons
+  until answered.
+- **Rollback:** promote dpl_sU9UTr4ZoqiSngGZXdnoZuWtRDbx (instaplaque-5vb35oan3, `index-CCY4XCzT.js`, the last
+  studio-photo release): `vercel promote dpl_sU9UTr4ZoqiSngGZXdnoZuWtRDbx --yes --scope dullaghan31-3959s-projects`.
+
 ## Sample PDFs and downloaded proofs with the designer's textures — PREVIEW ONLY, 31 October 2026
 
 - **Why:** the owner (msgs 8116, 8124): the sample PDFs' metal looked worse than the designer; production artwork

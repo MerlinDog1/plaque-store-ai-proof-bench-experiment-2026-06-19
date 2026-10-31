@@ -1,6 +1,7 @@
 # Product pages v3: photo first, "we make anything", photo rows (30 October 2026)
 
-**Status:** preview only. Nothing here is live until the owner says so.
+**Status:** LIVE since 31 October 2026, 08:05 UTC, on the owner's go (msg 8146): dpl_uNxynWjiLaW1qAcaUHEEXaNKJgiq
+(`index-CkaO0isp.js`, commit 2a93dd5). Rollback: dpl_sU9UTr4ZoqiSngGZXdnoZuWtRDbx. Release checks: HANDOVER.md.
 
 ## Why
 

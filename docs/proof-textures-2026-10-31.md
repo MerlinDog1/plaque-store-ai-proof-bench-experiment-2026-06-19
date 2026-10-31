@@ -1,6 +1,7 @@
 # Proofs and sample PDFs with the designer's textures (31 October 2026)
 
-**Status:** preview only, on the product pages v3 branch. Nothing here is live until the owner says so.
+**Status:** LIVE since 31 October 2026, 08:05 UTC, with the product pages v3 release (owner msg 8146):
+dpl_uNxynWjiLaW1qAcaUHEEXaNKJgiq (`index-CkaO0isp.js`, commit 2a93dd5). Rollback: dpl_sU9UTr4ZoqiSngGZXdnoZuWtRDbx.
 
 ## Why
 
