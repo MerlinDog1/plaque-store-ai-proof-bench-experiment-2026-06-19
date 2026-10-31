@@ -85,7 +85,13 @@ practices plate shows a full name and title ("RICHARD HARGREAVES KC / Barrister"
 
 ## Deployed preview
 
-- https://instaplaque-71953q1r8-dullaghan31-3959s-projects.vercel.app (Vercel login/protection applies).
+- **Current, with the photos in place:** https://instaplaque-8p2yu7hg0-dullaghan31-3959s-projects.vercel.app
+  (`dpl_BwG8QM1EuZDTGrGGEfMPirMPFzQF`, target **preview**, **Ready**, built from `06690f8`, 31 Oct 23:19 UTC). Cloud
+  build and every postbuild check passed, including `check:in-place-photos` (54 photos on 11 pages). Local checks
+  first: tsc, build, category browser 18/18, occasion browser 8/8, cookie notice taps PASS (hero buttons unmoved).
+  Hosted spot checks: church, tree and practices pages carry their photos; occasion share images are the lead
+  photos; a lead crop serves as 1200 × 900 WebP with the AI tag. Production still `dpl_EswXoDLFZF7164E7ZrU1JP5MRMe8`.
+- Earlier, before the photos: https://instaplaque-71953q1r8-dullaghan31-3959s-projects.vercel.app (Vercel login/protection applies).
 - `dpl_C6FwCsVctpDwZZCJp3R1yQKpzRm1`, target **preview**, **Ready**, built from `cf000e5`; one `vercel deploy` under
   the shared lock (workspace `tmp/instaplaque-vercel-deploy.lock`). Cloud build and every postbuild check passed
   (including `check:statistics` and `check:occasion-landings`).
