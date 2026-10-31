@@ -53,6 +53,17 @@
 - Screenshots: workspace `output/instaplaque-combined-preview-20261031/` (`banner-shots/`, `category-shots/`,
   `occasion-shots/`).
 
+## Deployed preview
+
+- https://instaplaque-71953q1r8-dullaghan31-3959s-projects.vercel.app (Vercel login/protection applies).
+- `dpl_C6FwCsVctpDwZZCJp3R1yQKpzRm1`, target **preview**, **Ready**, built from `cf000e5`; one `vercel deploy` under
+  the shared lock (workspace `tmp/instaplaque-vercel-deploy.lock`). Cloud build and every postbuild check passed
+  (including `check:statistics` and `check:occasion-landings`).
+- Hosted spot checks (`vercel curl`): house name page has no Metal House Signs link; practices page uses the
+  orbital brass 200 × 150 dark wood plaque; the bundle has the new notice and location wording and not the old
+  notice text.
+- Production unchanged: `instaplaque.co.uk` still `dpl_EswXoDLFZF7164E7ZrU1JP5MRMe8` after the deploy.
+
 ## Release
 
 Nothing goes live without the owner's approval of this preview. To release later: deploy this branch with

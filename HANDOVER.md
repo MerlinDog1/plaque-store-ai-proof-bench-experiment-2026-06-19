@@ -1,5 +1,13 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Combined preview (category pages v2 + four occasion pages + visit statistics) — PREVIEW ONLY, 31 October 2026
+
+- **Why:** the owner's go (msg 8314) to put the three 31 Oct previews together with four fixes for one approval.
+- **Branch:** `codex/instaplaque-combined-preview-20261031`, from the live source `ec24ba1`. Not merged, not live.
+- **Preview:** https://instaplaque-71953q1r8-dullaghan31-3959s-projects.vercel.app (`dpl_C6FwCsVctpDwZZCJp3R1yQKpzRm1`).
+- **Details, checks and release steps:** `docs/combined-preview-2026-10-31.md`. Next step: the owner's approval;
+  then release as below (deploy `--prod --skip-domain`, check, promote) and resubmit the sitemap.
+
 ## Shopping main picture = the studio photo: LIVE — 31 October 2026, 08:23 UTC
 
 - **Why:** the owner (msg 8159): "I need all the new photos in Google ads". Shopping ads take the feed's `image_link`,
