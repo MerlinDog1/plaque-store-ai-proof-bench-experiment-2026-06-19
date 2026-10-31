@@ -1,5 +1,16 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Sample PDFs and downloaded proofs with the designer's textures — PREVIEW ONLY, 31 October 2026
+
+- **Why:** the owner (msgs 8116, 8124): the sample PDFs' metal looked worse than the designer; production artwork
+  stays a plain drawing, everything customers see uses the textures.
+- **Branch:** same v3 branch, `codex/instaplaque-product-page-v3-20261030`. Not merged, not live.
+- **What changed:** the 175 sample PDFs show the designer's own drawing (`?v=12`, production days refreshed, 25 had
+  been out of date) and their 350 pictures were remade; the home-page sample uses the designer's brushed brass
+  (`v=5`); "Download proof PDF" always shows the drawing, with a current AI "Realistic preview" only as a labelled
+  page 2. The PDF generator stays in the workspace (`output/instaplaque-sample-proof/source/`). Details, redo steps and
+  checks: `docs/proof-textures-2026-10-31.md`.
+
 ## Product pages v3, "Tell us what you want" band: pictures and the proof PDF — PREVIEW ONLY, 31 October 2026
 
 - **Why:** the owner (msg 8088): pictures of "more far out stuff" in that band so people know we make anything, and a

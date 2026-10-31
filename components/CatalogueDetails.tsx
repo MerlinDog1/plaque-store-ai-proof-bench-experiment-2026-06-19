@@ -21,7 +21,7 @@ const bySize = (a: Offer, b: Offer) => a.preset.width * a.preset.height - b.pres
 
 // ?v= changes whenever the sample PDFs are redrawn, so browsers that opened an older copy fetch the new one. Their
 // pictures (scripts/make-sample-proof-thumbs.py) carry the same ?v=: redraw both together.
-const samplePdfVersion = 'v=11';
+const samplePdfVersion = 'v=12';
 export function samplePdfFor(slug: string) {
   return `/samples/products/${slug}.pdf?${samplePdfVersion}`;
 }

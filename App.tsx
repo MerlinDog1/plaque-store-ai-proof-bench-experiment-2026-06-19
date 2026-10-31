@@ -263,6 +263,9 @@ const App: React.FC = () => {
     if (currentView !== 'plaque') setIsDesignerGuideOpen(false);
   }, [currentView]);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  // The design the AI "Realistic preview" was made from (JSON of the plaque state), so a proof PDF only adds it while
+  // the design is unchanged: editing the wording, size or finish afterwards does not clear the picture.
+  const generatedImageFor = useRef<string | null>(null);
   const [realisticReferenceImage, setRealisticReferenceImage] = useState<string | null>(null);
   const [generationPhase, setGenerationPhase] = useState<GenerationPhase>(null);
   const layoutProgress = useLayoutProgress(isGeneratingLayout, generationPhase);
@@ -941,12 +944,14 @@ const App: React.FC = () => {
     setIsGeneratingImage(true);
 
     try {
+      const previewFor = JSON.stringify(state);
       const base64Png = await svgToPngBase64(svgRef.current, state);
       setRealisticReferenceImage(base64Png);
       const result = await generateRealisticView(base64Png, state, {
         prompt: realisticPreviewPrompt,
         aspectRatio: realisticPreviewAspectRatio,
       });
+      generatedImageFor.current = previewFor;
       setGeneratedImage(result);
     } catch (error) {
       handleApiError(error);
@@ -1113,10 +1118,14 @@ const App: React.FC = () => {
         window.alert('The proof PDF could not be saved right now. Please try again shortly.');
         return;
       }
-      const proofImageBase64 = generatedImage || await svgToProofPngBase64(svgRef.current);
+      // Owner msg 8124: the proof shows the designer drawing (what we make), never the AI picture in its place. An AI
+      // "Realistic preview" of this same design goes on its own labelled page.
+      const proofImageBase64 = await svgToProofPngBase64(svgRef.current);
+      const aiPreviewImage = generatedImage && generatedImageFor.current === JSON.stringify(state) ? generatedImage : undefined;
       await downloadPdf(svgRef.current, state, {
         continueUrl,
         proofImageBase64,
+        aiPreviewImage,
         wording: inscriptionPrompt,
         price,
       });

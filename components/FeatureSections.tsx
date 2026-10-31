@@ -7,9 +7,9 @@ import { portraitsInMetalLink } from '../services/shopInformation';
 // (owner msg 5178). Kept apart from Shopfront so the full pages can import both.
 
 // Bump ?v= whenever the sample PDF changes, so browsers that opened an older copy fetch the new one.
-export const sampleProofPdf = '/samples/instaplaque-sample-proof.pdf?v=4';
+export const sampleProofPdf = '/samples/instaplaque-sample-proof.pdf?v=5';
 // The same for the proof and AI images, which keep their file names when redrawn.
-export const featureImageVersion = 'v=4';
+export const featureImageVersion = 'v=5';
 
 const proofPage = (page: number) => ({
   src: `/site-images/proof/sample-proof-page-${page}-760.webp?${featureImageVersion}`,
@@ -27,8 +27,8 @@ export function ProofPdfStack({ sizes, href = sampleProofPdf, front, back, label
   back?: ProofPageImage;
   label?: string;
 }) {
-  const cover = front || { ...proofPage(1), height: 536, alt: 'Sample proof cover showing a brushed brass garden memorial plaque with a rose and vine border' };
-  const drawing = back || { ...proofPage(2), height: 537, alt: 'Sample proof page with the plaque drawn with every dimension, the hole positions and a side view of the screw caps' };
+  const cover = front || { ...proofPage(1), height: 537, alt: 'Sample proof cover showing a brushed brass garden memorial plaque with a rose and vine border' };
+  const drawing = back || { ...proofPage(2), height: 538, alt: 'Sample proof page with the plaque drawn with every dimension, the hole positions and a side view of the screw caps' };
   return (
     <a className="shop-proof-pdf-stack" href={href} target="_blank" rel="noopener" aria-label={label}>
       <img className="is-back" src={drawing.src} srcSet={drawing.srcSet} sizes={sizes} width="760" height={drawing.height} loading="lazy" alt={drawing.alt} />

@@ -18,6 +18,9 @@ import { hasGroundStake } from "./pricing";
 interface PdfExportOptions {
   continueUrl?: string;
   proofImageBase64?: string;
+  // The customer's AI "Realistic preview" of this exact design, if they made one: a labelled page of its own after
+  // the proof, never in place of the drawing (owner msg 8124).
+  aiPreviewImage?: string;
   wording?: string;
   price?: number;
 }
@@ -780,6 +783,45 @@ const drawInstaPlaqueWordmark = (doc: any, x: number, y: number, fontSize = 15.8
   doc.text("Plaque", x + fontSize * 0.85, y);
 };
 
+// Owner msg 8124 (31 Oct 2026): the proof page always shows the designer drawing, which is what we make. An AI picture
+// can change the lighting, texture and details, so it gets its own page, labelled as an illustration.
+const addAiPreviewPage = (doc: any, image: string, portrait: boolean) => {
+  const pageW = portrait ? 210 : 297;
+  const pageH = portrait ? 297 : 210;
+  const data = image.startsWith("data:") ? image : `data:image/png;base64,${image}`;
+  const format = /^data:image\/jpe?g/i.test(data) ? "JPEG" : /^data:image\/webp/i.test(data) ? "WEBP" : "PNG";
+  const props = doc.getImageProperties(data);
+  doc.addPage("a4", portrait ? "p" : "l");
+  doc.setFillColor(243, 239, 229);
+  doc.rect(0, 0, pageW, pageH, "F");
+  doc.setFillColor(8, 31, 26);
+  doc.rect(0, 0, pageW, 13, "F");
+  drawInstaPlaqueWordmark(doc, portrait ? 13 : 14, 9.9);
+  doc.setTextColor(23, 32, 29);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(portrait ? 10.5 : 12);
+  doc.text("AI impression, for illustration only", 14, 24.5);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(portrait ? 6.8 : 7.6);
+  doc.setTextColor(105, 90, 67);
+  addWrappedText(
+    doc,
+    "Made by AI from your design, to show how it might look in place. Lighting, colour and small details can differ. Your plaque is made exactly as the drawing on page 1.",
+    14,
+    30,
+    pageW - 28,
+    3.6
+  );
+  const boxX = 14;
+  const boxY = 40;
+  const boxW = pageW - 28;
+  const boxH = pageH - boxY - 14;
+  const scale = Math.min(boxW / props.width, boxH / props.height);
+  const w = props.width * scale;
+  const h = props.height * scale;
+  doc.addImage(data, format, boxX + (boxW - w) / 2, boxY + (boxH - h) / 2, w, h);
+};
+
 export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, options: PdfExportOptions = {}) => {
   try {
     await ensurePdfLibraries();
@@ -918,6 +960,7 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
         doc.textWithLink("Open proof", panelX + 34, panelY + 133.1, { url: options.continueUrl, align: "center" });
       }
 
+      if (options.aiPreviewImage) addAiPreviewPage(doc, options.aiPreviewImage, true);
       doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);
       return;
     }
@@ -1029,6 +1072,7 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       doc.textWithLink("Open proof", panelX + 54.5, 179.3, { url: options.continueUrl, align: "center" });
     }
 
+    if (options.aiPreviewImage) addAiPreviewPage(doc, options.aiPreviewImage, false);
     doc.save(`instaplaque-proof_${widthMm}x${heightMm}_${state.material}.pdf`);
   } catch (e) {
     console.error("PDF Export failed", e);
