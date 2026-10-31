@@ -46,6 +46,8 @@ export function occasionCategoryLandingFor(product: ProductFamily): LandingConfi
     note: page.heroNote || '',
     intro: page.heroCopy,
     // Reuse the category layout and already-vetted product imagery; no new unreviewed setting photos or artwork.
+    // Heading first, as in their own preview: a search visitor sees the page's title and price on the first screen.
+    photoFirst: false,
     designHref: designHrefFor(page.relatedProductSlug),
     hero: {
       src: image,

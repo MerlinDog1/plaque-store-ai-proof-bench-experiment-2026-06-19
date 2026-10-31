@@ -310,6 +310,8 @@ export type LandingConfig = {
   /** Existing category photo files (`base`) or an already-vetted catalogue photo (`src` and `srcSet`). */
   hero: { base?: string; src?: string; srcSet?: string; alt: string; caption: React.ReactNode };
   intro?: string;
+  /** Photo above the heading on phones; defaults to every page except the tree page. */
+  photoFirst?: boolean;
   /** Opens the designer on this plaque rather than the generic designer. */
   designHref?: string;
   notice?: React.ReactNode;
@@ -361,7 +363,7 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
   const parent = categoryParentFor(product.slug);
   const id = (name: string) => `${config.prefix}-${name}`;
   const { hero, routes, examples, sizes, wording } = config;
-  const photoFirst = sizes.mount !== 'stake';
+  const photoFirst = config.photoFirst ?? sizes.mount !== 'stake';
   const heroImage: HeroImage = {
     src: hero.src || `${hero.base}-1200.webp`,
     srcSet: hero.srcSet || `${hero.base}-800.webp 800w, ${hero.base}-1200.webp 1200w, ${hero.base}-1600.webp 1600w`,

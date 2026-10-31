@@ -3628,3 +3628,16 @@
 .statistics-switch__track > span { width: 18px; height: 18px; border-radius: 50%; background: #fff; }
 .statistics-switch[aria-checked="true"] .statistics-switch__track { background: #203b32; justify-content: flex-end; }
 @media (max-width: 720px) { .statistics-settings { padding: 18px; } }
+
+/* Combined preview (31 Oct 2026, owner go msg 8314; site audit item 1): on phones the cookie notice sits at the top of
+   the screen until answered, so it no longer covers a page's Design online / Design on WhatsApp buttons, the
+   Design/WhatsApp/Email bar or the designer's Continue button, which are all at the bottom. Computers keep the
+   bottom-centre card. Listed after the bar rules above so it wins at their specificity. */
+@media (max-width: 720px) {
+  .cookie-banner,
+  body:has(.shop-mobile-contact) .cookie-banner,
+  body:has(.shop-mobile-contact:not(.is-visible)) .cookie-banner {
+    top: calc(8px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+  }
+}
