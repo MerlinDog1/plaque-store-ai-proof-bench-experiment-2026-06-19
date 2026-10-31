@@ -1,34 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { inject } from '@vercel/analytics';
 import App from './App';
 import './index.css';
 import './shopfront.css';
 import './designer.css';
 import './shopfront-a11y.css';
-import { redactAnalyticsEvent } from './services/analyticsPrivacy.mjs';
-import { analyticsConsent, startSiteAnalytics } from './services/posthogAnalytics';
+import { startSiteAnalytics } from './services/posthogAnalytics';
+import { startSiteStatistics } from './services/siteStatistics';
 import { startSessionReplay } from './services/sessionReplay';
-import { OPTIONAL_AD_CONSENT_CHANGED, isInternalBrowser } from './services/metaPixel';
 import { applyInternalSwitch } from './services/internalTraffic';
 
 // Before any analytics starts: ?internal=on / ?internal=off marks or clears the owner's own browser.
 applyInternalSwitch();
 
-const analyticsHosts = new Set([
-  'instaplaque.co.uk',
-  'www.instaplaque.co.uk',
-]);
-
-let vercelAnalyticsStarted = false;
-const startVercelAnalytics = () => {
-  if (vercelAnalyticsStarted || !analyticsHosts.has(window.location.hostname) || analyticsConsent() !== 'yes'
-    || isInternalBrowser()) return;
-  vercelAnalyticsStarted = true;
-  inject({ beforeSend: event => analyticsConsent() === 'yes' && !isInternalBrowser() ? redactAnalyticsEvent(event) : null });
-};
-startVercelAnalytics();
-window.addEventListener(OPTIONAL_AD_CONSENT_CHANGED, startVercelAnalytics);
+// Anonymous totals use the statistics exception; the separate objection always wins.
+startSiteStatistics();
 startSiteAnalytics();
 // Session recordings, only with analytics consent given once the policies described them (owner msg 6565).
 startSessionReplay();
