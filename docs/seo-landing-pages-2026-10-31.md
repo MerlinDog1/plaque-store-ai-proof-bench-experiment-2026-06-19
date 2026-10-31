@@ -159,3 +159,19 @@ incorrectly looked for a literal `dist/_vercel/image` file. No candidate was pub
 failed build. Corrected the check to validate the original local image plus Vercel's configured
 width/quality; do not skip image checking. A full local `VERCEL=1` build is required before
 retrying the final preview, to cover this actual cloud rendering mode as well as plain local mode.
+
+### Successful preview — 31 October 2026, 17:17 UTC
+
+- **Preview:** https://instaplaque-efinm0a5l-dullaghan31-3959s-projects.vercel.app
+- **Deployment:** `dpl_DnafUQnECARY5rjXpR3DodLFwNeC`, independently inspected as target **preview**, **Ready**.
+- **Built source:** `bfb6dcdc63de9d030460ae26b3906982aa215610`, pushed on the task branch.
+- **All cloud postbuild checks passed**, including the corrected four-page/271-link check. The full
+  local `VERCEL=1` build passed before this successful build. One failed check-only deployment
+  preceded this single READY preview; there was no production publication or alias/promotion.
+- An unauthenticated HEAD of the house candidate returned Vercel SSO (302) and
+  `X-Robots-Tag: noindex`: **the owner needs Vercel login**. Protection was not changed. Hosted
+  browser interactions were not exercised; all required phone/desktop interaction proof is local.
+- Successful log: workspace `tmp/seo-pages-deploy.log`; failed-check log preserved as
+  `tmp/seo-pages-deploy-failed-check.log`; independent state: `tmp/seo-pages-preview-inspect.log`.
+- Existing sister-site limitation still applies: replace the MHS preview link with its confirmed
+  live URL before any future release. No current task asks to release these pages.
