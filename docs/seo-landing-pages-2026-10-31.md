@@ -138,8 +138,9 @@ the live-source record's built feed, SHA256
 Eight 390/1440 px hydrated browser cases passed: metadata/canonical/H1, loaded images, both
 window and main-pane horizontal bounds, FAQ open/close, primary CTA exact designer price and
 physical dimensions. Direct product-preset entry also passed at both widths. No JavaScript
-page errors. Sixteen final PNGs and two contact sheets were inspected; the layout is the existing
-category design and all four pages remain readable at phone width.
+page errors. Sixteen final PNGs were saved; the two first-screen contact sheets and four desktop
+full-page overviews were visually inspected. The layout is the existing category design and all
+four pages remain readable at phone width.
 
 The first screenshot pass exposed a **test-harness** mistake: the app scrolls `main`, not `window`.
 Those captures were replaced after correcting the harness to reset and assert the real scroller.
@@ -149,3 +150,12 @@ the viewport is restored before the interaction checks. No application change wa
 
 Screenshot filenames: `<page-path-without-slash>-{390,1440}-{top,full}.png` in the directory above.
 `review-top-390.jpg` and `review-top-1440.jpg` show all four first screens together.
+
+### Preview build check correction
+
+The first preview upload was only 334 KB, but its build was stopped by the new image-path check:
+Vercel's responsive `/_vercel/image?url=…` URLs are generated only with `VERCEL=1`, and the check
+incorrectly looked for a literal `dist/_vercel/image` file. No candidate was published by that
+failed build. Corrected the check to validate the original local image plus Vercel's configured
+width/quality; do not skip image checking. A full local `VERCEL=1` build is required before
+retrying the final preview, to cover this actual cloud rendering mode as well as plain local mode.

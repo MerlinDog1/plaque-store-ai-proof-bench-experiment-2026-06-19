@@ -100,7 +100,20 @@ for (const [slug, heading, parent, designer] of occasionRoutes) {
   for (const img of document.querySelectorAll('img')) {
     assert(img.hasAttribute('alt'), `${slug}: image alt`);
     const sources = [img.getAttribute('src'), ...(img.getAttribute('srcset') || '').split(',').filter(Boolean).map(part => part.trim().split(/\s/)[0])];
-    for (const src of sources.filter(src => src?.startsWith('/'))) await fs.access(path.join(root, src.split('?')[0]));
+    for (const src of sources.filter(src => src?.startsWith('/'))) {
+      let asset = new URL(src, site);
+      // Vercel builds render responsive URLs through its image endpoint; validate the original local source and
+      // allowed transformation, not a fictitious dist/_vercel/image file. Local builds use the file URL directly.
+      if (asset.pathname === '/_vercel/image') {
+        assert(vercel.images.sizes.includes(Number(asset.searchParams.get('w'))), `${slug}: configured image width`);
+        assert(vercel.images.qualities.includes(Number(asset.searchParams.get('q'))), `${slug}: configured image quality`);
+        const original = asset.searchParams.get('url');
+        assert(original?.startsWith('/'), `${slug}: local image optimisation source`);
+        asset = new URL(original, site);
+        assert.equal(asset.origin, site, `${slug}: same-origin image source`);
+      }
+      await fs.access(path.join(root, asset.pathname));
+    }
   }
   assert(body.includes('5 working days') && body.includes('7 working days') && body.includes('10 working days') && body.includes('15'), `${slug}: shared production estimates`);
   assert(!body.includes('undefined'), `${slug}: no missing copy/data`);
