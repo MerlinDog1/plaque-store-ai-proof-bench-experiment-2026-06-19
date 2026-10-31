@@ -8,11 +8,12 @@ import { merchantOffers } from '../services/merchantCatalogue.mjs';
 const base = process.env.APP_URL || 'http://127.0.0.1:4383';
 assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname), 'This browser check only permits a local preview');
 const out = process.env.SHOTS || '/home/coding-agent/workspace/output/instaplaque-seo-pages-20261031/screenshots';
+// The designer opens on the plaque in the page's lead photo (leadData in services/inPlacePhotos.data.ts).
 const cases = [
-  ['house-name-plaques', 'House name plaques', 'polished-brass-200x150-rect-plaque'],
-  ['donor-recognition-plaques', 'Donor and recognition plaques', 'brushed-brass-300x200-rect-light-wood-plaque'],
-  ['church-plaques', 'Church pew and dedication plaques', 'polished-brass-210x148-rect-dark-wood-plaque'],
-  ['professional-brass-plaques', 'Brass plaques for professional practices', 'orbital-brass-matt-lacquer-200x150-rect-dark-wood-plaque'],
+  ['house-name-plaques', 'House name plaques', 'polished-brass-300x200-rect-plaque'],
+  ['donor-recognition-plaques', 'Donor and recognition plaques', 'brushed-brass-300x200-rect-plaque'],
+  ['church-plaques', 'Church pew and dedication plaques', 'polished-brass-150x50-rect-plaque'],
+  ['professional-brass-plaques', 'Brass plaques for professional practices', 'polished-brass-200x150-rect-plaque'],
 ];
 await fs.mkdir(out, { recursive: true });
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/opt/google/chrome/chrome', args: ['--no-sandbox', '--disable-dev-shm-usage'] });

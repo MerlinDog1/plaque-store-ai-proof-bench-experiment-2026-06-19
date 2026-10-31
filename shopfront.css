@@ -3641,3 +3641,11 @@
     bottom: auto;
   }
 }
+
+/* Photos in place (owner msg 8341, 31 Oct 2026): rows of five across on computers; each photo opens its plaque. */
+@media (min-width: 1001px) {
+  .cat-scroll-row.cat-examples-row.is-five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+.shopfront .cat-examples-row figure > a { display: block; color: inherit; text-decoration: none; }
+.shopfront .cat-examples-row figure > a:hover strong,
+.shopfront .cat-examples-row figure > a:focus-visible strong { text-decoration: underline; }

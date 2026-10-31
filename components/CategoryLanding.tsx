@@ -8,6 +8,7 @@ import { offerSizeLabel, samplePdfFor, sampleProofPageFor } from './CatalogueDet
 import { CustomAnything, DesignLink, ProductPicks } from './Shopfront';
 import { PriceTable, priceTableIncludes, priceTableIncludesOnStake } from './PriceTable';
 import { promoVideoPath } from '../services/promoVideo.mjs';
+import { inPlacePhotos } from '../services/inPlacePhotos';
 
 // Category landing sections, phone first. The memorial plaques page was built from them first (owner msg 5876,
 // 24 Oct 2026: "make memorial page amazing and then use as yardstick to measure against other pages"), then every
@@ -168,7 +169,8 @@ export function SizeLinksFold({ title, offers }: { title: string; offers: Offer[
   );
 }
 
-export type ExampleItem = { title: string; copy: string; image: string; alt: string };
+/** `href`: the pictured plaque's own page, so a tap on the photo opens it. */
+export type ExampleItem = { title: string; copy: string; image: string; alt: string; href?: string };
 
 /** Photos of a plaque type in place, four or five across on computers and a sideways row on phones. */
 export function ExamplesRow({ id, kicker, title, intro, items }: { id?: string; kicker: string; title: string; intro?: React.ReactNode; items: ExampleItem[] }) {
@@ -177,13 +179,14 @@ export function ExamplesRow({ id, kicker, title, intro, items }: { id?: string; 
       <p className="shop-kicker">{kicker}</p>
       <h2 id="cat-examples-heading">{title}</h2>
       {intro && <p className="cat-section-intro">{intro}</p>}
-      <div className="cat-scroll-row cat-examples-row">
-        {items.map(item => (
-          <figure key={item.image}>
+      <div className={`cat-scroll-row cat-examples-row${items.length === 5 ? ' is-five' : ''}`}>
+        {items.map(item => {
+          const content = <>
             <img src={item.image} alt={item.alt} width="900" height="600" loading="lazy" decoding="async" />
             <figcaption><strong>{item.title}</strong> {item.copy}</figcaption>
-          </figure>
-        ))}
+          </>;
+          return <figure key={item.image}>{item.href ? <a href={item.href}>{content}</a> : content}</figure>;
+        })}
       </div>
     </section>
   );
@@ -363,6 +366,7 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
   const parent = categoryParentFor(product.slug);
   const id = (name: string) => `${config.prefix}-${name}`;
   const { hero, routes, examples, sizes, wording } = config;
+  const inPlace = inPlacePhotos[product.slug];
   const photoFirst = config.photoFirst ?? sizes.mount !== 'stake';
   const heroImage: HeroImage = {
     src: hero.src || `${hero.base}-1200.webp`,
@@ -395,7 +399,10 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
       {!photoFirst && <p className="cat-made-to-order cat-made-to-order-band">Any size, shape or wording, made to order.</p>}
       {config.notice && <section className="shop-section">{config.notice}</section>}
       {routes && <PlaceRoutes id={id('places')} kicker={routes.kicker} title={routes.title} routes={routes.routes} more={routes.more} />}
-      {examples && <ExamplesRow id={id('examples')} kicker={examples.kicker} title={examples.title} intro={examples.intro} items={examples.items} />}
+      {/* Photos in place (owner msg 8341): one row per page; the tree page's own row keeps its photos after the new ones. */}
+      {(examples || inPlace) && <ExamplesRow id={id(examples ? 'examples' : 'in-place')}
+        kicker={(examples || inPlace)!.kicker} title={(examples || inPlace)!.title} intro={examples ? examples.intro : inPlace!.intro}
+        items={[...(inPlace?.items || []), ...(examples?.items || [])]} />}
       {picks && <ProductPicks {...picks} id={id('picks')} className="cat-picks" studioFirst />}
       <SizeLadder id={id('sizes')} kicker={sizes.kicker || 'Sizes and prices'} title={sizes.title} intro={sizes.intro} sizes={sizes.sizes} mount={sizes.mount} note={sizes.note} more={sizes.more} folded={['brass-plaques', 'stainless-steel-plaques'].includes(product.slug)} />
       <CustomAnything subject={subject} showcase compact />

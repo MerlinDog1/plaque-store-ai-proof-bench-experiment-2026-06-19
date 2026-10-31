@@ -6,11 +6,13 @@ import path from 'node:path';
 import { JSDOM } from 'jsdom';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 
+// The last column is the plaque "Design online" opens: the one in the page's lead photo (leadData in
+// services/inPlacePhotos.data.ts, 31 Oct 2026).
 export const occasionRoutes = [
-  ['house-name-plaques', 'House name plaques', 'brass-plaques', 'polished-brass-200x150-rect-plaque'],
-  ['donor-recognition-plaques', 'Donor and recognition plaques', 'opening-plaques', 'brushed-brass-300x200-rect-light-wood-plaque'],
-  ['church-plaques', 'Church pew and dedication plaques', 'memorial-plaques', 'polished-brass-210x148-rect-dark-wood-plaque'],
-  ['professional-brass-plaques', 'Brass plaques for professional practices', 'brass-plaques', 'orbital-brass-matt-lacquer-200x150-rect-dark-wood-plaque'],
+  ['house-name-plaques', 'House name plaques', 'brass-plaques', 'polished-brass-300x200-rect-plaque'],
+  ['donor-recognition-plaques', 'Donor and recognition plaques', 'opening-plaques', 'brushed-brass-300x200-rect-plaque'],
+  ['church-plaques', 'Church pew and dedication plaques', 'memorial-plaques', 'polished-brass-150x50-rect-plaque'],
+  ['professional-brass-plaques', 'Brass plaques for professional practices', 'brass-plaques', 'polished-brass-200x150-rect-plaque'],
 ];
 const root = path.resolve(process.env.DIST || 'dist');
 const site = 'https://instaplaque.co.uk';
