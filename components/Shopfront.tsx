@@ -10,7 +10,7 @@ import { promoVideo, promoVideoPath } from '../services/promoVideo.mjs';
 import { designHrefFor, hasNewProductLayout } from '../services/productLayout';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { PriceTable, a5BoardPrice, groundStakePrice, homePriceSizes, priceTableIncludes } from './PriceTable';
-import { MerchantProductDetails, CatalogueSizeLinks, catalogueRowsFor, coreOfferFor, coreOfferPrice } from './CatalogueDetails';
+import { MerchantProductDetails, CatalogueSizeLinks, catalogueRowsFor, coreOfferFor, coreOfferPrice, offerSizeLabel } from './CatalogueDetails';
 import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogue.mjs';
 import { optimisedSrcSet } from '../services/imageUrls';
 import { WordingLibrary } from './WordingGuide';
@@ -342,13 +342,17 @@ function CustomWorkGallery({ subject }: { subject: string }) {
 // shop page, so a visitor who can't see their exact plaque knows to just ask.
 // showcase (catalogue pages, owner msg 8088): pictures of plaques made to order first and a shorter paragraph. The
 // plaque's own sample proof is pictured once, under "What you get." (owner msg 8100), not in these steps.
-export function CustomAnything({ subject = 'a custom plaque', showcase = false }: { subject?: string; showcase?: boolean }) {
+export function CustomAnything({ subject = 'a custom plaque', showcase = false, compact = false }: { subject?: string; showcase?: boolean; compact?: boolean }) {
   if (showcase) return (
-    <section className="shop-section shop-design-service shop-custom-anything shop-custom-anything-showcase" aria-labelledby="custom-anything-heading">
+    <section className={`shop-section shop-design-service shop-custom-anything shop-custom-anything-showcase${compact ? ' is-compact' : ''}`} aria-labelledby="custom-anything-heading">
       <p className="shop-kicker">Can’t see exactly what you need?</p>
       <h2 id="custom-anything-heading">Tell us what you want. We’ll make it.</h2>
       <CustomWorkGallery subject={subject} />
-      <div className="shop-custom-anything-body">
+      {compact ? <div className="shop-custom-anything-brief">
+        <p>Any size, shape or wording, made to order. Send us your idea for a free proof, usually within 3 working hours.</p>
+        <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-text-link">WhatsApp your idea ↗</ContactLink>
+        <a href="/design-request" className="shop-text-link">Design form ↗</a>
+      </div> : <div className="shop-custom-anything-body">
         <div>
           <p>Almost any size, shape or wording. Send us a few words, a sketch or a photo on WhatsApp, and we’ll design it for you and send a free proof, usually within 3 working hours.</p>
           <div className="shop-design-service-actions">
@@ -364,7 +368,7 @@ export function CustomAnything({ subject = 'a custom plaque', showcase = false }
           <li><span>02</span><div><strong>We design it</strong><p>A proof drawn to size, by WhatsApp or email.</p></div></li>
           <li><span>03</span><div><strong>Approve, then pay</strong><p>Ask for changes until it’s right.</p></div></li>
         </ol>
-      </div>
+      </div>}
     </section>
   );
   return (
@@ -391,7 +395,7 @@ export function CustomAnything({ subject = 'a custom plaque', showcase = false }
 }
 
 /** Photo links to exact catalogue plaques, for the category and landing pages. */
-export function ProductPicks({ slugs, kicker, title, intro, id, className }: { slugs: string[]; kicker: string; title: string; intro?: string; id?: string; className?: string }) {
+export function ProductPicks({ slugs, kicker, title, intro, id, className, studioFirst = false }: { slugs: string[]; kicker: string; title: string; intro?: string; id?: string; className?: string; studioFirst?: boolean }) {
   const items = slugs.map(slug => productFamilies.find(item => item.slug === slug)).filter((item): item is ProductFamily => Boolean(item));
   if (!items.length) return null;
   return (
@@ -400,15 +404,22 @@ export function ProductPicks({ slugs, kicker, title, intro, id, className }: { s
       <h2>{title}</h2>
       {intro && <p>{intro}</p>}
       <ul>
-        {items.map(item => (
-          <li key={item.slug}>
-            <a href={`/${item.slug}`}>
-              <img src={cardImageSrc(item)} {...cardImageSizes(item)} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
-              <span>{item.title}</span>
-              <strong>{item.startingFrom}</strong>
-            </a>
-          </li>
-        ))}
+        {items.map(item => {
+          const imageItem = studioFirst && item.studioPhoto ? { ...item, photo: item.studioPhoto } : item;
+          const offer = studioFirst ? merchantOffers.find(entry => entry.slug === item.slug) : undefined;
+          return (
+            <li key={item.slug}>
+              <a href={`/${item.slug}`} className={studioFirst ? 'cat-product-card' : undefined}>
+                <img src={cardImageSrc(imageItem)} {...cardImageSizes(imageItem)} alt={`${item.title}, shown with example wording`} width="600" height="600" loading="lazy" />
+                {offer ? <span>
+                  <b className="cat-pick-size">{offerSizeLabel(offer)}</b>
+                  {offer.label}{offer.preset.wood ? ` on ${offer.preset.woodTone === 'dark' ? 'dark wood' : 'light oak'}` : ''}
+                </span> : <span>{item.title}</span>}
+                <strong>{item.startingFrom}</strong>
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );
@@ -486,21 +497,23 @@ function LandingExamples({ examples, kicker, title }: { examples: LandingExample
 
 // Picks for the category pages: real catalogue pages with their photos. Each mixes metals, finishes, borders, shapes
 // and wood backings, settings that make sense for the wording, and nothing shown twice on a page (owner msg 5927).
-// Phones show the first four, so those four are the most varied.
-// The brass, stainless and custom pages have no picks: their four tiles are the plaques shown (owner msg 6270).
+// Phones swipe the complete row. Studio photos lead these category cards (31 October preview);
+// the brass and stainless categories now have their own popular sizes as well as finish routes.
 const productPicks: Record<string, { kicker: string; title: string; intro: string; slugs: string[] }> = {
-  // Four picks, each one photographed on the wall, shed or gate it is fixed to, so every photo on the page is one the
-  // owner has seen (owner msg 6270: "too many [images] realistically for me to root out the bad ones").
-  'garden-plaques': { kicker: 'Garden plaques', title: 'Popular garden plaques.', intro: 'Each plaque is shown where it was fixed, with its own example wording. Open one to see its sizes, finishes and a sample proof.',
+  // Existing checked examples, now with their approved studio photos (31 October category review).
+  'brass-plaques': { kicker: 'Popular brass plaques', title: 'A size for your words.', intro: 'Small name plates, longer dedications and larger openings. Choose a photo to see that plaque’s price and proof.',
+    slugs: ['brushed-brass-150x50-rect-plaque', 'polished-brass-210x148-rect-plaque', 'aged-brass-297x210-rect-plaque', 'orbital-brass-matt-lacquer-400x300-rect-plaque'] },
+  'stainless-steel-plaques': { kicker: 'Popular stainless steel plaques', title: 'A size for your words.', intro: 'From a bench dedication to a larger wall plaque, in brushed or polished steel. Open a photo for the details.',
+    slugs: ['brushed-stainless-150x65-rect-plaque', 'polished-stainless-210x148-rect-plaque', 'brushed-stainless-297x210-rect-plaque', 'polished-stainless-400x300-rect-plaque'] },
+  'garden-plaques': { kicker: 'Garden plaques', title: 'Popular garden plaques.', intro: 'Compare shapes and finishes, with example wording. Open one for its sizes and a sample proof.',
     slugs: ['polished-stainless-210x148-rect-plaque', 'aged-brass-250x150-oval-plaque', 'brushed-brass-200x200-circle-plaque', 'orbital-brass-matt-lacquer-300x200-rect-plaque'] },
   'memorial-plaques': { kicker: 'Memorial plaques', title: 'Memorial plaques, shown with example wording.', intro: 'From a short bench dedication to a family memorial on a wood board. Open any plaque for its sizes, finishes and a sample proof.',
     // Four picks with plain wording; the wall memorials on wood with the scalloped border (owner msgs 6001, 6270, 6313).
-    slugs: ['brushed-stainless-210x148-rect-dark-wood-plaque', 'aged-brass-400x300-rect-light-wood-plaque', 'polished-stainless-210x297-rect-dark-wood-plaque', 'brushed-stainless-150x50-rect-plaque'] },
-  // Each with a fuller dedication on a real bench, newer and older, photographed from in front the way a visitor sees
-  // it, with the plaque square on the top rail (owner msgs 6132, 6149, 6152); one on our workshop bench.
-  'bench-plaques': { kicker: 'Bench plaques', title: 'Bench plaques, shown on a bench.', intro: 'Each bench plaque is shown on a real bench with its own example dedication: newer benches and old favourites, from a seafront promenade to a churchyard. One is on our workshop bench, just polished.',
-    slugs: ['brushed-stainless-150x50-rect-plaque', 'brushed-brass-225x75-rect-plaque', 'polished-stainless-200x50-rect-plaque', 'aged-brass-150x75-rect-plaque', 'polished-brass-150x65-rect-plaque', 'orbital-brass-matt-lacquer-150x75-rect-plaque', 'brushed-stainless-150x75-rect-plaque', 'polished-stainless-225x65-rect-plaque'] },
-  // Four openings, each photographed where it is fixed; the pavilion is the brass page's orbital tile (owner msg 6281).
+    slugs: ['brushed-stainless-210x148-rect-dark-wood-plaque', 'aged-brass-400x300-rect-light-wood-plaque', 'polished-stainless-210x297-rect-dark-wood-plaque', 'brushed-stainless-150x65-rect-plaque'] },
+  // Eight bench sizes/finishes with approved studio photos. The thinner strips remain in the full size fold.
+  'bench-plaques': { kicker: 'Bench plaques', title: 'Popular bench plaques.', intro: 'Compare sizes and finishes, with example wording. Every plaque is made with your own dedication.',
+    slugs: ['brushed-stainless-150x65-rect-plaque', 'brushed-brass-225x75-rect-plaque', 'polished-stainless-150x75-rect-plaque', 'aged-brass-150x75-rect-plaque', 'polished-brass-150x65-rect-plaque', 'orbital-brass-matt-lacquer-150x75-rect-plaque', 'brushed-stainless-150x75-rect-plaque', 'polished-stainless-225x65-rect-plaque'] },
+  // Four openings, with a choice of brass/steel and bare metal/wood backing.
   'opening-plaques': { kicker: 'Opening and dedication plaques', title: 'Openings, shown with example wording.', intro: 'Rooms, clubs, surgeries and pavilions, in brass and stainless steel, with and without wood backing. Open any plaque for its sizes and a sample proof.',
     slugs: ['brushed-stainless-297x210-rect-light-wood-plaque', 'brushed-brass-300x200-rect-light-wood-plaque', 'brushed-stainless-400x300-rect-dark-wood-plaque', 'orbital-brass-matt-lacquer-297x210-rect-plaque'] },
 };

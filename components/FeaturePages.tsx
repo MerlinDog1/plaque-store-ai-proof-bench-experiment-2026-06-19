@@ -3,7 +3,7 @@ import { ContactLink, MobileContactBar, WhatsAppIcon } from './ContactOptions';
 import { AiConceptPair, HomeQualitySection, ProofPdfShowcase, featureImageVersion, sampleProofPdf } from './FeatureSections';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { merchantProducts } from '../services/commerce';
-import { ShopFaq } from './Shopfront';
+import { CustomAnything, ShopFaq } from './Shopfront';
 import { portraitsInMetalLink } from '../services/shopInformation';
 
 // Portrait plaques and AI-design pages (owner msg 5178).
@@ -132,7 +132,7 @@ const portraitFrom = merchantProducts.find(item => item.slug === 'a5-brushed-ste
 
 export function ShopPortraitPlaques() {
   return (
-    <div className="shopfront" data-prerendered="true">
+    <div className="shopfront cat-page-v2 cat-portrait-page" data-prerendered="true">
       <div className="shop-breadcrumb">
         <a href="/">Home</a>
         <span>/</span>
@@ -170,6 +170,8 @@ export function ShopPortraitPlaques() {
           <figcaption>Millie · a real engraving, photographed up close</figcaption>
         </figure>
       </section>
+
+      <p className="cat-made-to-order cat-made-to-order-band">Any size, shape or wording, made to order.</p>
 
       <section className="shop-section shop-portrait-process" aria-labelledby="portrait-process-heading">
         <p className="shop-kicker">From photo to plaque</p>
@@ -225,9 +227,13 @@ export function ShopPortraitPlaques() {
         </div>
       </section>
 
+      <CustomAnything subject="a portrait plaque" showcase compact />
       <HomeQualitySection compact />
 
-      <section className="shop-section shop-buying-guide" aria-labelledby="portrait-options-heading">
+      <section className="shop-section cat-portrait-guidance" aria-label="Choosing your portrait plaque">
+      <details className="cat-guidance-fold">
+        <summary>Sizes, finishes and display <span aria-hidden="true">+</span></summary>
+        <div className="shop-buying-guide" aria-labelledby="portrait-options-heading">
         <div>
           <p className="shop-kicker">Sizes, finishes and display</p>
           <h2 id="portrait-options-heading">Made for the place you’ll see it.</h2>
@@ -239,9 +245,12 @@ export function ShopPortraitPlaques() {
           <article><h3>On the wall or freestanding</h3><p>Fix it to a wall with matching screw caps, mount it on oak or mahogany backing, or choose a freestanding folded plaque or a rear easel stand for a shelf or windowsill.</p></article>
           <article><h3>Price</h3><p>A5 portrait plaques start from £95.50, with UK delivery included. Your free sketch comes with an exact quote, and you only pay once you approve.</p></article>
         </div>
-      </section>
+        </div>
+      </details>
 
-      <section className="shop-section shop-photo-tips" aria-labelledby="portrait-photo-heading">
+      <details className="cat-guidance-fold">
+        <summary>Choosing a photo <span aria-hidden="true">+</span></summary>
+        <div className="shop-photo-tips" aria-labelledby="portrait-photo-heading">
         <p className="shop-kicker">Choosing a photo</p>
         <h2 id="portrait-photo-heading">The photo that feels most like them.</h2>
         <div className="shop-tips">
@@ -250,6 +259,9 @@ export function ShopPortraitPlaques() {
           <article><h3>The original file</h3><p>Send the full-size photo rather than a screenshot or social media copy. There is no need to crop it or make it black and white.</p></article>
         </div>
         <p className="shop-section-lead">Only have one treasured photo, even an old or blurry one? Send it anyway. You can see your free sketch, ask for changes and take your time deciding.</p>
+        </div>
+      </details>
+
       </section>
 
       <ShopFaq faqs={portraitFaqs} />

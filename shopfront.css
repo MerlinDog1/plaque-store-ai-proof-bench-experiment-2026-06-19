@@ -3532,3 +3532,79 @@
   .shopfront .shop-custom-work-more strong { font-size: 18px; }
   .shopfront .shop-spec-proof { max-width: 320px; margin-top: 18px; }
 }
+
+
+/* Category pages v2 preview (31 October): real photos first, swipeable product choices and
+   one proof/making row. Scoped so catalogue product pages and the other helpers' work stay unchanged. */
+.shopfront .cat-made-to-order { margin: 12px 0 0; font-size: 15px; font-weight: 600; color: var(--shop-ink); }
+.shopfront .cat-made-to-order-band { max-width: 1256px; margin: 0 auto; padding: 0 32px 20px; }
+.cat-page-v2 .cat-route-card { min-width: 0; }
+.cat-page-v2 .cat-route img[src*="/studio-photo/"] { object-fit: contain; background: #efeee9; }
+.shopfront .cat-route-pictured { display: inline-block; margin: 7px 2px 0; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.shopfront .cat-picks .cat-product-card img { object-fit: contain; background: #efeee9; }
+.shopfront .shop-custom-anything-brief { margin-top: 20px; max-width: 760px; }
+.shopfront .shop-custom-anything-brief p { margin: 0 0 10px; font-size: 15px; line-height: 1.55; }
+.shopfront .shop-custom-anything-brief .shop-text-link { margin: 0 22px 0 0; font-size: 14px; }
+.shopfront .cat-proof { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: center; gap: 56px; background: #efeee4; }
+.shopfront .cat-proof-steps { list-style: decimal; margin: 22px 0 16px; padding-left: 21px; font-size: 16px; line-height: 1.5; }
+.shopfront .cat-proof-steps li + li { margin-top: 12px; }
+.shopfront .cat-proof-metal { margin: 0 0 14px; font-size: 14px; line-height: 1.55; }
+.shopfront .cat-proof-example { margin: 0; max-width: 390px; }
+.shopfront .cat-proof-example figcaption { margin-top: 14px; font-size: 12px; line-height: 1.5; }
+.shopfront .cat-proof-example figcaption a { display: block; color: var(--shop-ink); text-decoration: underline; font-size: 14px; font-weight: 600; }
+.shopfront .cat-proof-example figcaption span { display: block; margin-top: 5px; }
+.shopfront .cat-portrait-guidance { padding-top: 24px; padding-bottom: 24px; }
+.shopfront .cat-guidance-fold { border-top: 1px solid var(--shop-line); }
+.shopfront .cat-guidance-fold:last-child { border-bottom: 1px solid var(--shop-line); }
+.shopfront .cat-guidance-fold > summary { display: flex; justify-content: space-between; gap: 20px; cursor: pointer; padding: 20px 0; font-size: 19px; font-weight: 600; list-style: none; }
+.shopfront .cat-guidance-fold > summary::-webkit-details-marker { display: none; }
+.shopfront .cat-guidance-fold > summary span { flex: none; }
+.shopfront .cat-guidance-fold[open] > summary span { transform: rotate(45deg); }
+.shopfront .cat-guidance-fold > div { padding: 8px 0 24px; }
+@media (max-width: 720px) {
+  .shopfront.cat-page-v2 .shop-section { padding-top: 28px; padding-bottom: 28px; }
+  .shopfront .cat-hero.is-photo-first .cat-hero-photo-inline { margin: 0 -24px 18px; }
+  .shopfront .cat-hero.is-photo-first .cat-hero-photo-inline img { aspect-ratio: 16 / 10; object-fit: cover; }
+  .shopfront .cat-hero.is-photo-first .cat-hero-photo-inline figcaption { font-size: 11px; line-height: 1.35; }
+  .shopfront .cat-hero.is-photo-first .cat-hero-note { font-size: 18px; }
+  .shopfront .cat-hero.is-photo-first .cat-made-to-order { margin-top: 8px; font-size: 13px; }
+  .shopfront .cat-made-to-order-band { padding: 0 24px 20px; font-size: 14px; }
+  .shopfront.cat-page-v2 .cat-picks ul,
+  .shopfront.cat-portrait-page .shop-portrait-grid {
+    display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 47%;
+    gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+    margin-right: -24px; padding: 2px 24px 12px 0; scrollbar-width: thin;
+  }
+  .shopfront.cat-page-v2 .cat-picks li:nth-child(n + 5) { display: block; }
+  .shopfront.cat-page-v2 .cat-picks li,
+  .shopfront.cat-portrait-page .shop-portrait-grid figure { scroll-snap-align: start; }
+  .shopfront.cat-page-v2 .cat-picks a > span { font-size: 13px; line-height: 1.4; }
+  .shopfront.cat-portrait-page .shop-portrait-grid figure,
+  .shopfront.cat-portrait-page .shop-portrait-grid figure:nth-child(n + 5) { grid-column: auto; }
+  .shopfront.cat-portrait-page .shop-portrait-grid img,
+  .shopfront.cat-portrait-page .shop-portrait-grid figure:nth-child(n + 5) img { aspect-ratio: 3 / 4; object-fit: contain; }
+  .shopfront.cat-page-v2 .shop-custom-work { grid-auto-columns: 56%; }
+  .shopfront.cat-page-v2 .shop-custom-anything-brief p { font-size: 14px; }
+  .shopfront.cat-page-v2 .shop-custom-anything-brief .shop-text-link { display: inline-block; padding: 6px 0; }
+  .shopfront .cat-proof { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .shopfront .cat-proof-steps { margin: 16px 0 14px; font-size: 14px; }
+  .shopfront .cat-proof-steps li + li { margin-top: 8px; }
+  .shopfront .cat-proof-metal { font-size: 13px; }
+  .shopfront .cat-proof-example { width: 76%; margin: 0 auto; }
+  .shopfront .cat-proof-example figcaption { font-size: 11px; }
+  .shopfront .cat-proof-copy > .shop-text-link { font-size: 13px; }
+  .shopfront.cat-page-v2 .shop-faq summary { padding-top: 14px; padding-bottom: 14px; min-height: 48px; }
+}
+
+.shopfront.cat-page-v2 > .shop-section { padding-top: 52px; padding-bottom: 52px; }
+.shopfront .cat-pick-size { display: block; font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+.shopfront .cat-price-fold { margin-top: 22px; }
+.shopfront.cat-page-v2 .cat-portrait-option { padding-top: 12px; padding-bottom: 22px; }
+.shopfront .cat-portrait-option .cat-portraits { padding: 16px 0 0; border: 0; }
+.shopfront .cat-portrait-option > .shop-text-link { margin-top: 14px; font-size: 14px; }
+@media (max-width: 720px) {
+  .shopfront.cat-page-v2 > .shop-section { padding-top: 28px; padding-bottom: 28px; }
+  .shopfront .cat-portrait-option .cat-portraits { padding: 12px 0 0; }
+  .shopfront .cat-pick-size { font-size: 14px; }
+  .shopfront.cat-page-v2 .shop-custom-anything-brief .shop-text-link { margin-right: 18px; }
+}
