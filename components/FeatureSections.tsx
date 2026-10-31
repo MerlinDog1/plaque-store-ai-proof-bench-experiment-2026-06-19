@@ -16,15 +16,23 @@ const proofPage = (page: number) => ({
   srcSet: `/site-images/proof/sample-proof-page-${page}-760.webp?${featureImageVersion} 760w, /site-images/proof/sample-proof-page-${page}-1400.webp?${featureImageVersion} 1400w`,
 });
 
-/** The sample proof's first two pages, stacked, opening the PDF. Also in the catalogue pages' "We design it" step
- *  (owner msg 8088). */
-export function ProofPdfStack({ sizes }: { sizes: string }) {
+type ProofPageImage = { src: string; srcSet?: string; alt: string; height: number };
+
+/** A proof PDF's first two pages, stacked, opening the PDF. Defaults to the general sample; catalogue pages pass their
+ *  own plaque's sample proof (owner msgs 8088 and 8100). */
+export function ProofPdfStack({ sizes, href = sampleProofPdf, front, back, label = 'Open the sample proof PDF' }: {
+  sizes: string;
+  href?: string;
+  front?: ProofPageImage;
+  back?: ProofPageImage;
+  label?: string;
+}) {
+  const cover = front || { ...proofPage(1), height: 536, alt: 'Sample proof cover showing a brushed brass garden memorial plaque with a rose and vine border' };
+  const drawing = back || { ...proofPage(2), height: 537, alt: 'Sample proof page with the plaque drawn with every dimension, the hole positions and a side view of the screw caps' };
   return (
-    <a className="shop-proof-pdf-stack" href={sampleProofPdf} target="_blank" rel="noopener" aria-label="Open the sample proof PDF">
-      <img className="is-back" {...proofPage(2)} sizes={sizes} width="760" height="537" loading="lazy"
-        alt="Sample proof page with the plaque drawn with every dimension, the hole positions and a side view of the screw caps" />
-      <img className="is-front" {...proofPage(1)} sizes={sizes} width="760" height="536" loading="lazy"
-        alt="Sample proof cover showing a brushed brass garden memorial plaque with a rose and vine border" />
+    <a className="shop-proof-pdf-stack" href={href} target="_blank" rel="noopener" aria-label={label}>
+      <img className="is-back" src={drawing.src} srcSet={drawing.srcSet} sizes={sizes} width="760" height={drawing.height} loading="lazy" alt={drawing.alt} />
+      <img className="is-front" src={cover.src} srcSet={cover.srcSet} sizes={sizes} width="760" height={cover.height} loading="lazy" alt={cover.alt} />
     </a>
   );
 }

@@ -94,13 +94,20 @@ On catalogue pages only (`CustomAnything` with `showcase`; the home, category an
   and her plaque are real photographs; the others are the site's existing portrait, memorial and garden pictures.
 - **Shorter paragraph:** "Almost any size, shape or wording. Send us a few words, a sketch or a photo on WhatsApp, and
   we'll design it for you and send a free proof, usually within 3 working hours."
-- **The proof PDF as a picture.** Step 02 "We design it" now ends "It looks like this:" with the sample proof's first two
-  pages stacked (`ProofPdfStack`, shared with `ProofPdfShowcase`), opening the sample PDF, and a "See a sample proof
-  (PDF)" link. The band's steps sit directly above "What you get." (on A5 and larger pages the portrait row comes
-  between). "What you get." still links this plaque's own sample PDF.
+- **The proof PDF as a picture, the plaque's own.** First built as the general sample proof in step 02 "We design it";
+  the owner (msg 8100) found that repetitive next to "What you get." and its link to the plaque's own PDF ("Does every
+  page currently have its own pdf? Maybe we should just use that?"). So step 02 is text again, and "What you get." shows
+  the first two pages of this plaque's own sample proof, stacked (`ProofPdfStack` with `sampleProofPageFor` in
+  `CatalogueDetails.tsx`), just above "See a sample proof for this plaque (PDF)". Both open the same PDF.
+- **Proof pictures:** `scripts/make-sample-proof-thumbs.py` renders page 1 (cover) and page 2 (measured drawing) of
+  every `public/samples/products/<slug>.pdf` to `public/site-images/proof/products/<slug>-<page>.webp` (760 px, about
+  20 KB each; 350 files, 7.2 MB). They carry the PDF's `?v=11`: after redrawing the PDFs, rerun the script and bump
+  the version once in `CatalogueDetails.tsx`. On Vercel, phones get 320-640 px copies through image optimisation.
+  `check-product-policies.mjs` now fails the build if a new-layout page lacks either picture.
 
 Checks: tsc; full local build with every postbuild check; `output/instaplaque-custom-band-20261031/shots_band.cjs`
 (workspace) on the local build: brushed stainless 150 × 65 and aged brass 200 × 200 circle on a phone, polished brass
 300 × 200 dark wood on a computer. Band once, above "What you get.", 10 cards, phone strip scrolls sideways with the next
 card in view, computer cards wrap, no sideways page overflow, all 9 pictures and both proof pages load, the ask card
-opens WhatsApp and the proof picture opens the sample PDF.
+opens WhatsApp. After the msg 8100 change: one proof picture per page and none in the band, it is the plaque's own, and
+both it and the link open that plaque's PDF (same pages). The build's product-policy check covers all 175 pages.

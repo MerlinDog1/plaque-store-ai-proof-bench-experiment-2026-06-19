@@ -4,7 +4,7 @@ import { categoryLandingFor } from './CategoryPages';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
-import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase, ProofPdfStack, featureImageVersion, sampleProofPdf } from './FeatureSections';
+import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase, featureImageVersion } from './FeatureSections';
 import { PromoFilm, PromoFilmFigure } from './PromoVideo';
 import { promoVideo, promoVideoPath } from '../services/promoVideo.mjs';
 import { designHrefFor, hasNewProductLayout } from '../services/productLayout';
@@ -340,8 +340,8 @@ function CustomWorkGallery({ subject }: { subject: string }) {
 
 // "Make it clear we can make whatever you want via WhatsApp" (owner msg 5736): one band on every
 // shop page, so a visitor who can't see their exact plaque knows to just ask.
-// showcase (catalogue pages, owner msg 8088): pictures of plaques made to order first, a shorter paragraph, and the
-// sample proof in the "We design it" step, just above "What you get."
+// showcase (catalogue pages, owner msg 8088): pictures of plaques made to order first and a shorter paragraph. The
+// plaque's own sample proof is pictured once, under "What you get." (owner msg 8100), not in these steps.
 export function CustomAnything({ subject = 'a custom plaque', showcase = false }: { subject?: string; showcase?: boolean }) {
   if (showcase) return (
     <section className="shop-section shop-design-service shop-custom-anything shop-custom-anything-showcase" aria-labelledby="custom-anything-heading">
@@ -361,12 +361,7 @@ export function CustomAnything({ subject = 'a custom plaque', showcase = false }
         </div>
         <ol className="design-service-steps">
           <li><span>01</span><div><strong>Tell us your idea</strong><p>Wording, size, where it’s going, or a picture of something you like.</p></div></li>
-          <li><span>02</span><div><strong>We design it</strong><p>A proof drawn to size, by WhatsApp or email. It looks like this:</p>
-            <div className="shop-custom-proof">
-              <ProofPdfStack sizes="(max-width: 720px) 60vw, 300px" />
-              <a className="shop-text-link" href={sampleProofPdf} target="_blank" rel="noopener">See a sample proof (PDF) ↗</a>
-            </div>
-          </div></li>
+          <li><span>02</span><div><strong>We design it</strong><p>A proof drawn to size, by WhatsApp or email.</p></div></li>
           <li><span>03</span><div><strong>Approve, then pay</strong><p>Ask for changes until it’s right.</p></div></li>
         </ol>
       </div>

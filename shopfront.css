@@ -3457,8 +3457,7 @@
 
 
 /* Catalogue pages, owner msg 8088 (31 Oct 2026): "Tell us what you want" leads with pictures of plaques made to order
-   (phones swipe them sideways with the next one peeking in; computers see two rows of five), then a shorter paragraph,
-   and the "We design it" step shows the sample proof, just above "What you get." */
+   (phones swipe them sideways with the next one peeking in; computers see two rows of five), then a shorter paragraph. */
 .shopfront .shop-custom-anything-showcase { display: block; }
 /* One line on a computer, instead of "We'll make" with "it." below it. */
 .shopfront .shop-custom-anything-showcase h2 { max-width: none; }
@@ -3510,8 +3509,9 @@
   margin-top: 34px;
 }
 .shopfront .shop-custom-anything-body > div > p:first-child { margin-top: 0; }
-.shopfront .shop-custom-proof { margin-top: 14px; max-width: 300px; }
-.shopfront .shop-custom-proof .shop-text-link { display: inline-block; margin-top: 6px; font-size: 14px; }
+/* "What you get." (owner msg 8100): this plaque's own sample proof, pictured once, just above its link. */
+.shopfront .shop-spec-proof { max-width: 400px; margin-top: 26px; }
+.shopfront .shop-spec-proof + .shop-text-link { margin-top: 12px; }
 @media (max-width: 760px) {
   .shopfront .shop-custom-anything-body { grid-template-columns: minmax(0, 1fr); gap: 30px; margin-top: 24px; }
 }
@@ -3530,5 +3530,5 @@
   }
   .shopfront .shop-custom-work li { scroll-snap-align: start; }
   .shopfront .shop-custom-work-more strong { font-size: 18px; }
-  .shopfront .shop-custom-proof { max-width: 62vw; }
+  .shopfront .shop-spec-proof { max-width: 320px; margin-top: 18px; }
 }

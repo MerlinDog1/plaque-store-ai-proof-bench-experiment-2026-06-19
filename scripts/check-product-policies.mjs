@@ -77,5 +77,11 @@ for (const offer of merchantOffers) {
   // place of the text lists.
   assert.ok((html.match(/class="shop-catalogue-links"/g) || []).length >= 1 || (html.match(/<nav class="shop-photo-row"/g) || []).length >= 1, `Variant links on ${offer.slug}`);
   assert.ok(html.includes(`href="/samples/products/${offer.slug}.pdf?v=11"`) && existsSync(`dist/samples/products/${offer.slug}.pdf`), `Sample proof PDF for ${offer.slug}`);
+  // The new layout pictures its own proof above that link (owner msg 8100), at the PDF's version
+  // (scripts/make-sample-proof-thumbs.py).
+  if (html.includes('shop-product-spec-compact')) for (const page of [1, 2]) {
+    const picture = `/site-images/proof/products/${offer.slug}-${page}.webp`;
+    assert.ok(html.includes(`src="${picture}?v=11"`) && existsSync(`dist${picture}`), `Sample proof page ${page} pictured for ${offer.slug}`);
+  }
 }
 console.log(`Product policies: ${productCount} physical offers across ${pageCount} pages pass shipping, returns, production/transit separation and weekday checks; free designer unchanged. Every product page has its photo, specification, variant links and sample proof; ${studioPhotos.size} lead with a tagged studio photo.`);

@@ -3,7 +3,9 @@ import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { merchantProducts } from '../services/commerce';
 import { exampleFor, ideasFor, isPortraitSize, pictureWord } from '../services/catalogueContent';
 import { ContactLink, WhatsAppIcon } from './ContactOptions';
+import { ProofPdfStack } from './FeatureSections';
 import { hasNewProductLayout } from '../services/productLayout';
+import { optimisedSrcSet } from '../services/imageUrls';
 
 // Catalogue product pages (owner msg 5231, review 21 Oct 2026): a real specification where the
 // empty "Choose the size and finish." block was, and links between sizes, finishes and backings
@@ -17,9 +19,17 @@ const sameBacking = (a: Offer, b: Offer) => a.preset.wood === b.preset.wood && (
 const sameSize = (a: Offer, b: Offer) => a.preset.width === b.preset.width && a.preset.height === b.preset.height && a.preset.shape === b.preset.shape;
 const bySize = (a: Offer, b: Offer) => a.preset.width * a.preset.height - b.preset.width * b.preset.height || a.preset.width - b.preset.width;
 
-// ?v= changes whenever the sample PDFs are redrawn, so browsers that opened an older copy fetch the new one.
+// ?v= changes whenever the sample PDFs are redrawn, so browsers that opened an older copy fetch the new one. Their
+// pictures (scripts/make-sample-proof-thumbs.py) carry the same ?v=: redraw both together.
+const samplePdfVersion = 'v=11';
 export function samplePdfFor(slug: string) {
-  return `/samples/products/${slug}.pdf?v=11`;
+  return `/samples/products/${slug}.pdf?${samplePdfVersion}`;
+}
+
+/** Page 1 (cover) or 2 (measured drawing) of a plaque's own sample proof, as a 760 px picture. */
+export function sampleProofPageFor(slug: string, page: 1 | 2, alt: string) {
+  const src = `/site-images/proof/products/${slug}-${page}.webp?${samplePdfVersion}`;
+  return { src, srcSet: optimisedSrcSet(src, 760, [320, 480, 640]), alt, height: 538 };
 }
 
 /** Short size name, e.g. "150 × 50 mm bench", "A5 landscape", "250 × 150 mm oval". */
@@ -231,6 +241,12 @@ export function MerchantProductDetails({ slug }: { slug: string }) {
           <div>
             <p className="shop-kicker">Size, finish and fitting</p>
             <h2>What you get.</h2>
+            {/* Owner msgs 8088 and 8100: a picture of this plaque's own sample proof, once, just above its link. */}
+            <div className="shop-spec-proof">
+              <ProofPdfStack href={samplePdfFor(offer.slug)} sizes="(max-width: 720px) 74vw, 360px" label="Open the sample proof for this plaque (PDF)"
+                front={sampleProofPageFor(offer.slug, 1, `Sample proof cover for this ${offer.size} ${offer.label.toLowerCase()} plaque, with example wording`)}
+                back={sampleProofPageFor(offer.slug, 2, 'Sample proof page with this plaque drawn to size, every dimension, the fixings and the specification')} />
+            </div>
             <a className="shop-text-link" href={samplePdfFor(offer.slug)} target="_blank" rel="noopener">
               See a sample proof for this plaque (PDF) ↗
             </a>
