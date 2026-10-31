@@ -29,7 +29,7 @@ const redirectedPaths = new Set([
   '/tree-plaques',
 ]);
 
-assert(sitemapUrls.length === 25 && ['design-request', 'video', 'portrait-plaques', 'ai-plaque-design', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording'].every(slug => sitemapUrls.includes(`https://instaplaque.co.uk/${slug}`)), `Expected the public sitemap including design requests, portrait plaques and AI design, found ${sitemapUrls.length}`);
+assert(sitemapUrls.length === 29 && ['design-request', 'video', 'portrait-plaques', 'ai-plaque-design', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording', 'house-name-plaques', 'donor-recognition-plaques', 'church-plaques', 'professional-brass-plaques'].every(slug => sitemapUrls.includes(`https://instaplaque.co.uk/${slug}`)), `Expected the public sitemap including design requests, portrait plaques and AI design, found ${sitemapUrls.length}`);
 const productSitemap = await read('dist/sitemap-products.xml');
 const productUrls = [...productSitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
 const { merchantOffers } = await import('../services/merchantCatalogue.mjs');
@@ -70,7 +70,7 @@ assert(home.includes('hreflang="en-GB" href="https://instaplaque.co.uk/"'), 'Hom
 assert(home.includes('class="promo-film-player"') && home.includes('poster="/videos/instaplaque-design-in-seconds-20261028-poster.webp"'), 'Shop hero film is missing');
 assert(robots.includes('Sitemap: https://instaplaque.co.uk/sitemap.xml'), 'robots.txt sitemap declaration is missing');
 
-for (const route of ['about', 'memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques', 'garden-plaques', 'opening-plaques', 'portrait-plaques', 'ai-plaque-design', 'video', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording']) {
+for (const route of ['about', 'memorial-plaques', 'bench-plaques', 'brass-plaques', 'stainless-steel-plaques', 'custom-plaques', 'garden-plaques', 'opening-plaques', 'portrait-plaques', 'ai-plaque-design', 'video', 'tree-memorial-plaques', 'plaque-sizes', 'memorial-plaque-wording', 'house-name-plaques', 'donor-recognition-plaques', 'church-plaques', 'professional-brass-plaques']) {
   const routeHtml = await read(`dist/${route}/index.html`);
   assert(routeHtml.includes('data-prerendered="true"'), `Missing crawlable HTML for /${route}`);
   assert(routeHtml.includes(`rel="canonical" href="https://instaplaque.co.uk/${route}"`), `Bad canonical for /${route}`);
@@ -120,4 +120,4 @@ assert(!/^Disallow: \/videos/m.test(robots), 'robots.txt must let Google fetch t
 for (const route of ['', 'memorial-plaques', 'brass-plaques']) {
   assert((await read(`dist/${route ? `${route}/` : ''}index.html`)).includes('href="/video"'), `/${route} must link to the watch page`);
 }
-console.log('Live SEO checks passed: 22 editorial URLs and 175 exact product URLs, focused redirects, static route HTML, canonicals and LCP preloads, and the video watch page with its VideoObject and video sitemap entry.');
+console.log('Live SEO checks passed: 26 editorial URLs and 175 exact product URLs, focused redirects, static route HTML, canonicals and LCP preloads, and the video watch page with its VideoObject and video sitemap entry.');
