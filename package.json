@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/check-vercel-runtime.mjs && npm exec -- vite build && node scripts/prerender-product-pages.mjs && node scripts/finalise-public-html.mjs",
-    "postbuild": "node scripts/check-google-consent.mjs index.html dist/index.html dist/design/index.html dist/memorial-plaques/index.html && npm run check:live-seo && npm run check:designer-seo && npm run check:product-policies && node scripts/check-merchant-catalogue.mjs && node scripts/check-merchant-feed.mjs && node scripts/check-designer-seo-ci.mjs && node scripts/check-from-prices.mjs && node scripts/check-meta-pixel.cjs && node scripts/check-meta-purchase.cjs",
+    "postbuild": "node scripts/check-google-consent.mjs index.html dist/index.html dist/design/index.html dist/memorial-plaques/index.html && npm run check:live-seo && npm run check:designer-seo && npm run check:product-policies && node scripts/check-merchant-catalogue.mjs && node scripts/check-merchant-feed.mjs && node scripts/check-designer-seo-ci.mjs && node scripts/check-from-prices.mjs && node scripts/check-meta-pixel.cjs && node scripts/check-meta-purchase.cjs && npm run check:statistics && npm run check:analytics-redaction && npm run check:posthog && npm run check:replay && npm run check:google-purchase",
     "check:vercel-runtime": "node scripts/check-vercel-runtime.mjs",
     "typecheck": "tsc --noEmit",
     "check:admin-orders": "node scripts/check-admin-order-list.mjs",
@@ -55,7 +55,8 @@
     "check:manual-typography": "node scripts/check-manual-typography.mjs",
     "check:design-routes": "node scripts/check-design-routes.cjs",
     "check:design-requests": "node scripts/check-design-requests.mjs",
-    "check:design-request-ui": "node scripts/check-design-request-ui.cjs"
+    "check:design-request-ui": "node scripts/check-design-request-ui.cjs",
+    "check:statistics": "node scripts/check-site-statistics.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1136.0",

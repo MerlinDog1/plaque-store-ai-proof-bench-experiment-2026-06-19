@@ -16,6 +16,8 @@ for (const file of files) {
   assert.match(bootstrap, /window\.dataLayer/, `${file}: Google consent must be the FIRST head script`);
   assert.equal(scripts.filter(script => script[1].includes('function updateGoogleConsent()')).length, 1);
   assert.doesNotMatch(bootstrap, /ga-disable|googleTagsStarted/);
+  assert.doesNotMatch(html, /<script\b[^>]*\bsrc=["'][^"']*(?:posthog|connect\.facebook\.net|googletagmanager\.com|googleadservices\.com|_vercel\/insights)/i,
+    `${file}: tracker scripts must use their tested runtime consent/statistics gates, never an unconditional HTML tag`);
 
   // run() fires the page's load event (and the 3.5 s timer after it) unless pageLoaded is false; beforeLoad records
   // how many loaders were added while the page was still being drawn.
@@ -61,6 +63,15 @@ for (const file of files) {
     checkConsent(h.queue().at(-1), 'update', 'denied');
     assert.equal(h.appended.length, 1, 'Consent changes must not duplicate loaders');
     assert.equal(h.queue().filter(args => args[0] === 'config').length, 2);
+    // Statistics is not advertising consent. Neither setting may grant Google
+    // storage/profiling permission or send a custom/conversion event before Accept.
+    for (const statistics of ['yes', 'no']) {
+      h.map.set('instaplaque-statistics-v1', statistics);
+      h.map.set(consentKey, 'no');
+      h.listeners.get('storage')();
+      checkConsent(h.queue().at(-1), 'update', 'denied');
+      assert.equal(h.queue().some(args => args[0] === 'event'), false);
+    }
   }
   // A tap, key or scroll loads the library before the page-load timer; neither path loads it twice.
   for (const name of ['pointerdown', 'keydown', 'scroll', 'touchstart']) {
