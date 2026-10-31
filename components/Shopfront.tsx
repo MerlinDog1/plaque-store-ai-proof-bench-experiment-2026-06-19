@@ -4,7 +4,7 @@ import { categoryLandingFor } from './CategoryPages';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
-import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase } from './FeatureSections';
+import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase, ProofPdfStack, featureImageVersion, sampleProofPdf } from './FeatureSections';
 import { PromoFilm, PromoFilmFigure } from './PromoVideo';
 import { promoVideo, promoVideoPath } from '../services/promoVideo.mjs';
 import { designHrefFor, hasNewProductLayout } from '../services/productLayout';
@@ -290,9 +290,88 @@ export function ShopFaq({ faqs = shopFaqs }: { faqs?: typeof shopFaqs }) {
   );
 }
 
+// Owner msg 8088 (31 Oct 2026), on the band below: "Maybe just an image here? Or a carousel of images? Showing more far
+// out stuff? So people know we can make anything?" Pictures already on the site, cropped square by
+// scripts/make-custom-work-images.py; Millie's photo and her plaque are real photographs.
+const customWork = [
+  { src: '/site-images/custom-work/millie-photo-to-plaque.webp', size: 640, title: 'From a phone photo to metal', note: 'Millie, engraved from her owner’s photo',
+    alt: 'Millie the cat in her owner’s everyday photo, beside her portrait engraved on her finished metal plaque' },
+  { src: '/site-images/custom-work/willow-horse.webp', size: 640, title: 'A horse, drawn from a photo', note: 'Aged brass on dark wood',
+    alt: 'Aged brass plaque with an engraved portrait of Willow the horse, on a dark wood board fixed to a timber wall' },
+  { src: '/site-images/memorial/portrait-ron-pat-v3.webp', size: 600, title: 'Two faces on one plaque', note: 'Under their apple tree',
+    alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on an oak board and ground stake under their apple tree' },
+  { src: `/site-images/ai/ai-real-house-640.webp?${featureImageVersion}`, size: 640, title: 'Your house name, with artwork', note: 'An oval with a willow tree',
+    alt: 'Willow Cottage house sign, an engraved brushed stainless steel oval with a willow tree, fixed to a white-painted brick wall beside a front door' },
+  { src: '/site-images/custom-work/ruby-folded-steel.webp', size: 640, title: 'A plaque that stands on a shelf', note: 'Folded steel, with Ruby’s portrait',
+    alt: 'Freestanding folded stainless steel plaque with an engraved portrait of Ruby the Siamese cat, on a windowsill' },
+  { src: '/site-images/custom-work/ivy-sid-boulder.webp', size: 450, title: 'Fixed to a garden boulder', note: 'For the garden they made',
+    alt: 'Brushed brass memorial plaque for Ivy and Sid Moore, who made this garden together, fixed to a large garden boulder among lady’s mantle, catmint and roses' },
+  { src: '/site-images/custom-work/alice-grave-cross.webp', size: 450, title: 'A name plate for a grave cross', note: 'Polished brass on oak',
+    alt: 'Small polished brass name plate for Alice May Grant screwed to the arm of a temporary oak cross in a village churchyard, with white and yellow flowers' },
+  { src: '/site-images/memorial/portrait-daniel-v2.webp', size: 600, title: 'A portrait for a favourite place', note: 'On the boathouse wall',
+    alt: 'Brass memorial plaque with an engraved portrait of Daniel Price on an oak board, fixed to the painted timber wall of a sailing club boathouse' },
+  { src: '/site-images/custom-work/meadows-opening.webp', size: 640, title: 'An opening plaque', note: 'For a new building or room',
+    alt: 'Brushed stainless steel plaque recording the opening of The Meadows Community Hub by Councillor Anne Fielding, fixed to a pale stone wall' },
+];
+
+// Phones swipe sideways (the next picture peeks in); computers see two rows of five.
+function CustomWorkGallery({ subject }: { subject: string }) {
+  return (
+    <ul className="shop-custom-work" aria-label="Plaques we make to order">
+      {customWork.map(item => (
+        <li key={item.src}>
+          <figure>
+            <img src={item.src} srcSet={optimisedSrcSet(item.src, item.size, [320, 480])} sizes="(max-width: 720px) 64vw, 230px"
+              width={item.size} height={item.size} alt={item.alt} loading="lazy" decoding="async" />
+            <figcaption><strong>{item.title}</strong> <span>{item.note}</span></figcaption>
+          </figure>
+        </li>
+      ))}
+      <li className="shop-custom-work-more">
+        <ContactLink channel="whatsapp" placement="page" subject={subject}>
+          <strong>Logos, awards, odd shapes, big signs…</strong>
+          <span>If it can be engraved, we’ll make it.</span>
+          <span className="shop-custom-work-ask"><WhatsAppIcon /> Ask us on WhatsApp</span>
+        </ContactLink>
+      </li>
+    </ul>
+  );
+}
+
 // "Make it clear we can make whatever you want via WhatsApp" (owner msg 5736): one band on every
 // shop page, so a visitor who can't see their exact plaque knows to just ask.
-export function CustomAnything({ subject = 'a custom plaque' }: { subject?: string }) {
+// showcase (catalogue pages, owner msg 8088): pictures of plaques made to order first, a shorter paragraph, and the
+// sample proof in the "We design it" step, just above "What you get."
+export function CustomAnything({ subject = 'a custom plaque', showcase = false }: { subject?: string; showcase?: boolean }) {
+  if (showcase) return (
+    <section className="shop-section shop-design-service shop-custom-anything shop-custom-anything-showcase" aria-labelledby="custom-anything-heading">
+      <p className="shop-kicker">Can’t see exactly what you need?</p>
+      <h2 id="custom-anything-heading">Tell us what you want. We’ll make it.</h2>
+      <CustomWorkGallery subject={subject} />
+      <div className="shop-custom-anything-body">
+        <div>
+          <p>Almost any size, shape or wording. Send us a few words, a sketch or a photo on WhatsApp, and we’ll design it for you and send a free proof, usually within 3 working hours.</p>
+          <div className="shop-design-service-actions">
+            <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-button shop-hero-choice-whatsapp shop-whatsapp-button">
+              <WhatsAppIcon /> Message us on WhatsApp
+            </ContactLink>
+            <a href="/design-request" className="shop-text-link">Or use the design form ↗</a>
+          </div>
+          <p className="shop-smallprint">No obligation. You only pay once you’re happy with your proof.</p>
+        </div>
+        <ol className="design-service-steps">
+          <li><span>01</span><div><strong>Tell us your idea</strong><p>Wording, size, where it’s going, or a picture of something you like.</p></div></li>
+          <li><span>02</span><div><strong>We design it</strong><p>A proof drawn to size, by WhatsApp or email. It looks like this:</p>
+            <div className="shop-custom-proof">
+              <ProofPdfStack sizes="(max-width: 720px) 60vw, 300px" />
+              <a className="shop-text-link" href={sampleProofPdf} target="_blank" rel="noopener">See a sample proof (PDF) ↗</a>
+            </div>
+          </div></li>
+          <li><span>03</span><div><strong>Approve, then pay</strong><p>Ask for changes until it’s right.</p></div></li>
+        </ol>
+      </div>
+    </section>
+  );
   return (
     <section className="shop-section shop-design-service shop-custom-anything" aria-labelledby="custom-anything-heading">
       <div>
@@ -900,7 +979,7 @@ export function ShopProduct({
       )}
       {newLayout && <ProductPhotoRows slug={product.slug} />}
       {/* New layout: "we'll make anything" straight after the sizes and finishes, before the details. */}
-      {newLayout && <CustomAnything subject={plaqueSubject(product.shortTitle)} />}
+      {newLayout && <CustomAnything subject={plaqueSubject(product.shortTitle)} showcase />}
       {product.merchantOffer ? <MerchantProductDetails slug={product.slug} /> : product.seoSections?.length === 0 ? null : <section className="shop-section shop-buying-guide">
         <div>
           <p className="shop-kicker">Size, wording and fitting</p>

@@ -16,6 +16,19 @@ const proofPage = (page: number) => ({
   srcSet: `/site-images/proof/sample-proof-page-${page}-760.webp?${featureImageVersion} 760w, /site-images/proof/sample-proof-page-${page}-1400.webp?${featureImageVersion} 1400w`,
 });
 
+/** The sample proof's first two pages, stacked, opening the PDF. Also in the catalogue pages' "We design it" step
+ *  (owner msg 8088). */
+export function ProofPdfStack({ sizes }: { sizes: string }) {
+  return (
+    <a className="shop-proof-pdf-stack" href={sampleProofPdf} target="_blank" rel="noopener" aria-label="Open the sample proof PDF">
+      <img className="is-back" {...proofPage(2)} sizes={sizes} width="760" height="537" loading="lazy"
+        alt="Sample proof page with the plaque drawn with every dimension, the hole positions and a side view of the screw caps" />
+      <img className="is-front" {...proofPage(1)} sizes={sizes} width="760" height="536" loading="lazy"
+        alt="Sample proof cover showing a brushed brass garden memorial plaque with a rose and vine border" />
+    </a>
+  );
+}
+
 // compact: no checklist and a smaller picture, for the phone-length category pages (owner msg 5906).
 export function ProofPdfShowcase({ id = 'proof-pdf', heading = 'A proof you can check properly.', compact = false, children }: {
   id?: string;
@@ -25,12 +38,7 @@ export function ProofPdfShowcase({ id = 'proof-pdf', heading = 'A proof you can 
 }) {
   return (
     <section className={`shop-section shop-proof-pdf${compact ? ' is-compact' : ''}`} aria-labelledby={`${id}-heading`}>
-      <a className="shop-proof-pdf-stack" href={sampleProofPdf} target="_blank" rel="noopener" aria-label="Open the sample proof PDF">
-        <img className="is-back" {...proofPage(2)} sizes="(max-width: 720px) 78vw, 440px" width="760" height="537" loading="lazy"
-          alt="Sample proof page with the plaque drawn with every dimension, the hole positions and a side view of the screw caps" />
-        <img className="is-front" {...proofPage(1)} sizes="(max-width: 720px) 78vw, 440px" width="760" height="536" loading="lazy"
-          alt="Sample proof cover showing a brushed brass garden memorial plaque with a rose and vine border" />
-      </a>
+      <ProofPdfStack sizes="(max-width: 720px) 78vw, 440px" />
       <div className="shop-proof-pdf-copy">
         <p className="shop-kicker">Your proof, before you pay</p>
         <h2 id={`${id}-heading`}>{heading}</h2>

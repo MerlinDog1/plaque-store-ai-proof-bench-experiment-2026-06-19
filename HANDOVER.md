@@ -1,5 +1,15 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Product pages v3, "Tell us what you want" band: pictures and the proof PDF — PREVIEW ONLY, 31 October 2026
+
+- **Why:** the owner (msg 8088): pictures of "more far out stuff" in that band so people know we make anything, and a
+  picture of the proof PDF above "What you get.".
+- **Branch:** same v3 branch, `codex/instaplaque-product-page-v3-20261030`. Not merged, not live.
+- **What changed:** catalogue pages only: nine pictures of plaques made to order plus an "ask us" card (swipe on phones,
+  two rows of five on computers), a shorter paragraph, and the sample proof's first two pages in step 02. Existing site
+  pictures only (`scripts/make-custom-work-images.py` crops them). Details and checks: the 31 October section of
+  `docs/product-page-v3-2026-10-30.md`.
+
 ## Product pages v3 (photo first, "we make anything", photo rows): PREVIEW ONLY — 30 October 2026, ~23:45 UTC
 
 - **Why:** the owner (msg 8065) after reviewing the catalogue pages row by row: say in the first seconds that any size,

@@ -74,3 +74,33 @@ Details and settings". It still names the recordings, so analytics consent given
   days. Now that the film is on every page, the 99 pages that take longer than 5 days show it too.
 - On a first visit the cookie notice still covers the price and buttons on a phone (the photo, title and the new line
   are above it).
+
+## 31 October: pictures of plaques made to order, and the sample proof in sight
+
+The owner (msg 8088), on the "Tell us what you want. We'll make it." band: "Maybe just an image here? Or a carousel of
+images? Showing more far out stuff? So people know we can make anything? Also put a Pic of a pdf from page above the see
+what you get section somewhere that makes sense".
+
+On catalogue pages only (`CustomAnything` with `showcase`; the home, category and guide pages keep the old band):
+
+- **Pictures first.** Under the heading, nine plaques made to order (`CustomWorkGallery` in `Shopfront.tsx`): Millie's
+  phone photo beside her finished plaque, a horse portrait, a couple's portrait on a garden stake, a house name with
+  artwork, a freestanding folded-steel plaque, a plaque on a garden boulder, a name plate on a grave cross, a portrait on
+  a boathouse wall and an opening plaque. Then a dark card: "Logos, awards, odd shapes, big signs… If it can be engraved,
+  we'll make it. Ask us on WhatsApp". Phones swipe them sideways with the next one peeking in at the screen edge;
+  computers see two rows of five.
+- **Pictures already on the site, nothing generated.** Square crops are made by `scripts/make-custom-work-images.py`
+  into `public/site-images/custom-work/`; three are used as they are (Ron & Pat, Daniel, Willow Cottage). Millie's photo
+  and her plaque are real photographs; the others are the site's existing portrait, memorial and garden pictures.
+- **Shorter paragraph:** "Almost any size, shape or wording. Send us a few words, a sketch or a photo on WhatsApp, and
+  we'll design it for you and send a free proof, usually within 3 working hours."
+- **The proof PDF as a picture.** Step 02 "We design it" now ends "It looks like this:" with the sample proof's first two
+  pages stacked (`ProofPdfStack`, shared with `ProofPdfShowcase`), opening the sample PDF, and a "See a sample proof
+  (PDF)" link. The band's steps sit directly above "What you get." (on A5 and larger pages the portrait row comes
+  between). "What you get." still links this plaque's own sample PDF.
+
+Checks: tsc; full local build with every postbuild check; `output/instaplaque-custom-band-20261031/shots_band.cjs`
+(workspace) on the local build: brushed stainless 150 × 65 and aged brass 200 × 200 circle on a phone, polished brass
+300 × 200 dark wood on a computer. Band once, above "What you get.", 10 cards, phone strip scrolls sideways with the next
+card in view, computer cards wrap, no sideways page overflow, all 9 pictures and both proof pages load, the ask card
+opens WhatsApp and the proof picture opens the sample PDF.
