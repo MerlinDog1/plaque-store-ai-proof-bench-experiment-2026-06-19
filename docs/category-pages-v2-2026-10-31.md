@@ -92,5 +92,14 @@ Local checks: typecheck and full build/postbuild PASS. All 18 phone/desktop visu
 
 Screenshots and measurements: workspace `output/instaplaque-category-pages-v2-20261031/` (`shots/`, `first-screens-phone.jpg`, `screen-counts.md`, `screen-counts.json`). Local build logs are in workspace `tmp/category-pages-{typecheck,build,browser-final}.log`.
 
-Preview deployment: pending the serialised preview-only deploy.
+Preview: https://instaplaque-o1wzeywqt-dullaghan31-3959s-projects.vercel.app
 
+Deployment: `dpl_2ngef4rqJgYuyAiY1dyEY62FPe3z`, **Ready**, target **preview**, built from
+`05a6e7270e94d96413f99ba9fa0dbf67f95bb31a`. Full Vercel build/postbuild PASS.
+A single deploy was run under the shared deployment lock; no retry or production command.
+Vercel preview protection may require the owner's usual Vercel login. Browser interaction was
+verified against the same local build; the hosted deployment was independently inspected as Ready.
+The local port 4381 server was stopped after verification.
+
+Owner decision: review this preview before any merge/release. Reviews remain for later, as requested.
+No production or shared-service state was changed.
