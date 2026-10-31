@@ -51,7 +51,7 @@ try {
         await document.fonts.ready;
       });
       assert(await page.locator('.cat-page img').evaluateAll(images => images.every(img => img.complete && img.naturalWidth > 0)), `${slug}: loaded imagery`);
-      assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${slug}: no horizontal overflow at ${width}`);
+      assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1 && document.querySelector('main').scrollWidth <= document.querySelector('main').clientWidth + 1), `${slug}: no horizontal overflow at ${width}`);
       const price = await page.locator('.cat-hero-buy strong').innerText();
       const href = await page.locator('.cat-hero a.shop-button').first().getAttribute('href');
       assert.equal(href, `/design?plaque=${designerSlug}`);
@@ -60,9 +60,20 @@ try {
       assert(await faq.getAttribute('open') !== null, `${slug}: FAQ opens`);
       assert(await faq.locator('p').isVisible());
       await faq.locator('summary').click();
-      await page.evaluate(() => scrollTo(0, 0));
+      // This app scrolls <main>, not window. Reset the real scroller after testing the FAQ.
+      await page.locator('main').evaluate(main => { main.scrollTop = 0; });
+      await page.waitForFunction(() => document.querySelector('main').scrollTop === 0);
+      const headingBox = await page.locator('h1').boundingBox();
+      assert(headingBox.y >= 0 && headingBox.y < 400, `${slug}: first-screen capture contains its heading`);
       await page.screenshot({ path: path.join(out, `${slug}-${width}-top.png`) });
-      await page.screenshot({ path: path.join(out, `${slug}-${width}-full.png`), fullPage: true });
+      // A browser fullPage screenshot cannot see inside this fixed-height app shell. Keep the tested width and
+      // expand just the capture viewport to include the whole pane; restore the real phone/desktop height after it.
+      const fullHeight = await page.locator('main').evaluate(main => main.scrollHeight + innerHeight - main.clientHeight);
+      await page.setViewportSize({ width, height: fullHeight });
+      await page.locator('main').evaluate(main => { main.scrollTop = 0; });
+      assert(await page.locator('main').evaluate(main => main.scrollHeight <= main.clientHeight + 1), `${slug}: full capture includes the whole scroll pane`);
+      await page.screenshot({ path: path.join(out, `${slug}-${width}-full.png`) });
+      await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
       // Price and dimensions after the actual primary CTA; this never submits wording or creates a proof.
       await page.locator('.cat-hero a.shop-button').first().click();
       await page.locator('.designer-price strong').waitFor({ timeout: 30000 });

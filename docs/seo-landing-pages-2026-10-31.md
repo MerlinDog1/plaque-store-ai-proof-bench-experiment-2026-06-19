@@ -126,3 +126,26 @@ This is documented in code as well. It does not block comparing these preview ca
 - Build/typecheck logs: workspace `tmp/seo-pages-{build,typecheck}.log`.
 - Preview deployment uses the existing InstaPlaque project and the shared deploy lock only; no
   production flags, promotion, aliases or domain changes.
+
+### Local verification complete
+
+Application checkpoint: `2b5198ca2922d5fd7ce5b789e7b23484e1b3884e`.
+Final typecheck and full build passed, including every existing postbuild check and both extended
+SEO/from-price checks. All 175 Merchant products/policies passed. The feed is byte-identical to
+the live-source record's built feed, SHA256
+`7c654ebcf6dfd8032e78f867c4312b8d1b6fb0b8f60d0e076e8f4b09cfa9675e`.
+
+Eight 390/1440 px hydrated browser cases passed: metadata/canonical/H1, loaded images, both
+window and main-pane horizontal bounds, FAQ open/close, primary CTA exact designer price and
+physical dimensions. Direct product-preset entry also passed at both widths. No JavaScript
+page errors. Sixteen final PNGs and two contact sheets were inspected; the layout is the existing
+category design and all four pages remain readable at phone width.
+
+The first screenshot pass exposed a **test-harness** mistake: the app scrolls `main`, not `window`.
+Those captures were replaced after correcting the harness to reset and assert the real scroller.
+First-screen images are actual 390 × 844 and 1440 × 1000 viewports. The full-page images keep the
+same width and expand the capture height to expose the entire fixed-height app scroll pane;
+the viewport is restored before the interaction checks. No application change was needed.
+
+Screenshot filenames: `<page-path-without-slash>-{390,1440}-{top,full}.png` in the directory above.
+`review-top-390.jpg` and `review-top-1440.jpg` show all four first screens together.
