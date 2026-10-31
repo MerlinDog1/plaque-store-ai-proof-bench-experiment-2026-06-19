@@ -50,7 +50,8 @@ for (const offer of merchantOffers) {
   const studio = studioPhotos.has(offer.slug) ? `/site-images/studio-photo/${offer.slug}.webp` : null;
   if (studio) {
     // The studio photo leads the page (owner msg 7966), and every copy of it is marked as AI-made in its IPTC metadata,
-    // which Google requires for Merchant Center images. It is an extra Shopping image; the drawing stays the main one.
+    // which Google requires for Merchant Center images. It is the main Shopping image (owner msg 8159); the drawing is
+    // the first extra one.
     assert.ok(html.includes(`src="${studio}"`), `Studio photo leads ${offer.slug}`);
     for (const file of [studio, studio.replace('.webp', '-600.webp'), studio.replace('/studio-photo/', '/studio-photo/thumbs/')]) {
       assert.ok(existsSync(`dist${file}`), `Missing ${file}`);
@@ -58,7 +59,7 @@ for (const offer of merchantOffers) {
     }
     assert.ok(html.includes(`${offer.image}${merchantImageQuery}`), `Flat drawing still on ${offer.slug}`);
     assert.ok(productSitemap.includes(`<image:loc>https://instaplaque.co.uk${studio}</image:loc>`), `Studio photo in the product sitemap for ${offer.slug}`);
-    assert.ok(feed.includes(`<g:additional_image_link>https://instaplaque.co.uk${studio}</g:additional_image_link>`), `Studio photo in the feed for ${offer.slug}`);
+    assert.ok(feed.includes(`<g:image_link>https://instaplaque.co.uk${studio}</g:image_link>`), `Studio photo is the feed's main image for ${offer.slug}`);
   }
   if (offer.imageKind === 'render' && vettedCataloguePhotos.has(offer.slug)) {
     const photo = `/site-images/catalogue-photo/${offer.slug}.webp`;

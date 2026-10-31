@@ -576,6 +576,12 @@ for (const page of routePages) {
   await writePrerenderedPage({ ...page, kind: page.slug === '' ? 'home' : 'page' });
 }
 
+// The main Shopping picture (owner msg 8159, 31 Oct): the studio photo where a product has one, otherwise the flat
+// drawing (or the A5 steel and brass bench photos, which are their offer image). The feed's image_link and the page's
+// Product schema use the same picture; behind a studio photo the drawing becomes the first additional image.
+const drawingUrlFor = page => `${siteBaseUrl}${page.image}${merchantImageQuery}`;
+const mainImageUrlFor = page => (page.studioPhoto ? `${siteBaseUrl}${page.studioPhoto}` : drawingUrlFor(page));
+
 const merchantSlugs = new Set(merchantOffers.map((offer) => offer.slug));
 for (const page of indexablePages) {
   const url = `${siteBaseUrl}/${page.slug}`;
@@ -592,7 +598,7 @@ for (const page of indexablePages) {
       '@id': `${url}#product`,
       name: page.productType,
       description: page.description,
-      image: `${siteBaseUrl}${page.image}${merchantImageQuery}`,
+      image: mainImageUrlFor(page),
       brand: { '@type': 'Brand', name: 'InstaPlaque' },
       category: 'Custom engraved plaques',
       material: merchantOffers.find(item => item.slug === page.slug)?.label || 'Brass or stainless steel',
@@ -665,7 +671,8 @@ const merchantFeedPages = merchantPages;
 
 const feedItems = merchantFeedPages.map((page) => {
   const url = `${siteBaseUrl}/${page.slug}`;
-  const imageUrl = `${siteBaseUrl}${page.image}${merchantImageQuery}`;
+  const imageUrl = mainImageUrlFor(page);
+  const extraImages = [page.studioPhoto && drawingUrlFor(page), page.photo && `${siteBaseUrl}${page.photo}`].filter(Boolean);
   const offer = merchantOffers.find(item => item.slug === page.slug);
   return `    <item>
       <g:id>${offer.offerId}</g:id>
@@ -673,8 +680,8 @@ const feedItems = merchantFeedPages.map((page) => {
       <g:structured_description><g:digital_source_type>trained_algorithmic_media</g:digital_source_type><g:content>${escapeAttr(page.feedDescription)}</g:content></g:structured_description>
 
       <g:link>${url}</g:link>
-      <g:image_link>${imageUrl}</g:image_link>${[page.studioPhoto, page.photo].filter(Boolean).map(photo => `
-      <g:additional_image_link>${siteBaseUrl}${photo}</g:additional_image_link>`).join('')}
+      <g:image_link>${imageUrl}</g:image_link>${extraImages.map(extra => `
+      <g:additional_image_link>${extra}</g:additional_image_link>`).join('')}
       <g:brand>InstaPlaque</g:brand>
       <g:material>${escapeAttr(offer.label)}</g:material>
       <g:color>${escapeAttr(offer.colour)}</g:color>

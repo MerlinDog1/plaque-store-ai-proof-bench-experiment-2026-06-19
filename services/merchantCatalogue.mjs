@@ -64,7 +64,8 @@ for (const entry of entries) {
   entry.offerId = originalId.length <= 50 ? originalId : `ip-${shortMaterials[p.material]}-${p.width}x${p.height}-${p.shape}-${p.wood ? p.woodTone : 'metal'}`;
 }
 export const merchantOffers = entries;
-// Added to the flat design image URLs that Google reads (feed image_link, Product schema, image sitemap).
+// Added to the flat design image URLs that Google reads (feed image_link, or additional_image_link behind a studio
+// photo since 31 Oct; Product schema of products without a studio photo; image sitemap).
 // Bump it whenever those images are redrawn in place, so Google fetches them again (24 Oct 2026: v=2; v=3 when the
 // memorial page's eight products got new example wording, owner msg 6056; v=4 for the second round, msg 6085; v=5 for
 // the bench page's seven, msg 6132; v=6 when they took the simpler wording, msgs 6189-6192; v=7 for the garden page's

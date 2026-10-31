@@ -4,7 +4,8 @@
 // as its flat drawing), read back word for word, checked by eye, and shown to the owner in its batch. Plain .mjs so the
 // build checks can read it too.
 // Product pages lead with the studio photo; the in-place photo (services/vettedPhotos.mjs, if any) and the flat design
-// view (still the Shopping image_link) follow. Cards that would otherwise show the flat drawing show it instead.
+// view follow. Cards that would otherwise show the flat drawing show it instead. It is also the main Shopping picture
+// (feed image_link and Product schema, owner msg 8159, 31 Oct), with the drawing as the first additional image.
 // Files (scripts/publish-studio-photos.py): public/site-images/studio-photo/<slug>.webp (1200 px), <slug>-600.webp and
 // thumbs/<slug>.webp (160 px), all marked IPTC DigitalSourceType trainedAlgorithmicMedia (file metadata, no label).
 // Value: the date the photo went live, used as that page's lastmod in sitemap-products.xml.
