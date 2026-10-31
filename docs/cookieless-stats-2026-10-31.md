@@ -130,3 +130,36 @@ Local evidence under `output/cookieless-stats/` (ignored): `typecheck.log`,
 `phone-notice.png`, `phone-notice-detail.png`, `phone-cookies-on.png`,
 `phone-cookies-off.png`. Local noncanonical cases have no PostHog/replay/Google
 requests, as required by their existing host restrictions.
+
+### Deployed preview and hosted verification
+
+- Preview: https://instaplaque-gxvsljc31-dullaghan31-3959s-projects.vercel.app
+  (Vercel login/protection applies).
+- Deployed application/source checkpoint:
+  `dbf323da8f14923f3067fc10a8adf794ff678913`.
+- One `vercel deploy`, serialised by the shared lock; READY on 31 October 2026
+  around 17:04 UTC. Cloud build and **every postbuild check passed**. No retry,
+  production deploy, promote, manual alias or settings change.
+- Actual protected preview: **5/5 PASS**, using its real hosted Vercel SDK, one
+  page load per case. Event requests intercepted/fulfilled locally, so no test
+  events reached analytics providers. No overflow or browser page errors.
+- Vercel view attempts: no choice `1 + 3`; Reject `1 + 3`; Accept `1 + 3`;
+  Statistics off before choice `1 + 0`; off after Accept `1 + 0` (initial view +
+  three later probes). Exactly one Vercel script request per fresh case. The
+  two objection cases stop all subsequent SDK/navigation pageviews.
+- Meta loader: zero for no choice, Reject and off-before-choice; one for Accept
+  and off-after-Accept. Google/PostHog/replay stay absent on this nonproduction
+  host, matching their pre-existing host guards. The production-origin local
+  matrix above proves their normal Accept-only/Google-consent-mode behaviour.
+- Browser evidence: `output/cookieless-stats/browser-preview/results.json` and
+  `browser-preview.log`. Visually checked phone screenshots:
+  `browser-preview/phone-notice.png`, `phone-notice-detail.png`,
+  `phone-cookies-on.png`, `phone-cookies-off.png`. The preview toolbar belongs to
+  Vercel and is not part of the live site. Absolute evidence root:
+  `/home/coding-agent/workspace/projects/instaplaque-cookieless-stats-20261031/output/cookieless-stats/`.
+- `index.html`, PostHog, replay, Meta and Google purchase runtime files remain
+  byte-for-byte unchanged from the live-source base. No dependencies installed.
+  All task browsers closed and only this task's port-4382 server was stopped.
+- A subsequent documentation-only commit records these results; the deployed
+  application remains exactly the source checkpoint above. Nothing is live on
+  the production domains.
