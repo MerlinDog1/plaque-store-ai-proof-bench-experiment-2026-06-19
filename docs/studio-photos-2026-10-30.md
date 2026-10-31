@@ -11,8 +11,10 @@ Supatedorders Google Cloud route, "another 15"), 7966 ("do batches and update th
   them (`pictureWord`).
 - **Cards** (shop-by-size page, product picks) keep an in-place photo where there is one; otherwise they show the studio
   photo instead of the drawing. Category pages' own curated photos are unchanged.
-- **Google:** the feed's `image_link` is still the flat drawing (the Shopping picture is unchanged). The studio photo is
-  added as the first `additional_image_link`, and listed in `sitemap-products.xml` with that page's lastmod.
+- **Google:** since 31 October 08:23 UTC (owner msg 8159) the studio photo is the feed's `image_link`, so the main
+  Shopping picture, and the page's Product schema image; the flat drawing is the first `additional_image_link`. Until
+  then the drawing was the main image and the photo the first extra one. The photo is listed in `sitemap-products.xml`
+  with that page's lastmod.
 - **Files:** `public/site-images/studio-photo/<slug>.webp` (1200 px), `<slug>-600.webp` and `thumbs/<slug>.webp`
   (160 px), from `scripts/publish-studio-photos.py DATE FILE...`, which also adds the slug to the list. Every file
   carries IPTC DigitalSourceType `trainedAlgorithmicMedia` (metadata only), which Google requires for AI images.

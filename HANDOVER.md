@@ -1,5 +1,26 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Shopping main picture = the studio photo: LIVE — 31 October 2026, 08:23 UTC
+
+- **Why:** the owner (msg 8159): "I need all the new photos in Google ads". Shopping ads take the feed's `image_link`,
+  and the few products already shown with a photo had drawn clearly more clicks than the drawings.
+- **Branch:** `codex/instaplaque-feed-studio-photos-20261031` (a160b36), from the v3 live source (7e42700). This branch
+  is now the live source; base new work on it.
+- **What changed:** `scripts/prerender-product-pages.mjs` (`mainImageUrlFor`): for the 167 products with a studio photo
+  the feed's `image_link` and the page's Product schema image are that photo (1200 × 1200 WebP, IPTC
+  `trainedAlgorithmicMedia`); the drawing (`?v=11`) becomes the first `additional_image_link`, then any in-place
+  photo. The 6 thin strips keep the drawing; the A5 steel and the brass bench plaque keep their photos.
+  `check-merchant-feed.mjs` and `check-product-policies.mjs` now expect this. Nothing else in the feed changed (diff
+  against live: only those 167 image lines); pages differ from v3 only in that schema line.
+- **Live:** dpl_EswXoDLFZF7164E7ZrU1JP5MRMe8 (instaplaque-psui4f71b), promoted 08:23:49 UTC after its feed was checked
+  byte-identical to the local build. Live feed (apex and www) = the new file; all 175 main images answer 200 with an
+  image type. Merchant Center fetch requested at 08:25 (`post_release_submit.py merchant`): SUCCEEDED, 175 items.
+  Google then re-checks each new image (Merchant says up to 5 days for some destinations); read progress with
+  workspace `output/instaplaque-feed-photos-20261031/merchant_image_status.py`.
+- **Rollback:** promote dpl_uNxynWjiLaW1qAcaUHEEXaNKJgiq (the v3 release), then
+  `python3 -I output/instaplaque-google-visibility-tools/post_release_submit.py merchant` (workspace) so Google re-reads
+  the old feed.
+
 ## Product pages v3, the pictures band, each plaque's own proof and the designer-texture PDFs: LIVE — 31 October 2026, 08:05 UTC
 
 - **Why:** the owner's go (msg 8146) for everything on the v3 preview (msgs 8065, 8088, 8100, 8116, 8124; the three
