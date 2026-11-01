@@ -1,3 +1,4 @@
+import { templatePages } from './categoryTemplateSwitch';
 import {
   BorderStyle,
   DesignStyle,
@@ -8,6 +9,7 @@ import {
   TextColor,
 } from '../types';
 import { GROUND_STAKE_LENGTH, estimatePlaquePrice } from './pricing';
+import { MAX_PLAQUE_DIMENSION_MM, MIN_PLAQUE_DIMENSION_MM } from './checkoutPolicy.mjs';
 import { onBoardAndStake } from './groundStake';
 import { vettedCataloguePhotos } from './vettedPhotos.mjs';
 import { studioPhotoPath, studioPhotos } from './studioPhotos.mjs';
@@ -197,6 +199,27 @@ const formatRetailPrice = (price: number) => price.toLocaleString('en-GB', {
   maximumFractionDigits: 2,
 });
 
+/** The bench plates' fixings, from the catalogue: "two (one at each end) on 150 × 50 …; four (one in each corner) on …". */
+function benchFixingSummary() {
+  const sizes = (count: number) => [...new Set(merchantOffers.filter(offer => offer.format === 'Bench' && offer.preset.fixingHoleCount === count && offer.preset.fixing === 'screws')
+    .sort((a, b) => a.preset.width - b.preset.width || a.preset.height - b.preset.height).map(offer => offer.size))];
+  const list = (items: string[]) => (items.length > 1 ? `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}` : items[0]);
+  return `two, one at each end, on the ${list(sizes(2))} plates; four, one in each corner, on the ${list(sizes(4))} plates`;
+}
+
+/** The screw holes on the wall plaques (not bench plates), by shape, from the catalogue's fixing presets. */
+function wallFixingSummary() {
+  const words: Record<number, string> = { 2: 'two', 3: 'three', 4: 'four' };
+  const holes = (shapes: string[]) => [...new Set(merchantOffers.filter(offer => offer.format !== 'Bench' && shapes.includes(offer.preset.shape)).map(offer => offer.preset.fixingHoleCount))];
+  const rect = holes(['rect']);
+  const round = holes(['oval', 'circle']);
+  if (rect.length !== 1 || round.length !== 1) throw new Error('Wall plaque fixings vary within a shape: reword wallFixingSummary');
+  return `${words[rect[0]]}, one in each corner, on rectangular plaques and ${words[round[0]]}, one at each side, on ovals and circles`;
+}
+
+/** The longest production time of plaques in a finish, without wood backing (catalogue days). */
+const productionDaysFor = (material: string) => Math.max(...merchantOffers.filter(offer => offer.preset.material === material && !offer.preset.wood).map(offer => offer.productionDays));
+
 const startingFromFor = (preset: Pick<PlaqueState, 'width' | 'height' | 'material' | 'shape'>) =>
   `from ${formatRetailPrice(estimatePlaquePrice({
     ...preset,
@@ -347,7 +370,34 @@ export const productFamilies: ProductFamily[] = [
       textColor: TextColor.Black,
       cornerRadius: 0,
     },
-    faqs: [
+    faqs: templatePages['bench-plaques'] ? [
+      {
+        question: 'What size plaque will fit my bench?',
+        answer: 'Measure the flat part of the bench where it will be fitted. Our compact starting size is 150 × 50 mm, with other bench sizes in the designer. Leave clearance around edges and existing fixings. For a replacement plaque, check the old hole positions as well as the outside dimensions.',
+      },
+      {
+        question: 'How much wording fits on a bench plaque?',
+        answer: 'Start with a name, dates and one short dedication. There is no useful fixed word count: long names, the font and fixing positions all affect the space. Check the proof at your selected size, and shorten the wording or choose a larger plaque if it looks crowded.',
+      },
+      {
+        question: 'Can I match the fixing holes of an old plaque?',
+        answer: 'Contact us before ordering with the existing plaque dimensions and hole positions. The standard preview does not automatically match holes already in your bench, so the fitting arrangement needs checking before approval.',
+      },
+      // The three below (1 Nov 2026) complete the six bench questions the competitor research found buyers ask; the
+      // fixings come from the catalogue presets, so the answer cannot drift from the plates sold.
+      {
+        question: 'What fixings come with a bench plaque?',
+        answer: `Every bench plaque has its screw holes and comes with matching screws: ${benchFixingSummary()}. The holes are drawn on your proof, so you can check them against the bench before you pay. Tell us what the bench is made of, or if existing holes must be reused, before ordering.`,
+      },
+      {
+        question: 'Do I need permission for a park or council bench?',
+        answer: 'If the bench belongs to a park, council, churchyard, cemetery or another organisation, check its plaque rules before ordering. Ask for the permitted size, wording and fitting method, then choose the plaque to match. Your PDF proof shows the exact size, wording and fixings, so you can share it with them; approving our proof does not replace their permission.',
+      },
+      {
+        question: 'How long does a bench plaque take?',
+        answer: productionTiming.faq,
+      },
+    ] : [
       {
         question: 'What size plaque will fit my bench?',
         answer: 'Measure the flat part of the bench where it will be fitted. Our compact starting size is 150 × 50 mm, with other bench sizes in the designer. Leave clearance around edges and existing fixings. For a replacement plaque, check the old hole positions as well as the outside dimensions.',
@@ -404,7 +454,34 @@ export const productFamilies: ProductFamily[] = [
       textColor: TextColor.Black,
       cornerRadius: 0,
     },
-    faqs: [
+    // The page's six questions (category template stage 2, 1 Nov 2026; research metal-business section c). Finish and
+    // outdoor facts are the product pages' own (catalogueContent.ts); days from the catalogue. Not VAT registered.
+    faqs: templatePages['brass-plaques'] ? [
+      {
+        question: 'Which brass finish should I choose?',
+        answer: `Polished brass is the brightest, with a formal, refined face. Brushed brass has a warm satin grain: traditional and easy to read. Orbital brass has a distinctive orbital grain under a matt lacquer. Aged brass has a hand-applied patina sealed with matt lacquer, with cream lettering, and takes ${productionDaysFor(Material.AgedBrass)} working days to make rather than ${productionDaysFor(Material.BrushedBrass)}.`,
+      },
+      {
+        question: 'Will brass tarnish outside?',
+        answer: 'Brass is used outdoors for memorials and house names. Brushed and polished brass slowly mellow and darken outside unless they are polished from time to time. The matt lacquer on orbital brass protects its finish, and aged brass is sealed with matt lacquer to slow further ageing. For a silver finish that keeps its colour, choose stainless steel.',
+      },
+      {
+        question: 'How long does a brass plaque take?',
+        answer: productionTiming.faq,
+      },
+      {
+        question: 'Can you match an existing brass plaque?',
+        answer: 'Send us a photo of the old plaque and its size on WhatsApp. We’ll suggest the closest size, finish and lettering and send a free proof to compare, but we can’t promise an exact match.',
+      },
+      {
+        question: 'Can you add a logo or crest?',
+        answer: 'The online designer is set up for wording. For a logo or crest, send it to us on WhatsApp before ordering and we’ll tell you whether it can be engraved and how it would look on your proof.',
+      },
+      {
+        question: 'Do you charge VAT?',
+        answer: 'We are not VAT registered, so there is no VAT to add: the price shown for a plaque is the full price, with engraving, fixings and UK delivery included.',
+      },
+    ] : [
       {
         question: 'Can I choose the brass finish?',
         answer: 'Yes. The proof bench includes brushed brass, polished brass, orbital brass and aged brass options.',
@@ -454,7 +531,34 @@ export const productFamilies: ProductFamily[] = [
       textColor: TextColor.Black,
       cornerRadius: 0,
     },
-    faqs: [
+    // The page's six questions (category template stage 2, 1 Nov 2026; research metal-business section c), from the
+    // product pages' own finish and outdoor facts. No steel grade is claimed: none is stated anywhere on the site.
+    faqs: templatePages['stainless-steel-plaques'] ? [
+      {
+        question: 'Will a stainless steel plaque last outdoors?',
+        answer: 'Yes. Stainless steel suits outdoor walls, gardens and benches and keeps its silver colour. Our plaques are 1.5 mm solid metal with etched, paint-filled lettering. Wood backing suits indoors or a sheltered spot; outside, choose the plate on its own.',
+      },
+      {
+        question: 'Can it go near the sea?',
+        answer: 'Near the sea or somewhere very exposed, ask us before ordering. Send us a photo of the spot on WhatsApp and we’ll tell you honestly which finish suits it.',
+      },
+      {
+        question: 'Brushed or polished stainless steel?',
+        answer: 'Brushed stainless steel has a satin silver face with a fine linear grain: clean and restrained for outdoor benches, public spaces and modern settings. Polished stainless steel is bright and reflective, for plaques where a polished look matters.',
+      },
+      {
+        question: 'How do I look after a stainless steel plaque?',
+        answer: 'An occasional wipe keeps polished stainless steel’s mirror face clear. Check the care instructions before using any polish or abrasive cleaner, and ask us on WhatsApp if you are unsure.',
+      },
+      {
+        question: 'Can you add a logo?',
+        answer: 'The online designer is set up for wording. For a logo, send it to us on WhatsApp before ordering and we’ll tell you whether it can be engraved and how it would look on your proof.',
+      },
+      {
+        question: 'How long does a stainless steel plaque take?',
+        answer: productionTiming.faq,
+      },
+    ] : [
       {
         question: 'Which stainless steel finishes are available?',
         answer: 'You can start with brushed stainless or polished stainless and review the finish in the online plaque proof.',
@@ -612,7 +716,30 @@ export const productFamilies: ProductFamily[] = [
       textColor: TextColor.Black,
       cornerRadius: 0,
     },
-    faqs: [
+    // Five of the page's six questions (category template stage 2, 1 Nov 2026); the sixth is the shop's "Can I see my
+    // plaque before I pay?". Size limits from checkoutPolicy.mjs.
+    faqs: templatePages['custom-plaques'] ? [
+      {
+        question: 'What sizes and shapes can you make?',
+        answer: `Rectangles, ovals and circles from ${MIN_PLAQUE_DIMENSION_MM} mm up to ${MAX_PLAQUE_DIMENSION_MM} mm each way, in brass or stainless steel. The shapes and sizes on this page are priced online; for another size or shape, send us the measurements and we’ll send a free proof with the price.`,
+      },
+      {
+        question: 'How do I get a price for another size?',
+        answer: 'Send the measurements, a photo of where it will go and your words on WhatsApp, or send them with our design form. We send a free proof with the price before you pay anything.',
+      },
+      {
+        question: 'Can bespoke plaques still use instant proofing?',
+        answer: 'Yes. The proof helps establish the design quickly, even if the final price needs manual confirmation.',
+      },
+      {
+        question: 'Can you make a plaque from my own design?',
+        answer: 'Often, yes. Send your design, sketch or AI image on WhatsApp and we’ll tell you honestly whether it can be engraved, then send a proof drawn to size.',
+      },
+      {
+        question: 'How long does a custom plaque take?',
+        answer: productionTiming.faq,
+      },
+    ] : [
       {
         question: 'Can bespoke plaques still use instant proofing?',
         answer: 'Yes. The proof helps establish the design quickly, even if the final price needs manual confirmation.',
@@ -658,7 +785,16 @@ export const seoLandingPages: SeoLandingPage[] = [
         copy: 'Make the name or dedication the clearest part of the layout, then place dates and the personal message beneath it. Keep lettering clear of the border and fixing holes. View the proof at the intended plaque size: if it feels crowded, shorten the message or choose a larger plaque.',
       },
     ],
-    faqs: [
+    // The page's six questions (category template stage 2, 1 Nov 2026; research memorial section c), from the product
+    // pages' own outdoor, fixing and care facts.
+    faqs: templatePages['garden-plaques'] ? [
+      { question: 'Can a garden plaque stay outside all year?', answer: 'Yes. Our brass and stainless steel plaques are 1.5 mm solid metal with etched, paint-filled lettering, and the metal plate on its own is made for outdoor use. Wood backing suits a sheltered spot, such as a porch or a covered corner of the garden; in an open position, choose a plate without backing.' },
+      { question: 'Which metal is best for a garden?', answer: 'Stainless steel keeps its silver colour outdoors. Brass is warm and traditional and slowly mellows and darkens outside unless it is polished from time to time; aged brass has a hand-applied patina, sealed with matt lacquer to slow further ageing. Both metals are made for outdoor use, so choose the look you prefer.' },
+      { question: 'What size should a garden plaque be?', answer: 'Measure the flat space first and keep the plaque above the planting. A 200 × 150 mm or A5 plaque suits a name, dates and a short message; choose A4 or 300 × 200 mm for a longer tribute or a shared garden, and 150 × 50 mm for just a name and dates on a post.' },
+      { question: 'How do I fix it to a wall, fence or stone?', answer: `Each plaque comes with its screw holes and screws, under decorative caps that hide the screw heads: ${wallFixingSummary()}. Standard fixings suit timber, brick or stone, and the holes are drawn on your proof so you can check them before you pay. For a tree, use a ground stake or a post rather than the tree itself.` },
+      { question: 'Can a garden plaque go near the sea?', answer: 'Near the sea or somewhere very exposed, ask us before ordering. Send us a photo of the spot on WhatsApp and we’ll tell you honestly which finish suits it.' },
+      { question: 'How do I look after a garden plaque?', answer: 'Care depends on the finish. Polished stainless steel needs only an occasional wipe; brushed and polished brass mellow outside unless they are polished from time to time. On sealed finishes such as orbital and aged brass, check the care instructions before using any polish or abrasive cleaner.' },
+    ] : [
       { question: 'Can garden plaques be used outside?', answer: 'Yes. Choose brass or stainless steel with suitable fixings. The proof shows the layout, material and fixings before payment.' },
       { question: 'What size is best for a garden plaque?', answer: 'A5 is a good starting point for names, dates and a short message. Bench plaque sizes work better for very short wording.' },
     ],
@@ -740,7 +876,16 @@ export const seoLandingPages: SeoLandingPage[] = [
       { title: 'A school’s tree for a teacher.', copy: 'A5 polished stainless steel on an oak board and ground stake, on the school field.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-school-v2.webp', alt: 'Polished stainless steel tree plaque reading This tree was planted by the children of Ashfield Primary School in memory of Mrs Long, on an oak board and ground stake' },
       { title: 'A silver birch for Moss.', copy: 'A5 polished brass on an oak board and ground stake, in the bark mulch.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-birch-v2.webp', alt: 'Polished brass pet memorial plaque reading In loving memory of Moss, 2009 to 2023, forever by our side, on an oak board and ground stake beside a young silver birch' },
     ],
-    faqs: [
+    faqs: templatePages['tree-memorial-plaques'] ? [
+      { question: 'Can I fix a plaque to a tree?', answer: 'We recommend not fixing it to the tree itself. Screws and wire damage a growing tree and the bark grows over them. Stand the plaque beside the tree on an oak board and black steel ground stake (both are included in our tree plaque prices), or fix it to a short post, a nearby wall or a fence.' },
+      // Category template stage 2 (1 Nov 2026, research memorial section c): the permission and plate-only questions
+      // replace the portrait and design-for-me ones (the closing strip and WhatsApp route cover those).
+      { question: 'Can I put one in a churchyard, park or memorial woodland?', answer: 'Check with whoever looks after the site first. Parks, churchyards, schools and cemeteries usually have rules for memorial trees and plaques: ask about the permitted size, material, wording and fixing before ordering, as many councils run their own tree dedication schemes. Your PDF proof shows the exact size and wording to share with them; approving it does not replace their permission.' },
+      { question: 'What size should a memorial tree plaque be?', answer: 'A5 (210 × 148 mm) suits most memorial trees: a dedication line, a name, dates and a short message. Choose 200 × 150 mm for shorter wording, or A4 for a school, a community planting or several names.' },
+      { question: 'What should a tree memorial plaque say?', answer: 'Most start with a dedication such as “This oak was planted in memory of”, then the name, the dates and a short line about them, such as “who loved this garden”. Send us a few words on WhatsApp if you would like help with the wording.' },
+      { question: 'Will the plaque last outdoors?', answer: 'Yes. Our brass and stainless steel plaques are 1.5 mm solid metal with etched, paint-filled lettering. Stainless steel keeps its colour and brass mellows slowly outside. For an open, exposed spot choose a metal plaque without wood backing.' },
+      { question: 'Can I have just the plate, for a post or fence?', answer: `Yes. The plate on its own starts ${startingFromFor({ width: 200, height: 150, material: Material.BrushedSteel, shape: Shape.Rect })} for 200 × 150 mm stainless steel, with screws and decorative caps for a post, fence or wall. Take the board and stake off at the designer’s Backing step, or open the plate on its own from this page’s sizes.` },
+    ] : [
       { question: 'Can I fix a plaque to a tree?', answer: 'We recommend not fixing it to the tree itself. Screws and wire damage a growing tree and the bark grows over them. Stand the plaque beside the tree on an oak board and black steel ground stake (both are included in our tree plaque prices), or fix it to a short post, a nearby wall or a fence.' },
       { question: 'What size should a memorial tree plaque be?', answer: 'A5 (210 × 148 mm) suits most memorial trees: a dedication line, a name, dates and a short message. Choose 200 × 150 mm for shorter wording, or A4 for a school, a community planting or several names.' },
       { question: 'What should a tree memorial plaque say?', answer: 'Most start with a dedication such as “This oak was planted in memory of”, then the name, the dates and a short line about them, such as “who loved this garden”. Send us a few words on WhatsApp if you would like help with the wording.' },
@@ -782,7 +927,15 @@ export const seoLandingPages: SeoLandingPage[] = [
         copy: 'Download the proof PDF to share with colleagues and agree one final version before paying. Production begins after approval and payment, with delivery time additional. If your plaque is needed for an unveiling, contact us with the required arrival date and postcode before placing the order. For logos or supplied artwork, ask us to confirm what is possible before relying on it in your design.',
       },
     ],
-    faqs: [
+    faqs: templatePages['opening-plaques'] ? [
+      { question: 'Can colleagues check the opening plaque before we order?', answer: 'Yes. Download the proof PDF and share it for review. It includes a link back to the design. Agree the exact spelling, titles, date and acknowledgement wording before one person approves the final layout and places the order.' },
+      { question: 'Can you meet our opening ceremony date?', answer: 'Contact us before ordering with the required arrival date, delivery postcode and plaque options. Production estimates start after proof approval and payment, and delivery takes additional time. Please have the date confirmed before depending on the plaque for an event.' },
+      { question: 'Can the plaque include a school crest or organisation logo?', answer: 'The online designer is set up for inscription layouts. For a crest, logo or supplied artwork, contact us before ordering so we can confirm whether your requirements can be accommodated and how they affect the proof, price and timing.' },
+      // Category template stage 2 (1 Nov 2026, research occasion section c). Card payment only; not VAT registered.
+      { question: 'Can we pay by invoice or purchase order?', answer: 'Payment is by card when you place the order. If your organisation needs another way to pay, ask us on WhatsApp before ordering. We are not VAT registered, so there is no VAT to add to our prices.' },
+      { question: 'Can an opening plaque go outdoors?', answer: 'Yes. A brass or stainless steel plate on its own is made for outdoor use, and its fixings suit timber, brick or stone. Wood backing suits indoors or a sheltered spot, such as a porch.' },
+      { question: 'What fixings come with an opening plaque?', answer: `Each plaque comes with its screw holes and screws, under decorative caps that hide the screw heads: ${wallFixingSummary()}. The holes are drawn on your proof, so you can check them before you pay. For a plaque on a wood board, tell us the wall type and we’ll check the fixings suit it.` },
+    ] : [
       { question: 'Can colleagues check the opening plaque before we order?', answer: 'Yes. Download the proof PDF and share it for review. It includes a link back to the design. Agree the exact spelling, titles, date and acknowledgement wording before one person approves the final layout and places the order.' },
       { question: 'Can you meet our opening ceremony date?', answer: 'Contact us before ordering with the required arrival date, delivery postcode and plaque options. Production estimates start after proof approval and payment, and delivery takes additional time. Please have the date confirmed before depending on the plaque for an event.' },
       { question: 'Can the plaque include a school crest or organisation logo?', answer: 'The online designer is set up for inscription layouts. For a crest, logo or supplied artwork, contact us before ordering so we can confirm whether your requirements can be accommodated and how they affect the proof, price and timing.' },
