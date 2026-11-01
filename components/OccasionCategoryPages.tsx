@@ -3,7 +3,6 @@ import { merchantProducts, photo600, type ProductFamily } from '../services/comm
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { occasionLandingPages } from '../services/occasionLandingPages';
 import { designHrefFor } from '../services/productLayout';
-import { leadPhotos } from '../services/inPlacePhotos';
 import type { LandingConfig, SizeStep } from './CategoryLanding';
 
 // No link to Metal House Signs until that site is live: its only address is a private preview (combined preview,
@@ -31,13 +30,8 @@ export const occasionProductPicks = Object.fromEntries(occasionLandingPages.map(
 export function occasionCategoryLandingFor(product: ProductFamily): LandingConfig | undefined {
   const page = occasionLandingPages.find(item => item.slug === product.slug);
   if (!page) return undefined;
-  // The page's own lead photo (owner msg 8341: wording that suits the page) replaces the catalogue shot when made. The
-  // caption names the plaque in it; Design online opens page.relatedProductSlug, as the in-app click does
-  // (landingDesignProduct), which is set to the same plaque.
-  const lead = leadPhotos[page.slug];
-  const heroSlug = lead?.productSlug || page.heroSlug;
-  const hero = productFor(heroSlug);
-  const heroOffer = offerFor(heroSlug);
+  const hero = productFor(page.heroSlug);
+  const heroOffer = offerFor(page.heroSlug);
   const from = offerFor(page.fromSlug);
   const image = page.slug === 'house-name-plaques' ? hero.photo || page.image : hero.studioPhoto || page.image;
   const sizes: SizeStep[] = page.sizeSlugs.map((slug, index) => {
@@ -51,14 +45,14 @@ export function occasionCategoryLandingFor(product: ProductFamily): LandingConfi
     title: page.title,
     note: page.heroNote || '',
     intro: page.heroCopy,
-    // The category layout, with the page's own checked lead photo (services/inPlacePhotos.ts) or a catalogue photo.
+    // Reuse the category layout and already-vetted product imagery; no new unreviewed setting photos or artwork.
     // Heading first, as in their own preview: a search visitor sees the page's title and price on the first screen.
     photoFirst: false,
     designHref: designHrefFor(page.relatedProductSlug),
     hero: {
-      src: lead?.src || image,
-      srcSet: lead?.srcSet || `${photo600(image)} 600w, ${image} 1200w`,
-      alt: lead?.alt || `${hero.title}, shown with example wording`,
+      src: image,
+      srcSet: `${photo600(image)} 600w, ${image} 1200w`,
+      alt: `${hero.title}, shown with example wording`,
       caption: <>Shown: {heroOffer.size} {heroOffer.label.toLowerCase()}{heroOffer.preset.wood ? ` on ${heroOffer.preset.woodTone === 'dark' ? 'dark wood' : 'light oak'}` : ''}, {hero.startingFrom}. Example wording; yours replaces it. Estimated {heroOffer.productionDays} working days after proof approval and payment, plus delivery. <a href={`/${hero.slug}`}>See this plaque</a>.</>,
     },
     priceNote: `${from.size} ${from.label.toLowerCase()}, including engraving, fixings and UK delivery. Design online starts with the pictured plaque at ${hero.startingFrom}.`,
@@ -74,7 +68,7 @@ export function occasionCategoryLandingFor(product: ProductFamily): LandingConfi
       ['Approve, then pay', 'Only approve production once the wording and any permissions are settled. UK delivery is included.'],
     ],
     // The pictured plaque's own sample proof PDF, as on the category pages.
-    sampleSlug: heroSlug,
+    sampleSlug: page.heroSlug,
     wording: {
       title: `${page.slug === 'professional-brass-plaques' ? 'Practice name plate' : page.shortTitle.replace(/ plaques$/, ' plaque')} wording ideas.`,
       intro: page.slug === 'professional-brass-plaques'

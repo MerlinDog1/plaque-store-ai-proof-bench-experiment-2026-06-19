@@ -38,36 +38,6 @@
 4. **Privacy wording.** The statistics paragraphs on the privacy and cookies pages say Vercel records approximate
    location (country, region and town or city), matching Vercel's Web Analytics data points, not just country.
 
-## Photos in place (owner msg 8341, added 31 Oct 2026, 23:00 UTC)
-
-The owner asked for about five more good photos on each category page, with wording that suits the page: the
-practices plate shows a full name and title ("RICHARD HARGREAVES KC / Barrister"), the donor page a real donor plaque.
-
-- **Photos:** 55 made and checked (two helpers; every photo's wording read back word by word, failures remade, then
-  each final looked at). 54 published in `public/site-images/in-place/<page>/`: 900 × 600 for the rows, and for an
-  occasion page's lead photo 800/1200/1600 px 4:3 crops. All carry IPTC DigitalSourceType trainedAlgorithmicMedia in
-  their metadata, as the studio photos do (no visible label, owner msg 5231). All names are invented.
-- **Rows:** each of the seven category pages gets a row of five; a tap on a photo opens that plaque's page and the
-  caption takes its size, finish and price from the catalogue (`services/inPlacePhotos.ts`). On the tree page every
-  photo shows the oak board and ground stake, so its captions give the board-and-stake price and a tap opens the
-  designer on that plaque with both (`designWithStakeHref`). The tree page has four new photos before its own four:
-  a fifth was a near copy of its lead photo (Jim Partridge's cherry tree plaque), so it was not published.
-- **Occasion pages:** the first photo leads the page and the other four are the row. The lead plaque is now each
-  page's `heroSlug`, `relatedProductSlug` (what Design online opens, with or without the script) and share image
-  (`services/occasionLandingPages.ts`): house `polished-brass-300x200-rect-plaque` (Rose Cottage), donor
-  `brushed-brass-300x200-rect-plaque` (the Morgan family), church `polished-brass-150x50-rect-plaque` (the Taylor
-  family pew) and practices `polished-brass-200x150-rect-plaque` (Richard Hargreaves KC). This replaces fix 3's
-  "THE STUDIO" photo on the practices page.
-- **Rebuilding:** `python3 -I scripts/build-in-place-photos.py SOURCE_DIR MANIFEST.json ...` copies the photos, makes
-  the crops, tags them and writes `services/inPlacePhotos.data.ts`. Source: workspace
-  `output/instaplaque-category-photos-20261031/` with `manifest-a-site.json` (without the tree duplicate) and
-  `manifest-occasion-site.json` (the occasion helper's manifest with plain alt text; its own alts read like
-  generation prompts). Contact sheets: `contact-<page>.jpg` there.
-- **New check:** `scripts/check-in-place-photos.mjs` (postbuild `check:in-place-photos`): every row's count, each
-  photo published and tagged, its link (catalogue page, or the designer on the board and stake) and catalogue price;
-  each occasion page's lead photo, Design online plaque and share image. `check-occasion-landings*.mjs` now expect
-  the lead photo plaques.
-
 ## Checks (local, 31 Oct 2026)
 
 - `npx tsc --noEmit`: pass. `npm run build` with every postbuild check: pass (log: workspace

@@ -2,10 +2,8 @@ import type { SeoLandingPage } from './commerce';
 import { Material, Shape } from '../types';
 
 // Preview candidates, 31 October 2026. Copy is shared by React and prerendering; prices are never authored here.
-// Pictures are examples of the product with invented wording, not claimed customer commissions.
+// Existing catalogue imagery only: these are examples of the product, not claimed customer commissions.
 export interface OccasionLanding extends SeoLandingPage {
-  /** The pictured plaque, also relatedProductSlug (what Design online opens): the plaque in the page's own lead photo
-   * (services/inPlacePhotos.ts), which scripts/check-in-place-photos.mjs checks. */
   heroSlug: string;
   fromSlug: string;
   picks: string[];
@@ -28,8 +26,8 @@ export const occasionLandingPages: OccasionLanding[] = [
     seoDescription: 'Create a simple engraved house name plaque in brass or stainless steel. Compare sizes, finishes and prices, with a free proof and UK delivery included.',
     heroNote: 'Your house name, simply engraved.',
     heroCopy: 'A small metal name plate for a door, porch or gate. Choose brass or stainless steel, add your house name and check a free proof before you pay.',
-    image: '/site-images/in-place/house-name-plaques/1-polished-brass-300x200-rect-plaque-hero-1200.webp',
-    heroSlug: 'polished-brass-300x200-rect-plaque', relatedProductSlug: 'polished-brass-300x200-rect-plaque',
+    image: '/site-images/catalogue-photo/polished-brass-200x150-rect-plaque.webp',
+    heroSlug: 'polished-brass-200x150-rect-plaque', relatedProductSlug: 'polished-brass-200x150-rect-plaque',
     fromSlug: smallSteel, from: steelFrom, proofCta: 'Design a house name plaque',
     picks: [smallSteel, smallBrass, 'polished-brass-200x150-rect-plaque', 'aged-brass-250x150-oval-plaque'],
     sizeSlugs: [smallSteel, 'brushed-stainless-200x150-rect-plaque', 'a5-brushed-steel-personalised-plaque', 'brushed-stainless-250x150-oval-plaque'],
@@ -60,8 +58,8 @@ export const occasionLandingPages: OccasionLanding[] = [
     seoDescription: 'Thank donors and sponsors with an engraved brass or stainless steel plaque. Sizes for individual donor wall plates and dedications, with a free proof first.',
     heroNote: 'A lasting thank-you to the people who helped.',
     heroCopy: 'Recognise a donor, sponsor or group of supporters with an individual engraved plaque. Choose a small name plate for an existing donor wall, or a larger dedication for the project they helped make possible.',
-    image: '/site-images/in-place/donor-recognition-plaques/1-brushed-brass-300x200-rect-plaque-hero-1200.webp',
-    heroSlug: 'brushed-brass-300x200-rect-plaque', relatedProductSlug: 'brushed-brass-300x200-rect-plaque',
+    image: '/site-images/studio-photo/brushed-brass-300x200-rect-light-wood-plaque.webp',
+    heroSlug: 'brushed-brass-300x200-rect-light-wood-plaque', relatedProductSlug: 'brushed-brass-300x200-rect-light-wood-plaque',
     fromSlug: smallSteel, from: steelFrom, proofCta: 'Design a donor plaque',
     picks: [smallBrass, 'brushed-stainless-200x50-rect-plaque', 'brushed-brass-300x200-rect-light-wood-plaque', 'brushed-brass-400x300-rect-plaque'],
     sizeSlugs: [smallSteel, 'a5-brushed-steel-personalised-plaque', 'brushed-stainless-297x210-rect-plaque', 'brushed-stainless-400x300-rect-plaque'],
@@ -93,8 +91,8 @@ export const occasionLandingPages: OccasionLanding[] = [
     seoDescription: 'Plan a church pew, memorial or dedication plaque in brass or steel. Compare sizes and wording ideas, check church permission, then approve your free proof.',
     heroNote: 'A gift remembered. A dedication agreed.',
     heroCopy: 'Small plates for a pew and larger plaques for an agreed church dedication. Start with your parish’s permission and approved wording, then choose a size and finish and check a free proof.',
-    image: '/site-images/in-place/church-plaques/1-polished-brass-150x50-rect-plaque-hero-1200.webp',
-    heroSlug: 'polished-brass-150x50-rect-plaque', relatedProductSlug: 'polished-brass-150x50-rect-plaque',
+    image: '/site-images/studio-photo/polished-brass-210x148-rect-dark-wood-plaque.webp',
+    heroSlug: 'polished-brass-210x148-rect-dark-wood-plaque', relatedProductSlug: 'polished-brass-210x148-rect-dark-wood-plaque',
     fromSlug: smallSteel, from: steelFrom, proofCta: 'Design a church plaque',
     picks: ['polished-brass-150x50-rect-plaque', 'brushed-brass-225x75-rect-plaque', 'polished-brass-210x148-rect-dark-wood-plaque', 'brushed-stainless-210x297-rect-plaque'],
     sizeSlugs: [smallSteel, 'brushed-stainless-225x75-rect-plaque', 'a5-brushed-steel-personalised-plaque', 'brushed-stainless-210x297-rect-plaque'],
@@ -133,8 +131,8 @@ export const occasionLandingPages: OccasionLanding[] = [
     heroNote: 'Your practice name, clearly presented.',
     heroCopy: 'An engraved brass name plate for a practice entrance, reception or office door. Start with your approved business name, add only the titles and details you are entitled to use, and check the layout before it is made.',
     // A name plate ("THE STUDIO"), not the donor page's clubhouse opening plaque (owner go, msg 8314).
-    image: '/site-images/in-place/professional-brass-plaques/1-polished-brass-200x150-rect-plaque-hero-1200.webp',
-    heroSlug: 'polished-brass-200x150-rect-plaque', relatedProductSlug: 'polished-brass-200x150-rect-plaque',
+    image: '/site-images/studio-photo/orbital-brass-matt-lacquer-200x150-rect-dark-wood-plaque.webp',
+    heroSlug: 'orbital-brass-matt-lacquer-200x150-rect-dark-wood-plaque', relatedProductSlug: 'orbital-brass-matt-lacquer-200x150-rect-dark-wood-plaque',
     fromSlug: smallBrass, from: brassFrom, proofCta: 'Design a practice name plate',
     picks: [smallBrass, 'polished-brass-200x150-rect-plaque', 'brushed-brass-210x148-rect-light-wood-plaque', 'orbital-brass-matt-lacquer-297x210-rect-plaque'],
     sizeSlugs: [smallBrass, 'brushed-brass-200x150-rect-plaque', 'brushed-brass-210x148-rect-plaque', 'brushed-brass-297x210-rect-plaque'],
