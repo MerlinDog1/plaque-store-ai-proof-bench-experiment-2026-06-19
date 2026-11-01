@@ -1,5 +1,17 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## "Products first" category template, stage 1 (memorial + bench) — PREVIEW ONLY, 1 November 2026
+
+- **Why:** owner msg 8384 (studio shots only; "research and find stuff to copy"). Research: workspace
+  `output/instaplaque-competitor-research-20261101/`.
+- **Branch:** `codex/instaplaque-category-template-20261101`, from `df652c9` (combined preview, AI photos reverted).
+  Not merged, not live. Code commit `195692e`.
+- **Preview:** https://instaplaque-a5pwj5nd6-dullaghan31-3959s-projects.vercel.app (`dpl_AoKmAAKg68MHjGF9Zfm1YsG6oXPC`,
+  preview, Ready). Production still `dpl_EswXoDLFZF7164E7ZrU1JP5MRMe8`.
+- **What, checks, rollback:** `docs/category-template-2026-11-01.md`. Shared template `components/CategoryTemplate.tsx`,
+  page configs `components/CategoryTemplatePages.tsx`; new postbuild check `scripts/check-category-template.mjs`.
+- **Next:** the owner's review; then further stages (garden, tree, brass, stainless, occasion pages) as configs.
+
 ## Combined preview (category pages v2 + four occasion pages + visit statistics) — PREVIEW ONLY, 31 October 2026
 
 - **Why:** the owner's go (msg 8314) to put the three 31 Oct previews together with four fixes for one approval.
