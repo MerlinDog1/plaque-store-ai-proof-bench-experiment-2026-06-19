@@ -3,10 +3,10 @@
 // Phone 390 × 844 and computer 1440 × 900, on a local build only (external requests blocked, browser marked internal):
 // - the first product card starts within 330 px of the top, with the cookie notice showing and after Accept; the notice
 //   is a slim bar (64 px or less on the phone) covering neither the H1, the first row of products nor the contact bar;
-// - about 6.5 phone screens: at most 6.7 (main height / (viewport - main top), as in the 31 Oct review; the reviewer
-//   accepted memorial at 6.6 and opening at 6.5, Telegram 1 Nov 2026);
+// - at most 7.6 phone screens: owner msg 8603 asks for a separate, full-width video section;
+//   report every page's measured length (main height / (viewport - main top));
 // - no sideways overflow, no script errors or console errors (other than the blocked external requests);
-// - the largest paint on the first screen is a product photo; the film, tap to play in the proof block, loads nothing
+// - the largest paint on the first screen is a product photo; the film, tap to play in its own section after the proof, loads nothing
 //   before the tap, keeps its box when the poster loads and while it plays, and plays when tapped;
 // - every card: a swatch swaps the photo, price and link, and that link opens the built product page of that finish
 //   (tree: the designer on that plate, on the board and stake); the card itself opens its plaque; chips narrow the grid,
@@ -36,7 +36,7 @@ const pages = [
   { slug: 'opening-plaques', cards: 6, planner: true, chips: { finish: 'Brass', finishWord: 'brass', narrow: 'On a wood board', narrowCount: 3 } },
   { slug: 'custom-plaques', cards: 6, chips: { finish: 'Stainless steel', finishWord: 'steel', narrow: 'Oval and round', narrowCount: 2 } },
 ];
-const MAX_PHONE_SCREENS = 6.7;
+const MAX_PHONE_SCREENS = 7.6; // larger, separate film requested in owner msg 8603
 const MAX_NOTICE_HEIGHT = 64;
 // The planner's date maths, as the page uses it (services/occasionPlanner.ts, transpiled like check-promo-video-tracking).
 const ts = require('typescript');
@@ -209,15 +209,18 @@ async function checkChips(page, slug, chips, total) {
   await page.locator('main').evaluate(main => { main.scrollTop = 0; });
 }
 
-/** The film in the proof block: nothing loaded before the tap; its box and the block's stay the same when the poster
+/** The film in its own section after the proof: nothing loaded before the tap; its box and the block's stay the same when the poster
  * loads and while it plays; one download, after the tap; it plays and pauses. */
 async function checkFilm(page, films, where) {
   const boxes = () => page.evaluate(() => {
     const size = el => { const box = el.getBoundingClientRect(); return [Math.round(box.width), Math.round(box.height)]; };
-    return { block: size(document.querySelector('.cat-tpl-proof')), film: size(document.querySelector('.cat-tpl-film .promo-film')), cls: window.__cls };
+    return { block: size(document.querySelector('.cat-tpl-film-section')), film: size(document.querySelector('.cat-tpl-film .promo-film')), cls: window.__cls };
   });
   await page.locator('.cat-tpl-film').scrollIntoViewIfNeeded();
   const first = await boxes();
+  const viewport = page.viewportSize();
+  assert(first.film[1] <= viewport.height * 0.75 + 1, `${where}: film capped at 75% viewport height`);
+  assert(first.film[0] >= (viewport.width < 721 ? viewport.width - 40 : 450), `${where}: large film at content width`);
   await page.waitForFunction(() => { const img = document.querySelector('.cat-tpl-film .promo-film-poster'); return img && img.complete && img.naturalWidth > 0; }, null, { timeout: 15000 });
   const poster = await boxes();
   assert(!films.some(file => file.endsWith('.mp4')), `${where}: film downloaded before a tap`);
@@ -291,7 +294,7 @@ async function checkPlanner(page, where) {
         assert(lcp && /\/site-images\/studio-photo\/[^?&]+\.webp/.test(lcp.url) && (!lcp.element || (lcp.element.tag === 'IMG' && lcp.element.card)),
           `${spec.slug}/${mode}: largest paint ${JSON.stringify(lcp)}`);
         lcp.src = lcp.url.replace(/^.*\/site-images\/studio-photo\//, '').replace(/[?&].*$/, '');
-        const film = await page.evaluate(() => { const video = document.querySelector('.cat-tpl-proof .cat-tpl-film video'); return video && { src: video.getAttribute('src'), preload: video.getAttribute('preload'), autoplay: video.autoplay, paused: video.paused }; });
+        const film = await page.evaluate(() => { const video = document.querySelector('.cat-tpl-film-section .cat-tpl-film video'); return video && { src: video.getAttribute('src'), preload: video.getAttribute('preload'), autoplay: video.autoplay, paused: video.paused }; });
         assert(film && !film.src && film.preload === 'none' && !film.autoplay && film.paused, `${spec.slug}/${mode}: film waits for a tap ${JSON.stringify(film)}`);
         assert(!films.some(file => file.endsWith('.mp4')), `${spec.slug}/${mode}: film downloaded on load`);
         await screenshot(page, `${spec.slug}.${mode}.screen1-cookie.png`);

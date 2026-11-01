@@ -3794,12 +3794,13 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
 .cat-tpl .cat-tpl-org { grid-column: 1 / -1; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(32, 59, 50, 0.16); }
 .cat-tpl .cat-tpl-org h3 { margin: 0 0 6px; font: 700 15px/1.3 Arial, Helvetica, sans-serif; color: var(--shop-ink); }
 .cat-tpl .cat-tpl-org p { margin: 0; font-size: 13.5px; line-height: 1.45; }
-/* The promo film in the proof block (owner msg 8440): phones, a row under the steps with the film in the right-hand
-   column (the sample proof's width) and its small print beside it; computers, a column of its own. */
-.cat-tpl .cat-tpl-film { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) 118px; column-gap: 14px; align-items: center; margin: 14px 0 0; }
-.cat-tpl .cat-tpl-film .promo-film { grid-column: 2; grid-row: 1; border-radius: 6px; box-shadow: 0 6px 16px rgba(16, 38, 31, 0.16); }
-.shopfront.cat-tpl .cat-tpl-film figcaption { grid-column: 1; grid-row: 1; margin: 0; font-size: 11px; line-height: 1.4; color: var(--shop-muted); }
-.cat-tpl .cat-tpl-film figcaption strong { display: block; margin-bottom: 2px; font: 700 13.5px/1.3 Arial, Helvetica, sans-serif; color: var(--shop-ink); }
+/* Owner msg 8603: give the proof and the film their own sections. The existing film is 4:5,
+   so a 60svh width caps its height at 75svh without cropping or stretching it. */
+.shopfront.cat-tpl > .cat-tpl-film-section { padding-top: 28px; padding-bottom: 28px; }
+.cat-tpl .cat-tpl-film-section h2 { text-align: center; margin-bottom: 16px; }
+.cat-tpl .cat-tpl-film { width: 100%; max-width: min(480px, 60svh); margin: 0 auto; }
+.cat-tpl .cat-tpl-film .promo-film { width: 100%; border-radius: 6px; box-shadow: 0 6px 16px rgba(16, 38, 31, 0.16); }
+.shopfront.cat-tpl .cat-tpl-film figcaption { margin-top: 10px; font-size: 11px; line-height: 1.4; color: var(--shop-muted); }
 .cat-tpl .cat-tpl-film figcaption a { display: block; margin-top: 4px; font-weight: 600; color: var(--shop-ink); text-decoration: underline; text-underline-offset: 3px; }
 
 @media (min-width: 721px) {
@@ -3860,9 +3861,5 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
   .cat-tpl .cat-tpl-finish-outdoors { font-size: 13px; }
   .cat-tpl .cat-tpl-org { grid-column: 1; max-width: 640px; }
   .cat-tpl .cat-tpl-org p { font-size: 15px; }
-  .cat-tpl .cat-tpl-proof { grid-template-columns: minmax(0, 1fr) 210px 280px; column-gap: 40px; }
-  .cat-tpl .cat-tpl-proof-sample { grid-column: 3; }
-  .cat-tpl .cat-tpl-film { grid-column: 2; grid-row: 1 / span 4; display: block; align-self: start; margin: 0; }
-  .shopfront.cat-tpl .cat-tpl-film figcaption { margin-top: 10px; font-size: 12px; line-height: 1.45; }
-  .cat-tpl .cat-tpl-film figcaption strong { font-size: 15px; }
+
 }

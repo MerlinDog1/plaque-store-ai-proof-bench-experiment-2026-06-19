@@ -12,7 +12,7 @@
 // - the opening page's date planner states the catalogue days of its plaques, and its date maths
 //   (services/occasionPlanner.ts) never names an approval day that the catalogue's days and delivery can't meet,
 //   checked against this script's own calendar for every date it accepts;
-// - no hero film: one tap-to-play film in the proof block; no in-place or scene photos; every image and swatch exists;
+// - no hero film: one tap-to-play film in its own section after the proof; no in-place or scene photos; every image and swatch exists;
 // - the facts line, the sample proof PDF and the page's contextual links are present.
 // Usage: node scripts/check-category-template.mjs
 import assert from 'node:assert/strict';
@@ -157,12 +157,16 @@ for (const page of pages) {
   }
   assert(main.querySelector('.cat-tpl-toolbar.is-static .cat-tpl-chips[aria-hidden="true"]'), `${page.slug}: chips hidden until the app runs`);
 
-  // No hero film and no scene photos; every picture exists. The promo film is back once, tap to play, inside the proof
-  // block (owner msg 8440, 1 Nov 2026): nothing loads before the tap (no src, preload none, no autoplay, lazy poster).
+  // No hero film and no scene photos; every picture exists. The promo film is back once, tap to play, after the proof
+  // block (owner msg 8603, 1 Nov 2026): nothing loads before the tap (no src, preload none, no autoplay, lazy poster).
   assert.equal(main.querySelectorAll('iframe').length, 0, `${page.slug}: no embedded frames`);
   const films = [...main.querySelectorAll('video')];
   assert.equal(films.length, 1, `${page.slug}: one film`);
-  assert(films[0].closest('.cat-tpl-proof .cat-tpl-film'), `${page.slug}: the film sits in the proof block, not at the top`);
+  const proofSection = main.querySelector('.cat-tpl-proof');
+  const filmSection = main.querySelector('.cat-tpl-film-section');
+  assert(filmSection && proofSection?.nextElementSibling === filmSection && !proofSection.querySelector('video'), `${page.slug}: distinct video section immediately after the proof`);
+  assert(films[0].closest('.cat-tpl-film-section .cat-tpl-film'), `${page.slug}: the film is in its own section`);
+  assert.equal(compact(filmSection.querySelector('figcaption span').textContent), '*Sped up. Most plaques are made in 5 working days; aged brass 7, wood-backed 10–15.', `${page.slug}: only the short film footnote`);
   assert(!films[0].hasAttribute('src') && !films[0].hasAttribute('autoplay') && films[0].getAttribute('preload') === 'none' && !films[0].hasAttribute('poster'),
     `${page.slug}: the film loads nothing until tapped`);
   assert.equal(main.querySelector('.cat-tpl-film .promo-film-poster')?.getAttribute('loading'), 'lazy', `${page.slug}: lazy film poster`);
@@ -203,7 +207,7 @@ for (const page of pages) {
   for (const href of page.links) assert(main.querySelector(`a[href="${href}"]`), `${page.slug}: link to ${href}`);
   const internal = [...main.querySelectorAll('a[href^="/"]')].map(a => a.getAttribute('href'));
   for (const href of new Set(internal)) assert(built(href), `${page.slug}: internal link ${href} is built`);
-  console.log(`PASS /${page.slug}: title, description, H1 and canonical unchanged; ${visible.length} questions match the FAQ schema; ${cards.length} cards lead with studio photos and link to built pages; lead-time lines match the catalogue (usual ${usual} days); ${new Set(internal).size} internal links; no scene photos, one tap-to-play film in the proof block.`);
+  console.log(`PASS /${page.slug}: title, description, H1 and canonical unchanged; ${visible.length} questions match the FAQ schema; ${cards.length} cards lead with studio photos and link to built pages; lead-time lines match the catalogue (usual ${usual} days); ${new Set(internal).size} internal links; no scene photos, one tap-to-play film in its own section after the proof.`);
 }
 
 // The date planner's maths (services/occasionPlanner.ts), against a calendar of this script's own: for every event date
