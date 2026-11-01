@@ -1,6 +1,28 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Live-only eight-template release candidate — PREVIEW ONLY, 1 November 2026
+## Eight products-first category pages: LIVE — 1 November 2026, 14:07 UTC
+
+- **Owner:** msg 8620 "Go live then" (after msg 8603's proof/video change, preview `dpl_Y65CRMBo73eaE9h84eanyEMD3mDz`).
+- **Live:** `dpl_3yA5Qrb7ipZgQaJnKHaMMSEvV3zF` (instaplaque-gangmmw1a), bundle `index-Dm4PwOLZ.js`, from this branch at
+  `db5ff4bf8e35d736017af090704218be83e31a4a` (code identical to the verified `6dea61f`; db5ff4b adds docs only).
+  Staged with `vercel deploy --prod --skip-domain` (cloud build and every postbuild check passed), promoted 14:07:06 UTC.
+  **This branch is now the live source.** Base any further InstaPlaque work on it, not on the Stage 2/combined-preview branches.
+- **Checks before promotion** (`output/instaplaque-category-template-20261101/release/check_release_20261101.sh`, log
+  `check-release-prod.log` beside it): the 8 pages 200 with the proof and video sections, footnote, "sizes · finishes"
+  count, canonical, H1, titles identical to the previous production and no links to unreleased pages; home, portrait,
+  cookies, privacy, designer and two product pages 200; feed, sitemap and robots byte-identical to the previous
+  production; `/api/gemini/health` ok.
+- **Checks after promotion** (from OVH with a phone browser user agent): `vercel inspect instaplaque.co.uk` = the new id;
+  the 8 pages live with the new layout; home 200 with the new bundle; portrait, designer and a product page 200;
+  www 308 to the apex; sitemap, feed (175 items) and robots 200; AI health ok.
+- **Search Console:** sitemap.xml and sitemap-products.xml resubmitted 14:08 UTC (204, 0 errors, 0 warnings).
+  Merchant feed unchanged, so not refetched.
+- **Rollback:** `flock /home/coding-agent/workspace/tmp/instaplaque-vercel-deploy.lock vercel promote
+  dpl_EswXoDLFZF7164E7ZrU1JP5MRMe8 --yes --scope dullaghan31-3959s-projects`, then verify and resubmit the sitemap.
+- **Measure in about two weeks:** share leaving within 30 seconds, clicks from these pages to product pages, Google Ads
+  landing-page experience, Search Console positions and sales from these pages.
+
+## Live-only eight-template release candidate — PREVIEW ONLY, 1 November 2026 (superseded: released above)
 
 - Branch `codex/instaplaque-template-release-20261101`, based on live source `ec24ba1`.
   Verified code/checks: `6dea61fe2231af5775bf61a650fdda44d5817c60`; no merge, production deploy, promotion or domain assignment.
