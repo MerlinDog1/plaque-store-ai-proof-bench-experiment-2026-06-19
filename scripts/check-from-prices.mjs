@@ -8,13 +8,15 @@
 // - all category product cards show their exact catalogue price;
 // - the brass and stainless finish tiles lead to their finish's cheapest plaque (on the same backing), so they show its
 //   from-price rather than a photographed larger plaque's;
-// - on the "products first" template pages (components/CategoryTemplate.tsx, 1 Nov 2026), every finish swatch carries
-//   its plaque's catalogue price, each card's from-price is the lowest of its swatches and the card leads to one of
-//   them, and each size drawn to scale shows its linked plaque's price.
+// - on the eight "products first" template pages (components/CategoryTemplate.tsx, 1 Nov 2026: memorial, bench, garden,
+//   tree, brass, stainless steel, opening, custom), every finish swatch carries its plaque's catalogue price (on the tree
+//   page, the plate on its oak board plus the ground stake), each card's from-price is the lowest of its swatches and the
+//   card leads to one of them, and each size drawn to scale links to the cheapest plaque of that size in the page's
+//   metals, at its price.
 // Usage: node scripts/check-from-prices.mjs (reads dist/), DIST=<folder of saved pages>, or BASE=<site URL>.
 import fs from 'node:fs';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
-import { categoryTileOffers } from '../services/categoryTileOffers.mjs';
+import { GROUND_STAKE_PRICE } from '../services/checkoutPolicy.mjs';
 
 const BASE = process.env.BASE;
 const DIST = process.env.DIST || 'dist';
@@ -36,7 +38,7 @@ const amount = value => {
   const match = /£\s?([0-9][0-9,]*(?:\.[0-9]{1,2})?)/.exec(value || '');
   return match ? Number(match[1].replace(/,/g, '')) : null;
 };
-const gbp = value => (value === null ? 'none' : `£${Number.isInteger(value) ? value : value.toFixed(2)}`);
+const gbp = value => (value == null ? 'none' : `£${Number.isInteger(value) ? value : value.toFixed(2)}`);
 
 function heroPrice(html) {
   const match = /class="cat-hero-buy"><strong class="shop-product-price">([\s\S]*?)<\/strong>/.exec(html);
@@ -89,54 +91,63 @@ for (const slug of ['brass-plaques', 'stainless-steel-plaques']) {
     check(!!offer && shown === low, `/${slug} finish tile to /${destination}: ${gbp(shown)}, its finish from ${offer ? gbp(low) : 'unknown'}`);
   }
 }
-// Setting and shape routes must quote the cheapest offered option, not just match the linked
-// photographed plaque (the old check allowed those two equally wrong values to agree).
-// The memorial page's grave tile went with its "Where will it go?" photo tiles (template, 1 Nov 2026): its 150 × 50 mm
-// card and size are covered by the template checks below.
-const choiceGroups = {
-  'garden-plaques': ['garden-wall', 'garden-wall'],
-  'custom-plaques': ['oval', 'circle', 'large'],
-};
-for (const [slug, groups] of Object.entries(choiceGroups)) {
-  const choices = tiles(html[slug], 'cat-route', 'small').filter(([, , group]) => group);
-  check(JSON.stringify(choices.map(([, , group]) => group)) === JSON.stringify(groups), `/${slug}: all setting/shape choices have price coverage`);
-  for (const [destination, shown, group] of choices) {
-    const options = categoryTileOffers(group);
-    const low = Math.min(...options.map(offer => offer.price));
-    check(options.some(offer => offer.slug === destination) && shown === low && offerPrice.get(destination) === low,
-      `/${slug} ${group}: ${gbp(shown)}, cheapest catalogue option ${gbp(low)}, linked offer ${gbp(offerPrice.get(destination))}`);
-  }
-}
-// Exact product photo cards show their own offered price, never a stale copied amount. Fail if a row
-// disappears: this covers the new brass/steel size cards as well as the existing popular-plaque rows.
-const pickCounts = { 'garden-plaques': 4, 'opening-plaques': 4, 'brass-plaques': 4, 'stainless-steel-plaques': 4 };
-for (const [slug, count] of Object.entries(pickCounts)) {
-  const cards = tiles(html[slug], 'cat-product-card', 'strong');
-  check(cards.length === count, `/${slug}: ${cards.length}/${count} product photo cards covered`);
-  for (const [destination, shown] of cards) {
-    check(offerPrice.has(destination) && shown === offerPrice.get(destination), `/${slug} product card /${destination}: ${gbp(shown)}, catalogue ${gbp(offerPrice.get(destination))}`);
-  }
-}
-// Template cards: one per size (or size on a wood board), with a link per finish in the static HTML.
-const templateCounts = { 'memorial-plaques': 10, 'bench-plaques': 6 };
+// Template cards (components/CategoryTemplate.tsx): one per size (or size on a wood board), with a link per finish in
+// the static HTML. Garden, tree, brass, stainless steel, opening and custom moved onto the template on 1 Nov 2026: their
+// setting and shape tiles (garden walls; custom oval, circle and large) and their four product photo cards went with the
+// old layout, and the same choices are now cards and sizes checked here. On the tree page every plaque is priced and
+// opened on the oak board and ground stake (owner msg 6506): its links open the designer on a plate
+// (/design?backing=stake&plaque=<slug>) at the price of that plate on its light oak board plus the stake.
+const templateCounts = { 'memorial-plaques': 10, 'bench-plaques': 6, 'garden-plaques': 8, 'tree-memorial-plaques': 6, 'brass-plaques': 8,
+  'stainless-steel-plaques': 8, 'opening-plaques': 6, 'custom-plaques': 6 };
+const pageMetals = { 'brass-plaques': ['polished-brass', 'brushed-brass', 'orbital-brass-matt-lacquer', 'aged-brass'], 'stainless-steel-plaques': ['polished-stainless', 'brushed-stainless'] };
+const stakePages = new Set(['tree-memorial-plaques']);
 const attr = (tag, name) => new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
+const sameSize = (a, b) => a.preset.width === b.preset.width && a.preset.height === b.preset.height && a.preset.shape === b.preset.shape;
+/** Where a template link leads and the price it should show: a product page at its catalogue price, or on the tree page
+ * the designer on a plate, at that plate on its light oak board plus the stake. */
+function target(href, stake) {
+  const url = new URL((href || '').replace(/&amp;/g, '&'), 'https://instaplaque.co.uk');
+  if (!stake) return { slug: url.pathname.slice(1), price: offerPrice.get(url.pathname.slice(1)) };
+  const plate = offers.get(url.searchParams.get('plaque'));
+  const board = plate && !plate.preset.wood && merchantOffers.find(item => item.preset.wood && item.preset.woodTone === 'light'
+    && item.preset.material === plate.preset.material && sameSize(item, plate));
+  const designer = url.pathname === '/design' && url.searchParams.get('backing') === 'stake';
+  return { slug: plate?.slug, price: designer && board ? board.price + GROUND_STAKE_PRICE : undefined };
+}
 for (const [slug, count] of Object.entries(templateCounts)) {
+  const stake = stakePages.has(slug);
   const cards = [...html[slug].matchAll(/<li class="cat-tpl-card[^"]*"[^>]*>([\s\S]*?)<\/li>/g)].map(match => match[1]);
   check(cards.length === count, `/${slug}: ${cards.length}/${count} template cards`);
   cards.forEach((card, index) => {
-    const link = /<a class="cat-tpl-card-link" href="\/([^"#?]+)"/.exec(card)?.[1];
-    const swatches = [...card.matchAll(/<a\b[^>]*class="cat-tpl-swatch[^"]*"[^>]*>/g)].map(match => [attr(match[0], 'href')?.replace(/^\//, ''), Number(attr(match[0], 'data-price'))]);
+    const link = target(/<a class="cat-tpl-card-link" href="([^"]+)"/.exec(card)?.[1], stake).slug;
+    const swatches = [...card.matchAll(/<a\b[^>]*class="cat-tpl-swatch[^"]*"[^>]*>/g)].map(match => {
+      const { slug: destination, price } = target(attr(match[0], 'href'), stake);
+      return [destination, Number(attr(match[0], 'data-price')), price];
+    });
     const shown = /<strong class="cat-tpl-amount">([\s\S]*?)<\/strong>/.exec(card);
     const low = Math.min(...swatches.map(([, price]) => price));
-    check(swatches.length > 0 && swatches.every(([destination, price]) => offerPrice.get(destination) === price),
-      `/${slug} card ${index + 1}: ${swatches.length} finish links, each at its catalogue price`);
+    check(swatches.length > 0 && swatches.every(([, price, want]) => want !== undefined && price === want),
+      `/${slug} card ${index + 1}: ${swatches.length} finish links, each at its catalogue price${stake ? ' on the oak board and stake' : ''}`);
     check(!!shown && /^from /.test(text(shown[1])) && amount(text(shown[1])) === low, `/${slug} card ${index + 1}: from ${gbp(shown && amount(text(shown[1])))}, lowest finish ${gbp(low)}`);
     check(!!link && swatches.some(([destination]) => destination === link), `/${slug} card ${index + 1}: leads to /${link}, one of its finishes`);
   });
-  const sizes = tiles(html[slug], 'cat-tpl-scale-link', 'strong');
+  // Sizes drawn to scale: each links to the cheapest plaque of its size (without backing) in the page's metals.
+  // A tree-page size with no oak-board version in the catalogue (the 200 mm round) is priced by the designer's own
+  // pricing, as the page's price table is: there it must match that table's cell for its size and metal.
+  const metalWord = material => (material === 'aged-brass' ? 'aged brass' : material.endsWith('brass') ? 'brass' : 'stainless steel');
+  const tableCell = (label, material) => amount(new RegExp(`aria-label="${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}, ${metalWord(material)} on an oak board and ground stake: (£[0-9.,]+)"`).exec(html[slug])?.[1]);
+  const sizes = [...html[slug].matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/g)]
+    .filter(match => /class="cat-tpl-scale-link"/.test(match[1]))
+    .map(match => [target(attr(match[1], 'href'), stake), amount(text(/<strong[^>]*>([\s\S]*?)<\/strong>/.exec(match[2])?.[1] || '')), text(/<b>([\s\S]*?)<\/b>/.exec(match[2])?.[1] || '')]);
   check(sizes.length >= 4, `/${slug}: ${sizes.length} sizes drawn to scale`);
-  for (const [destination, shown] of sizes) {
-    check(offerPrice.has(destination) && shown === offerPrice.get(destination), `/${slug} size to scale /${destination}: ${gbp(shown)}, catalogue ${gbp(offerPrice.get(destination))}`);
+  for (const [found, shown, label] of sizes) {
+    const { slug: destination } = found;
+    const plate = offers.get(destination);
+    const price = found.price ?? (stake && plate ? tableCell(label, plate.preset.material) : undefined);
+    const cheapest = plate && Math.min(...merchantOffers.filter(item => !item.preset.wood && sameSize(item, plate)
+      && (!pageMetals[slug] || pageMetals[slug].includes(item.preset.material))).map(item => item.price));
+    check(!!plate && !plate.preset.wood && plate.price === cheapest && price !== undefined && shown === price,
+      `/${slug} size to scale /${destination}: ${gbp(shown)}, expected ${gbp(price)}, the cheapest of its size ${gbp(cheapest)}`);
   }
 }
 for (const [className, tag] of [['shop-hero-route', 'small'], ['shop-collection', 'strong']]) {

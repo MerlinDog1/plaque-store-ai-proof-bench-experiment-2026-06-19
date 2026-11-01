@@ -8,6 +8,7 @@ import { PromoFilm } from './PromoVideo';
 import { designWithStakeHref, groundStakeVisibleMm } from '../services/groundStake';
 import { GROUND_STAKE_LENGTH, GROUND_STAKE_THICKNESS_MM, GROUND_STAKE_WIDTH_MM, WOOD_BACKING_EXTRA_MM } from '../services/pricing';
 import { finishOutdoors } from '../services/catalogueContent';
+import { PLANNER_LAST_DAY, approveBy } from '../services/occasionPlanner';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { ProofPdfStack } from './FeatureSections';
@@ -82,7 +83,9 @@ export type CardScope = { finishes?: Finish[]; mount?: 'stake' };
 type CardImage = { src: string; srcSet?: string; drawing: boolean };
 /** `label`: "Polished stainless steel on dark walnut" (screen readers, swatch titles); `short`: "Polished steel on walnut",
  * on the photo. `href`: the product page, or on the tree page the designer on that plaque on the board and stake. */
-type CardOption = { slug: string; href: string; finish: Finish; tone?: WoodTone; price: number; days: number; title: string; label: string; short: string; image: CardImage };
+type CardOption = { slug: string; href: string; finish: Finish; tone?: WoodTone; price: number; days: number; title: string; label: string; short: string; image: CardImage;
+  /** The catalogue plaque that gets made (on the tree page, the plate's oak-board version): its days are `days`. */
+  made: string };
 export type ResolvedCard = { card: TemplateCard; name: string; options: CardOption[]; lead: CardOption; from: number };
 
 export function sizeName(card: Pick<TemplateCard, 'width' | 'height' | 'shape' | 'name'>) {
@@ -130,11 +133,11 @@ export function resolveCard(card: TemplateCard, scope: CardScope = {}): Resolved
       if (!image) { unpictured.push(offer); continue; }
       if (stake) {
         const plate = bare(offer);
-        options.push({ slug: plate.slug, href: designWithStakeHref(plate.slug), finish: finish.key, tone: 'light', price: priceOf(offer), days: offer.productionDays,
+        options.push({ slug: plate.slug, href: designWithStakeHref(plate.slug), finish: finish.key, tone: 'light', price: priceOf(offer), days: offer.productionDays, made: offer.slug,
           title: `${plate.title}, on an oak board and ground stake`, label: `${finish.label} on an oak board`, short: `${finish.short} on oak`, image });
         continue;
       }
-      options.push({ slug: offer.slug, href: `/${offer.slug}`, finish: finish.key, tone: wood?.tone, price: offer.price, days: offer.productionDays, title: offer.title,
+      options.push({ slug: offer.slug, href: `/${offer.slug}`, finish: finish.key, tone: wood?.tone, price: offer.price, days: offer.productionDays, made: offer.slug, title: offer.title,
         label: wood ? `${finish.label} on ${wood.label}` : finish.label, short: wood ? `${finish.short} on ${wood.short}` : finish.short, image });
     }
   }
@@ -148,20 +151,25 @@ export function resolveCard(card: TemplateCard, scope: CardScope = {}): Resolved
 }
 
 /** The usual production days on a page: the fewest of its plaques (catalogue days). The facts line under the H1 gives
- * only this figure (review fix, 1 Nov 2026); plaques that take longer (aged brass, wood-backed, the larger boards on the
- * tree page) say so on their card, and the page's timing question gives every figure. */
+ * only this figure (review fix, 1 Nov 2026): 5, or 10 on the tree page, where every plaque is on a board. Plaques that
+ * take longer say so on their card (cardDays), and the page's timing question gives every figure. */
 export function usualDays(cards: ResolvedCard[]) {
   return Math.min(...cards.flatMap(item => item.options.map(option => option.days)));
 }
 const dayRange = (days: number[]) => (Math.min(...days) === Math.max(...days) ? `${days[0]}` : `${Math.min(...days)}–${Math.max(...days)}`);
 
-/** A card's lead-time line, only where its plaques take longer than the page's usual days: the chosen finish's days
- * once one is picked; the card's days when every plaque on it takes longer (wood-backed cards); otherwise the pictured
- * finish's, named (an aged brass lead beside a from-price that belongs to a quicker finish). */
-function cardDays(allowed: CardOption[], current: CardOption, picked: boolean, usual: number) {
-  if (picked) return current.days > usual ? `Made in ${current.days} working days` : '';
-  if (allowed.every(option => option.days > usual)) return `Made in ${dayRange(allowed.map(option => option.days))} working days`;
-  return current.days > usual ? `${current.short}: ${current.days} working days` : '';
+/** The catalogue's standard production time (most plaques; the facts line's figure on every page but the tree's). */
+const STANDARD_DAYS = Math.min(...merchantOffers.map(offer => offer.productionDays));
+/** A card's lead-time line, whenever a plaque behind it (in the chosen chip's finishes) takes longer than the standard
+ * days, naming the slowest: "Made in 10 working days" when they all do (wood-backed cards, every card on the tree page),
+ * otherwise the slower finish and its days ("Aged brass: 7 working days"). No line means every plaque on the card is
+ * made in the standard days. scripts/check-category-template.mjs checks it against the catalogue. */
+function cardDays(allowed: CardOption[]) {
+  const slow = allowed.filter(option => option.days > STANDARD_DAYS);
+  if (!slow.length) return '';
+  if (slow.length === allowed.length) return `Made in ${dayRange(allowed.map(option => option.days))} working days`;
+  const finishes = [...new Set(slow.map(option => option.finish))];
+  return `${finishes.length === 1 ? finishLabel(finishes[0]) : 'Some finishes'}: ${dayRange(slow.map(option => option.days))} working days`;
 }
 
 /** Client-only behaviour (swatch buttons, chips) after the app has mounted; the static HTML keeps plain links. */
@@ -177,7 +185,7 @@ function defaultOption(item: ResolvedCard, allowed: CardOption[]) {
   return allowed.find(option => !option.image.drawing && option.tone === tone) || allowed.find(option => !option.image.drawing) || allowed[0];
 }
 
-function GridCard({ item, finishes, mounted, priority, wide, stake, usual }: { item: ResolvedCard; finishes?: Finish[]; mounted: boolean; priority: number; wide: boolean; stake: boolean; usual: number }) {
+function GridCard({ item, finishes, mounted, priority, wide, stake }: { item: ResolvedCard; finishes?: Finish[]; mounted: boolean; priority: number; wide: boolean; stake: boolean }) {
   const allowed = finishes ? item.options.filter(option => finishes.includes(option.finish)) : item.options;
   const [picked, setPicked] = useState<{ finish: Finish; tone?: WoodTone } | null>(null);
   const filterKey = finishes ? finishes.join(',') : '';
@@ -188,7 +196,7 @@ function GridCard({ item, finishes, mounted, priority, wide, stake, usual }: { i
   const from = Math.min(...allowed.map(option => option.price));
   const price = picked ? formatGbp(current.price) : `from ${formatGbp(from)}`;
   const finishRow = templateFinishes.filter(finish => allowed.some(option => option.finish === finish.key));
-  const days = cardDays(allowed, current, Boolean(picked), usual);
+  const days = cardDays(allowed);
   const choose = (finish: Finish, tone?: WoodTone) => setPicked({ finish, tone });
   const swatch = (key: string, file: string, label: string, option: CardOption, selected: boolean, onPick: () => void) => (mounted
     ? <button type="button" key={key} className={`cat-tpl-swatch${selected ? ' is-selected' : ''}`} style={swatchStyle(file)}
@@ -198,7 +206,7 @@ function GridCard({ item, finishes, mounted, priority, wide, stake, usual }: { i
   const alt = stake ? `${current.title}: shown on its oak board, the ground stake not pictured, with example wording`
     : `${current.title}, shown with example wording${current.image.drawing ? ' (flat design view)' : ''}`;
   return (
-    <li className={`cat-tpl-card${item.card.board ? ' is-board' : ''}`} data-options={item.options.length}>
+    <li className={`cat-tpl-card${item.card.board ? ' is-board' : ''}`} data-options={item.options.length} data-offers={item.options.map(option => option.made).join(' ')}>
       <div className={`cat-tpl-photo${current.image.drawing ? ' is-drawing' : ''}${wide ? ' is-wide' : ''}`}>
         <img src={current.image.src} srcSet={current.image.srcSet} sizes={current.image.srcSet ? '(max-width: 720px) 46vw, 290px' : undefined}
           alt={alt} width="600" height="600"
@@ -255,7 +263,6 @@ function ProductGrid({ id, cards, chips, links, end, wide, stake, mounted }: {
   const sizes = cards.filter((_, index) => shown[index]);
   const finishCount = new Set(sizes.flatMap(item => item.options.filter(option => !finishChip || finishChip.finishes!.includes(option.finish)).map(option => option.finish))).size;
   const count = `${sizes.length} ${sizes.length === 1 ? 'size' : 'sizes'} · ${finishCount} ${finishCount === 1 ? 'finish' : 'finishes'}`;
-  const usual = usualDays(cards);
   const pick = (chip: TemplateChip) => {
     if (chip.key === 'all') { setFinishKey(null); setCardKey(null); return; }
     if (chip.finishes) setFinishKey(key => (key === chip.key ? null : chip.key));
@@ -282,7 +289,7 @@ function ProductGrid({ id, cards, chips, links, end, wide, stake, mounted }: {
       <ul className="cat-tpl-grid" style={{ '--cat-tpl-cols': cards.length % 4 === 0 ? 4 : cards.length % 5 === 0 ? 5 : cards.length % 3 === 0 ? 3 : 4 } as React.CSSProperties}>
         {cards.map((item, index) => (
           <React.Fragment key={item.name + (item.card.board ? ' board' : '')}>
-            {shown[index] && <GridCard item={item} finishes={finishChip?.finishes} mounted={mounted} priority={index} wide={wide} stake={stake} usual={usual} />}
+            {shown[index] && <GridCard item={item} finishes={finishChip?.finishes} mounted={mounted} priority={index} wide={wide} stake={stake} />}
           </React.Fragment>
         ))}
         {end && <li className="cat-tpl-ask">{end}</li>}
@@ -527,24 +534,6 @@ export function StakeKit({ id }: { id: string }) {
   );
 }
 
-// England and Wales bank holidays (GOV.UK), skipped when counting working days back from an opening date.
-const BANK_HOLIDAYS = new Set(['2026-01-01', '2026-04-03', '2026-04-06', '2026-05-04', '2026-05-25', '2026-08-31', '2026-12-25', '2026-12-28',
-  '2027-01-01', '2027-03-26', '2027-03-29', '2027-05-03', '2027-05-31', '2027-08-30', '2027-12-27', '2027-12-28']);
-/** Delivery after dispatch, as checkout and Merchant Center state it (services/merchantPolicies.mjs), and a day to spare. */
-const DELIVERY_WORKING_DAYS = 1;
-const SPARE_WORKING_DAYS = 1;
-const isoDay = (date: Date) => date.toISOString().slice(0, 10);
-const isWorkingDay = (date: Date) => date.getUTCDay() % 6 !== 0 && !BANK_HOLIDAYS.has(isoDay(date));
-/** The working day `count` working days before `date` (dates at UTC midnight). */
-export function workingDaysBefore(date: Date, count: number) {
-  const day = new Date(date.getTime());
-  for (let left = count; left > 0;) {
-    day.setUTCDate(day.getUTCDate() - 1);
-    if (isWorkingDay(day)) left -= 1;
-  }
-  return day;
-}
-
 /** The production times on a page, by kind of plaque, from the catalogue's days for its cards. */
 export function timingKinds(cards: ResolvedCard[]) {
   const options = cards.flatMap(item => item.options.map(option => ({ ...option, size: item.card.name || item.name })));
@@ -572,25 +561,26 @@ export function OccasionPlanner({ id, cards, subject, occasion = 'opening' }: { 
   const kinds = timingKinds(cards);
   const [first, ...rest] = kinds;
   const today = mounted ? new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date()) : '';
-  const target = /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T00:00:00Z`) : null;
-  const show = (day: Date) => day.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
-    ...(day.getUTCFullYear() !== Number(today.slice(0, 4)) ? { year: 'numeric' } : {}) });
+  const valid = /^\d{4}-\d{2}-\d{2}$/.test(date);
+  const show = (day: string) => new Date(`${day}T00:00:00Z`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
+    ...(day.slice(0, 4) !== today.slice(0, 4) ? { year: 'numeric' } : {}) });
   return (
     <section className="shop-section cat-tpl-planner" id={id} aria-labelledby={`${id}-heading`}>
       <h2 id={`${id}-heading`}>When is your {occasion}?</h2>
       <p className="cat-tpl-section-intro">{first.label} plaques are made in {first.days} working days after you approve your proof and pay{rest.length
         ? ` (${rest.map(kind => `${kind.inline} ${kind.days}`).join(', ')})` : ''}, then delivered the next working day.</p>
       {mounted && <label className="cat-tpl-planner-field"><span>Date of the {occasion}</span>
-        <input type="date" value={date} min={today} onChange={event => setDate(event.target.value)} /></label>}
-      {target && <ul className="cat-tpl-planner-list" aria-live="polite">
+        <input type="date" value={date} min={today} max={PLANNER_LAST_DAY} onChange={event => setDate(event.target.value)} /></label>}
+      {valid && <ul className="cat-tpl-planner-list" aria-live="polite">
         {kinds.map(kind => {
-          const by = workingDaysBefore(target, kind.days + DELIVERY_WORKING_DAYS + SPARE_WORKING_DAYS);
-          const left = isoDay(by) < today ? 'gone' : isoDay(by) === today ? 'today' : 'ok';
-          return <li key={kind.label} className={left === 'gone' ? 'is-late' : undefined}><span>{kind.label}</span>{left === 'gone'
-            ? <strong>Too close to promise: ask us first</strong> : <strong>Approve and pay by {left === 'today' ? 'today' : show(by)}</strong>}</li>;
+          const by = approveBy(date, kind.days, today);
+          return <li key={kind.label} className={by.status === 'late' ? 'is-late' : undefined} data-days={kind.days} data-approve-by={by.day}><span>{kind.label}</span>{
+            by.status === 'late' ? <strong>Too close to promise: ask us first</strong>
+              : by.status === 'unknown' ? <strong>Too far ahead to count: ask us</strong>
+                : <strong>Approve and pay by {by.status === 'today' ? 'today' : show(by.day!)}</strong>}</li>;
         })}
       </ul>}
-      <p className="cat-tpl-small">{target && 'Counted back from your date: the working days to make it, one working day’s delivery and a day to spare, missing out weekends and bank holidays. '}Delivery dates are estimates, not guarantees. A fixed date? <ContactLink channel="whatsapp" placement="page" subject={subject}>Tell us on WhatsApp</ContactLink> before you order.</p>
+      <p className="cat-tpl-small">{valid && 'Counted back from your date: the working days to make it, one working day’s delivery and a day to spare, missing out weekends and bank holidays. '}Delivery dates are estimates, not guarantees. A fixed date? <ContactLink channel="whatsapp" placement="page" subject={subject}>Tell us on WhatsApp</ContactLink> before you order.</p>
     </section>
   );
 }

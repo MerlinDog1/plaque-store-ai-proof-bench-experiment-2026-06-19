@@ -9,9 +9,11 @@ const BASE = process.env.BASE || 'http://127.0.0.1:4381';
 assert(['127.0.0.1', 'localhost'].includes(new URL(BASE).hostname), 'Use a local build, not the live site');
 const OUT = process.env.OUT || 'output/category-pages-v2';
 fs.mkdirSync(OUT, { recursive: true });
-// Memorial and bench moved to the "products first" template on 1 Nov 2026 (no hero photo or made-to-order band by
-// design): scripts/check-category-template-browser.cjs checks them.
-const slugs = ['garden-plaques', 'tree-memorial-plaques', 'opening-plaques', 'brass-plaques', 'stainless-steel-plaques', 'portrait-plaques', 'custom-plaques'];
+// Memorial and bench (stage 1) and garden, tree, opening, brass, stainless steel and custom (stage 2) moved to the
+// "products first" template on 1 Nov 2026: no hero photo, hero film or made-to-order band by design (owner msgs 8384,
+// 8440). scripts/check-category-template-browser.cjs checks those eight, with stricter rules (first card, notice, cards,
+// links, chips, film, length). The portrait page keeps the category layout checked here.
+const slugs = ['portrait-plaques'];
 const phone = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1,
   userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' };
 (async () => {

@@ -6,7 +6,8 @@
 //   Design/WhatsApp/Email bar at the bottom;
 // - it does not take the taps meant for a page's Design online / Design on WhatsApp buttons, the bar or the
 //   designer's Continue button (hit-tests the centre of each control);
-// - consent is unchanged: Accept stores yes and Reject stores no for analytics, recordings and ads, and the notice goes.
+// - consent is unchanged: Accept stores yes and Reject stores no for analytics, recordings and ads, and the notice goes;
+//   Settings opens the cookies page.
 // Saves the first screens. Never calls the live site.
 // BASE=http://127.0.0.1:4390 OUT=/path/to/shots node scripts/check-cookie-banner-clear.cjs
 const { chromium } = require('@playwright/test');
@@ -146,6 +147,17 @@ async function open(browser, url) {
       if (stored.some(item => item !== value) || stillOpen) fail(`${label}: stored ${JSON.stringify(stored)}, notice ${stillOpen ? 'still open' : 'closed'}`);
       else console.log(`PASS ${label}: analytics, recordings and ads all "${value}", notice closed`);
       results.push({ answer: label, stored, noticeOpen: stillOpen });
+      await context.close();
+    }
+    // Settings opens the cookies page, where the choice can be changed.
+    {
+      const { context, page } = await open(browser, `${BASE}/garden-plaques`);
+      await page.locator('.cookie-banner a', { hasText: 'Settings' }).click();
+      await page.waitForURL(url => url.pathname === '/cookies', { timeout: 20000 });
+      const heading = ((await page.locator('h1').first().textContent()) || '').trim();
+      if (!/cookie/i.test(heading)) fail(`Settings: /cookies heading "${heading}"`);
+      else console.log(`PASS Settings: opens /cookies ("${heading}")`);
+      results.push({ settings: heading });
       await context.close();
     }
   } finally {

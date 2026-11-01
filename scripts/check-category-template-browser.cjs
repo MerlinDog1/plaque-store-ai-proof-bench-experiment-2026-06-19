@@ -1,10 +1,18 @@
-// Local browser check of the "products first" category template (components/CategoryTemplate.tsx, 1 Nov 2026).
+// Local browser check of the "products first" category template (components/CategoryTemplate.tsx, 1 Nov 2026): the
+// eight template pages (memorial, bench, garden, tree, brass, stainless steel, opening, custom).
 // Phone 390 × 844 and computer 1440 × 900, on a local build only (external requests blocked, browser marked internal):
-// - the first product card starts within 330 px of the top, with the cookie notice showing (and not covering it) and
-//   after Accept; the page is at most 6.5 phone screens (main height / (viewport - main top), as in the 31 Oct review);
+// - the first product card starts within 330 px of the top, with the cookie notice showing and after Accept; the notice
+//   is a slim bar (64 px or less on the phone) covering neither the H1, the first row of products nor the contact bar;
+// - about 6.5 phone screens: at most 6.7 (main height / (viewport - main top), as in the 31 Oct review; the reviewer
+//   accepted memorial at 6.6 and opening at 6.5, Telegram 1 Nov 2026);
 // - no sideways overflow, no script errors or console errors (other than the blocked external requests);
-// - every card: a swatch swaps the photo, price and link, and that link opens the built product page of that finish;
-//   the card itself opens its plaque; chips narrow the grid and switch finishes; the questions open and close;
+// - the largest paint on the first screen is a product photo; the film, tap to play in the proof block, loads nothing
+//   before the tap, keeps its box when the poster loads and while it plays, and plays when tapped;
+// - every card: a swatch swaps the photo, price and link, and that link opens the built product page of that finish
+//   (tree: the designer on that plate, on the board and stake); the card itself opens its plaque; chips narrow the grid,
+//   switch finishes and update the count; the questions open and close;
+// - opening: the date planner names, for a date, the approval day services/occasionPlanner.ts gives for each kind of
+//   plaque, refuses a date too close and does not count one past its calendar;
 // - with JavaScript off the page still has its heading, cards, links, prices and questions.
 // Saves phone first and second screens, full pages and computer first screens to OUT.
 // PORT=4395 HOST=127.0.0.1 REVIEW_FOLLOWUP_CHECK_INTERVAL_MS=0 node server.mjs   (separately), then
@@ -21,7 +29,20 @@ fs.mkdirSync(OUT, { recursive: true });
 const pages = [
   { slug: 'memorial-plaques', cards: 10, chips: { finish: 'Brass', finishWord: 'brass', narrow: 'On a wood board', narrowCount: 3 } },
   { slug: 'bench-plaques', cards: 6, chips: { finish: 'Aged brass', finishWord: 'aged brass' } },
+  { slug: 'garden-plaques', cards: 8, chips: { finish: 'Brass', finishWord: 'brass', narrow: 'On a wood board', narrowCount: 1 } },
+  { slug: 'tree-memorial-plaques', cards: 6, stake: true, chips: { finish: 'Brass', finishWord: 'brass' } },
+  { slug: 'brass-plaques', cards: 8, chips: { finish: 'Polished', finishWord: 'polished brass', narrow: 'On a wood board', narrowCount: 1 } },
+  { slug: 'stainless-steel-plaques', cards: 8, chips: { finish: 'Polished', finishWord: 'polished steel', narrow: 'Bench sizes', narrowCount: 2 } },
+  { slug: 'opening-plaques', cards: 6, planner: true, chips: { finish: 'Brass', finishWord: 'brass', narrow: 'On a wood board', narrowCount: 3 } },
+  { slug: 'custom-plaques', cards: 6, chips: { finish: 'Stainless steel', finishWord: 'steel', narrow: 'Oval and round', narrowCount: 2 } },
 ];
+const MAX_PHONE_SCREENS = 6.7;
+const MAX_NOTICE_HEIGHT = 64;
+// The planner's date maths, as the page uses it (services/occasionPlanner.ts, transpiled like check-promo-video-tracking).
+const ts = require('typescript');
+const planner = { exports: {} };
+require('node:vm').runInNewContext(ts.transpileModule(fs.readFileSync(path.join(__dirname, '../services/occasionPlanner.ts'), 'utf8'),
+  { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, planner);
 const phone = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2,
   userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' };
 const desktop = { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 };
@@ -29,7 +50,14 @@ const results = [];
 
 async function newPage(browser, device, options = {}) {
   const context = await browser.newContext({ ...device, locale: 'en-GB', timezoneId: 'Europe/London', ...options });
-  await context.addInitScript(() => localStorage.setItem('instaplaque-internal-v1', 'yes'));
+  await context.addInitScript(() => {
+    localStorage.setItem('instaplaque-internal-v1', 'yes');
+    // The largest paint and layout shifts, as the browser reports them.
+    window.__lcp = [];
+    window.__cls = 0;
+    try { new PerformanceObserver(list => { window.__lcp.push(...list.getEntries()); }).observe({ type: 'largest-contentful-paint', buffered: true }); } catch (error) { /* not supported */ }
+    try { new PerformanceObserver(list => { for (const entry of list.getEntries()) if (!entry.hadRecentInput) window.__cls += entry.value; }).observe({ type: 'layout-shift', buffered: true }); } catch (error) { /* not supported */ }
+  });
   const blocked = new Set();
   await context.route('**/*', route => {
     const url = new URL(route.request().url());
@@ -48,17 +76,23 @@ async function newPage(browser, device, options = {}) {
     if (/Failed to load resource|ERR_FAILED|ERR_BLOCKED/.test(text) && (blocked.has(where) || [...blocked].some(url => text.includes(url)) || where.includes('/_vercel/') || !where.startsWith(BASE))) return;
     errors.push(`console: ${text} ${where}`);
   });
-  return { context, page, errors, blocked };
+  const films = [];
+  page.on('request', request => { if (request.url().includes('/videos/')) films.push(new URL(request.url()).pathname); });
+  return { context, page, errors, blocked, films };
 }
 
 const geometry = page => page.evaluate(() => {
   const main = document.querySelector('main');
   const top = main.getBoundingClientRect().top;
   const card = document.querySelector('.cat-tpl-card');
+  const cards = [...document.querySelectorAll('.cat-tpl-card')];
+  const firstRow = cards.filter(item => Math.abs(item.getBoundingClientRect().top - card.getBoundingClientRect().top) < 4);
+  const bar = document.querySelector('.shop-mobile-contact.is-visible');
   const banner = [...document.querySelectorAll('.cookie-banner')].find(el => el.getBoundingClientRect().height > 0);
   const rect = el => el && (({ top, bottom, left, right }) => ({ top: Math.round(top), bottom: Math.round(bottom), left: Math.round(left), right: Math.round(right) }))(el.getBoundingClientRect());
   return { mainTop: Math.round(top), pageHeight: main.scrollHeight, viewport: [innerWidth, innerHeight], screens: main.scrollHeight / (innerHeight - top),
-    overflow: Math.max(main.scrollWidth - main.clientWidth, document.documentElement.scrollWidth - innerWidth), card: rect(card), banner: rect(banner) };
+    overflow: Math.max(main.scrollWidth - main.clientWidth, document.documentElement.scrollWidth - innerWidth), card: rect(card), banner: rect(banner),
+    h1: rect(document.querySelector('h1')), firstRow: firstRow.map(rect), bar: bar && bar.getBoundingClientRect().height ? rect(bar) : null };
 });
 const overlaps = (a, b) => a && b && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
 
@@ -87,7 +121,7 @@ async function sweep(page) {
   assert.deepEqual(broken, [], 'broken images');
 }
 
-async function checkCards(page, context, slug) {
+async function checkCards(page, context, slug, stake) {
   const cards = page.locator('.cat-tpl-card');
   const count = await cards.count();
   for (let index = 0; index < count; index++) {
@@ -116,14 +150,21 @@ async function checkCards(page, context, slug) {
       assert.notEqual(after.href, before.href, `${slug} card ${index + 1}: ${label} changes the link`);
       assert(/^£/.test(after.price) && label.endsWith(after.price), `${slug} card ${index + 1}: ${label} shows its own price (${after.price})`);
       assert.notEqual(after.src, before.src, `${slug} card ${index + 1}: ${label} swaps the picture`);
-      const response = await context.request.get(`${BASE}${after.href}`);
-      assert.equal(response.status(), 200, `${slug} card ${index + 1}: ${after.href} opens`);
+      // Tree page: the designer on that plate, on the board and stake; the plate's own page names the finish.
+      const opened = new URL(after.href, BASE);
+      const productHref = stake ? `/${opened.searchParams.get('plaque')}` : after.href;
+      if (stake) {
+        assert(opened.pathname === '/design' && opened.searchParams.get('backing') === 'stake', `${slug} card ${index + 1}: ${after.href} opens the designer on the board and stake`);
+        assert.equal((await context.request.get(`${BASE}${after.href}`)).status(), 200, `${slug} card ${index + 1}: ${after.href} opens`);
+      }
+      const response = await context.request.get(`${BASE}${productHref}`);
+      assert.equal(response.status(), 200, `${slug} card ${index + 1}: ${productHref} opens`);
       const html = await response.text();
       const heading = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1]?.replace(/<[^>]+>/g, '') || '';
       const finishWord = label.split(',')[0].replace(/^On /, '').toLowerCase().replace(' steel', '');
-      assert(html.includes(`<link rel="canonical" href="https://instaplaque.co.uk${after.href}"`), `${slug} card ${index + 1}: ${after.href} is that product's page`);
-      if (!pickWood) assert(heading.toLowerCase().includes(finishWord), `${slug} card ${index + 1}: ${after.href} heading "${heading}" names ${finishWord}`);
-      else assert(heading.toLowerCase().includes(finishWord.includes('oak') ? 'light wood' : 'dark wood'), `${slug} card ${index + 1}: ${after.href} heading "${heading}" names the wood`);
+      assert(html.includes(`<link rel="canonical" href="https://instaplaque.co.uk${productHref}"`), `${slug} card ${index + 1}: ${productHref} is that product's page`);
+      if (!pickWood) assert(heading.toLowerCase().includes(finishWord), `${slug} card ${index + 1}: ${productHref} heading "${heading}" names ${finishWord}`);
+      else assert(heading.toLowerCase().includes(finishWord.includes('oak') ? 'light wood' : 'dark wood'), `${slug} card ${index + 1}: ${productHref} heading "${heading}" names the wood`);
       before.href = after.href; before.src = after.src;
     }
   }
@@ -160,28 +201,102 @@ async function checkChips(page, slug, chips, total) {
   await page.locator('main').evaluate(main => { main.scrollTop = 0; });
 }
 
+/** The film in the proof block: nothing loaded before the tap; its box and the block's stay the same when the poster
+ * loads and while it plays; one download, after the tap; it plays and pauses. */
+async function checkFilm(page, films, where) {
+  const boxes = () => page.evaluate(() => {
+    const size = el => { const box = el.getBoundingClientRect(); return [Math.round(box.width), Math.round(box.height)]; };
+    return { block: size(document.querySelector('.cat-tpl-proof')), film: size(document.querySelector('.cat-tpl-film .promo-film')), cls: window.__cls };
+  });
+  await page.locator('.cat-tpl-film').scrollIntoViewIfNeeded();
+  const first = await boxes();
+  await page.waitForFunction(() => { const img = document.querySelector('.cat-tpl-film .promo-film-poster'); return img && img.complete && img.naturalWidth > 0; }, null, { timeout: 15000 });
+  const poster = await boxes();
+  assert(!films.some(file => file.endsWith('.mp4')), `${where}: film downloaded before a tap`);
+  const toggle = page.locator('.cat-tpl-film .promo-film-toggle');
+  await toggle.click();
+  await page.waitForFunction(() => { const video = document.querySelector('.cat-tpl-film video'); return video && !video.paused && video.currentTime > 0.3; }, null, { timeout: 15000 });
+  const playing = await boxes();
+  for (const [label, now] of [['poster', poster], ['playing', playing]]) {
+    assert.deepEqual(now.block, first.block, `${where}: proof block size, ${label}`);
+    assert.deepEqual(now.film, first.film, `${where}: film size, ${label}`);
+  }
+  const shift = playing.cls - first.cls;
+  assert(shift < 0.01, `${where}: layout shift ${shift.toFixed(4)} while the film loads and plays`);
+  assert.equal(films.filter(file => file.endsWith('.mp4')).length, 1, `${where}: one film download, after the tap`);
+  assert.equal(await toggle.getAttribute('aria-label'), 'Pause the video', `${where}: pause button while playing`);
+  await toggle.click();
+  await page.waitForFunction(() => document.querySelector('.cat-tpl-film video').paused, null, { timeout: 5000 });
+  await page.locator('main').evaluate(main => { main.scrollTop = 0; });
+  return { film: first.film, shift: Number(shift.toFixed(4)) };
+}
+
+/** Opening: for a date, each kind of plaque shows the approval day services/occasionPlanner.ts gives; a date too close
+ * is refused for every kind; a date past the planner's calendar is not counted. */
+async function checkPlanner(page, where) {
+  const input = page.locator('.cat-tpl-planner-field input');
+  await input.scrollIntoViewIfNeeded();
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date());
+  const shift = (day, by) => { const date = new Date(`${day}T00:00:00Z`); date.setUTCDate(date.getUTCDate() + by); return date.toISOString().slice(0, 10); };
+  const checked = [];
+  for (const [event, expect] of [[shift(today, 45), 'ok'], [shift(today, 2), 'late'], ['2028-03-01', 'unknown']]) {
+    await input.fill(event);
+    await page.waitForTimeout(150);
+    const rows = await page.locator('.cat-tpl-planner-list li').evaluateAll(items => items.map(item => ({
+      days: Number(item.dataset.days), by: item.dataset.approveBy || null, late: item.classList.contains('is-late'), text: item.querySelector('strong').textContent })));
+    assert.deepEqual(rows.map(row => row.days).sort((a, b) => a - b), [5, 7, 10, 15], `${where}: planner rows for ${event}`);
+    for (const row of rows) {
+      const want = planner.exports.approveBy(event, row.days, today);
+      assert.equal(row.by, want.day || null, `${where}: ${event}, ${row.days} days: approve by ${row.by}, expected ${want.day}`);
+      if (expect === 'ok') assert(!row.late && /^Approve and pay by /.test(row.text), `${where}: ${event}, ${row.days} days: "${row.text}"`);
+      if (expect === 'late') assert(row.late && /Too close to promise/.test(row.text), `${where}: ${event}, ${row.days} days: "${row.text}"`);
+      if (expect === 'unknown') assert(/Too far ahead to count/.test(row.text), `${where}: ${event}, ${row.days} days: "${row.text}"`);
+    }
+    checked.push(`${event} ${expect}`);
+  }
+  await input.fill('');
+  return checked;
+}
+
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/opt/google/chrome/chrome', args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] });
   try {
     for (const spec of pages) {
       for (const [mode, device] of [['phone', phone], ['desktop', desktop]]) {
-        const { context, page, errors } = await newPage(browser, device);
+        const { context, page, errors, films } = await newPage(browser, device);
         await page.goto(`${BASE}/${spec.slug}`, { waitUntil: 'load', timeout: 60000 });
         await settle(page);
         const withNotice = await geometry(page);
         assert(withNotice.banner, `${spec.slug}/${mode}: cookie notice showing for a new visitor`);
         assert(withNotice.card.top <= 330, `${spec.slug}/${mode}: first card at ${withNotice.card.top}px with the notice`);
         assert(!overlaps(withNotice.card, withNotice.banner), `${spec.slug}/${mode}: notice covers the first card`);
+        // The slim notice: 64 px or less on the phone, clear of the H1, the first row of products and the contact bar.
+        const noticeHeight = withNotice.banner.bottom - withNotice.banner.top;
+        if (mode === 'phone') assert(noticeHeight <= MAX_NOTICE_HEIGHT, `${spec.slug}/phone: notice ${noticeHeight}px tall`);
+        assert(!overlaps(withNotice.banner, withNotice.h1) && !withNotice.firstRow.some(card => overlaps(card, withNotice.banner)) && !overlaps(withNotice.banner, withNotice.bar),
+          `${spec.slug}/${mode}: notice clear of the H1, first products and contact bar ${JSON.stringify({ banner: withNotice.banner, h1: withNotice.h1, bar: withNotice.bar })}`);
+        // The largest paint is a product photo; the film has loaded nothing and waits for a tap.
+        // (The app replaces the prerendered markup when it starts, so the entry's element may be gone: its image URL
+        // tells which picture it was.)
+        const lcp = await page.evaluate(() => { const entry = window.__lcp[window.__lcp.length - 1]; return entry ? { url: decodeURIComponent(entry.url || ''), size: entry.size,
+          element: entry.element ? { tag: entry.element.tagName, card: !!entry.element.closest('.cat-tpl-card') } : null } : null; });
+        assert(lcp && /\/site-images\/studio-photo\/[^?&]+\.webp/.test(lcp.url) && (!lcp.element || (lcp.element.tag === 'IMG' && lcp.element.card)),
+          `${spec.slug}/${mode}: largest paint ${JSON.stringify(lcp)}`);
+        lcp.src = lcp.url.replace(/^.*\/site-images\/studio-photo\//, '').replace(/[?&].*$/, '');
+        const film = await page.evaluate(() => { const video = document.querySelector('.cat-tpl-proof .cat-tpl-film video'); return video && { src: video.getAttribute('src'), preload: video.getAttribute('preload'), autoplay: video.autoplay, paused: video.paused }; });
+        assert(film && !film.src && film.preload === 'none' && !film.autoplay && film.paused, `${spec.slug}/${mode}: film waits for a tap ${JSON.stringify(film)}`);
+        assert(!films.some(file => file.endsWith('.mp4')), `${spec.slug}/${mode}: film downloaded on load`);
         await page.screenshot({ path: path.join(OUT, `${spec.slug}.${mode}.screen1-cookie.png`) });
         await page.locator('.cookie-banner').getByRole('button', { name: 'Accept' }).click();
         await page.waitForTimeout(400);
         const accepted = await geometry(page);
         assert(!accepted.banner, `${spec.slug}/${mode}: notice gone after Accept`);
         assert(accepted.card.top <= 330, `${spec.slug}/${mode}: first card at ${accepted.card.top}px after Accept`);
+        const filmCheck = await checkFilm(page, films, `${spec.slug}/${mode}`);
         await sweep(page);
         const after = await geometry(page);
         assert.equal(after.overflow, 0, `${spec.slug}/${mode}: sideways overflow ${after.overflow}px`);
-        if (mode === 'phone') assert(after.screens <= 6.5, `${spec.slug}: ${after.screens.toFixed(2)} phone screens`);
+        if (mode === 'phone') assert(after.screens <= MAX_PHONE_SCREENS, `${spec.slug}: ${after.screens.toFixed(2)} phone screens`);
         await page.screenshot({ path: path.join(OUT, `${spec.slug}.${mode}.screen1.png`) });
         if (mode === 'phone') {
           await page.locator('main').evaluate((main, y) => { main.scrollTop = y; }, after.viewport[1] - after.mainTop);
@@ -197,7 +312,8 @@ async function checkChips(page, slug, chips, total) {
         assert(!(await faq.evaluate(el => el.open)), `${spec.slug}/${mode}: question closes`);
         // Swatches and links (phone only: the same component at both widths), chips at both widths.
         let cardsChecked = 0;
-        if (mode === 'phone') cardsChecked = await checkCards(page, context, spec.slug);
+        if (mode === 'phone') cardsChecked = await checkCards(page, context, spec.slug, spec.stake);
+        const plannerChecked = spec.planner && mode === 'phone' ? await checkPlanner(page, `${spec.slug}/${mode}`) : undefined;
         await page.reload({ waitUntil: 'load' });
         await settle(page);
         await checkChips(page, spec.slug, spec.chips, spec.cards);
@@ -207,8 +323,9 @@ async function checkChips(page, slug, chips, total) {
         const photo = await first.locator('.cat-tpl-photo').boundingBox();
         const [x, y] = [photo.x + photo.width / 2, photo.y + photo.height / 3];
         if (mode === 'phone') await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
-        await page.waitForURL(`**${href}`, { timeout: 20000 });
-        await page.locator('h1').waitFor();
+        // (Tree: the designer, on that plate on the board and stake.)
+        await page.waitForURL(url => url.pathname === new URL(href, BASE).pathname, { timeout: 20000 });
+        await page.locator(spec.stake ? '.designer-step-footer' : 'h1').first().waitFor();
         await page.waitForTimeout(300);
         assert.deepEqual(errors, [], `${spec.slug}/${mode}: errors`);
         // Full page, as the 31 Oct captures: notice and contact bar hidden, the app's scroller expanded.
@@ -219,7 +336,8 @@ async function checkChips(page, slug, chips, total) {
         await page.waitForTimeout(300);
         await page.screenshot({ path: path.join(OUT, `${spec.slug}.${mode}.full.png`), fullPage: true });
         results.push({ slug: spec.slug, mode, firstCardWithNotice: withNotice.card.top, noticeBottom: withNotice.banner.bottom, firstCardAfterAccept: accepted.card.top,
-          pageHeight: after.pageHeight, mainTop: after.mainTop, screens: Number(after.screens.toFixed(2)), overflow: after.overflow, cardsChecked });
+          noticeHeight, pageHeight: after.pageHeight, mainTop: after.mainTop, screens: Number(after.screens.toFixed(2)), overflow: after.overflow, cardsChecked,
+          largestPaint: lcp.src, film: filmCheck, planner: plannerChecked });
         console.log('PASS', spec.slug, mode, JSON.stringify(results[results.length - 1]));
         await context.close();
       }
