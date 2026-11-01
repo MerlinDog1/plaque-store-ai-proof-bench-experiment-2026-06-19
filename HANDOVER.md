@@ -1,5 +1,19 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Light/dark solid wood wording: LIVE — 1 November 2026, 15:49 UTC
+
+- **Owner:** msg 8635 ("just say light or dark solid wood", no species, never say we don't know) and msg 8640 "Yeah release that".
+- **Live:** `dpl_GkwLwPezCk8nN2dof46vZTe5adwp` (instaplaque-nw4xptuc9) from this branch at `9cc96a6` (staged with
+  `vercel deploy --prod --skip-domain`, cloud build + postbuild pass), promoted 15:49:46 UTC. **This branch is now the live source.**
+- **Pre-promote checks** (`output/instaplaque-wood-wording-20261101/check_wood_release.sh` + independent feed diff): tree page
+  says "light solid wood board" with no species; the 8 template pages, home, designer, portrait and two product pages 200;
+  feed 175 items, same ids, only `structured_title/content` and `structured_description/content` changed on 84 items
+  (wood-backed variants), species words 168 → 0; robots identical; AI health ok.
+- **Live checks (OVH):** instaplaque.co.uk = the new id; tree page 0 species; feed 175 items, 0 species; home/designer 200;
+  www 308. Merchant feed fetch triggered (200) and both sitemaps resubmitted to Search Console (204).
+- **Rollback:** `flock /home/coding-agent/workspace/tmp/instaplaque-vercel-deploy.lock vercel promote dpl_3yA5Qrb7ipZgQaJnKHaMMSEvV3zF --yes --scope dullaghan31-3959s-projects`, then re-fetch the Merchant feed.
+- Details: [docs/wood-wording-2026-11-01.md](docs/wood-wording-2026-11-01.md).
+
 ## Light/dark solid wood wording — PREVIEW ONLY, 1 November 2026
 
 - Owner msg 8635: never name a species for supplied boards/stands; use light/dark solid wood (short labels: light/dark wood).
