@@ -198,6 +198,14 @@ const formatRetailPrice = (price: number) => price.toLocaleString('en-GB', {
   maximumFractionDigits: 2,
 });
 
+/** The bench plates' fixings, from the catalogue: "two (one at each end) on 150 × 50 …; four (one in each corner) on …". */
+function benchFixingSummary() {
+  const sizes = (count: number) => [...new Set(merchantOffers.filter(offer => offer.format === 'Bench' && offer.preset.fixingHoleCount === count && offer.preset.fixing === 'screws')
+    .sort((a, b) => a.preset.width - b.preset.width || a.preset.height - b.preset.height).map(offer => offer.size))];
+  const list = (items: string[]) => (items.length > 1 ? `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}` : items[0]);
+  return `two, one at each end, on the ${list(sizes(2))} plates; four, one in each corner, on the ${list(sizes(4))} plates`;
+}
+
 const startingFromFor = (preset: Pick<PlaqueState, 'width' | 'height' | 'material' | 'shape'>) =>
   `from ${formatRetailPrice(estimatePlaquePrice({
     ...preset,
@@ -360,6 +368,20 @@ export const productFamilies: ProductFamily[] = [
       {
         question: 'Can I match the fixing holes of an old plaque?',
         answer: 'Contact us before ordering with the existing plaque dimensions and hole positions. The standard preview does not automatically match holes already in your bench, so the fitting arrangement needs checking before approval.',
+      },
+      // The three below (1 Nov 2026) complete the six bench questions the competitor research found buyers ask; the
+      // fixings come from the catalogue presets, so the answer cannot drift from the plates sold.
+      {
+        question: 'What fixings come with a bench plaque?',
+        answer: `Every bench plaque has its screw holes and comes with matching screws: ${benchFixingSummary()}. The holes are drawn on your proof, so you can check them against the bench before you pay. Tell us what the bench is made of, or if existing holes must be reused, before ordering.`,
+      },
+      {
+        question: 'Do I need permission for a park or council bench?',
+        answer: 'If the bench belongs to a park, council, churchyard, cemetery or another organisation, check its plaque rules before ordering. Ask for the permitted size, wording and fitting method, then choose the plaque to match. Your PDF proof shows the exact size, wording and fixings, so you can share it with them; approving our proof does not replace their permission.',
+      },
+      {
+        question: 'How long does a bench plaque take?',
+        answer: productionTiming.faq,
       },
     ],
   },

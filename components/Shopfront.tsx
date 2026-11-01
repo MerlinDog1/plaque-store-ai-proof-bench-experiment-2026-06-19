@@ -1,6 +1,8 @@
 import React from "react";
 import { CategoryLandingPage } from './CategoryLanding';
 import { categoryLandingFor } from './CategoryPages';
+import { CategoryTemplatePage } from './CategoryTemplate';
+import { categoryTemplateFor } from './CategoryTemplatePages';
 import { occasionProductPicks } from './OccasionCategoryPages';
 import { GardenAdvice, CollectionLinks, PlaqueWordingExamples, ShopTurnaround, ProductionNote } from './ShopGuides';
 import { businessContact, productionTiming } from '../services/shopInformation';
@@ -849,6 +851,11 @@ export function ShopProduct({
         list.findIndex((other) => other.question === item.question) === index,
     )
     .slice(0, 6);
+  // Pages rebuilt on the "products first" template (owner msg 8384, 1 Nov 2026; components/CategoryTemplatePages.tsx).
+  const template = categoryTemplateFor(product);
+  if (template) {
+    return <CategoryTemplatePage config={template} product={product} faqs={faqs} onLaunch={onLaunch} onRequestDesign={onRequestDesign} />;
+  }
   // The category pages use the memorial page's phone-first layout (owner msgs 5876 and 5927, 24 Oct 2026).
   const landingConfig = categoryLandingFor(product, plaqueSubject(product.shortTitle), examples);
   if (landingConfig) {

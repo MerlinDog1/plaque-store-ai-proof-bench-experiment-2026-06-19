@@ -7,7 +7,10 @@
 // - setting and shape tiles use the lowest matching catalogue option, independently of the pictured finish;
 // - all category product cards show their exact catalogue price;
 // - the brass and stainless finish tiles lead to their finish's cheapest plaque (on the same backing), so they show its
-//   from-price rather than a photographed larger plaque's.
+//   from-price rather than a photographed larger plaque's;
+// - on the "products first" template pages (components/CategoryTemplate.tsx, 1 Nov 2026), every finish swatch carries
+//   its plaque's catalogue price, each card's from-price is the lowest of its swatches and the card leads to one of
+//   them, and each size drawn to scale shows its linked plaque's price.
 // Usage: node scripts/check-from-prices.mjs (reads dist/), DIST=<folder of saved pages>, or BASE=<site URL>.
 import fs from 'node:fs';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
@@ -88,8 +91,9 @@ for (const slug of ['brass-plaques', 'stainless-steel-plaques']) {
 }
 // Setting and shape routes must quote the cheapest offered option, not just match the linked
 // photographed plaque (the old check allowed those two equally wrong values to agree).
+// The memorial page's grave tile went with its "Where will it go?" photo tiles (template, 1 Nov 2026): its 150 × 50 mm
+// card and size are covered by the template checks below.
 const choiceGroups = {
-  'memorial-plaques': ['grave-nameplate'],
   'garden-plaques': ['garden-wall', 'garden-wall'],
   'custom-plaques': ['oval', 'circle', 'large'],
 };
@@ -105,12 +109,34 @@ for (const [slug, groups] of Object.entries(choiceGroups)) {
 }
 // Exact product photo cards show their own offered price, never a stale copied amount. Fail if a row
 // disappears: this covers the new brass/steel size cards as well as the existing popular-plaque rows.
-const pickCounts = { 'memorial-plaques': 4, 'bench-plaques': 8, 'garden-plaques': 4, 'opening-plaques': 4, 'brass-plaques': 4, 'stainless-steel-plaques': 4 };
+const pickCounts = { 'garden-plaques': 4, 'opening-plaques': 4, 'brass-plaques': 4, 'stainless-steel-plaques': 4 };
 for (const [slug, count] of Object.entries(pickCounts)) {
   const cards = tiles(html[slug], 'cat-product-card', 'strong');
   check(cards.length === count, `/${slug}: ${cards.length}/${count} product photo cards covered`);
   for (const [destination, shown] of cards) {
     check(offerPrice.has(destination) && shown === offerPrice.get(destination), `/${slug} product card /${destination}: ${gbp(shown)}, catalogue ${gbp(offerPrice.get(destination))}`);
+  }
+}
+// Template cards: one per size (or size on a wood board), with a link per finish in the static HTML.
+const templateCounts = { 'memorial-plaques': 10, 'bench-plaques': 6 };
+const attr = (tag, name) => new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
+for (const [slug, count] of Object.entries(templateCounts)) {
+  const cards = [...html[slug].matchAll(/<li class="cat-tpl-card[^"]*"[^>]*>([\s\S]*?)<\/li>/g)].map(match => match[1]);
+  check(cards.length === count, `/${slug}: ${cards.length}/${count} template cards`);
+  cards.forEach((card, index) => {
+    const link = /<a class="cat-tpl-card-link" href="\/([^"#?]+)"/.exec(card)?.[1];
+    const swatches = [...card.matchAll(/<a\b[^>]*class="cat-tpl-swatch[^"]*"[^>]*>/g)].map(match => [attr(match[0], 'href')?.replace(/^\//, ''), Number(attr(match[0], 'data-price'))]);
+    const shown = /<strong class="cat-tpl-amount">([\s\S]*?)<\/strong>/.exec(card);
+    const low = Math.min(...swatches.map(([, price]) => price));
+    check(swatches.length > 0 && swatches.every(([destination, price]) => offerPrice.get(destination) === price),
+      `/${slug} card ${index + 1}: ${swatches.length} finish links, each at its catalogue price`);
+    check(!!shown && /^from /.test(text(shown[1])) && amount(text(shown[1])) === low, `/${slug} card ${index + 1}: from ${gbp(shown && amount(text(shown[1])))}, lowest finish ${gbp(low)}`);
+    check(!!link && swatches.some(([destination]) => destination === link), `/${slug} card ${index + 1}: leads to /${link}, one of its finishes`);
+  });
+  const sizes = tiles(html[slug], 'cat-tpl-scale-link', 'strong');
+  check(sizes.length >= 4, `/${slug}: ${sizes.length} sizes drawn to scale`);
+  for (const [destination, shown] of sizes) {
+    check(offerPrice.has(destination) && shown === offerPrice.get(destination), `/${slug} size to scale /${destination}: ${gbp(shown)}, catalogue ${gbp(offerPrice.get(destination))}`);
   }
 }
 for (const [className, tag] of [['shop-hero-route', 'small'], ['shop-collection', 'strong']]) {

@@ -9,7 +9,9 @@ const BASE = process.env.BASE || 'http://127.0.0.1:4381';
 assert(['127.0.0.1', 'localhost'].includes(new URL(BASE).hostname), 'Use a local build, not the live site');
 const OUT = process.env.OUT || 'output/category-pages-v2';
 fs.mkdirSync(OUT, { recursive: true });
-const slugs = ['memorial-plaques', 'bench-plaques', 'garden-plaques', 'tree-memorial-plaques', 'opening-plaques', 'brass-plaques', 'stainless-steel-plaques', 'portrait-plaques', 'custom-plaques'];
+// Memorial and bench moved to the "products first" template on 1 Nov 2026 (no hero photo or made-to-order band by
+// design): scripts/check-category-template-browser.cjs checks them.
+const slugs = ['garden-plaques', 'tree-memorial-plaques', 'opening-plaques', 'brass-plaques', 'stainless-steel-plaques', 'portrait-plaques', 'custom-plaques'];
 const phone = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1,
   userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' };
 (async () => {
