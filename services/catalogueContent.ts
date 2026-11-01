@@ -75,7 +75,8 @@ function suits(offer: Offer) {
   return 'a made-to-order plaque for your own wording';
 }
 
-const finishOutdoors: Record<string, string> = {
+/** How each finish looks outdoors (also the finishes row on the category template pages). */
+export const finishOutdoors: Record<string, string> = {
   'brushed-stainless': 'Yes. Brushed stainless steel suits outdoor walls, gardens and benches and keeps its silver colour.',
   'polished-stainless': 'Yes. Polished stainless steel keeps its bright silver finish outdoors; an occasional wipe keeps the mirror face clear.',
   'brushed-brass': 'Yes. Brass is used outdoors for memorials and house names. Left outside it slowly mellows and darkens unless it is polished from time to time.',

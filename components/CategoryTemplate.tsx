@@ -4,12 +4,15 @@ import { studioPhotoPath, studioPhotos } from '../services/studioPhotos.mjs';
 import { categoryParentFor, materialStories, photo600, type ProductFamily } from '../services/commerce';
 import { optimisedSrcSet } from '../services/imageUrls';
 import { promoVideoPath } from '../services/promoVideo.mjs';
+import { designWithStakeHref, groundStakeVisibleMm } from '../services/groundStake';
+import { GROUND_STAKE_LENGTH, GROUND_STAKE_THICKNESS_MM, GROUND_STAKE_WIDTH_MM, WOOD_BACKING_EXTRA_MM } from '../services/pricing';
+import { finishOutdoors } from '../services/catalogueContent';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { ProofPdfStack } from './FeatureSections';
 import { samplePdfFor, sampleProofPageFor } from './CatalogueDetails';
 import { DesignLink } from './Shopfront';
-import { PriceTable, formatGbp, priceTableIncludes, type PriceTableSize } from './PriceTable';
+import { PriceTable, formatGbp, onStakePrice, priceTableIncludes, priceTableIncludesOnStake, type PriceTableSize } from './PriceTable';
 import type { Inscription } from './CategoryLanding';
 
 // The "products first" category template (owner msg 8384, 1 Nov 2026: "stick with studio shots… the layouts and
@@ -21,6 +24,8 @@ import type { Inscription } from './CategoryLanding';
 // (components/CategoryTemplatePages.tsx). Every price comes from the catalogue (merchantOffers, priced by
 // estimatePlaquePrice); no amount is typed into the copy. Only studio photos lead a card; a finish without one shows
 // its flat design view, labelled as such, and a finish with neither (only an in-place photo) is left off the card.
+// Stage 2 (garden, tree, brass, stainless, opening, custom) added: metal-only pages (`finishes`), the tree page's
+// oak board and ground stake (`mount: 'stake'`), link chips, card badges, a grid-end tile and page-specific sections.
 
 type Offer = (typeof merchantOffers)[number];
 export type Finish = 'polished-brass' | 'brushed-brass' | 'orbital-brass-matt-lacquer' | 'aged-brass' | 'polished-stainless' | 'brushed-stainless';
@@ -61,14 +66,22 @@ export type TemplateCard = {
   /** The finish (and wood) pictured first. Needs a studio photo. */
   lead: Finish;
   leadTone?: WoodTone;
+  /** A short tag on the photo, e.g. "The usual size". */
+  badge?: string;
 };
-/** A chip narrows the grid: by finish (`finishes`), by size group (`group`) or to wood-backed cards (`board`). */
-export type TemplateChip = { key: string; label: string; finishes?: Finish[]; group?: string; board?: true };
+/** A chip narrows the grid: by finish (`finishes`), by size group (`group`) or to wood-backed cards (`board`). `note`:
+ * one line shown under the chips while it is on (e.g. aged brass's extra days). */
+export type TemplateChip = { key: string; label: string; finishes?: Finish[]; group?: string; board?: true; note?: string };
+/** A chip that opens another page instead (the garden page's "On a ground stake" opens the tree page). */
+export type TemplateLinkChip = { href: string; label: string };
+/** What a page sells: only some finishes (the brass and stainless steel pages), or every plaque on the oak board and
+ * ground stake (the tree page, owner msg 6506: priced with both, opening the designer on that plaque on both). */
+export type CardScope = { finishes?: Finish[]; mount?: 'stake' };
 
 type CardImage = { src: string; srcSet?: string; drawing: boolean };
 /** `label`: "Polished stainless steel on dark walnut" (screen readers, swatch titles); `short`: "Polished steel on walnut",
- * on the photo. */
-type CardOption = { slug: string; finish: Finish; tone?: WoodTone; price: number; days: number; title: string; label: string; short: string; image: CardImage };
+ * on the photo. `href`: the product page, or on the tree page the designer on that plaque on the board and stake. */
+type CardOption = { slug: string; href: string; finish: Finish; tone?: WoodTone; price: number; days: number; title: string; label: string; short: string; image: CardImage };
 export type ResolvedCard = { card: TemplateCard; name: string; options: CardOption[]; lead: CardOption; from: number };
 
 export function sizeName(card: Pick<TemplateCard, 'width' | 'height' | 'shape' | 'name'>) {
@@ -90,26 +103,43 @@ function cardImage(offer: Offer): CardImage | null {
 }
 
 /** A card's options from the catalogue. Throws (failing the build) if the card's lead has no studio photo, or if a
- * finish left off for want of a picture is cheaper than the card's from-price, which would then be wrong. */
-export function resolveCard(card: TemplateCard): ResolvedCard {
+ * finish left off for want of a picture is cheaper than the card's from-price, which would then be wrong.
+ * On the tree page (`mount: 'stake'`) each option is the plate on the light oak board and ground stake: pictured by
+ * the studio photo of the plate on its oak board, priced with the board and stake as the designer prices it
+ * (onStakePrice), and opening the designer on that plaque on both (designWithStakeHref). */
+export function resolveCard(card: TemplateCard, scope: CardScope = {}): ResolvedCard {
   const name = sizeName(card);
-  const offers = merchantOffers.filter(offer => offer.preset.width === card.width && offer.preset.height === card.height
-    && offer.preset.shape === (card.shape || 'rect') && Boolean(offer.preset.wood) === Boolean(card.board));
+  const stake = scope.mount === 'stake';
+  const sized = merchantOffers.filter(offer => offer.preset.width === card.width && offer.preset.height === card.height
+    && offer.preset.shape === (card.shape || 'rect'));
+  const offers = sized.filter(offer => (stake ? Boolean(offer.preset.wood) && offer.preset.woodTone === 'light' : Boolean(offer.preset.wood) === Boolean(card.board)));
+  const bare = (offer: Offer) => {
+    const plate = sized.find(item => !item.preset.wood && item.preset.material === offer.preset.material);
+    if (!plate) throw new Error(`Category template: no plate without backing for ${offer.slug}`);
+    return plate;
+  };
+  const priceOf = (offer: Offer) => (stake ? onStakePrice(bare(offer)) : offer.price);
   const options: CardOption[] = [];
   const unpictured: Offer[] = [];
-  for (const finish of templateFinishes) {
-    for (const wood of card.board ? woods : [undefined]) {
+  for (const finish of templateFinishes.filter(item => !scope.finishes || scope.finishes.includes(item.key))) {
+    for (const wood of card.board && !stake ? woods : [undefined]) {
       const offer = offers.find(item => item.preset.material === finish.key && (!wood || item.preset.woodTone === wood.tone));
       if (!offer) continue;
       const image = cardImage(offer);
       if (!image) { unpictured.push(offer); continue; }
-      options.push({ slug: offer.slug, finish: finish.key, tone: wood?.tone, price: offer.price, days: offer.productionDays, title: offer.title,
+      if (stake) {
+        const plate = bare(offer);
+        options.push({ slug: plate.slug, href: designWithStakeHref(plate.slug), finish: finish.key, tone: 'light', price: priceOf(offer), days: offer.productionDays,
+          title: `${plate.title}, on an oak board and ground stake`, label: `${finish.label} on an oak board`, short: `${finish.short} on oak`, image });
+        continue;
+      }
+      options.push({ slug: offer.slug, href: `/${offer.slug}`, finish: finish.key, tone: wood?.tone, price: offer.price, days: offer.productionDays, title: offer.title,
         label: wood ? `${finish.label} on ${wood.label}` : finish.label, short: wood ? `${finish.short} on ${wood.short}` : finish.short, image });
     }
   }
   if (!options.length) throw new Error(`Category template: no catalogue plaque for ${name}`);
   const from = Math.min(...options.map(option => option.price));
-  const hidden = unpictured.find(offer => offer.price < from);
+  const hidden = unpictured.find(offer => priceOf(offer) < from);
   if (hidden) throw new Error(`Category template: ${hidden.slug} has no picture and is cheaper than the ${name} card's from-price`);
   const lead = options.find(option => option.finish === card.lead && (!card.board || option.tone === (card.leadTone || 'light')));
   if (!lead || lead.image.drawing) throw new Error(`Category template: the ${name} card's lead finish needs a studio photo`);
@@ -123,6 +153,12 @@ export function leadTimeNote(cards: ResolvedCard[]) {
   const aged = options.filter(option => option.finish === 'aged-brass' && !option.tone).map(option => option.days);
   const wood = options.filter(option => option.tone).map(option => option.days);
   const range = (days: number[]) => (Math.min(...days) === Math.max(...days) ? `${days[0]}` : `${Math.min(...days)}–${Math.max(...days)}`);
+  if (wood.length === options.length) {
+    // Every plaque on the page is on a board (the tree page): name the larger boards that take longer.
+    const longer = cards.filter(item => item.options.some(option => option.days > usual));
+    const note = longer.length ? ` (${longer.map(item => item.name).join(', ')}: ${range(longer.flatMap(item => item.options.map(option => option.days)))})` : '';
+    return `made in the UK in ${usual} working days after you approve${note}`;
+  }
   const extra = [aged.length && Math.max(...aged) > usual ? `aged brass ${range(aged)}` : '', wood.length ? `wood-backed ${range(wood)}` : ''].filter(Boolean);
   return `made in the UK in ${usual} working days after you approve${extra.length ? ` (${extra.join(', ')})` : ''}`;
 }
@@ -140,7 +176,7 @@ function defaultOption(item: ResolvedCard, allowed: CardOption[]) {
   return allowed.find(option => !option.image.drawing && option.tone === tone) || allowed.find(option => !option.image.drawing) || allowed[0];
 }
 
-function GridCard({ item, finishes, mounted, priority, wide }: { item: ResolvedCard; finishes?: Finish[]; mounted: boolean; priority: number; wide: boolean }) {
+function GridCard({ item, finishes, mounted, priority, wide, stake }: { item: ResolvedCard; finishes?: Finish[]; mounted: boolean; priority: number; wide: boolean; stake: boolean }) {
   const allowed = finishes ? item.options.filter(option => finishes.includes(option.finish)) : item.options;
   const [picked, setPicked] = useState<{ finish: Finish; tone?: WoodTone } | null>(null);
   const filterKey = finishes ? finishes.join(',') : '';
@@ -155,19 +191,22 @@ function GridCard({ item, finishes, mounted, priority, wide }: { item: ResolvedC
   const swatch = (key: string, file: string, label: string, option: CardOption, selected: boolean, onPick: () => void) => (mounted
     ? <button type="button" key={key} className={`cat-tpl-swatch${selected ? ' is-selected' : ''}`} style={swatchStyle(file)}
       aria-pressed={selected} aria-label={`${label}, ${formatGbp(option.price)}`} title={label} onClick={onPick} />
-    : <a key={key} className={`cat-tpl-swatch${selected ? ' is-selected' : ''}`} style={swatchStyle(file)} href={`/${option.slug}`}
+    : <a key={key} className={`cat-tpl-swatch${selected ? ' is-selected' : ''}`} style={swatchStyle(file)} href={option.href}
       data-price={option.price} aria-label={`${label}, ${formatGbp(option.price)}`} title={label} />);
+  const alt = stake ? `${current.title}: shown on its oak board, the ground stake not pictured, with example wording`
+    : `${current.title}, shown with example wording${current.image.drawing ? ' (flat design view)' : ''}`;
   return (
     <li className={`cat-tpl-card${item.card.board ? ' is-board' : ''}`} data-options={item.options.length}>
       <div className={`cat-tpl-photo${current.image.drawing ? ' is-drawing' : ''}${wide ? ' is-wide' : ''}`}>
         <img src={current.image.src} srcSet={current.image.srcSet} sizes={current.image.srcSet ? '(max-width: 720px) 46vw, 290px' : undefined}
-          alt={`${current.title}, shown with example wording${current.image.drawing ? ' (flat design view)' : ''}`} width="600" height="600"
+          alt={alt} width="600" height="600"
           loading={priority < 4 ? 'eager' : 'lazy'} fetchPriority={priority === 0 ? 'high' : undefined} decoding="async" />
+        {item.card.badge && <span className="cat-tpl-badge">{item.card.badge}</span>}
         {/* What the photo shows, so a from-price beside it is never read as that finish's price. */}
         <span className="cat-tpl-finish">{current.short}{current.image.drawing ? ' · design view' : ''}</span>
       </div>
       <h3 className="cat-tpl-card-title">
-        <a className="cat-tpl-card-link" href={`/${current.slug}`}>{item.name}<span className="cat-tpl-sr">, {current.label.toLowerCase()}</span></a>
+        <a className="cat-tpl-card-link" href={current.href}>{item.name}<span className="cat-tpl-sr">, {current.label.toLowerCase()}</span></a>
       </h3>
       <p className="cat-tpl-fits">{item.card.fits}</p>
       <div className="cat-tpl-swatches" role="group" aria-label={`Finish for ${item.name}`}>
@@ -191,7 +230,9 @@ function GridCard({ item, finishes, mounted, priority, wide }: { item: ResolvedC
   );
 }
 
-function ProductGrid({ id, cards, chips, wide, mounted }: { id: string; cards: ResolvedCard[]; chips: TemplateChip[]; wide: boolean; mounted: boolean }) {
+function ProductGrid({ id, cards, chips, links, end, wide, stake, mounted }: {
+  id: string; cards: ResolvedCard[]; chips: TemplateChip[]; links?: TemplateLinkChip[]; end?: React.ReactNode; wide: boolean; stake: boolean; mounted: boolean;
+}) {
   const [finishKey, setFinishKey] = useState<string | null>(null);
   const [cardKey, setCardKey] = useState<string | null>(null);
   // Ad and email links can open the page narrowed: ?finish=brass, ?size=large or ?board=yes (chip keys).
@@ -215,6 +256,7 @@ function ProductGrid({ id, cards, chips, wide, mounted }: { id: string; cards: R
     else setCardKey(key => (key === chip.key ? null : chip.key));
   };
   const active = (chip: TemplateChip) => (chip.key === 'all' ? !finishKey && !cardKey : chip.key === finishKey || chip.key === cardKey);
+  const note = finishChip?.note || cardChip?.note;
   return (
     <section className="cat-tpl-grid-section" id={id} aria-label="Plaques to choose from">
       <div className={`cat-tpl-toolbar${mounted ? '' : ' is-static'}`}>
@@ -224,14 +266,20 @@ function ProductGrid({ id, cards, chips, wide, mounted }: { id: string; cards: R
             <button type="button" key={chip.key} className="cat-tpl-chip" aria-pressed={active(chip)} tabIndex={mounted ? undefined : -1} onClick={() => pick(chip)}>{chip.label}</button>
           ))}
         </div>
+        {/* Plain links, so they work before the script runs. */}
+        {links && links.length > 0 && <div className="cat-tpl-chip-links">
+          {links.map(link => <a key={link.href} className="cat-tpl-chip is-link" href={link.href}>{link.label} <span aria-hidden="true">↗</span></a>)}
+        </div>}
       </div>
+      {note && <p className="cat-tpl-chip-note" aria-live="polite">{note}</p>}
       {/* Computers: full rows (6 cards in 3 columns, 10 in 5, otherwise 4). */}
       <ul className="cat-tpl-grid" style={{ '--cat-tpl-cols': cards.length % 4 === 0 ? 4 : cards.length % 5 === 0 ? 5 : cards.length % 3 === 0 ? 3 : 4 } as React.CSSProperties}>
         {cards.map((item, index) => (
           <React.Fragment key={item.name + (item.card.board ? ' board' : '')}>
-            {shown[index] && <GridCard item={item} finishes={finishChip?.finishes} mounted={mounted} priority={index} wide={wide} />}
+            {shown[index] && <GridCard item={item} finishes={finishChip?.finishes} mounted={mounted} priority={index} wide={wide} stake={stake} />}
           </React.Fragment>
         ))}
+        {end && <li className="cat-tpl-ask">{end}</li>}
       </ul>
     </section>
   );
@@ -260,36 +308,59 @@ const REFERENCES = {
   brick: { widthMm: 215, heightMm: 65, label: 'A house brick, 215 × 65 mm, to the same scale' },
   card: { widthMm: 86, heightMm: 54, label: 'A bank card, 86 × 54 mm, to the same scale' },
 };
-const cheapestOf = (size: PriceTableSize) => merchantOffers
-  .filter(offer => !offer.preset.wood && offer.preset.width === size.widthMm && offer.preset.height === size.heightMm && offer.preset.shape === (size.shape || 'rect'))
-  .sort((a, b) => a.price - b.price)[0];
+/** The cheapest plaque of a size without backing, in the page's finishes; brushed first among equal prices. */
+const cheapestOf = (size: PriceTableSize, finishes?: Finish[]) => merchantOffers
+  .filter(offer => !offer.preset.wood && offer.preset.width === size.widthMm && offer.preset.height === size.heightMm && offer.preset.shape === (size.shape || 'rect')
+    && (!finishes || finishes.includes(offer.preset.material as Finish)))
+  .sort((a, b) => a.price - b.price || Number(b.preset.material.startsWith('brushed')) - Number(a.preset.material.startsWith('brushed')))[0];
+
+const toScale = (mm: number) => `calc(${mm}px * var(--cat-tpl-mm))`;
+const plateStyle = (widthMm: number, heightMm: number): React.CSSProperties => ({ width: toScale(widthMm), height: toScale(heightMm) });
+
+/** A plate on its oak board with the ground stake below, to the strip's scale: the board is WOOD_BACKING_EXTRA_MM
+ * larger each way, and the stake shows as much as the designer's preview and the price table draw. */
+function StakeMount({ size }: { size: TemplateSize }) {
+  const board = { w: size.widthMm + WOOD_BACKING_EXTRA_MM, h: size.heightMm + WOOD_BACKING_EXTRA_MM };
+  const shape = size.shape ? ` is-${size.shape}` : '';
+  return (
+    <span className="cat-tpl-mount" aria-hidden="true">
+      <span className={`cat-tpl-board${shape}`} style={plateStyle(board.w, board.h)}>
+        <span className={`cat-tpl-plate${shape}`} style={plateStyle(size.widthMm, size.heightMm)} />
+      </span>
+      <span className="cat-tpl-stake" style={plateStyle(GROUND_STAKE_WIDTH_MM, groundStakeVisibleMm(board.h))} />
+    </span>
+  );
+}
 
 /** Every size drawn to one scale beside an everyday object, each linking to its cheapest plaque at that price; the
- * size × metal price table folded below it. */
-function SizeStrip({ id, title, intro, scale, reference, sizes, tableSizes, note, more }: {
-  id: string; title: string; intro: string; scale: 'wall' | 'bench'; reference: keyof typeof REFERENCES;
-  sizes: TemplateSize[]; tableSizes: TemplateSize[]; note?: React.ReactNode; more?: React.ReactNode;
+ * size × metal price table folded below it. On the tree page (`mount: 'stake'`) each plate stands on its oak board and
+ * ground stake, priced with both and opening the designer on it, as the price table does. */
+function SizeStrip({ id, title, intro, scale, reference, sizes, tableSizes, note, more, mount, finishes }: {
+  id: string; title: string; intro: string; scale: 'wall' | 'bench' | 'stake'; reference?: keyof typeof REFERENCES;
+  sizes: TemplateSize[]; tableSizes: TemplateSize[]; note?: React.ReactNode; more?: React.ReactNode; mount?: 'stake'; finishes?: Finish[];
 }) {
-  const ref = REFERENCES[reference];
-  const plate = (widthMm: number, heightMm: number) => ({ width: `calc(${widthMm}px * var(--cat-tpl-mm))`, height: `calc(${heightMm}px * var(--cat-tpl-mm))` });
+  const ref = reference && REFERENCES[reference];
+  const onStake = mount === 'stake';
   return (
     <section className="shop-section cat-tpl-sizes" id={id} aria-labelledby={`${id}-heading`}>
       <h2 id={`${id}-heading`}>{title}</h2>
       <p className="cat-tpl-section-intro">{intro}</p>
-      <p className={`cat-tpl-scale-ref is-${scale}`}>
-        <span className={`cat-tpl-plate is-${reference}`} style={plate(ref.widthMm, ref.heightMm)} aria-hidden="true" /> {ref.label}.
-      </p>
+      {ref && <p className={`cat-tpl-scale-ref is-${scale}`}>
+        <span className={`cat-tpl-plate is-${reference}`} style={plateStyle(ref.widthMm, ref.heightMm)} aria-hidden="true" /> {ref.label}.
+      </p>}
       <ul className={`cat-tpl-scale is-${scale}`}>
         {sizes.map(size => {
-          const offer = cheapestOf(size);
+          const offer = cheapestOf(size, finishes);
           if (!offer) throw new Error(`Category template: no plaque ${size.widthMm} × ${size.heightMm}`);
+          const price = onStake ? onStakePrice(offer) : offer.price;
           return (
             <li key={size.label}>
-              <a className="cat-tpl-scale-link" href={`/${offer.slug}`}>
-                <span className={`cat-tpl-plate${size.shape ? ` is-${size.shape}` : ''}`} style={plate(size.widthMm, size.heightMm)} aria-hidden="true" />
+              <a className="cat-tpl-scale-link" href={onStake ? designWithStakeHref(offer.slug) : `/${offer.slug}`}>
+                {onStake ? <StakeMount size={size} />
+                  : <span className={`cat-tpl-plate${size.shape ? ` is-${size.shape}` : ''}`} style={plateStyle(size.widthMm, size.heightMm)} aria-hidden="true" />}
                 <b>{size.label}</b>
                 <small>{size.fits}</small>
-                <strong>from <TrackedPrice value={offer.price} product={offer.slug}>{formatGbp(offer.price)}</TrackedPrice></strong>
+                <strong>from <TrackedPrice value={price} product={offer.slug}>{formatGbp(price)}</TrackedPrice></strong>
               </a>
             </li>
           );
@@ -298,8 +369,8 @@ function SizeStrip({ id, title, intro, scale, reference, sizes, tableSizes, note
       <details className="cat-tpl-fold">
         <summary>Compare all sizes and prices<span aria-hidden="true">+</span></summary>
         <div>
-          <PriceTable sizes={tableSizes} caption={`${title} Prices by size and metal.`} />
-          <p className="shop-smallprint">{priceTableIncludes}{note && <> {note}</>}</p>
+          <PriceTable sizes={tableSizes} mount={mount} caption={`${title} Prices by size and metal${onStake ? ', on an oak board and ground stake' : ''}.`} />
+          <p className="shop-smallprint">{onStake ? priceTableIncludesOnStake : priceTableIncludes}{note && <> {note}</>}</p>
           {more}
         </div>
       </details>
@@ -313,9 +384,9 @@ const defaultSteps: [string, string][] = [
   ['Approve, then we make it', 'Ask for changes until it’s right.'],
 ];
 
-function ProofBlock({ id, sampleSlug, sampleNote, steps, subject, designHref, onLaunch, onRequestDesign }: {
+function ProofBlock({ id, sampleSlug, sampleNote, steps, subject, designHref, extra, onLaunch, onRequestDesign }: {
   id: string; sampleSlug: string; sampleNote?: string; steps: [string, string][]; subject: string; designHref?: string;
-  onLaunch?: () => void; onRequestDesign?: () => void;
+  extra?: React.ReactNode; onLaunch?: () => void; onRequestDesign?: () => void;
 }) {
   const sample = merchantOffers.find(offer => offer.slug === sampleSlug);
   if (!sample) throw new Error(`Category template: no sample plaque ${sampleSlug}`);
@@ -341,28 +412,36 @@ function ProofBlock({ id, sampleSlug, sampleNote, steps, subject, designHref, on
         Prefer us to lay it out? <a href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Send us your words</a>
         {' · '}<a href={promoVideoPath}>Watch the designer in action</a>
       </p>
+      {extra}
     </section>
   );
 }
 
-function FinishesRow({ id, wood }: { id: string; wood: boolean }) {
+/** The finishes as close-ups with the materials page's own words. `outdoors`: each metal's outdoor line from its
+ * product pages (services/catalogueContent.ts) and the site's line on wood backing. */
+function FinishesRow({ id, finishes, woodTones, title, intro, outdoors }: {
+  id: string; finishes: Finish[]; woodTones: WoodTone[]; title?: string; intro?: React.ReactNode; outdoors?: boolean;
+}) {
   // The materials page's own words for each finish: its short tone, and the longer line on computers.
   const story = (title: string) => materialStories.find(item => item.title === title) || { tone: '', copy: '' };
   const tiles = [
-    ...templateFinishes.map(finish => ({ key: finish.key, file: finish.file, label: finish.label, ...story(finish.story) })),
-    ...(wood ? woods.map(entry => ({ key: entry.tone, file: entry.file, label: `${entry.label[0].toUpperCase()}${entry.label.slice(1)} board`, ...story(entry.story) })) : []),
+    ...templateFinishes.filter(finish => finishes.includes(finish.key)).map(finish => ({ key: finish.key, file: finish.file, label: finish.label, ...story(finish.story),
+      outside: outdoors ? (finishOutdoors[finish.key] || '').replace(/^Yes\. /, '') : '' })),
+    ...woods.filter(entry => woodTones.includes(entry.tone)).map(entry => ({ key: entry.tone, file: entry.file, label: `${entry.label[0].toUpperCase()}${entry.label.slice(1)} board`, ...story(entry.story),
+      outside: outdoors ? 'Wood backing suits indoors or a sheltered spot; the metal on its own is made for outdoors.' : '' })),
   ];
   return (
     <section className="shop-section cat-tpl-finishes" id={id} aria-labelledby={`${id}-heading`}>
-      <h2 id={`${id}-heading`}>The finishes, side by side.</h2>
-      <p className="cat-tpl-section-intro">Solid brass or stainless steel, laser cut to size, etched and infilled by hand. <a href="/materials">Compare the finishes ↗</a></p>
-      <ul className="cat-tpl-finish-row">
+      <h2 id={`${id}-heading`}>{title || 'The finishes, side by side.'}</h2>
+      <p className="cat-tpl-section-intro">{intro || 'Solid brass or stainless steel, laser cut to size, etched and infilled by hand.'} <a href="/materials">Compare the finishes ↗</a></p>
+      <ul className={`cat-tpl-finish-row${outdoors ? ' has-outdoors' : ''}`}>
         {tiles.map(tile => (
           <li key={tile.key}>
             <img src={`/site-images/finish/${tile.file}-480.webp`} alt={`${tile.label}, close up`} width="480" height="270" loading="lazy" decoding="async" />
             <strong>{tile.label}</strong>
             <span className="cat-tpl-finish-tone">{tile.tone}</span>
             <span className="cat-tpl-finish-copy">{tile.copy}</span>
+            {tile.outside && <span className="cat-tpl-finish-outdoors"><b>Outdoors:</b> {tile.outside}</span>}
           </li>
         ))}
       </ul>
@@ -388,6 +467,120 @@ function WordingBlock({ id, title, intro, inscriptions, link }: { id: string; ti
   );
 }
 
+/** The tree page's kit, drawn and labelled (memorial research c, /tree-memorial-plaques item 3): an A5 plate on its
+ * oak board on the black steel ground stake, to scale, with the sizes from services/checkoutPolicy.mjs. The stake's top
+ * is fixed to the back of the board; below the ground it is drawn cut short (the list gives its full length). */
+export function StakeKit({ id }: { id: string }) {
+  const plate = { w: 210, h: 148 };
+  const board = { w: plate.w + WOOD_BACKING_EXTRA_MM, h: plate.h + WOOD_BACKING_EXTRA_MM };
+  const inset = WOOD_BACKING_EXTRA_MM / 2;
+  const side = 44;
+  const ground = board.h + groundStakeVisibleMm(board.h);
+  const buried = 110;
+  const stakeX = side + board.w / 2 - GROUND_STAKE_WIDTH_MM / 2;
+  const marker = (n: number, x: number, y: number, toX: number, toY: number) => (
+    <g key={n}>
+      <line x1={x} y1={y} x2={toX} y2={toY} stroke="#203b32" strokeWidth="1.6" />
+      <circle cx={x} cy={y} r="13" fill="#203b32" />
+      <text x={x} y={y + 5} textAnchor="middle" fontSize="15" fontWeight="700" fill="#fff" fontFamily="Arial, Helvetica, sans-serif">{n}</text>
+    </g>
+  );
+  return (
+    <section className="shop-section cat-tpl-kit" id={id} aria-labelledby={`${id}-heading`}>
+      <h2 id={`${id}-heading`}>What you get.</h2>
+      <div className="cat-tpl-kit-body">
+        <svg className="cat-tpl-kit-drawing" viewBox={`0 0 ${board.w + side * 2} ${ground + buried + 8}`} role="img"
+          aria-label="Drawing to scale: an A5 plate on its oak board, on a black steel ground stake pushed into the ground">
+          <rect x={stakeX} y={board.h / 2} width={GROUND_STAKE_WIDTH_MM} height={ground - board.h / 2} fill="#25292b" />
+          <rect x={stakeX} y={ground} width={GROUND_STAKE_WIDTH_MM} height={buried - 14} fill="#25292b" opacity="0.3" />
+          <path d={`M${stakeX} ${ground + buried - 14} l7.5 8 l7.5 -8 l7.5 8 l7.5 -8`} fill="none" stroke="#25292b" strokeWidth="1.6" opacity="0.5" />
+          <rect x={side} y="0" width={board.w} height={board.h} rx="3" fill="#c89b62" stroke="#8d6534" strokeWidth="1.5" />
+          <rect x={side + inset} y={inset} width={plate.w} height={plate.h} rx="1.5" fill="#dcc583" stroke="#a88a3f" strokeWidth="1.5" />
+          {[34, 62, 80, 102].map((y, index) => <rect key={y} x={side + inset + (index === 1 ? 45 : 62)} y={inset + y} width={index === 1 ? 120 : 86} height={index === 1 ? 10 : 6} rx="2" fill="#5a4a2a" opacity="0.55" />)}
+          <line x1="0" y1={ground} x2={board.w + side * 2} y2={ground} stroke="#6b5a3e" strokeWidth="2" />
+          {marker(1, side + inset + 28, inset + 26, side + inset + 50, inset + 50)}
+          {marker(2, side - 22, board.h - 30, side + 4, board.h - 30)}
+          {marker(3, side + board.w + 22, board.h + 40, stakeX + GROUND_STAKE_WIDTH_MM, board.h + 40)}
+        </svg>
+        <ol className="cat-tpl-kit-list">
+          <li><strong>Your plate</strong> in brass or stainless steel, 1.5 mm solid metal, engraved with your words.</li>
+          <li><strong>A solid oak board</strong>, {WOOD_BACKING_EXTRA_MM} mm bigger than the plate each way: {board.w} × {board.h} mm for an A5 plate.</li>
+          <li><strong>A black steel ground stake</strong>, {GROUND_STAKE_LENGTH} long, {GROUND_STAKE_WIDTH_MM} mm wide and {GROUND_STAKE_THICKNESS_MM} mm thick, fixed to the back of the board.</li>
+        </ol>
+      </div>
+      <p className="cat-tpl-small">Push the stake into the soil beside the tree, never into the tree itself. In hard or stony ground, make a pilot hole first.</p>
+    </section>
+  );
+}
+
+// England and Wales bank holidays (GOV.UK), skipped when counting working days back from an opening date.
+const BANK_HOLIDAYS = new Set(['2026-01-01', '2026-04-03', '2026-04-06', '2026-05-04', '2026-05-25', '2026-08-31', '2026-12-25', '2026-12-28',
+  '2027-01-01', '2027-03-26', '2027-03-29', '2027-05-03', '2027-05-31', '2027-08-30', '2027-12-27', '2027-12-28']);
+/** Delivery after dispatch, as checkout and Merchant Center state it (services/merchantPolicies.mjs), and a day to spare. */
+const DELIVERY_WORKING_DAYS = 1;
+const SPARE_WORKING_DAYS = 1;
+const isoDay = (date: Date) => date.toISOString().slice(0, 10);
+const isWorkingDay = (date: Date) => date.getUTCDay() % 6 !== 0 && !BANK_HOLIDAYS.has(isoDay(date));
+/** The working day `count` working days before `date` (dates at UTC midnight). */
+export function workingDaysBefore(date: Date, count: number) {
+  const day = new Date(date.getTime());
+  for (let left = count; left > 0;) {
+    day.setUTCDate(day.getUTCDate() - 1);
+    if (isWorkingDay(day)) left -= 1;
+  }
+  return day;
+}
+
+/** The production times on a page, by kind of plaque, from the catalogue's days for its cards. */
+export function timingKinds(cards: ResolvedCard[]) {
+  const options = cards.flatMap(item => item.options.map(option => ({ ...option, size: item.card.name || item.name })));
+  const metal = options.filter(option => !option.tone && option.finish !== 'aged-brass');
+  const aged = options.filter(option => !option.tone && option.finish === 'aged-brass');
+  const boards = options.filter(option => option.tone);
+  const list = (items: string[]) => (items.length > 1 ? `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}` : items[0]);
+  // `label` heads a row of the planner; `inline` sits in a sentence.
+  const kinds: { label: string; inline: string; days: number }[] = [];
+  if (metal.length) kinds.push({ label: 'Stainless steel or brass', inline: 'stainless steel or brass', days: Math.max(...metal.map(option => option.days)) });
+  if (aged.length) kinds.push({ label: 'Aged brass', inline: 'aged brass', days: Math.max(...aged.map(option => option.days)) });
+  for (const days of [...new Set(boards.map(option => option.days))].sort((a, b) => a - b)) {
+    const sizes = [...new Set(boards.filter(option => option.days === days).map(option => option.size))];
+    kinds.push({ label: `On a wood board: ${sizes.join(', ')}`, inline: `${list(sizes)} on a wood board`, days });
+  }
+  return kinds;
+}
+
+/** "When is your opening?" (occasion research c, /opening-plaques item 2): for a date, the last day to approve the proof
+ * and pay for each kind of plaque on the page, counted back in working days: the catalogue's production days, one
+ * working day of delivery and one to spare. Without the script, the production times as one line. */
+export function OccasionPlanner({ id, cards, subject, occasion = 'opening' }: { id: string; cards: ResolvedCard[]; subject: string; occasion?: string }) {
+  const mounted = useMounted();
+  const [date, setDate] = useState('');
+  const kinds = timingKinds(cards);
+  const [first, ...rest] = kinds;
+  const today = mounted ? new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date()) : '';
+  const target = /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T00:00:00Z`) : null;
+  const show = (day: Date) => day.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
+    ...(day.getUTCFullYear() !== Number(today.slice(0, 4)) ? { year: 'numeric' } : {}) });
+  return (
+    <section className="shop-section cat-tpl-planner" id={id} aria-labelledby={`${id}-heading`}>
+      <h2 id={`${id}-heading`}>When is your {occasion}?</h2>
+      <p className="cat-tpl-section-intro">{first.label} plaques are made in {first.days} working days after you approve your proof and pay{rest.length
+        ? ` (${rest.map(kind => `${kind.inline} ${kind.days}`).join(', ')})` : ''}, then delivered the next working day.</p>
+      {mounted && <label className="cat-tpl-planner-field"><span>Date of the {occasion}</span>
+        <input type="date" value={date} min={today} onChange={event => setDate(event.target.value)} /></label>}
+      {target && <ul className="cat-tpl-planner-list" aria-live="polite">
+        {kinds.map(kind => {
+          const by = workingDaysBefore(target, kind.days + DELIVERY_WORKING_DAYS + SPARE_WORKING_DAYS);
+          const left = isoDay(by) < today ? 'gone' : isoDay(by) === today ? 'today' : 'ok';
+          return <li key={kind.label} className={left === 'gone' ? 'is-late' : undefined}><span>{kind.label}</span>{left === 'gone'
+            ? <strong>Too close to promise: ask us first</strong> : <strong>Approve and pay by {left === 'today' ? 'today' : show(by)}</strong>}</li>;
+        })}
+      </ul>}
+      <p className="cat-tpl-small">Counted back from your date: the working days to make it, one working day’s delivery and a day to spare, missing out weekends and bank holidays. Delivery dates are estimates, not guarantees. A fixed date? <ContactLink channel="whatsapp" placement="page" subject={subject}>Tell us on WhatsApp</ContactLink> before you order.</p>
+    </section>
+  );
+}
+
 export type TemplateConfig = {
   /** Anchors: `${prefix}-grid`, -questions, -sizes, -proof, -finishes, -wording, -materials (other pages link to
    * /memorial-plaques#memorial-wording). */
@@ -399,12 +592,33 @@ export type TemplateConfig = {
   /** 'wide': 4:3 photos, for pages of thin bench strips. */
   photos?: 'square' | 'wide';
   chips: TemplateChip[];
+  /** Chips that open another page (the garden page's ground stake and bench). */
+  links?: TemplateLinkChip[];
+  /** Only these finishes, on the cards and in the finishes row (the brass and stainless steel pages). */
+  finishes?: Finish[];
+  /** 'stake': every plaque on the oak board and ground stake (the tree page). */
+  mount?: 'stake';
+  /** The facts line's from-price where the page's own is not a catalogue price (the custom page). */
+  from?: { value: number; slug: string };
+  /** What the prices include, in the facts line. */
+  included?: string;
+  /** A last, full-width tile in the grid (the custom page's free quote). */
+  gridEnd?: React.ReactNode;
   faqTitle: string;
-  sizes: { title: string; intro: string; scale: 'wall' | 'bench'; reference: keyof typeof REFERENCES; sizes: TemplateSize[]; tableSizes: TemplateSize[]; note?: React.ReactNode; more?: React.ReactNode };
+  /** A section of the page's own straight after the questions (the tree kit, the opening date planner). */
+  afterQuestions?: (cards: ResolvedCard[], subject: string) => React.ReactNode;
+  /** The finishes row straight after the questions (the material pages), with its own title, intro and outdoor lines. */
+  finishesFirst?: boolean;
+  finishesTitle?: string;
+  finishesIntro?: React.ReactNode;
+  outdoors?: boolean;
+  sizes: { title: string; intro: string; scale: 'wall' | 'bench' | 'stake'; reference?: keyof typeof REFERENCES; sizes: TemplateSize[]; tableSizes: TemplateSize[]; note?: React.ReactNode; more?: React.ReactNode };
   sampleSlug: string;
   sampleNote?: string;
   steps?: [string, string][];
-  wording: { title: string; intro?: string; inscriptions: Inscription[]; link: { href: string; label: string } };
+  /** Below the proof steps (the opening page's notes for schools, councils and companies). */
+  proofExtra?: React.ReactNode;
+  wording?: { title: string; intro?: string; inscriptions: Inscription[]; link: { href: string; label: string } };
   moreTitle: string;
   related?: React.ReactNode;
   closing: { title: string; copy: React.ReactNode };
@@ -422,8 +636,13 @@ export function CategoryTemplatePage({ config, product, faqs, onLaunch, onReques
   const subject = plaqueSubject(product.shortTitle);
   const parent = categoryParentFor(product.slug);
   const id = (name: string) => `${config.prefix}-${name}`;
-  const cards = config.cards.map(resolveCard);
-  const fromLabel = product.startingFrom.replace(/^from/, 'From');
+  const stake = config.mount === 'stake';
+  const cards = config.cards.map(card => resolveCard(card, { finishes: config.finishes, mount: config.mount }));
+  const fromValue = config.from ? config.from.value : displayedPriceValue(product.startingFrom);
+  const fromLabel = config.from ? `From ${formatGbp(config.from.value)}` : product.startingFrom.replace(/^from/, 'From');
+  const finishes = <FinishesRow id={id('finishes')} finishes={config.finishes || templateFinishes.map(finish => finish.key)}
+    woodTones={stake ? ['light'] : config.cards.some(card => card.board) ? ['light', 'dark'] : []}
+    title={config.finishesTitle} intro={config.finishesIntro} outdoors={config.outdoors} />;
   return (
     <div className="shopfront cat-page cat-tpl" data-prerendered="true">
       <header className="cat-tpl-head">
@@ -435,16 +654,18 @@ export function CategoryTemplatePage({ config, product, faqs, onLaunch, onReques
         </div>
         <h1>{config.title}</h1>
         <p className="cat-tpl-intro">{config.intro}</p>
-        <p className="cat-hero-buy"><strong className="shop-product-price"><TrackedPrice value={displayedPriceValue(product.startingFrom)} product={product.slug}>{fromLabel}</TrackedPrice></strong>
-          <span> · engraving, fixings and UK delivery included · free PDF proof before you pay · {leadTimeNote(cards)}</span></p>
+        <p className="cat-hero-buy"><strong className="shop-product-price"><TrackedPrice value={fromValue} product={product.slug}>{fromLabel}</TrackedPrice></strong>
+          <span> · {config.included || 'engraving, fixings and UK delivery included'} · free PDF proof before you pay · {leadTimeNote(cards)}</span></p>
       </header>
-      <ProductGrid id={id('grid')} cards={cards} chips={config.chips} wide={config.photos === 'wide'} mounted={mounted} />
+      <ProductGrid id={id('grid')} cards={cards} chips={config.chips} links={config.links} end={config.gridEnd} wide={config.photos === 'wide'} stake={stake} mounted={mounted} />
       <FaqAccordion id={id('questions')} title={config.faqTitle} faqs={faqs} subject={subject} />
-      <SizeStrip id={id('sizes')} {...config.sizes} />
+      {config.afterQuestions?.(cards, subject)}
+      {config.finishesFirst && finishes}
+      <SizeStrip id={id('sizes')} {...config.sizes} mount={config.mount} finishes={config.finishes} />
       <ProofBlock id={id('proof')} sampleSlug={config.sampleSlug} sampleNote={config.sampleNote} steps={config.steps || defaultSteps} subject={subject}
-        designHref={config.designHref} onLaunch={onLaunch} onRequestDesign={onRequestDesign} />
-      <FinishesRow id={id('finishes')} wood={config.cards.some(card => card.board)} />
-      <WordingBlock id={id('wording')} {...config.wording} />
+        designHref={config.designHref} extra={config.proofExtra} onLaunch={onLaunch} onRequestDesign={onRequestDesign} />
+      {!config.finishesFirst && finishes}
+      {config.wording && <WordingBlock id={id('wording')} {...config.wording} />}
       <section className="shop-section cat-tpl-more" id={id('materials')}>
         <details className="cat-tpl-fold">
           <summary>{config.moreTitle}<span aria-hidden="true">+</span></summary>
