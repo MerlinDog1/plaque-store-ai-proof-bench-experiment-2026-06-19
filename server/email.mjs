@@ -181,7 +181,7 @@ const woodDetails = (order) => {
   const height = Number(state.height || 0);
   const boardWidth = width ? width + 25 : 0;
   const boardHeight = height ? height + 25 : 0;
-  const tone = state.woodTone === "light" ? "Light wood" : "Dark wood";
+  const tone = state.woodTone === "light" ? "Light solid wood" : "Dark solid wood";
   const edge = state.woodEdge ? `${labelFromSlug(state.woodEdge)} edge` : "";
   const size = boardWidth && boardHeight ? `${boardWidth} x ${boardHeight} mm board` : "";
   const stake = state.groundStake === true ? "with black steel ground stake (2 mm L-shaped, 30 mm wide, 23.5 in long)" : "";

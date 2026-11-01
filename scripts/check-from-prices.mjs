@@ -1,3 +1,4 @@
+// 1 Nov 2026: owner requests light/dark solid wood, never a species; assertions follow the customer wording.
 // Every "from" price is the cheapest plaque its page sells, and every tile shows the price of the page it leads to
 // (owner msg 7009, 28 Oct 2026: "our from price still seems way high always"). On the built pages:
 // - each category page's hero "from" price is the lowest in its own price table, in the page's own metal (brass on the
@@ -10,7 +11,7 @@
 //   from-price rather than a photographed larger plaque's;
 // - on the eight "products first" template pages (components/CategoryTemplate.tsx, 1 Nov 2026: memorial, bench, garden,
 //   tree, brass, stainless steel, opening, custom), every finish swatch carries its plaque's catalogue price (on the tree
-//   page, the plate on its oak board plus the ground stake), each card's from-price is the lowest of its swatches and the
+//   page, the plate on its light solid wood board plus the ground stake), each card's from-price is the lowest of its swatches and the
 //   card leads to one of them, and each size drawn to scale links to the cheapest plaque of that size in the page's
 //   metals, at its price.
 // Usage: node scripts/check-from-prices.mjs (reads dist/), DIST=<folder of saved pages>, or BASE=<site URL>.
@@ -46,7 +47,7 @@ function heroPrice(html) {
 }
 /** The lowest price in the page's price tables for one metal (the cells' labels name the size, the metal and the price). */
 function tableLow(html, metal) {
-  const prices = [...html.matchAll(/aria-label="[^"]*?, (stainless steel|aged brass|brass)(?: on an oak board and ground stake)?: £([0-9.,]+)"/g)]
+  const prices = [...html.matchAll(/aria-label="[^"]*?, (stainless steel|aged brass|brass)(?: on a light solid wood board and ground stake)?: £([0-9.,]+)"/g)]
     .filter(match => match[1] === metal).map(match => Number(match[2].replace(/,/g, '')));
   return prices.length ? Math.min(...prices) : null;
 }
@@ -95,8 +96,8 @@ for (const slug of ['brass-plaques', 'stainless-steel-plaques']) {
 // the static HTML. Garden, tree, brass, stainless steel, opening and custom moved onto the template on 1 Nov 2026: their
 // setting and shape tiles (garden walls; custom oval, circle and large) and their four product photo cards went with the
 // old layout, and the same choices are now cards and sizes checked here. On the tree page every plaque is priced and
-// opened on the oak board and ground stake (owner msg 6506): its links open the designer on a plate
-// (/design?backing=stake&plaque=<slug>) at the price of that plate on its light oak board plus the stake.
+// opened on the light solid wood board and ground stake (owner msg 6506): its links open the designer on a plate
+// (/design?backing=stake&plaque=<slug>) at the price of that plate on its light solid wood board plus the stake.
 const templateCounts = { 'memorial-plaques': 10, 'bench-plaques': 6, 'garden-plaques': 8, 'tree-memorial-plaques': 6, 'brass-plaques': 8,
   'stainless-steel-plaques': 8, 'opening-plaques': 6, 'custom-plaques': 6 };
 const pageMetals = { 'brass-plaques': ['polished-brass', 'brushed-brass', 'orbital-brass-matt-lacquer', 'aged-brass'], 'stainless-steel-plaques': ['polished-stainless', 'brushed-stainless'] };
@@ -104,7 +105,7 @@ const stakePages = new Set(['tree-memorial-plaques']);
 const attr = (tag, name) => new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
 const sameSize = (a, b) => a.preset.width === b.preset.width && a.preset.height === b.preset.height && a.preset.shape === b.preset.shape;
 /** Where a template link leads and the price it should show: a product page at its catalogue price, or on the tree page
- * the designer on a plate, at that plate on its light oak board plus the stake. */
+ * the designer on a plate, at that plate on its light solid wood board plus the stake. */
 function target(href, stake) {
   const url = new URL((href || '').replace(/&amp;/g, '&'), 'https://instaplaque.co.uk');
   if (!stake) return { slug: url.pathname.slice(1), price: offerPrice.get(url.pathname.slice(1)) };
@@ -127,15 +128,15 @@ for (const [slug, count] of Object.entries(templateCounts)) {
     const shown = /<strong class="cat-tpl-amount">([\s\S]*?)<\/strong>/.exec(card);
     const low = Math.min(...swatches.map(([, price]) => price));
     check(swatches.length > 0 && swatches.every(([, price, want]) => want !== undefined && price === want),
-      `/${slug} card ${index + 1}: ${swatches.length} finish links, each at its catalogue price${stake ? ' on the oak board and stake' : ''}`);
+      `/${slug} card ${index + 1}: ${swatches.length} finish links, each at its catalogue price${stake ? ' on the light solid wood board and stake' : ''}`);
     check(!!shown && /^from /.test(text(shown[1])) && amount(text(shown[1])) === low, `/${slug} card ${index + 1}: from ${gbp(shown && amount(text(shown[1])))}, lowest finish ${gbp(low)}`);
     check(!!link && swatches.some(([destination]) => destination === link), `/${slug} card ${index + 1}: leads to /${link}, one of its finishes`);
   });
   // Sizes drawn to scale: each links to the cheapest plaque of its size (without backing) in the page's metals.
-  // A tree-page size with no oak-board version in the catalogue (the 200 mm round) is priced by the designer's own
+  // A tree-page size with no light-wood-board version in the catalogue (the 200 mm round) is priced by the designer's own
   // pricing, as the page's price table is: there it must match that table's cell for its size and metal.
   const metalWord = material => (material === 'aged-brass' ? 'aged brass' : material.endsWith('brass') ? 'brass' : 'stainless steel');
-  const tableCell = (label, material) => amount(new RegExp(`aria-label="${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}, ${metalWord(material)} on an oak board and ground stake: (£[0-9.,]+)"`).exec(html[slug])?.[1]);
+  const tableCell = (label, material) => amount(new RegExp(`aria-label="${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}, ${metalWord(material)} on a light solid wood board and ground stake: (£[0-9.,]+)"`).exec(html[slug])?.[1]);
   const sizes = [...html[slug].matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/g)]
     .filter(match => /class="cat-tpl-scale-link"/.test(match[1]))
     .map(match => [target(attr(match[1], 'href'), stake), amount(text(/<strong[^>]*>([\s\S]*?)<\/strong>/.exec(match[2])?.[1] || '')), text(/<b>([\s\S]*?)<\/b>/.exec(match[2])?.[1] || '')]);

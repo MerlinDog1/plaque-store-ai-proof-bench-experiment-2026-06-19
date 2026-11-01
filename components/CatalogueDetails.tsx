@@ -110,7 +110,7 @@ function SizeLinks({ title, offers }: { title: string; offers: Offer[] }) {
 // Millie's plaque is a photograph of a finished plaque; Alfie and Thomas are Portraits in Metal designs.
 const portraitExamples = [
   { src: '/site-images/portraits/pim-millie-plaque.webp', width: 720, height: 1280, alt: 'Millie the cat’s portrait engraved on her finished metal plaque, photographed', caption: 'Millie · a finished plaque' },
-  { src: '/site-images/portraits/pim-alfie-polished-brass-480.webp', width: 480, height: 680, alt: 'Portrait memorial plaque of Alfie the spaniel in polished brass on light oak', caption: 'Alfie · polished brass' },
+  { src: '/site-images/portraits/pim-alfie-polished-brass-480.webp', width: 480, height: 680, alt: 'Portrait memorial plaque of Alfie the spaniel in polished brass on light wood', caption: 'Alfie · polished brass' },
   { src: '/site-images/portraits/pim-thomas-polished-steel-480.webp', width: 480, height: 679, alt: 'Family memorial plaque with a portrait of Thomas in polished stainless steel', caption: 'Thomas · polished steel' },
 ];
 

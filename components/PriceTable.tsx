@@ -45,9 +45,9 @@ export const formatGbp = (price: number) => price.toLocaleString('en-GB', {
 
 /** One sentence for every price table: what the prices include, and which finishes share a column. */
 export const priceTableIncludes = 'Prices include engraving, fixings and UK delivery. Mirror steel and polished or orbital brass cost the brass price.';
-export const priceTableIncludesOnStake = 'Prices include the oak board, the black steel ground stake, engraving, fixings and UK delivery. Mirror steel and polished or orbital brass cost the brass price.';
+export const priceTableIncludesOnStake = 'Prices include the light solid wood board, the black steel ground stake, engraving, fixings and UK delivery. Mirror steel and polished or orbital brass cost the brass price.';
 
-/** The tree page's prices (owner msg 6506): the plaque on the light oak board with the ground stake, priced as the
+/** The tree page's prices (owner msg 6506): the plaque on the light solid wood board with the ground stake, priced as the
  * designer and the server price it. */
 export const onStakePrice = (offer: Offer) => estimatePlaquePrice(onBoardAndStake(offer.preset as Partial<PlaqueState>) as PlaqueState);
 
@@ -58,7 +58,7 @@ const mountOf = (size: PriceTableSize) => {
   return { board, stakeMm: groundStakeVisibleMm(board.h) };
 };
 
-/** A plate drawn to scale on its oak board and ground stake; `span` is the largest board width or board-and-stake
+/** A plate drawn to scale on its light solid wood board and ground stake; `span` is the largest board width or board-and-stake
  * height in the table, so every drawing shares one scale and the stakes stand on one ground line. */
 function MountedPlate({ size, span }: { size: PriceTableSize; span: number }) {
   const { board, stakeMm } = mountOf(size);
@@ -88,7 +88,7 @@ export function PriceTable({ sizes, caption, compact = false, mount }: {
   caption: string;
   /** Phones: leave out the "what fits" lines (the homepage table). */
   compact?: boolean;
-  /** 'stake': each plate on the oak board and ground stake, priced with both, each price opening the designer on
+  /** 'stake': each plate on the light solid wood board and ground stake, priced with both, each price opening the designer on
    * that plaque on the board and stake (the tree page, owner msg 6506). */
   mount?: 'stake';
 }) {
@@ -140,7 +140,7 @@ export function PriceTable({ sizes, caption, compact = false, mount }: {
                   const price = formatGbp(amount);
                   return (
                     <td key={column.key}>
-                      <a href={onStake ? designWithStakeHref(offer.slug) : `/${offer.slug}`} aria-label={`${size.label}, ${column.label.toLowerCase()}${onStake ? ' on an oak board and ground stake' : ''}: ${price}`}>
+                      <a href={onStake ? designWithStakeHref(offer.slug) : `/${offer.slug}`} aria-label={`${size.label}, ${column.label.toLowerCase()}${onStake ? ' on a light solid wood board and ground stake' : ''}: ${price}`}>
                         <TrackedPrice value={amount} product={offer.slug}>{price}</TrackedPrice>
                       </a>
                     </td>

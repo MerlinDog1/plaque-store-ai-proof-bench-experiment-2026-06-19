@@ -100,7 +100,7 @@ export interface SeoLandingPage {
   relatedSearches: string[];
   /** The short line under the page title. */
   heroNote?: string;
-  /** 'stake': the page sells its plaques on the oak board and ground stake, so "Design online" starts there and the
+  /** 'stake': the page sells its plaques on the light solid wood board and ground stake, so "Design online" starts there and the
    * from-price includes both (the tree page, owner msg 6506). */
   mount?: 'stake';
   /** The plaque the from-price is for, where the page sells a smaller one than "Design online" opens on: a from-price
@@ -279,7 +279,7 @@ export const productFamilies: ProductFamily[] = [
     // "Design online" opens on A5 brushed stainless steel without wood backing (owner msg 5906, 24 Oct 2026: it had
     // opened on brass with dark wood at £165 under "from £95.50"). A 150 × 50 mm plate is too small for most memorial
     // wording, so it stays A5 although the from-price is the plate's; the hero's note names both prices (owner msg 7009).
-    // The garden and other pages that borrow this product start there too; the tree page adds the oak board and
+    // The garden and other pages that borrow this product start there too; the tree page adds the light solid wood board and
     // ground stake to it (landingDesignProduct, owner msg 6506).
     preset: {
       width: 210,
@@ -766,10 +766,10 @@ export const seoLandingPages: SeoLandingPage[] = [
     relatedProductSlug: 'memorial-plaques',
     proofCta: 'Start a garden plaque proof',
     examples: [
-      { title: 'An apple tree for Pauline.', copy: 'A5 aged brass with cream lettering, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-apple-v2.webp', alt: 'Aged brass tree plaque reading This apple tree was planted in loving memory of Pauline Hargreaves, 1940 to 2023, on an oak board and ground stake beside a young apple tree' },
-      { title: 'An oak on the village green.', copy: 'A5 brushed stainless steel with a scalloped border, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-oak-v2.webp', alt: 'Brushed stainless steel tree plaque reading This oak was planted in memory of Kathleen Ellis, 1942 to 2024, on an oak board and ground stake beside a young oak in a tree guard' },
-      { title: 'A school’s tree for a teacher.', copy: 'A5 polished stainless steel on an oak board and ground stake, on the school field.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-school-v2.webp', alt: 'Polished stainless steel tree plaque reading This tree was planted by the children of Ashfield Primary School in memory of Mrs Long, on an oak board and ground stake' },
-      { title: 'A silver birch for Moss.', copy: 'A5 polished brass on an oak board and ground stake, in the bark mulch.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-birch-v2.webp', alt: 'Polished brass pet memorial plaque reading In loving memory of Moss, 2009 to 2023, forever by our side, on an oak board and ground stake beside a young silver birch' },
+      { title: 'An apple tree for Pauline.', copy: 'A5 aged brass with cream lettering, on a light solid wood board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-apple-v2.webp', alt: 'Aged brass tree plaque reading This apple tree was planted in loving memory of Pauline Hargreaves, 1940 to 2023, on a light solid wood board and ground stake beside a young apple tree' },
+      { title: 'An oak on the village green.', copy: 'A5 brushed stainless steel with a scalloped border, on a light solid wood board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-oak-v2.webp', alt: 'Brushed stainless steel tree plaque reading This oak was planted in memory of Kathleen Ellis, 1942 to 2024, on a light solid wood board and ground stake beside a young oak in a tree guard' },
+      { title: 'A school’s tree for a teacher.', copy: 'A5 polished stainless steel on a light solid wood board and ground stake, on the school field.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-school-v2.webp', alt: 'Polished stainless steel tree plaque reading This tree was planted by the children of Ashfield Primary School in memory of Mrs Long, on a light solid wood board and ground stake' },
+      { title: 'A silver birch for Moss.', copy: 'A5 polished brass on a light solid wood board and ground stake, in the bark mulch.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-birch-v2.webp', alt: 'Polished brass pet memorial plaque reading In loving memory of Moss, 2009 to 2023, forever by our side, on a light solid wood board and ground stake beside a young silver birch' },
     ],
     sections: [
       {
@@ -854,30 +854,30 @@ export const seoLandingPages: SeoLandingPage[] = [
     eyebrow: 'Memorial tree dedications',
     description: 'Engraved brass and stainless steel plaques for a memorial tree in a garden, churchyard, school or park.',
     seoTitle: 'Memorial Tree Plaques UK | Engraved Tree Dedication Plaques | InstaPlaque',
-    seoDescription: 'Personalised memorial tree plaques in brass or stainless steel, on an oak board and black steel ground stake beside the tree. Free proof, or we design it on WhatsApp.',
-    heroCopy: 'Planting a tree is a living way to remember someone. Mark it with a plaque in their name, in brass or stainless steel on a solid oak board with a black steel ground stake that stands beside the tree, never fixed to it. See a free online proof, or send us your words on WhatsApp and we’ll design it for you.',
+    seoDescription: 'Personalised memorial tree plaques in brass or stainless steel, on a light solid wood board and black steel ground stake beside the tree. Free proof, or we design it on WhatsApp.',
+    heroCopy: 'Planting a tree is a living way to remember someone. Mark it with a plaque in their name, in brass or stainless steel on a light solid wood board with a black steel ground stake that stands beside the tree, never fixed to it. See a free online proof, or send us your words on WhatsApp and we’ll design it for you.',
     image: '/site-images/tree-plaque-photos/memorial-tree-plaque-cherry-v2-sq.webp',
     relatedProductSlug: 'memorial-plaques',
-    // Every tree plaque is priced on the oak board and ground stake (owner msg 6506: "you kinda need it for this product").
+    // Every tree plaque is priced on the light solid wood board and ground stake (owner msg 6506: "you kinda need it for this product").
     mount: 'stake',
     // From the 200 × 150 mm plate, the smallest on the page; "Design online" opens on A5 (owner msg 7009).
     from: { width: 200, height: 150, material: Material.BrushedSteel, shape: Shape.Rect },
     proofCta: 'Start a tree plaque proof',
     sections: [
-      { title: 'Fix it beside the tree, not to it', copy: `Screws and wire damage a growing tree, and the bark slowly swallows anything fixed to it. Stand the plaque beside it instead: we fix the plate to a solid oak board on a black steel ground stake, ${GROUND_STAKE_LENGTH} long, that pushes straight into the soil at the foot of the tree, as in the photos below. Our tree plaque prices include the board and the stake, and the designer starts with both. A short post, a nearby wall or a fence work too.` },
+      { title: 'Fix it beside the tree, not to it', copy: `Screws and wire damage a growing tree, and the bark slowly swallows anything fixed to it. Stand the plaque beside it instead: we fix the plate to a light solid wood board on a black steel ground stake, ${GROUND_STAKE_LENGTH} long, that pushes straight into the soil at the foot of the tree, as in the photos below. Our tree plaque prices include the board and the stake, and the designer starts with both. A short post, a nearby wall or a fence work too.` },
       { title: 'Choose a size for the words and the setting', copy: 'A 200 × 150 mm plaque suits a name, dates and a line about them. A5 (210 × 148 mm) is the most popular size for a memorial tree, with room for a dedication such as “This cherry tree was planted in loving memory of”. Choose A4 (297 × 210 mm) for a school, a community orchard or several names, or a round plaque for a short dedication.' },
-      { title: 'Pick a finish that suits the garden', copy: 'Stainless steel keeps its silver colour outdoors. Brass is warm and traditional and slowly mellows outside; aged brass starts darker and keeps developing gently. An oak backing board suits a sheltered spot in the garden; in an open, exposed position choose a metal plaque without backing.' },
+      { title: 'Pick a finish that suits the garden', copy: 'Stainless steel keeps its silver colour outdoors. Brass is warm and traditional and slowly mellows outside; aged brass starts darker and keeps developing gently. A light solid wood backing board suits a sheltered spot in the garden; in an open, exposed position choose a metal plaque without backing.' },
       { title: 'Check first if the tree is in a public place', copy: 'Parks, churchyards, schools and cemeteries usually have rules for memorial trees and plaques. Ask the site manager or council about the permitted size, material, wording and fixing before ordering; many councils run their own tree dedication schemes. Approving our proof does not replace their permission.' },
     ],
     examples: [
-      { title: 'A cherry tree for Jim.', copy: 'A5 brushed brass with a scalloped border, on an oak board and black steel ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-cherry-v2.webp', alt: 'Brushed brass tree plaque reading This cherry tree was planted in loving memory of Jim Partridge, 1947 to 2025, on an oak board and black steel ground stake beside a young cherry tree in blossom' },
-      { title: 'An apple tree for Pauline.', copy: 'A5 aged brass with cream lettering, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-apple-v2.webp', alt: 'Aged brass tree plaque reading This apple tree was planted in loving memory of Pauline Hargreaves, 1940 to 2023, on an oak board and ground stake beside a young apple tree' },
-      { title: 'An oak on the village green.', copy: 'A5 brushed stainless steel with a scalloped border, on an oak board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-oak-v2.webp', alt: 'Brushed stainless steel tree plaque reading This oak was planted in memory of Kathleen Ellis, 1942 to 2024, on an oak board and ground stake beside a young oak in a tree guard' },
-      { title: 'A school’s tree for a teacher.', copy: 'A5 polished stainless steel on an oak board and ground stake, on the school field.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-school-v2.webp', alt: 'Polished stainless steel tree plaque reading This tree was planted by the children of Ashfield Primary School in memory of Mrs Long, on an oak board and ground stake' },
-      { title: 'A silver birch for Moss.', copy: 'A5 polished brass on an oak board and ground stake, in the bark mulch.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-birch-v2.webp', alt: 'Polished brass pet memorial plaque reading In loving memory of Moss, 2009 to 2023, forever by our side, on an oak board and ground stake beside a young silver birch' },
+      { title: 'A cherry tree for Jim.', copy: 'A5 brushed brass with a scalloped border, on a light solid wood board and black steel ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-cherry-v2.webp', alt: 'Brushed brass tree plaque reading This cherry tree was planted in loving memory of Jim Partridge, 1947 to 2025, on a light solid wood board and black steel ground stake beside a young cherry tree in blossom' },
+      { title: 'An apple tree for Pauline.', copy: 'A5 aged brass with cream lettering, on a light solid wood board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-apple-v2.webp', alt: 'Aged brass tree plaque reading This apple tree was planted in loving memory of Pauline Hargreaves, 1940 to 2023, on a light solid wood board and ground stake beside a young apple tree' },
+      { title: 'An oak on the village green.', copy: 'A5 brushed stainless steel with a scalloped border, on a light solid wood board and ground stake.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-oak-v2.webp', alt: 'Brushed stainless steel tree plaque reading This oak was planted in memory of Kathleen Ellis, 1942 to 2024, on a light solid wood board and ground stake beside a young oak in a tree guard' },
+      { title: 'A school’s tree for a teacher.', copy: 'A5 polished stainless steel on a light solid wood board and ground stake, on the school field.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-school-v2.webp', alt: 'Polished stainless steel tree plaque reading This tree was planted by the children of Ashfield Primary School in memory of Mrs Long, on a light solid wood board and ground stake' },
+      { title: 'A silver birch for Moss.', copy: 'A5 polished brass on a light solid wood board and ground stake, in the bark mulch.', image: '/site-images/tree-plaque-photos/memorial-tree-plaque-birch-v2.webp', alt: 'Polished brass pet memorial plaque reading In loving memory of Moss, 2009 to 2023, forever by our side, on a light solid wood board and ground stake beside a young silver birch' },
     ],
     faqs: templatePages['tree-memorial-plaques'] ? [
-      { question: 'Can I fix a plaque to a tree?', answer: 'We recommend not fixing it to the tree itself. Screws and wire damage a growing tree and the bark grows over them. Stand the plaque beside the tree on an oak board and black steel ground stake (both are included in our tree plaque prices), or fix it to a short post, a nearby wall or a fence.' },
+      { question: 'Can I fix a plaque to a tree?', answer: 'We recommend not fixing it to the tree itself. Screws and wire damage a growing tree and the bark grows over them. Stand the plaque beside the tree on a light solid wood board and black steel ground stake (both are included in our tree plaque prices), or fix it to a short post, a nearby wall or a fence.' },
       // Category template stage 2 (1 Nov 2026, research memorial section c): the permission and plate-only questions
       // replace the portrait and design-for-me ones (the closing strip and WhatsApp route cover those).
       { question: 'Can I put one in a churchyard, park or memorial woodland?', answer: 'Check with whoever looks after the site first. Parks, churchyards, schools and cemeteries usually have rules for memorial trees and plaques: ask about the permitted size, material, wording and fixing before ordering, as many councils run their own tree dedication schemes. Your PDF proof shows the exact size and wording to share with them; approving it does not replace their permission.' },
@@ -886,7 +886,7 @@ export const seoLandingPages: SeoLandingPage[] = [
       { question: 'Will the plaque last outdoors?', answer: 'Yes. Our brass and stainless steel plaques are 1.5 mm solid metal with etched, paint-filled lettering. Stainless steel keeps its colour and brass mellows slowly outside. For an open, exposed spot choose a metal plaque without wood backing.' },
       { question: 'Can I have just the plate, for a post or fence?', answer: `Yes. The plate on its own starts ${startingFromFor({ width: 200, height: 150, material: Material.BrushedSteel, shape: Shape.Rect })} for 200 × 150 mm stainless steel, with screws and decorative caps for a post, fence or wall. Take the board and stake off at the designer’s Backing step, or open the plate on its own from this page’s sizes.` },
     ] : [
-      { question: 'Can I fix a plaque to a tree?', answer: 'We recommend not fixing it to the tree itself. Screws and wire damage a growing tree and the bark grows over them. Stand the plaque beside the tree on an oak board and black steel ground stake (both are included in our tree plaque prices), or fix it to a short post, a nearby wall or a fence.' },
+      { question: 'Can I fix a plaque to a tree?', answer: 'We recommend not fixing it to the tree itself. Screws and wire damage a growing tree and the bark grows over them. Stand the plaque beside the tree on a light solid wood board and black steel ground stake (both are included in our tree plaque prices), or fix it to a short post, a nearby wall or a fence.' },
       { question: 'What size should a memorial tree plaque be?', answer: 'A5 (210 × 148 mm) suits most memorial trees: a dedication line, a name, dates and a short message. Choose 200 × 150 mm for shorter wording, or A4 for a school, a community planting or several names.' },
       { question: 'What should a tree memorial plaque say?', answer: 'Most start with a dedication such as “This oak was planted in memory of”, then the name, the dates and a short line about them, such as “who loved this garden”. Send us a few words on WhatsApp if you would like help with the wording.' },
       { question: 'Will the plaque last outdoors?', answer: 'Yes. Our brass and stainless steel plaques are 1.5 mm solid metal with etched, paint-filled lettering. Stainless steel keeps its colour and brass mellows slowly outside. For an open, exposed spot choose a metal plaque without wood backing.' },
@@ -1285,7 +1285,7 @@ export const materialStories = [
     thumbnail: '/materials/thumbs/light-wood.webp',
     sliderImage: '/materials/slider/light-wood.webp',
     family: 'Wood',
-    tone: 'Pale oak grain',
+    tone: 'Pale wood grain',
     copy: 'A lighter backing option for softer contrast behind brass or stainless plates.',
   },
 ];
@@ -1362,7 +1362,7 @@ const cataloguePhotoVersions: Record<string, number> = {
   'brushed-stainless-400x300-rect-dark-wood-plaque': 2,
   'brushed-stainless-200x200-circle-plaque': 2,
   'orbital-brass-matt-lacquer-400x300-rect-plaque': 2,
-  // The tree page's top photo (the A5 brushed brass on light oak shows a square crop of it), and the memorial page's
+  // The tree page's top photo (the A5 brushed brass on light wood shows a square crop of it), and the memorial page's
   // two story-style picks redone with plain wording (owner msgs 6270, 6281, 6313).
   'brushed-brass-210x148-rect-light-wood-plaque': 2,
 };
@@ -1418,7 +1418,7 @@ export function getLandingPageBySlug(slug: string | null | undefined) {
 }
 
 /** The plaque a landing page's "Design online" opens on, with the page's from-price: the related product, or on the
- * tree page that product on the oak board and ground stake (owner msg 6506). The from-price is the page's cheapest
+ * tree page that product on the light solid wood board and ground stake (owner msg 6506). The from-price is the page's cheapest
  * plaque (`from`, owner msg 7009), which the hero's note tells apart from the one the designer opens on (msg 5906). */
 export function landingDesignProduct(landing: SeoLandingPage): ProductFamily {
   const related = productFamilies.find((product) => product.slug === landing.relatedProductSlug) ?? productFamilies[0];

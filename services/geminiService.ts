@@ -1843,7 +1843,7 @@ export const generateRealisticView = async (
 
   let backingDesc = "None (Mounted directly to wall)";
   if (state.wood) {
-    const tone = state.woodTone === 'dark' ? "Dark Walnut" : "Light Oak";
+    const tone = state.woodTone === 'dark' ? "Dark solid wood" : "Light solid wood";
     const edge = state.woodEdge === 'bevel' ? "beveled" : "square";
 
     let backingShape = "Rectangular";
@@ -1851,7 +1851,7 @@ export const generateRealisticView = async (
     if (state.shape === Shape.Oval) backingShape = "Oval";
     if (state.shape === Shape.Heart) backingShape = "Heart";
 
-    backingDesc = `Solid Wood Backing Board. Material: ${tone}. Edge: ${edge}. Shape: ${backingShape} (following the contour of the metal plaque with a small border). The metal plate is centered on this wood base.`;
+    backingDesc = `Solid Wood Backing Board. Material: ${tone}. Edge: ${edge}. Shape: ${backingShape} (following the contour of the metal plaque with a small border). The metal plate is centered on this wood base. Describe the backing only as light solid wood or dark solid wood, matching its tone; never name or infer a wood species.`;
     if (hasGroundStake(state)) {
       backingDesc += " The board is mounted on ONE chunky black powder-coated 30mm square steel ground stake, fixed by a bracket to the back of the board at its bottom centre. From the front only the part below the board shows: a single straight black square post running down from the middle of the board's bottom edge into the ground. The plaque stands in the ground on this stake; it is not fixed to a wall, post or tree.";
     }

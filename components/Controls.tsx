@@ -1827,7 +1827,7 @@ export const Controls: React.FC<Props> = ({
                     ? 'Not available on heart plaques.'
                     : isBenchPlaque
                       ? 'Not available on bench plaques.'
-                      : `Adds ${formatPrice(woodAddOnPrice)} for a 15mm timber backing board.`}
+                      : `Adds ${formatPrice(woodAddOnPrice)} for a 15mm solid wood backing board.`}
                 </div>
               </div>
               <button
@@ -1840,8 +1840,8 @@ export const Controls: React.FC<Props> = ({
             </div>
             {state.wood && !isHeartPlaque && !isBenchPlaque && (
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <button onClick={() => update('woodTone', 'light')} className={pillClass(state.woodTone === 'light')}>Light</button>
-                <button onClick={() => update('woodTone', 'dark')} className={pillClass(state.woodTone === 'dark')}>Dark</button>
+                <button onClick={() => update('woodTone', 'light')} className={pillClass(state.woodTone === 'light')}>Light wood</button>
+                <button onClick={() => update('woodTone', 'dark')} className={pillClass(state.woodTone === 'dark')}>Dark wood</button>
               </div>
             )}
           </div>
@@ -2294,7 +2294,7 @@ export const Controls: React.FC<Props> = ({
               </div>
               {state.wood && (
                 <div className="flex items-center justify-between gap-3 border-b border-[rgba(84,72,52,0.12)] pb-2">
-                  <span>15mm timber backing board</span>
+                  <span>15mm solid wood backing board</span>
                   <strong>{formatPrice(woodAddOnPrice)}</strong>
                 </div>
               )}

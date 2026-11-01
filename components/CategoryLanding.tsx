@@ -17,7 +17,7 @@ import { PromoFilmFigure } from './PromoVideo';
 // (quality, sample proof, FAQs) are the homepage's own.
 
 /** The page a route leads to and its from-price: landing pages take their related product's price (the tree page's
- * with the oak board and ground stake, owner msg 6506). */
+ * with the light solid wood board and ground stake, owner msg 6506). */
 function startingPrice(slug: string) {
   const landing = seoLandingPages.find(item => item.slug === slug);
   const product = landing ? landingDesignProduct(landing) : productFamilies.find(item => item.slug === slug);
@@ -129,14 +129,14 @@ export function PlaceRoutes({ id, kicker, title, routes, more }: { id?: string; 
 export type SizeStep = { slug: string; label: string; widthMm: number; heightMm: number; fits: string; shape?: 'oval' | 'circle' };
 
 /** Four sizes, each in stainless steel, brass and aged brass (owner msg 6436: brass prices were only in the designer),
- * every price linking to that exact plaque; on the tree page, on the oak board and ground stake (owner msg 6506). */
+ * every price linking to that exact plaque; on the tree page, on the light solid wood board and ground stake (owner msg 6506). */
 export function SizeLadder({ id, kicker, title, intro, sizes, mount, note, more }: { id?: string; kicker: string; title: string; intro: string; sizes: SizeStep[]; mount?: 'stake'; note?: React.ReactNode; more?: React.ReactNode }) {
   return (
     <section className="shop-section cat-sizes" id={id} aria-labelledby="cat-sizes-heading">
       <p className="shop-kicker">{kicker}</p>
       <h2 id="cat-sizes-heading">{title}</h2>
       <p className="cat-section-intro">{intro}</p>
-      <PriceTable sizes={sizes} mount={mount} caption={`${title} Prices by size and metal${mount === 'stake' ? ', on an oak board and ground stake' : ''}.`} />
+      <PriceTable sizes={sizes} mount={mount} caption={`${title} Prices by size and metal${mount === 'stake' ? ', on a light solid wood board and ground stake' : ''}.`} />
       <p className="shop-smallprint">{mount === 'stake' ? priceTableIncludesOnStake : priceTableIncludes}{note && <> {note}</>}</p>
       {more}
     </section>
@@ -151,7 +151,7 @@ const productPrice = (slug: string) => merchantProducts.find(item => item.slug =
 export function SizeLinksFold({ title, offers }: { title: string; offers: Offer[] }) {
   const groups = new Map<string, Offer[]>();
   for (const offer of [...offers].sort((a, b) => a.price - b.price)) {
-    const label = `${offer.label}${offer.preset.wood ? ` on ${offer.preset.woodTone === 'dark' ? 'dark wood' : 'light oak'}` : ''}`;
+    const label = `${offer.label}${offer.preset.wood ? ` on ${offer.preset.woodTone === 'dark' ? 'dark wood' : 'light wood'}` : ''}`;
     groups.set(label, [...(groups.get(label) || []), offer]);
   }
   return (
@@ -320,7 +320,7 @@ export type LandingConfig = {
   trust?: string[];
   routes?: { kicker: string; title: string; routes: PlaceRoute[]; more?: React.ReactNode };
   examples?: { kicker: string; title: string; intro?: React.ReactNode; items: ExampleItem[] };
-  /** mount 'stake': every price and drawing includes the oak board and ground stake (the tree page). */
+  /** mount 'stake': every price and drawing includes the light solid wood board and ground stake (the tree page). */
   sizes: { kicker?: string; title: string; intro: string; sizes: SizeStep[]; mount?: 'stake'; note?: React.ReactNode; more?: React.ReactNode };
   steps?: [string, string][];
   portraits?: boolean;
@@ -342,10 +342,10 @@ const memorialImages = '/site-images/memorial';
 // a setting that fits each one's story (owner msgs 5992, 6056): two close-ups on ground stakes, one on a wall and one on
 // our workshop bench, not all on stakes (owner msg 6085).
 const portraitCards: PortraitExample[] = [
-  { src: `${memorialImages}/portrait-george-v3.webp`, alt: 'Close-up of a brass memorial plaque with an engraved portrait of George Hartley, on an oak board and ground stake under a young oak by an allotment gate', caption: 'George · brass, under the oak he planted' },
-  { src: `${memorialImages}/portrait-bramble-v3.webp`, alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel on an oak board, on our workshop bench after its final polish', caption: 'Bramble · on our workshop bench' },
-  { src: `${memorialImages}/portrait-daniel-v2.webp`, alt: 'Brass memorial plaque with an engraved portrait of Daniel Price on an oak board, fixed to the painted timber wall of a sailing club boathouse', caption: 'Daniel · on the boathouse wall' },
-  { src: `${memorialImages}/portrait-ron-pat-v3.webp`, alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on an oak board and ground stake under their apple tree', caption: 'Ron & Pat · under their apple tree' },
+  { src: `${memorialImages}/portrait-george-v3.webp`, alt: 'Close-up of a brass memorial plaque with an engraved portrait of George Hartley, on a light solid wood board and ground stake under a young oak by an allotment gate', caption: 'George · brass, under the oak he planted' },
+  { src: `${memorialImages}/portrait-bramble-v3.webp`, alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel on a light solid wood board, on our workshop bench after its final polish', caption: 'Bramble · on our workshop bench' },
+  { src: `${memorialImages}/portrait-daniel-v2.webp`, alt: 'Brass memorial plaque with an engraved portrait of Daniel Price on a light solid wood board, fixed to the painted timber wall of a sailing club boathouse', caption: 'Daniel · on the boathouse wall' },
+  { src: `${memorialImages}/portrait-ron-pat-v3.webp`, alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on a light solid wood board and ground stake under their apple tree', caption: 'Ron & Pat · under their apple tree' },
 ];
 
 /** One category page: hero, optional photo routes and examples, picks, sizes, how it works, optional portraits,
@@ -363,7 +363,7 @@ export function CategoryLandingPage({ config, product, faqs, picks, onLaunch, on
   const id = (name: string) => `${config.prefix}-${name}`;
   const { hero, routes, examples, sizes, wording } = config;
   // The film says "Made in 5 working days*", so it leads every category page except the tree page, where every plaque
-  // is on an oak board and stake (10–15 working days); that page keeps its photo at the top.
+  // is on a light solid wood board and stake (10–15 working days); that page keeps its photo at the top.
   const film = sizes.mount !== 'stake';
   const heroImage: HeroImage = {
     src: `${hero.base}-1200.webp`,

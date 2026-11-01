@@ -299,19 +299,19 @@ const customWork = [
   { src: '/site-images/custom-work/millie-photo-to-plaque.webp', size: 640, title: 'From a phone photo to metal', note: 'Millie, engraved from her owner’s photo',
     alt: 'Millie the cat in her owner’s everyday photo, beside her portrait engraved on her finished metal plaque' },
   { src: '/site-images/custom-work/willow-horse.webp', size: 640, title: 'A horse, drawn from a photo', note: 'Aged brass on dark wood',
-    alt: 'Aged brass plaque with an engraved portrait of Willow the horse, on a dark wood board fixed to a timber wall' },
+    alt: 'Aged brass plaque with an engraved portrait of Willow the horse, on a dark solid wood board fixed to a timber wall' },
   { src: '/site-images/memorial/portrait-ron-pat-v3.webp', size: 600, title: 'Two faces on one plaque', note: 'Under their apple tree',
-    alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on an oak board and ground stake under their apple tree' },
+    alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on a light solid wood board and ground stake under their apple tree' },
   { src: `/site-images/ai/ai-real-house-640.webp?${featureImageVersion}`, size: 640, title: 'Your house name, with artwork', note: 'An oval with a willow tree',
     alt: 'Willow Cottage house sign, an engraved brushed stainless steel oval with a willow tree, fixed to a white-painted brick wall beside a front door' },
   { src: '/site-images/custom-work/ruby-folded-steel.webp', size: 640, title: 'A plaque that stands on a shelf', note: 'Folded steel, with Ruby’s portrait',
     alt: 'Freestanding folded stainless steel plaque with an engraved portrait of Ruby the Siamese cat, on a windowsill' },
   { src: '/site-images/custom-work/ivy-sid-boulder.webp', size: 450, title: 'Fixed to a garden boulder', note: 'For the garden they made',
     alt: 'Brushed brass memorial plaque for Ivy and Sid Moore, who made this garden together, fixed to a large garden boulder among lady’s mantle, catmint and roses' },
-  { src: '/site-images/custom-work/alice-grave-cross.webp', size: 450, title: 'A name plate for a grave cross', note: 'Polished brass on oak',
+  { src: '/site-images/custom-work/alice-grave-cross.webp', size: 450, title: 'A name plate for a grave cross', note: 'Polished brass on a grave cross',
     alt: 'Small polished brass name plate for Alice May Grant screwed to the arm of a temporary oak cross in a village churchyard, with white and yellow flowers' },
   { src: '/site-images/memorial/portrait-daniel-v2.webp', size: 600, title: 'A portrait for a favourite place', note: 'On the boathouse wall',
-    alt: 'Brass memorial plaque with an engraved portrait of Daniel Price on an oak board, fixed to the painted timber wall of a sailing club boathouse' },
+    alt: 'Brass memorial plaque with an engraved portrait of Daniel Price on a light solid wood board, fixed to the painted timber wall of a sailing club boathouse' },
   { src: '/site-images/custom-work/meadows-opening.webp', size: 640, title: 'An opening plaque', note: 'For a new building or room',
     alt: 'Brushed stainless steel plaque recording the opening of The Meadows Community Hub by Councillor Anne Fielding, fixed to a pale stone wall' },
 ];
@@ -457,7 +457,7 @@ export function ShopBySize() {
               })}
             </ul>
             {wood.length > 0 && <p className="shop-smallprint">On wood: {wood.map((offer, index) => (
-              <React.Fragment key={offer.slug}>{index > 0 && ' · '}<a href={`/${offer.slug}`}>{offer.label} on {offer.preset.woodTone === 'dark' ? 'dark walnut' : 'light oak'}</a></React.Fragment>
+              <React.Fragment key={offer.slug}>{index > 0 && ' · '}<a href={`/${offer.slug}`}>{offer.label} on {offer.preset.woodTone === 'dark' ? 'dark wood' : 'light wood'}</a></React.Fragment>
             ))}</p>}
           </div>
         );
@@ -1047,7 +1047,7 @@ export function ShopLanding({
   onLaunch?: () => void;
   onRequestDesign?: () => void;
 }) {
-  // The tree page's from-price includes the oak board and ground stake (owner msg 6506).
+  // The tree page's from-price includes the light solid wood board and ground stake (owner msg 6506).
   const related = landingDesignProduct(landing);
   return (
     <ShopProduct

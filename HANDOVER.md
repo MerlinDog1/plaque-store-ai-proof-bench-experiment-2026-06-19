@@ -1,5 +1,15 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Light/dark solid wood wording — PREVIEW ONLY, 1 November 2026
+
+- Owner msg 8635: never name a species for supplied boards/stands; use light/dark solid wood (short labels: light/dark wood).
+- Branch `codex/instaplaque-wood-wording-20261101`, based on live-source `753e195`; no production promotion.
+- Ready preview: https://instaplaque-4q96reixr-dullaghan31-3959s-projects.vercel.app (`dpl_AgRkRc72NRicXFNGuzLZvWkMN8LW`).
+- All build/postbuild checks and 390px phone checks pass. 84 feed titles/descriptions updated; all other feed fields unchanged.
+- 176 sample PDFs already species-free; PDFs/pictures/version numbers unchanged. PIM audit read-only, 35 source claims found.
+- Full evidence, remaining allowed mentions, screenshots, release steps and rollback: [docs/wood-wording-2026-11-01.md](docs/wood-wording-2026-11-01.md).
+- **Cody releases.** Production stays `dpl_3yA5Qrb7ipZgQaJnKHaMMSEvV3zF`.
+
 ## Eight products-first category pages: LIVE — 1 November 2026, 14:07 UTC
 
 - **Owner:** msg 8620 "Go live then" (after msg 8603's proof/video change, preview `dpl_Y65CRMBo73eaE9h84eanyEMD3mDz`).

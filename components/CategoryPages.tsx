@@ -40,7 +40,7 @@ const finishRoute = (title: string, materials: string[], image: string, alt: str
   const slug = cheapestIn(materials, woodTone);
   return { href: `/${slug}`, title, image, alt, priceSlug: slug };
 };
-/** A catalogue plaque's price on the oak board and ground stake (the tree page, owner msg 6506). */
+/** A catalogue plaque's price on the light solid wood board and ground stake (the tree page, owner msg 6506). */
 const onStakePriceOf = (slug: string) => {
   const offer = merchantOffers.find(item => item.slug === slug);
   return offer ? formatGbp(onStakePrice(offer)) : '';
@@ -58,8 +58,8 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           // Real-looking photo from the plaque's own artwork (owner msgs 5992 and 6056); wall plaques like this one are
           // shown on wood with the scalloped border (msg 6001), so the caption names the board and its price.
           base: `${category}/memorial-hero-v4`,
-          alt: 'Brushed stainless steel memorial plaque on a dark walnut board, reading In loving memory of Margaret Rowley, 1936 to 2023, Mum, Nan and dear friend, who loved this garden in every season, on an old brick garden wall beside a pink climbing rose',
-          caption: <>Shown: A5 brushed stainless steel on a dark walnut board, {priceOf('brushed-stainless-210x148-rect-dark-wood-plaque')}; without the board, {priceOf('a5-brushed-steel-personalised-plaque')}. {seeThis('brushed-stainless-210x148-rect-dark-wood-plaque')}</>,
+          alt: 'Brushed stainless steel memorial plaque on a dark solid wood board, reading In loving memory of Margaret Rowley, 1936 to 2023, Mum, Nan and dear friend, who loved this garden in every season, on an old brick garden wall beside a pink climbing rose',
+          caption: <>Shown: A5 brushed stainless steel on a dark solid wood board, {priceOf('brushed-stainless-210x148-rect-dark-wood-plaque')}; without the board, {priceOf('a5-brushed-steel-personalised-plaque')}. {seeThis('brushed-stainless-210x148-rect-dark-wood-plaque')}</>,
         },
         priceNote: `150 × 50 mm stainless steel, or A5 for ${priceOf('a5-brushed-steel-personalised-plaque')}, with engraving, fixings and UK delivery`,
         // Four distinct settings (owner msg 5906); wall plaques are the hero and the picks below.
@@ -69,7 +69,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           routes: [
             { href: '/bench-plaques', title: 'On a bench', image: `${memorial}/route-bench.webp`, alt: 'Polished brass memorial plaque on a wooden bench, reading Peter John Wilson, please sit awhile, enjoy the view', priceSlug: 'bench-plaques' },
             { href: '/garden-plaques', title: 'In the garden', image: `${category}/route-garden-stone-v4.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore, who made this garden together, fixed to a large garden boulder among lady’s mantle, catmint and roses', priceSlug: 'garden-plaques' },
-            { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree-v4.webp`, alt: 'Close-up of a brushed brass tree plaque reading This cherry tree was planted in loving memory of Jim Partridge, on an oak board and black ground stake beside a young cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
+            { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree-v4.webp`, alt: 'Close-up of a brushed brass tree plaque reading This cherry tree was planted in loving memory of Jim Partridge, on a light solid wood board and black ground stake beside a young cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
             { href: '/polished-brass-150x50-rect-plaque', title: 'At a grave', image: `${memorial}/route-grave-cross-v2.webp`, alt: 'Small polished brass name plate for Alice May Grant screwed to the arm of a temporary oak cross in a village churchyard, with white and yellow flowers', priceSlug: 'polished-brass-150x50-rect-plaque' },
           ],
           more: <>On a wall, in a church or somewhere else? {ask('Ask us on WhatsApp')} and we’ll suggest a size and fixings. For a grave, check the cemetery’s rules first.</>,
@@ -83,7 +83,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
             { slug: 'brushed-stainless-297x210-rect-plaque', label: 'A4 · 297 × 210 mm', widthMm: 297, heightMm: 210, fits: 'A longer tribute or several names' },
             { slug: 'brushed-stainless-400x300-rect-plaque', label: '400 × 300 mm', widthMm: 400, heightMm: 300, fits: 'A family memorial, a poem or a portrait' },
           ],
-          note: <>Oak or walnut backing is priced on each plaque. <a href="/plaque-sizes">See every size and price</a>.</>,
+          note: <>Light or dark solid wood backing is priced on each plaque. <a href="/plaque-sizes">See every size and price</a>.</>,
         },
         portraits: true,
         wording: {
@@ -148,7 +148,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           routes: [
             { href: '/brushed-brass-200x150-rect-plaque', title: 'On a stone', image: `${category}/route-garden-stone-v4.webp`, alt: 'Brushed brass memorial plaque for Ivy and Sid Moore, who made this garden together, fixed to a large garden boulder among lady’s mantle, catmint and roses', priceSlug: 'brushed-brass-200x150-rect-plaque' },
             { href: '/orbital-brass-matt-lacquer-200x150-rect-plaque', title: 'On a fence', image: `${category}/route-garden-fence-v2.webp`, alt: 'Orbital brass pet memorial plaque reading In loving memory of Biscuit, 2006 to 2024, our gentle cat, on a weathered timber garden fence above lavender', priceSlug: 'orbital-brass-matt-lacquer-200x150-rect-plaque' },
-            { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree-v4.webp`, alt: 'Close-up of a brushed brass tree plaque reading This cherry tree was planted in loving memory of Jim Partridge, on an oak board and black ground stake beside a young cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
+            { href: '/tree-memorial-plaques', title: 'By a tree', image: `${memorial}/route-tree-v4.webp`, alt: 'Close-up of a brushed brass tree plaque reading This cherry tree was planted in loving memory of Jim Partridge, on a light solid wood board and black ground stake beside a young cherry tree in blossom', priceSlug: 'tree-memorial-plaques' },
             { href: '/bench-plaques', title: 'On a bench', image: `${memorial}/route-bench.webp`, alt: 'Polished brass memorial plaque on a wooden bench, reading Peter John Wilson, please sit awhile, enjoy the view', priceSlug: 'bench-plaques' },
           ],
           more: <>On a wall, a gate or a shed? {ask('Ask us on WhatsApp')} and we’ll suggest a size and fixings.</>,
@@ -200,9 +200,9 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
           title: 'Choose your brass.',
           routes: [
             // Each finish from its cheapest plaque (owner msg 7009); they had shown the photographed plaque's price.
-            finishRoute('Brushed brass', ['brushed-brass'], photo('brushed-brass-297x210-rect-dark-wood-plaque'), 'A4 brushed brass memorial plaque for Frank and Joan Hollis on a dark walnut board, with a scalloped border, on an old red brick garden wall'),
+            finishRoute('Brushed brass', ['brushed-brass'], photo('brushed-brass-297x210-rect-dark-wood-plaque'), 'A4 brushed brass memorial plaque for Frank and Joan Hollis on a dark solid wood board, with a scalloped border, on an old red brick garden wall'),
             finishRoute('Polished brass', ['polished-brass'], photo('polished-brass-200x150-rect-plaque'), 'Polished brass house sign reading Holly House on a white-painted brick wall beside a green front door'),
-            finishRoute('Orbital brass', ['orbital-brass-matt-lacquer'], photo('orbital-brass-matt-lacquer-297x210-rect-plaque'), 'A4 orbital brass plaque on cedar boards, reading This pavilion was officially opened by Jean Harper MBE on 12 April 2025'),
+            finishRoute('Orbital brass', ['orbital-brass-matt-lacquer'], photo('orbital-brass-matt-lacquer-297x210-rect-plaque'), 'A4 orbital brass plaque on timber boards, reading This pavilion was officially opened by Jean Harper MBE on 12 April 2025'),
             finishRoute('Aged brass', ['aged-brass'], photo('aged-brass-210x148-rect-plaque'), 'A5 aged brass memorial plaque for James Ormerod with cream lettering on a grey limestone wall'),
           ],
           more: <>Not sure which? <a href="/materials">Compare the finishes</a>, or {ask('ask us on WhatsApp')}.</>,
@@ -216,7 +216,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
             { slug: 'brushed-brass-297x210-rect-plaque', label: 'A4 · 297 × 210 mm', widthMm: 297, heightMm: 210, fits: 'An opening or a longer tribute' },
             { slug: 'brushed-brass-400x300-rect-plaque', label: '400 × 300 mm', widthMm: 400, heightMm: 300, fits: 'A dedication, a history or a portrait' },
           ],
-          note: <>Oak or dark wood backing is priced on each plaque.</>,
+          note: <>Light or dark solid wood backing is priced on each plaque.</>,
           more: <SizeLinksFold title="Every brass size and finish" offers={merchantOffers.filter(offer => brassMaterials.includes(offer.preset.material) && !offer.preset.wood)} />,
         },
         wording: {
@@ -252,8 +252,8 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
             // Each finish or backing from its cheapest plaque (owner msg 7009); they had shown the photographed plaque's price.
             finishRoute('Brushed', ['brushed-stainless'], photo('brushed-stainless-250x150-oval-plaque'), 'Oval brushed stainless steel memorial plaque for Lilian Boyd on an old red brick garden wall'),
             finishRoute('Polished', ['polished-stainless'], photo('polished-stainless-297x210-rect-plaque'), 'A4 polished stainless steel memorial plaque for Peter and June Walker on a stone garden wall, reflecting the sky'),
-            finishRoute('On light oak', ['brushed-stainless', 'polished-stainless'], photo('polished-stainless-200x150-rect-light-wood-plaque'), 'Polished stainless steel pet memorial plaque for Skye on a light oak board, on a blue-grey garden shed', 'light'),
-            finishRoute('On dark wood', ['brushed-stainless', 'polished-stainless'], photo('brushed-stainless-210x148-rect-dark-wood-plaque'), 'Brushed stainless steel memorial plaque for Margaret Rowley on a dark walnut board, with a scalloped border', 'dark'),
+            finishRoute('On light wood', ['brushed-stainless', 'polished-stainless'], photo('polished-stainless-200x150-rect-light-wood-plaque'), 'Polished stainless steel pet memorial plaque for Skye on a light solid wood board, on a blue-grey garden shed', 'light'),
+            finishRoute('On dark wood', ['brushed-stainless', 'polished-stainless'], photo('brushed-stainless-210x148-rect-dark-wood-plaque'), 'Brushed stainless steel memorial plaque for Margaret Rowley on a dark solid wood board, with a scalloped border', 'dark'),
           ],
           more: <>Wood backing suits indoors or a sheltered spot; metal on its own is made for outdoors. <a href="/materials">Compare the finishes</a>.</>,
         },
@@ -291,24 +291,24 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
         hero: {
           // Plain wording (owner msgs 6270, 6313); also the memorial and garden pages' "By a tree" tile.
           base: `${category}/tree-hero-v2`,
-          alt: 'Brushed brass memorial plaque with a scalloped border reading This cherry tree was planted in loving memory of Jim Partridge, 1947 to 2025, on an oak board and black steel ground stake beside a young cherry tree in blossom',
-          // Every tree price includes the oak board and ground stake (owner msg 6506), so the caption's link opens the
+          alt: 'Brushed brass memorial plaque with a scalloped border reading This cherry tree was planted in loving memory of Jim Partridge, 1947 to 2025, on a light solid wood board and black steel ground stake beside a young cherry tree in blossom',
+          // Every tree price includes the light solid wood board and ground stake (owner msg 6506), so the caption's link opens the
           // designer on this plaque on both, at the price it names.
-          caption: <>Shown: A5 brushed brass on an oak board and ground stake, {onStakePriceOf('brushed-brass-210x148-rect-light-wood-plaque')}. <a href={designWithStakeHref('brushed-brass-210x148-rect-light-wood-plaque')}>Design this one</a></>,
+          caption: <>Shown: A5 brushed brass on a light solid wood board and ground stake, {onStakePriceOf('brushed-brass-210x148-rect-light-wood-plaque')}. <a href={designWithStakeHref('brushed-brass-210x148-rect-light-wood-plaque')}>Design this one</a></>,
         },
         // The from-price (landingDesignProduct) is the 200 × 150 mm plate on the board and stake; "Design online" opens
         // on A5 on both.
-        priceNote: `200 × 150 mm stainless steel on an oak board and black steel ground stake, or A5 for ${onStakePriceOf('a5-brushed-steel-personalised-plaque')}, with engraving and UK delivery`,
+        priceNote: `200 × 150 mm stainless steel on a light solid wood board and black steel ground stake, or A5 for ${onStakePriceOf('a5-brushed-steel-personalised-plaque')}, with engraving and UK delivery`,
         examples: {
           kicker: 'Memorial tree plaques in place',
           title: 'Beside the tree, never fixed to it.',
-          intro: <>Each plate stands on an oak board on a black steel ground stake, pushed into the soil at the foot of the tree. Both are included in every price on this page. <a href={DESIGN_WITH_STAKE_HREF}>Design one online</a>.</>,
+          intro: <>Each plate stands on a light solid wood board on a black steel ground stake, pushed into the soil at the foot of the tree. Both are included in every price on this page. <a href={DESIGN_WITH_STAKE_HREF}>Design one online</a>.</>,
           // The cherry tree is the top photo, so the row starts with the next one.
           items: examples.filter(example => !example.image.includes('-cherry')).map(example => ({ ...example, image: example.image.replace(/\.webp$/, '-900.webp') })),
         },
         sizes: {
           title: 'Choose a size for the tree.',
-          intro: 'Every price includes the oak board and the black steel ground stake. A5 suits most memorial trees; choose A4 for a school, an orchard or several names. Each is drawn to scale.',
+          intro: 'Every price includes the light solid wood board and the black steel ground stake. A5 suits most memorial trees; choose A4 for a school, an orchard or several names. Each is drawn to scale.',
           mount: 'stake',
           sizes: [
             { slug: 'brushed-stainless-200x150-rect-plaque', label: '200 × 150 mm', widthMm: 200, heightMm: 150, fits: 'A name, dates and a line' },
@@ -354,7 +354,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
             { slug: 'brushed-stainless-297x210-rect-plaque', label: 'A4 · 297 × 210 mm', widthMm: 297, heightMm: 210, fits: 'The usual size for an opening' },
             { slug: 'brushed-stainless-400x300-rect-plaque', label: '400 × 300 mm', widthMm: 400, heightMm: 300, fits: 'A building, or a list of supporters' },
           ],
-          note: <>Oak or dark wood backing is priced on each plaque. Need it for a date? {ask('Tell us on WhatsApp')} before ordering.</>,
+          note: <>Light or dark solid wood backing is priced on each plaque. Need it for a date? {ask('Tell us on WhatsApp')} before ordering.</>,
         },
         steps: [
           ['Add your words', 'Design it online, or send us the names and date on WhatsApp and we’ll lay it out for you.'],
@@ -396,7 +396,7 @@ export function categoryLandingFor(product: ProductFamily, subject: string, exam
             { href: '/aged-brass-250x150-oval-plaque', title: 'Oval', image: photo('aged-brass-250x150-oval-plaque'), alt: 'Oval aged brass plaque reading Grandad’s Garden in cream lettering, on a sage-green garden shed', priceSlug: 'aged-brass-250x150-oval-plaque' },
             { href: '/brushed-stainless-200x200-circle-plaque', title: 'Circle', image: photo('brushed-stainless-200x200-circle-plaque'), alt: 'Round brushed stainless steel house sign reading The Old School, 1874, on a grey stone wall', priceSlug: 'brushed-stainless-200x200-circle-plaque' },
             { href: '/orbital-brass-matt-lacquer-400x300-rect-plaque', title: 'Large', image: photo('orbital-brass-matt-lacquer-400x300-rect-plaque'), alt: 'Large orbital brass memorial plaque with a scalloped border for George and Mary Fenton, on an old stone garden wall', priceSlug: 'orbital-brass-matt-lacquer-400x300-rect-plaque' },
-            { href: '/portrait-plaques', title: 'With a portrait', image: `${memorial}/portrait-bramble-v3.webp`, alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel on an oak board, on our workshop bench after its final polish', priceSlug: 'a5-brushed-steel-personalised-plaque' },
+            { href: '/portrait-plaques', title: 'With a portrait', image: `${memorial}/portrait-bramble-v3.webp`, alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel on a light solid wood board, on our workshop bench after its final polish', priceSlug: 'a5-brushed-steel-personalised-plaque' },
           ],
           more: <>Another shape, or a size up to 600 mm? {ask('Send us the measurements on WhatsApp')} for a free quote. Made a design in ChatGPT? <a href="/ai-plaque-design">We’ll make it real</a>.</>,
         },

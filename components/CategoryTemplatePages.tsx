@@ -32,7 +32,7 @@ const metalChips: TemplateChip[] = [
 // "What fits" lines stay within one line of a phone card (about 27 characters).
 const memorialCards: TemplateCard[] = [
   { width: 150, height: 50, fits: 'A name and dates', group: 'small', lead: 'polished-brass' },
-  { width: 210, height: 148, name: 'A5', board: true, fits: 'On an oak or walnut board', group: 'medium', lead: 'brushed-stainless', leadTone: 'dark' },
+  { width: 210, height: 148, name: 'A5', board: true, fits: 'On light or dark wood', group: 'medium', lead: 'brushed-stainless', leadTone: 'dark' },
   { width: 200, height: 150, fits: 'A name, dates and a line', group: 'medium', lead: 'brushed-stainless' },
   { width: 148, height: 210, name: 'A5', fits: 'A short tribute, upright', group: 'medium', lead: 'orbital-brass-matt-lacquer' },
   { width: 297, height: 210, name: 'A4', fits: 'A longer tribute', group: 'large', lead: 'polished-stainless' },
@@ -84,7 +84,7 @@ function memorialPage(): TemplateConfig {
         { label: 'A4 · 297 × 210 mm', widthMm: 297, heightMm: 210, fits: 'A longer tribute or several names' },
         { label: '400 × 300 mm', widthMm: 400, heightMm: 300, fits: 'A family memorial, a poem or a portrait' },
       ],
-      note: <>Oak or walnut backing is priced on each plaque. <a href="/plaque-sizes">See every size and price</a>.</>,
+      note: <>Light or dark solid wood backing is priced on each plaque. <a href="/plaque-sizes">See every size and price</a>.</>,
     },
     sampleSlug: 'brushed-stainless-210x148-rect-dark-wood-plaque',
     wording: {
@@ -230,8 +230,8 @@ function gardenPage(): TemplateConfig {
   };
 }
 
-// Every tree plaque is shown and priced on the light oak board and black steel ground stake (owner msg 6506); the
-// photos show each plate on its oak board (no studio photo shows the stake), and the kit drawing shows all three.
+// Every tree plaque is shown and priced on the light solid wood board and black steel ground stake (owner msg 6506); the
+// photos show each plate on its light solid wood board (no studio photo shows the stake), and the kit drawing shows all three.
 const treeCards: TemplateCard[] = [
   { width: 210, height: 148, name: 'A5', fits: 'Suits most memorial trees', lead: 'brushed-brass', badge: 'Most popular size' },
   { width: 200, height: 150, fits: 'A name, dates and a line', lead: 'brushed-stainless' },
@@ -252,16 +252,16 @@ function treePage(): TemplateConfig {
   return {
     prefix: 'tree',
     title: 'Memorial tree plaques',
-    intro: <>Brass or stainless steel, on an oak board and ground stake that stands beside the tree, never fixed to it.</>,
+    intro: <>Brass or stainless steel, on a light solid wood board and ground stake that stands beside the tree, never fixed to it.</>,
     cards: treeCards,
     mount: 'stake',
-    included: 'oak board, stake, engraving & UK delivery included',
+    included: 'light solid wood board, stake, engraving & UK delivery included',
     chips: metalChips,
     faqTitle: 'Memorial tree plaque questions.',
     afterQuestions: () => <StakeKit id="tree-kit" />,
     sizes: {
       title: 'Sizes, on the board and stake.',
-      intro: 'Each drawn to scale, on its oak board and stake. A5 suits most memorial trees; choose A4 for a school, an orchard or several names.',
+      intro: 'Each drawn to scale, on its light solid wood board and stake. A5 suits most memorial trees; choose A4 for a school, an orchard or several names.',
       scale: 'stake',
       sizes,
       tableSizes: sizes,
@@ -269,7 +269,7 @@ function treePage(): TemplateConfig {
       more: <SizeLinksFold title="Just the plate, for a post, wall or fence" offers={plates} />,
     },
     sampleSlug: 'brushed-brass-210x148-rect-light-wood-plaque',
-    sampleNote: 'Sample A5 brass plaque and oak board. Your tree plaque proof will also include the ground stake.',
+    sampleNote: 'Sample A5 brass plaque and light solid wood board. Your tree plaque proof will also include the ground stake.',
     designHref: DESIGN_WITH_STAKE_HREF,
     wording: {
       title: 'Tree plaque wording ideas.',
@@ -339,7 +339,7 @@ function brassPage(): TemplateConfig {
         { label: 'A4 · 297 × 210 mm', widthMm: 297, heightMm: 210, fits: 'An opening or a longer tribute' },
         { label: '400 × 300 mm', widthMm: 400, heightMm: 300, fits: 'A dedication, a history or a portrait' },
       ],
-      note: <>Oak or dark wood backing is priced on each plaque.</>,
+      note: <>Light or dark solid wood backing is priced on each plaque.</>,
       more: <SizeLinksFold title="Every brass size and finish" offers={merchantOffers.filter(offer => BRASS.includes(offer.preset.material as Finish) && !offer.preset.wood)} />,
     },
     sampleSlug: 'brushed-brass-210x148-rect-plaque',
@@ -418,7 +418,7 @@ function stainlessPage(): TemplateConfig {
 
 const openingCards: TemplateCard[] = [
   { width: 297, height: 210, name: 'A4', fits: 'Who opened it, and when', lead: 'brushed-stainless', badge: 'The usual size' },
-  { width: 297, height: 210, name: 'A4', board: true, fits: 'On an oak or walnut board', lead: 'polished-brass', leadTone: 'light' },
+  { width: 297, height: 210, name: 'A4', board: true, fits: 'On light or dark wood', lead: 'polished-brass', leadTone: 'light' },
   { width: 300, height: 200, fits: 'Long names, a wider plate', lead: 'polished-stainless' },
   { width: 210, height: 148, name: 'A5', board: true, fits: 'A room name, on wood', lead: 'aged-brass', leadTone: 'light' },
   { width: 400, height: 300, board: true, fits: 'A building, on a large board', lead: 'brushed-stainless', leadTone: 'dark' },
@@ -451,7 +451,7 @@ function openingPage(): TemplateConfig {
         { label: 'A4 · 297 × 210 mm', widthMm: 297, heightMm: 210, fits: 'The usual size for an opening' },
         { label: '400 × 300 mm', widthMm: 400, heightMm: 300, fits: 'A building, or a list of supporters' },
       ],
-      note: <>Oak or dark wood backing is priced on each plaque.</>,
+      note: <>Light or dark solid wood backing is priced on each plaque.</>,
     },
     sampleSlug: 'brushed-stainless-297x210-rect-plaque',
     steps: [

@@ -150,7 +150,7 @@ export function HomeQualitySection({ compact = false }: { compact?: boolean }) {
 const homePortraits = [
   { src: '/site-images/portraits/pim-millie-photo.webp', width: 600, height: 800, alt: 'Millie the cat in her owner’s everyday photo', caption: 'Millie’s photo' },
   { src: '/site-images/portraits/pim-millie-plaque.webp', width: 720, height: 1280, alt: 'Millie’s portrait engraved on her finished metal plaque, photographed', caption: 'Her finished plaque', top: true },
-  { src: '/site-images/portraits/pim-alfie-polished-brass-480.webp', width: 480, height: 680, alt: 'Portrait memorial plaque of Alfie the spaniel in polished brass on light oak', caption: 'Alfie · polished brass' },
+  { src: '/site-images/portraits/pim-alfie-polished-brass-480.webp', width: 480, height: 680, alt: 'Portrait memorial plaque of Alfie the spaniel in polished brass on light wood', caption: 'Alfie · polished brass' },
   { src: '/site-images/portraits/pim-thomas-polished-steel-480.webp', width: 480, height: 679, alt: 'Family memorial plaque with a portrait of Thomas in polished stainless steel', caption: 'Thomas · polished steel' },
 ];
 

@@ -1253,7 +1253,7 @@ const App: React.FC = () => {
   };
 
   // The tree page's "/design?backing=stake" links: open on the plaque its "Design online" starts with, or on the
-  // catalogue plaque one of its prices is for ("&plaque=<slug>"), already on the light oak board and the black steel
+  // catalogue plaque one of its prices is for ("&plaque=<slug>"), already on the light solid wood board and the black steel
   // ground stake (owner msgs 6394, 6506). Proof and checkout links take precedence.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

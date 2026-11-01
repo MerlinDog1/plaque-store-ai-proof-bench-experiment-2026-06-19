@@ -1,3 +1,4 @@
+// 1 Nov 2026: owner requests light/dark solid wood, never a species; assertions follow the customer wording.
 // Local browser check of the "products first" category template (components/CategoryTemplate.tsx, 1 Nov 2026): the
 // eight template pages (memorial, bench, garden, tree, brass, stainless steel, opening, custom).
 // Phone 390 × 844 and computer 1440 × 900, on a local build only (external requests blocked, browser marked internal):
@@ -172,7 +173,7 @@ async function checkCards(page, context, slug, stake) {
       const finishWord = label.split(',')[0].replace(/^On /, '').toLowerCase().replace(' steel', '');
       assert(html.includes(`<link rel="canonical" href="https://instaplaque.co.uk${productHref}"`), `${slug} card ${index + 1}: ${productHref} is that product's page`);
       if (!pickWood) assert(heading.toLowerCase().includes(finishWord), `${slug} card ${index + 1}: ${productHref} heading "${heading}" names ${finishWord}`);
-      else assert(heading.toLowerCase().includes(finishWord.includes('oak') ? 'light wood' : 'dark wood'), `${slug} card ${index + 1}: ${productHref} heading "${heading}" names the wood`);
+      else assert(heading.toLowerCase().includes(finishWord.includes('light wood') ? 'light wood' : 'dark wood'), `${slug} card ${index + 1}: ${productHref} heading "${heading}" names the wood`);
       before.href = after.href; before.src = after.src;
     }
   }

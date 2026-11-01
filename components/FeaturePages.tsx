@@ -111,11 +111,11 @@ const portraitSteps = [
 
 const portraitGallery = [
   { file: 'thomas-polished-steel', width: 480, height: 679, title: 'Family memorial', detail: 'Polished stainless steel', alt: 'Family memorial plaque for Thomas with an engraved portrait, in polished stainless steel on stone' },
-  { file: 'alfie-polished-brass', width: 480, height: 680, title: 'Dog memorial', detail: 'Polished brass on light oak', alt: 'Spaniel portrait memorial plaque for Alfie in polished brass on light oak' },
+  { file: 'alfie-polished-brass', width: 480, height: 680, title: 'Dog memorial', detail: 'Polished brass on light wood', alt: 'Spaniel portrait memorial plaque for Alfie in polished brass on light wood' },
   { file: 'lily-brushed-steel', width: 480, height: 640, title: 'Cat portrait', detail: 'Brushed stainless steel', alt: 'Portrait of Lily the tabby-and-white cat above a family inscription on brushed stainless steel' },
-  { file: 'nell-orbital-brass', width: 480, height: 680, title: 'Sleeping cat', detail: 'Orbital brass on mahogany', alt: 'Full sleeping-cat portrait of Nell on orbital brass with a mahogany board' },
-  { file: 'anne-mahogany-easel', width: 480, height: 360, title: 'On an easel stand', detail: 'Polished steel, dark mahogany', alt: 'Memorial portrait plaque for Anne in polished stainless steel on a dark mahogany easel stand' },
-  { file: 'willow-aged-brass', width: 480, height: 360, title: 'Horse nameplate', detail: 'Aged brass on mahogany', alt: 'Stable nameplate with an engraved horse head for Willowbrook Belle, in aged brass on dark mahogany' },
+  { file: 'nell-orbital-brass', width: 480, height: 680, title: 'Sleeping cat', detail: 'Orbital brass on dark wood', alt: 'Full sleeping-cat portrait of Nell on orbital brass with a dark solid wood board' },
+  { file: 'anne-mahogany-easel', width: 480, height: 360, title: 'On an easel stand', detail: 'Polished steel, dark wood', alt: 'Memorial portrait plaque for Anne in polished stainless steel on a dark solid wood easel stand' },
+  { file: 'willow-aged-brass', width: 480, height: 360, title: 'Horse nameplate', detail: 'Aged brass on dark wood', alt: 'Stable nameplate with an engraved horse head for Willowbrook Belle, in aged brass on dark wood' },
   { file: 'ruby-folded-steel', width: 480, height: 360, title: 'Freestanding', detail: 'Folded brushed steel', alt: 'Freestanding folded stainless steel portrait plaque of Ruby the Siamese cat on a windowsill' },
 ];
 
@@ -123,10 +123,10 @@ const portraitGallery = [
 // shown on the memorial and tree pages (portraitCards in CategoryLanding.tsx). Real-looking photos made from each plaque's
 // own artwork, in a setting that fits its story; not all on ground stakes (owner msgs 5992, 6056, 6085).
 const portraitsInPlace = [
-  { src: '/site-images/memorial/portrait-george-v3.webp', alt: 'Close-up of a brass memorial plaque with an engraved portrait of George Hartley, on an oak board and ground stake under a young oak by an allotment gate', caption: 'George · brass, under the oak he planted' },
-  { src: '/site-images/memorial/portrait-bramble-v3.webp', alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel on an oak board, on our workshop bench after its final polish', caption: 'Bramble · on our workshop bench' },
-  { src: '/site-images/memorial/portrait-daniel-v2.webp', alt: 'Brass memorial plaque with an engraved portrait of Daniel Price on an oak board, fixed to the painted timber wall of a sailing club boathouse', caption: 'Daniel · on the boathouse wall' },
-  { src: '/site-images/memorial/portrait-ron-pat-v3.webp', alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on an oak board and ground stake under their apple tree', caption: 'Ron & Pat · under their apple tree' },
+  { src: '/site-images/memorial/portrait-george-v3.webp', alt: 'Close-up of a brass memorial plaque with an engraved portrait of George Hartley, on a light solid wood board and ground stake under a young oak by an allotment gate', caption: 'George · brass, under the oak he planted' },
+  { src: '/site-images/memorial/portrait-bramble-v3.webp', alt: 'Brass pet memorial plaque with an engraved portrait of Bramble the springer spaniel on a light solid wood board, on our workshop bench after its final polish', caption: 'Bramble · on our workshop bench' },
+  { src: '/site-images/memorial/portrait-daniel-v2.webp', alt: 'Brass memorial plaque with an engraved portrait of Daniel Price on a light solid wood board, fixed to the painted timber wall of a sailing club boathouse', caption: 'Daniel · on the boathouse wall' },
+  { src: '/site-images/memorial/portrait-ron-pat-v3.webp', alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on a light solid wood board and ground stake under their apple tree', caption: 'Ron & Pat · under their apple tree' },
 ];
 const portraitFrom = merchantProducts.find(item => item.slug === 'a5-brushed-steel-personalised-plaque')?.startingFrom || '£95.50';
 
@@ -214,7 +214,7 @@ export function ShopPortraitPlaques() {
       <section className="shop-section cat-portraits" aria-labelledby="portrait-place-heading">
         <p className="shop-kicker">In place</p>
         <h2 id="portrait-place-heading">Portrait plaques where they belong.</h2>
-        <p className="cat-section-intro">On an oak board, fixed to a wall or on a ground stake beside a tree or a favourite spot. <a href="/tree-memorial-plaques">See memorial tree plaques</a>.</p>
+        <p className="cat-section-intro">On a light solid wood board, fixed to a wall or on a ground stake beside a tree or a favourite spot. <a href="/tree-memorial-plaques">See memorial tree plaques</a>.</p>
         <div className="cat-scroll-row cat-portraits-row">
           {portraitsInPlace.map(card => (
             <figure key={card.src}>
@@ -236,7 +236,7 @@ export function ShopPortraitPlaques() {
         <div>
           <article><h3>Three sizes</h3><p>A5 (210 × 148 mm), A4 (297 × 210 mm) or A3 (420 × 297 mm), in portrait or landscape. A full-length portrait or longer wording needs more room, and your sketch shows how it fits.</p></article>
           <article><h3>Six metal finishes</h3><p>Brushed, polished, aged or orbital brass, or brushed or polished stainless steel, all in 1.5 mm solid metal.</p></article>
-          <article><h3>On the wall or freestanding</h3><p>Fix it to a wall with matching screw caps, mount it on oak or mahogany backing, or choose a freestanding folded plaque or a rear easel stand for a shelf or windowsill.</p></article>
+          <article><h3>On the wall or freestanding</h3><p>Fix it to a wall with matching screw caps, mount it on light or dark solid wood backing, or choose a freestanding folded plaque or a rear easel stand for a shelf or windowsill.</p></article>
           <article><h3>Price</h3><p>A5 portrait plaques start from £95.50, with UK delivery included. Your free sketch comes with an exact quote, and you only pay once you approve.</p></article>
         </div>
       </section>

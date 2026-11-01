@@ -22,7 +22,8 @@ export function exampleFor(slug: string): CatalogueExample | undefined {
 const isBench = (offer: Offer) => offer.format === 'Bench';
 const isPortraitSize = (offer: Offer) => Math.min(offer.preset.width, offer.preset.height) >= 148 && Math.max(offer.preset.width, offer.preset.height) >= 210;
 const finish = (offer: Offer) => offer.label.toLowerCase();
-const backing = (offer: Offer) => (!offer.preset.wood ? '' : offer.preset.woodTone === 'dark' ? ' on dark walnut' : ' on light oak');
+// Full descriptions name solid wood; compact titles and captions use light/dark wood.
+const backing = (offer: Offer, full = false) => (!offer.preset.wood ? '' : ` on ${offer.preset.woodTone === 'dark' ? 'dark' : 'light'}${full ? ' solid' : ''} wood`);
 const shapeWord = (offer: Offer) => (offer.preset.shape === 'oval' ? 'oval ' : offer.preset.shape === 'circle' ? 'round ' : '');
 
 /** "a" or "an" for the word that follows ("an A5", "an aged brass"). */
@@ -136,7 +137,7 @@ export function productIntro(slug: string) {
   const example = exampleFor(slug);
   const shown = example ? ` The ${pictureWord(slug)} shows it as ${example.use}${example.portrait ? ' with an engraved portrait' : ''}; your own wording replaces it.` : '';
   const size = sizeName(offer);
-  return `${an(size) === 'an' ? 'An' : 'A'} ${size} ${shapeWord(offer)}${finish(offer)} plaque${backing(offer)}: ${suits(offer)}. It takes ${wordingFit(offer)}.${shown} See a free proof before you pay, or send us your words on WhatsApp and we'll design it for you.`;
+  return `${an(size) === 'an' ? 'An' : 'A'} ${size} ${shapeWord(offer)}${finish(offer)} plaque${backing(offer, true)}: ${suits(offer)}. It takes ${wordingFit(offer)}.${shown} See a free proof before you pay, or send us your words on WhatsApp and we'll design it for you.`;
 }
 
 export function heroNote(slug: string) {
@@ -178,7 +179,7 @@ function shortUse(offer: Offer) {
 export function seoDescriptionFor(slug: string) {
   const offer = offerFor(slug);
   if (!offer) return '';
-  return `${offer.size} ${finish(offer)} plaque${backing(offer)} for ${shortUse(offer)}. Free proof, or we design it for you on WhatsApp. UK delivery included.`;
+  return `${offer.size} ${finish(offer)} plaque${backing(offer, true)} for ${shortUse(offer)}. Free proof, or we design it for you on WhatsApp. UK delivery included.`;
 }
 
 /** Google Shopping title: what people search for first, then the exact size. */

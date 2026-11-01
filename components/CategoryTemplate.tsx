@@ -27,7 +27,7 @@ import type { Inscription } from './CategoryLanding';
 // estimatePlaquePrice); no amount is typed into the copy. Only studio photos lead a card; a finish without one shows
 // its flat design view, labelled as such, and a finish with neither (only an in-place photo) is left off the card.
 // Stage 2 (garden, tree, brass, stainless, opening, custom) added: metal-only pages (`finishes`), the tree page's
-// oak board and ground stake (`mount: 'stake'`), link chips, card badges, a grid-end tile and page-specific sections.
+// light solid wood board and ground stake (`mount: 'stake'`), link chips, card badges, a grid-end tile and page-specific sections.
 
 type Offer = (typeof merchantOffers)[number];
 export type Finish = 'polished-brass' | 'brushed-brass' | 'orbital-brass-matt-lacquer' | 'aged-brass' | 'polished-stainless' | 'brushed-stainless';
@@ -44,8 +44,8 @@ export const templateFinishes: Array<{ key: Finish; label: string; short: string
   { key: 'brushed-stainless', label: 'Brushed stainless steel', short: 'Brushed steel', file: 'brushed-stainless', story: 'Brushed stainless steel' },
 ];
 const woods: Array<{ tone: WoodTone; label: string; short: string; file: string; story: string }> = [
-  { tone: 'light', label: 'light oak', short: 'oak', file: 'light-wood', story: 'Light wood backing' },
-  { tone: 'dark', label: 'dark walnut', short: 'walnut', file: 'dark-wood', story: 'Dark wood backing' },
+  { tone: 'light', label: 'light wood', short: 'light wood', file: 'light-wood', story: 'Light wood backing' },
+  { tone: 'dark', label: 'dark wood', short: 'dark wood', file: 'dark-wood', story: 'Dark wood backing' },
 ];
 export const BRASS: Finish[] = ['polished-brass', 'brushed-brass', 'orbital-brass-matt-lacquer', 'aged-brass'];
 export const STAINLESS: Finish[] = ['polished-stainless', 'brushed-stainless'];
@@ -57,7 +57,7 @@ export type TemplateCard = {
   width: number;
   height: number;
   shape?: 'rect' | 'oval' | 'circle';
-  /** The wood-backed versions, in light oak and dark walnut. */
+  /** The wood-backed versions, in light wood and dark wood. */
   board?: boolean;
   /** "A5", "A4": shown before the millimetres. */
   name?: string;
@@ -76,15 +76,15 @@ export type TemplateCard = {
 export type TemplateChip = { key: string; label: string; finishes?: Finish[]; group?: string; board?: true; note?: string };
 /** A chip that opens another page instead (the garden page's "On a ground stake" opens the tree page). */
 export type TemplateLinkChip = { href: string; label: string };
-/** What a page sells: only some finishes (the brass and stainless steel pages), or every plaque on the oak board and
+/** What a page sells: only some finishes (the brass and stainless steel pages), or every plaque on the light solid wood board and
  * ground stake (the tree page, owner msg 6506: priced with both, opening the designer on that plaque on both). */
 export type CardScope = { finishes?: Finish[]; mount?: 'stake' };
 
 type CardImage = { src: string; srcSet?: string; drawing: boolean };
-/** `label`: "Polished stainless steel on dark walnut" (screen readers, swatch titles); `short`: "Polished steel on walnut",
+/** `label`: "Polished stainless steel on dark wood" (screen readers, swatch titles); `short`: "Polished steel on dark wood",
  * on the photo. `href`: the product page, or on the tree page the designer on that plaque on the board and stake. */
 type CardOption = { slug: string; href: string; finish: Finish; tone?: WoodTone; price: number; days: number; title: string; label: string; short: string; image: CardImage;
-  /** The catalogue plaque that gets made (on the tree page, the plate's oak-board version): its days are `days`. */
+  /** The catalogue plaque that gets made (on the tree page, the plate's light-wood-board version): its days are `days`. */
   made: string };
 export type ResolvedCard = { card: TemplateCard; name: string; options: CardOption[]; lead: CardOption; from: number };
 
@@ -108,8 +108,8 @@ function cardImage(offer: Offer): CardImage | null {
 
 /** A card's options from the catalogue. Throws (failing the build) if the card's lead has no studio photo, or if a
  * finish left off for want of a picture is cheaper than the card's from-price, which would then be wrong.
- * On the tree page (`mount: 'stake'`) each option is the plate on the light oak board and ground stake: pictured by
- * the studio photo of the plate on its oak board, priced with the board and stake as the designer prices it
+ * On the tree page (`mount: 'stake'`) each option is the plate on the light solid wood board and ground stake: pictured by
+ * the studio photo of the plate on its light solid wood board, priced with the board and stake as the designer prices it
  * (onStakePrice), and opening the designer on that plaque on both (designWithStakeHref). */
 export function resolveCard(card: TemplateCard, scope: CardScope = {}): ResolvedCard {
   const name = sizeName(card);
@@ -134,7 +134,7 @@ export function resolveCard(card: TemplateCard, scope: CardScope = {}): Resolved
       if (stake) {
         const plate = bare(offer);
         options.push({ slug: plate.slug, href: designWithStakeHref(plate.slug), finish: finish.key, tone: 'light', price: priceOf(offer), days: offer.productionDays, made: offer.slug,
-          title: `${plate.title}, on an oak board and ground stake`, label: `${finish.label} on an oak board`, short: `${finish.short} on oak`, image });
+          title: `${plate.title}, on a light solid wood board and ground stake`, label: `${finish.label} on a light solid wood board`, short: `${finish.short} on light wood`, image });
         continue;
       }
       options.push({ slug: offer.slug, href: `/${offer.slug}`, finish: finish.key, tone: wood?.tone, price: offer.price, days: offer.productionDays, made: offer.slug, title: offer.title,
@@ -203,7 +203,7 @@ function GridCard({ item, finishes, mounted, priority, wide, stake }: { item: Re
       aria-pressed={selected} aria-label={`${label}, ${formatGbp(option.price)}`} title={label} onClick={onPick} />
     : <a key={key} className={`cat-tpl-swatch${selected ? ' is-selected' : ''}`} style={swatchStyle(file)} href={option.href}
       data-price={option.price} aria-label={`${label}, ${formatGbp(option.price)}`} title={label} />);
-  const alt = stake ? `${current.title}: shown on its oak board, the ground stake not pictured, with example wording`
+  const alt = stake ? `${current.title}: shown on its light solid wood board, the ground stake not pictured, with example wording`
     : `${current.title}, shown with example wording${current.image.drawing ? ' (flat design view)' : ''}`;
   return (
     <li className={`cat-tpl-card${item.card.board ? ' is-board' : ''}`} data-options={item.options.length} data-offers={item.options.map(option => option.made).join(' ')}>
@@ -330,7 +330,7 @@ const cheapestOf = (size: PriceTableSize, finishes?: Finish[]) => merchantOffers
 const toScale = (mm: number) => `calc(${mm}px * var(--cat-tpl-mm))`;
 const plateStyle = (widthMm: number, heightMm: number): React.CSSProperties => ({ width: toScale(widthMm), height: toScale(heightMm) });
 
-/** A plate on its oak board with the ground stake below, to the strip's scale: the board is WOOD_BACKING_EXTRA_MM
+/** A plate on its light solid wood board with the ground stake below, to the strip's scale: the board is WOOD_BACKING_EXTRA_MM
  * larger each way, and the stake shows as much as the designer's preview and the price table draw. */
 function StakeMount({ size }: { size: TemplateSize }) {
   const board = { w: size.widthMm + WOOD_BACKING_EXTRA_MM, h: size.heightMm + WOOD_BACKING_EXTRA_MM };
@@ -346,7 +346,7 @@ function StakeMount({ size }: { size: TemplateSize }) {
 }
 
 /** Every size drawn to one scale beside an everyday object, each linking to its cheapest plaque at that price; the
- * size × metal price table folded below it. On the tree page (`mount: 'stake'`) each plate stands on its oak board and
+ * size × metal price table folded below it. On the tree page (`mount: 'stake'`) each plate stands on its light solid wood board and
  * ground stake, priced with both and opening the designer on it, as the price table does. */
 function SizeStrip({ id, title, intro, scale, reference, sizes, tableSizes, note, more, mount, finishes }: {
   id: string; title: string; intro: string; scale: 'wall' | 'bench' | 'stake'; reference?: keyof typeof REFERENCES;
@@ -382,7 +382,7 @@ function SizeStrip({ id, title, intro, scale, reference, sizes, tableSizes, note
       <details className="cat-tpl-fold">
         <summary>Compare all sizes and prices<span aria-hidden="true">+</span></summary>
         <div>
-          <PriceTable sizes={tableSizes} mount={mount} caption={`${title} Prices by size and metal${onStake ? ', on an oak board and ground stake' : ''}.`} />
+          <PriceTable sizes={tableSizes} mount={mount} caption={`${title} Prices by size and metal${onStake ? ', on a light solid wood board and ground stake' : ''}.`} />
           <p className="shop-smallprint">{onStake ? priceTableIncludesOnStake : priceTableIncludes}{note && <> {note}</>}</p>
           {more}
         </div>
@@ -415,7 +415,7 @@ function ProofBlock({ id, sampleSlug, sampleNote, steps, subject, designHref, ex
         <ProofPdfStack href={samplePdfFor(sampleSlug)} sizes="(max-width: 720px) 34vw, 300px" label="Open a sample proof (PDF)"
           front={sampleProofPageFor(sampleSlug, 1, `Sample proof cover: ${sample.title}, with example wording`)}
           back={sampleProofPageFor(sampleSlug, 2, `Measured drawing, finish and fixings for ${sample.title}`)} />
-        <figcaption><a href={samplePdfFor(sampleSlug)} target="_blank" rel="noopener">Sample proof (PDF) ↗</a> {sampleNote || `${sample.size} ${sample.label.toLowerCase()}${sample.preset.wood ? ` on ${sample.preset.woodTone === 'dark' ? 'dark walnut' : 'light oak'}` : ''}.`}</figcaption>
+        <figcaption><a href={samplePdfFor(sampleSlug)} target="_blank" rel="noopener">Sample proof (PDF) ↗</a> {sampleNote || `${sample.size} ${sample.label.toLowerCase()}${sample.preset.wood ? ` on ${sample.preset.woodTone === 'dark' ? 'dark wood' : 'light wood'}` : ''}.`}</figcaption>
       </figure>
       <div className="cat-tpl-actions">
         <DesignLink onStart={onLaunch} href={designHref}>Design online</DesignLink>
@@ -500,7 +500,7 @@ function WordingBlock({ id, title, intro, inscriptions, link }: { id: string; ti
 }
 
 /** The tree page's kit, drawn and labelled (memorial research c, /tree-memorial-plaques item 3): an A5 plate on its
- * oak board on the black steel ground stake, to scale, with the sizes from services/checkoutPolicy.mjs. The stake's top
+ * light solid wood board on the black steel ground stake, to scale, with the sizes from services/checkoutPolicy.mjs. The stake's top
  * is fixed to the back of the board; below the ground it is drawn cut short (the list gives its full length). */
 export function StakeKit({ id }: { id: string }) {
   const plate = { w: 210, h: 148 };
@@ -522,7 +522,7 @@ export function StakeKit({ id }: { id: string }) {
       <h2 id={`${id}-heading`}>What you get.</h2>
       <div className="cat-tpl-kit-body">
         <svg className="cat-tpl-kit-drawing" viewBox={`0 0 ${board.w + side * 2} ${ground + buried + 8}`} role="img"
-          aria-label="Drawing to scale: an A5 plate on its oak board, on a black steel ground stake pushed into the ground">
+          aria-label="Drawing to scale: an A5 plate on its light solid wood board, on a black steel ground stake pushed into the ground">
           <rect x={stakeX} y={board.h / 2} width={GROUND_STAKE_WIDTH_MM} height={ground - board.h / 2} fill="#25292b" />
           <rect x={stakeX} y={ground} width={GROUND_STAKE_WIDTH_MM} height={buried - 14} fill="#25292b" opacity="0.3" />
           <path d={`M${stakeX} ${ground + buried - 14} l7.5 8 l7.5 -8 l7.5 8 l7.5 -8`} fill="none" stroke="#25292b" strokeWidth="1.6" opacity="0.5" />
@@ -536,7 +536,7 @@ export function StakeKit({ id }: { id: string }) {
         </svg>
         <ol className="cat-tpl-kit-list">
           <li><strong>Your plate</strong> in brass or stainless steel, 1.5 mm solid metal, engraved with your words.</li>
-          <li><strong>A solid oak board</strong>, {WOOD_BACKING_EXTRA_MM} mm bigger than the plate each way: {board.w} × {board.h} mm for an A5 plate.</li>
+          <li><strong>A light solid wood board</strong>, {WOOD_BACKING_EXTRA_MM} mm bigger than the plate each way: {board.w} × {board.h} mm for an A5 plate.</li>
           <li><strong>A black steel ground stake</strong>, {GROUND_STAKE_LENGTH} long, {GROUND_STAKE_WIDTH_MM} mm wide and {GROUND_STAKE_THICKNESS_MM} mm thick, fixed to the back of the board.</li>
         </ol>
       </div>
@@ -611,7 +611,7 @@ export type TemplateConfig = {
   links?: TemplateLinkChip[];
   /** Only these finishes, on the cards and in the finishes row (the brass and stainless steel pages). */
   finishes?: Finish[];
-  /** 'stake': every plaque on the oak board and ground stake (the tree page). */
+  /** 'stake': every plaque on the light solid wood board and ground stake (the tree page). */
   mount?: 'stake';
   /** The facts line's from-price where the page's own is not a catalogue price (the custom page). */
   from?: { value: number; slug: string };

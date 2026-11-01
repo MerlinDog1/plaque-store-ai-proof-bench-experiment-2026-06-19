@@ -854,7 +854,7 @@ export const downloadPdf = async (sourceSvg: SVGSVGElement, state: PlaqueState, 
       ["Fixing", state.fixing === Fixing.None ? "No fixings" : labelFromSlug(state.fixing)],
       ["Border", state.border ? labelFromSlug(state.borderStyle) : "No border"],
       ["Wood backing", state.wood
-        ? `${labelFromSlug(state.woodTone)} wood, ${state.woodEdge} edge${hasGroundStake(state) ? ", black steel ground stake" : ""}`
+        ? `${labelFromSlug(state.woodTone)} solid wood, ${state.woodEdge} edge${hasGroundStake(state) ? ", black steel ground stake" : ""}`
         : "No backing"],
       ["Estimate", `${formatPrice(options.price)} inc. UK delivery`],
     ];

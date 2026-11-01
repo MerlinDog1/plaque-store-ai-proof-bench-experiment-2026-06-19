@@ -1,10 +1,11 @@
+// 1 Nov 2026: owner requests light/dark solid wood, never a species; assertions follow the customer wording.
 // The "products first" category template pages (components/CategoryTemplate.tsx, 1 Nov 2026, owner msg 8384): memorial
 // and bench (stage 1), garden, tree, brass, stainless steel, opening and custom (stage 2), checked in the final HTML
 // (dist, or DIST=<folder>):
 // - title, meta description, H1 and canonical are the live ones (as production's source, ec24ba1, builds them);
 // - the FAQPage schema is exactly the six questions and answers shown on the page;
 // - one card per size, each leading with a studio photo of the plaque it links to, every card and finish link reaching
-//   a built product page (on the tree page, the designer on that plate, on the oak board and ground stake), and the
+//   a built product page (on the tree page, the designer on that plate, on the light solid wood board and ground stake), and the
 //   finish links present as plain links for visitors without JavaScript;
 // - each card's lead-time line names the slowest catalogue production days (offer.productionDays) of the plaques
 //   behind it (its data-offers); a card without one has only plaques made in the standard 5 working days; the facts
@@ -50,7 +51,7 @@ const pages = [
     links: [...["/tree-memorial-plaques", "/bench-plaques", "/memorial-plaques", "/memorial-plaque-wording", "/opening-plaques", "/plaque-sizes"], ...common] },
   { slug: 'tree-memorial-plaques', cards: 6, stake: true, h1: "Memorial tree plaques",
     title: "Memorial Tree Plaques UK | Engraved Tree Dedication Plaques | InstaPlaque",
-    description: "Personalised memorial tree plaques in brass or stainless steel, on an oak board and black steel ground stake beside the tree. Free proof, or we design it on WhatsApp.",
+    description: "Personalised memorial tree plaques in brass or stainless steel, on a light solid wood board and black steel ground stake beside the tree. Free proof, or we design it on WhatsApp.",
     faqs: ["Can I fix a plaque to a tree?", "Can I put one in a churchyard, park or memorial woodland?", "What size should a memorial tree plaque be?", "What should a tree memorial plaque say?", "Will the plaque last outdoors?", "Can I have just the plate, for a post or fence?"],
     links: [...["/garden-plaques", "/memorial-plaques", "/memorial-plaque-wording"], ...common] },
   { slug: 'brass-plaques', cards: 8, h1: "Personalised brass plaques",
@@ -122,14 +123,14 @@ for (const page of pages) {
     const swatches = [...card.querySelectorAll('a.cat-tpl-swatch')].map(swatch => swatch.getAttribute('href'));
     assert(swatches.length >= 2 && swatches.includes(href), `${page.slug} ${name}: finish links, the card's own among them`);
     if (page.stake) {
-      // The designer on the plate, on the light oak board and stake; pictured by the plate on its oak board.
+      // The designer on the plate, on the light solid wood board and stake; pictured by the plate on its light solid wood board.
       const plateOf = link => {
         const url = new URL(link, site);
         const plate = offers.get(url.searchParams.get('plaque'));
         assert(url.pathname === '/design' && url.searchParams.get('backing') === 'stake' && built('/design') && plate && !plate.preset.wood && built(`/${plate.slug}`),
           `${page.slug} ${name}: ${link} opens the designer on a built plate, on the board and stake`);
         const board = made.find(offer => offer.preset.material === plate.preset.material && sameSize(offer, plate));
-        assert(board && board.preset.wood && board.preset.woodTone === 'light', `${page.slug} ${name}: ${plate.slug} is made on its light oak board`);
+        assert(board && board.preset.wood && board.preset.woodTone === 'light', `${page.slug} ${name}: ${plate.slug} is made on its light solid wood board`);
         return { plate, board };
       };
       const { board } = plateOf(href);

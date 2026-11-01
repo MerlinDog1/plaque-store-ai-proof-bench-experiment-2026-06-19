@@ -9,7 +9,7 @@ import type { PlaqueState } from '../types';
 export const groundStakeVisibleMm = (boardHeightMm: number) =>
   Math.round(Math.min(160, Math.max(90, boardHeightMm * 0.6)));
 
-// The tree page's link (owner msg 6394): opens the designer on its A5 plaque already on the light oak board and
+// The tree page's link (owner msg 6394): opens the designer on its A5 plaque already on the light solid wood board and
 // ground stake, as on the Nicola order. App.tsx reads it once, then drops it from the address.
 export const DESIGN_WITH_STAKE_HREF = '/design?backing=stake';
 export const DESIGN_WITH_STAKE_PARAM = { name: 'backing', value: 'stake' } as const;
@@ -21,7 +21,7 @@ export const DESIGN_PLAQUE_PARAM = 'plaque';
 export const designWithStakeHref = (plaqueSlug?: string) =>
   plaqueSlug ? `${DESIGN_WITH_STAKE_HREF}&${DESIGN_PLAQUE_PARAM}=${encodeURIComponent(plaqueSlug)}` : DESIGN_WITH_STAKE_HREF;
 
-/** A plaque on the light oak board (bevel edge) with the ground stake; a plaque already on wood keeps its board. */
+/** A plaque on the light solid wood board (bevel edge) with the ground stake; a plaque already on wood keeps its board. */
 export const onBoardAndStake = (preset: Partial<PlaqueState>): Partial<PlaqueState> => ({
   ...preset,
   wood: true,
