@@ -253,7 +253,7 @@ function treePage(): TemplateConfig {
     intro: <>Brass or stainless steel, on an oak board and ground stake that stands beside the tree, never fixed to it.</>,
     cards: treeCards,
     mount: 'stake',
-    included: 'oak board, ground stake, engraving and UK delivery included',
+    included: 'oak board, stake, engraving & UK delivery included',
     chips: metalChips,
     faqTitle: 'Memorial tree plaque questions.',
     afterQuestions: () => <StakeKit id="tree-kit" />,
@@ -460,17 +460,12 @@ function openingPage(): TemplateConfig {
     proofExtra: (
       <div className="cat-tpl-org">
         <h3>For schools, councils and companies</h3>
-        <ul>
-          <li>Share the PDF proof with colleagues and agree one version before anyone pays.</li>
-          <li>Payment is by card when you order. Need another way to pay? Ask us on WhatsApp first.</li>
-          <li>We’re not VAT registered, so there’s no VAT to add.</li>
-          <li>Several plaques for one building? Send us the list on WhatsApp.</li>
-        </ul>
+        <p>Share the PDF proof with colleagues and agree one version before anyone pays. Payment is by card when you order, with no VAT to add: we’re not VAT registered. Another way to pay, or several plaques for one building? Ask us on WhatsApp first.</p>
       </div>
     ),
     wording: {
       title: 'Opening plaque wording ideas.',
-      intro: 'Check the venue name, titles (such as Cllr, MP or OBE), spellings and the date with everyone involved before you approve the proof.',
+      intro: 'Check names, titles (such as Cllr, MP or OBE), spellings and the date with everyone before you approve.',
       inscriptions: [
         { title: 'A building opening', lines: ['Riverside Community Centre', 'officially opened by', '[Name and title]', 'on [Day Month Year]'] },
         { title: 'A new room', lines: ['The Arthur Lee Room', 'Opened on 9 September 2024'] },

@@ -3,7 +3,8 @@ import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogu
 import { studioPhotoPath, studioPhotos } from '../services/studioPhotos.mjs';
 import { categoryParentFor, materialStories, photo600, type ProductFamily } from '../services/commerce';
 import { optimisedSrcSet } from '../services/imageUrls';
-import { promoVideoPath } from '../services/promoVideo.mjs';
+import { promoVideo, promoVideoPath } from '../services/promoVideo.mjs';
+import { PromoFilm } from './PromoVideo';
 import { designWithStakeHref, groundStakeVisibleMm } from '../services/groundStake';
 import { GROUND_STAKE_LENGTH, GROUND_STAKE_THICKNESS_MM, GROUND_STAKE_WIDTH_MM, WOOD_BACKING_EXTRA_MM } from '../services/pricing';
 import { finishOutdoors } from '../services/catalogueContent';
@@ -146,21 +147,21 @@ export function resolveCard(card: TemplateCard, scope: CardScope = {}): Resolved
   return { card, name, options, lead, from };
 }
 
-/** The production days on a page: the usual figure, then aged brass and wood backing where the page sells them. */
-export function leadTimeNote(cards: ResolvedCard[]) {
-  const options = cards.flatMap(item => item.options);
-  const usual = Math.min(...options.map(option => option.days));
-  const aged = options.filter(option => option.finish === 'aged-brass' && !option.tone).map(option => option.days);
-  const wood = options.filter(option => option.tone).map(option => option.days);
-  const range = (days: number[]) => (Math.min(...days) === Math.max(...days) ? `${days[0]}` : `${Math.min(...days)}–${Math.max(...days)}`);
-  if (wood.length === options.length) {
-    // Every plaque on the page is on a board (the tree page): name the larger boards that take longer.
-    const longer = cards.filter(item => item.options.some(option => option.days > usual));
-    const note = longer.length ? ` (${longer.map(item => item.name).join(', ')}: ${range(longer.flatMap(item => item.options.map(option => option.days)))})` : '';
-    return `made in the UK in ${usual} working days after you approve${note}`;
-  }
-  const extra = [aged.length && Math.max(...aged) > usual ? `aged brass ${range(aged)}` : '', wood.length ? `wood-backed ${range(wood)}` : ''].filter(Boolean);
-  return `made in the UK in ${usual} working days after you approve${extra.length ? ` (${extra.join(', ')})` : ''}`;
+/** The usual production days on a page: the fewest of its plaques (catalogue days). The facts line under the H1 gives
+ * only this figure (review fix, 1 Nov 2026); plaques that take longer (aged brass, wood-backed, the larger boards on the
+ * tree page) say so on their card, and the page's timing question gives every figure. */
+export function usualDays(cards: ResolvedCard[]) {
+  return Math.min(...cards.flatMap(item => item.options.map(option => option.days)));
+}
+const dayRange = (days: number[]) => (Math.min(...days) === Math.max(...days) ? `${days[0]}` : `${Math.min(...days)}–${Math.max(...days)}`);
+
+/** A card's lead-time line, only where its plaques take longer than the page's usual days: the chosen finish's days
+ * once one is picked; the card's days when every plaque on it takes longer (wood-backed cards); otherwise the pictured
+ * finish's, named (an aged brass lead beside a from-price that belongs to a quicker finish). */
+function cardDays(allowed: CardOption[], current: CardOption, picked: boolean, usual: number) {
+  if (picked) return current.days > usual ? `Made in ${current.days} working days` : '';
+  if (allowed.every(option => option.days > usual)) return `Made in ${dayRange(allowed.map(option => option.days))} working days`;
+  return current.days > usual ? `${current.short}: ${current.days} working days` : '';
 }
 
 /** Client-only behaviour (swatch buttons, chips) after the app has mounted; the static HTML keeps plain links. */
@@ -176,7 +177,7 @@ function defaultOption(item: ResolvedCard, allowed: CardOption[]) {
   return allowed.find(option => !option.image.drawing && option.tone === tone) || allowed.find(option => !option.image.drawing) || allowed[0];
 }
 
-function GridCard({ item, finishes, mounted, priority, wide, stake }: { item: ResolvedCard; finishes?: Finish[]; mounted: boolean; priority: number; wide: boolean; stake: boolean }) {
+function GridCard({ item, finishes, mounted, priority, wide, stake, usual }: { item: ResolvedCard; finishes?: Finish[]; mounted: boolean; priority: number; wide: boolean; stake: boolean; usual: number }) {
   const allowed = finishes ? item.options.filter(option => finishes.includes(option.finish)) : item.options;
   const [picked, setPicked] = useState<{ finish: Finish; tone?: WoodTone } | null>(null);
   const filterKey = finishes ? finishes.join(',') : '';
@@ -187,6 +188,7 @@ function GridCard({ item, finishes, mounted, priority, wide, stake }: { item: Re
   const from = Math.min(...allowed.map(option => option.price));
   const price = picked ? formatGbp(current.price) : `from ${formatGbp(from)}`;
   const finishRow = templateFinishes.filter(finish => allowed.some(option => option.finish === finish.key));
+  const days = cardDays(allowed, current, Boolean(picked), usual);
   const choose = (finish: Finish, tone?: WoodTone) => setPicked({ finish, tone });
   const swatch = (key: string, file: string, label: string, option: CardOption, selected: boolean, onPick: () => void) => (mounted
     ? <button type="button" key={key} className={`cat-tpl-swatch${selected ? ' is-selected' : ''}`} style={swatchStyle(file)}
@@ -226,6 +228,7 @@ function GridCard({ item, finishes, mounted, priority, wide, stake }: { item: Re
           })}
         </div>}
       </div>
+      {days && <p className="cat-tpl-days" aria-live="polite">{days}</p>}
     </li>
   );
 }
@@ -247,9 +250,12 @@ function ProductGrid({ id, cards, chips, links, end, wide, stake, mounted }: {
   const cardChip = chips.find(chip => !chip.finishes && chip.key === cardKey);
   const shown = cards.map(item => (!cardChip || (cardChip.board ? Boolean(item.card.board) : item.card.group === cardChip.group))
     && (!finishChip || item.options.some(option => finishChip.finishes!.includes(option.finish))));
-  // Counted as plaques (each size in each finish and wood), as on the catalogue's own product pages.
-  const plaques = cards.reduce((sum, item, index) => sum + (shown[index]
-    ? item.options.filter(option => !finishChip || finishChip.finishes!.includes(option.finish)).length : 0), 0);
+  // What the grid holds (review fix, 1 Nov 2026: "78 plaques" above ten cards read oddly): its cards, one per size (a
+  // board makes a size of its own), and the finishes on them, both following the chips.
+  const sizes = cards.filter((_, index) => shown[index]);
+  const finishCount = new Set(sizes.flatMap(item => item.options.filter(option => !finishChip || finishChip.finishes!.includes(option.finish)).map(option => option.finish))).size;
+  const count = `${sizes.length} ${sizes.length === 1 ? 'size' : 'sizes'} · ${finishCount} ${finishCount === 1 ? 'finish' : 'finishes'}`;
+  const usual = usualDays(cards);
   const pick = (chip: TemplateChip) => {
     if (chip.key === 'all') { setFinishKey(null); setCardKey(null); return; }
     if (chip.finishes) setFinishKey(key => (key === chip.key ? null : chip.key));
@@ -260,7 +266,7 @@ function ProductGrid({ id, cards, chips, links, end, wide, stake, mounted }: {
   return (
     <section className="cat-tpl-grid-section" id={id} aria-label="Plaques to choose from">
       <div className={`cat-tpl-toolbar${mounted ? '' : ' is-static'}`}>
-        <p className="cat-tpl-count" aria-live="polite">{plaques} plaques</p>
+        <p className="cat-tpl-count" aria-live="polite">{count}</p>
         <div className="cat-tpl-chips" role="group" aria-label="Narrow the plaques" aria-hidden={mounted ? undefined : true}>
           {chips.map(chip => (
             <button type="button" key={chip.key} className="cat-tpl-chip" aria-pressed={active(chip)} tabIndex={mounted ? undefined : -1} onClick={() => pick(chip)}>{chip.label}</button>
@@ -276,7 +282,7 @@ function ProductGrid({ id, cards, chips, links, end, wide, stake, mounted }: {
       <ul className="cat-tpl-grid" style={{ '--cat-tpl-cols': cards.length % 4 === 0 ? 4 : cards.length % 5 === 0 ? 5 : cards.length % 3 === 0 ? 3 : 4 } as React.CSSProperties}>
         {cards.map((item, index) => (
           <React.Fragment key={item.name + (item.card.board ? ' board' : '')}>
-            {shown[index] && <GridCard item={item} finishes={finishChip?.finishes} mounted={mounted} priority={index} wide={wide} stake={stake} />}
+            {shown[index] && <GridCard item={item} finishes={finishChip?.finishes} mounted={mounted} priority={index} wide={wide} stake={stake} usual={usual} />}
           </React.Fragment>
         ))}
         {end && <li className="cat-tpl-ask">{end}</li>}
@@ -404,13 +410,21 @@ function ProofBlock({ id, sampleSlug, sampleNote, steps, subject, designHref, ex
           back={sampleProofPageFor(sampleSlug, 2, `Measured drawing, finish and fixings for ${sample.title}`)} />
         <figcaption><a href={samplePdfFor(sampleSlug)} target="_blank" rel="noopener">Sample proof (PDF) ↗</a> {sampleNote || `${sample.size} ${sample.label.toLowerCase()}${sample.preset.wood ? ` on ${sample.preset.woodTone === 'dark' ? 'dark walnut' : 'light oak'}` : ''}.`}</figcaption>
       </figure>
+      {/* The promo film (owner msg 8440: keep the video on each page, not at the top): tap to play, loading nothing
+          before, with its small print and the watch page (larger, with a written version) beside it. */}
+      <figure className="cat-tpl-film">
+        <PromoFilm tapToPlay />
+        <figcaption>
+          <strong>See the designer in action</strong> {promoVideo.seconds} seconds, no sound. {promoVideo.disclosure} {promoVideo.footnote}{' '}
+          <a href={promoVideoPath}>Watch it larger, with a written version</a>
+        </figcaption>
+      </figure>
       <div className="cat-tpl-actions">
         <DesignLink onStart={onLaunch} href={designHref}>Design online</DesignLink>
         <ContactLink channel="whatsapp" placement="page" subject={subject} className="shop-button shop-hero-choice-whatsapp cat-tpl-whatsapp"><WhatsAppIcon /> Send words on WhatsApp</ContactLink>
       </div>
       <p className="cat-tpl-small cat-tpl-proof-links">
         Prefer us to lay it out? <a href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Send us your words</a>
-        {' · '}<a href={promoVideoPath}>Watch the designer in action</a>
       </p>
       {extra}
     </section>
@@ -576,7 +590,7 @@ export function OccasionPlanner({ id, cards, subject, occasion = 'opening' }: { 
             ? <strong>Too close to promise: ask us first</strong> : <strong>Approve and pay by {left === 'today' ? 'today' : show(by)}</strong>}</li>;
         })}
       </ul>}
-      <p className="cat-tpl-small">Counted back from your date: the working days to make it, one working day’s delivery and a day to spare, missing out weekends and bank holidays. Delivery dates are estimates, not guarantees. A fixed date? <ContactLink channel="whatsapp" placement="page" subject={subject}>Tell us on WhatsApp</ContactLink> before you order.</p>
+      <p className="cat-tpl-small">{target && 'Counted back from your date: the working days to make it, one working day’s delivery and a day to spare, missing out weekends and bank holidays. '}Delivery dates are estimates, not guarantees. A fixed date? <ContactLink channel="whatsapp" placement="page" subject={subject}>Tell us on WhatsApp</ContactLink> before you order.</p>
     </section>
   );
 }
@@ -655,7 +669,7 @@ export function CategoryTemplatePage({ config, product, faqs, onLaunch, onReques
         <h1>{config.title}</h1>
         <p className="cat-tpl-intro">{config.intro}</p>
         <p className="cat-hero-buy"><strong className="shop-product-price"><TrackedPrice value={fromValue} product={product.slug}>{fromLabel}</TrackedPrice></strong>
-          <span> · {config.included || 'engraving, fixings and UK delivery included'} · free PDF proof before you pay · {leadTimeNote(cards)}</span></p>
+          <span> · {config.included || 'engraving, fixings & UK delivery included'} · free proof before you pay · made in {usualDays(cards)} working days</span></p>
       </header>
       <ProductGrid id={id('grid')} cards={cards} chips={config.chips} links={config.links} end={config.gridEnd} wide={config.photos === 'wide'} stake={stake} mounted={mounted} />
       <FaqAccordion id={id('questions')} title={config.faqTitle} faqs={faqs} subject={subject} />

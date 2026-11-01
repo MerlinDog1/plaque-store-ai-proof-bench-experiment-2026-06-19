@@ -78,8 +78,16 @@ for (const page of pages) {
   }
   assert(main.querySelector('.cat-tpl-toolbar.is-static .cat-tpl-chips[aria-hidden="true"]'), `${page.slug}: chips hidden until the app runs`);
 
-  // No film, no scene photos; every picture exists.
-  assert.equal(main.querySelectorAll('video, iframe').length, 0, `${page.slug}: no film on the page`);
+  // No hero film and no scene photos; every picture exists. The promo film is back once, tap to play, inside the proof
+  // block (owner msg 8440, 1 Nov 2026): nothing loads before the tap (no src, preload none, no autoplay, lazy poster).
+  assert.equal(main.querySelectorAll('iframe').length, 0, `${page.slug}: no embedded frames`);
+  const films = [...main.querySelectorAll('video')];
+  assert.equal(films.length, 1, `${page.slug}: one film`);
+  assert(films[0].closest('.cat-tpl-proof .cat-tpl-film'), `${page.slug}: the film sits in the proof block, not at the top`);
+  assert(!films[0].hasAttribute('src') && !films[0].hasAttribute('autoplay') && films[0].getAttribute('preload') === 'none' && !films[0].hasAttribute('poster'),
+    `${page.slug}: the film loads nothing until tapped`);
+  assert.equal(main.querySelector('.cat-tpl-film .promo-film-poster')?.getAttribute('loading'), 'lazy', `${page.slug}: lazy film poster`);
+  assert(main.querySelector(`.cat-tpl-film a[href="${'/video'}"]`), `${page.slug}: watch page link beside the film`);
   const pictures = [...main.querySelectorAll('img')].map(img => img.getAttribute('src'));
   const swatchFiles = [...html.matchAll(/url\((\/site-images\/finish\/[^)]+)\)/g)].map(match => match[1]);
   assert(swatchFiles.length >= page.cards * 2, `${page.slug}: finish swatches`);
@@ -90,14 +98,16 @@ for (const page of pages) {
 
   // Facts line, sample proof and contextual links.
   const facts = compact(main.querySelector('.cat-tpl-head .cat-hero-buy').textContent);
-  for (const words of ['engraving, fixings and UK delivery included', 'free PDF proof before you pay', 'working days after you approve']) {
+  // One or two phone lines (review fix, 1 Nov 2026): the usual days only; longer times are on the cards and in the FAQ.
+  for (const words of ['UK delivery included', 'free proof before you pay']) {
     assert(facts.includes(words), `${page.slug}: facts line says "${words}"`);
   }
+  assert(/ made in \d+ working days$/.test(facts) && !facts.includes('('), `${page.slug}: facts line ends with the usual days, no exceptions: ${facts}`);
   const proof = main.querySelector('.cat-tpl-proof .shop-proof-pdf-stack').getAttribute('href');
   assert(proof.startsWith('/samples/products/') && existsSync(path.join(root, proof.replace(/\?.*$/, ''))), `${page.slug}: sample proof PDF ${proof}`);
   for (const href of page.links) assert(main.querySelector(`a[href="${href}"]`), `${page.slug}: link to ${href}`);
   const internal = [...main.querySelectorAll('a[href^="/"]')].map(a => a.getAttribute('href')).filter(href => !href.startsWith('/design'));
   for (const href of new Set(internal)) assert(built(href), `${page.slug}: internal link ${href} is built`);
-  console.log(`PASS /${page.slug}: title, description, H1 and canonical unchanged; ${visible.length} questions match the FAQ schema; ${cards.length} cards lead with studio photos and link to built product pages; ${new Set(internal).size} internal links; no film or scene photos.`);
+  console.log(`PASS /${page.slug}: title, description, H1 and canonical unchanged; ${visible.length} questions match the FAQ schema; ${cards.length} cards lead with studio photos and link to built product pages; ${new Set(internal).size} internal links; no scene photos, one tap-to-play film in the proof block.`);
 }
 console.log('Category template: RESULT PASS');

@@ -18,10 +18,5 @@
   opacity: 0.8;
 }
 
-/* Cookie banner on phones: one line per sentence (MetaConsent.tsx), so no single text block outweighs the page's own
-   heading as the Largest Contentful Paint. */
-@media (max-width: 720px) {
-  .cookie-banner-line {
-    display: block;
-  }
-}
+/* Cookie banner: the slim bar (shopfront.css, 1 Nov 2026) holds one short line on phones, too small a text block to
+   outweigh the page's own heading or photo as the Largest Contentful Paint. */

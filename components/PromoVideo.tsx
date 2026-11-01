@@ -33,9 +33,12 @@ const quiet = () => {
  * showing, and has its own pause button (WCAG 2.2.2). While it plays, the page's .shopfront carries data-promo-cue for
  * the buttons to glow. PostHog hears how far it plays (services/promoVideoTracking.ts).
  * On the watch page (eager) the film is the page, so its source is in the static HTML for search engines; preload="none"
- * still means nothing is downloaded until it plays. */
-export function PromoFilm({ eager = false }: { eager?: boolean }) {
-  preload(PROMO_POSTER, { as: 'image', fetchPriority: 'high' });
+ * still means nothing is downloaded until it plays.
+ * `tapToPlay` (the category template's proof block, owner msg 8440, 1 Nov 2026): never starts by itself and loads
+ * nothing until tapped; its poster is a lazy image under a large play button, so the page's first screen and its
+ * Largest Contentful Paint (a product photo) are unchanged. Same tracking: a tap counts as started from the button. */
+export function PromoFilm({ eager = false, tapToPlay = false }: { eager?: boolean; tapToPlay?: boolean }) {
+  if (!tapToPlay) preload(PROMO_POSTER, { as: 'image', fetchPriority: 'high' });
   const frame = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const [near, setNear] = useState(eager);
@@ -43,6 +46,7 @@ export function PromoFilm({ eager = false }: { eager?: boolean }) {
   const [showing, setShowing] = useState(true); // the tab is visible
   const [stopped, setStopped] = useState<boolean | null>(null); // the visitor's choice; null until they make one
   const [playing, setPlaying] = useState(false);
+  const [played, setPlayed] = useState(false); // it has started at least once (the tap-to-play poster then gives way)
   const tapped = useRef(false); // the visitor pressed play, so it didn't start by itself
 
   useEffect(() => {
@@ -51,6 +55,7 @@ export function PromoFilm({ eager = false }: { eager?: boolean }) {
     let cancelLoad = () => {};
     if (eager) setNear(true);
     const ready = () => {
+      if (tapToPlay) return; // loads only when tapped
       if (document.readyState === 'complete') { setNear(true); return; }
       const loaded = () => setNear(true);
       window.addEventListener('load', loaded, { once: true });
@@ -84,7 +89,7 @@ export function PromoFilm({ eager = false }: { eager?: boolean }) {
     const element = video.current;
     if (!element || !near) return;
     element.muted = true; // the property, which autoplay rules check (React doesn't always set the attribute)
-    const wanted = onScreen && showing && (stopped === null ? !quiet() : !stopped);
+    const wanted = onScreen && showing && (stopped === null ? !tapToPlay && !quiet() : !stopped);
     if (wanted) element.play().catch(() => setPlaying(false));
     else element.pause();
   }, [near, onScreen, showing, stopped]);
@@ -119,24 +124,27 @@ export function PromoFilm({ eager = false }: { eager?: boolean }) {
   }, []);
 
   return (
-    <div className="promo-film" ref={frame}>
+    <div className={`promo-film${tapToPlay ? ' is-tap' : ''}`} ref={frame}>
       <video
         ref={video}
         className="promo-film-player"
         width={1080}
         height={1350}
         src={near ? VIDEO : undefined}
-        poster={PROMO_POSTER}
+        poster={tapToPlay && !near ? undefined : PROMO_POSTER}
         preload="none"
         muted
         loop
         playsInline
         disablePictureInPicture
         aria-label={DESCRIPTION}
-        onPlay={() => setPlaying(true)}
+        onPlay={() => { setPlaying(true); setPlayed(true); }}
         onPause={() => setPlaying(false)}
       />
-      <button type="button" className="promo-film-toggle" onClick={() => { if (!playing) tapped.current = true; setStopped(playing); }} aria-label={playing ? 'Pause the video' : 'Play the video'}>
+      {tapToPlay && !played && <img className="promo-film-poster" src={PROMO_POSTER} alt="" aria-hidden="true" width={1080} height={1350} loading="lazy" decoding="async" />}
+      <button type="button" className={`promo-film-toggle${tapToPlay && !played ? ' is-start' : ''}`}
+        onClick={() => { if (!playing) { tapped.current = true; if (tapToPlay) setNear(true); } setStopped(playing); }}
+        aria-label={playing ? 'Pause the video' : tapToPlay && !played ? `Play the video: ${promoVideo.seconds} seconds, no sound` : 'Play the video'}>
         {playing ? (
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" /></svg>
         ) : (
