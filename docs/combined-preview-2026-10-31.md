@@ -55,7 +55,12 @@
 
 ## Deployed preview
 
-- **Current, with the photos in place:** https://instaplaque-8p2yu7hg0-dullaghan31-3959s-projects.vercel.app
+- **1 Nov 2026: photos withdrawn.** The owner hated the AI photos in place (msg 8384, "stick with studio shots");
+  revert `e0e7e57` removes them, so the code equals `cf000e5` again and the current preview is the earlier one,
+  https://instaplaque-71953q1r8-dullaghan31-3959s-projects.vercel.app (`dpl_C6FwCsVctpDwZZCJp3R1yQKpzRm1`). Local
+  tsc and the full build with every postbuild check passed after the revert. The photo files stay in workspace
+  `output/instaplaque-category-photos-20261031/` but are not used.
+- **Obsolete, with the photos in place:** https://instaplaque-8p2yu7hg0-dullaghan31-3959s-projects.vercel.app
   (`dpl_BwG8QM1EuZDTGrGGEfMPirMPFzQF`, target **preview**, **Ready**, built from `06690f8`, 31 Oct 23:19 UTC). Cloud
   build and every postbuild check passed, including `check:in-place-photos` (54 photos on 11 pages). Local checks
   first: tsc, build, category browser 18/18, occasion browser 8/8, cookie notice taps PASS (hero buttons unmoved).
