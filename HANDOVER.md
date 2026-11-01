@@ -1,5 +1,20 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Live-only eight-template release candidate — PREVIEW ONLY, 1 November 2026
+
+- Branch `codex/instaplaque-template-release-20261101`, based on live source `ec24ba1`.
+  Verified code/checks: `6dea61fe2231af5775bf61a650fdda44d5817c60`; no merge, production deploy, promotion or domain assignment.
+- Preview: https://instaplaque-etn8xqef9-dullaghan31-3959s-projects.vercel.app
+  (`dpl_Y65CRMBo73eaE9h84eanyEMD3mDz`, **Ready**, target **preview**).
+- Only the eight products-first pages and slim cookie bar, retaining live consent and all non-template content.
+  Owner msg 8603: separate free-proof and large tap-to-play video sections, short footnote (`1d9070b`).
+- Route diff: exactly eight content changes, 192 notice-only routes, 16 finish crops; sitemap unchanged, nothing removed.
+  Every off switch restores live's original page and FAQs. Typecheck/build, postbuild and 24 browser/no-JS cases pass.
+- Full scope, tests, screenshots, removed unpublished links, release steps and rollback:
+  [docs/category-template-release-2026-11-01.md](docs/category-template-release-2026-11-01.md).
+- **Next: owner's review; Cody releases only after the owner's yes.** Live remains
+  `dpl_EswXoDLFZF7164E7ZrU1JP5MRMe8`; do not deploy the Stage 2/combined-preview branch.
+
 ## Shopping main picture = the studio photo: LIVE — 31 October 2026, 08:23 UTC
 
 - **Why:** the owner (msg 8159): "I need all the new photos in Google ads". Shopping ads take the feed's `image_link`,
