@@ -37,8 +37,8 @@ const pages = [
 ];
 const CONSENT_KEYS = ['instaplaque-analytics-consent-v1', 'instaplaque-replay-consent-v1', 'instaplaque-meta-consent'];
 
-async function open(browser, url) {
-  const context = await browser.newContext({ ...phone, locale: 'en-GB', timezoneId: 'Europe/London' });
+async function open(browser, url, device = phone) {
+  const context = await browser.newContext({ ...device, locale: 'en-GB', timezoneId: 'Europe/London' });
   await context.addInitScript(() => localStorage.setItem('instaplaque-internal-v1', 'yes'));
   await context.route('**/*', route => (new URL(route.request().url()).origin === new URL(BASE).origin && !new URL(route.request().url()).pathname.startsWith('/_vercel/') ? route.continue() : route.abort()));
   const page = await context.newPage();
@@ -56,8 +56,8 @@ async function open(browser, url) {
   let failures = 0;
   const fail = message => { failures++; console.log(`FAIL ${message}`); };
   try {
-    for (const spec of pages) {
-      const { context, page, errors } = await open(browser, `${BASE}${spec.path}`);
+    for (const [mode, device] of [['phone', phone], ['desktop', { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 }]]) for (const spec of pages) {
+      const { context, page, errors } = await open(browser, `${BASE}${spec.path}`, device);
       const report = await page.evaluate(({ selectors, text }) => {
         const box = el => { const b = el.getBoundingClientRect(); return { top: Math.round(b.top), bottom: Math.round(b.bottom), left: Math.round(b.left), right: Math.round(b.right), height: Math.round(b.height) }; };
         const notice = [...document.querySelectorAll('.cookie-banner')].find(el => el.getBoundingClientRect().height > 0);
@@ -96,7 +96,7 @@ async function open(browser, url) {
       const problems = [];
       if (!n) problems.push('no notice showing');
       else {
-        if (n.height > MAX_NOTICE_HEIGHT) problems.push(`notice ${n.height} px tall (max ${MAX_NOTICE_HEIGHT})`);
+        if (mode === 'phone' && n.height > MAX_NOTICE_HEIGHT) problems.push(`notice ${n.height} px tall (max ${MAX_NOTICE_HEIGHT})`);
         if (overlaps(n, report.h1)) problems.push('notice covers the H1');
         if (report.firstRow.some(card => overlaps(n, card))) problems.push('notice covers the first row of products');
         if (overlaps(n, report.bar)) problems.push('notice covers the Design/WhatsApp/Email bar');
@@ -108,11 +108,11 @@ async function open(browser, url) {
       if (!report.controls.length) problems.push('no target controls found');
       if (covered.length) problems.push(`notice takes the tap for ${covered.map(c => c.label).join(', ')}`);
       if (errors.length) problems.push(`page errors ${errors.join(' | ')}`);
-      if (problems.length) fail(`${spec.path}: ${problems.join('; ')}`);
-      await page.screenshot({ path: path.join(OUT, `${spec.name}-phone-first-screen.jpg`), type: 'jpeg', quality: 70, scale: 'css' });
-      results.push({ path: spec.path, ...report, errors, problems });
+      if (problems.length) fail(`${spec.path}/${mode}: ${problems.join('; ')}`);
+      if (mode === 'phone') await page.screenshot({ path: path.join(OUT, `${spec.name}-phone-first-screen.jpg`), type: 'jpeg', quality: 70, scale: 'css' });
+      results.push({ path: spec.path, mode, ...report, errors, problems });
       if (!problems.length) {
-        console.log(`PASS ${spec.path}: notice ${n.top}-${n.bottom} px (${n.height} px)` +
+        console.log(`PASS ${spec.path}/${mode}: notice ${n.top}-${n.bottom} px (${n.height} px)` +
           `${report.h1 ? `, H1 ${report.h1.top}-${report.h1.bottom}` : ''}${report.firstRow.length ? `, first products ${report.firstRow[0].top}-${Math.max(...report.firstRow.map(c => c.bottom))}` : ''}` +
           `${report.bar ? `, bar from ${report.bar.top}` : ''}; ` +
           report.controls.map(c => `${c.label} ${c.top}-${c.bottom}${c.onFirstScreen ? (c.tapReachesIt ? ' tappable' : ' under the contact bar') : ' (off the first screen)'}`).slice(0, 6).join('; '));

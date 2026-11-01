@@ -11,6 +11,15 @@ const mainCode = compile('services/googlePurchase.ts');
 const frameCode = fs.readFileSync('public/google-purchase.js', 'utf8');
 const html = fs.readFileSync('index.html', 'utf8');
 const bootstrap = html.match(/<script>\s*(window\.dataLayer[\s\S]*?)<\/script>/)[1];
+// Live's Google bootstrap loads after the load event plus its 3.5-second timer, not at evaluation.
+// Model that timing in this VM; keep the live loader, consent defaults and purchase implementation unchanged.
+function runBootstrap(context) {
+  const listeners = new Map();
+  context.window.addEventListener = (name, listener) => listeners.set(name, listener);
+  context.setTimeout = callback => callback();
+  vm.runInNewContext(bootstrap, context);
+  listeners.get('load')?.();
+}
 const origin = 'https://instaplaque.co.uk';
 const order = { id: 'synthetic-order-reference', paymentStatus: 'paid',
   totalPence: 9550, currency: 'GBP', stripeCheckoutSessionId: 'cs_live_synthetic123',
@@ -73,7 +82,7 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
     const context = { window, location: window.location, localStorage: { getItem: key => key === 'instaplaque-internal-v1' ? null : 'yes' }, URL, Date, document: { referrer: '', createElement: () => ({}),
       head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
-    vm.runInNewContext(bootstrap, context);
+    runBootstrap(context);
     assert.equal(scripts.length, 0, url + ' must not load Google on a private document');
     assert.equal(window.dataLayer.some(args => ['js', 'config', 'event'].includes(args[0])), false,
       'Private pages may queue consent settings but never configure a destination or send events');
@@ -83,7 +92,7 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
     const context = { window, location: window.location, localStorage: { getItem: key => key === 'instaplaque-internal-v1' ? null : 'yes' }, URL, Date, document: { referrer: origin + '/?proof=private',
       createElement: () => ({}), head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
-    vm.runInNewContext(bootstrap, context);
+    runBootstrap(context);
     assert.equal(scripts.length, 1, 'Public pages retain one loader');
     const configs = window.dataLayer.filter(args => args[0] === 'config');
     assert.equal(configs.length, 2);
@@ -97,7 +106,7 @@ const payload = { type: 'instaplaque:purchase', transactionId: 'ip_' + 'a'.repea
     const context = { window, location: window.location, localStorage: { getItem: () => consent }, URL, Date,
       document: { referrer: '', createElement: () => ({}), head: { appendChild: script => scripts.push(script) } } };
     Object.defineProperty(context, 'dataLayer', { get: () => window.dataLayer });
-    vm.runInNewContext(bootstrap, context);
+    runBootstrap(context);
     assert.equal(scripts.length, 1, 'Advanced consent mode loads the public Google tag even without consent');
     const update = window.dataLayer.find(args => args[0] === 'consent' && args[1] === 'update');
     assert.equal(update[2].analytics_storage, 'denied');
