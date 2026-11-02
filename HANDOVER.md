@@ -1,5 +1,26 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Noticeable cookie bar + anonymous visit totals — PREVIEW ONLY, 2 November 2026
+
+- **Owner:** msg 9079 “do both”; preview only. Based on live source `406df95aedf810b4dac8e03a43010efe2107e9ce`; live checkout untouched.
+- **Branch:** `codex/instaplaque-consent-stats-20261102`; deployed, verified application SHA
+  **`7ce5df4144f8011850844f1a4c8db66e765534dd`**. The following documentation commit does not change the application.
+- **Ready preview:** https://instaplaque-5v5zwb1o2-dullaghan31-3959s-projects.vercel.app
+  (`dpl_4zSfvb256ecwUN5Ck26xi9KiweSK`, independently inspected **READY**, target **preview**).
+- Preserved counter port and dark-green, equal-button bar. The resumed category test found
+  `tree-memorial-plaques/desktop: notice covers the first card`; a minimal desktop padding/bottom-gap fix
+  makes it 66 px tall (phone remains 88 px, buttons at least 44 px). No wording or design rewrite.
+- **Checks:** typecheck, local/cloud builds + postbuild guards; bar 7/7, categories 24/24,
+  statistics 5/5 localhost + 5/5 canonical-origin simulation, Google consent 3/3; preview HTML/CSS 5/5 HTTP 200.
+  Tracker requests were intercepted locally; no test ran against the live site or sent analytics events.
+- Evidence/screenshots: workspace `output/instaplaque-consent-stats-20261102/`; four small shots in `review-final/`
+  (`phone-home.jpg`, `phone-product.jpg`, `phone-cookies.jpg`, `desktop-home.jpg`). Task server/browser processes stopped.
+- **Before release:** confirm Vercel processor terms/retention meet the statistics exception; review phone wording.
+  Google advanced consent mode is unchanged. **Rollback: nothing live.** No production deploy, promotion,
+  manual alias/domain, account/environment, Ads/Google/Meta/Merchant or Supabase changes.
+- Details: [docs/consent-bar-stats-2026-11-02.md](docs/consent-bar-stats-2026-11-02.md).
+
+
 ## Light/dark solid wood wording: LIVE — 1 November 2026, 15:49 UTC
 
 - **Owner:** msg 8635 ("just say light or dark solid wood", no species, never say we don't know) and msg 8640 "Yeah release that".
