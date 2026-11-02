@@ -3569,12 +3569,10 @@
   .shopfront .shop-spec-proof { max-width: 320px; margin-top: 18px; }
 }
 
-/* Slim cookie bar (review fix, 1 Nov 2026, owner msg 8437; replaces the 31 Oct notice at the top of a phone screen,
-   which hid the page's H1 and intro). One row: the question, a Settings link, then Accept and Reject, equally prominent.
-   At most 64 px tall on a 390 x 844 phone, so it covers neither the H1, nor the first row of products, nor the
-   Design/WhatsApp/Email bar: phones show it just above that bar (at the bottom edge while the bar is hidden); in the
-   designer it sits at the top, clear of the Continue button (site audit item 1). Computers: a bar along the bottom.
-   Consent is unchanged (components/MetaConsent.tsx). Listed after the bar rules above so it wins at their specificity. */
+/* Noticeable, neutral cookie choice (2 Nov 2026, preview only): two short lines and two
+   equal 44 px buttons on phones (88 px total at 390 px). Stay above the contact bar,
+   below the first products; the designer keeps its top placement, clear of Continue.
+   No consent, storage or tracker changes here. The static fallback uses the same markup. */
 .cookie-banner,
 body:has(.shop-mobile-contact) .cookie-banner,
 body:has(.shop-mobile-contact:not(.is-visible)) .cookie-banner {
@@ -3582,23 +3580,33 @@ body:has(.shop-mobile-contact:not(.is-visible)) .cookie-banner {
   bottom: 12px;
   left: 16px;
   right: 16px;
-  max-width: 1080px;
+  max-width: 1160px;
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 8px 8px 8px 18px;
+  gap: 20px;
+  padding: 14px 14px 14px 20px;
+  border: 1px solid #536c5e;
   border-radius: 10px;
-  font-size: 14px;
-  line-height: 1.35;
+  background: #203b32;
+  color: #fffdf7;
+  box-shadow: 0 5px 24px #0004;
+  font: 14px/1.4 Arial, Helvetica, sans-serif;
+  animation: cookie-notice-enter 240ms ease-out;
 }
 .cookie-banner p { flex: 1 1 auto; min-width: 0; margin: 0; }
 .cookie-banner .cookie-banner-short { display: none; }
-.cookie-banner-actions { flex: none; display: flex; flex-wrap: nowrap; gap: 8px; }
-.cookie-banner-actions button { min-width: 88px; min-height: 40px; padding: 0 16px; border: 1px solid #203b32; border-radius: 6px;
-  background: #203b32; color: #fff; font: 700 14px/1 Arial, Helvetica, sans-serif; cursor: pointer; }
-.cookie-banner-actions button:focus-visible { outline: 3px solid #996e17; outline-offset: 2px; }
+.cookie-banner-full > span, .cookie-banner-short > span { display: block; }
+.cookie-banner-question { font-weight: 600; }
+.cookie-banner a { color: inherit; text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+.cookie-banner-actions { flex: none; display: flex; flex-wrap: nowrap; gap: 10px; }
+.cookie-banner-actions button { flex: 1; min-width: 104px; min-height: 44px; padding: 0 16px;
+  border: 1px solid #fffdf7; border-radius: 6px; background: #fffdf7; color: #203b32;
+  font: 700 14px/1 Arial, Helvetica, sans-serif; cursor: pointer; }
+.cookie-banner-actions button:hover { background: #e8eadd; }
+.cookie-banner-actions button:focus-visible, .cookie-banner a:focus-visible { outline: 3px solid #f0cd78; outline-offset: 2px; }
 html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-area-inset-top, 0px)); bottom: auto; }
+@keyframes cookie-notice-enter { from { opacity: 0.5; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 720px) {
   .cookie-banner,
   body:has(.shop-mobile-contact) .cookie-banner,
@@ -3606,18 +3614,23 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
     bottom: calc(6px + env(safe-area-inset-bottom, 0px));
     left: 6px;
     right: 6px;
-    gap: 8px;
-    padding: 5px 5px 5px 10px;
+    display: grid;
+    gap: 4px;
+    padding: 4px 10px;
     border-radius: 8px;
     font-size: 12px;
-    line-height: 1.3;
+    line-height: 15px;
   }
   body:has(.shop-mobile-contact.is-visible) .cookie-banner { bottom: calc(73px + env(safe-area-inset-bottom, 0px)); }
   html body:has(.designer-step-footer) .cookie-banner { top: calc(6px + env(safe-area-inset-top, 0px)); bottom: auto; }
   .cookie-banner .cookie-banner-full { display: none; }
-  .cookie-banner .cookie-banner-short { display: inline; }
-  .cookie-banner-actions { gap: 6px; }
-  .cookie-banner-actions button { min-width: 0; padding: 0 11px; font-size: 13px; }
+  .cookie-banner .cookie-banner-short { display: block; }
+  .cookie-banner-actions { gap: 10px; }
+  .cookie-banner-actions button { min-width: 0; padding: 0 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cookie-banner, body:has(.shop-mobile-contact) .cookie-banner,
+  body:has(.shop-mobile-contact:not(.is-visible)) .cookie-banner { animation: none; transition: none; }
 }
 
 /* "Products first" category template (1 Nov 2026, owner msg 8384; components/CategoryTemplate.tsx): title block with

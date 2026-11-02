@@ -3,7 +3,7 @@
 // eight template pages (memorial, bench, garden, tree, brass, stainless steel, opening, custom).
 // Phone 390 × 844 and computer 1440 × 900, on a local build only (external requests blocked, browser marked internal):
 // - the first product card starts within 330 px of the top, with the cookie notice showing and after Accept; the notice
-//   is a slim bar (64 px or less on the phone) covering neither the H1, the first row of products nor the contact bar;
+//   is a compact bar (88 px or less on the phone) covering neither the H1, the first row of products nor the contact bar;
 // - at most 7.6 phone screens: owner msg 8603 asks for a separate, full-width video section;
 //   report every page's measured length (main height / (viewport - main top));
 // - no sideways overflow, no script errors or console errors (other than the blocked external requests);
@@ -38,7 +38,7 @@ const pages = [
   { slug: 'custom-plaques', cards: 6, chips: { finish: 'Stainless steel', finishWord: 'steel', narrow: 'Oval and round', narrowCount: 2 } },
 ];
 const MAX_PHONE_SCREENS = 7.6; // larger, separate film requested in owner msg 8603
-const MAX_NOTICE_HEIGHT = 64;
+const MAX_NOTICE_HEIGHT = 88; // two short lines + equal 44 px buttons (owner msg 9079)
 // The planner's date maths, as the page uses it (services/occasionPlanner.ts, transpiled like check-promo-video-tracking).
 const ts = require('typescript');
 const planner = { exports: {} };
@@ -282,7 +282,7 @@ async function checkPlanner(page, where) {
         assert(withNotice.banner, `${spec.slug}/${mode}: cookie notice showing for a new visitor`);
         assert(withNotice.card.top <= 330, `${spec.slug}/${mode}: first card at ${withNotice.card.top}px with the notice`);
         assert(!overlaps(withNotice.card, withNotice.banner), `${spec.slug}/${mode}: notice covers the first card`);
-        // The slim notice: 64 px or less on the phone, clear of the H1, the first row of products and the contact bar.
+        // The noticeable neutral notice: 88 px or less on the phone, clear of the H1, the first row of products and the contact bar.
         const noticeHeight = withNotice.banner.bottom - withNotice.banner.top;
         if (mode === 'phone') assert(noticeHeight <= MAX_NOTICE_HEIGHT, `${spec.slug}/phone: notice ${noticeHeight}px tall`);
         assert(!overlaps(withNotice.banner, withNotice.h1) && !withNotice.firstRow.some(card => overlaps(card, withNotice.banner)) && !overlaps(withNotice.banner, withNotice.bar),

@@ -52,7 +52,7 @@ const counts = rows => Object.fromEntries(['vercelScript', 'vercelView', 'postho
           }
           return route.continue({ headers });
         }
-        return route.continue();
+        return route.abort(); // Every nonlocal/non-test origin is blocked; no provider receives test data.
       });
       const page = await context.newPage();
       page.on('pageerror', error => errors.push(error.message));
@@ -65,6 +65,7 @@ const counts = rows => Object.fromEntries(['vercelScript', 'vercelView', 'postho
       assert.equal(await toggle.getAttribute('aria-checked'), 'true');
       assert.ok(seen.some(row => row.type === 'vercelView'), 'Default-on Vercel pageview');
       const initial = counts(seen);
+      assert.deepEqual(await context.cookies(), [], 'Statistics sets no cookies before optional consent');
       assert.equal(initial.posthog + initial.replayScript + initial.meta, 0, 'No optional trackers before Accept');
       if (name === 'no-choice') {
         await page.screenshot({ path: path.join(output, 'phone-notice.png') });
