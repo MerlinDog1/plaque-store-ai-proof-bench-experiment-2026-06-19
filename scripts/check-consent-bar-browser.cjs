@@ -55,7 +55,7 @@ async function dimensions(page) {
         const initial = await dimensions(page);
         await page.screenshot({ path: path.join(out, `${mode}-${name}.jpg`), type: 'jpeg', quality: 86, scale: 'css' });
         assert.equal(initial.overflow, 0, `${mode}/${name}: overflow`);
-        assert.equal(initial.background, 'rgb(32, 59, 50)', `${mode}/${name}: green notice`);
+        assert.equal(initial.background, 'rgb(246, 244, 237)', `${mode}/${name}: live cream notice`);
         assert.equal(initial.buttons.length, 2);
         for (const button of initial.buttons) assert(button.rect.height >= 44, `${mode}/${name}: 44px touch targets`);
         const [accept, reject] = initial.buttons;
@@ -66,7 +66,7 @@ async function dimensions(page) {
         assert(initial.headings.every(heading => !overlap(heading, initial.banner)), `${mode}/${name}: heading/intro overlap ${JSON.stringify(initial)}`);
         assert(!overlap(initial.contact, initial.banner), `${mode}/${name}: contact bar overlap`);
         if (mode === 'phone') {
-          assert(initial.banner.height <= 88.1, `${mode}/${name}: notice height ${initial.banner.height}`);
+          assert(initial.banner.height <= (mode === 'phone' ? 72.1 : 66.1), `${mode}/${name}: notice height ${initial.banner.height}`);
           assert(initial.shortLines.every(line => line.height <= 15.1), `${mode}/${name}: two short text lines`);
         }
         if (name === 'design') {

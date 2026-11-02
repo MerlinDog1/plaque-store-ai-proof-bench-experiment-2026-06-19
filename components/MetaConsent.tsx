@@ -9,18 +9,10 @@ export function MetaConsent() {
     ? <button type="button" onClick={() => setOpen(true)}>Cookie settings</button>
     : null;
   return <section role="dialog" aria-label="Cookie preferences" className="cookie-banner">
-    {/* Presentation only: Accept/Reject retain the live consent functions and static fallback.
-        The separate statistics choice lives on /cookies and never grants optional consent. */}
-    <p>
-      <span className="cookie-banner-full">
-        <span className="cookie-banner-question">May we use optional analytics cookies to record how pages and the designer are used (typing hidden), and ad cookies?</span>
-        <span>We count visits anonymously to improve the site, even if you Reject. Turn this off in <a href="/cookies">Settings</a>.</span>
-      </span>
-      <span className="cookie-banner-short">
-        <span className="cookie-banner-question">Allow site-use recording (typing hidden) &amp; ad cookies?</span>
-        <span>Visits counted anonymously even if you Reject. Off: <a href="/cookies">Settings</a>.</span>
-      </span>
-    </p>
+    {/* The live slim bar and wording, a little bigger (owner msg 9143). Accept/Reject use the live functions and
+        static fallback. The separate anonymous visit statistics are explained, and can be switched off, on /cookies
+        (the Settings link); they never grant optional analytics or advertising consent. */}
+    <p><span className="cookie-banner-full"><strong>Cookies:</strong> may we use optional analytics cookies, which record how pages and the designer are used (typing hidden), and ad cookies?</span><span className="cookie-banner-short"><strong>Cookies:</strong> allow analytics that record site use, and ads?</span> <a href="/cookies">Settings</a></p>
     <div className="cookie-banner-actions">
       <button type="button" onClick={() => choose(true)}>Accept</button>
       <button type="button" onClick={() => choose(false)}>Reject</button>
