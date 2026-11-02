@@ -3570,14 +3570,15 @@
 }
 
 /* Noticeable, neutral cookie choice (2 Nov 2026, preview only): two short lines and two
-   equal 44 px buttons on phones (88 px total at 390 px). Stay above the contact bar,
-   below the first products; the designer keeps its top placement, clear of Continue.
+   equal 44 px buttons on phones (88 px total at 390 px). Desktop padding keeps the
+   notice below even the tree page's taller first row. Stay above the contact bar;
+   the designer keeps its top placement, clear of Continue.
    No consent, storage or tracker changes here. The static fallback uses the same markup. */
 .cookie-banner,
 body:has(.shop-mobile-contact) .cookie-banner,
 body:has(.shop-mobile-contact:not(.is-visible)) .cookie-banner {
   top: auto;
-  bottom: 12px;
+  bottom: 6px;
   left: 16px;
   right: 16px;
   max-width: 1160px;
@@ -3585,7 +3586,7 @@ body:has(.shop-mobile-contact:not(.is-visible)) .cookie-banner {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 14px 14px 14px 20px;
+  padding: 10px 14px 10px 20px;
   border: 1px solid #536c5e;
   border-radius: 10px;
   background: #203b32;
