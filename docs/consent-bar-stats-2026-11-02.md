@@ -1,6 +1,119 @@
 # Cookie choice and anonymous visit statistics — PREVIEW ONLY, 2 November 2026
 
-## Scope and source
+## Round 2 — keep the live cream bar, just a little bigger
+
+Owner msg **9143** rejected the dark-green redesign and its wording: “leave as is just a bit bigger” and
+“Don't like mentioning recording like that”. This round restores the **live markup, cream styling and wording**,
+with slightly larger text and 44 px buttons. There is no added counter sentence in the bar and no animation.
+The cookie-free counter and independent Statistics switch on `/cookies` remain unchanged.
+
+- Branch: `codex/instaplaque-consent-stats-20261102`, pushed without force.
+- Owner-requested restoration: `138c33c0f7887d7760bc73b1a3996ea568982d7a` over `6200ee9`.
+- Deployed and checked application SHA: **`87a804b84d85b0e3adaf10b02c0c5f116aacf054`**.
+  This adds only two CSS padding corrections to `138c33c`; the documentation commit follows it.
+- Live-source baseline remains `406df95aedf810b4dac8e03a43010efe2107e9ce`. No live checkout or production
+  deployment was changed. The round-1 dark-green preview below is historical and superseded.
+
+### Ready preview
+
+https://instaplaque-oxf3vgt69-dullaghan31-3959s-projects.vercel.app
+
+Deployment **`dpl_4RMhBMCFHHPorH51b14c2S2afycu`** was independently inspected **READY**, target **preview**,
+project `instaplaque` (`prj_e0enz36tdUE3mI8q3tKKG9YR5CLD`). The clean application commit was pushed before upload.
+Vercel's unauthenticated API probe returned `403 application/json; charset=utf-8`; there was no Security Checkpoint.
+Exactly one preview was deployed, with bounded timeouts and `cody-job`, under the existing shared lock:
+
+```sh
+flock /home/coding-agent/workspace/tmp/instaplaque-vercel-deploy.lock \
+  vercel deploy --yes --scope dullaghan31-3959s-projects
+```
+
+Cloud build and all postbuild guards passed. Supported authenticated `vercel curl` GETs, spaced ten seconds
+apart, returned **5/5 HTTP 200** for home, `/cookies`, the brushed-stainless 150 × 65 product, the tree category,
+and `/assets/index-CV19bkAY.css`. The four HTML notices contain the restored live wording, and the deployed CSS
+is byte-identical to the locally checked build. These GETs executed no analytics. Hosted browser interactions
+were not rerun; the complete interaction checks used the local built site.
+
+### Final appearance and exact clearance
+
+- Desktop wording: “Cookies: may we use optional analytics cookies, which record how pages and the designer
+  are used (typing hidden), and ad cookies? Settings”. Text is 15 px; buttons are 100 × 44 px.
+- Phone wording: “Cookies: allow analytics that record site use, and ads? Settings”. Text is 13 px;
+  buttons remain equally sized and 44 px high.
+- Cream background: `rgb(246, 244, 237)`. No animation with either normal or reduced-motion preferences.
+- Final height: **64.640625 px on phones** (390 × 844), **62 px on desktop** (1366/1440 × 900).
+
+The initial category run failed with:
+
+> `tree-memorial-plaques/desktop: notice covers the first card`
+
+Raw measurements also found a small phone-product button overlap that the existing layout suite does not assert.
+Only vertical padding changed: desktop **10 → 8 px**, phone **7 → 5 px**. Horizontal padding, gaps, text,
+colours, position and all 44 px buttons stayed unchanged.
+
+| Case | Content bottom | Initial bar top / overlap | Final bar top / clearance |
+| --- | --- | --- | --- |
+| Phone product, both Design buttons | 770.828125 px | 769.359375 px / 1.46875 px overlap | 773.359375 px / 2.53125 px clear |
+| Desktop tree, all three first-row cards | 823.84375 px | 822 px / 1.84375 px overlap | 826 px / 2.15625 px clear |
+
+Initial failure: `categories-initial.log`. Exact before/after measurements:
+`clearance-before.json`, `clearance-final.json`; the small local-only measurement script is alongside them.
+
+### Round-2 verification
+
+Evidence root: `/home/coding-agent/workspace/output/instaplaque-consent-stats-20261102/round2/`.
+All requested browser suites ran **one at a time**. Typecheck and build/postbuild were repeated after the padding fix.
+
+| Check | Final result | Evidence relative to round2/ |
+| --- | --- | --- |
+| TypeScript | PASS | `typecheck-final.log` |
+| Local build + all postbuild guards | PASS | `build-final.log` |
+| Cookie bar, 5 phone + 2 desktop routes | 7/7 PASS | `layout-final.log`, `final/layout-results.json` |
+| Product buttons and desktop tree row, raw bounds | All clear | `clearance-final.json` |
+| Eight categories: phone, desktop, JavaScript off | 24/24 PASS | `categories-final.log`, `categories-final/browser-results.json` |
+| Statistics on localhost | 5/5 PASS | `statistics-local.log`, `statistics-local/results.json` |
+| Statistics with canonical-origin simulation | 5/5 PASS | `statistics-canonical.log`, `statistics-canonical/results.json` |
+| Built Google consent UI, saved null/no/yes | 3/3 PASS | `google-consent-browser.log` |
+| Cloud build + all postbuild guards | PASS | `deploy-preview.log` |
+| Deployment identity/status/target | READY / preview | `preview-inspect.json` |
+| Protected preview HTML/CSS GETs | 5/5 HTTP 200; CSS identical | `preview-http-results.json` |
+| Whitespace check | PASS | `git diff --check` |
+
+Statistics used the saved real Vercel runtime with tracker loaders/events intercepted or fulfilled locally.
+`TEST_ORIGIN=https://instaplaque.co.uk` was only a simulated browser origin: its requests were routed to
+`http://127.0.0.1:4398`, never the live website. Google consent's built-file simulation likewise fulfilled every
+request locally. No test ran against the live site, and no synthetic event reached a real analytics provider.
+
+The counter is still independent of optional consent: Reject does not change Statistics; switching Statistics off
+blocks future views immediately, persists across reload, and a later Accept cannot restart it. No cookies or
+Vercel attribution ID are created before optional consent, and custom events/identity probes are blocked.
+Google advanced consent mode is unchanged: its public tag may load denied before Accept or after Reject.
+
+### Round-2 screenshots and cleanup
+
+All paths below are relative to the round-2 evidence root above. Original captures: `final/`.
+Four downscaled review copies (not committed):
+
+- `review/phone-home.jpg` — 351 × 760.
+- `review/phone-product.jpg` — 351 × 760.
+- `review/phone-cookies.jpg` — 351 × 760.
+- `review/desktop-home.jpg` — 1000 × 659.
+
+Three views were visually inspected: phone home, phone product and desktop home. The product controls are fully
+visible. All task browsers closed, the loopback-only port-4398 server was stopped, and its listener was absent.
+Unrelated processes were not stopped.
+
+No production deploy, promotion, manual alias/domain/environment change, Ads/Google/Meta/Merchant/Supabase
+setting change, message or email was made. Production release remains a separate owner decision. The previously
+recorded processor-terms/retention question for the statistics exception remains unchanged; this preview did not
+change account settings or legal terms. **Rollback: nothing live to roll back.**
+
+## Round 1 — historical, superseded by round 2 above
+
+The following is retained as provenance for `7ce5df4` / `6200ee9`, not a description of the current preview.
+Its dark-green bar, phone wording, screenshots and preview URL were rejected by owner msg 9143.
+
+### Scope and source
 
 Owner msg 9079: “do both” — make the cookie bar more noticeable and add the cookie-free visit counter.
 This is **preview only**, based on the current live source `406df95aedf810b4dac8e03a43010efe2107e9ce` on
@@ -14,7 +127,7 @@ This is **preview only**, based on the current live source `406df95aedf810b4dac8
 - Git deployment rules remain unchanged: only `preview/**` can trigger Git deployments;
   this `codex/` branch was pushed without force. The GitHub push workflow only covers `main` and pull requests.
 
-## Preview
+### Preview
 
 https://instaplaque-5v5zwb1o2-dullaghan31-3959s-projects.vercel.app
 
@@ -40,7 +153,7 @@ All four HTML pages contain the new static notice; the stylesheet contains the c
 and 44 px touch targets. These GETs did not execute analytics. Hosted browser interactions were not rerun;
 the complete interaction checks below used the local built site.
 
-## Behaviour
+### Behaviour
 
 - Dark-green notice; equally styled, equally sized Accept/Reject buttons, both at least 44 px high.
   At 390 × 844 the phone bar is 88 px tall. At the checked desktop sizes it is 66 px tall.
@@ -58,7 +171,7 @@ the complete interaction checks below used the local built site.
   its existing public tag can load in denied mode before Accept and after Reject. This is separate from
   the new statistics counter; do not describe this as “Google never loads before Accept”.
 
-## Interrupted run and minimal correction
+### Interrupted run and minimal correction
 
 The earlier server interruption closed Chrome mid-test. Its completed build/typecheck and other successful
 checks were retained; the unfinished browser suites were resumed one at a time, never in parallel.
@@ -73,7 +186,7 @@ beginning at 828 px. Both 44 px buttons, all wording, colours and the 88 px phon
 Typecheck, build/postbuild, the final layout suite and all 24 category cases passed after the correction.
 The failure evidence remains in `category-browser-finish.log`; success is in `category-browser-fixed.log`.
 
-## Verification
+### Verification
 
 All paths below are relative to the evidence root:
 
@@ -118,7 +231,7 @@ No cookies were created by the statistics runtime before optional consent, no Ve
 was stored, and synthetic custom-event/identify probes were blocked. Google consent remains denied without
 Accept, even when Statistics is on. Canonical-origin PostHog/replay/Meta attempts occur only after Accept.
 
-## Screenshots
+### Screenshots
 
 Small review copies (not committed):
 
@@ -133,7 +246,7 @@ correction, and final dimensions/overlap were asserted by the browser suites. Ph
 All task browsers closed, and this task's loopback-only port-4398 server was stopped and its listener checked absent.
 Unrelated processes were not stopped.
 
-## Before release / open questions
+### Historical release questions (wording superseded by round 2)
 
 1. Confirm the selected **Vercel Web Analytics processor terms and retention** satisfy PECR Schedule A1
    paragraph 5, especially individual-level technical data being retained only until aggregation.
