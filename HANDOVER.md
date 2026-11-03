@@ -1,6 +1,23 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Cookie bar round 3: plainer wording — PREVIEW ONLY, 3 November 2026
+## Cookie bar round 3 + cookie-free visit counter: LIVE — 3 November 2026, 17:58 UTC
+
+- **Owner:** msg 9515 "Yeah go live". **Live:** `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN` (instaplaque-nxc3awz2j) from this
+  branch at `285d4d8` (app `6721d9a`), staged with `vercel deploy --prod --skip-domain` under the shared lock (cloud build
+  + every postbuild guard passed), promoted 17:58:30 UTC. **This branch is now the live source.**
+- **Ships, vs the previous live source `406df95`:** the plainer bar wording (phone "Cookies: OK to use analytics and ad
+  cookies?", desktop "Cookies: may we use optional analytics and ad cookies to improve the site and our ads?"), the
+  slightly bigger cream bar (round 2), and the cookie-free anonymous visit counter (Vercel Web Analytics pageviews for
+  every visitor, PECR Sch A1 para 5, switch on /cookies). PostHog, session replay, Meta and Google ads stay behind Accept.
+- **Pre-promote checks** (`output/instaplaque-consent-stats-20261102/round3/check_cookie_release.sh`, bypass header never
+  printed): 9 pages 200 with the new wording and none of the old; /cookies has the statistics switch and still explains
+  the recordings; `/_vercel/insights/script.js` 200; AI health ok; robots.txt identical; Merchant feed 175 items identical.
+- **Live checks:** instaplaque.co.uk home, /cookies, /memorial-plaques, an A5 product 200 with only the new wording; www 308.
+  `consent_live_check.cjs` (phone, trackers blocked): the counter's 2 cookie-free requests before any choice; Accept ->
+  PostHog + Meta + GTM + insights, keys yes; Reject -> counter + GTM consent mode only, keys no.
+- **Rollback:** `flock /home/coding-agent/workspace/tmp/instaplaque-vercel-deploy.lock vercel promote dpl_GkwLwPezCk8nN2dof46vZTe5adwp --yes --scope dullaghan31-3959s-projects`.
+
+## Cookie bar round 3: plainer wording — preview (superseded by the live release above), 3 November 2026
 
 - **Owner:** msg 9503 "Do this one" for the wording offered at 15:50 UTC (no "record" in the bar).
   Phone: **"Cookies: OK to use analytics and ad cookies?"**; desktop: **"Cookies: may we use optional analytics and ad
