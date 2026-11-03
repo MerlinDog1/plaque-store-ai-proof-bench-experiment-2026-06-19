@@ -1,5 +1,25 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Cookie bar round 3: plainer wording — PREVIEW ONLY, 3 November 2026
+
+- **Owner:** msg 9503 "Do this one" for the wording offered at 15:50 UTC (no "record" in the bar).
+  Phone: **"Cookies: OK to use analytics and ad cookies?"**; desktop: **"Cookies: may we use optional analytics and ad
+  cookies to improve the site and our ads?"**; then Settings / Accept / Reject. Same bigger cream bar as round 2,
+  same Accept/Reject functions and keys (Accept still sets the replay key), cookie-free counter and /cookies switch
+  unchanged; /cookies still explains PostHog session replay in full.
+- **Why:** 3 Nov check (owner msg 9493): live wiring PASS (Accept -> PostHog/GTM/Meta/Vercel insights; Reject ->
+  GTM consent mode only), but accepted Google ad visitors fell from 39% (25-30 Oct) to 14% (31 Oct-2 Nov) and 0 of 8
+  on 3 Nov after the slimmer bar.
+- **Branch:** `codex/instaplaque-consent-stats-20261102`, app commit **`6721d9a`** (MetaConsent.tsx only), pushed.
+- **Ready preview:** https://instaplaque-dsdo2661c-dullaghan31-3959s-projects.vercel.app (`dpl_6m8fSnFeTwPBzdYh9RdyuQKhYAYd`,
+  inspected Ready, target preview), deployed under the shared lock with `vercel deploy --yes`.
+- **Checks:** typecheck; local build + every postbuild guard; new wording in all 200 HTML pages + the JS bundle, old
+  wording in none; consent bar layout 7/7 (phone bar now one line, 56 px; desktop 62 px; equal 44 px buttons);
+  category template 24/24; Google consent browser 3/3. Evidence: workspace
+  `output/instaplaque-consent-stats-20261102/round3/` (logs, layout/ and categories/ shots, cookie-bar-round3-preview.jpg).
+- **Not live.** Release only on the owner's go: `vercel deploy --prod --skip-domain` under the lock, check, then
+  `vercel promote`; rollback = promote `dpl_GkwLwPezCk8nN2dof46vZTe5adwp` (live since 1 Nov 15:49 UTC).
+
 ## Cookie bar round 2: live cream bar, a little bigger — PREVIEW ONLY, 2 November 2026
 
 - **Owner:** msg 9079 “do both”, then msg **9143** “leave as is just a bit bigger” / “Don't like mentioning
