@@ -12,7 +12,12 @@
 - Both TypeScript checks, full local build/postbuild, portrait comparison and existing-live-HTML scope checks passed.
   Final category coverage: 36 cases / 77 card interactions (24 unchanged-page cases + the final 12 new-page rerun).
   The donor intro was shortened to fix a 2.45 px desktop cookie overlap; all six approved card leads retained.
-  Both final contact/layout sheets visually inspected. New ready-preview receipt follows after deployment.
+  Both final contact/layout sheets visually inspected. Cloud build/postbuild and 13/13 hosted checks passed,
+  including original image paths behind Vercel’s responsive variants.
+- **New Ready preview:** https://instaplaque-cp2at610f-dullaghan31-3959s-projects.vercel.app
+  (`dpl_FteF4aLdykyKEDa4o8Sq6MiUHGU8`, target preview), from app source `540e1aa35ff8c45aa206b089605de7f2477b7a9d`.
+  Production independently unchanged before/after: `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`.
+  Deployment used the existing preview script and shared lock; API probe clear. Local test server/browsers stopped.
 - Practice still lacks actual practice-name images; the specified Studio/Clifford Ackroyd/Audrey Godfrey/Library
   examples are explicit fallbacks. Donor uses the approved dedication/opening examples.
 - New evidence/screenshots: workspace `output/instaplaque-stage3-pages-20261104/wording-r2/` and root JPEGs named

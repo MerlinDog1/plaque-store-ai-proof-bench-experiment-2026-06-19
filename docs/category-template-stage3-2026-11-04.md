@@ -79,8 +79,25 @@ start at 296 px; phone lengths are house 5.91, donor 6.40, church 6.38, practice
 
 All four pages were captured at 390 × 844 and 1440 × 900; the final phone contact sheet and desktop layout
 sheet were visually inspected. `stage3-wording-r2-phone-contact-sheet.jpg` is 706 × 1600, about 253 KiB.
-The new preview receipt follows after deployment. Production before this correction remains
-`dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`.
+### Ready revision-two preview
+
+- **Preview:** https://instaplaque-cp2at610f-dullaghan31-3959s-projects.vercel.app
+- **Deployment:** `dpl_FteF4aLdykyKEDa4o8Sq6MiUHGU8`, independently inspected **READY**, target **preview**.
+- **Deployed source:** `540e1aa35ff8c45aa206b089605de7f2477b7a9d`, committed and pushed before deployment; the receipt-only follow-up changes no app code.
+- Used the existing `deploy-preview.sh`: project link verified, API probe at 15:35:43 UTC returned 403 JSON,
+  then `vercel deploy --yes --scope dullaghan31-3959s-projects` under the shared `flock`. No checkpoint wait needed.
+- Full cloud build and every postbuild gate passed. Both TypeScript checks also passed on the exact deployed source.
+- Hosted smoke: **13/13 HTTP 200**. All four new pages, memorial/brass/opening, home, portrait and cookies match
+  the tested build for metadata, H1, body copy, links, original image sources/alt text and JSON-LD. Sitemap, the
+  175-item Merchant feed and robots are byte-identical. Hosted interaction testing is not claimed.
+- The enhanced image check initially flagged Vercel-only responsive `srcset` variants absent locally. It now checks
+  every responsive variant’s decoded original URL against the local source set, retaining photo validation.
+  The initial harness log and final passing run are both kept; no app change or redeployment was needed.
+- Production independently inspected before/after: still `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN` (READY, production).
+  No production deployment, promotion, domain/alias change or owner/customer message. No product images generated.
+- Local server on 127.0.0.1:4398 and task browsers stopped. Old screenshots retained; new root files are
+  `*-wording-r2-phone.jpg`, `*-wording-r2-desktop.jpg` and `stage3-wording-r2-phone-contact-sheet.jpg`.
+
 
 ---
 
