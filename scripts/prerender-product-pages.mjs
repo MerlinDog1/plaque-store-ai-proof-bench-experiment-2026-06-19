@@ -303,6 +303,12 @@ const indexableLandingPages = landingPages.filter((page) => indexableLandingSlug
   return { ...page, title: visiblePage.seoTitle, description: visiblePage.seoDescription };
 });
 
+// Stage 3 has separate landing records so the live homepage's category schema stays unchanged.
+const occasionPages = catalogue.occasionLandingPages.map(page => ({
+  slug: page.slug, title: page.seoTitle, description: page.seoDescription, image: page.image,
+  pageName: page.title, faqs: page.faqs.map(item => [item.question, item.answer]), relatedSearches: page.relatedSearches,
+}));
+
 const faqSchema = (faqs) => ({
   '@type': 'FAQPage',
   mainEntity: faqs.map(([question, answer]) => ({
@@ -633,7 +639,7 @@ for (const page of indexablePages) {
   });
 }
 
-for (const page of indexableLandingPages) {
+for (const page of [...indexableLandingPages, ...occasionPages]) {
   const url = `${siteBaseUrl}/${page.slug}`;
   await writePrerenderedPage({
     slug: page.slug,

@@ -72,4 +72,20 @@
   <url><loc>https://instaplaque.co.uk/privacy</loc><lastmod>2026-10-28</lastmod></url>
   <url><loc>https://instaplaque.co.uk/cookies</loc><lastmod>2026-08-08</lastmod></url>
   <url><loc>https://instaplaque.co.uk/returns-and-cancellations</loc><lastmod>2026-08-08</lastmod></url>
+  <url>
+    <loc>https://instaplaque.co.uk/house-name-plaques</loc><lastmod>2026-11-04</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/studio-photo/polished-brass-200x150-rect-plaque.webp</image:loc><image:title>Brass house name plaque, catalogue example</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://instaplaque.co.uk/donor-recognition-plaques</loc><lastmod>2026-11-04</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/studio-photo/brushed-brass-300x200-rect-light-wood-plaque.webp</image:loc><image:title>Brass dedication plaque on light solid wood, catalogue example</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://instaplaque.co.uk/church-plaques</loc><lastmod>2026-11-04</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/studio-photo/polished-brass-210x148-rect-dark-wood-plaque.webp</image:loc><image:title>Brass memorial plaque on dark solid wood, catalogue example</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://instaplaque.co.uk/professional-brass-plaques</loc><lastmod>2026-11-04</lastmod>
+    <image:image><image:loc>https://instaplaque.co.uk/site-images/studio-photo/orbital-brass-matt-lacquer-200x150-rect-dark-wood-plaque.webp</image:loc><image:title>Orbital brass plaque on dark solid wood, catalogue example</image:title></image:image>
+  </url>
 </urlset>

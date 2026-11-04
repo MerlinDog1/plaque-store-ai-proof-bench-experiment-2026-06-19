@@ -22,8 +22,9 @@ import { GROUND_STAKE_PRICE } from '../services/checkoutPolicy.mjs';
 const BASE = process.env.BASE;
 const DIST = process.env.DIST || 'dist';
 const categories = ['memorial-plaques', 'bench-plaques', 'garden-plaques', 'brass-plaques', 'stainless-steel-plaques',
-  'tree-memorial-plaques', 'opening-plaques', 'custom-plaques'];
-const metalOf = slug => (slug === 'brass-plaques' ? 'brass' : 'stainless steel');
+  'tree-memorial-plaques', 'opening-plaques', 'custom-plaques',
+  'house-name-plaques', 'donor-recognition-plaques', 'church-plaques', 'professional-brass-plaques'];
+const metalOf = slug => (['brass-plaques', 'professional-brass-plaques'].includes(slug) ? 'brass' : 'stainless steel');
 const offerPrice = new Map(merchantOffers.map(offer => [offer.slug, offer.price]));
 
 async function page(slug) {
@@ -99,8 +100,10 @@ for (const slug of ['brass-plaques', 'stainless-steel-plaques']) {
 // opened on the light solid wood board and ground stake (owner msg 6506): its links open the designer on a plate
 // (/design?backing=stake&plaque=<slug>) at the price of that plate on its light solid wood board plus the stake.
 const templateCounts = { 'memorial-plaques': 10, 'bench-plaques': 6, 'garden-plaques': 8, 'tree-memorial-plaques': 6, 'brass-plaques': 8,
-  'stainless-steel-plaques': 8, 'opening-plaques': 6, 'custom-plaques': 6 };
+  'stainless-steel-plaques': 8, 'opening-plaques': 6, 'custom-plaques': 6,
+  'house-name-plaques': 6, 'donor-recognition-plaques': 6, 'church-plaques': 6, 'professional-brass-plaques': 6 };
 const pageMetals = { 'brass-plaques': ['polished-brass', 'brushed-brass', 'orbital-brass-matt-lacquer', 'aged-brass'], 'stainless-steel-plaques': ['polished-stainless', 'brushed-stainless'] };
+pageMetals['professional-brass-plaques'] = pageMetals['brass-plaques'];
 const stakePages = new Set(['tree-memorial-plaques']);
 const attr = (tag, name) => new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
 const sameSize = (a, b) => a.preset.width === b.preset.width && a.preset.height === b.preset.height && a.preset.shape === b.preset.shape;

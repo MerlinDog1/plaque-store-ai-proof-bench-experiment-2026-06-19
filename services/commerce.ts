@@ -1,3 +1,5 @@
+import { occasionLandingPages } from './occasionLandingPages';
+export { occasionLandingPages } from './occasionLandingPages';
 import { templatePages } from './categoryTemplateSwitch';
 import {
   BorderStyle,
@@ -1213,6 +1215,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     ],
     relatedSearches: ['school opening plaques UK', 'school building plaques', 'classroom opening plaques', 'library opening plaques'],
   },
+  ...occasionLandingPages,
 ];
 
 export const materialStories = [

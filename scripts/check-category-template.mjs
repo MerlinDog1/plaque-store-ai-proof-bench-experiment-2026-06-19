@@ -74,6 +74,30 @@ const pages = [
     description: "Start a custom plaque proof for bespoke sizes, oval plaques, circular plaques and made-to-measure brass or stainless steel plaques.",
     faqs: ["What sizes and shapes can you make?", "How do I get a price for another size?", "Can bespoke plaques still use instant proofing?", "Can you make a plaque from my own design?", "How long does a custom plaque take?", "Can I see my plaque before I pay?"],
     links: [...["/ai-plaque-design", "/plaque-sizes", "/memorial-plaque-wording", "/design-request"], ...common] },
+  { slug: 'house-name-plaques', cards: 6, h1: 'House name plaques',
+    title: 'House Name Plaques | Engraved Brass & Steel | InstaPlaque',
+    description: 'Create a simple engraved house name plaque in brass or stainless steel. Compare sizes, finishes and prices, with a free proof and UK delivery included.',
+    faqs: ['Can I put my house name and number on one plaque?', 'Can a house name plaque go outside?', 'Do I need a wood backing?', 'What fixings come with a house name plaque?', 'Can I check the house name before I pay?', 'How long does a house name plaque take?'],
+    design: 'brushed-stainless-150x50-rect-plaque',
+    links: ['/brass-plaques', '/stainless-steel-plaques', '/custom-plaques', '/plaque-sizes', ...common] },
+  { slug: 'donor-recognition-plaques', cards: 6, h1: 'Donor & recognition plaques',
+    title: 'Donor & Recognition Plaques | Brass Sponsor Plaques | InstaPlaque',
+    description: 'Thank donors and sponsors with an engraved brass or stainless steel plaque. Sizes for individual donor wall plates and dedications, with a free proof first.',
+    faqs: ['Do you supply complete donor walls?', 'Can several donors be named on one plaque?', 'Can you match an existing donor plaque?', 'Can a plaque include a sponsor’s logo?', 'Can our team approve the wording together?', 'How long does a donor plaque take?'],
+    design: 'brushed-stainless-150x50-rect-plaque',
+    links: ['/opening-plaques', '/church-plaques', '/garden-plaques', '/brass-plaques', ...common] },
+  { slug: 'church-plaques', cards: 6, h1: 'Church plaques',
+    title: 'Church Pew & Dedication Plaques | Engraved Metal | InstaPlaque',
+    description: 'Plan a church pew, memorial or dedication plaque in brass or steel. Compare sizes and wording ideas, check church permission, then approve your free proof.',
+    faqs: ['Do I need church permission before ordering?', 'What size should a pew plaque be?', 'Can I share the proof with the parish?', 'What fixings come with a church plaque?', 'Which material should I choose?', 'How long does a church plaque take?'],
+    design: 'brushed-stainless-150x50-rect-plaque',
+    links: ['/memorial-plaques', '/bench-plaques', '/donor-recognition-plaques', '/opening-plaques', '/memorial-plaque-wording', ...common] },
+  { slug: 'professional-brass-plaques', cards: 6, h1: 'Brass practice plaques',
+    title: 'Brass Plaques for Professional Practices | InstaPlaque',
+    description: 'Brass name plates for solicitors, dentists, vets, architects and accountants. Compare sizes and finishes, add your wording and approve a free proof before paying.',
+    faqs: ['What size suits a practice name plate?', 'Which brass finish should I choose?', 'Can you include a practice logo?', 'Can I include qualifications or a registration number?', 'Does a plaque meet a regulator’s display requirements?', 'How long does a brass practice plaque take?'],
+    design: 'brushed-brass-150x50-rect-plaque',
+    links: ['/brass-plaques', '/stainless-steel-plaques', '/house-name-plaques', '/plaque-sizes', '/contact', ...common] },
 ];
 // The catalogue's standard production time; longer: aged brass 7, wood-backed 10 (up to A4) or 15 (larger).
 const STANDARD_DAYS = 5;
@@ -98,6 +122,16 @@ for (const page of pages) {
 
   // FAQPage schema = the visible questions, in order, word for word.
   const graph = [...document.querySelectorAll('script[type="application/ld+json"]')].flatMap(script => JSON.parse(script.textContent)['@graph'] || []);
+  if (page.design) {
+    assert(!graph.some(node => ['Product', 'Review', 'AggregateRating'].includes(node['@type'])), `${page.slug}: no product offer or invented reviews on a category`);
+    const collection = graph.find(node => node['@type'] === 'CollectionPage');
+    assert(collection && collection['@id'] === `${site}/${page.slug}#collection` && collection.image.startsWith(`${site}/site-images/studio-photo/`), `${page.slug}: collection schema and catalogue studio image`);
+    assert(graph.some(node => node['@type'] === 'BreadcrumbList'), `${page.slug}: breadcrumb schema`);
+    const designLinks = [...main.querySelectorAll('.cat-tpl-actions a, .cat-tpl-closing a, .shop-mobile-contact a')].filter(a => a.textContent.trim().startsWith('Design online'));
+    assert(designLinks.length >= 2 && designLinks.every(a => a.getAttribute('href') === `/design?plaque=${page.design}`), `${page.slug}: no-JS design links open the matching catalogue preset`);
+    assert(!/\b(?:oak|walnut|mahogany|teak)\b|Liam Dullaghan/i.test(main.textContent), `${page.slug}: no wood species or owner's name in customer copy`);
+    assert(!/customer review|five.star|5.star rated/i.test(main.textContent), `${page.slug}: no invented rating claims`);
+  }
   const faqNodes = graph.filter(node => node['@type'] === 'FAQPage');
   assert.equal(faqNodes.length, 1, `${page.slug}: one FAQPage`);
   const visible = [...main.querySelectorAll('.cat-tpl-faq-list details')].map(details => ({
@@ -208,7 +242,7 @@ for (const page of pages) {
   for (const href of page.links) assert(main.querySelector(`a[href="${href}"]`), `${page.slug}: link to ${href}`);
   const internal = [...main.querySelectorAll('a[href^="/"]')].map(a => a.getAttribute('href'));
   for (const href of new Set(internal)) assert(built(href), `${page.slug}: internal link ${href} is built`);
-  console.log(`PASS /${page.slug}: title, description, H1 and canonical unchanged; ${visible.length} questions match the FAQ schema; ${cards.length} cards lead with studio photos and link to built pages; lead-time lines match the catalogue (usual ${usual} days); ${new Set(internal).size} internal links; no scene photos, one tap-to-play film in its own section after the proof.`);
+  console.log(`PASS /${page.slug}: title, description, H1 and canonical match expected metadata; ${visible.length} questions match the FAQ schema; ${cards.length} cards lead with studio photos and link to built pages; lead-time lines match the catalogue (usual ${usual} days); ${new Set(internal).size} internal links; no scene photos, one tap-to-play film in its own section after the proof.`);
 }
 
 // The date planner's maths (services/occasionPlanner.ts), against a calendar of this script's own: for every event date

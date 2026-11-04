@@ -1,5 +1,15 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Stage 3 category pages — PREVIEW ONLY, 4 November 2026
+
+- Branch `codex/instaplaque-stage3-pages-20261104`, from live `86188c9`: four new products-first pages for house names,
+  donor recognition, church and professional practices. Only approved catalogue studio examples; six cards each.
+- Existing live HTML is unchanged except links from memorial, brass and opening. No portrait rebuild, border/export
+  edits, production operation, settings change or message to a customer. This is not the rejected combined preview.
+- Scope, sources, photo gaps, checks and deployment receipt: [docs/category-template-stage3-2026-11-04.md](docs/category-template-stage3-2026-11-04.md).
+- Keep this separate from the parallel border-parity work until the parent reviews and combines verified changes.
+
+
 ## Cookie bar round 3 + cookie-free visit counter: LIVE — 3 November 2026, 17:58 UTC
 
 - **Owner:** msg 9515 "Yeah go live". **Live:** `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN` (instaplaque-nxc3awz2j) from this
