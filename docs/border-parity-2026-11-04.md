@@ -127,8 +127,28 @@ pushed and were run successfully. No credential/scopes or workflow access change
 
 ## Release / rollback
 
-This task is **preview only**. Record the verified preview deployment and source
-SHA in the handover after upload. A future production release requires the
+Application commit **`8d36d7ea0b6531804414b82f71844979390ccb9a`**, pushed.
+Preview: https://instaplaque-fuj2hb5v3-dullaghan31-3959s-projects.vercel.app
+(`dpl_3wdfv5KuRf4e765sieHkceCNHEwS`, independently inspected **READY**, target
+**preview**). It was deployed once from the linked existing project, under
+`flock /home/coding-agent/workspace/tmp/instaplaque-vercel-deploy.lock vercel deploy --yes`.
+The API probe returned 403 JSON (no Security Checkpoint); cloud build and every
+postbuild guard passed. No production command, promotion or domain assignment ran.
+
+A real Chrome visit to the protected preview configured an A5 landscape plaque,
+10 mm caps and Double border through the actual UI, then invoked the deployed
+public exporter (the workshop button is intentionally hidden on hosted sites).
+The resulting `hosted-double-a5.svg` has **1 / 0.75 mm** strokes at **3 / 5 mm**,
+solid black, no opacity or text nodes, and **210mm x 148mm** dimensions. The
+actual preview geometry and exported geometry match; zero browser errors.
+`hosted-check.json`, `hosted-check.log`, and desktop/phone screenshots record it.
+Only synthetic/default guide text was used; non-GET backend and tracker requests
+were blocked. The supported Vercel bypass header stayed in memory, scoped to
+that preview origin, never logged, saved or sent to other hosts.
+
+Production was independently inspected and remains READY on
+`dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. Temporary local servers and task browsers were
+closed. This task is **preview only**. A future production release requires the
 owner's separate decision. There is no live change to roll back. To remove the
 candidate fix, revert its application commit on a new branch and rebuild; do
 not promote or redeploy the old default branch. Existing production remains

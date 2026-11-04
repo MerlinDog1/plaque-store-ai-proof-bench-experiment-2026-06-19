@@ -1,5 +1,25 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Production border parity — PREVIEW ONLY, 4 November 2026
+
+- Task branch `codex/instaplaque-border-parity-20261104`, from current live `86188c9`.
+  Application commit **`8d36d7ea0b6531804414b82f71844979390ccb9a`**, pushed; this handover is docs only.
+- Ready preview: https://instaplaque-fuj2hb5v3-dullaghan31-3959s-projects.vercel.app
+  (`dpl_3wdfv5KuRf4e765sieHkceCNHEwS`, inspected target **preview**, cloud build/postbuild passed).
+- Only runtime change: stop forcing `.engraved-border` to 0.5 mm in production SVG/PDF. Preserve the exact
+  approved proof widths/coordinates/radii; production remains solid etch black. Preview and other layers unchanged.
+- Verified: baseline + standalone **1,604-case** border geometry matrices, **58-font** glyph parity, tsc, full
+  local/cloud builds + postbuild, CI security/checkout suites, preview/scallop/circle geometry. Actual hosted A5
+  Double export = **1 / 0.75 mm**, centreline insets **3 / 5 mm**, outlined text, zero browser errors.
+- Evidence: workspace `output/instaplaque-border-parity-20261104/`; `border-parity-phone.jpg` plus three shorter
+  size sheets, 12 old/new/proof SVG sets, logs and hosted SVG/screenshots. All synthetic; no order data accessed.
+- Details, exact widths, 0.25 mm small-double-scallop manufacturing question, code-only impact since 26 Oct,
+  old optional UI-suite failures, optional CI-hook permission limitation and rollback:
+  [docs/border-parity-2026-11-04.md](docs/border-parity-2026-11-04.md).
+- **Not live.** Production independently remains `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. No production deploy,
+  promotion, aliases, order changes or messages. Future release is a separate owner decision; no live rollback needed.
+
+
 ## Cookie bar round 3 + cookie-free visit counter: LIVE — 3 November 2026, 17:58 UTC
 
 - **Owner:** msg 9515 "Yeah go live". **Live:** `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN` (instaplaque-nxc3awz2j) from this
