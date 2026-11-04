@@ -1,5 +1,25 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Stage 3 card-wording correction — PREVIEW ONLY, 4 November 2026
+
+- Same branch/worktree: `codex/instaplaque-stage3-pages-20261104` / `projects/instaplaque-stage3-pages-20261104`.
+  Replaces the first preview's inappropriate default inscriptions with the parent's exact existing catalogue choices:
+  3 house-name, 6 donor/dedication, 6 church and 4 brass practice cards. No new product images.
+- Incompatible cards removed, their sizes retained in tables/designer and From prices unchanged. Empty house-board
+  filter removed; shared chip/swatch behavior unchanged. All practice cards have boards: facts correctly derive 10 days.
+- Build guard reads `catalogueExamples` for every new-page default lead and rejects incompatible subject matter;
+  13 real negative catalogue cases. Independent review inspected all 18 unique images: all 19 leads correct, no blockers.
+- Both TypeScript checks, full local build/postbuild, portrait comparison and existing-live-HTML scope checks passed.
+  Final category coverage: 36 cases / 77 card interactions (24 unchanged-page cases + the final 12 new-page rerun).
+  The donor intro was shortened to fix a 2.45 px desktop cookie overlap; all six approved card leads retained.
+  Both final contact/layout sheets visually inspected. New ready-preview receipt follows after deployment.
+- Practice still lacks actual practice-name images; the specified Studio/Clifford Ackroyd/Audrey Godfrey/Library
+  examples are explicit fallbacks. Donor uses the approved dedication/opening examples.
+- New evidence/screenshots: workspace `output/instaplaque-stage3-pages-20261104/wording-r2/` and root JPEGs named
+  `*-wording-r2-*`; old screenshots remain. Full card inscriptions: [stage-three release notes](docs/category-template-stage3-2026-11-04.md).
+- PREVIEW ONLY; production, border/export files, owner/customer messaging and external settings untouched.
+
+
 ## Stage 3 category pages — PREVIEW ONLY, 4 November 2026
 
 - **Ready preview:** https://instaplaque-25t9gzp2s-dullaghan31-3959s-projects.vercel.app

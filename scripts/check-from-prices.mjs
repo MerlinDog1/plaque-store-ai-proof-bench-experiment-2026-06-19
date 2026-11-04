@@ -101,7 +101,7 @@ for (const slug of ['brass-plaques', 'stainless-steel-plaques']) {
 // (/design?backing=stake&plaque=<slug>) at the price of that plate on its light solid wood board plus the stake.
 const templateCounts = { 'memorial-plaques': 10, 'bench-plaques': 6, 'garden-plaques': 8, 'tree-memorial-plaques': 6, 'brass-plaques': 8,
   'stainless-steel-plaques': 8, 'opening-plaques': 6, 'custom-plaques': 6,
-  'house-name-plaques': 6, 'donor-recognition-plaques': 6, 'church-plaques': 6, 'professional-brass-plaques': 6 };
+  'house-name-plaques': 3, 'donor-recognition-plaques': 6, 'church-plaques': 6, 'professional-brass-plaques': 4 };
 const pageMetals = { 'brass-plaques': ['polished-brass', 'brushed-brass', 'orbital-brass-matt-lacquer', 'aged-brass'], 'stainless-steel-plaques': ['polished-stainless', 'brushed-stainless'] };
 pageMetals['professional-brass-plaques'] = pageMetals['brass-plaques'];
 const stakePages = new Set(['tree-memorial-plaques']);

@@ -36,10 +36,10 @@ const pages = [
   { slug: 'stainless-steel-plaques', cards: 8, chips: { finish: 'Polished', finishWord: 'polished steel', narrow: 'Bench sizes', narrowCount: 2 } },
   { slug: 'opening-plaques', cards: 6, planner: true, chips: { finish: 'Brass', finishWord: 'brass', narrow: 'On a wood board', narrowCount: 3 } },
   { slug: 'custom-plaques', cards: 6, chips: { finish: 'Stainless steel', finishWord: 'steel', narrow: 'Oval and round', narrowCount: 2 } },
-  { slug: 'house-name-plaques', cards: 6, chips: { finish: 'Brass', finishWord: 'brass', narrow: 'On a wood board', narrowCount: 1 } },
-  { slug: 'donor-recognition-plaques', cards: 6, chips: { finish: 'Brass', finishWord: 'brass', narrow: 'On a wood board', narrowCount: 1 } },
-  { slug: 'church-plaques', cards: 6, chips: { finish: 'Stainless steel', finishWord: 'steel', narrow: 'On a wood board', narrowCount: 1 } },
-  { slug: 'professional-brass-plaques', cards: 6, chips: { finish: 'Polished', finishWord: 'polished brass', narrow: 'On a wood board', narrowCount: 2 } },
+  { slug: 'house-name-plaques', cards: 3, chips: { finish: 'Brass', finishWord: 'brass' } },
+  { slug: 'donor-recognition-plaques', cards: 6, chips: { finish: 'Brass', finishWord: 'brass', narrow: 'On a wood board', narrowCount: 4 } },
+  { slug: 'church-plaques', cards: 6, chips: { finish: 'Stainless steel', finishWord: 'steel', narrow: 'On a wood board', narrowCount: 2 } },
+  { slug: 'professional-brass-plaques', cards: 4, chips: { finish: 'Polished', finishWord: 'polished brass', narrow: 'On a wood board', narrowCount: 4 } },
 ];
 const selectedSlugs = process.env.CATEGORY_SLUGS?.split(',').filter(Boolean);
 if (selectedSlugs) assert(selectedSlugs.every(slug => pages.some(page => page.slug === slug)), 'Unknown CATEGORY_SLUGS entry');

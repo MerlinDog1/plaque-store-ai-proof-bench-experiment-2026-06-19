@@ -1,5 +1,91 @@
 # Stage 3: house, donor, church and practice pages — 4 November 2026
 
+## Wording-matched card leads — revision 2, 4 November
+
+**PREVIEW ONLY. Production, domains and aliases remain untouched.**
+
+This correction supersedes the first preview’s card/photo selections below. The parent’s review found
+memorial, pet and house-name inscriptions on the wrong occasion pages. Each default lead now uses the exact
+requested existing catalogue configuration and its matching inscription: **house 3, donor 6, church 6,
+practice 4**. No new product image or scene image was created. Earlier screenshots and preview evidence remain.
+
+- House has only house/building-name leads. Its empty wood-board filter is removed; the same live finish-chip
+  and swatch behavior remains. There is no shared-template/CSS change.
+- Donor leads are dedications or named-room/opening examples, not personal memorials. The Meadows Community Hub
+  keeps a stainless-steel lead. Small individual-name plates remain available in the size table/designer.
+- Church leads use the requested pew/church/memorial examples. The 225 × 65 mm strip is added to the table and FAQ;
+  old 225 × 75, landscape A5/A4 sizes remain in the table/designer. The social/schema image now uses Ivor Pugh.
+- Practice is brass only and leads with The Studio, followed by the three approved named rooms/library.
+  **There are still no actual professional-practice-name examples**: these are the explicitly requested fallbacks.
+  All four cards have wood backing, so the live template derives 10 working days in the facts line and 10/15 on
+  the cards. The available unbacked 150 × 50 mm size keeps the page’s £63.50 From price truthful.
+- House/donor/church still start at £58.50 for the available 150 × 50 mm stainless option. Removed grid sizes are
+  retained in the tables and designer; no product, price, lead time, or designer default was changed.
+- `check-category-template.mjs` now reads `services/catalogueExamples.ts` for every default lead on these pages.
+  It rejects person/pet memorials, in-memory/planting wording on house/donor/practice; pets, openings and planting
+  on church; and a catalogue use that does not fit the page. Thirteen actual incompatible catalogue examples
+  exercise the guard. Swatch and chip alternatives deliberately retain the live behavior, as requested.
+
+### Every default card and its photo wording
+
+#### /house-name-plaques
+
+1. **200 × 150 mm — Polished brass**: HOLLY / HOUSE
+2. **250 × 150 mm oval — Brushed brass**: LARCH / HOUSE
+3. **200 mm round — Brushed steel**: THE OLD / SCHOOL / 1874
+
+#### /donor-recognition-plaques
+
+1. **300 × 200 mm — Orbital brass**: This garden is dedicated to / THE NURSES / of Slad Valley Hospital
+2. **A4 · 297 × 210 mm — Brushed steel**: THE MEADOWS / COMMUNITY HUB / was officially opened by / Councillor Anne Fielding / on 14 March 2026
+3. **200 × 150 mm — Aged brass on light wood**: THE GILLIAN / GREENWOOD ROOM / Opened on 14 April 2024
+4. **A4 · 210 × 297 mm — Orbital brass on dark wood**: THE ERIC / PICKERING / ROOM / Opened on 13 November 2025
+5. **A5 · 148 × 210 mm — Orbital brass on light wood**: THE ART / ROOM / Opened on 20 June 2023
+6. **400 × 300 mm — Polished brass on dark wood**: THE LIBRARY / Opened on 24 September 2025
+
+#### /church-plaques
+
+1. **150 × 50 mm — Polished brass**: In loving memory of / VICTOR HOLLINS / 1933 – 2015
+2. **225 × 65 mm — Polished steel**: In loving memory of / REVD JOHN ASHWORTH / 1929 – 2012 / “Come ye apart and rest a while” Mark 6:31
+3. **200 × 150 mm — Polished brass on light wood**: In loving memory of / IVOR PUGH / 1938 – 2017 / Lay reader in this church / for thirty years, / a good and faithful servant
+4. **A5 · 148 × 210 mm — Polished brass on light wood**: In loving memory of / SAMUEL / HARGREAVES / 1924 – 2011 / Bell ringer at St Mary's / for seventy years / Ring on
+5. **250 × 150 mm oval — Polished brass**: In loving memory of / IRENE BAXTER / 1933 – 2022 / who arranged the flowers here / for more than fifty years
+6. **A4 · 210 × 297 mm — Brushed steel**: In loving memory of / ROBERT / ILLINGWORTH / 1937 – 2008
+
+#### /professional-brass-plaques
+
+1. **200 × 150 mm — Orbital brass on dark wood**: THE STUDIO / Opened on 23 October 2023
+2. **A5 · 210 × 148 mm — Aged brass on light wood**: THE CLIFFORD / ACKROYD ROOM / Opened on 22 March 2025
+3. **A4 · 297 × 210 mm — Polished brass on light wood**: THE AUDREY / GODFREY ROOM / Opened on 21 February 2024
+4. **400 × 300 mm — Polished brass on dark wood**: THE LIBRARY / Opened on 24 September 2025
+
+### Revision-two verification and delivery
+
+Evidence is in workspace `output/instaplaque-stage3-pages-20261104/wording-r2/`; all new review JPEGs have
+`wording-r2` in their filenames, preserving the first set. The build’s `lead-wording.json` / `lead-wording.md`
+record the exact default product slugs, image paths and wording from the built HTML and catalogue.
+Both TypeScript checks and the full local build/postbuild passed. The wording guard accepted all 19 default
+leads and rejected all 13 incompatible catalogue regression examples. The unchanged-live scope check passed
+for all 203 existing HTML files: no title/canonical/content changes except the three previously added incoming
+link paragraphs (bundle hashes excluded). Portrait comparison passed at 390 and 1440 px. Independent read-only
+review inspected all 18 unique studio images and confirmed all 19 requested leads, catalogue facts and size
+retention, with no blockers. The full category-browser run passed all 24 existing-page cases, then caught a 2.45 px donor desktop
+cookie-bar overlap: its two-line intro plus a wood-backed card stretched the first row. Shortening only that
+page's intro keeps all six requested leads and the shared template unchanged. The final rebuild/postbuild
+passed again, and all four revised pages passed all 12 browser cases / 19 card interactions. Combined with
+24 passing unchanged-live-page cases, this is **36 cases / 77 card interactions**; evidence is
+`browser-results-verified.json`. No overflow, page errors or cookie-bar overlaps remain. First phone cards
+start at 296 px; phone lengths are house 5.91, donor 6.40, church 6.38, practice 6.06 screens.
+
+All four pages were captured at 390 × 844 and 1440 × 900; the final phone contact sheet and desktop layout
+sheet were visually inspected. `stage3-wording-r2-phone-contact-sheet.jpg` is 706 × 1600, about 253 KiB.
+The new preview receipt follows after deployment. Production before this correction remains
+`dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`.
+
+---
+
+## First preview record (superseded card selections)
+
 **PREVIEW ONLY. No production deployment, promotion, alias or domain change.**
 Branch: `codex/instaplaque-stage3-pages-20261104`, based on live source `86188c9`
 (`codex/instaplaque-consent-stats-20261102`). Production was independently inspected as

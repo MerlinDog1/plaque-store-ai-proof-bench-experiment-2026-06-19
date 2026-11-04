@@ -9,7 +9,7 @@
 //   finish links present as plain links for visitors without JavaScript;
 // - each card's lead-time line names the slowest catalogue production days (offer.productionDays) of the plaques
 //   behind it (its data-offers); a card without one has only plaques made in the standard 5 working days; the facts
-//   line gives the page's usual days (5; 10 on the tree page, where every plaque is on a board);
+//   line gives the page's usual days (5; 10 on tree and practice grids, where every plaque is on a board);
 // - the opening page's date planner states the catalogue days of its plaques, and its date maths
 //   (services/occasionPlanner.ts) never names an approval day that the catalogue's days and delivery can't meet,
 //   checked against this script's own calendar for every date it accepts;
@@ -74,7 +74,7 @@ const pages = [
     description: "Start a custom plaque proof for bespoke sizes, oval plaques, circular plaques and made-to-measure brass or stainless steel plaques.",
     faqs: ["What sizes and shapes can you make?", "How do I get a price for another size?", "Can bespoke plaques still use instant proofing?", "Can you make a plaque from my own design?", "How long does a custom plaque take?", "Can I see my plaque before I pay?"],
     links: [...["/ai-plaque-design", "/plaque-sizes", "/memorial-plaque-wording", "/design-request"], ...common] },
-  { slug: 'house-name-plaques', cards: 6, h1: 'House name plaques',
+  { slug: 'house-name-plaques', cards: 3, h1: 'House name plaques',
     title: 'House Name Plaques | Engraved Brass & Steel | InstaPlaque',
     description: 'Create a simple engraved house name plaque in brass or stainless steel. Compare sizes, finishes and prices, with a free proof and UK delivery included.',
     faqs: ['Can I put my house name and number on one plaque?', 'Can a house name plaque go outside?', 'Do I need a wood backing?', 'What fixings come with a house name plaque?', 'Can I check the house name before I pay?', 'How long does a house name plaque take?'],
@@ -92,7 +92,7 @@ const pages = [
     faqs: ['Do I need church permission before ordering?', 'What size should a pew plaque be?', 'Can I share the proof with the parish?', 'What fixings come with a church plaque?', 'Which material should I choose?', 'How long does a church plaque take?'],
     design: 'brushed-stainless-150x50-rect-plaque',
     links: ['/memorial-plaques', '/bench-plaques', '/donor-recognition-plaques', '/opening-plaques', '/memorial-plaque-wording', ...common] },
-  { slug: 'professional-brass-plaques', cards: 6, h1: 'Brass practice plaques',
+  { slug: 'professional-brass-plaques', cards: 4, usual: 10, h1: 'Brass practice plaques',
     title: 'Brass Plaques for Professional Practices | InstaPlaque',
     description: 'Brass name plates for solicitors, dentists, vets, architects and accountants. Compare sizes and finishes, add your wording and approve a free proof before paying.',
     faqs: ['What size suits a practice name plate?', 'Which brass finish should I choose?', 'Can you include a practice logo?', 'Can I include qualifications or a registration number?', 'Does a plaque meet a regulator’s display requirements?', 'How long does a brass practice plaque take?'],
@@ -108,6 +108,54 @@ const compact = text => text.replace(/\s+/g, ' ').trim();
 const built = href => existsSync(path.join(root, decodeURI(href.replace(/[?#].*$/, '')).replace(/^\//, ''), 'index.html'))
   || existsSync(path.join(root, decodeURI(href.replace(/[?#].*$/, ''))));
 const sceneImage = /\/site-images\/(category|memorial|in-place|photos-in-place)\/|merchant-steel-a5|merchant-brass-bench|\/site-images\/home-(gallery|carousel|route)/;
+
+// The pictured inscription must fit the page, not merely the right dimensions/finish. Read the same
+// catalogue wording data that describes each existing studio image; do not infer intent from a filename.
+const exampleModule = { exports: {} };
+vm.runInNewContext(ts.transpileModule(readFileSync(new URL('../services/catalogueExamples.ts', import.meta.url), 'utf8'),
+  { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, exampleModule);
+const { catalogueExamples } = exampleModule.exports;
+const leadUses = {
+  'house-name-plaques': ['a house or building name'],
+  'donor-recognition-plaques': ['a dedication plaque', 'an opening plaque'],
+  // Until practice-specific examples exist, the reviewed named rooms/studio/library are the permitted fallback.
+  'professional-brass-plaques': ['an opening plaque'],
+  'church-plaques': ['a memorial bench dedication', 'a memorial plaque', 'a church dedication'],
+};
+function checkLeadWording(pageSlug, productSlug) {
+  const example = catalogueExamples[productSlug];
+  const label = `${pageSlug}: lead wording for ${productSlug}`;
+  assert(example?.lines?.length && example.use, `${label}: catalogue example required`);
+  const words = compact(example.lines.join(' '));
+  if (pageSlug === 'church-plaques') {
+    assert(!/pet|opening/i.test(example.use) && !/\b(opened|opening|unveiled|planted)\b/i.test(words),
+      `${label}: no pet memorial, planting or opening inscription (${words})`);
+  } else {
+    assert(!/memorial|pet/i.test(example.use) && !/\bin (?:loving |grateful )?memory\b|\bplanted\b/i.test(words),
+      `${label}: no person/pet memorial, in-memory or planted inscription (${words})`);
+  }
+  assert(leadUses[pageSlug].includes(example.use), `${label}: ${example.use} does not fit this page (${words})`);
+  return words;
+}
+// Regression cases use the actual inappropriate examples from the first preview. These must fail even
+// though they are real, priced catalogue products with valid studio photos.
+let rejectedLeads = 0;
+for (const slug of ['house-name-plaques', 'donor-recognition-plaques', 'professional-brass-plaques']) {
+  for (const product of ['brushed-brass-150x50-rect-plaque', 'brushed-brass-148x210-rect-plaque', 'polished-stainless-148x210-rect-plaque']) {
+    assert.throws(() => checkLeadWording(slug, product), /lead wording/);
+    rejectedLeads++;
+  }
+}
+for (const [slug, product] of [
+  ['church-plaques', 'brushed-brass-148x210-rect-plaque'],
+  ['church-plaques', 'orbital-brass-matt-lacquer-297x210-rect-plaque'],
+  ['house-name-plaques', 'aged-brass-210x148-rect-light-wood-plaque'],
+  ['professional-brass-plaques', 'polished-brass-200x150-rect-plaque'],
+]) {
+  assert.throws(() => checkLeadWording(slug, product), /lead wording/);
+  rejectedLeads++;
+}
+console.log(`PASS occasion lead wording guard: rejects ${rejectedLeads} incompatible catalogue examples.`);
 
 for (const page of pages) {
   const html = await fs.readFile(path.join(root, page.slug, 'index.html'), 'utf8');
@@ -175,6 +223,7 @@ for (const page of pages) {
       assert(offers.has(link) && built(href) && made.some(offer => offer.slug === link), `${page.slug}: card link ${href} is one of its built product pages`);
       assert(studioPhotos.has(link) && image === `/site-images/studio-photo/${link}-600.webp`, `${page.slug}: ${href} card leads with its studio photo (${image})`);
       assert(listed.has(`${site}${href}`), `${page.slug}: ${href} in the ItemList`);
+      if (leadUses[page.slug]) console.log(`PASS ${page.slug} lead: ${link} — ${checkLeadWording(page.slug, link)}`);
       assert(swatches.every(swatch => made.some(offer => `/${offer.slug}` === swatch) && built(swatch)), `${page.slug}: ${href} card's finish links reach its built product pages`);
     }
     assert(/^from £/.test(compact(card.querySelector('.cat-tpl-amount').textContent)), `${page.slug} ${name}: a from-price`);
@@ -217,12 +266,12 @@ for (const page of pages) {
   // Facts line, sample proof and contextual links.
   const facts = compact(main.querySelector('.cat-tpl-head .cat-hero-buy').textContent);
   // One or two phone lines (review fix, 1 Nov 2026): the page's usual days only (5; 10 on the tree page, where every
-  // plaque is on a board); longer times are on the cards and in the questions.
+  // plaque is on a board, as on the practice grid); longer times are on the cards and in the questions.
   for (const words of ['UK delivery included', 'free proof before you pay']) {
     assert(facts.includes(words), `${page.slug}: facts line says "${words}"`);
   }
   const usual = Math.min(...pageDays);
-  assert.equal(usual, page.stake ? 10 : STANDARD_DAYS, `${page.slug}: the page's usual days`);
+  assert.equal(usual, page.usual || (page.stake ? 10 : STANDARD_DAYS), `${page.slug}: the page's usual days`);
   assert(facts.endsWith(` made in ${usual} working days`) && !facts.includes('('), `${page.slug}: facts line ends with the usual ${usual} days, no exceptions: ${facts}`);
   if (page.planner) {
     // The date planner states the catalogue days of the page's plaques, as the cards do.

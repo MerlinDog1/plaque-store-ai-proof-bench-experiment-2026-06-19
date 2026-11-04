@@ -59,7 +59,7 @@ export const occasionLandingPages: SeoLandingPage[] = [
     seoTitle: 'Church Pew & Dedication Plaques | Engraved Metal | InstaPlaque',
     seoDescription: 'Plan a church pew, memorial or dedication plaque in brass or steel. Compare sizes and wording ideas, check church permission, then approve your free proof.',
     heroCopy: 'Small plates for a pew and larger plaques for an agreed church dedication. Settle the location, wording, material and fixings with the church before ordering.',
-    image: '/site-images/studio-photo/polished-brass-210x148-rect-dark-wood-plaque.webp',
+    image: '/site-images/studio-photo/polished-brass-200x150-rect-light-wood-plaque.webp',
     relatedProductSlug: 'brushed-stainless-150x50-rect-plaque', from: steelFrom, proofCta: 'Design a church plaque',
     sections: [
       { title: 'Start with the church', copy: 'Ask whoever is responsible for the building which permission is needed for your proposed plaque. For a Church of England church, speak to the parish or Diocesan Advisory Committee. A design proof is not permission to install a plaque.' },
@@ -67,7 +67,7 @@ export const occasionLandingPages: SeoLandingPage[] = [
     ],
     faqs: [
       { question: 'Do I need church permission before ordering?', answer: 'Ask your church first. It needs to agree the location, wording, material and method of fixing. For Church of England churches, the parish or Diocesan Advisory Committee can advise on permissions. A free proof is not permission to install.' },
-      { question: 'What size should a pew plaque be?', answer: 'Measure the flat area and check the size permitted by your church. A 150 × 50 mm strip suits a short inscription; 225 × 75 mm gives a dedication more space. These are catalogue options, not church-approved sizes.' },
+      { question: 'What size should a pew plaque be?', answer: 'Measure the flat area and check the size permitted by your church. A 150 × 50 mm strip suits a short inscription; 225 × 65 mm or 225 × 75 mm gives a dedication more space. These are catalogue options, not church-approved sizes.' },
       { question: 'Can I share the proof with the parish?', answer: 'Yes. Download the free PDF proof to share the wording, dimensions, finish and fixing positions. Agree any changes before approving the plaque for production.' },
       { question: 'What fixings come with a church plaque?', answer: 'Standard fixings are included. The small strips have two screw holes; the larger rectangular plaques shown have decorative caps over the screw heads. The church must agree how and where the plaque is attached.' },
       { question: 'Which material should I choose?', answer: 'Brass has a warm finish; stainless steel is silver. Check the church’s agreed material first. Light solid wood or dark solid wood backing is available on suitable sizes for indoor or sheltered positions; use metal without backing for an exposed spot.' },
