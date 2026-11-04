@@ -121,3 +121,21 @@ Git deployment is disabled for `codex/` branches in `vercel.json`; no workflow p
 This preview is **not** approval to release. The parent will combine/reconcile it with any independently checked
 border fix against the then-current live source. No Search Console or Merchant Center submission was made.
 A production rollback is not needed: this task never changes production.
+
+
+## Ready preview receipt
+
+- **Preview:** https://instaplaque-25t9gzp2s-dullaghan31-3959s-projects.vercel.app
+- **Deployment:** `dpl_4hyxmWgzKf4iDC1qdkUsQ2yVWWF6`, independently inspected **Ready**, target **preview**.
+- **Deployed source:** `5035d66b041f72ed1f5532c3e975aa8448e38bab`, pushed to `codex/instaplaque-stage3-pages-20261104` before deploying.
+- Command: `flock /home/coding-agent/workspace/tmp/instaplaque-vercel-deploy.lock vercel deploy --yes --scope dullaghan31-3959s-projects`.
+  The API probe returned 403 **application/json** at 14:43 UTC, so no checkpoint retry was needed.
+  Cloud build and every postbuild gate passed. Logs and `preview-receipt.json` are in the evidence directory.
+- Hosted smoke: **13/13 HTTP 200**, through `vercel curl`, spaced ten seconds apart. All four new pages,
+  memorial/brass/opening, home, portrait and cookies match the browser-tested build for metadata, H1, body copy,
+  links and JSON-LD. Sitemap, 175-item Merchant feed and robots are byte-identical to the tested files.
+  Evidence: `logs/hosted-check.log`, `hosted-results.json`, `hosted/`.
+- Production independently inspected **before and after**: still `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`, Ready, production.
+  No production command, promotion, production alias/domain, environment, database, Ads or Merchant change was made.
+- The local server on 127.0.0.1:4398 and task browsers are stopped. Screenshots were inspected locally;
+  hosted interaction testing is not claimed. No message was sent to the owner or a customer by this task.

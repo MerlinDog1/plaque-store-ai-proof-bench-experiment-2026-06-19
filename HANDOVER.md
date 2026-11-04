@@ -2,6 +2,15 @@
 
 ## Stage 3 category pages — PREVIEW ONLY, 4 November 2026
 
+- **Ready preview:** https://instaplaque-25t9gzp2s-dullaghan31-3959s-projects.vercel.app
+  (`dpl_4hyxmWgzKf4iDC1qdkUsQ2yVWWF6`, target preview), from pushed app source
+  `5035d66b041f72ed1f5532c3e975aa8448e38bab`. Follow-up documentation changes no application code.
+- Full local/cloud build and postbuild, typecheck, 36 category browser cases (final new-page rechecks included),
+  two portrait comparisons and the all-existing-HTML scope gate passed. Production was inspected before/after:
+  still `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. No production deployment or promotion.
+- Hosted checks: 13/13 HTTP 200; page content/SEO/schema match the tested build; sitemap, feed and robots identical.
+- Review JPEGs and 706 × 1600 phone contact sheet: workspace `output/instaplaque-stage3-pages-20261104/`.
+
 - Branch `codex/instaplaque-stage3-pages-20261104`, from live `86188c9`: four new products-first pages for house names,
   donor recognition, church and professional practices. Only approved catalogue studio examples; six cards each.
 - Existing live HTML is unchanged except links from memorial, brass and opening. No portrait rebuild, border/export
