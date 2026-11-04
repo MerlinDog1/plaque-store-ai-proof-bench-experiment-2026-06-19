@@ -23,6 +23,7 @@
     "check:bold-toggle": "node scripts/check-bold-toggle.cjs",
     "check:fixings-border-ui": "node scripts/check-fixings-border-ui.cjs",
     "check:curved-scallop-border": "node scripts/check-curved-scallop-border.cjs",
+    "check:border-parity": "node scripts/check-border-parity.mjs",
     "check:preview-geometry": "node scripts/check-preview-geometry.cjs",
     "check:circle-plaques": "node scripts/check-circular-plaques.mjs",
     "check:small-border-stroke": "node scripts/check-small-border-stroke.cjs",

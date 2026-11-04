@@ -590,12 +590,14 @@ const prepareCloneForProduction = async (sourceSvg: SVGSVGElement, state: Plaque
       });
     }
 
-    // 6. Process Engraved borders -> black engrave line
+    // 6. Solid black etch, using the approved preview's exact border geometry.
+    // SVG units are millimetres here. Preserve each stroke-width (including
+    // the small-plaque scale and different inner/outer widths), not a uniform
+    // production hairline. Step 9 removes the preview-only opacity.
     clone.querySelectorAll('.engraved-border').forEach(el => {
       el.removeAttribute('fill');
       el.setAttribute('fill', 'none');
       el.setAttribute('stroke', '#000000');
-      el.setAttribute('stroke-width', '0.5');
       el.removeAttribute('filter');
       el.removeAttribute('style');
     });
