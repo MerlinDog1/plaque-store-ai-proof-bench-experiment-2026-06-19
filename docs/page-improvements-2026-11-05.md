@@ -49,8 +49,20 @@ from the catalogue, like memorial (titles unchanged), so the static HTML and the
 - Phone length: the new sections are sideways rows on phones (like the wording ideas), stacked columns on computers.
   Measured on the local build (390 x 844): garden 7.63, brass 7.69, stainless steel 7.24, opening 7.07 phone screens.
   `check-category-template-browser.cjs` now allows 7.8 (was 7.6, set for the film section in owner msg 8603).
-- `scripts/check-category-template-browser.cjs` on the local build (phone 390 x 844 and computer 1440 x 900) for the
-  changed pages: results are recorded in the handover once the run finishes.
+- `scripts/check-category-template-browser.cjs` on the local build for garden, brass, stainless steel and opening:
+  12/12 pass (phone 390 x 844, computer 1440 x 900, no JavaScript): first card at 291-325 px, no overflow or
+  console errors, swatches, chips, FAQs, the opening date planner. Phone screenshots of every new section:
+  workspace `output/instaplaque-page-improvements-20261105/shots/` and `page-improvements-phone-sheet.jpg`.
+
+## Preview
+
+- **Ready preview:** https://instaplaque-a7zsyukl0-dullaghan31-3959s-projects.vercel.app (`dpl_C9UjE4ur2VrXNvKz2yGW2UK6J8F4`,
+  target preview), from `25e55cbead041e8da59cece292a42a757a130ec8`, deployed 22:34 UTC with the existing preview script
+  (API probe 403 JSON, shared lock). The cloud build ran prerender and every postbuild guard.
+- **Hosted:** 12/12 (`output/instaplaque-page-improvements-20261105/verify-preview.cjs`, 10 s apart): the five pages,
+  house, donor, memorial and home match the tested build's metadata, copy, links and schema; sitemap, Merchant feed
+  and robots.txt byte-identical.
+- **Production unchanged:** `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2` before and after.
 
 ## Release (on the owner's go only)
 

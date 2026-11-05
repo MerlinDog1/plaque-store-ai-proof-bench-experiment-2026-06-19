@@ -11,7 +11,10 @@
   from-price on garden, tree, brass, stainless steel and opening. Tree content unchanged. Details, reasons and checks:
   [docs/page-improvements-2026-11-05.md](docs/page-improvements-2026-11-05.md).
 - **Checks:** typecheck; full build with every postbuild guard; `scripts/check-page-improvements-scope.py` against a build of
-  `93ef7d5` (4 pages improved, tree summary only, everything else bundle-hash only, sitemap/robots/feed identical).
+  `93ef7d5` (4 pages improved, tree summary only, everything else bundle-hash only, sitemap/robots/feed identical);
+  category browser check 12/12 (phone, computer, no JavaScript; phone length limit now 7.8, garden 7.63, brass 7.69).
+- **Ready preview:** https://instaplaque-a7zsyukl0-dullaghan31-3959s-projects.vercel.app (`dpl_C9UjE4ur2VrXNvKz2yGW2UK6J8F4`,
+  target preview) from `25e55cb`; hosted checks 12/12. Production unchanged: `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2`.
 - **Release on the owner's go only:** deploy `--prod --skip-domain` under the shared lock, check, promote. Rollback: promote
   `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2`. Then resubmit the sitemap and request indexing for the changed pages.
 
