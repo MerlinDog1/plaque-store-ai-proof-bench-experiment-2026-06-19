@@ -3794,6 +3794,16 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
 .cat-tpl .cat-tpl-org { grid-column: 1 / -1; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(32, 59, 50, 0.16); }
 .cat-tpl .cat-tpl-org h3 { margin: 0 0 6px; font: 700 15px/1.3 Arial, Helvetica, sans-serif; color: var(--shop-ink); }
 .cat-tpl .cat-tpl-org p { margin: 0; font-size: 13.5px; line-height: 1.45; }
+
+/* Guide sections (5 Nov 2026, owner msg 10173): short notes, each heading linking to its own page where there is one.
+   On phones a sideways row, like the wording ideas, so each section adds about one card's height. */
+.cat-tpl .cat-tpl-guide-list { display: grid; grid-auto-flow: column; grid-auto-columns: 72%; gap: 10px; margin: 0 calc(var(--cat-tpl-pad) * -1);
+  padding: 2px var(--cat-tpl-pad) 10px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 var(--cat-tpl-pad); list-style: none; }
+.cat-tpl .cat-tpl-guide-list li { min-width: 0; padding: 12px 12px 13px; border: 1px solid var(--shop-line); border-radius: 4px; background: #fff; scroll-snap-align: start; }
+.cat-tpl .cat-tpl-guide-list h3 { margin: 0 0 4px; font: 700 14.5px/1.3 Arial, Helvetica, sans-serif; letter-spacing: 0; color: var(--shop-ink); }
+.cat-tpl .cat-tpl-guide-list h3 a, .cat-tpl .cat-tpl-guide-list p a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.cat-tpl .cat-tpl-guide-list p { margin: 0; font-size: 13px; line-height: 1.42; }
+.cat-tpl .cat-tpl-guide .cat-size-links { margin-top: 12px; }
 /* Owner msg 8603: give the proof and the film their own sections. The existing film is 4:5,
    so a 60svh width caps its height at 75svh without cropping or stretching it. */
 .shopfront.cat-tpl > .cat-tpl-film-section { padding-top: 28px; padding-bottom: 28px; }
@@ -3861,6 +3871,12 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
   .cat-tpl .cat-tpl-finish-outdoors { font-size: 13px; }
   .cat-tpl .cat-tpl-org { grid-column: 1; max-width: 640px; }
   .cat-tpl .cat-tpl-org p { font-size: 15px; }
+  .cat-tpl .cat-tpl-guide .cat-tpl-section-intro { max-width: 760px; font-size: 15px; }
+  .cat-tpl .cat-tpl-guide-list { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; max-width: 1100px;
+    margin: 0; padding: 0; overflow: visible; }
+  .cat-tpl .cat-tpl-guide-list li { padding: 16px 18px 18px; }
+  .cat-tpl .cat-tpl-guide-list h3 { font-size: 17px; }
+  .cat-tpl .cat-tpl-guide-list p { font-size: 15px; line-height: 1.5; }
 
 }
 

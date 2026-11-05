@@ -634,11 +634,42 @@ export type TemplateConfig = {
   /** Below the proof steps (the opening page's notes for schools, councils and companies). */
   proofExtra?: React.ReactNode;
   wording?: { title: string; intro?: string; inscriptions: Inscription[]; link: { href: string; label: string } };
+  /** Visible sections after the wording ideas (anchors `${prefix}-${key}`). */
+  guides?: TemplateGuide[];
   moreTitle: string;
   related?: React.ReactNode;
   closing: { title: string; copy: React.ReactNode };
   designHref?: string;
 };
+
+/** A section of short notes, each optionally linking to its own page (owner msg 10173, 5 Nov 2026, the page-1
+ * improvements): what a metal is used for, memorial gardens, garden dedication signs, a closer look at aged brass. */
+export type TemplateGuide = {
+  key: string;
+  title: string;
+  intro?: React.ReactNode;
+  items: { title: string; href?: string; copy: React.ReactNode }[];
+  /** After the notes (the aged brass sizes). */
+  more?: React.ReactNode;
+};
+
+function GuideBlock({ id, title, intro, items, more }: Omit<TemplateGuide, 'key'> & { id: string }) {
+  return (
+    <section className="shop-section cat-tpl-guide" id={id} aria-labelledby={`${id}-heading`}>
+      <h2 id={`${id}-heading`}>{title}</h2>
+      {intro && <p className="cat-tpl-section-intro">{intro}</p>}
+      <ul className="cat-tpl-guide-list">
+        {items.map(item => (
+          <li key={item.title}>
+            <h3>{item.href ? <a href={item.href}>{item.title}</a> : item.title}</h3>
+            <p>{item.copy}</p>
+          </li>
+        ))}
+      </ul>
+      {more}
+    </section>
+  );
+}
 
 export function CategoryTemplatePage({ config, product, faqs, onLaunch, onRequestDesign }: {
   config: TemplateConfig;
@@ -682,6 +713,7 @@ export function CategoryTemplatePage({ config, product, faqs, onLaunch, onReques
       <FilmBlock id={id('film')} />
       {!config.finishesFirst && finishes}
       {config.wording && <WordingBlock id={id('wording')} {...config.wording} />}
+      {(config.guides || []).map(({ key, ...guide }) => <GuideBlock key={key} id={id(key)} {...guide} />)}
       <section className="shop-section cat-tpl-more" id={id('materials')}>
         <details className="cat-tpl-fold">
           <summary>{config.moreTitle}<span aria-hidden="true">+</span></summary>

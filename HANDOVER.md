@@ -1,5 +1,20 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Page-1 improvements + stage 3 pages — PREVIEW ONLY, 5 November 2026
+
+- **Owner:** msg 10173 "go with improvements" (the plan sent 21:26 UTC). Branch `codex/instaplaque-page-improvements-20261105`,
+  worktree `projects/instaplaque-page-improvements-20261105`, from the live source `f3d05f2` with the stage 3 branch
+  (`4189eb0`, four new pages) merged unchanged in `93ef7d5`.
+- **Ships:** garden H1 "Garden memorial plaques" and two new sections (memorial gardens / gardens of remembrance, garden
+  dedication signs) linking to the tree page by name; brass and stainless steel "used for" sections (linked) and wording
+  ideas, brass "Aged brass plaques" section; three more opening wording ideas; search summaries with each page's own
+  from-price on garden, tree, brass, stainless steel and opening. Tree content unchanged. Details, reasons and checks:
+  [docs/page-improvements-2026-11-05.md](docs/page-improvements-2026-11-05.md).
+- **Checks:** typecheck; full build with every postbuild guard; `scripts/check-page-improvements-scope.py` against a build of
+  `93ef7d5` (4 pages improved, tree summary only, everything else bundle-hash only, sitemap/robots/feed identical).
+- **Release on the owner's go only:** deploy `--prod --skip-domain` under the shared lock, check, promote. Rollback: promote
+  `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2`. Then resubmit the sitemap and request indexing for the changed pages.
+
 ## Border fix (rounds 1-3): LIVE — 5 November 2026, 09:36 UTC
 
 - **Owner:** msg 10020 "Go live". **Live:** `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2` (instaplaque-cdlb9d6rt) from this branch at

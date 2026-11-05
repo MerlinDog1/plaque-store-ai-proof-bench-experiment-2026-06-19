@@ -2,7 +2,10 @@
 // The "products first" category template pages (components/CategoryTemplate.tsx, 1 Nov 2026, owner msg 8384): memorial
 // and bench (stage 1), garden, tree, brass, stainless steel, opening and custom (stage 2), checked in the final HTML
 // (dist, or DIST=<folder>):
-// - title, meta description, H1 and canonical are the live ones (as production's source, ec24ba1, builds them);
+// - title, meta description, H1 and canonical are the live ones (as production's source, ec24ba1, builds them), except
+//   the page-1 improvements (owner msg 10173, 5 Nov 2026): the garden H1, and the garden, tree, brass, stainless steel
+//   and opening summaries, which quote the page's own from-price (read here from the page's facts line);
+// - those pages' new sections are there, and every link in them reaches a built page;
 // - the FAQPage schema is exactly the six questions and answers shown on the page;
 // - one card per size, each leading with a studio photo of the plaque it links to, every card and finish link reaching
 //   a built product page (on the tree page, the designer on that plate, on the light solid wood board and ground stake), and the
@@ -44,29 +47,33 @@ const pages = [
     title: 'Bench Plaques UK | Custom Brass & Stainless Steel Bench Plaques',
     description: 'Order custom bench plaques in brass or stainless steel. Build a proof online, check the inscription and see live pricing before payment.',
     links: ['/memorial-plaques', '/garden-plaques', '/tree-memorial-plaques', '/memorial-plaque-wording', ...common] },
-  { slug: 'garden-plaques', cards: 8, h1: "Personalised garden plaques",
+  { slug: 'garden-plaques', cards: 8, h1: "Garden memorial plaques",
     title: "Garden Memorial Plaques UK | Free Online Proof | InstaPlaque",
-    description: "Personalise a brass or stainless steel garden plaque for a tree, bench or memorial corner. Compare sizes and fixings, then check a free proof before you buy.",
+    description: from => `Garden memorial plaques ${from} in brass or stainless steel, for a garden of remembrance, a wall, a post or a dedication sign. Free proof first.`,
+    guides: { 'garden-remembrance': 'Memorial gardens and gardens of remembrance.', 'garden-dedications': 'Garden dedication signs.' },
     faqs: ["Can a garden plaque stay outside all year?", "Which metal is best for a garden?", "What size should a garden plaque be?", "How do I fix it to a wall, fence or stone?", "Can a garden plaque go near the sea?", "How do I look after a garden plaque?"],
-    links: [...["/tree-memorial-plaques", "/bench-plaques", "/memorial-plaques", "/memorial-plaque-wording", "/opening-plaques", "/plaque-sizes"], ...common] },
+    links: [...["/tree-memorial-plaques", "/bench-plaques", "/memorial-plaques", "/memorial-plaque-wording", "/opening-plaques", "/plaque-sizes", "/donor-recognition-plaques"], ...common] },
   { slug: 'tree-memorial-plaques', cards: 6, stake: true, h1: "Memorial tree plaques",
     title: "Memorial Tree Plaques UK | Engraved Tree Dedication Plaques | InstaPlaque",
-    description: "Personalised memorial tree plaques in brass or stainless steel, on a light solid wood board and black steel ground stake beside the tree. Free proof, or we design it on WhatsApp.",
+    description: from => `Memorial tree plaques ${from} on a light solid wood board and black steel ground stake beside the tree. Brass or stainless steel, free proof first.`,
     faqs: ["Can I fix a plaque to a tree?", "Can I put one in a churchyard, park or memorial woodland?", "What size should a memorial tree plaque be?", "What should a tree memorial plaque say?", "Will the plaque last outdoors?", "Can I have just the plate, for a post or fence?"],
     links: [...["/garden-plaques", "/memorial-plaques", "/memorial-plaque-wording"], ...common] },
   { slug: 'brass-plaques', cards: 8, h1: "Personalised brass plaques",
     title: "Brass Plaques UK | Custom Engraved Brass Plaques",
-    description: "Custom brass plaques for memorials, benches, openings and presentation use. Choose brushed, polished, orbital or aged brass and approve a proof online.",
+    description: from => `Brass plaques ${from} in polished, brushed, orbital or aged brass, for memorials, benches, house names and openings. Free proof, UK delivery included.`,
+    guides: { 'brass-wording': 'Brass plaque wording ideas.', 'brass-uses': 'What brass plaques are used for.', 'brass-aged': 'Aged brass plaques.' },
     faqs: ["Which brass finish should I choose?", "Will brass tarnish outside?", "How long does a brass plaque take?", "Can you match an existing brass plaque?", "Can you add a logo or crest?", "Do you charge VAT?"],
-    links: [...["/stainless-steel-plaques", "/memorial-plaques", "/bench-plaques", "/opening-plaques", "/memorial-plaque-wording"], ...common] },
+    links: [...["/stainless-steel-plaques", "/memorial-plaques", "/bench-plaques", "/opening-plaques", "/memorial-plaque-wording", "/house-name-plaques", "/professional-brass-plaques", "/church-plaques", "/donor-recognition-plaques"], ...common] },
   { slug: 'stainless-steel-plaques', cards: 8, h1: "Personalised stainless steel plaques",
     title: "Stainless Steel Plaques UK | Outdoor Metal Plaques Made to Order",
-    description: "Custom stainless steel plaques for outdoor, wall, bench and memorial use. Choose brushed or polished stainless and approve your proof before payment.",
+    description: from => `Stainless steel plaques ${from}, brushed or polished, for benches, gardens, house names and business signs. Free proof first, UK delivery included.`,
+    guides: { 'stainless-wording': 'Stainless steel plaque wording ideas.', 'stainless-uses': 'What stainless steel plaques are used for.' },
     faqs: ["Will a stainless steel plaque last outdoors?", "Can it go near the sea?", "Brushed or polished stainless steel?", "How do I look after a stainless steel plaque?", "Can you add a logo?", "How long does a stainless steel plaque take?"],
-    links: [...["/brass-plaques", "/memorial-plaques", "/bench-plaques", "/opening-plaques", "/tree-memorial-plaques"], ...common] },
+    links: [...["/brass-plaques", "/memorial-plaques", "/bench-plaques", "/opening-plaques", "/tree-memorial-plaques", "/garden-plaques", "/house-name-plaques", "/professional-brass-plaques"], ...common] },
   { slug: 'opening-plaques', cards: 6, planner: true, h1: "Opening plaques",
     title: "Opening Plaques UK | Custom Building Opening Plaques",
-    description: "Order custom opening plaques in the UK with a free online proof. Brass and stainless steel plaques for building openings, unveilings, presentations and formal ceremonies.",
+    description: from => `Opening plaques ${from} in brass or stainless steel, for a new building, room or anniversary. Share a free proof with colleagues before you pay.`,
+    wordingIdeas: 6,
     faqs: ["Can colleagues check the opening plaque before we order?", "Can you meet our opening ceremony date?", "Can the plaque include a school crest or organisation logo?", "Can we pay by invoice or purchase order?", "Can an opening plaque go outdoors?", "What fixings come with an opening plaque?"],
     links: [...["/brass-plaques", "/stainless-steel-plaques", "/how-it-works", "/contact"], ...common] },
   { slug: 'custom-plaques', cards: 6, h1: "Custom plaques",
@@ -163,7 +170,12 @@ for (const page of pages) {
   const main = document.querySelector('.cat-tpl');
   assert(main, `${page.slug}: template markup`);
   assert.equal(document.title, page.title, `${page.slug}: title`);
-  assert.equal(document.querySelector('meta[name="description"]').content, page.description, `${page.slug}: meta description`);
+  // The improved summaries quote the facts line's own from-price ("From £58.50" -> "from £58.50").
+  const heroFrom = compact(main.querySelector('.cat-hero-buy .shop-product-price')?.textContent || '').replace(/^From /, 'from ');
+  const description = typeof page.description === 'function' ? page.description(heroFrom) : page.description;
+  assert(typeof page.description !== 'function' || /^from £\d/.test(heroFrom), `${page.slug}: facts line from-price (${heroFrom})`);
+  assert.equal(document.querySelector('meta[name="description"]').content, description, `${page.slug}: meta description`);
+  assert.equal(document.querySelector('meta[property="og:description"]')?.content, description, `${page.slug}: og:description`);
   assert.equal(document.querySelectorAll('h1').length, 1, `${page.slug}: one H1`);
   assert.equal(compact(document.querySelector('h1').textContent), page.h1, `${page.slug}: H1`);
   assert.equal(document.querySelector('link[rel="canonical"]').href, `${site}/${page.slug}`, `${page.slug}: canonical`);
@@ -289,6 +301,14 @@ for (const page of pages) {
   const proof = main.querySelector('.cat-tpl-proof .shop-proof-pdf-stack').getAttribute('href');
   assert(proof.startsWith('/samples/products/') && existsSync(path.join(root, proof.replace(/\?.*$/, ''))), `${page.slug}: sample proof PDF ${proof}`);
   for (const href of page.links) assert(main.querySelector(`a[href="${href}"]`), `${page.slug}: link to ${href}`);
+  // Page-1 improvements: each new section with its heading, and every link in the guide sections reaching a built page.
+  for (const [anchor, heading] of Object.entries(page.guides || {})) {
+    assert.equal(compact(main.querySelector(`#${anchor}-heading`)?.textContent || ''), heading, `${page.slug}: #${anchor} section`);
+  }
+  for (const link of main.querySelectorAll('.cat-tpl-guide a[href^="/"]')) {
+    assert(built(link.getAttribute('href')), `${page.slug}: guide link ${link.getAttribute('href')} reaches a built page`);
+  }
+  if (page.wordingIdeas) assert.equal(main.querySelectorAll('.cat-tpl-wording-row li').length, page.wordingIdeas, `${page.slug}: wording ideas`);
   const internal = [...main.querySelectorAll('a[href^="/"]')].map(a => a.getAttribute('href'));
   for (const href of new Set(internal)) assert(built(href), `${page.slug}: internal link ${href} is built`);
   console.log(`PASS /${page.slug}: title, description, H1 and canonical match expected metadata; ${visible.length} questions match the FAQ schema; ${cards.length} cards lead with studio photos and link to built pages; lead-time lines match the catalogue (usual ${usual} days); ${new Set(internal).size} internal links; no scene photos, one tap-to-play film in its own section after the proof.`);

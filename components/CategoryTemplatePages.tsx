@@ -10,7 +10,7 @@ import { MemorialMaterialLinks, memorialInscriptions } from './MemorialGuide';
 import { SizeLinksFold } from './CategoryLanding';
 import { ContactLink, WhatsAppIcon } from './ContactOptions';
 import { formatGbp, onStakePrice } from './PriceTable';
-import { BRASS, OccasionPlanner, STAINLESS, StakeKit, type Finish, type TemplateCard, type TemplateChip, type TemplateConfig, sizeName } from './CategoryTemplate';
+import { BRASS, OccasionPlanner, STAINLESS, StakeKit, type Finish, type TemplateCard, type TemplateChip, type TemplateConfig, type TemplateGuide, sizeName } from './CategoryTemplate';
 
 // The pages on the "products first" template (components/CategoryTemplate.tsx), stage 1 of the rebuild (owner msg
 // 8384, 1 Nov 2026): /memorial-plaques and /bench-plaques, from workspace
@@ -182,10 +182,38 @@ const gardenCards: TemplateCard[] = [
   { width: 210, height: 148, name: 'A5', board: true, fits: 'For a sheltered spot', lead: 'brushed-brass', leadTone: 'light' },
 ];
 
+// Page-1 improvements (owner msg 10173, 5 Nov 2026; Search Console 6 Oct-2 Nov): people search "memorial plaques for
+// garden" (15th) and "garden memorial plaques" (18th), so the H1 says garden memorial plaques; "garden dedication signs"
+// (6th, no clicks yet) gets its own section; and "memorial tree plaques" showed this page (43rd) rather than the tree
+// page, so this page now links to the tree page by name.
+const gardenGuides: TemplateGuide[] = [
+  {
+    key: 'remembrance',
+    title: 'Memorial gardens and gardens of remembrance.',
+    intro: 'For a garden of remembrance, a churchyard or your own garden.',
+    items: [
+      { title: 'In a garden of remembrance', copy: 'Crematoria, churches and councils often have rules on size, material and wording: check first. Your free proof is drawn to size, to show them before you pay.' },
+      { title: 'In your own garden', copy: <>A name and dates fit 150 × 50 mm; A5 or 200 × 150 mm leaves room for a line of tribute. See <a href="/memorial-plaque-wording">memorial wording ideas</a>.</> },
+      { title: 'Memorial tree plaques', href: '/tree-memorial-plaques', copy: 'Planting a tree in their memory? The plaque stands beside it on a light solid wood board and ground stake.' },
+      { title: 'Memorial bench plaques', href: '/bench-plaques', copy: 'A name and dates for the top rail of a garden bench, from 150 × 50 mm.' },
+    ],
+  },
+  {
+    key: 'dedications',
+    title: 'Garden dedication signs.',
+    intro: 'To name a garden, thank the people who made it, or mark its opening.',
+    items: [
+      { title: 'Name a garden', copy: 'A 250 × 150 mm oval or a 200 mm round plate suits a short name such as “Grandad’s Garden”.' },
+      { title: 'A school or community garden', copy: <>300 × 200 mm or A4 fits the garden’s name, who made it and the year. Thanking supporters? See <a href="/donor-recognition-plaques">donor plaques</a>.</> },
+      { title: 'Opening plaques', href: '/opening-plaques', copy: 'Who opened the garden and when, with a planner for the last day to approve your proof.' },
+    ],
+  },
+];
+
 function gardenPage(): TemplateConfig {
   return {
     prefix: 'garden',
-    title: 'Personalised garden plaques',
+    title: 'Garden memorial plaques',
     intro: <>Solid brass or stainless steel for a wall, fence, post or stone in the garden, with screws and caps included.</>,
     cards: gardenCards,
     chips: [...metalChips, boardChip],
@@ -223,8 +251,9 @@ function gardenPage(): TemplateConfig {
       ],
       link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
     },
+    guides: gardenGuides,
     moreTitle: 'More about garden plaques',
-    related: related(<>Remembering someone? See <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">wording ideas</a>. Opening a community garden? See <a href="/opening-plaques">opening plaques</a>.</>),
+    related: related(<>Remembering someone? See <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">wording ideas</a>. Planting a tree? See <a href="/tree-memorial-plaques">memorial tree plaques</a>. Opening a community garden? See <a href="/opening-plaques">opening plaques</a>.</>),
     closing: {
       title: 'Not sure which size?',
       copy: 'Send a photo of the spot and your words on WhatsApp: we’ll suggest a size and fixings and send a free proof.',
@@ -304,6 +333,7 @@ const brassCards: TemplateCard[] = [
 
 function brassPage(): TemplateConfig {
   const from = (width: number, height: number) => priceOf(plate(width, height, BRASS));
+  const aged = (width: number, height: number) => priceOf(plate(width, height, ['aged-brass']));
   return {
     prefix: 'brass',
     title: 'Personalised brass plaques',
@@ -345,6 +375,46 @@ function brassPage(): TemplateConfig {
       more: <SizeLinksFold title="Every brass size and finish" offers={merchantOffers.filter(offer => BRASS.includes(offer.preset.material as Finish) && !offer.preset.wood)} />,
     },
     sampleSlug: 'brushed-brass-210x148-rect-plaque',
+    // Page-1 improvements (owner msg 10173, 5 Nov 2026): "brass plaques" 33rd, "custom brass" and "aged brass" about
+    // 16th. The wording ideas are the ones live on this page before the template (components/CategoryPages.tsx).
+    wording: {
+      title: 'Brass plaque wording ideas.',
+      intro: 'Start with the most important line, then add the rest beneath it.',
+      inscriptions: [
+        { title: 'A house name', lines: ['Holly House'] },
+        { title: 'A memorial', lines: ['In loving memory of', 'James Ormerod', '1941 – 2019'] },
+        { title: 'A thank you', lines: ['Presented to', 'Linda Fairclough', 'with thanks for twenty years'] },
+      ],
+      link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
+    },
+    guides: [
+      {
+        key: 'uses',
+        title: 'What brass plaques are used for.',
+        intro: 'The traditional choice, warm against timber, brick and stone.',
+        items: [
+          { title: 'Memorial plaques', href: '/memorial-plaques', copy: 'A name, dates and a tribute for a wall, a grave or a garden.' },
+          { title: 'Bench plaques', href: '/bench-plaques', copy: `Name and dates for the top rail, from ${from(150, 50)} for 150 × 50 mm.` },
+          { title: 'House name plaques', href: '/house-name-plaques', copy: 'A house name, or a name and number, by the door or gate.' },
+          { title: 'Practice plaques', href: '/professional-brass-plaques', copy: 'A traditional name plate for a solicitor, dentist, vet, architect or accountant.' },
+          { title: 'Opening plaques', href: '/opening-plaques', copy: 'Who opened the building and when, usually on A4.' },
+          { title: 'Church plaques', href: '/church-plaques', copy: 'Pew plates, memorials and dedications, in the wording your church has agreed.' },
+          { title: 'Donor and recognition plaques', href: '/donor-recognition-plaques', copy: 'Thank a donor, a sponsor or everyone who helped.' },
+        ],
+      },
+      {
+        key: 'aged',
+        title: 'Aged brass plaques.',
+        intro: 'A hand-applied patina, sealed with matt lacquer, with cream lettering that stands out against the darker metal.',
+        items: [
+          { title: 'Sizes and prices', copy: `150 × 50 mm from ${aged(150, 50)}, A5 ${aged(210, 148)}, A4 ${aged(297, 210)}, fixings included. Made in ${daysIn('aged-brass')} working days after you approve your proof.` },
+          { title: 'Every one is different', copy: 'Each patina is applied by hand, so every plaque has its own natural variation.' },
+          { title: 'Outdoors', copy: 'The lacquer slows further ageing; outside, the patina keeps developing slowly, which suits natural gardens and older benches.' },
+          { title: 'Looking after it', copy: 'Check the care instructions before using any polish or abrasive cleaner on the sealed finish.' },
+        ],
+        more: <SizeLinksFold title="Every aged brass size" offers={merchantOffers.filter(offer => offer.preset.material === 'aged-brass' && !offer.preset.wood)} />,
+      },
+    ],
     moreTitle: 'More about brass plaques',
     related: <>{related(<>Compare with <a href="/stainless-steel-plaques">stainless steel plaques</a>, or see <a href="/memorial-plaques">memorial plaques</a>, <a href="/bench-plaques">bench plaques</a> and <a href="/opening-plaques">opening plaques</a>. Wording help: <a href="/memorial-plaque-wording">memorial wording ideas</a>.</>)}{occasionLinks(<><a href="/house-name-plaques">House name plaques</a> · <a href="/professional-brass-plaques">Professional practice plaques</a></>)}</>,
     closing: {
@@ -409,6 +479,32 @@ function stainlessPage(): TemplateConfig {
       more: <SizeLinksFold title="Every stainless steel size and finish" offers={merchantOffers.filter(offer => STAINLESS.includes(offer.preset.material as Finish) && !offer.preset.wood)} />,
     },
     sampleSlug: 'a5-brushed-steel-personalised-plaque',
+    // Page-1 improvements (owner msg 10173, 5 Nov 2026): "stainless steel plaques" 13th. The wording ideas are the ones
+    // live on this page before the template (components/CategoryPages.tsx).
+    wording: {
+      title: 'Stainless steel plaque wording ideas.',
+      intro: 'Start with the most important line, then add the rest beneath it.',
+      inscriptions: [
+        { title: 'A house name', lines: ['The Old Dairy'] },
+        { title: 'A bench', lines: ['In loving memory of', 'Tom & Betty Harris', 'Tom 1932 – 2016 · Betty 1935 – 2021', 'Together again'] },
+        { title: 'A pet', lines: ['In loving memory of', 'Skye', '2010 – 2024', 'Our faithful friend'] },
+      ],
+      link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
+    },
+    guides: [{
+      key: 'uses',
+      title: 'What stainless steel plaques are used for.',
+      intro: 'It keeps its silver colour outdoors, so it suits plaques that face the weather.',
+      items: [
+        { title: 'Bench plaques', href: '/bench-plaques', copy: `A name, dates and a line on the top rail, from ${priceOf(plate(150, 50, STAINLESS))} for 150 × 50 mm.` },
+        { title: 'Garden memorial plaques', href: '/garden-plaques', copy: 'A memorial or a dedication on a wall, fence, post or stone.' },
+        { title: 'Memorial tree plaques', href: '/tree-memorial-plaques', copy: 'On a light solid wood board and ground stake beside the tree, never fixed to it.' },
+        { title: 'House name plaques', href: '/house-name-plaques', copy: 'A house name, or a name and number, by the door or gate.' },
+        { title: 'Business name plates', copy: <>A company or practice name by the entrance. Prefer brass? See <a href="/professional-brass-plaques">practice plaques</a>.</> },
+        { title: 'Opening plaques', href: '/opening-plaques', copy: 'Who opened the building and when, usually on A4.' },
+        { title: 'By the sea', copy: 'Near the sea or somewhere very exposed? Send us a photo first and we’ll tell you honestly which finish suits it.' },
+      ],
+    }],
     moreTitle: 'More about stainless steel plaques',
     related: related(<>Compare with <a href="/brass-plaques">brass plaques</a>, or see <a href="/memorial-plaques">memorial plaques</a>, <a href="/bench-plaques">bench plaques</a> and <a href="/opening-plaques">opening plaques</a>.</>),
     closing: {
@@ -474,6 +570,11 @@ function openingPage(): TemplateConfig {
         { title: 'A building opening', lines: ['Riverside Community Centre', 'officially opened by', '[Name and title]', 'on [Day Month Year]'] },
         { title: 'A new room', lines: ['The Arthur Lee Room', 'Opened on 9 September 2024'] },
         { title: 'A club', lines: ['The Clubhouse', 'was officially opened by', 'Mark Dawson', 'on 7 September 2024'] },
+        // Page-1 improvements (owner msg 10173, 5 Nov 2026): three more, the first two live on the earlier opening and
+        // brass pages (components/CategoryPages.tsx).
+        { title: 'Recognising support', lines: ['The Reading Garden', 'created with the generous', 'support of [Supporter]', 'Opened [Day Month Year]'] },
+        { title: 'With a title', lines: ['Officially opened by', 'Jean Harper MBE', 'on 12 April 2025'] },
+        { title: 'An anniversary', lines: ['Riverside Community Centre', 'Celebrating 50 years', '1975 – 2025'] },
       ],
       link: { href: '/contact', label: 'Discuss a deadline, logo or crest' },
     },

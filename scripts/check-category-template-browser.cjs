@@ -4,7 +4,8 @@
 // Phone 390 × 844 and computer 1440 × 900, on a local build only (external requests blocked, browser marked internal):
 // - the first product card starts within 330 px of the top, with the cookie notice showing and after Accept; the notice
 //   is a compact bar (88 px or less on the phone) covering neither the H1, the first row of products nor the contact bar;
-// - at most 7.6 phone screens: owner msg 8603 asks for a separate, full-width video section;
+// - at most 7.8 phone screens (7.6 with owner msg 8603's separate, full-width video section, then the page-1 improvement
+//   sections of owner msg 10173);
 //   report every page's measured length (main height / (viewport - main top));
 // - no sideways overflow, no script errors or console errors (other than the blocked external requests);
 // - the largest paint on the first screen is a product photo; the film, tap to play in its own section after the proof, loads nothing
@@ -44,7 +45,9 @@ const pages = [
 const selectedSlugs = process.env.CATEGORY_SLUGS?.split(',').filter(Boolean);
 if (selectedSlugs) assert(selectedSlugs.every(slug => pages.some(page => page.slug === slug)), 'Unknown CATEGORY_SLUGS entry');
 const selectedPages = selectedSlugs ? pages.filter(page => selectedSlugs.includes(page.slug)) : pages;
-const MAX_PHONE_SCREENS = 7.6; // larger, separate film requested in owner msg 8603
+// 7.6 for the larger, separate film (owner msg 8603); 7.8 since the page-1 improvement sections (owner msg 10173,
+// 5 Nov 2026), shown on phones as sideways rows: garden 7.63 and brass 7.69 phone screens when added.
+const MAX_PHONE_SCREENS = 7.8;
 const MAX_NOTICE_HEIGHT = 88; // two short lines + equal 44 px buttons (owner msg 9079)
 // The planner's date maths, as the page uses it (services/occasionPlanner.ts, transpiled like check-promo-video-tracking).
 const ts = require('typescript');

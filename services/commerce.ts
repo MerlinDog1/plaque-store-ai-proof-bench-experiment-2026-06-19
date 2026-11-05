@@ -800,7 +800,7 @@ export const seoLandingPages: SeoLandingPage[] = [
       { question: 'Can garden plaques be used outside?', answer: 'Yes. Choose brass or stainless steel with suitable fixings. The proof shows the layout, material and fixings before payment.' },
       { question: 'What size is best for a garden plaque?', answer: 'A5 is a good starting point for names, dates and a short message. Bench plaque sizes work better for very short wording.' },
     ],
-    relatedSearches: ['garden plaques UK', 'memorial garden plaques', 'tree dedication plaques', 'outdoor memorial plaques'],
+    relatedSearches: ['garden plaques UK', 'memorial garden plaques', 'garden dedication signs', 'outdoor memorial plaques'],
   },
   {
     slug: 'memorial-plaque-wording',
@@ -1514,4 +1514,23 @@ export function makeMockOrder(
       payloadVersion: '2026-06-24',
     },
   };
+}
+
+// Search-result summaries with each page's from-price (owner msg 10173, 5 Nov 2026: the page-1 improvements). The price
+// is the page's own "From" line (a product's startingFrom; a landing page's from landingDesignProduct, as ShopLanding
+// shows it), filled in here so a summary can never quote a different price from the page it describes.
+const searchSummaries: Record<string, (from: string) => string> = {
+  'brass-plaques': from => `Brass plaques ${from} in polished, brushed, orbital or aged brass, for memorials, benches, house names and openings. Free proof, UK delivery included.`,
+  'stainless-steel-plaques': from => `Stainless steel plaques ${from}, brushed or polished, for benches, gardens, house names and business signs. Free proof first, UK delivery included.`,
+  'garden-plaques': from => `Garden memorial plaques ${from} in brass or stainless steel, for a garden of remembrance, a wall, a post or a dedication sign. Free proof first.`,
+  'tree-memorial-plaques': from => `Memorial tree plaques ${from} on a light solid wood board and black steel ground stake beside the tree. Brass or stainless steel, free proof first.`,
+  'opening-plaques': from => `Opening plaques ${from} in brass or stainless steel, for a new building, room or anniversary. Share a free proof with colleagues before you pay.`,
+};
+for (const product of productFamilies) {
+  const summary = searchSummaries[product.slug];
+  if (summary) product.seoDescription = summary(product.startingFrom);
+}
+for (const page of seoLandingPages) {
+  const summary = searchSummaries[page.slug];
+  if (summary) page.seoDescription = summary(landingDesignProduct(page).startingFrom);
 }

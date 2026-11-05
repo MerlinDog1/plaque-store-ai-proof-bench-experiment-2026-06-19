@@ -166,7 +166,7 @@ const landingPages = [
       ['Can garden plaques be used outside?', 'Yes. Choose brass or stainless steel with suitable fixings. The proof shows the layout, material and fixings before payment.'],
       ['What size is best for a garden plaque?', 'A5 is a good starting point for names, dates and a short message. Bench plaque sizes work better for very short wording.'],
     ],
-    relatedSearches: ['garden plaques UK', 'memorial garden plaques', 'tree dedication plaques', 'outdoor memorial plaques'],
+    relatedSearches: ['garden plaques UK', 'memorial garden plaques', 'garden dedication signs', 'outdoor memorial plaques'],
   },
   {
     slug: 'opening-plaques',
@@ -294,8 +294,11 @@ const merchantPages = catalogue.merchantProducts.map(product => ({ slug: product
 const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page.slug)).map(page => {
   // Keep the revised memorial search metadata and illustration identical to
   // the hydrated page; the catalogue is the source for both representations.
-  if (page.slug !== 'memorial-plaques') return page;
+  // Brass and stainless steel take the catalogue's title and summary too (its from-price, owner msg 10173), keeping
+  // their own image.
+  if (!['memorial-plaques', 'brass-plaques', 'stainless-steel-plaques'].includes(page.slug)) return page;
   const product = catalogue.productFamilies.find(item => item.slug === page.slug);
+  if (page.slug !== 'memorial-plaques') return { ...page, title: product.seoTitle, description: product.seoDescription };
   return { ...page, title: product.seoTitle, description: product.seoDescription, image: product.image };
 }), ...merchantPages];
 const indexableLandingPages = landingPages.filter((page) => indexableLandingSlugs.has(page.slug)).map(page => {
