@@ -153,3 +153,22 @@ owner's separate decision. There is no live change to roll back. To remove the
 candidate fix, revert its application commit on a new branch and rebuild; do
 not promote or redeploy the old default branch. Existing production remains
 `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN` throughout this task.
+
+## Round 2, 5 November 2026: solid proof lines and parallel inner corners
+
+The owner reviewed the comparison sheet. Its samples used a test-only 8 mm corner radius; real products and the
+designer use square corners (cornerRadius 0). Two proof issues were fixed in `components/PlaquePreview.tsx`
+(commit `3116e2f`):
+
+1. **Faded inner lines.** The proof drew the inner line of double (0.8), double-scalloped (0.75) and legacy inset (0.45)
+   borders at reduced opacity, while the workshop file etches every line solid black. Every border line is now drawn
+   at full opacity.
+2. **Corners on rounded plates.** Every rectangle border line used `max(0, cornerRadius - 2)`, so an inner line was not
+   parallel to the outer one: the gap widened at the corners. Inner lines now use the outer radius minus their extra
+   inset (`max(0, cornerRadius - 2 - (inset - borderOuterInset))`). Square plates are unchanged (radius 0).
+
+`check:border-parity` now runs nine fixing/wood/corner configurations (1,804 cases), saves square-cornered evidence
+samples, and asserts that no proof border line is faded and that inner rectangle corners stay parallel. The exporter is
+unchanged in this round; the baseline comparison still shows only border widths differ from live `86188c9`.
+Preview `dpl_BwsoK1K2fKJw5YrgRfYECfnuzSfj` (https://instaplaque-ibdtrmk9a-dullaghan31-3959s-projects.vercel.app) passed the
+hosted A5 double export check. Rollback is unchanged: production stays `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN` until released.
