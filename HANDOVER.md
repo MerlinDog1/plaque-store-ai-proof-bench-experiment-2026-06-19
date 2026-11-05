@@ -84,6 +84,49 @@
 - **Not live.** Production independently remains `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. No production deploy,
   promotion, aliases, order changes or messages. Future release is a separate owner decision; no live rollback needed.
 
+## Stage 3 card-wording correction — PREVIEW ONLY, 4 November 2026
+
+- Same branch/worktree: `codex/instaplaque-stage3-pages-20261104` / `projects/instaplaque-stage3-pages-20261104`.
+  Replaces the first preview's inappropriate default inscriptions with the parent's exact existing catalogue choices:
+  3 house-name, 6 donor/dedication, 6 church and 4 brass practice cards. No new product images.
+- Incompatible cards removed, their sizes retained in tables/designer and From prices unchanged. Empty house-board
+  filter removed; shared chip/swatch behavior unchanged. All practice cards have boards: facts correctly derive 10 days.
+- Build guard reads `catalogueExamples` for every new-page default lead and rejects incompatible subject matter;
+  13 real negative catalogue cases. Independent review inspected all 18 unique images: all 19 leads correct, no blockers.
+- Both TypeScript checks, full local build/postbuild, portrait comparison and existing-live-HTML scope checks passed.
+  Final category coverage: 36 cases / 77 card interactions (24 unchanged-page cases + the final 12 new-page rerun).
+  The donor intro was shortened to fix a 2.45 px desktop cookie overlap; all six approved card leads retained.
+  Both final contact/layout sheets visually inspected. Cloud build/postbuild and 13/13 hosted checks passed,
+  including original image paths behind Vercel’s responsive variants.
+- **New Ready preview:** https://instaplaque-cp2at610f-dullaghan31-3959s-projects.vercel.app
+  (`dpl_FteF4aLdykyKEDa4o8Sq6MiUHGU8`, target preview), from app source `540e1aa35ff8c45aa206b089605de7f2477b7a9d`.
+  Production independently unchanged before/after: `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`.
+  Deployment used the existing preview script and shared lock; API probe clear. Local test server/browsers stopped.
+- Practice still lacks actual practice-name images; the specified Studio/Clifford Ackroyd/Audrey Godfrey/Library
+  examples are explicit fallbacks. Donor uses the approved dedication/opening examples.
+- New evidence/screenshots: workspace `output/instaplaque-stage3-pages-20261104/wording-r2/` and root JPEGs named
+  `*-wording-r2-*`; old screenshots remain. Full card inscriptions: [stage-three release notes](docs/category-template-stage3-2026-11-04.md).
+- PREVIEW ONLY; production, border/export files, owner/customer messaging and external settings untouched.
+
+
+## Stage 3 category pages — PREVIEW ONLY, 4 November 2026
+
+- **Ready preview:** https://instaplaque-25t9gzp2s-dullaghan31-3959s-projects.vercel.app
+  (`dpl_4hyxmWgzKf4iDC1qdkUsQ2yVWWF6`, target preview), from pushed app source
+  `5035d66b041f72ed1f5532c3e975aa8448e38bab`. Follow-up documentation changes no application code.
+- Full local/cloud build and postbuild, typecheck, 36 category browser cases (final new-page rechecks included),
+  two portrait comparisons and the all-existing-HTML scope gate passed. Production was inspected before/after:
+  still `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. No production deployment or promotion.
+- Hosted checks: 13/13 HTTP 200; page content/SEO/schema match the tested build; sitemap, feed and robots identical.
+- Review JPEGs and 706 × 1600 phone contact sheet: workspace `output/instaplaque-stage3-pages-20261104/`.
+
+- Branch `codex/instaplaque-stage3-pages-20261104`, from live `86188c9`: four new products-first pages for house names,
+  donor recognition, church and professional practices. Only approved catalogue studio examples; six cards each.
+- Existing live HTML is unchanged except links from memorial, brass and opening. No portrait rebuild, border/export
+  edits, production operation, settings change or message to a customer. This is not the rejected combined preview.
+- Scope, sources, photo gaps, checks and deployment receipt: [docs/category-template-stage3-2026-11-04.md](docs/category-template-stage3-2026-11-04.md).
+- Keep this separate from the parallel border-parity work until the parent reviews and combines verified changes.
+
 
 ## Cookie bar round 3 + cookie-free visit counter: LIVE — 3 November 2026, 17:58 UTC
 

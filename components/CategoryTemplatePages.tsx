@@ -1,3 +1,4 @@
+import { occasionTemplateConfigs } from './OccasionTemplatePages';
 import React from 'react';
 import { templatePages } from '../services/categoryTemplateSwitch';
 export { templatePages } from '../services/categoryTemplateSwitch';
@@ -22,6 +23,7 @@ import { BRASS, OccasionPlanner, STAINLESS, StakeKit, type Finish, type Template
 // of materials, borders, woods etc"); every lead carries memorial wording. Sizes, finishes and prices all come from the
 // catalogue. "What fits" lines describe the example wording each size is shown with.
 
+const occasionLinks = (content: React.ReactNode) => <p className="memorial-material-links cat-related cat-stage3-links">{content}</p>;
 const related = (content: React.ReactNode) => <p className="memorial-material-links cat-related">{content}</p>;
 const metalChips: TemplateChip[] = [
   { key: 'all', label: 'All' },
@@ -93,7 +95,7 @@ function memorialPage(): TemplateConfig {
       link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
     },
     moreTitle: 'More about memorial plaques',
-    related: <MemorialMaterialLinks />,
+    related: <><MemorialMaterialLinks />{occasionLinks(<a href="/church-plaques">Church pew and dedication plaques</a>)}</>,
     closing: {
       title: 'Not sure which size?',
       copy: 'Send a photo of the space and your words on WhatsApp: we’ll suggest a size and send a free proof. Several names or a bespoke size? Ask us too.',
@@ -344,7 +346,7 @@ function brassPage(): TemplateConfig {
     },
     sampleSlug: 'brushed-brass-210x148-rect-plaque',
     moreTitle: 'More about brass plaques',
-    related: related(<>Compare with <a href="/stainless-steel-plaques">stainless steel plaques</a>, or see <a href="/memorial-plaques">memorial plaques</a>, <a href="/bench-plaques">bench plaques</a> and <a href="/opening-plaques">opening plaques</a>. Wording help: <a href="/memorial-plaque-wording">memorial wording ideas</a>.</>),
+    related: <>{related(<>Compare with <a href="/stainless-steel-plaques">stainless steel plaques</a>, or see <a href="/memorial-plaques">memorial plaques</a>, <a href="/bench-plaques">bench plaques</a> and <a href="/opening-plaques">opening plaques</a>. Wording help: <a href="/memorial-plaque-wording">memorial wording ideas</a>.</>)}{occasionLinks(<><a href="/house-name-plaques">House name plaques</a> · <a href="/professional-brass-plaques">Professional practice plaques</a></>)}</>,
     closing: {
       title: 'Not sure which finish?',
       copy: 'Send a photo of the spot and your words on WhatsApp: we’ll suggest a size and finish and send a free proof. Replacing an old plaque? Send us a photo of it.',
@@ -476,7 +478,7 @@ function openingPage(): TemplateConfig {
       link: { href: '/contact', label: 'Discuss a deadline, logo or crest' },
     },
     moreTitle: 'More about opening plaques',
-    related: related(<>See <a href="/brass-plaques">brass plaques</a> and <a href="/stainless-steel-plaques">stainless steel plaques</a>, or <a href="/how-it-works">how the free proof works</a> before your ceremony.</>),
+    related: <>{related(<>See <a href="/brass-plaques">brass plaques</a> and <a href="/stainless-steel-plaques">stainless steel plaques</a>, or <a href="/how-it-works">how the free proof works</a> before your ceremony.</>)}{occasionLinks(<><a href="/donor-recognition-plaques">Donor and recognition plaques</a> · <a href="/church-plaques">Church plaques</a></>)}</>,
     closing: {
       title: 'Got a date to meet?',
       copy: 'Send your words and the date on WhatsApp: we’ll send a free proof and tell you honestly whether we can make it in time.',
@@ -558,6 +560,7 @@ function customPage(): TemplateConfig {
 }
 
 const templateConfigs: Record<string, () => TemplateConfig> = {
+  ...occasionTemplateConfigs,
   'memorial-plaques': memorialPage,
   'bench-plaques': benchPage,
   'garden-plaques': gardenPage,

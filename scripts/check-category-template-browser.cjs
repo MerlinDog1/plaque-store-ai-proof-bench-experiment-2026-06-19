@@ -1,6 +1,6 @@
 // 1 Nov 2026: owner requests light/dark solid wood, never a species; assertions follow the customer wording.
 // Local browser check of the "products first" category template (components/CategoryTemplate.tsx, 1 Nov 2026): the
-// eight template pages (memorial, bench, garden, tree, brass, stainless steel, opening, custom).
+// twelve template pages: the live eight plus house, donor, church and practice (stage 3, 4 Nov 2026).
 // Phone 390 × 844 and computer 1440 × 900, on a local build only (external requests blocked, browser marked internal):
 // - the first product card starts within 330 px of the top, with the cookie notice showing and after Accept; the notice
 //   is a compact bar (88 px or less on the phone) covering neither the H1, the first row of products nor the contact bar;
@@ -18,7 +18,7 @@
 // Saves phone first and second screens, full pages and computer first screens to OUT.
 // PORT=4395 HOST=127.0.0.1 REVIEW_FOLLOWUP_CHECK_INTERVAL_MS=0 node server.mjs   (separately), then
 // BASE=http://127.0.0.1:4395 OUT=/path/to/shots node scripts/check-category-template-browser.cjs
-const { chromium } = require('@playwright/test');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || '@playwright/test');
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -36,7 +36,14 @@ const pages = [
   { slug: 'stainless-steel-plaques', cards: 8, chips: { finish: 'Polished', finishWord: 'polished steel', narrow: 'Bench sizes', narrowCount: 2 } },
   { slug: 'opening-plaques', cards: 6, planner: true, chips: { finish: 'Brass', finishWord: 'brass', narrow: 'On a wood board', narrowCount: 3 } },
   { slug: 'custom-plaques', cards: 6, chips: { finish: 'Stainless steel', finishWord: 'steel', narrow: 'Oval and round', narrowCount: 2 } },
+  { slug: 'house-name-plaques', cards: 3, chips: { finish: 'Brass', finishWord: 'brass' } },
+  { slug: 'donor-recognition-plaques', cards: 6, chips: { finish: 'Brass', finishWord: 'brass', narrow: 'On a wood board', narrowCount: 4 } },
+  { slug: 'church-plaques', cards: 6, chips: { finish: 'Stainless steel', finishWord: 'steel', narrow: 'On a wood board', narrowCount: 2 } },
+  { slug: 'professional-brass-plaques', cards: 4, chips: { finish: 'Polished', finishWord: 'polished brass', narrow: 'On a wood board', narrowCount: 4 } },
 ];
+const selectedSlugs = process.env.CATEGORY_SLUGS?.split(',').filter(Boolean);
+if (selectedSlugs) assert(selectedSlugs.every(slug => pages.some(page => page.slug === slug)), 'Unknown CATEGORY_SLUGS entry');
+const selectedPages = selectedSlugs ? pages.filter(page => selectedSlugs.includes(page.slug)) : pages;
 const MAX_PHONE_SCREENS = 7.6; // larger, separate film requested in owner msg 8603
 const MAX_NOTICE_HEIGHT = 88; // two short lines + equal 44 px buttons (owner msg 9079)
 // The planner's date maths, as the page uses it (services/occasionPlanner.ts, transpiled like check-promo-video-tracking).
@@ -273,7 +280,7 @@ async function checkPlanner(page, where) {
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/opt/google/chrome/chrome', args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] });
   try {
-    for (const spec of pages) {
+    for (const spec of selectedPages) {
       for (const [mode, device] of [['phone', phone], ['desktop', desktop]]) {
         const { context, page, errors, films } = await newPage(browser, device);
         await page.goto(`${BASE}/${spec.slug}`, { waitUntil: 'load', timeout: 60000 });

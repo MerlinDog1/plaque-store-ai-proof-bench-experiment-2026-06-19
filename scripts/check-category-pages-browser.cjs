@@ -1,7 +1,7 @@
 // Live-only port: portrait is deliberately NOT category v2. Compare its rendered layout against ec24ba1,
 // instead of asserting the combined preview's unapproved band/cards. All requests stay on localhost.
 // BASE=http://127.0.0.1:4397 REF_DIST=/path/to/ec24ba1/dist OUT=/path node scripts/check-category-pages-browser.cjs
-const { chromium } = require('@playwright/test');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || '@playwright/test');
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
