@@ -172,3 +172,13 @@ samples, and asserts that no proof border line is faded and that inner rectangle
 unchanged in this round; the baseline comparison still shows only border widths differ from live `86188c9`.
 Preview `dpl_BwsoK1K2fKJw5YrgRfYECfnuzSfj` (https://instaplaque-ibdtrmk9a-dullaghan31-3959s-projects.vercel.app) passed the
 hosted A5 double export check. Rollback is unchanged: production stays `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN` until released.
+
+## Round 3, 5 November 2026: 0.3 mm minimum line
+
+The owner confirmed 0.3 mm is the thinnest line the etcher makes cleanly. `MIN_ETCH_LINE_MM = 0.3`
+(`services/fixingGeometry.ts`) and `scaleBorderStroke` now clamps every border line to at least that, so the proof and the
+workshop file agree. The only change for offered styles: small plates (under 100 mm on a side) with a double-scalloped
+border now have a 0.375 / 0.3 mm pair instead of 0.375 / 0.25 mm. `check:border-parity` (1,804 cases) asserts the clamped
+widths and that no workshop border line is under 0.3 mm. Preview `dpl_A22kMSwD8ALuRDCYYiZiBAcCeUbJ`
+(https://instaplaque-2b5xb3xow-dullaghan31-3959s-projects.vercel.app) passed hosted checks for A5 double (1 / 0.75 mm) and a
+real 120 x 80 mm double-scalloped plate with caps (0.375 / 0.3 mm). Commit `d12747b`.

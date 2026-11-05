@@ -1,5 +1,26 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Border parity round 3: 0.3 mm minimum line — PREVIEW ONLY, 5 November 2026
+
+- **Owner:** msg 10015 "0.3mm is minimum generally speaking" (answer to the 0.25 mm etchability question).
+- **Branch** `codex/instaplaque-border-parity-20261104`; app commit **`d12747b037eb928ee302ddeea908ea7dabd17fa7`** on top of
+  round 2 (`3116e2f`) and the width-parity commit (`8d36d7e`); this note is docs only.
+- **Change:** `services/fixingGeometry.ts` exports `MIN_ETCH_LINE_MM = 0.3`; `scaleBorderStroke` in
+  `components/PlaquePreview.tsx` clamps every border line to at least 0.3 mm, on the proof and therefore in the workshop file.
+  Only the small-plate (under 100 mm) double-scalloped inner line changes, 0.25 -> 0.3 mm (and the never-offered legacy
+  inset inner line, 0.275 -> 0.3). Every other border width was already >= 0.375 mm. Red cut/hole guides stay 0.25 mm.
+- **Checks:** `tsc --noEmit`; `BORDER_PARITY_BASELINE=86188c9 npm run check:border-parity` = **1,804 cases** (expects the clamped
+  widths, asserts no workshop border line under 0.3 mm) + old/new full SVG comparison; `check:small-border-stroke`,
+  `check:preview-geometry`, `check:curved-scallop-border` on a local Vite server (system Chrome shim); cloud build + postbuild.
+- **Ready preview:** https://instaplaque-2b5xb3xow-dullaghan31-3959s-projects.vercel.app (`dpl_A22kMSwD8ALuRDCYYiZiBAcCeUbJ`,
+  inspected target **preview**). Hosted checks with the real designer UI and deployed exporter: A5 double 1 / 0.75 mm, rx 0,
+  proof lines solid; 120 x 80 mm caps + double scalloped: proof and file **0.375 / 0.3 mm**, solid, no live text, no page errors.
+- **Evidence:** workspace `output/instaplaque-border-parity-20261104/r3/` (square-cornered `border-parity-phone.jpg` + size sheets,
+  sample SVGs, logs, `hosted-check.log`, `hosted-small-check.json`).
+- **Not live.** Production independently remains `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. Release on the owner's go:
+  `vercel deploy --prod --skip-domain` under the shared lock, check, then `vercel promote`; rollback = promote
+  `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. The 0.25 mm question is resolved; nothing else is open for this release.
+
 ## Border parity round 2: solid proof lines + parallel inner corners — PREVIEW ONLY, 5 November 2026
 
 - **Owner:** msgs 10006 ("even then the double line is wrong huh?") and 10010 "OK do all that", after reviewing the
