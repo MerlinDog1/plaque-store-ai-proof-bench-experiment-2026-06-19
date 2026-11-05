@@ -1,5 +1,23 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Border fix (rounds 1-3): LIVE — 5 November 2026, 09:36 UTC
+
+- **Owner:** msg 10020 "Go live". **Live:** `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2` (instaplaque-cdlb9d6rt) from this branch at
+  `2721f28` (app `d12747b`), staged with `vercel deploy --prod --skip-domain` under the shared lock (cloud build + every
+  postbuild guard passed), promoted 09:36:18 UTC. **This branch is now the live source.**
+- **Ships, vs the previous live source `86188c9`:** workshop SVG/PDF keep the proof's border widths (1 / 0.75 mm etc. instead of
+  a forced 0.5 mm); the proof draws every border line solid; inner rectangle lines stay parallel round rounded corners; no
+  border line under 0.3 mm (small double-scalloped inner 0.25 -> 0.3 mm). Square products are otherwise unchanged.
+- **Pre-promote checks** (`output/instaplaque-border-parity-20261104/release/check_border_release.sh`, bypass header never
+  printed): 9 pages 200 with the cookie bar intact, statistics script 200, AI health ok, robots.txt, sitemap.xml and
+  sitemap-products.xml identical to live, Merchant feed 175 items identical; hosted exports A5 double 1 / 0.75 mm and a real
+  120 x 80 mm double-scalloped plate 0.375 / 0.3 mm, proof lines solid, no page errors.
+- **Live checks:** instaplaque.co.uk and www alias both on the new deployment (vercel inspect); apex 200, www 308 -> apex;
+  /design, /memorial-plaques and a product page 200; the same two export checks run on https://instaplaque.co.uk pass
+  (1 / 0.75 and 0.375 / 0.3 mm, no page errors) with the same `exportService-7m-OvlOK.js` as the staged build.
+- Orders placed before 09:36 UTC keep their stored files. No order data, emails or messages were touched.
+- **Rollback:** `flock /home/coding-agent/workspace/tmp/instaplaque-vercel-deploy.lock vercel promote dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN --yes --scope dullaghan31-3959s-projects`.
+
 ## Border parity round 3: 0.3 mm minimum line — PREVIEW ONLY, 5 November 2026
 
 - **Owner:** msg 10015 "0.3mm is minimum generally speaking" (answer to the 0.25 mm etchability question).
