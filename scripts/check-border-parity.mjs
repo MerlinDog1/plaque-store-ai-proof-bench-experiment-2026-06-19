@@ -48,6 +48,7 @@ try {
     { fixing: 'screws', fixingHoleCount: 2, wood: false, cornerRadius: 0 },
     { fixing: 'screws', fixingHoleCount: 4, wood: false, cornerRadius: 8 },
     { fixing: 'caps', capSize: 10, wood: false, cornerRadius: 8 },
+    { fixing: 'caps', capSize: 10, wood: false, cornerRadius: 0 },
     { fixing: 'caps', capSize: 15, wood: false, cornerRadius: 0 },
     { fixing: 'caps', capSize: 10, wood: true, cornerRadius: 8 },
     { fixing: 'screws', fixingHoleCount: 4, wood: true, cornerRadius: 0 },
@@ -59,7 +60,7 @@ try {
       const width = w, height = shape === 'circle' ? w : h;
       const state = { width, height, shape, borderStyle: style, ...fixing, wood, cornerRadius };
       const sampleSize = [[120, 80], [210, 148], [297, 210]].some(([sw, sh]) => width === sw && height === sh);
-      const saveSample = baselineRef && shape === 'rect' && sampleSize && !wood && cornerRadius === 8 && fixing.fixing === 'caps' && fixing.capSize === 10 && style !== 'inset';
+      const saveSample = baselineRef && shape === 'rect' && sampleSize && !wood && cornerRadius === 0 && fixing.fixing === 'caps' && fixing.capSize === 10 && style !== 'inset';
       const result = await page.evaluate(async ({ state, baselineUrl, saveSample }) => {
         const result = await window.renderBorderCase(state, baselineUrl);
         if (!saveSample) for (const key of ['previewSvg', 'customerPreviewSvg', 'productionSvg', 'beforeSvg']) delete result[key];
@@ -79,6 +80,15 @@ try {
       const widths = style === 'double' ? [1, 0.75] : style === 'inset' ? [1.6, 0.55]
         : style === 'double-scalloped' && result.holeCount > 0 ? [0.75, 0.5] : [1];
       assert.deepEqual(result.preview.map(b => Number(b.attributes['stroke-width'])), widths.map(w => w * scale), label);
+      // The proof draws every line solid, exactly as it is etched.
+      assert.deepEqual(result.previewOpacities.flat().filter(o => Number(o) !== 1), [], `Proof line drawn lighter than the etch: ${label}`);
+      // Inner rectangle lines stay parallel to the outer line round the corners.
+      const rects = result.preview.filter(b => b.tag === 'rect');
+      for (const inner of rects.slice(1)) {
+        const outer = rects[0].attributes;
+        const expected = Math.max(0, Number(outer.rx) - (Number(inner.attributes.x) - Number(outer.x)));
+        assert.ok(Math.abs(Number(inner.attributes.rx) - expected) < 1e-9, `Inner border corner not parallel (rx ${inner.attributes.rx}, expected ${expected}): ${label}`);
+      }
       results.push({ label, widths: widths.map(w => w * scale) });
       if (results.length % 200 === 0) console.log(`PASS ${results.length} cases so far`);
       if (saveSample) {
@@ -102,7 +112,7 @@ try {
   }
   await writeFile(path.join(out, 'results.json'), JSON.stringify({ baselineRef, count: results.length, results }, null, 2));
   if (evidence.length) await writeFile(path.join(out, 'samples.json'), JSON.stringify(evidence, null, 2));
-  console.log(`PASS ${results.length} border cases: all styles (including legacy Inset), four shapes, ten sizes, eight fixing/wood/corner configurations, wood, square/rounded corners, border off.`);
+  console.log(`PASS ${results.length} border cases: all styles (including legacy Inset), four shapes, ten sizes, nine fixing/wood/corner configurations, wood, square/rounded corners, border off.`);
   if (baselineRef) console.log(`PASS old/new full SVG comparison: only engraved border widths differ from ${baselineRef}; evidence ${out}`);
 } finally {
   await browser?.close();

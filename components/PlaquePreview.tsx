@@ -416,7 +416,9 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
             y={offset + safeInset}
             width={Math.max(1, state.width - safeInset * 2)}
             height={Math.max(1, state.height - safeInset * 2)}
-            rx={Math.max(0, cornerR - 2)}
+            // Inner lines stay parallel to the outer line: each step inwards
+            // tightens the corner by the same amount (square plates stay 0).
+            rx={Math.max(0, cornerR - 2 - Math.max(0, safeInset - borderOuterInset))}
             strokeWidth={scaleBorderStroke(strokeWidth)}
             opacity={opacity}
             {...strokeProps}
@@ -448,10 +450,11 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
       );
     };
     if (state.borderStyle === BorderStyle.Double) {
-      return <g>{renderStandardBorder(borderOuterInset)}{renderStandardBorder(borderInnerInset, 0.75, 0.8)}</g>;
+      // Every line is drawn solid: the proof shows exactly what is etched.
+      return <g>{renderStandardBorder(borderOuterInset)}{renderStandardBorder(borderInnerInset, 0.75)}</g>;
     }
     if (state.borderStyle === BorderStyle.Inset) {
-      return <g>{renderStandardBorder(bInset + 3, 1.6)}{renderStandardBorder(bInset + 9, 0.55, 0.45)}</g>;
+      return <g>{renderStandardBorder(bInset + 3, 1.6)}{renderStandardBorder(bInset + 9, 0.55)}</g>;
     }
 
     const renderScallopedBorder = (extraInset = 0, strokeWidth = 1, opacity = 1) => {
@@ -507,7 +510,7 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
 
     if (isScallopedBorder && holes.length > 0) {
       if (state.borderStyle === BorderStyle.DoubleScalloped) {
-        return <g>{renderScallopedBorder(0, 0.75)}{renderScallopedBorder(borderInnerInset - borderOuterInset, 0.5, 0.75)}</g>;
+        return <g>{renderScallopedBorder(0, 0.75)}{renderScallopedBorder(borderInnerInset - borderOuterInset, 0.5)}</g>;
       }
       return renderScallopedBorder();
     }

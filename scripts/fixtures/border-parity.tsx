@@ -17,6 +17,11 @@ const geometry = (element: Element) => ({
 });
 const bordersInExport = (svg: Element) => Array.from(svg.querySelectorAll('[stroke="#000000"][fill="none"]'));
 const serialize = (svg: Element) => new XMLSerializer().serializeToString(svg);
+const ancestors = (element: Element, stop: Element) => {
+  const list: Element[] = [];
+  for (let node = element.parentElement; node && node !== stop; node = node.parentElement) list.push(node);
+  return list;
+};
 const parsed = (xml: string) => new DOMParser().parseFromString(xml, 'image/svg+xml').documentElement;
 
 async function renderBorderCase(overrides: Partial<PlaqueState>, baselineUrl?: string) {
@@ -58,6 +63,10 @@ async function renderBorderCase(overrides: Partial<PlaqueState>, baselineUrl?: s
   return {
     state,
     preview: previewBorders.map(geometry),
+    // The proof must not draw any border line lighter than the solid etch.
+    previewOpacities: previewBorders.map(el => [el, ...ancestors(el, source)]
+      .map(node => node.getAttribute('opacity') ?? node.getAttribute('stroke-opacity'))
+      .filter((value): value is string => value !== null)),
     exported: productionBorders.map(geometry),
     solidBlack: productionBorders.every(el => el.getAttribute('stroke') === '#000000'
       && el.getAttribute('fill') === 'none' && !el.closest('[opacity], [stroke-opacity]')),
