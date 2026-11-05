@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ensureInscriptionFonts } from '../services/inscriptionFonts';
 import { BorderStyle, PlaqueState, Shape, Fixing, Material, TEXT_COLOR_VALUES, MemorialImageMethod, DesignStyle, MemorialImageShape } from '../types';
-import { getFixingGeometry, getFixingPositions } from '../services/fixingGeometry';
+import { getFixingGeometry, getFixingPositions, MIN_ETCH_LINE_MM } from '../services/fixingGeometry';
 import { getInscriptionLayout } from '../services/inscriptionLayout';
 import { fitTextToEllipse } from '../services/circularTextFit';
 import { isBenchPlaqueFormat } from '../services/plaqueRules';
@@ -405,7 +405,8 @@ const PlaquePreview = forwardRef<SVGSVGElement, Props>(({ state, activeStep, ins
       stroke: bColor,
       className: "engraved-border",
     };
-    const scaleBorderStroke = (strokeWidth: number) => strokeWidth * borderStrokeScale;
+    // Small plates halve border lines, but never below the etchable minimum.
+    const scaleBorderStroke = (strokeWidth: number) => Math.max(MIN_ETCH_LINE_MM, strokeWidth * borderStrokeScale);
     const renderStandardBorder = (inset: number, strokeWidth = 1, opacity = 1) => {
       const safeInset = Math.max(1, inset);
       if (state.shape === Shape.Rect) {

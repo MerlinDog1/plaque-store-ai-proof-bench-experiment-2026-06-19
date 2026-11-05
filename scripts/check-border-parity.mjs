@@ -79,7 +79,10 @@ try {
       const scale = Math.min(width, height) < 100 ? 0.5 : 1;
       const widths = style === 'double' ? [1, 0.75] : style === 'inset' ? [1.6, 0.55]
         : style === 'double-scalloped' && result.holeCount > 0 ? [0.75, 0.5] : [1];
-      assert.deepEqual(result.preview.map(b => Number(b.attributes['stroke-width'])), widths.map(w => w * scale), label);
+      // Small plates halve each line, but no line goes below the 0.3 mm etchable minimum.
+      const expectedWidths = widths.map(w => Math.max(0.3, w * scale));
+      assert.deepEqual(result.preview.map(b => Number(b.attributes['stroke-width'])), expectedWidths, label);
+      assert.ok(result.exported.every(b => Number(b.attributes['stroke-width']) >= 0.3), `Workshop line thinner than 0.3 mm: ${label}`);
       // The proof draws every line solid, exactly as it is etched.
       assert.deepEqual(result.previewOpacities.flat().filter(o => Number(o) !== 1), [], `Proof line drawn lighter than the etch: ${label}`);
       // Inner rectangle lines stay parallel to the outer line round the corners.
@@ -89,14 +92,14 @@ try {
         const expected = Math.max(0, Number(outer.rx) - (Number(inner.attributes.x) - Number(outer.x)));
         assert.ok(Math.abs(Number(inner.attributes.rx) - expected) < 1e-9, `Inner border corner not parallel (rx ${inner.attributes.rx}, expected ${expected}): ${label}`);
       }
-      results.push({ label, widths: widths.map(w => w * scale) });
+      results.push({ label, widths: expectedWidths });
       if (results.length % 200 === 0) console.log(`PASS ${results.length} cases so far`);
       if (saveSample) {
         const name = `${width}x${height}-${style}`;
         for (const [suffix, svg] of [['preview', result.previewSvg], ['customer-preview', result.customerPreviewSvg], ['before', result.beforeSvg], ['after', result.productionSvg]]) {
           await writeFile(path.join(out, `${name}-${suffix}.svg`), svg);
         }
-        evidence.push({ name, width, height, style, widths: widths.map(w => w * scale) });
+        evidence.push({ name, width, height, style, widths: expectedWidths });
       }
     }
   // Border off must remain border off on all supported shapes.

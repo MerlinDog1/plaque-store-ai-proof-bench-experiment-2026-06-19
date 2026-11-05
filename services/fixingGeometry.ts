@@ -16,6 +16,10 @@ export function getFixingPositions(state: PlaqueState) {
   return [{ x: left, y: top }, { x: right, y: top }, { x: right, y: bottom }, { x: left, y: bottom }];
 }
 
+// Thinnest line the etcher can make cleanly (owner, 5 Nov 2026). No border line
+// on the proof, and so in the workshop file, is drawn thinner than this.
+export const MIN_ETCH_LINE_MM = 0.3;
+
 // Shared by the visible hardware and inscription clearance, in millimetres.
 export function getFixingGeometry(state: PlaqueState) {
   const isScallopedBorder = state.borderStyle === BorderStyle.Scalloped || state.borderStyle === BorderStyle.DoubleScalloped;
