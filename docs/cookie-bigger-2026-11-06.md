@@ -20,3 +20,18 @@ contact-strip entrance animation to settle before checking clearance. JPEGs are 
 
 No production deployment, promotion, aliases, environment settings or database changes.
 Production must remain `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2`.
+
+## Ready preview
+
+https://instaplaque-p3i2aaqov-dullaghan31-3959s-projects.vercel.app
+(`dpl_4nYfX5rjPC4cNgvSFVJQUB2mpg6i`, inspected target **preview**, READY), application
+commit `797f24e5171ed536d56feffa4d94a375f4041178`.
+
+Typecheck and full local/cloud builds with all postbuild guards passed (383 local PASS lines).
+The local browser matrix passed all 15 before and 15 after cases, with Accept and Reject persisted
+through reload in every case. Home/category banner heights: 320px 82.19 → 123.25; 360px 64.64 → 103;
+390/414px 56 → 82.75; desktop 62 → 86. The 320px designer wraps from 64.64 → 123.25.
+Production independently inspected after deployment: unchanged `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2`.
+
+Hosted Chrome checks also passed at 390 × 844 and 1440 × 900: HTTP 200, enlarged text/buttons,
+unchanged wording and Settings, no overflow. Both local preview servers stopped after verification.
