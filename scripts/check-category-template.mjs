@@ -17,7 +17,9 @@ import { categoryFilmFor } from '../services/categoryFilms.mjs';
 // - the opening page's date planner states the catalogue days of its plaques, and its date maths
 //   (services/occasionPlanner.ts) never names an approval day that the catalogue's days and delivery can't meet,
 //   checked against this script's own calendar for every date it accepts;
-// - no hero film: one tap-to-play film in its own section after the proof; no in-place or scene photos; every image and swatch exists;
+// - the page's own film leads it, as on the homepage (owner msg 10240, 6 Nov 2026): under two hero buttons for phones
+//   and beside the copy for computers, playing by itself after the page loads (poster preloaded, no source in the HTML),
+//   nothing after the proof; no in-place or scene photos; every image and swatch exists;
 // - the facts line, the sample proof PDF and the page's contextual links are present.
 // Usage: node scripts/check-category-template.mjs
 import assert from 'node:assert/strict';
@@ -254,21 +256,33 @@ for (const page of pages) {
   }
   assert(main.querySelector('.cat-tpl-toolbar.is-static .cat-tpl-chips[aria-hidden="true"]'), `${page.slug}: chips hidden until the app runs`);
 
-  // No hero film and no scene photos; every picture exists. The promo film is back once, tap to play, after the proof
-  // block (owner msg 8603, 1 Nov 2026): nothing loads before the tap (no src, preload none, no autoplay, lazy poster).
+  // The page's own film leads it, as the homepage's does (owner msg 10240, 6 Nov 2026): two copies in the hero (under
+  // the two buttons for phones, beside the copy for computers; CSS shows one). Like the homepage film it plays by itself
+  // once the page has loaded, so the HTML has its preloaded poster but no source. Nothing follows the proof any more.
   assert.equal(main.querySelectorAll('iframe').length, 0, `${page.slug}: no embedded frames`);
+  const film = categoryFilmFor(page.slug);
   const films = [...main.querySelectorAll('video')];
-  assert.equal(films.length, 1, `${page.slug}: one film`);
-  const proofSection = main.querySelector('.cat-tpl-proof');
-  const filmSection = main.querySelector('.cat-tpl-film-section');
-  assert(filmSection && proofSection?.nextElementSibling === filmSection && !proofSection.querySelector('video'), `${page.slug}: distinct video section immediately after the proof`);
-  assert(films[0].closest('.cat-tpl-film-section .cat-tpl-film'), `${page.slug}: the film is in its own section`);
-  assert.equal(compact(filmSection.querySelector('figcaption span').textContent), `${categoryFilmFor(page.slug).disclosure} ${categoryFilmFor(page.slug).footnote}`, `${page.slug}: only the short film footnote`);
-  assert(!films[0].hasAttribute('src') && !films[0].hasAttribute('autoplay') && films[0].getAttribute('preload') === 'none' && !films[0].hasAttribute('poster'),
-    `${page.slug}: the film loads nothing until tapped`);
-  assert.equal(main.querySelector('.cat-tpl-film .promo-film-poster')?.getAttribute('loading'), 'lazy', `${page.slug}: lazy film poster`);
-  assert(main.querySelector(`.cat-tpl-film a[href="${'/video'}"]`), `${page.slug}: watch page link beside the film`);
-  const pictures = [...main.querySelectorAll('img')].map(img => img.getAttribute('src'));
+  const hero = main.querySelector(':scope > .cat-tpl-hero.cat-film-hero');
+  const inline = hero?.querySelector(':scope > .cat-tpl-head > .cat-film-inline');
+  const side = hero?.querySelector(':scope > .cat-film-side');
+  assert.equal(films.length, 2, `${page.slug}: the film twice, for phones and computers`);
+  assert(inline && side && films.every(video => [inline, side].includes(video.closest('.cat-film-figure'))), `${page.slug}: both copies of the film in the hero`);
+  assert(hero.compareDocumentPosition(main.querySelector('.cat-tpl-grid-section')) & 4, `${page.slug}: the film before the plaques`);
+  const choices = inline.previousElementSibling;
+  assert(choices?.matches('.shop-hero-choices') && choices.querySelector(':scope > a.shop-button[href^="/design"]')
+    && choices.querySelector(':scope > a.shop-hero-choice-whatsapp[data-contact-placement="hero"][href^="https://wa.me"]'), `${page.slug}: two hero buttons straight above the phone film`);
+  for (const video of films) {
+    assert.equal(video.closest('[data-film-id]')?.getAttribute('data-film-id'), film.id, `${page.slug}: its own film`);
+    assert(!video.hasAttribute('src') && !video.hasAttribute('autoplay') && video.getAttribute('preload') === 'none' && video.getAttribute('poster') === film.poster
+      && video.hasAttribute('loop') && video.hasAttribute('playsinline'), `${page.slug}: looping film with only its poster in the HTML`);
+  }
+  for (const figure of [inline, side]) {
+    assert.equal(compact(figure.querySelector('figcaption span').textContent), `${film.disclosure} ${film.footnote}`, `${page.slug}: only the short film footnote`);
+    assert(figure.querySelector('figcaption a[href="/video"]'), `${page.slug}: watch page link beside the film`);
+  }
+  assert([...document.querySelectorAll('link[rel="preload"][as="image"]')].some(link => link.getAttribute('href') === film.poster), `${page.slug}: film poster preloaded`);
+  assert(!main.querySelector('.cat-tpl-film-section') && !main.querySelector('.cat-tpl-proof video') && !main.querySelector('.cat-tpl-proof + * video'), `${page.slug}: no film after the proof`);
+  const pictures = [...main.querySelectorAll('img')].map(img => img.getAttribute('src')).concat(film.poster);
   const swatchFiles = [...html.matchAll(/url\((\/site-images\/finish\/[^)]+)\)/g)].map(match => match[1]);
   assert(swatchFiles.length >= page.cards * 2, `${page.slug}: finish swatches`);
   for (const src of [...pictures, ...new Set(swatchFiles)]) {
