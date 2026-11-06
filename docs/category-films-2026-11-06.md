@@ -14,6 +14,11 @@ from `public/videos`. Cue windows come from each descriptor: design 0–11.07 s 
 film's own windows. Film source: `projects/instaplaque-category-films-20261106`, branch
 `codex/instaplaque-category-films-v2-20261106`; media and report: `output/instaplaque-category-films-v2-20261106/`.
 
+v2 preview: https://instaplaque-kmjpw9n14-dullaghan31-3959s-projects.vercel.app (`dpl_25muGWnEThvH17Ji9ww72CSGySXN`,
+preview / Ready, from `14b70eb`). Typecheck, local and cloud build with all postbuild guards, 175 mappings, 43/43
+playback and cue cases, 36 template-browser cases and 16/16 paced hosted checks passed. Production stayed
+`dpl_EN5TJhoAY3gizahUEiQG9hji4mr2` before and after. Evidence: `output/instaplaque-category-films-v2-20261106/site/`.
+
 ## Implementation
 
 - `services/categoryFilms.mjs`: one versioned descriptor per category. Import only the complete, audited media
