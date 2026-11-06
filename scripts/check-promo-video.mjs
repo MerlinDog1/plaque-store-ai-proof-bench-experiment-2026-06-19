@@ -308,7 +308,8 @@ await check('13 independent film IDs and assets; tree and practice lead-time qua
     }
   }
   for (const slug of ['tree-memorial-plaques','professional-brass-plaques']) assert.ok(categoryFilms[slug].footnote.includes('10–15'));
-  for (const film of Object.values(categoryFilms)) assert.ok(film.id.endsWith('-20261106-v2') && Math.abs(film.duration - 796 / 30) < 0.01, `${film.id}: v2 film expected`);
+  // Portrait is v3: Bramble replaced Millie after the Millie film had been live as v2, and /videos is cached as immutable.
+  for (const [slug, film] of Object.entries(categoryFilms)) assert.ok(film.id === `${slug}-20261106-${slug === 'portrait-plaques' ? 'v3' : 'v2'}` && film.file === `/videos/${film.id}.mp4` && film.poster === `/videos/${film.id}.webp` && Math.abs(film.duration - 796 / 30) < 0.01, `${film.id}: v2 film expected (portrait v3)`);
 });
 
 await browser.close();

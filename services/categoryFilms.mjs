@@ -202,13 +202,13 @@ export const categoryFilms = {
     ]
   },
   "portrait-plaques": {
-    "id": "portrait-plaques-20261106-v2",
+    "id": "portrait-plaques-20261106-v3",
     "name": "Portrait plaques",
     "description": "Silent 27-second portrait plaque film. “Their photo — engraved in metal”. A photo and portrait artwork show the route to an engraved plaque. Example wording: “George Hartley 1938 – 2024 He planted trees so we would have shade”. Then an example WhatsApp conversation: the customer writes “This is Bramble. Could you make a round plaque from this photo?” and sends an example photo of Bramble, a springer spaniel. We reply “What a face! Here’s Bramble, drawn from your photo, on a round plaque” with an example proof of Bramble drawn as a fine engraving, with his name on a scroll, on a 200 mm round brushed stainless plaque, and an order link. They reply “That’s Bramble exactly”. “A face you love”.",
     "disclosure": "Example conversation. George’s photo is illustrative and his portrait artwork is real, from the site. Bramble’s photo and round design are illustrative examples of a fictional pet; nothing in that design has been made yet. No customer order is shown.",
     "footnote": "*A5 plate only from £95.50. Shown on a wood board and stake: from £190. Estimated production 10–15 working days after proof approval and payment, plus delivery.",
-    "file": "/videos/portrait-plaques-20261106-v2.mp4",
-    "poster": "/videos/portrait-plaques-20261106-v2.webp",
+    "file": "/videos/portrait-plaques-20261106-v3.mp4",
+    "poster": "/videos/portrait-plaques-20261106-v3.webp",
     "seconds": 27,
     "duration": 26.533333333333335,
     "cues": [

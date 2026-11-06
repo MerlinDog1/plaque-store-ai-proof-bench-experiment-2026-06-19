@@ -6,8 +6,8 @@ Based on page-improvements `4f72e04`, preserving the stage-three pages. Cookie b
 
 ## v2 films (owner msg 10243, 6 Nov 2026)
 
-The 13 films were remade as v2 (`<slug>-20261106-v2`, 26.53 s, 796 frames): the WhatsApp half now shows a different,
-bespoke example design per page (sketch/logo/document/voice note/photo in, illustrative bespoke proof out), and six
+The 13 films were remade as v2 (`<slug>-20261106-v2`, 26.53 s, 796 frames; portrait is now v3, see the last section):
+the WhatsApp half now shows a different, bespoke example design per page (sketch/logo/document/voice note/photo in, illustrative bespoke proof out), and six
 pages have new real designer captures with better wording. The v1 files were never live, so the importer removes them
 from `public/videos`. Cue windows come from each descriptor: design 0–11.07 s (frame 332), WhatsApp 11.07–23.47 s
 (frame 704), both 23.47–26.53 s; portrait WhatsApp only. `check-promo-video.mjs` seeks into the middle of each
@@ -81,3 +81,13 @@ Complete evidence: workspace `output/instaplaque-category-films-20261106/SITE-RE
 ## Expand-icon fix (6 Nov 2026, preview only)
 
 The designer's expand button shows U+26F6, which the film capture machines can't render, so every designer capture had an empty box on the round white button. The films now draw a four-corners icon there (film repo `src/Designer.tsx`, `ExpandIcon`; checked by `scripts/check-expand-glyph.py`). The 12 designer films were re-rendered and re-imported under the same v2 IDs; portrait is unchanged. Preview: https://instaplaque-h7wf8okog-dullaghan31-3959s-projects.vercel.app (`dpl_Ee6nRJpn9mgjJYeZQuMzMfoGXLsS`). Checks: typecheck pass; build with all guards pass; mapping 175/175 pass; promo-video 43 PASS / 0 FAIL; category template browser RESULT PASS; paced hosted check 0 fails; hosted bench MP4 SHA-256 matches the render. This task deployed preview only. Separately, the owner-authorised hero release (owner msg 10342, `output/instaplaque-films-hero-release-20261106`) staged a production build of this branch's commit `ff1f102`, which includes the icon fix, and promoted it at 11:01 UTC as `dpl_3AzgaNWm1e3sJS3WwUDfo9bNd4aq`. Rollback target in that release: `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2`. instaplaque.co.uk now serves the icon-fixed bench film; its SHA-256 matches the render.
+
+## Portrait film v3: a new, cache-safe name (6 Nov 2026)
+
+`vercel.json` serves `/videos/(.*)` with `Cache-Control: public, max-age=31536000, immutable`. The Millie portrait film was live as
+`portrait-plaques-20261106-v2.mp4` from 11:03 UTC, and `939d701` (Bramble's round plaque replaces Millie, owner msg 10305) reused
+that name, so a browser that had opened the live portrait page would have kept showing Millie for a year. The Bramble film
+therefore ships as `portrait-plaques-20261106-v3` (film ID, MP4 and poster). Its bytes are unchanged from `939d701` (MP4 SHA-256
+`a1d82847ab331b9863ced69b177b37e53c8350b75bd3d6afaf14313050c54174`); the poster image is unchanged too. The other 12 films keep their
+v2 names. The importer's `VERSIONS` map keeps portrait at v3 on a re-import, and `check-promo-video.mjs` requires it. Rule: a
+film name that has been live never gets new pictures; a changed film needs a new name.

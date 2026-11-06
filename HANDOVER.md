@@ -1,5 +1,13 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Portrait film v3: cache-safe name for the Bramble film — 6 November 2026
+
+- `939d701` put the Bramble portrait film under the live Millie file name, which `/videos` caches as immutable for a year.
+  It now ships as `portrait-plaques-20261106-v3` (film ID, MP4 and poster; bytes unchanged). The other 12 films keep v2.
+  Details: [category films](docs/category-films-2026-11-06.md), last section.
+- Preview and staged production receipts: workspace `output/instaplaque-bramble-release-20261106/`. Promotion is a
+  separate, owner-approved step.
+
 ## Category films at the top of their pages — PREVIEW ONLY, 6 November 2026
 
 - Owner msg 10240: "each of these new vids to be bang at the top of their respective pages just like the home page".

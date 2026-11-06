@@ -9,6 +9,10 @@ const source = process.argv[2];
 // v2 (owner msg 10243, 6 Nov 2026): a longer chat with a bespoke example design per page. 796 frames at 30 fps;
 // the chat swipes in at frame 332 and the end card at frame 704 (the film's src/timeline.ts).
 const VERSION = 'v2';
+// A film name that has been live must never get new pictures: vercel.json caches /videos as immutable for a year.
+// Portrait v3 (6 Nov 2026): Bramble replaced Millie after the Millie film had been live as v2.
+const VERSIONS = { 'portrait-plaques': 'v3' };
+const versionOf = slug => VERSIONS[slug] || VERSION;
 const FRAMES = 796;
 const CHAT_IN = 332;
 const END_IN = 704;
@@ -43,9 +47,9 @@ const films = Object.fromEntries(rows.map(row => {
     ? `Silent ${SECONDS}-second portrait plaque film. “${row.hook} — ${row.sub}”. A photo and portrait artwork show the route to an engraved plaque. Example wording: “${row.words}”. ${chat} “${row.end}”.`
     : `Silent ${SECONDS}-second ${name.toLowerCase()} film. “${row.hook} — ${row.sub}”. The designer lays out “${row.words}” on a ${row.start.width} × ${row.start.height} mm plaque${row.start.wood ? ' on wood backing' : ''}${row.start.groundStake ? ' and a ground stake' : ''}, then shows ${row.swaps.join(', ')}. ${chat} “${row.end}”.`;
   const descriptor = {
-    id:`${row.slug}-20261106-${VERSION}`, name, description,
+    id:`${row.slug}-20261106-${versionOf(row.slug)}`, name, description,
     disclosure:row.disclosure, footnote:row.footnote,
-    file:`/videos/${row.slug}-20261106-${VERSION}.mp4`, poster:`/videos/${row.slug}-20261106-${VERSION}.webp`, seconds:SECONDS, duration:FRAMES/30,
+    file:`/videos/${row.slug}-20261106-${versionOf(row.slug)}.mp4`, poster:`/videos/${row.slug}-20261106-${versionOf(row.slug)}.webp`, seconds:SECONDS, duration:FRAMES/30,
     // Design while the designer shows, WhatsApp during the chat, both on the end card. Portrait is a
     // photo-submission route, not the instant text designer, so only its WhatsApp action is cued.
     cues:row.portrait ? [{start:0,cue:'whatsapp'}] : [{start:0,cue:'design'},{start:CHAT_IN/30,cue:'whatsapp'},{start:END_IN/30,cue:'both'}],
@@ -53,8 +57,11 @@ const films = Object.fromEntries(rows.map(row => {
   files.push([file, `public${descriptor.file}`], [poster, `public${descriptor.poster}`]);
   return [row.slug, descriptor];
 }));
-// Validate the whole batch before copying any assets. Earlier versions were never live, so they are replaced.
-for (const old of fs.readdirSync('public/videos')) if (/^[a-z-]+-plaques-20261106-v\d+\.(mp4|webp)$/.test(old) && !old.includes(`-${VERSION}.`)) fs.rmSync(path.join('public/videos', old));
+// Validate the whole batch before copying any assets. Other versions of each film are removed: no page refers to them.
+for (const old of fs.readdirSync('public/videos')) {
+  const match = /^([a-z-]+-plaques)-20261106-(v\d+)\.(mp4|webp)$/.exec(old);
+  if (match && match[2] !== versionOf(match[1])) fs.rmSync(path.join('public/videos', old));
+}
 for (const [from,to] of files) fs.copyFileSync(from,to);
 fs.writeFileSync('services/categoryFilms.mjs', '// Generated from the approved category film manifest by scripts/import-category-films.mjs.\n// The original homepage and /video descriptor stays in promoVideo.mjs.\nexport const categoryFilms = '+JSON.stringify(films,null,2)+';\n\nexport const categoryFilmFor = (slug) => categoryFilms[slug];\n');
 console.log(`Imported ${rows.length} films and posters, with independent IDs, disclosures and cue descriptors.`);
