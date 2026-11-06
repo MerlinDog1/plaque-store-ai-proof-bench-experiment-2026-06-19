@@ -359,6 +359,9 @@ async function checkPlanner(page, where) {
         // The card itself opens its plaque: a tap on its photo lands on the card's link.
         const first = page.locator('.cat-tpl-card').first();
         const href = await first.locator('.cat-tpl-card-link').getAttribute('href');
+        // (The film above the grid puts the first card below the first screen.)
+        await first.scrollIntoViewIfNeeded();
+        await page.waitForTimeout(300);
         const photo = await first.locator('.cat-tpl-photo').boundingBox();
         const [x, y] = [photo.x + photo.width / 2, photo.y + photo.height / 3];
         if (mode === 'phone') await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
