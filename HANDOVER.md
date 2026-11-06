@@ -1,5 +1,31 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Page-1 SEO copy: garden, opening, stainless steel and brass — PREVIEW ONLY, 6 November 2026
+
+- Owner msgs 10401/10402/10408 ("OK set helper on it"): the corrected spec is workspace
+  `output/instaplaque-seo-page1-20261106/BRIEF.md`. Branch `codex/instaplaque-seo-page1-20261106`, from the live source
+  `f33fa04` (live `dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` was built from `e97d856`; `f33fa04` adds only this file).
+- **Ships:** new titles, meta/og/twitter summaries (still each page's own catalogue from-price), H1s and one swapped
+  question per page (still six; the FAQPage is the visible six). One new section each, in the template's guide block below
+  the questions: garden above "Memorial gardens and gardens of remembrance.", opening, stainless steel and brass directly
+  above their wording ideas. Garden and stainless steel intros per the spec, saying "fixings" (the 150 × 50 mm plates have
+  screws, no caps). Garden: the hero film's label and the first two cards' alt text. Links: footer "Garden memorial
+  plaques"; in-text links on memorial, tree, bench, custom and house name; church and donor already link "opening
+  plaques"; the practice page doesn't mention them, so no link. Sitemap `<lastmod>` 2026-11-06 on the four pages only.
+  URLs, prices, products, the Merchant feed, schema types, routes and layout are unchanged.
+- **Code:** `TemplateGuide` takes `paragraphs` and `beforeWording` (its items are optional), `TemplateCard.leadAlt`, a
+  `link` on a product's seoSections (the memorial "Garden, grave and cemetery settings" block), and `NAMES` in
+  `scripts/import-category-films.mjs` for the garden film's label. Copy in `services/commerce.ts` (questions, titles,
+  summaries) and `components/CategoryTemplatePages.tsx` (H1s, intros, sections, links).
+- **Checks:** typecheck; full build with every postbuild guard (383 PASS; `check-category-template.mjs` now expects the
+  new titles, summaries, H1s, questions, sections and links); BRIEF section 6, 95/95, against a build of `f33fa04`
+  (Merchant feed 175 items and product sitemap byte-identical, sitemap the same 29 URLs); only the 9 intended pages
+  change beyond bundle names and the footer anchor. Evidence: the workspace output folder above.
+- **Not passing, limits left as they are:** `scripts/check-category-template-browser.cjs` (local; not a build guard). On a
+  390 × 844 phone the garden film now starts at 582 px and stainless steel's at 568 px (limit 562.7, two-thirds of the
+  screen; they were 491 and 466), and garden is 8.98 and brass 8.68 phone screens long (limit 8.4; were 8.24 and 8.30).
+  Opening (531 px, 8.26) is within both. Release needs the owner's decision: raise the limits, or shorten the copy.
+
 ## Portrait film v3: cache-safe name for the Bramble film — LIVE, 6 November 2026
 
 - `939d701` put the Bramble portrait film under the live Millie file name, which `/videos` caches as immutable for a year.
