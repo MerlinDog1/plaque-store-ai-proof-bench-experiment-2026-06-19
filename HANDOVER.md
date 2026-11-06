@@ -33,8 +33,16 @@
   output folder above (NOTES.md).
 - **First round, superseded (do not promote):** preview `dpl_4odaQG9zCd1VrmF3je1eufFjga5d` and staged production
   `dpl_66txzMy7uUFkpaSAfpi2m1cnFbBx`, both from `a6d4e59`, before the shorter intros and the fixing answer.
-- **Production unchanged:** `dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx`. Release on the owner's go only, from the round-2 staged
-  build: `DPL=<staged id> bash output/instaplaque-films-hero-release-20261106/promote.sh`; rollback
+- **Ready preview (round 2):** https://instaplaque-ez8on9d36-dullaghan31-3959s-projects.vercel.app
+  (`dpl_EdLGmAXhZtcqsP3eTAWukzJfsDFh`, target preview) from `51bcb55`. Hosted, paced: section 6 96/96; the live sitemaps
+  and feed fetched once each (feed 175 items and product sitemap byte-identical, sitemap.xml the same 29 URLs with the
+  four newer `<lastmod>`). Phone hero shots of garden and stainless steel (film at 531 and 517 px): output folder `shots-r2/`.
+- **Staged production, NOT promoted (round 2):** https://instaplaque-1ulpk0gue-dullaghan31-3959s-projects.vercel.app
+  (`dpl_DyTwtgWCmASKbePetzNnczHsHsG1`, target production, Ready) from `51bcb55` (`vercel deploy --prod --skip-domain` under
+  the shared lock; cloud build and every guard passed). `check-staged.sh` (edited copy, paced): 95 PASS, RESULT PASS,
+  including the four new titles, H1s, summaries and questions, the two intros and the garden fixing answer.
+- **Production unchanged:** `dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` before and after both rounds. Release on the owner's go
+  only: `DPL=dpl_DyTwtgWCmASKbePetzNnczHsHsG1 bash output/instaplaque-films-hero-release-20261106/promote.sh`; rollback
   `DPL=dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` with the same script. Then resubmit the sitemap and request indexing for the four
   pages.
 
