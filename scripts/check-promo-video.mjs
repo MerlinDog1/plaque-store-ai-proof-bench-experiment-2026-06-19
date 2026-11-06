@@ -14,12 +14,14 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
+import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { categoryFilms } from '../services/categoryFilms.mjs';
 const shots = process.env.SHOTS || 'output/category-film-browser';
 mkdirSync(shots, { recursive: true });
 
 const BASE = process.env.BASE || 'http://127.0.0.1:4187';
 const POSTER = 'poster="/videos/instaplaque-design-in-seconds-20261028-poster.webp"';
+assert(['127.0.0.1', 'localhost'].includes(new URL(BASE).hostname), 'Use this comprehensive matrix on a local build; hosted checks must be paced');
 const browser = await chromium.launch({
   executablePath: process.env.CHROME || '/opt/google/chrome/chrome',
   args: ['--no-sandbox', '--disable-dev-shm-usage', '--renderer-process-limit=1', '--js-flags=--max-old-space-size=448', '--autoplay-policy=no-user-gesture-required'],
@@ -265,6 +267,35 @@ for (const options of [{ reducedMotion: 'reduce' }, { saveData: true }]) {
       await page.waitForTimeout(200);
       assert.ok(!await video.evaluate(v => v.paused));
     } finally { await context.close(); }
+  });
+}
+
+// Representative exact products cover all four stable breadcrumb mapping branches on phone and desktop.
+const productExamples = [
+  ['custom-plaques', merchantOffers.find(o => o.preset.shape !== 'rect')],
+  ['bench-plaques', merchantOffers.find(o => o.preset.shape === 'rect' && Math.min(o.preset.width,o.preset.height) <= 100 && Math.max(o.preset.width,o.preset.height)/Math.min(o.preset.width,o.preset.height) >= 2)],
+  ['stainless-steel-plaques', merchantOffers.find(o => o.preset.shape === 'rect' && o.preset.width === 210 && o.preset.height === 148 && o.preset.material === 'brushed-stainless')],
+  ['brass-plaques', merchantOffers.find(o => o.preset.shape === 'rect' && o.preset.width === 210 && o.preset.height === 148 && o.preset.material === 'brushed-brass')],
+];
+for (const [category, product] of productExamples) for (const phone of [true, false]) {
+  await check(`${category} mapped product ${phone ? 'phone' : 'desktop'}: own film, one copy, quiet/manual play`, async () => {
+    assert.ok(product, category);
+    const { context, page } = await open('/' + product.slug, {phone, saveData:true});
+    try {
+      const film = page.locator('.shop-product-film .promo-film');
+      const video = film.locator('video');
+      assert.equal(await page.locator('.promo-film').count(), 1);
+      assert.equal(await film.getAttribute('data-film-id'), categoryFilms[category].id);
+      await film.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      assert.ok(await video.evaluate(v => v.paused && v.currentTime === 0), 'Save-Data must stop autoplay');
+      await film.locator('button').click();
+      await page.waitForFunction(() => {const v=document.querySelector('.shop-product-film video');return v && !v.paused && v.currentTime > .2;});
+      assert.equal(await video.getAttribute('src'), categoryFilms[category].file);
+      assert.equal(await page.locator('.promo-film-player[src]').count(), 1);
+      assert.ok(!await page.evaluate(() => document.documentElement.scrollWidth > innerWidth));
+      await page.screenshot({path:`${shots}/product-${category}-${phone ? 'phone' : 'desktop'}.jpg`,type:'jpeg',quality:75,scale:'css'});
+    } finally {await context.close();}
   });
 }
 

@@ -3,18 +3,27 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 const source = process.argv[2];
 assert(source && path.isAbsolute(source), 'Pass the absolute film output directory');
 const rows = JSON.parse(fs.readFileSync(path.join(source, 'manifest.json'), 'utf8'));
 const slugs = ['memorial-plaques','bench-plaques','garden-plaques','tree-memorial-plaques','opening-plaques','brass-plaques','stainless-steel-plaques','custom-plaques','portrait-plaques','church-plaques','house-name-plaques','professional-brass-plaques','donor-recognition-plaques'];
 assert.deepEqual(rows.map(row => row.slug).sort(), [...slugs].sort());
+const verification = JSON.parse(fs.readFileSync(path.join(source, 'media-verification.json'), 'utf8'));
+assert(Array.isArray(verification) && verification.length === 39, 'All 39 verified renders are required');
+assert.deepEqual(verification.map(item => `${item.slug}/${item.cut}`).sort(), slugs.flatMap(slug => ['reels','feed','web'].map(cut => `${slug}/${cut}`)).sort(), 'One receipt per category and cut');
+assert(verification.every(item => item.decode === 'pass' && item.faststart && item.silent), 'Every cut must have passed decode, faststart and silent checks');
+for (const slug of slugs) assert(fs.existsSync(path.join(source, 'films', slug, 'READY')), `${slug}: READY marker required`);
 const files = [];
 const films = Object.fromEntries(rows.map(row => {
   const file = path.join(source, 'films', row.slug, 'web.mp4');
   const poster = path.join(source, 'films', row.slug, 'poster.webp');
   assert(fs.statSync(file).size > 10000 && fs.statSync(poster).size > 1000, `${row.slug}: incomplete render`);
   const probe = JSON.parse(execFileSync('ffprobe', ['-v','error','-show_streams','-show_format','-of','json',file], {encoding:'utf8'}));
+  const receipt = verification.find(item => item.slug === row.slug && item.cut === 'web');
+  assert(receipt?.decode === 'pass' && receipt.faststart && receipt.silent, `${row.slug}: verified silent faststart render required`);
+  assert.equal(createHash('sha256').update(fs.readFileSync(file)).digest('hex'), receipt.sha256, `${row.slug}: verified checksum`);
   const video = probe.streams.find(stream => stream.codec_type === 'video');
   assert(video?.codec_name === 'h264' && video.width / video.height === 0.8 && probe.streams.length === 1, `${row.slug}: silent 4:5 H.264 required`);
   assert(Math.abs(Number(probe.format.duration) - 658/30) < 0.1, `${row.slug}: unexpected duration`);
