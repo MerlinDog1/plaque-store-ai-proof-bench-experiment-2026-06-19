@@ -33,3 +33,14 @@ Use the established shared deployment lock. Only `vercel deploy --yes --scope du
 no production flag, promotion, alias operations or environment changes. Probe api.vercel.com first; HTML security
 checkpoints mean wait, not reauthenticate. Hosted checks use `vercel curl` and are paced. Production must remain
 `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2`. No ads, campaigns or Meta settings are changed.
+
+## Merge verification correction
+
+The larger cookie bar covered the bottom 21.84px of the tree page's first desktop card row at 1440×900.
+A tree-only desktop spacing correction widens its intro into available space and reduces the header's top padding
+by 6px. Wording, full-size uncropped product photos, all other categories and phone layouts remain unchanged.
+The existing strict no-overlap browser assertion is retained.
+
+For local playback/cue checks use a server with both clean prerendered routes and HTTP Range support. Vite preview
+falls back to homepage SSR on clean routes here, while `server.mjs` serves correct route HTML but lacks byte ranges.
+The evidence directory includes a loopback-only range proxy over `server.mjs`; Vercel supplies ranges itself.

@@ -3896,3 +3896,10 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
 .statistics-switch__track > span { width: 18px; height: 18px; border-radius: 50%; background: #fff; }
 .statistics-switch[aria-checked="true"] .statistics-switch__track { background: #203b32; justify-content: flex-end; }
 @media (max-width: 720px) { .statistics-settings { padding: 18px; } }
+
+/* The larger 6 Nov cookie bar is 86px tall. Keep the tree's first desktop card row above it,
+   with the same full-size photos and unchanged wording: use the available intro width and six less top pixels. */
+@media (min-width: 1100px) {
+  .cat-tpl:has(#tree-grid) .cat-tpl-head { padding-top: 12px; }
+  .cat-tpl:has(#tree-grid) .cat-tpl-intro { max-width: 960px; }
+}

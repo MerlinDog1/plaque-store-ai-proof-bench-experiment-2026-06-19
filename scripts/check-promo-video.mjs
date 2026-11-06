@@ -1,16 +1,9 @@
-// Browser check for the promo film at the top of the homepage and the category pages (components/PromoVideo.tsx, owner
-// msgs 6977 and 6986). Against a running copy of the site (BASE, default http://127.0.0.1:4187 serving dist/), in
-// Google Chrome (H.264), with analytics (Google, Meta, PostHog, Vercel) aborted and consent refused, so a run on the
-// live site records no visit:
-// - phones: the film is straight under the two buttons, all on the first screen; computers: beside the copy;
-// - the poster is in the static HTML; the video is requested only after the page's load event, by one copy only;
-// - it plays muted on screen and pauses off screen; its button pauses and plays it;
-// - while it plays, "Design online" glows during the designer, "Design on WhatsApp" during the chat, both at the end;
-//   paused, nothing glows; with reduced motion it doesn't play by itself and the glow doesn't pulse;
-// - the category's own photo follows the hero; the tree page (all oak board and stake, 10-15 days) keeps its photo hero;
-// - the watch page /video (owner msg 6988): the film leads, its source and VideoObject are in the static HTML, the
-//   buttons under it glow in turn, and the sitemap entry and thumbnails are served.
-// Usage: BASE=https://instaplaque.co.uk node scripts/check-promo-video.mjs
+// Local browser matrix for the original homepage/watch film, 13 category-specific films and mapped product films.
+// Serve correct prerendered clean routes plus HTTP Range support (Chrome/H.264). Never use this unpaced matrix live.
+// Covers independent IDs, category tap-to-load, single product/homepage copy, 4:5 uncropped phone/desktop layout,
+// frame-332/566 cues (portrait WhatsApp only), pause/play, actual main-container offscreen pause, quiet modes and
+// visibility-event pause/resume. External analytics are blocked and consent refused. Screenshots use CSS pixels.
+// Usage: BASE=http://127.0.0.1:4398 SHOTS=/absolute/path/to/shots node scripts/check-promo-video.mjs
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
@@ -30,9 +23,9 @@ const results = [];
 const check = async (name, fn) => {
   try {
     await fn();
-    results.push(`PASS ${name}`);
+    results.push(`PASS ${name}`); console.log(results.at(-1));
   } catch (error) {
-    results.push(`FAIL ${name}: ${error.message.split('\n')[0]}`);
+    results.push(`FAIL ${name}: ${error.message.split('\n')[0]}`); console.log(results.at(-1));
   }
 };
 
@@ -240,7 +233,7 @@ for (const [slug, film] of Object.entries(categoryFilms)) {
         assert.equal(await page.locator('.shopfront').getAttribute('data-promo-cue'), null);
         await section.locator('button').click();
         await page.waitForTimeout(150);
-        await page.evaluate(() => window.scrollTo(0,0));
+        await page.evaluate(() => { document.querySelector('main')?.scrollTo(0,0); window.scrollTo(0,0); });
         await page.waitForTimeout(250);
         assert.ok(await video.evaluate(v => v.paused), 'offscreen pause');
         assert.equal(await page.locator('.shopfront').getAttribute('data-promo-cue'), null);
@@ -311,7 +304,7 @@ await check('13 independent film IDs and assets; tree and practice lead-time qua
 });
 
 await browser.close();
-console.log(results.join('\n'));
+// Individual cases are logged as they finish.
 const failed = results.filter(line => line.startsWith('FAIL')).length;
 console.log(failed ? `RESULT FAIL (${failed})` : 'RESULT PASS');
 process.exit(failed ? 1 : 0);
