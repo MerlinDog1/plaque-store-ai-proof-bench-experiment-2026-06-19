@@ -3818,7 +3818,8 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
 .cat-tpl .cat-tpl-guide .cat-size-links { margin-top: 12px; }
 /* Each category's film at the top of its page, as on the homepage (owner msg 10240, 6 Nov 2026; CategoryFilmFigure):
    straight under the two buttons on phones, beside the title, price and buttons on computers. CSS shows one copy; the
-   hidden one never loads its video. The film is 4:5; on computers a 56svh width keeps it within 70svh of height. */
+   hidden one never loads its video. The film is 4:5; on computers a 56svh width keeps it within 70svh of height. There
+   the breadcrumb stays at the top of the column and the title, price and buttons sit level with the film's middle. */
 .cat-tpl .cat-tpl-head .shop-hero-choices { margin: 12px 0 0; }
 .shopfront .cat-film-side { display: none; }
 .shopfront .cat-film-inline { width: min(100%, 420px); margin: 14px auto 6px; }
@@ -3831,9 +3832,11 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
 .shopfront .shop-portrait-closeup { max-width: 760px; margin: 0 auto; padding: 0 24px 36px; }
 @media (min-width: 721px) {
   .cat-tpl .cat-tpl-hero.cat-film-hero { max-width: 1256px; margin: 0 auto; padding: 0 var(--cat-tpl-pad); display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, min(430px, 56svh)); gap: 48px; align-items: center; }
-  .cat-tpl .cat-tpl-hero.cat-film-hero > .cat-tpl-head { max-width: none; margin: 0; padding-left: 0; padding-right: 0; }
-  .shopfront .cat-film-side { display: block; width: min(100%, 430px, 56svh); justify-self: center; padding: 18px 0 6px; }
+    grid-template-columns: minmax(0, 1fr) minmax(0, min(400px, 56svh)); gap: 56px; }
+  .cat-tpl .cat-tpl-hero.cat-film-hero > .cat-tpl-head { display: flex; flex-direction: column; max-width: none; margin: 0; padding-left: 0; padding-right: 0; padding-bottom: 24px; }
+  .cat-tpl .cat-tpl-hero.cat-film-hero > .cat-tpl-head > h1 { margin-top: auto; }
+  .cat-tpl .cat-tpl-hero.cat-film-hero > .cat-tpl-head > .shop-hero-choices { max-width: 560px; margin: 18px 0 auto; }
+  .shopfront .cat-film-side { display: block; width: min(100%, 400px, 56svh); justify-self: center; padding: 18px 0 6px; }
   .shopfront .cat-film-inline { display: none; }
   .shopfront .shop-portrait-closeup { padding: 0 32px 48px; }
 }

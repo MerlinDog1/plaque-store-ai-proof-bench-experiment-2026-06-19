@@ -2,14 +2,17 @@
 // Local browser check of the "products first" category template (components/CategoryTemplate.tsx, 1 Nov 2026): the
 // twelve template pages: the live eight plus house, donor, church and practice (stage 3, 4 Nov 2026).
 // Phone 390 × 844 and computer 1440 × 900, on a local build only (external requests blocked, browser marked internal):
-// - the first product card starts within 330 px of the top, with the cookie notice showing and after Accept; the notice
-//   is a compact bar (88 px or less on the phone) covering neither the H1, the first row of products nor the contact bar;
+// - the page's own film leads it, as on the homepage (owner msg 10240, 6 Nov 2026): it starts in the top half of the
+//   first screen, under the two hero buttons on phones and beside them on computers, before the first product card,
+//   with the cookie notice showing and after Accept; the notice is a compact bar (88 px or less on the phone) covering
+//   neither the H1, the hero buttons, the film's pause button nor the contact bar;
 // - at most 7.8 phone screens (7.6 with owner msg 8603's separate, full-width video section, then the page-1 improvement
 //   sections of owner msg 10173);
 //   report every page's measured length (main height / (viewport - main top));
 // - no sideways overflow, no script errors or console errors (other than the blocked external requests);
-// - the largest paint on the first screen is a product photo; the film, tap to play in its own section after the proof, loads nothing
-//   before the tap, keeps its box when the poster loads and while it plays, and plays when tapped;
+// - the largest paint on the first screen is the film's poster; the film plays by itself once the page has loaded, as the
+//   homepage's does: only the copy on screen downloads (the page's own film), its box stays the same while it plays, the
+//   hero button for what it is showing lights up, and its button pauses it;
 // - every card: a swatch swaps the photo, price and link, and that link opens the built product page of that finish
 //   (tree: the designer on that plate, on the board and stake); the card itself opens its plaque; chips narrow the grid,
 //   switch finishes and update the count; the questions open and close;
@@ -109,9 +112,12 @@ const geometry = page => page.evaluate(() => {
   const bar = document.querySelector('.shop-mobile-contact.is-visible');
   const banner = [...document.querySelectorAll('.cookie-banner')].find(el => el.getBoundingClientRect().height > 0);
   const rect = el => el && (({ top, bottom, left, right }) => ({ top: Math.round(top), bottom: Math.round(bottom), left: Math.round(left), right: Math.round(right) }))(el.getBoundingClientRect());
+  // The copy of the film on show (the phone one under the buttons, or the computer one beside them).
+  const figure = [...document.querySelectorAll('.cat-film-figure')].find(el => el.getBoundingClientRect().height > 0);
   return { mainTop: Math.round(top), pageHeight: main.scrollHeight, viewport: [innerWidth, innerHeight], screens: main.scrollHeight / (innerHeight - top),
     overflow: Math.max(main.scrollWidth - main.clientWidth, document.documentElement.scrollWidth - innerWidth), card: rect(card), banner: rect(banner),
-    h1: rect(document.querySelector('h1')), firstRow: firstRow.map(rect), bar: bar && bar.getBoundingClientRect().height ? rect(bar) : null };
+    h1: rect(document.querySelector('h1')), firstRow: firstRow.map(rect), bar: bar && bar.getBoundingClientRect().height ? rect(bar) : null,
+    buttons: rect(document.querySelector('.cat-tpl-head .shop-hero-choices')), film: rect(figure?.querySelector('.promo-film')), toggle: rect(figure?.querySelector('.promo-film-toggle')) };
 });
 const overlaps = (a, b) => a && b && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
 
@@ -220,37 +226,45 @@ async function checkChips(page, slug, chips, total) {
   await page.locator('main').evaluate(main => { main.scrollTop = 0; });
 }
 
-/** The film in its own section after the proof: nothing loaded before the tap; its box and the block's stay the same when the poster
- * loads and while it plays; one download, after the tap; it plays and pauses. */
+/** The film at the top plays by itself once the page has loaded, as the homepage film does: only the copy on screen
+ * downloads, and only the page's own film; its box stays the same while it loads and plays; the hero button for what it
+ * is showing lights up (both on the end card); its button pauses it, and it stays paused. */
 async function checkFilm(page, films, where) {
-  const boxes = () => page.evaluate(() => {
-    const size = el => { const box = el.getBoundingClientRect(); return [Math.round(box.width), Math.round(box.height)]; };
-    return { block: size(document.querySelector('.cat-tpl-film-section')), film: size(document.querySelector('.cat-tpl-film .promo-film')), cls: window.__cls };
+  const state = () => page.evaluate(() => {
+    const figure = [...document.querySelectorAll('.cat-film-figure')].find(el => el.getBoundingClientRect().height > 0);
+    const video = figure.querySelector('video');
+    const box = figure.querySelector('.promo-film').getBoundingClientRect();
+    const glowing = [...document.querySelectorAll('.cat-tpl-head .shop-hero-choices > a')].filter(a => getComputedStyle(a).outlineStyle === 'solid')
+      .map(a => (a.classList.contains('shop-hero-choice-whatsapp') ? 'whatsapp' : 'design'));
+    return { film: [Math.round(box.width), Math.round(box.height)], id: figure.querySelector('[data-film-id]').dataset.filmId, paused: video.paused, time: video.currentTime,
+      others: [...document.querySelectorAll('.cat-film-figure video')].filter(el => el !== video).map(el => el.getAttribute('src')),
+      cue: document.querySelector('.shopfront').dataset.promoCue || null, glowing, cls: window.__cls };
   });
-  await page.locator('.cat-tpl-film').scrollIntoViewIfNeeded();
-  const first = await boxes();
+  const first = await state();
   const viewport = page.viewportSize();
-  assert(first.film[1] <= viewport.height * 0.75 + 1, `${where}: film capped at 75% viewport height`);
-  assert(first.film[0] >= (viewport.width < 721 ? viewport.width - 40 : 450), `${where}: large film at content width`);
-  await page.waitForFunction(() => { const img = document.querySelector('.cat-tpl-film .promo-film-poster'); return img && img.complete && img.naturalWidth > 0; }, null, { timeout: 15000 });
-  const poster = await boxes();
-  assert(!films.some(file => file.endsWith('.mp4')), `${where}: film downloaded before a tap`);
-  const toggle = page.locator('.cat-tpl-film .promo-film-toggle');
-  await toggle.click();
-  await page.waitForFunction(() => { const video = document.querySelector('.cat-tpl-film video'); return video && !video.paused && video.currentTime > 0.3; }, null, { timeout: 15000 });
-  const playing = await boxes();
-  for (const [label, now] of [['poster', poster], ['playing', playing]]) {
-    assert.deepEqual(now.block, first.block, `${where}: proof block size, ${label}`);
-    assert.deepEqual(now.film, first.film, `${where}: film size, ${label}`);
-  }
+  assert(first.film[1] <= viewport.height * 0.75 + 1, `${where}: film within 75% of the screen height (${first.film})`);
+  assert(first.film[0] >= (viewport.width < 721 ? viewport.width - 40 : 380), `${where}: large film (${first.film})`);
+  await page.waitForFunction(() => {
+    const video = [...document.querySelectorAll('.cat-film-figure')].find(el => el.getBoundingClientRect().height > 0)?.querySelector('video');
+    return video && !video.paused && video.currentTime > 0.5;
+  }, null, { timeout: 20000 });
+  const playing = await state();
+  assert.deepEqual(playing.film, first.film, `${where}: film size while it plays`);
   const shift = playing.cls - first.cls;
   assert(shift < 0.01, `${where}: layout shift ${shift.toFixed(4)} while the film loads and plays`);
-  assert.equal(films.filter(file => file.endsWith('.mp4')).length, 1, `${where}: one film download, after the tap`);
+  assert.deepEqual([...new Set(films.filter(file => file.endsWith('.mp4')))], [`/videos/${playing.id}.mp4`], `${where}: only the page's own film downloads`);
+  assert(playing.others.every(src => !src), `${where}: the hidden copy loads nothing`);
+  const expected = { design: ['design'], whatsapp: ['whatsapp'], both: ['design', 'whatsapp'] }[playing.cue];
+  assert(expected, `${where}: the page marks what the film shows (${playing.cue})`);
+  assert.deepEqual(playing.glowing.sort(), expected, `${where}: the ${playing.cue} button lights up (${playing.glowing})`);
+  const toggle = page.locator('.cat-film-figure:visible .promo-film-toggle');
   assert.equal(await toggle.getAttribute('aria-label'), 'Pause the video', `${where}: pause button while playing`);
   await toggle.click();
-  await page.waitForFunction(() => document.querySelector('.cat-tpl-film video').paused, null, { timeout: 5000 });
-  await page.locator('main').evaluate(main => { main.scrollTop = 0; });
-  return { film: first.film, shift: Number(shift.toFixed(4)) };
+  await page.waitForTimeout(1500);
+  const paused = await state();
+  assert(paused.paused && !paused.cue && !paused.glowing.length, `${where}: paused, buttons no longer lit ${JSON.stringify(paused)}`);
+  assert.equal(await toggle.getAttribute('aria-label'), 'Play the video', `${where}: play button once paused`);
+  return { film: first.film, shift: Number(shift.toFixed(4)), cue: playing.cue };
 }
 
 /** Opening: for a date, each kind of plaque shows the approval day services/occasionPlanner.ts gives; a date too close
@@ -290,31 +304,34 @@ async function checkPlanner(page, where) {
         await settle(page);
         const withNotice = await geometry(page);
         assert(withNotice.banner, `${spec.slug}/${mode}: cookie notice showing for a new visitor`);
-        assert(withNotice.card.top <= 330, `${spec.slug}/${mode}: first card at ${withNotice.card.top}px with the notice`);
-        assert(!overlaps(withNotice.card, withNotice.banner), `${spec.slug}/${mode}: notice covers the first card`);
-        // The noticeable neutral notice: 88 px or less on the phone, clear of the H1, the first row of products and the contact bar.
+        // The film leads, as on the homepage (owner msg 10240): in the top half of the first screen, under the two hero
+        // buttons on phones and beside them on computers, and before the first product card.
+        const leads = state => state.film && state.buttons && state.film.top < state.viewport[1] / 2 && state.film.bottom <= state.card.top
+          && (mode === 'phone' ? state.film.top >= state.buttons.bottom : state.film.left >= state.buttons.right);
+        assert(leads(withNotice), `${spec.slug}/${mode}: the film leads the page ${JSON.stringify({ film: withNotice.film, buttons: withNotice.buttons, card: withNotice.card })}`);
+        // The noticeable neutral notice: 88 px or less on the phone, clear of the H1, the hero buttons and the contact bar,
+        // and on computers of the film's pause button. (On a phone the film's foot can sit under the notice until it is
+        // answered, as the homepage film's does.)
         const noticeHeight = withNotice.banner.bottom - withNotice.banner.top;
         if (mode === 'phone') assert(noticeHeight <= MAX_NOTICE_HEIGHT, `${spec.slug}/phone: notice ${noticeHeight}px tall`);
-        assert(!overlaps(withNotice.banner, withNotice.h1) && !withNotice.firstRow.some(card => overlaps(card, withNotice.banner)) && !overlaps(withNotice.banner, withNotice.bar),
-          `${spec.slug}/${mode}: notice clear of the H1, first products and contact bar ${JSON.stringify({ banner: withNotice.banner, h1: withNotice.h1, bar: withNotice.bar })}`);
-        // The largest paint is a product photo; the film has loaded nothing and waits for a tap.
-        // (The app replaces the prerendered markup when it starts, so the entry's element may be gone: its image URL
-        // tells which picture it was.)
+        assert(!overlaps(withNotice.banner, withNotice.h1) && !overlaps(withNotice.banner, withNotice.buttons) && (mode === 'phone' || !overlaps(withNotice.banner, withNotice.toggle)) && !overlaps(withNotice.banner, withNotice.bar),
+          `${spec.slug}/${mode}: notice clear of the H1, buttons, pause button and contact bar ${JSON.stringify({ banner: withNotice.banner, h1: withNotice.h1, buttons: withNotice.buttons, toggle: withNotice.toggle, bar: withNotice.bar })}`);
+        // The largest paint is the film's poster (the first frame of a playing film counts as the same picture).
+        // (The app replaces the prerendered markup when it starts, so the entry's element may be gone: its URL tells which
+        // picture it was.)
         const lcp = await page.evaluate(() => { const entry = window.__lcp[window.__lcp.length - 1]; return entry ? { url: decodeURIComponent(entry.url || ''), size: entry.size,
-          element: entry.element ? { tag: entry.element.tagName, card: !!entry.element.closest('.cat-tpl-card') } : null } : null; });
-        assert(lcp && /\/site-images\/studio-photo\/[^?&]+\.webp/.test(lcp.url) && (!lcp.element || (lcp.element.tag === 'IMG' && lcp.element.card)),
+          element: entry.element ? { tag: entry.element.tagName, film: !!entry.element.closest('.cat-film-figure') } : null } : null; });
+        assert(lcp && new RegExp(`/videos/${spec.slug}-[0-9]{8}-v[0-9]+\\.(webp|mp4)$`).test(new URL(lcp.url, BASE).pathname) && (!lcp.element || (lcp.element.tag === 'VIDEO' && lcp.element.film)),
           `${spec.slug}/${mode}: largest paint ${JSON.stringify(lcp)}`);
-        lcp.src = lcp.url.replace(/^.*\/site-images\/studio-photo\//, '').replace(/[?&].*$/, '');
-        const film = await page.evaluate(() => { const video = document.querySelector('.cat-tpl-film-section .cat-tpl-film video'); return video && { src: video.getAttribute('src'), preload: video.getAttribute('preload'), autoplay: video.autoplay, paused: video.paused }; });
-        assert(film && !film.src && film.preload === 'none' && !film.autoplay && film.paused, `${spec.slug}/${mode}: film waits for a tap ${JSON.stringify(film)}`);
-        assert(!films.some(file => file.endsWith('.mp4')), `${spec.slug}/${mode}: film downloaded on load`);
+        lcp.src = new URL(lcp.url, BASE).pathname;
         await screenshot(page, `${spec.slug}.${mode}.screen1-cookie.png`);
         await page.locator('.cookie-banner').getByRole('button', { name: 'Accept' }).click();
         await page.waitForTimeout(400);
         const accepted = await geometry(page);
         assert(!accepted.banner, `${spec.slug}/${mode}: notice gone after Accept`);
-        assert(accepted.card.top <= 330, `${spec.slug}/${mode}: first card at ${accepted.card.top}px after Accept`);
+        assert(leads(accepted), `${spec.slug}/${mode}: the film leads the page after Accept`);
         const filmCheck = await checkFilm(page, films, `${spec.slug}/${mode}`);
+        await page.locator('main').evaluate(main => { main.scrollTop = 0; });
         await sweep(page);
         const after = await geometry(page);
         assert.equal(after.overflow, 0, `${spec.slug}/${mode}: sideways overflow ${after.overflow}px`);
@@ -357,7 +374,7 @@ async function checkPlanner(page, where) {
         await page.addStyleTag({ content: '.cookie-banner,.shop-mobile-contact{display:none!important} html,body,#root,#root>*,main{height:auto!important;max-height:none!important;overflow:visible!important}' });
         await page.waitForTimeout(300);
         await screenshot(page, `${spec.slug}.${mode}.full.png`, true);
-        results.push({ slug: spec.slug, mode, firstCardWithNotice: withNotice.card.top, noticeBottom: withNotice.banner.bottom, firstCardAfterAccept: accepted.card.top,
+        results.push({ slug: spec.slug, mode, filmTop: withNotice.film.top, filmBottom: withNotice.film.bottom, firstCardWithNotice: withNotice.card.top, noticeBottom: withNotice.banner.bottom, firstCardAfterAccept: accepted.card.top,
           noticeHeight, pageHeight: after.pageHeight, mainTop: after.mainTop, screens: Number(after.screens.toFixed(2)), overflow: after.overflow, cardsChecked,
           largestPaint: lcp.src, film: filmCheck, planner: plannerChecked });
         console.log('PASS', spec.slug, mode, JSON.stringify(results[results.length - 1]));
