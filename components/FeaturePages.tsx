@@ -1,4 +1,6 @@
 import React from 'react';
+import { CategoryFilmBlock } from './PromoVideo';
+import { categoryFilmFor } from '../services/categoryFilms.mjs';
 import { ContactLink, MobileContactBar, WhatsAppIcon } from './ContactOptions';
 import { AiConceptPair, HomeQualitySection, ProofPdfShowcase, featureImageVersion, sampleProofPdf } from './FeatureSections';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
@@ -185,6 +187,8 @@ export function ShopPortraitPlaques() {
           ))}
         </ol>
       </section>
+
+      <CategoryFilmBlock id="portrait-film" film={categoryFilmFor('portrait-plaques')} />
 
       <section className="shop-section shop-portrait-gallery" aria-labelledby="portrait-gallery-heading">
         <p className="shop-kicker">People and pets</p>

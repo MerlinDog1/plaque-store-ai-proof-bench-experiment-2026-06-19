@@ -3807,11 +3807,11 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
 /* Owner msg 8603: give the proof and the film their own sections. The existing film is 4:5,
    so a 60svh width caps its height at 75svh without cropping or stretching it. */
 .shopfront.cat-tpl > .cat-tpl-film-section { padding-top: 28px; padding-bottom: 28px; }
-.cat-tpl .cat-tpl-film-section h2 { text-align: center; margin-bottom: 16px; }
-.cat-tpl .cat-tpl-film { width: 100%; max-width: min(480px, 60svh); margin: 0 auto; }
-.cat-tpl .cat-tpl-film .promo-film { width: 100%; border-radius: 6px; box-shadow: 0 6px 16px rgba(16, 38, 31, 0.16); }
-.shopfront.cat-tpl .cat-tpl-film figcaption { margin-top: 10px; font-size: 11px; line-height: 1.4; color: var(--shop-muted); }
-.cat-tpl .cat-tpl-film figcaption a { display: block; margin-top: 4px; font-weight: 600; color: var(--shop-ink); text-decoration: underline; text-underline-offset: 3px; }
+.shopfront .cat-tpl-film-section h2 { text-align: center; margin-bottom: 16px; }
+.shopfront .cat-tpl-film { width: 100%; max-width: min(480px, 60svh); margin: 0 auto; }
+.shopfront .cat-tpl-film .promo-film { width: 100%; border-radius: 6px; box-shadow: 0 6px 16px rgba(16, 38, 31, 0.16); }
+.shopfront .cat-tpl-film figcaption { margin-top: 10px; font-size: 11px; line-height: 1.4; color: var(--shop-muted); }
+.shopfront .cat-tpl-film figcaption a { display: block; margin-top: 4px; font-weight: 600; color: var(--shop-ink); text-decoration: underline; text-underline-offset: 3px; }
 
 @media (min-width: 721px) {
   .shopfront.cat-tpl { --cat-tpl-pad: 32px; }

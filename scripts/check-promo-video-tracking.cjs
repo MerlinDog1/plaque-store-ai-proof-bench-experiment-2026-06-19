@@ -18,12 +18,12 @@ const { watchPromoFilm, PROMO_MILESTONES } = sandbox.exports;
 const promoMilestonesAt = (seconds, duration) => [...sandbox.exports.promoMilestonesAt(seconds, duration)];
 const ID = 'design-in-seconds-20261028';
 
-function film(duration = 21.93) {
+function film(duration = 21.93, id = ID) {
   const video = new EventTarget();
   Object.assign(video, { duration, currentTime: 0, paused: true, seeking: false });
   const sent = [];
   let tapped = false;
-  const stop = watchPromoFilm(video, ID, (event, properties, key) => sent.push({ event, ...properties, key }), () => tapped);
+  const stop = watchPromoFilm(video, id, (event, properties, key) => sent.push({ event, ...properties, key }), () => tapped);
   const fire = type => video.dispatchEvent(new Event(type));
   const play = () => { video.paused = false; fire('play'); fire('playing'); };
   const pause = () => { video.paused = true; fire('pause'); };
@@ -50,7 +50,7 @@ assert.deepEqual(promoMilestonesAt(10, Infinity), []);
 // Watched to the end by itself, then on round the loop: one start, each milestone once, in order.
 let f = film();
 f.play();
-assert.deepEqual(f.sent, [{ event: 'video_started', video: ID, autoplay: true, key: 'video:/memorial-plaques:started' }]);
+assert.deepEqual(f.sent, [{ event: 'video_started', video: ID, autoplay: true, key: `video:/memorial-plaques:${ID}:started` }]);
 f.playTo(5.25);
 assert.deepEqual(f.progress(), [], 'Not a quarter yet');
 f.playTo(5.5);
@@ -60,7 +60,7 @@ assert.deepEqual(f.progress(), [25, 50, 75, 100]);
 f.loop(); f.playTo(21.75); f.loop(); f.playTo(3);
 assert.deepEqual(f.progress(), [25, 50, 75, 100], 'Looping again sends nothing more');
 assert.equal(f.sent.filter(e => e.event === 'video_started').length, 1);
-assert.deepEqual(f.sent.slice(1).map(e => e.key), [25, 50, 75, 100].map(p => `video:/memorial-plaques:${p}`));
+assert.deepEqual(f.sent.slice(1).map(e => e.key), [25, 50, 75, 100].map(p => `video:/memorial-plaques:${ID}:${p}`));
 assert.ok(f.sent.slice(1).every(e => e.video === ID && Object.keys(e).sort().join() === 'event,key,percent,video'), 'Progress carries only the film and the percent');
 
 // The loop restarts the film before a time update reaches its last half second: the restart is the end.
@@ -118,6 +118,12 @@ assert.deepEqual(f.progress(), [25, 50, 75, 100]);
 f = film(); f.play(); f.playTo(6);
 sandbox.location = new URL('https://instaplaque.co.uk/video');
 f.playTo(11.5);
-assert.equal(f.sent.at(-1).key, 'video:/video:50');
+assert.equal(f.sent.at(-1).key, `video:/video:${ID}:50`);
+
+const categoryA = film(21.93, 'bench-plaques-20261106-v1');
+const categoryB = film(21.93, 'brass-plaques-20261106-v1');
+categoryA.play(); categoryB.play();
+assert.notEqual(categoryA.sent[0].key, categoryB.sent[0].key, 'Different cuts on the same page must not suppress each other');
+assert.equal(categoryA.sent[0].video, 'bench-plaques-20261106-v1');
 
 console.log('Promo film watch tracking: one start (autoplay or tapped), 25/50/75/100% once each and in order, the loop and ended as the end, nothing while paused/seeking/unmeasured or after unmount, per-page keys: passed.');

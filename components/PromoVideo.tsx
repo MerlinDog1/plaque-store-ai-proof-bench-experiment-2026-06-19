@@ -11,14 +11,20 @@ import { DesignLink } from './Shopfront';
 // is the Remotion project in projects/instaplaque-promo-video-20261028 (docs/promo-video-2026-10-28.md). It sits at the
 // top of the homepage and the category pages, beside or under the two buttons, and the button for what it is showing
 // glows (owner msg 6986: "the button for design online glows as video plays that and then the whats app one does").
-const VIDEO = promoVideo.file;
+export type FilmDescriptor = {
+  id: string; name: string; description: string; disclosure: string; footnote: string;
+  file: string; poster: string; seconds: number; cues?: { start: number; cue: string }[];
+};
 export const PROMO_POSTER = promoVideo.poster;
 const DESCRIPTION = 'Silent 22-second video. Someone types a memorial inscription into the InstaPlaque designer as one line and taps Design my plaque; our AI lays it out on a brass plaque, which then switches between four finishes. Then a WhatsApp chat: a customer sends their wording, we reply with a free PDF proof and an order link, and they reply that it’s perfect.';
 
 /** What the film is showing at a time, so the page can light the button for it: the designer until the WhatsApp chat
  * swipes in (frame 332 at 30 fps), the chat until the end card (frame 566), then both (the film's src/timeline.ts). */
 export type PromoCue = 'design' | 'whatsapp' | 'both';
-export const promoCueAt = (seconds: number): PromoCue => (seconds < 332 / 30 ? 'design' : seconds < 566 / 30 ? 'whatsapp' : 'both');
+export const promoCueAt = (seconds: number, film: FilmDescriptor = promoVideo): PromoCue => {
+  if (film.cues?.length) return ([...film.cues].reverse().find(cue => seconds >= cue.start)?.cue || film.cues[0].cue) as PromoCue;
+  return seconds < 332 / 30 ? 'design' : seconds < 566 / 30 ? 'whatsapp' : 'both';
+};
 
 /** Reduced motion or Save-Data: show the poster and a play button instead of playing by itself. */
 const quiet = () => {
@@ -37,8 +43,8 @@ const quiet = () => {
  * `tapToPlay` (the category template's proof block, owner msg 8440, 1 Nov 2026): never starts by itself and loads
  * nothing until tapped; its poster is a lazy image under a large play button, so the page's first screen and its
  * Largest Contentful Paint (a product photo) are unchanged. Same tracking: a tap counts as started from the button. */
-export function PromoFilm({ eager = false, tapToPlay = false }: { eager?: boolean; tapToPlay?: boolean }) {
-  if (!tapToPlay) preload(PROMO_POSTER, { as: 'image', fetchPriority: 'high' });
+export function PromoFilm({ eager = false, tapToPlay = false, film = promoVideo }: { eager?: boolean; tapToPlay?: boolean; film?: FilmDescriptor }) {
+  if (!tapToPlay) preload(film.poster, { as: 'image', fetchPriority: 'high' });
   const frame = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const [near, setNear] = useState(eager);
@@ -97,15 +103,15 @@ export function PromoFilm({ eager = false, tapToPlay = false }: { eager?: boolea
   useEffect(() => {
     const element = video.current;
     if (!element) return;
-    return watchPromoFilm(element, promoVideo.id, (event, properties, onceKey) => trackSiteEvent(event, properties, onceKey), () => tapped.current);
-  }, []);
+    return watchPromoFilm(element, film.id, (event, properties, onceKey) => trackSiteEvent(event, properties, onceKey), () => tapped.current);
+  }, [film.id]);
 
   useEffect(() => {
     const element = video.current;
     const page = frame.current?.closest<HTMLElement>('.shopfront');
     if (!element || !page) return;
     const mark = () => {
-      const cue = promoCueAt(element.currentTime);
+      const cue = promoCueAt(element.currentTime, film);
       if (page.dataset.promoCue !== cue) page.dataset.promoCue = cue;
     };
     const tick = () => { if (!element.paused) mark(); };
@@ -121,30 +127,30 @@ export function PromoFilm({ eager = false, tapToPlay = false }: { eager?: boolea
       element.removeEventListener('ended', clear);
       clear();
     };
-  }, []);
+  }, [film]);
 
   return (
-    <div className={`promo-film${tapToPlay ? ' is-tap' : ''}`} ref={frame}>
+    <div className={`promo-film${tapToPlay ? ' is-tap' : ''}`} ref={frame} data-film-id={film.id}>
       <video
         ref={video}
         className="promo-film-player"
         width={1080}
         height={1350}
-        src={near ? VIDEO : undefined}
-        poster={tapToPlay && !near ? undefined : PROMO_POSTER}
+        src={near ? film.file : undefined}
+        poster={tapToPlay && !near ? undefined : film.poster}
         preload="none"
         muted
         loop
         playsInline
         disablePictureInPicture
-        aria-label={DESCRIPTION}
+        aria-label={film === promoVideo ? DESCRIPTION : film.description}
         onPlay={() => { setPlaying(true); setPlayed(true); }}
         onPause={() => setPlaying(false)}
       />
-      {tapToPlay && !played && <img className="promo-film-poster" src={PROMO_POSTER} alt="" aria-hidden="true" width={1080} height={1350} loading="lazy" decoding="async" />}
+      {tapToPlay && !played && <img className="promo-film-poster" src={film.poster} alt="" aria-hidden="true" width={1080} height={1350} loading="lazy" decoding="async" />}
       <button type="button" className={`promo-film-toggle${tapToPlay && !played ? ' is-start' : ''}`}
         onClick={() => { if (!playing) { tapped.current = true; if (tapToPlay) setNear(true); } setStopped(playing); }}
-        aria-label={playing ? 'Pause the video' : tapToPlay && !played ? `Play the video: ${promoVideo.seconds} seconds, no sound` : 'Play the video'}>
+        aria-label={playing ? 'Pause the video' : tapToPlay && !played ? `Play the video: ${film.seconds} seconds, no sound` : 'Play the video'}>
         {playing ? (
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" /></svg>
         ) : (
@@ -172,6 +178,23 @@ export function PromoFilmFigure({ className, eager = false }: { className: strin
         </figcaption>
       )}
     </figure>
+  );
+}
+
+/** Category films have their own disclosure; /video remains the original general designer film. */
+export function CategoryFilmBlock({ id, film }: { id: string; film: FilmDescriptor }) {
+  return (
+    <section className="shop-section cat-tpl-film-section" id={id} aria-labelledby={`${id}-heading`}>
+      <h2 id={`${id}-heading`}>{film.name}: see how it works</h2>
+      <figure className="cat-tpl-film">
+        <PromoFilm key={film.id} tapToPlay film={film} />
+        <figcaption>
+          <span>{film.disclosure} {film.footnote}</span>
+          <details><summary>About this video</summary><p>{film.description}</p></details>
+          {!film.id.startsWith('portrait-plaques-') && <a href={promoVideoPath}>Watch our general designer guide</a>}
+        </figcaption>
+      </figure>
+    </section>
   );
 }
 

@@ -1,3 +1,4 @@
+import { categoryFilmFor } from '../services/categoryFilms.mjs';
 import React from "react";
 import { CategoryLandingPage } from './CategoryLanding';
 import { categoryLandingFor } from './CategoryPages';
@@ -882,6 +883,8 @@ export function ShopProduct({
     : 'Finish and optional backing affect the final price.';
   const category = product.merchantOffer ? productCategoryFor(product) : null;
   const parentCategory = categoryParentFor(category ? category.slug : product.slug);
+  // Use the same stable category as the breadcrumb, not whichever route the visitor came from.
+  const productFilm = categoryFilmFor(category?.slug) || promoVideo;
   return (
     <div className="shopfront" data-prerendered="true">
       <div className="shop-breadcrumb">
@@ -967,7 +970,7 @@ export function ShopProduct({
           </div>
           {/* Owner msgs 7598 and 7614: the buttons straight under the film on phones (as on /video), so the one glowing
               for what the film shows is in sight while it plays; the film's small print goes under the buttons. */}
-          <figure className="promo-film-figure shop-product-film-figure"><PromoFilm /></figure>
+          <figure className="promo-film-figure shop-product-film-figure"><PromoFilm key={productFilm.id} film={productFilm} /></figure>
           <div className="shop-film-cta">
             <div className="shop-hero-choices shop-film-choices">
               <DesignLink onStart={onLaunch} href={designHref}>Design online</DesignLink>
@@ -975,7 +978,7 @@ export function ShopProduct({
                 <WhatsAppIcon /> Design on WhatsApp
               </ContactLink>
             </div>
-            <p className="shop-smallprint">{promoVideo.disclosure} {promoVideo.footnote} <a href={promoVideoPath}>Watch it larger, with a written version</a></p>
+            <p className="shop-smallprint">{productFilm.disclosure} {productFilm.footnote} <a href={promoVideoPath}>Watch our general designer guide</a></p>
           </div>
         </section>
       )}

@@ -3,8 +3,8 @@ import { merchantImageQuery, merchantOffers } from '../services/merchantCatalogu
 import { studioPhotoPath, studioPhotos } from '../services/studioPhotos.mjs';
 import { categoryParentFor, materialStories, photo600, type ProductFamily } from '../services/commerce';
 import { optimisedSrcSet } from '../services/imageUrls';
-import { promoVideoPath } from '../services/promoVideo.mjs';
-import { PromoFilm } from './PromoVideo';
+import { categoryFilmFor } from '../services/categoryFilms.mjs';
+import { CategoryFilmBlock } from './PromoVideo';
 import { designWithStakeHref, groundStakeVisibleMm } from '../services/groundStake';
 import { GROUND_STAKE_LENGTH, GROUND_STAKE_THICKNESS_MM, GROUND_STAKE_WIDTH_MM, WOOD_BACKING_EXTRA_MM } from '../services/pricing';
 import { finishOutdoors } from '../services/catalogueContent';
@@ -429,26 +429,6 @@ function ProofBlock({ id, sampleSlug, sampleNote, steps, subject, designHref, ex
   );
 }
 
-/** Owner msg 8603: proof and film are distinct sections. Keep the existing 4:5 film uncropped;
- * full content width on phones, capped at 75svh, with only the short production footnote below. */
-function FilmBlock({ id }: { id: string }) {
-  const standard = Math.min(...merchantOffers.map(offer => offer.productionDays));
-  const aged = Math.max(...merchantOffers.filter(offer => offer.preset.material === 'aged-brass' && !offer.preset.wood).map(offer => offer.productionDays));
-  const backed = merchantOffers.filter(offer => offer.preset.wood).map(offer => offer.productionDays);
-  return (
-    <section className="shop-section cat-tpl-film-section" id={id} aria-labelledby={`${id}-heading`}>
-      <h2 id={`${id}-heading`}>See the designer in action</h2>
-      <figure className="cat-tpl-film">
-        <PromoFilm tapToPlay />
-        <figcaption>
-          <span>*Sped up. Most plaques are made in {standard} working days; aged brass {aged}, wood-backed {Math.min(...backed)}–{Math.max(...backed)}.</span>
-          <a href={promoVideoPath}>Watch it larger, with a written version</a>
-        </figcaption>
-      </figure>
-    </section>
-  );
-}
-
 /** The finishes as close-ups with the materials page's own words. `outdoors`: each metal's outdoor line from its
  * product pages (services/catalogueContent.ts) and the site's line on wood backing. */
 function FinishesRow({ id, finishes, woodTones, title, intro, outdoors }: {
@@ -710,7 +690,7 @@ export function CategoryTemplatePage({ config, product, faqs, onLaunch, onReques
       <SizeStrip id={id('sizes')} {...config.sizes} mount={config.mount} finishes={config.finishes} />
       <ProofBlock id={id('proof')} sampleSlug={config.sampleSlug} sampleNote={config.sampleNote} steps={config.steps || defaultSteps} subject={subject}
         designHref={config.designHref} extra={config.proofExtra} onLaunch={onLaunch} onRequestDesign={onRequestDesign} />
-      <FilmBlock id={id('film')} />
+      <CategoryFilmBlock id={id('film')} film={categoryFilmFor(product.slug)} />
       {!config.finishesFirst && finishes}
       {config.wording && <WordingBlock id={id('wording')} {...config.wording} />}
       {(config.guides || []).map(({ key, ...guide }) => <GuideBlock key={key} id={id(key)} {...guide} />)}

@@ -13,6 +13,10 @@
 // Usage: BASE=https://instaplaque.co.uk node scripts/check-promo-video.mjs
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import { mkdirSync } from 'node:fs';
+import { categoryFilms } from '../services/categoryFilms.mjs';
+const shots = process.env.SHOTS || 'output/category-film-browser';
+mkdirSync(shots, { recursive: true });
 
 const BASE = process.env.BASE || 'http://127.0.0.1:4187';
 const POSTER = 'poster="/videos/instaplaque-design-in-seconds-20261028-poster.webp"';
@@ -30,7 +34,7 @@ const check = async (name, fn) => {
   }
 };
 
-async function open(path, { phone = true, reducedMotion = 'no-preference' } = {}) {
+async function open(path, { phone = true, reducedMotion = 'no-preference', saveData = false } = {}) {
   const context = await browser.newContext(phone
     ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion }
     : { viewport: { width: 1440, height: 900 }, reducedMotion });
@@ -39,6 +43,7 @@ async function open(path, { phone = true, reducedMotion = 'no-preference' } = {}
     localStorage.setItem('instaplaque-analytics-consent-v1', 'no');
   });
   await context.route(/googletagmanager|google-analytics|googleadservices|googlesyndication|doubleclick|facebook|posthog|clarity|_vercel\/insights/, route => route.abort());
+  if (saveData) await context.addInitScript(() => Object.defineProperty(navigator, 'connection', { value: { saveData: true } }));
   const page = await context.newPage();
   const response = await page.goto(BASE + path, { waitUntil: 'load', timeout: 90000 });
   const html = await response.text();
@@ -93,7 +98,7 @@ async function glowCycle(page) {
   assert.ok(s.cue === 'both' && s.designGlow && s.whatsappGlow, `end card: ${JSON.stringify({ cue: s.cue, d: s.designGlow, w: s.whatsappGlow })}`);
 }
 
-for (const path of ['/', '/memorial-plaques']) {
+for (const path of ['/']) {
   await check(`${path} phone: film under the buttons on the first screen, loads after the page, plays, glows in turn, pauses`, async () => {
     const { context, page, html } = await open(path);
     try {
@@ -140,7 +145,7 @@ await check('/ phone, reduced motion: poster and play button, no autoplay, stead
   }
 });
 
-for (const path of ['/', '/brass-plaques']) {
+for (const path of ['/']) {
   await check(`${path} computer: film beside the copy, with the buttons, on the first screen; glows in turn`, async () => {
     const { context, page } = await open(path, { phone: false });
     try {
@@ -197,17 +202,81 @@ await check('video sitemap entry and thumbnails are served; the film pages link 
   }
 });
 
-await check('film leads the ad pages with their photo after it; the tree page keeps its photo', async () => {
-  for (const path of ['/bench-plaques', '/garden-plaques', '/stainless-steel-plaques', '/memorial-plaques', '/brass-plaques']) {
-    const html = await (await fetch(BASE + path)).text();
-    const hero = html.indexOf('class="cat-hero"');
-    const film = html.indexOf('promo-film-figure cat-hero-film-side');
-    const shown = html.indexOf('class="cat-shown"');
-    assert.ok(hero > 0 && film > hero && shown > film && html.includes(POSTER), `${path}: film not in the hero or photo not after it`);
-    assert.ok(!html.includes('cat-hero-photo-side'), `${path}: still has the hero photo`);
+// Category templates are products-first: one distinct tap-to-play film after the proof, not a hero autoplay.
+for (const [slug, film] of Object.entries(categoryFilms)) {
+  for (const phone of [true, false]) {
+    await check(`${slug} ${phone ? 'phone' : 'desktop'}: own film/poster, lazy load, cues, pause and off-screen`, async () => {
+      const { context, page, html } = await open('/' + slug, { phone });
+      try {
+        const section = page.locator('.cat-tpl-film-section');
+        const video = section.locator('video');
+        assert.equal(await video.count(), 1);
+        assert.ok(html.includes(film.poster) && html.includes(film.id));
+        assert.ok(!html.includes('src="' + film.file + '"'), 'video source must wait for tap');
+        assert.equal(await video.getAttribute('src'), null);
+        assert.equal(await section.locator('.promo-film-poster').getAttribute('loading'), 'lazy');
+        await section.scrollIntoViewIfNeeded();
+        await page.waitForTimeout(250);
+        assert.equal(await video.getAttribute('src'), null, 'scroll must not fetch film');
+        const bounds = await video.boundingBox();
+        assert.ok(bounds && Math.abs(bounds.width / bounds.height - 0.8) < 0.01);
+        assert.ok(bounds.height <= (phone ? 844 * .75 : 650), 'uncropped film exceeds screen allowance');
+        assert.ok(!await page.evaluate(() => document.documentElement.scrollWidth > innerWidth));
+        await page.screenshot({ path: `${shots}/${slug}-${phone ? 'phone' : 'desktop'}-poster.jpg`, type: 'jpeg', quality: 75, scale: 'css' });
+        await section.locator('button').click();
+        await page.waitForFunction(() => { const v = document.querySelector('.cat-tpl-film-section video'); return v && !v.paused && v.currentTime > .2; });
+        assert.equal(await video.getAttribute('src'), film.file);
+        assert.ok(await video.evaluate(v => v.muted));
+        for (const [seconds, expected] of [[5, slug === 'portrait-plaques' ? 'whatsapp' : 'design'], [14, 'whatsapp'], [20, slug === 'portrait-plaques' ? 'whatsapp' : 'both']]) {
+          await video.evaluate(async (v,t) => { await new Promise(resolve => { v.addEventListener('seeked', resolve, {once:true}); v.currentTime=t; }); }, seconds);
+          await page.waitForTimeout(100);
+          assert.equal(await page.locator('.shopfront').getAttribute('data-promo-cue'), expected);
+        }
+        await section.locator('button').click();
+        await page.waitForTimeout(150);
+        assert.ok(await video.evaluate(v => v.paused));
+        assert.equal(await page.locator('.shopfront').getAttribute('data-promo-cue'), null);
+        await section.locator('button').click();
+        await page.waitForTimeout(150);
+        await page.evaluate(() => window.scrollTo(0,0));
+        await page.waitForTimeout(250);
+        assert.ok(await video.evaluate(v => v.paused), 'offscreen pause');
+        assert.equal(await page.locator('.shopfront').getAttribute('data-promo-cue'), null);
+      } finally { await context.close(); }
+    });
   }
-  const tree = await (await fetch(BASE + '/tree-memorial-plaques')).text();
-  assert.ok(tree.includes('cat-hero-photo-side') && !tree.includes('promo-film'), 'tree page lost its photo or has the film');
+}
+
+for (const options of [{ reducedMotion: 'reduce' }, { saveData: true }]) {
+  await check(`category manual play with ${JSON.stringify(options)}; hidden tab pauses`, async () => {
+    const { context, page } = await open('/tree-memorial-plaques', options);
+    try {
+      const section = page.locator('.cat-tpl-film-section');
+      await section.scrollIntoViewIfNeeded();
+      const video = section.locator('video');
+      assert.equal(await video.getAttribute('src'), null);
+      assert.ok(await video.evaluate(v => v.paused));
+      await section.locator('button').click();
+      await page.waitForFunction(() => !document.querySelector('.cat-tpl-film-section video').paused);
+      await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', {configurable:true, value:'hidden'}); document.dispatchEvent(new Event('visibilitychange')); });
+      await page.waitForTimeout(200);
+      assert.ok(await video.evaluate(v => v.paused));
+      await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', {configurable:true, value:'visible'}); document.dispatchEvent(new Event('visibilitychange')); });
+      await page.waitForTimeout(200);
+      assert.ok(!await video.evaluate(v => v.paused));
+    } finally { await context.close(); }
+  });
+}
+
+await check('13 independent film IDs and assets; tree and practice lead-time qualifications', async () => {
+  assert.equal(new Set(Object.values(categoryFilms).map(f => f.id)).size, 13);
+  for (const film of Object.values(categoryFilms)) {
+    for (const [url, type] of [[film.file, 'video/mp4'], [film.poster, 'image/webp']]) {
+      const response = await fetch(BASE + url, { method: 'HEAD' });
+      assert.ok(response.ok && response.headers.get('content-type')?.includes(type), url);
+    }
+  }
+  for (const slug of ['tree-memorial-plaques','professional-brass-plaques']) assert.ok(categoryFilms[slug].footnote.includes('10–15'));
 });
 
 await browser.close();

@@ -24,7 +24,7 @@ export function watchPromoFilm(video: HTMLVideoElement, id: string, send: Send, 
   let furthest = 0;
   let last = 0;
   // Once per visit and page: posthogAnalytics keeps the visit's keys.
-  const key = (what: string | number) => `video:${location.pathname}:${what}`;
+  const key = (what: string | number) => `video:${location.pathname}:${id}:${what}`;
   const reach = (seconds: number) => {
     if (Number.isFinite(seconds)) furthest = Math.max(furthest, seconds);
     for (const percent of promoMilestonesAt(furthest, video.duration)) {

@@ -1,3 +1,4 @@
+import { categoryFilmFor } from '../services/categoryFilms.mjs';
 // 1 Nov 2026: owner requests light/dark solid wood, never a species; assertions follow the customer wording.
 // The "products first" category template pages (components/CategoryTemplate.tsx, 1 Nov 2026, owner msg 8384): memorial
 // and bench (stage 1), garden, tree, brass, stainless steel, opening and custom (stage 2), checked in the final HTML
@@ -262,7 +263,7 @@ for (const page of pages) {
   const filmSection = main.querySelector('.cat-tpl-film-section');
   assert(filmSection && proofSection?.nextElementSibling === filmSection && !proofSection.querySelector('video'), `${page.slug}: distinct video section immediately after the proof`);
   assert(films[0].closest('.cat-tpl-film-section .cat-tpl-film'), `${page.slug}: the film is in its own section`);
-  assert.equal(compact(filmSection.querySelector('figcaption span').textContent), '*Sped up. Most plaques are made in 5 working days; aged brass 7, wood-backed 10–15.', `${page.slug}: only the short film footnote`);
+  assert.equal(compact(filmSection.querySelector('figcaption span').textContent), `${categoryFilmFor(page.slug).disclosure} ${categoryFilmFor(page.slug).footnote}`, `${page.slug}: only the short film footnote`);
   assert(!films[0].hasAttribute('src') && !films[0].hasAttribute('autoplay') && films[0].getAttribute('preload') === 'none' && !films[0].hasAttribute('poster'),
     `${page.slug}: the film loads nothing until tapped`);
   assert.equal(main.querySelector('.cat-tpl-film .promo-film-poster')?.getAttribute('loading'), 'lazy', `${page.slug}: lazy film poster`);
