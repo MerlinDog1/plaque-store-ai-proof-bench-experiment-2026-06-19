@@ -36,10 +36,10 @@ checkpoints mean wait, not reauthenticate. Hosted checks use `vercel curl` and a
 
 ## Merge verification correction
 
-The larger cookie bar covered the bottom 21.84px of the tree page's first desktop card row at 1440×900.
-A tree-only desktop spacing correction widens its intro into available space and reduces the header's top padding
-by 6px. Wording, full-size uncropped product photos, all other categories and phone layouts remain unchanged.
-The existing strict no-overlap browser assertion is retained.
+The larger cookie bar overlapped the first desktop row by 21.84px on tree/custom and 4.38px on opening/church/donor;
+house had only 0.23px clearance (1440×900). These six desktop headers use 8px top padding instead of 18px, and the
+tree/custom introductions use available width to avoid a second line. Wording, full-size uncropped product photos,
+the larger notice, other categories and all phone layouts remain unchanged. The strict no-overlap assertion stays.
 
 For local playback/cue checks use a server with both clean prerendered routes and HTTP Range support. Vite preview
 falls back to homepage SSR on clean routes here, while `server.mjs` serves correct route HTML but lacks byte ranges.
