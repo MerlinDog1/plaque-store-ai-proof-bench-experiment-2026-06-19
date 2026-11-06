@@ -71,6 +71,9 @@ export type TemplateCard = {
   leadTone?: WoodTone;
   /** A short tag on the photo, e.g. "The usual size". */
   badge?: string;
+  /** The lead photo's alt text, where it says more than the generic line (the garden page's first cards, page-1 SEO,
+   * owner msgs 10401-10408): what that studio photo shows. Other finishes keep the generic line. */
+  leadAlt?: string;
 };
 /** A chip narrows the grid: by finish (`finishes`), by size group (`group`) or to wood-backed cards (`board`). `note`:
  * one line shown under the chips while it is on (e.g. aged brass's extra days). */
@@ -204,7 +207,8 @@ function GridCard({ item, finishes, mounted, priority, wide, stake }: { item: Re
       aria-pressed={selected} aria-label={`${label}, ${formatGbp(option.price)}`} title={label} onClick={onPick} />
     : <a key={key} className={`cat-tpl-swatch${selected ? ' is-selected' : ''}`} style={swatchStyle(file)} href={option.href}
       data-price={option.price} aria-label={`${label}, ${formatGbp(option.price)}`} title={label} />);
-  const alt = stake ? `${current.title}: shown on its light solid wood board, the ground stake not pictured, with example wording`
+  const alt = item.card.leadAlt && current === item.lead ? item.card.leadAlt
+    : stake ? `${current.title}: shown on its light solid wood board, the ground stake not pictured, with example wording`
     : `${current.title}, shown with example wording${current.image.drawing ? ' (flat design view)' : ''}`;
   return (
     <li className={`cat-tpl-card${item.card.board ? ' is-board' : ''}`} data-options={item.options.length} data-offers={item.options.map(option => option.made).join(' ')}>
@@ -626,32 +630,47 @@ export type TemplateConfig = {
 };
 
 /** A section of short notes, each optionally linking to its own page (owner msg 10173, 5 Nov 2026, the page-1
- * improvements): what a metal is used for, memorial gardens, garden dedication signs, a closer look at aged brass. */
+ * improvements): what a metal is used for, memorial gardens, garden dedication signs, a closer look at aged brass.
+ * The page-1 SEO sections (owner msgs 10401-10408, 6 Nov 2026) are the same block with only an H2 and paragraphs in
+ * the intro's style; `beforeWording` puts one directly above the wording ideas instead of after them. */
 export type TemplateGuide = {
   key: string;
   title: string;
   intro?: React.ReactNode;
-  items: { title: string; href?: string; copy: React.ReactNode }[];
+  /** Paragraphs after the intro, in the same style. */
+  paragraphs?: React.ReactNode[];
+  items?: { title: string; href?: string; copy: React.ReactNode }[];
   /** After the notes (the aged brass sizes). */
   more?: React.ReactNode;
+  beforeWording?: boolean;
 };
 
-function GuideBlock({ id, title, intro, items, more }: Omit<TemplateGuide, 'key'> & { id: string }) {
+function GuideBlock({ id, title, intro, paragraphs, items, more }: Omit<TemplateGuide, 'key' | 'beforeWording'> & { id: string }) {
   return (
     <section className="shop-section cat-tpl-guide" id={id} aria-labelledby={`${id}-heading`}>
       <h2 id={`${id}-heading`}>{title}</h2>
       {intro && <p className="cat-tpl-section-intro">{intro}</p>}
-      <ul className="cat-tpl-guide-list">
+      {(paragraphs || []).map((paragraph, index) => <p key={index} className="cat-tpl-section-intro">{paragraph}</p>)}
+      {items && items.length > 0 && <ul className="cat-tpl-guide-list">
         {items.map(item => (
           <li key={item.title}>
             <h3>{item.href ? <a href={item.href}>{item.title}</a> : item.title}</h3>
             <p>{item.copy}</p>
           </li>
         ))}
-      </ul>
+      </ul>}
       {more}
     </section>
   );
+}
+
+/** A "more about" section's copy with its in-text link (`link`), on the first place its words appear. The words must be
+ * in the copy: a missing anchor fails the build rather than quietly dropping the link. */
+function linkedCopy(copy: string, link?: { text: string; href: string }) {
+  if (!link) return copy;
+  const at = copy.indexOf(link.text);
+  if (at < 0) throw new Error(`Category template: "${link.text}" is not in its section's copy`);
+  return <>{copy.slice(0, at)}<a href={link.href}>{link.text}</a>{copy.slice(at + link.text.length)}</>;
 }
 
 export function CategoryTemplatePage({ config, product, faqs, onLaunch, onRequestDesign }: {
@@ -736,14 +755,15 @@ export function CategoryTemplatePage({ config, product, faqs, onLaunch, onReques
       <ProofBlock id={id('proof')} sampleSlug={config.sampleSlug} sampleNote={config.sampleNote} steps={config.steps || defaultSteps} subject={subject}
         designHref={config.designHref} extra={config.proofExtra} onLaunch={onLaunch} onRequestDesign={onRequestDesign} />
       {!config.finishesFirst && finishes}
+      {(config.guides || []).filter(guide => guide.beforeWording).map(({ key, beforeWording, ...guide }) => <GuideBlock key={key} id={id(key)} {...guide} />)}
       {config.wording && <WordingBlock id={id('wording')} {...config.wording} />}
-      {(config.guides || []).map(({ key, ...guide }) => <GuideBlock key={key} id={id(key)} {...guide} />)}
+      {(config.guides || []).filter(guide => !guide.beforeWording).map(({ key, beforeWording, ...guide }) => <GuideBlock key={key} id={id(key)} {...guide} />)}
       <section className="shop-section cat-tpl-more" id={id('materials')}>
         <details className="cat-tpl-fold">
           <summary>{config.moreTitle}<span aria-hidden="true">+</span></summary>
           <div>
             {product.seoIntro && <p>{product.seoIntro}</p>}
-            {(product.seoSections || []).map(section => <React.Fragment key={section.title}><h3>{section.title}</h3><p>{section.copy}</p></React.Fragment>)}
+            {(product.seoSections || []).map(section => <React.Fragment key={section.title}><h3>{section.title}</h3><p>{linkedCopy(section.copy, section.link)}</p></React.Fragment>)}
           </div>
         </details>
         {config.related}

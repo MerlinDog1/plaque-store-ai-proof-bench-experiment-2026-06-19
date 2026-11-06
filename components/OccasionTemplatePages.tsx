@@ -48,7 +48,8 @@ function housePage(): TemplateConfig {
       link: { href: '/plaque-sizes', label: 'See every size and price' },
     },
     moreTitle: 'More about house name plaques',
-    related: related(<>Compare <a href="/brass-plaques">brass finishes</a> and <a href="/stainless-steel-plaques">stainless steel</a>. Another shape? See <a href="/custom-plaques">custom plaques</a>.</>),
+    // Page-1 SEO internal link (owner msgs 10401-10408, 6 Nov 2026): "engraved stainless steel plaques".
+    related: related(<>Compare <a href="/brass-plaques">brass finishes</a> and <a href="/stainless-steel-plaques">engraved stainless steel plaques</a>. Another shape? See <a href="/custom-plaques">custom plaques</a>.</>),
     closing: { title: 'Not sure which size?', copy: 'Send your house name and a photo or measurements of the space on WhatsApp: we’ll help with the size and send a free proof.' },
   };
 }

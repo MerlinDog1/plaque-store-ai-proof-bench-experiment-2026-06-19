@@ -1186,7 +1186,7 @@ export function ShopFooter() {
         <a href="/bench-plaques">Bench plaques</a>
         <a href="/brass-plaques">Brass plaques</a>
         <a href="/stainless-steel-plaques">Stainless steel plaques</a>
-        <a href="/garden-plaques">Garden plaques</a>
+        <a href="/garden-plaques">Garden memorial plaques</a>
         <a href="/tree-memorial-plaques">Tree memorial plaques</a>
         <a href="/opening-plaques">Opening plaques</a>
         <a href="/custom-plaques">Custom plaques</a>

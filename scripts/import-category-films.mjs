@@ -13,6 +13,9 @@ const VERSION = 'v2';
 // Portrait v3 (6 Nov 2026): Bramble replaced Millie after the Millie film had been live as v2.
 const VERSIONS = { 'portrait-plaques': 'v3' };
 const versionOf = slug => VERSIONS[slug] || VERSION;
+// A film's name where the slug's words undersell it; the description (the film's aria-label) opens with it. Garden: page-1
+// SEO (owner msgs 10401-10408, 6 Nov 2026), its hero film shows garden memorial plaques.
+const NAMES = { 'garden-plaques': 'Garden memorial plaques' };
 const FRAMES = 796;
 const CHAT_IN = 332;
 const END_IN = 704;
@@ -39,7 +42,7 @@ const films = Object.fromEntries(rows.map(row => {
   assert(video?.codec_name === 'h264' && video.width / video.height === 0.8 && probe.streams.length === 1, `${row.slug}: silent 4:5 H.264 required`);
   assert(Math.abs(Number(probe.format.duration) - FRAMES/30) < 0.1 && Number(video.nb_frames) === FRAMES, `${row.slug}: unexpected duration`);
   assert(row.footnote && row.disclosure && row.words && row.swaps?.length, `${row.slug}: missing descriptive facts`);
-  const name = row.slug.replace(/-/g,' ').replace(/^./, c => c.toUpperCase());
+  const name = NAMES[row.slug] || row.slug.replace(/-/g,' ').replace(/^./, c => c.toUpperCase());
   const b = row.bespoke;
   assert(b?.ask && b.sends && b.design && b.reply && b.thanks, `${row.slug}: missing bespoke chat facts`);
   const chat = `Then an example WhatsApp conversation: the customer writes “${b.ask}” and sends ${b.sends}. We reply “${b.reply.replace(/ 👇$/, '')}” with ${row.portrait ? '' : 'an example bespoke proof: '}${b.design}, and an order link. They reply “${b.thanks.replace(/ [🤍😄]$/u, '')}”.`;

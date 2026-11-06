@@ -148,7 +148,9 @@ function benchPage(): TemplateConfig {
       link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
     },
     moreTitle: 'More about choosing a bench plaque',
-    related: related(<>Remembering someone? See <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">memorial wording ideas</a>. For a garden or a memorial tree, see <a href="/garden-plaques">garden plaques</a> and <a href="/tree-memorial-plaques">memorial tree plaques</a>.</>),
+    // Page-1 SEO internal links (owner msgs 10401-10408, 6 Nov 2026): "garden memorial plaques" and "engraved stainless
+    // steel plaques".
+    related: related(<>Remembering someone? See <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">memorial wording ideas</a>. For a garden or a tree, see <a href="/garden-plaques">garden memorial plaques</a> and <a href="/tree-memorial-plaques">memorial tree plaques</a>. For other sizes in steel, see <a href="/stainless-steel-plaques">engraved stainless steel plaques</a>.</>),
     closing: {
       title: 'Not sure which size fits?',
       copy: 'Send a photo of the bench rail and your words on WhatsApp: we’ll suggest a size and send a free proof. Replacing an old plaque? Send its size and hole positions.',
@@ -171,13 +173,19 @@ function plate(width: number, height: number, finishes: Finish[], shape = 'rect'
 }
 const priceOf = (offer: Offer) => formatGbp(offer.price);
 const ALL: Finish[] = [...BRASS, ...STAINLESS];
+/** The catalogue's standard production time, the days most plaques take (the opening page's commemorative section). */
+const STANDARD_DAYS = Math.min(...merchantOffers.map(offer => offer.productionDays));
 /** The longest production time of plaques in a finish without backing, in catalogue days. */
 const daysIn = (finish: Finish) => Math.max(...merchantOffers.filter(offer => offer.preset.material === finish && !offer.preset.wood).map(offer => offer.productionDays));
 const boardChip: TemplateChip = { key: 'board', label: 'On a wood board', board: true };
 
+// The first two cards' photos described (page-1 SEO, owner msgs 10401-10408): the A5 is a memorial, so it is called a
+// garden memorial plaque; the oval names a garden and is not a memorial, so it is not.
 const gardenCards: TemplateCard[] = [
-  { width: 148, height: 210, name: 'A5', fits: 'A dedication, upright', lead: 'polished-stainless' },
-  { width: 250, height: 150, shape: 'oval', fits: 'A garden’s name', lead: 'aged-brass' },
+  { width: 148, height: 210, name: 'A5', fits: 'A dedication, upright', lead: 'polished-stainless',
+    leadAlt: 'Polished stainless steel garden memorial plaque, A5 upright, reading This rowan was planted in loving memory of Doreen Watts, 1934 to 2007' },
+  { width: 250, height: 150, shape: 'oval', fits: 'A garden’s name', lead: 'aged-brass',
+    leadAlt: 'Aged brass oval garden plaque reading Grandad’s Garden, with cream lettering' },
   { width: 200, height: 200, shape: 'circle', fits: 'A short dedication', lead: 'brushed-brass' },
   { width: 300, height: 200, fits: 'A community garden', lead: 'orbital-brass-matt-lacquer' },
   { width: 200, height: 150, fits: 'A name, dates and a line', lead: 'brushed-stainless' },
@@ -191,6 +199,16 @@ const gardenCards: TemplateCard[] = [
 // (6th, no clicks yet) gets its own section; and "memorial tree plaques" showed this page (43rd) rather than the tree
 // page, so this page now links to the tree page by name.
 const gardenGuides: TemplateGuide[] = [
+  // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026): "memorial plaques for garden" 14.8, "garden memorial plaques" 18.1,
+  // "garden plaques" 23.0. Every size named is on this page.
+  {
+    key: 'outdoors',
+    title: 'Memorial plaques for the garden, made to last outdoors.',
+    paragraphs: [
+      'Every garden memorial plaque is cut from 1.5 mm solid brass or stainless steel, with etched, paint-filled lettering, so the plate itself is made for outdoor use. Stainless steel keeps its silver colour in the garden. Brass is warm and traditional, and it slowly mellows outside unless it is polished from time to time. Aged brass is sealed with matt lacquer to slow further ageing.',
+      'For an open spot in the garden, choose the metal plate on its own. Save wood backing for a porch or a covered corner. A 200 × 150 mm or A5 plaque suits a name, dates and a short message. A4 or 300 × 200 mm suits a longer tribute or a shared memorial garden, and 150 × 50 mm suits just a name and dates on a post. Your screw holes are drawn on the proof, so you can check how it will sit before you pay.',
+    ],
+  },
   {
     key: 'remembrance',
     title: 'Memorial gardens and gardens of remembrance.',
@@ -217,9 +235,11 @@ const gardenGuides: TemplateGuide[] = [
 function gardenPage(): TemplateConfig {
   return {
     prefix: 'garden',
-    title: 'Garden memorial plaques',
+    title: 'Garden memorial plaques, made for outdoors',
     tagline: 'A dedication for a favourite place.',
-    intro: <>Solid brass or stainless steel for a wall, fence, post or stone in the garden, with screws and caps included.</>,
+    // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026). "Fixings", not "screws and caps": the 150 × 50 mm plates on this
+    // page have screws only.
+    intro: <>Memorial plaques for the garden in solid brass or stainless steel, made to stay outside all year. Fix one to a wall, fence, post or stone with the fixings included, and see your wording on a free proof before you pay.</>,
     cards: gardenCards,
     chips: [...metalChips, boardChip],
     links: [{ href: '/tree-memorial-plaques', label: 'On a ground stake' }, { href: '/bench-plaques', label: 'On a bench' }],
@@ -318,7 +338,8 @@ function treePage(): TemplateConfig {
       link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
     },
     moreTitle: 'More about memorial tree plaques',
-    related: related(<>See <a href="/garden-plaques">garden plaques</a>, <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">memorial wording ideas</a>.</>),
+    // Page-1 SEO internal link (owner msgs 10401-10408, 6 Nov 2026): "garden memorial plaques".
+    related: related(<>For a wall, fence or post, see <a href="/garden-plaques">garden memorial plaques</a>. See also <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">memorial wording ideas</a>.</>),
     closing: {
       title: 'Not sure which size?',
       copy: 'Send a photo of the tree and your words on WhatsApp: we’ll suggest a size and send a free proof with the board and stake drawn in.',
@@ -342,7 +363,7 @@ function brassPage(): TemplateConfig {
   const aged = (width: number, height: number) => priceOf(plate(width, height, ['aged-brass']));
   return {
     prefix: 'brass',
-    title: 'Personalised brass plaques',
+    title: 'Custom engraved brass plaques',
     tagline: 'Warm, traditional and made to last.',
     intro: <>Polished, brushed, orbital or aged: 150 × 50 mm from {from(150, 50)}, A5 {from(210, 148)}, A4 {from(297, 210)}, 400 × 300 mm {from(400, 300)}.</>,
     cards: brassCards,
@@ -395,6 +416,14 @@ function brassPage(): TemplateConfig {
       link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
     },
     guides: [
+      // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026): "custom brass plaques" 16.5, "custom engraved brass plaque" 15.9.
+      // Directly above the wording ideas; sizes from checkoutPolicy.mjs.
+      {
+        key: 'custom',
+        title: 'Custom brass plaques, made to your size.',
+        beforeWording: true,
+        paragraphs: [<>Every brass plaque is made to order: rectangles, ovals and circles in any size from {MIN_PLAQUE_DIMENSION_MM} mm up to {MAX_PLAQUE_DIMENSION_MM} mm each way. Your lettering is etched into 1.5 mm solid brass and paint-filled, in polished, brushed, orbital or aged brass. For a logo or crest, send it to us on WhatsApp before ordering and we’ll tell you whether it can be engraved and how it would look on your proof. For other shapes and made-to-measure ideas, see our <a href="/custom-plaques">custom plaques</a>.</>],
+      },
       {
         key: 'uses',
         title: 'What brass plaques are used for.',
@@ -447,9 +476,11 @@ function stainlessPage(): TemplateConfig {
   const treeFrom = plate(200, 150, STAINLESS);
   return {
     prefix: 'stainless',
-    title: 'Personalised stainless steel plaques',
+    title: 'Engraved stainless steel plaques',
     tagline: 'Clean, modern and made for outdoors.',
-    intro: <>Bench plates from {priceOf(plate(150, 50, STAINLESS))}, A5 {priceOf(plate(210, 148, STAINLESS))}, on a wood board {formatGbp(board.price)}, <a href="/tree-memorial-plaques">on a tree stake</a> {formatGbp(onStakePrice(treeFrom))}.</>,
+    // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026): the first sentence follows the tagline. "Fixings": the bench
+    // plates have screws only.
+    intro: <>Each one is 1.5 mm solid stainless steel with etched, paint-filled lettering, made to order in rectangles, ovals and circles from {MIN_PLAQUE_DIMENSION_MM} mm up to {MAX_PLAQUE_DIMENSION_MM} mm each way, with fixings included. Bench plates from {priceOf(plate(150, 50, STAINLESS))}, A5 {priceOf(plate(210, 148, STAINLESS))}, on a wood board {formatGbp(board.price)}, <a href="/tree-memorial-plaques">on a tree stake</a> {formatGbp(onStakePrice(treeFrom))}.</>,
     cards: stainlessCards,
     finishes: STAINLESS,
     chips: [
@@ -500,6 +531,12 @@ function stainlessPage(): TemplateConfig {
       link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
     },
     guides: [{
+      // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026): "stainless steel plaques" 12.6; directly above the wording ideas.
+      key: 'engraved',
+      title: 'Engraved stainless steel plaques, made to order.',
+      beforeWording: true,
+      paragraphs: ['Your wording is etched into the steel and filled with paint, so the lettering sits in the plate rather than on top of it. Choose brushed stainless steel for a satin finish with a fine grain that suits benches and public spaces, or polished for a bright, mirror-like face. We make stainless steel plaques for memorials, benches, house names, allotments, clinics and business doors. For a logo, send it to us on WhatsApp before ordering and we’ll tell you whether it can be engraved and how it would look on your proof.'],
+    }, {
       key: 'uses',
       title: 'What stainless steel plaques are used for.',
       intro: 'It keeps its silver colour outdoors, so it suits plaques that face the weather.',
@@ -534,7 +571,7 @@ const openingCards: TemplateCard[] = [
 function openingPage(): TemplateConfig {
   return {
     prefix: 'opening',
-    title: 'Opening plaques',
+    title: 'Opening plaques for buildings and official openings',
     intro: <>Brass or stainless steel for a new building, a room or an anniversary, with a proof to share before you pay.</>,
     cards: openingCards,
     chips: [...metalChips, boardChip],
@@ -586,6 +623,17 @@ function openingPage(): TemplateConfig {
       ],
       link: { href: '/contact', label: 'Discuss a deadline, logo or crest' },
     },
+    // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026): "opening plaques" 11.4, "commemorative plaques"; directly above the
+    // wording ideas. The days are the catalogue's standard production time.
+    guides: [{
+      key: 'commemorative',
+      title: 'Commemorative and official opening plaques.',
+      beforeWording: true,
+      paragraphs: [
+        'An opening plaque records who officially opened a building, room, garden or clubhouse, and when. Schools, councils, churches, sports clubs and companies use them for new buildings, extensions and anniversaries. Most read along the lines of “This building was officially opened by [name and title] on [date]”, sometimes with a crest or logo above.',
+        `Download the free proof as a PDF and share it with colleagues, so everyone can agree the exact names, titles and date before one person approves it. Most plaques are made in ${STANDARD_DAYS} working days from approval and payment, plus delivery. Contact us before ordering if you have a ceremony date to meet.`,
+      ],
+    }],
     moreTitle: 'More about opening plaques',
     related: <>{related(<>See <a href="/brass-plaques">brass plaques</a> and <a href="/stainless-steel-plaques">stainless steel plaques</a>, or <a href="/how-it-works">how the free proof works</a> before your ceremony.</>)}{occasionLinks(<><a href="/donor-recognition-plaques">Donor and recognition plaques</a> · <a href="/church-plaques">Church plaques</a></>)}</>,
     closing: {
@@ -661,7 +709,8 @@ function customPage(): TemplateConfig {
       link: { href: '/memorial-plaque-wording', label: 'See over 40 memorial wording ideas' },
     },
     moreTitle: 'More about custom plaques',
-    related: related(<>See <a href="/portrait-plaques">portrait plaques</a>, <a href="/ai-plaque-design">AI designs made real</a> and <a href="/plaque-sizes">every standard size and price</a>.</>),
+    // Page-1 SEO internal link (owner msgs 10401-10408, 6 Nov 2026): "custom brass plaques".
+    related: related(<>See <a href="/brass-plaques">custom brass plaques</a>, <a href="/portrait-plaques">portrait plaques</a>, <a href="/ai-plaque-design">AI designs made real</a> and <a href="/plaque-sizes">every standard size and price</a>.</>),
     closing: {
       title: 'Have a size in mind?',
       copy: 'Send the measurements, a photo of the spot and your words on WhatsApp: we’ll send a free proof with the price.',
