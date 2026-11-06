@@ -77,3 +77,7 @@ Typecheck, full local/cloud build and postbuild passed; 175 mappings, 43 playbac
 and 51 paced hosted checks passed. Final screenshots were personally inspected. Production independently remains
 `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2` before and after. No production deployment, promotion, alias or environment change.
 Complete evidence: workspace `output/instaplaque-category-films-20261106/SITE-REPORT.md`. Local servers stopped.
+
+## Expand-icon fix (6 Nov 2026, preview only)
+
+The designer's expand button shows U+26F6, which the film capture machines can't render, so every designer capture had an empty box on the round white button. The films now draw a four-corners icon there (film repo `src/Designer.tsx`, `ExpandIcon`; checked by `scripts/check-expand-glyph.py`). The 12 designer films were re-rendered and re-imported under the same v2 IDs; portrait is unchanged. Preview: https://instaplaque-h7wf8okog-dullaghan31-3959s-projects.vercel.app (`dpl_Ee6nRJpn9mgjJYeZQuMzMfoGXLsS`). Checks: typecheck pass; build with all guards pass; mapping 175/175 pass; promo-video 43 PASS / 0 FAIL; category template browser RESULT PASS; paced hosted check 0 fails; hosted bench MP4 SHA-256 matches the render. Production was not touched by this task. During the run, a separate owner-authorised hero release (owner msg 10342) promoted `dpl_3AzgaNWm1e3sJS3WwUDfo9bNd4aq` to production. That release does not include these category films.
