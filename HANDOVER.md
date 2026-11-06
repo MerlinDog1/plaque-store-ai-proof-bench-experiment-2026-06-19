@@ -25,6 +25,20 @@
   390 × 844 phone the garden film now starts at 582 px and stainless steel's at 568 px (limit 562.7, two-thirds of the
   screen; they were 491 and 466), and garden is 8.98 and brass 8.68 phone screens long (limit 8.4; were 8.24 and 8.30).
   Opening (531 px, 8.26) is within both. Release needs the owner's decision: raise the limits, or shorten the copy.
+  The other eight template pages pass it unchanged.
+- **Ready preview:** https://instaplaque-reftj875s-dullaghan31-3959s-projects.vercel.app (`dpl_4odaQG9zCd1VrmF3je1eufFjga5d`,
+  target preview) from `a6d4e59`. Hosted, paced: section 6 94/94; the live sitemaps and feed fetched once each (feed
+  175 items and product sitemap byte-identical, sitemap.xml the same 29 URLs with the four newer `<lastmod>`).
+  Phone 390 and desktop 1440 screenshots of each hero and new section: workspace output folder above, `shots/`.
+- **Staged production, NOT promoted:** https://instaplaque-fihwoj39b-dullaghan31-3959s-projects.vercel.app
+  (`dpl_66txzMy7uUFkpaSAfpi2m1cnFbBx`, target production, Ready) from `a6d4e59` (`vercel deploy --prod --skip-domain`
+  under the shared lock; cloud build and every guard passed). `check-staged.sh` (edited copy, paced): 92 PASS, RESULT
+  PASS, including the four new titles, H1s, summaries and questions.
+- **Production unchanged:** `dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` before, after the preview, after staging and at the end.
+  Vercel's checkpoint challenged this server from about 14:39 to 14:53 UTC; staging waited for it.
+- **Release on the owner's go only:** `DPL=dpl_66txzMy7uUFkpaSAfpi2m1cnFbBx bash output/instaplaque-films-hero-release-20261106/promote.sh`;
+  rollback `DPL=dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` with the same script. Then resubmit the sitemap and request indexing
+  for the four pages.
 
 ## Portrait film v3: cache-safe name for the Bramble film — LIVE, 6 November 2026
 
