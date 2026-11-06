@@ -1,6 +1,7 @@
 // Local browser matrix for the original homepage/watch film, 13 category-specific films and mapped product films.
 // Serve correct prerendered clean routes plus HTTP Range support (Chrome/H.264). Never use this unpaced matrix live.
-// Covers independent IDs, category tap-to-load, single product/homepage copy, 4:5 uncropped phone/desktop layout,
+// Covers independent IDs, category films leading their pages and playing after load (owner msg 10240), single
+// product/homepage copy, 4:5 uncropped phone/desktop layout,
 // frame-332/566 cues (portrait WhatsApp only), pause/play, actual main-container offscreen pause, quiet modes and
 // visibility-event pause/resume. External analytics are blocked and consent refused. Screenshots use CSS pixels.
 // Usage: BASE=http://127.0.0.1:4398 SHOTS=/absolute/path/to/shots node scripts/check-promo-video.mjs
@@ -50,9 +51,11 @@ async function open(path, { phone = true, reducedMotion = 'no-preference', saveD
 // The film copy this screen shows, the hero's two buttons, and what is glowing.
 const state = page => page.evaluate(() => {
   const video = [...document.querySelectorAll('.promo-film-player')].find(v => v.getClientRects().length > 0);
-  const hero = document.querySelector('.shop-hero, .cat-hero, .watch-hero');
-  const design = hero?.querySelector('.shop-hero-choices > a[href="/design"]');
-  const whatsapp = hero?.querySelector('.shop-hero-choices > a[data-contact-placement="hero"]');
+  // (Category films' heroes, .cat-film-hero: the tree page's designer link is /design?backing=stake, and the portrait
+  // hero's other button is email.)
+  const hero = document.querySelector('.shop-hero, .cat-hero, .watch-hero, .cat-film-hero');
+  const design = hero?.querySelector('.shop-hero-choices > a:is([href="/design"], [href^="/design?"])');
+  const whatsapp = hero?.querySelector('.shop-hero-choices > a.shop-hero-choice-whatsapp[data-contact-placement="hero"]');
   const box = el => el && (({ top, bottom, left, right, width, height }) => ({ top: top + window.scrollY, bottom: bottom + window.scrollY, left, right, width, height }))(el.getBoundingClientRect());
   const glow = el => el && getComputedStyle(el).outlineStyle !== 'none' && getComputedStyle(el).outlineColor === 'rgb(214, 170, 82)';
   return video && {
@@ -66,7 +69,7 @@ const state = page => page.evaluate(() => {
     designAnimation: design && getComputedStyle(design).animationName,
     label: video.parentElement.querySelector('.promo-film-toggle')?.getAttribute('aria-label'),
     film: box(video),
-    copy: box(document.querySelector('.shop-hero-copy, .cat-hero-copy, .watch-head')),
+    copy: box(document.querySelector('.shop-hero-copy, .cat-hero-copy, .watch-head, .cat-tpl-head, .shop-feature-hero-copy')),
     buttons: box(hero.querySelector('.shop-hero-choices')),
     overflow: document.documentElement.scrollWidth > window.innerWidth,
     // The film's resource must start after the page's load event.
@@ -197,68 +200,67 @@ await check('video sitemap entry and thumbnails are served; the film pages link 
   }
 });
 
-// Category templates are products-first: one distinct tap-to-play film after the proof, not a hero autoplay.
+// Each category page leads with its own film, as the homepage does (owner msg 10240, 6 Nov 2026): a copy under the hero
+// buttons for phones and one beside the copy for computers. The copy on show plays by itself once the page has loaded and
+// lights the buttons in turn (portrait: WhatsApp only); the other copy loads nothing.
 for (const [slug, film] of Object.entries(categoryFilms)) {
   for (const phone of [true, false]) {
-    await check(`${slug} ${phone ? 'phone' : 'desktop'}: own film/poster, lazy load, cues, pause and off-screen`, async () => {
+    await check(`${slug} ${phone ? 'phone' : 'desktop'}: own film first, plays after load, cues, pause and off-screen`, async () => {
       const { context, page, html } = await open('/' + slug, { phone });
       try {
-        const section = page.locator('.cat-tpl-film-section');
-        const video = section.locator('video');
-        assert.equal(await video.count(), 1);
-        assert.ok(html.includes(film.poster) && html.includes(film.id));
-        assert.ok(!html.includes('src="' + film.file + '"'), 'video source must wait for tap');
-        assert.equal(await video.getAttribute('src'), null);
-        assert.equal(await section.locator('.promo-film-poster').getAttribute('loading'), 'lazy');
-        await section.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(250);
-        assert.equal(await video.getAttribute('src'), null, 'scroll must not fetch film');
-        const bounds = await video.boundingBox();
-        assert.ok(bounds && Math.abs(bounds.width / bounds.height - 0.8) < 0.01);
-        assert.ok(bounds.height <= (phone ? 844 * .75 : 650), 'uncropped film exceeds screen allowance');
-        assert.ok(!await page.evaluate(() => document.documentElement.scrollWidth > innerWidth));
-        await page.screenshot({ path: `${shots}/${slug}-${phone ? 'phone' : 'desktop'}-poster.jpg`, type: 'jpeg', quality: 75, scale: 'css' });
-        await section.locator('button').click();
-        await page.waitForFunction(() => { const v = document.querySelector('.cat-tpl-film-section video'); return v && !v.paused && v.currentTime > .2; });
-        assert.equal(await video.getAttribute('src'), film.file);
-        assert.ok(await video.evaluate(v => v.muted));
-        for (const [seconds, expected] of [[5, slug === 'portrait-plaques' ? 'whatsapp' : 'design'], [14, 'whatsapp'], [20, slug === 'portrait-plaques' ? 'whatsapp' : 'both']]) {
-          await video.evaluate(async (v,t) => { await new Promise(resolve => { v.addEventListener('seeked', resolve, {once:true}); v.currentTime=t; }); }, seconds);
-          await page.waitForTimeout(100);
-          assert.equal(await page.locator('.shopfront').getAttribute('data-promo-cue'), expected);
-        }
-        await section.locator('button').click();
-        await page.waitForTimeout(150);
-        assert.ok(await video.evaluate(v => v.paused));
-        assert.equal(await page.locator('.shopfront').getAttribute('data-promo-cue'), null);
-        await section.locator('button').click();
-        await page.waitForTimeout(150);
-        await page.evaluate(() => { document.querySelector('main')?.scrollTo(0,0); window.scrollTo(0,0); });
-        await page.waitForTimeout(250);
-        assert.ok(await video.evaluate(v => v.paused), 'offscreen pause');
-        assert.equal(await page.locator('.shopfront').getAttribute('data-promo-cue'), null);
+        assert.ok(html.includes(`poster="${film.poster}"`) && html.includes(film.id) && !html.includes('src="/videos/'), 'static HTML must have the poster and no video source');
+        assert.equal(await page.locator('.cat-film-figure video').count(), 2, 'one copy for phones, one for computers');
+        let s = await state(page);
+        assert.ok(s && !s.overflow, 'no visible film, or the page overflows');
+        assert.equal(s.loaded, 1, 'more than one copy of the film loaded');
+        assert.equal(await page.locator('.promo-film-player[src]').getAttribute('src'), film.file);
+        assert.ok(Math.abs(s.film.width / s.film.height - 0.8) < 0.01, `film is not 4:5 (${s.film.width}x${s.film.height})`);
+        assert.ok(s.film.height <= (phone ? 844 * .75 : 650), 'uncropped film exceeds screen allowance');
+        if (phone) assert.ok(s.film.top >= s.buttons.bottom && s.film.top - s.buttons.bottom < 60 && s.film.top < 700, `film not straight under the buttons on the first screen (${s.buttons.bottom} -> ${s.film.top})`);
+        else assert.ok(s.film.left > s.copy.right && s.film.top < 260 && s.film.width >= 380, `film not beside the copy at the top ${JSON.stringify({ film: s.film, copy: s.copy })}`);
+        assert.ok(!s.paused && s.time > 0.5 && s.muted, `not playing muted on the first screen: ${JSON.stringify({ paused: s.paused, time: s.time, muted: s.muted })}`);
+        assert.ok(s.videoStart !== null && s.loadEvent !== null && s.videoStart >= s.loadEvent, `video requested before the load event (${s.videoStart} < ${s.loadEvent})`);
+        if (slug === 'portrait-plaques') {
+          for (const seconds of [5, 14, 20]) {
+            s = await seek(page, seconds);
+            assert.ok(s.cue === 'whatsapp' && s.whatsappGlow && !s.designGlow, `portrait at ${seconds}s: ${JSON.stringify({ cue: s.cue, d: s.designGlow, w: s.whatsappGlow })}`);
+          }
+        } else await glowCycle(page);
+        await page.screenshot({ path: `${shots}/${slug}-${phone ? 'phone' : 'desktop'}-top.jpg`, type: 'jpeg', quality: 75, scale: 'css' });
+        await page.locator('.promo-film-toggle:visible').click();
+        await page.waitForTimeout(400);
+        s = await state(page);
+        assert.ok(s.paused && s.label === 'Play the video' && s.cue === '' && !s.designGlow && !s.whatsappGlow, `pause: ${JSON.stringify({ paused: s.paused, cue: s.cue })}`);
+        await page.locator('.promo-film-toggle:visible').click();
+        await page.waitForTimeout(800);
+        s = await state(page);
+        assert.ok(!s.paused && s.cue !== '', 'play again');
+        await page.evaluate(() => document.querySelector('.shop-closing')?.scrollIntoView());
+        await page.waitForTimeout(900);
+        s = await state(page);
+        assert.ok(s.paused && s.cue === '', 'still playing or glowing off screen');
       } finally { await context.close(); }
     });
   }
 }
 
 for (const options of [{ reducedMotion: 'reduce' }, { saveData: true }]) {
-  await check(`category manual play with ${JSON.stringify(options)}; hidden tab pauses`, async () => {
+  await check(`category film with ${JSON.stringify(options)}: poster and play button, no autoplay; hidden tab pauses`, async () => {
     const { context, page } = await open('/tree-memorial-plaques', options);
     try {
-      const section = page.locator('.cat-tpl-film-section');
-      await section.scrollIntoViewIfNeeded();
-      const video = section.locator('video');
-      assert.equal(await video.getAttribute('src'), null);
-      assert.ok(await video.evaluate(v => v.paused));
-      await section.locator('button').click();
-      await page.waitForFunction(() => !document.querySelector('.cat-tpl-film-section video').paused);
+      let s = await state(page);
+      assert.ok(s.paused && s.time === 0 && s.cue === '' && s.label === 'Play the video', `autoplayed: ${JSON.stringify({ paused: s.paused, time: s.time, cue: s.cue })}`);
+      await page.locator('.promo-film-toggle:visible').click();
+      await page.waitForTimeout(1500);
+      s = await state(page);
+      assert.ok(!s.paused && s.cue === 'design' && s.designGlow, `play: ${JSON.stringify({ paused: s.paused, cue: s.cue })}`);
+      if (options.reducedMotion) assert.equal(s.designAnimation, 'none', 'reduced motion: steady glow, no pulse');
       await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', {configurable:true, value:'hidden'}); document.dispatchEvent(new Event('visibilitychange')); });
       await page.waitForTimeout(200);
-      assert.ok(await video.evaluate(v => v.paused));
+      assert.ok((await state(page)).paused, 'hidden tab pauses');
       await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', {configurable:true, value:'visible'}); document.dispatchEvent(new Event('visibilitychange')); });
-      await page.waitForTimeout(200);
-      assert.ok(!await video.evaluate(v => v.paused));
+      await page.waitForTimeout(400);
+      assert.ok(!(await state(page)).paused, 'plays again when the tab shows');
     } finally { await context.close(); }
   });
 }
