@@ -88,7 +88,8 @@ for (const route of redirectedPaths) {
 }
 
 const portraits = await read('dist/portrait-plaques/index.html');
-assert(portraits.includes('<h1>Personalised portrait plaques</h1>') && portraits.includes('"@type":"FAQPage"') && portraits.includes('Can you make a plaque from a photo of my pet?'), 'Portrait plaques page needs its H1, visible FAQs and FAQ schema');
+// The homepage's hero since owner msg 10329, so the homepage's H1 class.
+assert(portraits.includes('<h1 class="shop-hero-title">Personalised portrait plaques</h1>') && portraits.includes('"@type":"FAQPage"') && portraits.includes('Can you make a plaque from a photo of my pet?'), 'Portrait plaques page needs its H1, visible FAQs and FAQ schema');
 const aiDesign = await read('dist/ai-plaque-design/index.html');
 assert(aiDesign.includes('<h1>Turn your AI design into a real plaque</h1>') && aiDesign.includes('"@type":"FAQPage"') && aiDesign.includes('Can you make a real plaque from a ChatGPT design?'), 'AI design page needs its H1, visible FAQs and FAQ schema');
 assert(home.includes('href="/portrait-plaques"') && home.includes('href="/ai-plaque-design"'), 'Homepage must link to the portrait and AI design pages');

@@ -173,8 +173,9 @@ for (const page of pages) {
   const main = document.querySelector('.cat-tpl');
   assert(main, `${page.slug}: template markup`);
   assert.equal(document.title, page.title, `${page.slug}: title`);
-  // The improved summaries quote the facts line's own from-price ("From £58.50" -> "from £58.50").
-  const heroFrom = compact(main.querySelector('.cat-hero-buy .shop-product-price')?.textContent || '').replace(/^From /, 'from ');
+  // The improved summaries quote the hero's own from-price ("From £58.50" -> "from £58.50"): its price row since the
+  // page took the homepage's hero (owner msg 10329), else the earlier facts line.
+  const heroFrom = compact(main.querySelector('.shop-hero-price strong, .cat-hero-buy .shop-product-price')?.textContent || '').replace(/^From /, 'from ');
   const description = typeof page.description === 'function' ? page.description(heroFrom) : page.description;
   assert(typeof page.description !== 'function' || /^from £\d/.test(heroFrom), `${page.slug}: facts line from-price (${heroFrom})`);
   assert.equal(document.querySelector('meta[name="description"]').content, description, `${page.slug}: meta description`);
