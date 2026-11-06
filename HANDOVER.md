@@ -1,6 +1,22 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
-## Page-1 SEO copy: garden, opening, stainless steel and brass — PREVIEW ONLY, 6 November 2026
+## Page-1 SEO copy: garden, opening, stainless steel and brass — LIVE, 6 November 2026
+
+- **LIVE since 15:36:54 UTC** (owner msg 10422 "go live bro"): Cody promoted the round-2 staged build
+  `dpl_DyTwtgWCmASKbePetzNnczHsHsG1` (from `51bcb55`) with
+  `DPL=dpl_DyTwtgWCmASKbePetzNnczHsHsG1 bash output/instaplaque-films-hero-release-20261106/promote.sh` (workspace
+  `output/instaplaque-seo-page1-20261106/promote-r2.log`). LIVE SOURCE = `51bcb55` on
+  `codex/instaplaque-seo-page1-20261106` (later commits are docs only).
+- **Live check:** `verify-live-r2.sh` (paced, read-only): instaplaque.co.uk serves `dpl_DyTwtgWC`, www 308; the four pages
+  200 with their films (206), new titles, one H1 each, summaries with their own from-prices, six questions = FAQPage,
+  canonicals, the two round-2 intros and the garden fixing answer; home, /design, a product page, /custom-plaques,
+  /tree-memorial-plaques, AI health and robots 200; sitemap.xml 29 URLs, sitemap-products.xml 175, feed 175 items.
+  46 PASS, RESULT PASS (`verify-live-r2.log`).
+- **Search engines:** both sitemaps resubmitted to Search Console at 15:39:51 UTC (PUT 204; read back pending, 0 errors,
+  0 warnings) and the four URLs sent to IndexNow (200), `submit-r2.log`. The Merchant feed is unchanged, so no feed fetch.
+  The owner presses "Request indexing" for the four URLs in Search Console (no API for it).
+- **Rollback:** `DPL=dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx bash output/instaplaque-films-hero-release-20261106/promote.sh`
+  (the Bramble portrait film release, built from `e97d856`).
 
 - Owner msgs 10401/10402/10408 ("OK set helper on it"): the corrected spec is workspace
   `output/instaplaque-seo-page1-20261106/BRIEF.md`. Round 2 follows Cody's review of the first preview: two shorter hero
@@ -37,14 +53,12 @@
   (`dpl_EdLGmAXhZtcqsP3eTAWukzJfsDFh`, target preview) from `51bcb55`. Hosted, paced: section 6 96/96; the live sitemaps
   and feed fetched once each (feed 175 items and product sitemap byte-identical, sitemap.xml the same 29 URLs with the
   four newer `<lastmod>`). Phone hero shots of garden and stainless steel (film at 531 and 517 px): output folder `shots-r2/`.
-- **Staged production, NOT promoted (round 2):** https://instaplaque-1ulpk0gue-dullaghan31-3959s-projects.vercel.app
+- **Staged production (round 2), promoted 15:36:54 UTC:** https://instaplaque-1ulpk0gue-dullaghan31-3959s-projects.vercel.app
   (`dpl_DyTwtgWCmASKbePetzNnczHsHsG1`, target production, Ready) from `51bcb55` (`vercel deploy --prod --skip-domain` under
   the shared lock; cloud build and every guard passed). `check-staged.sh` (edited copy, paced): 95 PASS, RESULT PASS,
   including the four new titles, H1s, summaries and questions, the two intros and the garden fixing answer.
-- **Production unchanged:** `dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` before and after both rounds. Release on the owner's go
-  only: `DPL=dpl_DyTwtgWCmASKbePetzNnczHsHsG1 bash output/instaplaque-films-hero-release-20261106/promote.sh`; rollback
-  `DPL=dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` with the same script. Then resubmit the sitemap and request indexing for the four
-  pages.
+- **Production before the release:** `dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx`, unchanged through both rounds of preview and
+  staging; it is the rollback target above.
 
 ## Portrait film v3: cache-safe name for the Bramble film — LIVE, 6 November 2026
 
