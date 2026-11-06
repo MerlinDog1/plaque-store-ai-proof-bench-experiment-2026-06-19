@@ -3278,6 +3278,21 @@
     animation: promo-cue 1.4s ease-out infinite;
   }
 }
+/* The category films' heroes (template pages and the portrait page, owner msg 10240): the designer link (on the tree
+   page /design?backing=stake) and the WhatsApp button by its class, as the portrait hero's other button is email. */
+.shopfront[data-promo-cue="design"] .cat-film-hero .shop-hero-choices > a:is([href="/design"], [href^="/design?"]),
+.shopfront[data-promo-cue="whatsapp"] .cat-film-hero .shop-hero-choices > a.shop-hero-choice-whatsapp,
+.shopfront[data-promo-cue="both"] .cat-film-hero .shop-hero-choices > a:is([href="/design"], [href^="/design?"], .shop-hero-choice-whatsapp) {
+  outline: 3px solid #d6aa52;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .shopfront[data-promo-cue="design"] .cat-film-hero .shop-hero-choices > a:is([href="/design"], [href^="/design?"]),
+  .shopfront[data-promo-cue="whatsapp"] .cat-film-hero .shop-hero-choices > a.shop-hero-choice-whatsapp,
+  .shopfront[data-promo-cue="both"] .cat-film-hero .shop-hero-choices > a:is([href="/design"], [href^="/design?"], .shop-hero-choice-whatsapp) {
+    animation: promo-cue 1.4s ease-out infinite;
+  }
+}
 
 /* The film's watch page, /video (components/PromoVideo.tsx, owner msg 6988): the film leads, large, with the heading and
    buttons beside it on computers; on phones heading, film, then the buttons straight under it. */
@@ -3620,7 +3635,7 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
 /* "Products first" category template (1 Nov 2026, owner msg 8384; components/CategoryTemplate.tsx): title block with
    one facts line, sticky chips, a two-column studio-photo grid with finish swatches, then the page's questions, sizes
    to scale, proof, finishes, wording and a closing strip. Phone-first; scoped to .cat-tpl so other pages are untouched.
-   The first card starts within 330 px of the top of a 390 × 844 phone (header 111 px). */
+   Since owner msg 10240 (6 Nov 2026) the page's own film leads, with two buttons, as on the homepage; then the cards. */
 .shopfront.cat-tpl { --cat-tpl-pad: 20px; }
 .cat-tpl .cat-tpl-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .cat-tpl .cat-tpl-head { max-width: 1256px; margin: 0 auto; padding: 6px var(--cat-tpl-pad) 0; }
@@ -3801,14 +3816,27 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
 .cat-tpl .cat-tpl-guide-list h3 a, .cat-tpl .cat-tpl-guide-list p a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .cat-tpl .cat-tpl-guide-list p { margin: 0; font-size: 13px; line-height: 1.42; }
 .cat-tpl .cat-tpl-guide .cat-size-links { margin-top: 12px; }
-/* Owner msg 8603: give the proof and the film their own sections. The existing film is 4:5,
-   so a 60svh width caps its height at 75svh without cropping or stretching it. */
-.shopfront.cat-tpl > .cat-tpl-film-section { padding-top: 28px; padding-bottom: 28px; }
-.shopfront .cat-tpl-film-section h2 { text-align: center; margin-bottom: 16px; }
-.shopfront .cat-tpl-film { width: 100%; max-width: min(480px, 60svh); margin: 0 auto; }
-.shopfront .cat-tpl-film .promo-film { width: 100%; border-radius: 6px; box-shadow: 0 6px 16px rgba(16, 38, 31, 0.16); }
-.shopfront .cat-tpl-film figcaption { margin-top: 10px; font-size: 11px; line-height: 1.4; color: var(--shop-muted); }
-.shopfront .cat-tpl-film figcaption a { display: block; margin-top: 4px; font-weight: 600; color: var(--shop-ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Each category's film at the top of its page, as on the homepage (owner msg 10240, 6 Nov 2026; CategoryFilmFigure):
+   straight under the two buttons on phones, beside the title, price and buttons on computers. CSS shows one copy; the
+   hidden one never loads its video. The film is 4:5; on computers a 56svh width keeps it within 70svh of height. */
+.cat-tpl .cat-tpl-head .shop-hero-choices { margin: 12px 0 0; }
+.shopfront .cat-film-side { display: none; }
+.shopfront .cat-film-inline { width: min(100%, 420px); margin: 14px auto 6px; }
+.shopfront .cat-film-figure figcaption { margin-top: 10px; font-size: 11px; line-height: 1.4; color: var(--shop-muted); }
+.shopfront .cat-film-figure figcaption > span { display: block; }
+.shopfront .cat-film-figure details { margin-top: 4px; }
+.shopfront .cat-film-figure summary { cursor: pointer; font-weight: 600; color: var(--shop-ink); }
+.shopfront .cat-film-figure figcaption a { display: inline-block; margin-top: 4px; font-weight: 600; }
+/* The portrait page's Millie close-up, which led its hero before the film. */
+.shopfront .shop-portrait-closeup { max-width: 760px; margin: 0 auto; padding: 0 24px 36px; }
+@media (min-width: 721px) {
+  .cat-tpl .cat-tpl-hero.cat-film-hero { max-width: 1256px; margin: 0 auto; padding: 0 var(--cat-tpl-pad); display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, min(430px, 56svh)); gap: 48px; align-items: center; }
+  .cat-tpl .cat-tpl-hero.cat-film-hero > .cat-tpl-head { max-width: none; margin: 0; padding-left: 0; padding-right: 0; }
+  .shopfront .cat-film-side { display: block; width: min(100%, 430px, 56svh); justify-self: center; padding: 18px 0 6px; }
+  .shopfront .cat-film-inline { display: none; }
+  .shopfront .shop-portrait-closeup { padding: 0 32px 48px; }
+}
 
 @media (min-width: 721px) {
   .shopfront.cat-tpl { --cat-tpl-pad: 32px; }

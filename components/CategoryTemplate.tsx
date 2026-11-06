@@ -4,7 +4,7 @@ import { studioPhotoPath, studioPhotos } from '../services/studioPhotos.mjs';
 import { categoryParentFor, materialStories, photo600, type ProductFamily } from '../services/commerce';
 import { optimisedSrcSet } from '../services/imageUrls';
 import { categoryFilmFor } from '../services/categoryFilms.mjs';
-import { CategoryFilmBlock } from './PromoVideo';
+import { CategoryFilmFigure } from './PromoVideo';
 import { designWithStakeHref, groundStakeVisibleMm } from '../services/groundStake';
 import { GROUND_STAKE_LENGTH, GROUND_STAKE_THICKNESS_MM, GROUND_STAKE_WIDTH_MM, WOOD_BACKING_EXTRA_MM } from '../services/pricing';
 import { finishOutdoors } from '../services/catalogueContent';
@@ -664,6 +664,7 @@ export function CategoryTemplatePage({ config, product, faqs, onLaunch, onReques
   const id = (name: string) => `${config.prefix}-${name}`;
   const stake = config.mount === 'stake';
   const cards = config.cards.map(card => resolveCard(card, { finishes: config.finishes, mount: config.mount }));
+  const film = categoryFilmFor(product.slug);
   const fromValue = config.from ? config.from.value : displayedPriceValue(product.startingFrom);
   const fromLabel = config.from ? `From ${formatGbp(config.from.value)}` : product.startingFrom.replace(/^from/, 'From');
   const finishes = <FinishesRow id={id('finishes')} finishes={config.finishes || templateFinishes.map(finish => finish.key)}
@@ -671,18 +672,30 @@ export function CategoryTemplatePage({ config, product, faqs, onLaunch, onReques
     title={config.finishesTitle} intro={config.finishesIntro} outdoors={config.outdoors} />;
   return (
     <div className="shopfront cat-page cat-tpl" data-prerendered="true">
-      <header className="cat-tpl-head">
-        <div className="shop-breadcrumb cat-tpl-crumbs">
-          <a href="/">Home</a>
-          <span>/</span>
-          {parent && <><a href={`/${parent.slug}`}>{parent.title}</a><span>/</span></>}
-          <span>{product.title}</span>
-        </div>
-        <h1>{config.title}</h1>
-        <p className="cat-tpl-intro">{config.intro}</p>
-        <p className="cat-hero-buy"><strong className="shop-product-price"><TrackedPrice value={fromValue} product={product.slug}>{fromLabel}</TrackedPrice></strong>
-          <span> · {config.included || 'engraving, fixings & UK delivery included'} · free proof before you pay · made in {usualDays(cards)} working days</span></p>
-      </header>
+      {/* The page's own film at the top, as on the homepage (owner msg 10240, 6 Nov 2026): straight under the two
+          buttons on phones, beside the title, price and buttons on computers. The buttons light up as it plays. */}
+      <div className={`cat-tpl-hero${film ? ' cat-film-hero' : ''}`}>
+        <header className="cat-tpl-head">
+          <div className="shop-breadcrumb cat-tpl-crumbs">
+            <a href="/">Home</a>
+            <span>/</span>
+            {parent && <><a href={`/${parent.slug}`}>{parent.title}</a><span>/</span></>}
+            <span>{product.title}</span>
+          </div>
+          <h1>{config.title}</h1>
+          <p className="cat-tpl-intro">{config.intro}</p>
+          <p className="cat-hero-buy"><strong className="shop-product-price"><TrackedPrice value={fromValue} product={product.slug}>{fromLabel}</TrackedPrice></strong>
+            <span> · {config.included || 'engraving, fixings & UK delivery included'} · free proof before you pay · made in {usualDays(cards)} working days</span></p>
+          {film && <div className="shop-hero-choices">
+            <DesignLink onStart={onLaunch} href={config.designHref}>Design online</DesignLink>
+            <ContactLink channel="whatsapp" placement="hero" subject={subject} className="shop-button shop-hero-choice-whatsapp">
+              <WhatsAppIcon /> Design on WhatsApp
+            </ContactLink>
+          </div>}
+          {film && <CategoryFilmFigure className="cat-film-inline" film={film} />}
+        </header>
+        {film && <CategoryFilmFigure className="cat-film-side" film={film} />}
+      </div>
       <ProductGrid id={id('grid')} cards={cards} chips={config.chips} links={config.links} end={config.gridEnd} wide={config.photos === 'wide'} stake={stake} mounted={mounted} />
       <FaqAccordion id={id('questions')} title={config.faqTitle} faqs={faqs} subject={subject} />
       {config.afterQuestions?.(cards, subject)}
@@ -690,7 +703,6 @@ export function CategoryTemplatePage({ config, product, faqs, onLaunch, onReques
       <SizeStrip id={id('sizes')} {...config.sizes} mount={config.mount} finishes={config.finishes} />
       <ProofBlock id={id('proof')} sampleSlug={config.sampleSlug} sampleNote={config.sampleNote} steps={config.steps || defaultSteps} subject={subject}
         designHref={config.designHref} extra={config.proofExtra} onLaunch={onLaunch} onRequestDesign={onRequestDesign} />
-      <CategoryFilmBlock id={id('film')} film={categoryFilmFor(product.slug)} />
       {!config.finishesFirst && finishes}
       {config.wording && <WordingBlock id={id('wording')} {...config.wording} />}
       {(config.guides || []).map(({ key, ...guide }) => <GuideBlock key={key} id={id(key)} {...guide} />)}

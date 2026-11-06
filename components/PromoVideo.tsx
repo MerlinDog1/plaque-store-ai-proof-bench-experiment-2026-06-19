@@ -40,9 +40,10 @@ const quiet = () => {
  * the buttons to glow. PostHog hears how far it plays (services/promoVideoTracking.ts).
  * On the watch page (eager) the film is the page, so its source is in the static HTML for search engines; preload="none"
  * still means nothing is downloaded until it plays.
- * `tapToPlay` (the category template's proof block, owner msg 8440, 1 Nov 2026): never starts by itself and loads
- * nothing until tapped; its poster is a lazy image under a large play button, so the page's first screen and its
- * Largest Contentful Paint (a product photo) are unchanged. Same tracking: a tap counts as started from the button. */
+ * `tapToPlay` (owner msg 8440, 1 Nov 2026, for a film low on a page): never starts by itself and loads nothing until
+ * tapped; its poster is a lazy image under a large play button, so the page's first screen and its Largest Contentful
+ * Paint are unchanged. Same tracking: a tap counts as started from the button. The category films used it after their
+ * proof block until they moved to the top of their pages (CategoryFilmFigure). */
 export function PromoFilm({ eager = false, tapToPlay = false, film = promoVideo }: { eager?: boolean; tapToPlay?: boolean; film?: FilmDescriptor }) {
   if (!tapToPlay) preload(film.poster, { as: 'image', fetchPriority: 'high' });
   const frame = useRef<HTMLDivElement>(null);
@@ -181,20 +182,21 @@ export function PromoFilmFigure({ className, eager = false }: { className: strin
   );
 }
 
-/** Category films have their own disclosure; /video remains the original general designer film. */
-export function CategoryFilmBlock({ id, film }: { id: string; film: FilmDescriptor }) {
+/** A category's own film at the top of its page, as the homepage has its film (owner msg 10240, 6 Nov 2026: "each of
+ * these new vids to be bang at the top of their respective pages just like the home page"). It plays by itself as the
+ * homepage film does, and the page's two buttons light up for what it is showing. Pages render it twice (under the
+ * buttons on phones, beside the copy on computers); CSS shows one, and the hidden one never loads its video.
+ * Category films have their own disclosure; /video remains the original general designer film. */
+export function CategoryFilmFigure({ className, film }: { className: string; film: FilmDescriptor }) {
   return (
-    <section className="shop-section cat-tpl-film-section" id={id} aria-labelledby={`${id}-heading`}>
-      <h2 id={`${id}-heading`}>{film.name}: see how it works</h2>
-      <figure className="cat-tpl-film">
-        <PromoFilm key={film.id} tapToPlay film={film} />
-        <figcaption>
-          <span>{film.disclosure} {film.footnote}</span>
-          <details><summary>About this video</summary><p>{film.description}</p></details>
-          {!film.id.startsWith('portrait-plaques-') && <a href={promoVideoPath}>Watch our general designer guide</a>}
-        </figcaption>
-      </figure>
-    </section>
+    <figure className={`promo-film-figure cat-film-figure ${className}`}>
+      <PromoFilm key={film.id} film={film} />
+      <figcaption>
+        <span>{film.disclosure} {film.footnote}</span>
+        <details><summary>About this video</summary><p>{film.description}</p></details>
+        {!film.id.startsWith('portrait-plaques-') && <a href={promoVideoPath}>Watch our general designer guide</a>}
+      </figcaption>
+    </figure>
   );
 }
 

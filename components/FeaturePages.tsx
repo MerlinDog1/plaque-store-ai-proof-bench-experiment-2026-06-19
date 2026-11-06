@@ -1,5 +1,5 @@
 import React from 'react';
-import { CategoryFilmBlock } from './PromoVideo';
+import { CategoryFilmFigure } from './PromoVideo';
 import { categoryFilmFor } from '../services/categoryFilms.mjs';
 import { ContactLink, MobileContactBar, WhatsAppIcon } from './ContactOptions';
 import { AiConceptPair, HomeQualitySection, ProofPdfShowcase, featureImageVersion, sampleProofPdf } from './FeatureSections';
@@ -131,6 +131,7 @@ const portraitsInPlace = [
   { src: '/site-images/memorial/portrait-ron-pat-v3.webp', alt: 'Close-up of a stainless steel memorial plaque with an engraved portrait of Ron and Pat Coleman, on a light solid wood board and ground stake under their apple tree', caption: 'Ron & Pat · under their apple tree' },
 ];
 const portraitFrom = merchantProducts.find(item => item.slug === 'a5-brushed-steel-personalised-plaque')?.startingFrom || '£95.50';
+const portraitFilm = categoryFilmFor('portrait-plaques');
 
 export function ShopPortraitPlaques() {
   return (
@@ -140,7 +141,9 @@ export function ShopPortraitPlaques() {
         <span>/</span>
         <span>Portrait plaques</span>
       </div>
-      <section className="shop-feature-hero">
+      {/* The portrait film at the top, as on the homepage (owner msg 10240, 6 Nov 2026): under the two buttons on
+          phones, beside the copy on computers, where the Millie close-up was; the close-up follows the hero. */}
+      <section className="shop-feature-hero cat-film-hero">
         <div className="shop-feature-hero-copy">
           <p className="shop-kicker">Free portrait sketch · Made in the UK</p>
           <h1>Personalised portrait plaques</h1>
@@ -162,16 +165,18 @@ export function ShopPortraitPlaques() {
             </ContactLink>
             <ContactLink channel="email" placement="hero" className="shop-button">Email your photo</ContactLink>
           </div>
+          <CategoryFilmFigure className="cat-film-inline" film={portraitFilm} />
           <p className="shop-hero-note">
             Brass or stainless steel · A5, A4 and A3 · Prefer to upload it? <a href={pim('/free-proof', 'hero_free_sketch')}>Request a free sketch online</a>
           </p>
         </div>
-        <figure className="shop-feature-hero-image">
-          <img src="/site-images/portraits/pim-millie-detail-1200.webp" width="1200" height="675" fetchPriority="high"
-            alt="Close-up photograph of Millie the cat’s portrait engraved in brushed metal, showing fine fur lines and whiskers" />
-          <figcaption>Millie · a real engraving, photographed up close</figcaption>
-        </figure>
+        <CategoryFilmFigure className="cat-film-side" film={portraitFilm} />
       </section>
+      <figure className="shop-feature-hero-image shop-portrait-closeup">
+        <img src="/site-images/portraits/pim-millie-detail-1200.webp" width="1200" height="675" loading="lazy" decoding="async"
+          alt="Close-up photograph of Millie the cat’s portrait engraved in brushed metal, showing fine fur lines and whiskers" />
+        <figcaption>Millie · a real engraving, photographed up close</figcaption>
+      </figure>
 
       <section className="shop-section shop-portrait-process" aria-labelledby="portrait-process-heading">
         <p className="shop-kicker">From photo to plaque</p>
@@ -187,8 +192,6 @@ export function ShopPortraitPlaques() {
           ))}
         </ol>
       </section>
-
-      <CategoryFilmBlock id="portrait-film" film={categoryFilmFor('portrait-plaques')} />
 
       <section className="shop-section shop-portrait-gallery" aria-labelledby="portrait-gallery-heading">
         <p className="shop-kicker">People and pets</p>
