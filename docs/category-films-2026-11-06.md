@@ -10,10 +10,17 @@ Based on page-improvements `4f72e04`, preserving the stage-three pages. Cookie b
   batch with `node scripts/import-category-films.mjs /absolute/path/to/media-output`. The importer requires all
   13 READY markers, 39 verification receipts, verified web checksums, silent 4:5 H.264, and the expected duration.
   Disclosures, production qualifications and text descriptions come from the final manifest, not generic claims.
-- Twelve category templates use the shared category film block after the proof. Portrait has its own block after
-  its process section, a photo-to-proof description and WhatsApp-only cues. It has no link to the wording designer.
-- Categories retain products-first layout and manual play: no MP4 request before tapping. Lazy poster, pause/play,
-  off-screen and background-tab pause, reduced-motion and Save-Data behavior are retained.
+- Each category film leads its page, as the homepage film does (owner msg 10240, 6 Nov 2026: "bang at the top of
+  their respective pages just like the home page"; branch `codex/instaplaque-films-top-20261106`). The twelve
+  template pages have two hero buttons (Design online, Design on WhatsApp) under the title and facts line, then the
+  film (`CategoryFilmFigure`) on phones; on computers the film sits beside the title, facts line and buttons, with the
+  breadcrumb kept at the top. The portrait page's hero has its film under its two buttons on phones and in place of the
+  Millie close-up on computers; the close-up follows the hero. The click-to-play block after the proof is gone.
+- The films play like the homepage film: poster preloaded in the HTML, the MP4 requested only after the page's load
+  event and only for the copy on screen, silent and looping, paused off screen and in background tabs; reduced motion
+  and Save-Data show the poster and a play button. While it plays, the hero button for what it shows lights up
+  (`.cat-film-hero` rules in `shopfront.css`). Portrait has a photo-to-proof description, WhatsApp-only cues and no
+  link to the wording designer. The products follow the film, so the first card is below a phone's first screen.
 - All 175 exact product pages use `productCategoryFor`, the same stable category as their breadcrumb: nonrectangular
   plaques → custom; long narrow rectangles → bench; other rectangles → brass or stainless steel by material.
   This is one template change, not 175 independent edits. The mapping does not depend on browsing history.
@@ -24,7 +31,8 @@ Based on page-improvements `4f72e04`, preserving the stage-three pages. Cookie b
 
 ## Verification and preview
 
-Actual check results and final preview receipt are recorded in the task media directory's `SITE-REPORT.md`.
+Actual check results and final preview receipt are recorded in the task media directory's `SITE-REPORT.md` (films at
+the top: `output/instaplaque-films-top-20261106/REPORT.md`).
 The parent owns the media repository, manifest, rendering and final overall `REPORT.md`; this worktree owns site
 integration only. Run typecheck, full build/postbuild, `scripts/check-category-film-mapping.mjs`,
 `scripts/check-promo-video.mjs` and `scripts/check-category-template-browser.cjs` before deploying.

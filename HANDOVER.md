@@ -1,5 +1,22 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Category films at the top of their pages — PREVIEW ONLY, 6 November 2026
+
+- Owner msg 10240: "each of these new vids to be bang at the top of their respective pages just like the home page".
+  Branch `codex/instaplaque-films-top-20261106`, from the category films preview `aec5ab4` (receipt `f017b4b` merged).
+- **Ready preview:** https://instaplaque-a5ud29v0d-dullaghan31-3959s-projects.vercel.app (`dpl_72kgHBsuu5N9HJ37PdmpSD1BAkEM`,
+  target preview, app source `763af7c`). The first cut, `dpl_67ZSseZHd8ub4GekS2MdHSqrh7UC` (7w8t75x23), differed only in
+  the computer layout (breadcrumb mid-height).
+- Twelve template pages: two hero buttons, then the category film (phones) or the film beside the title and buttons
+  (computers); plays by itself like the homepage film and lights the button for what it shows. Portrait page: the film
+  in its hero, the Millie close-up straight after. The click-to-play block after the proof is removed. Product pages,
+  homepage and /video unchanged.
+- Checks: typecheck; full local and cloud build + postbuild (`check-category-template.mjs` updated for the new
+  placement); `check-category-template-browser.cjs` and `check-promo-video.mjs` updated and run on the local build;
+  paced protected hosted check of all 13 routes, two posters and an MP4 byte range. Results:
+  workspace `output/instaplaque-films-top-20261106/REPORT.md`.
+- Production unchanged: `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2`. No promotion, alias, environment or ads change.
+
 ## Category films + larger cookie notice — PREVIEW ONLY, 6 November 2026
 
 - Owner msg 10199. Branch `codex/instaplaque-category-films-20261106`; app source **`aec5ab4c8bee7fecd61966f0cf3fceba74a9723a`**, pushed.
