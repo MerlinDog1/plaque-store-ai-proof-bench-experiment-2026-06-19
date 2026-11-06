@@ -44,3 +44,13 @@ the larger notice, other categories and all phone layouts remain unchanged. The 
 For local playback/cue checks use a server with both clean prerendered routes and HTTP Range support. Vite preview
 falls back to homepage SSR on clean routes here, while `server.mjs` serves correct route HTML but lacks byte ranges.
 The evidence directory includes a loopback-only range proxy over `server.mjs`; Vercel supplies ranges itself.
+
+## Ready preview receipt
+
+https://instaplaque-9islru9kh-dullaghan31-3959s-projects.vercel.app
+
+`dpl_5Fj5WvK913X5gQm6rMLUfKKvL9fj`, independently inspected preview / Ready, from application commit `aec5ab4c8bee7fecd61966f0cf3fceba74a9723a`.
+Typecheck, full local/cloud build and postbuild passed; 175 mappings, 43 playback cases, 36 category-layout cases,
+and 51 paced hosted checks passed. Final screenshots were personally inspected. Production independently remains
+`dpl_EN5TJhoAY3gizahUEiQG9hji4mr2` before and after. No production deployment, promotion, alias or environment change.
+Complete evidence: workspace `output/instaplaque-category-films-20261106/SITE-REPORT.md`. Local servers stopped.
