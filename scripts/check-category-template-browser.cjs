@@ -2,12 +2,13 @@
 // Local browser check of the "products first" category template (components/CategoryTemplate.tsx, 1 Nov 2026): the
 // twelve template pages: the live eight plus house, donor, church and practice (stage 3, 4 Nov 2026).
 // Phone 390 × 844 and computer 1440 × 900, on a local build only (external requests blocked, browser marked internal):
-// - the page's own film leads it, as on the homepage (owner msg 10240, 6 Nov 2026): it starts in the top half of the
-//   first screen, under the two hero buttons on phones and beside them on computers, before the first product card,
+// - the page's own film leads it, as on the homepage (owner msg 10240, 6 Nov 2026): it starts in the top two-thirds of
+//   the first screen (in the homepage's own hero since owner msg 10329, below its title, tagline and intro), under the
+//   two hero buttons on phones and beside them on computers, before the first product card,
 //   with the cookie notice showing and after Accept; the notice is a compact bar (88 px or less on the phone) covering
 //   neither the H1, the hero buttons, the film's pause button nor the contact bar;
-// - at most 7.8 phone screens (7.6 with owner msg 8603's separate, full-width video section, then the page-1 improvement
-//   sections of owner msg 10173);
+// - at most 8.4 phone screens (7.6 with owner msg 8603's separate, full-width video section, 7.8 with the page-1
+//   improvement sections of owner msg 10173, 8.4 with the homepage's hero of owner msg 10329);
 //   report every page's measured length (main height / (viewport - main top));
 // - no sideways overflow, no script errors or console errors (other than the blocked external requests);
 // - the largest paint on the first screen is the film's poster; the film plays by itself once the page has loaded, as the
@@ -49,8 +50,10 @@ const selectedSlugs = process.env.CATEGORY_SLUGS?.split(',').filter(Boolean);
 if (selectedSlugs) assert(selectedSlugs.every(slug => pages.some(page => page.slug === slug)), 'Unknown CATEGORY_SLUGS entry');
 const selectedPages = selectedSlugs ? pages.filter(page => selectedSlugs.includes(page.slug)) : pages;
 // 7.6 for the larger, separate film (owner msg 8603); 7.8 since the page-1 improvement sections (owner msg 10173,
-// 5 Nov 2026), shown on phones as sideways rows: garden 7.63 and brass 7.69 phone screens when added.
-const MAX_PHONE_SCREENS = 7.8;
+// 5 Nov 2026), shown on phones as sideways rows: garden 7.63 and brass 7.69 phone screens when added. 8.4 since the
+// homepage's own hero (owner msg 10329, 6 Nov 2026: "matching the text size and layout of the homepage always"), about
+// half a phone screen taller than the compact title block it replaced: garden 8.24 when changed.
+const MAX_PHONE_SCREENS = 8.4;
 const MAX_NOTICE_HEIGHT = 88; // two short lines + equal 44 px buttons (owner msg 9079)
 // The planner's date maths, as the page uses it (services/occasionPlanner.ts, transpiled like check-promo-video-tracking).
 const ts = require('typescript');
