@@ -237,9 +237,10 @@ function gardenPage(): TemplateConfig {
     prefix: 'garden',
     title: 'Garden memorial plaques, made for outdoors',
     tagline: 'A dedication for a favourite place.',
-    // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026). "Fixings", not "screws and caps": the 150 × 50 mm plates on this
-    // page have screws only.
-    intro: <>Memorial plaques for the garden in solid brass or stainless steel, made to stay outside all year. Fix one to a wall, fence, post or stone with the fixings included, and see your wording on a free proof before you pay.</>,
+    // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026), three lines on a phone so the film still starts in the top
+    // two-thirds of the screen (owner msg 10240). "Fixings", not "screws and caps": the 150 × 50 mm plates on this page
+    // have screws only.
+    intro: <>Memorial plaques for the garden in solid brass or stainless steel, made to stay outside all year, with fixings included and a free proof first.</>,
     cards: gardenCards,
     chips: [...metalChips, boardChip],
     links: [{ href: '/tree-memorial-plaques', label: 'On a ground stake' }, { href: '/bench-plaques', label: 'On a bench' }],
@@ -478,9 +479,10 @@ function stainlessPage(): TemplateConfig {
     prefix: 'stainless',
     title: 'Engraved stainless steel plaques',
     tagline: 'Clean, modern and made for outdoors.',
-    // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026): the first sentence follows the tagline. "Fixings": the bench
-    // plates have screws only.
-    intro: <>Each one is 1.5 mm solid stainless steel with etched, paint-filled lettering, made to order in rectangles, ovals and circles from {MIN_PLAQUE_DIMENSION_MM} mm up to {MAX_PLAQUE_DIMENSION_MM} mm each way, with fixings included. Bench plates from {priceOf(plate(150, 50, STAINLESS))}, A5 {priceOf(plate(210, 148, STAINLESS))}, on a wood board {formatGbp(board.price)}, <a href="/tree-memorial-plaques">on a tree stake</a> {formatGbp(onStakePrice(treeFrom))}.</>,
+    // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026): the first sentence follows the tagline, short enough to keep the
+    // intro to four phone lines so the film starts in the top two-thirds of the screen (owner msg 10240). "Fixings": the
+    // bench plates have screws only.
+    intro: <>Solid 1.5 mm stainless steel with etched, paint-filled lettering, made to order up to {MAX_PLAQUE_DIMENSION_MM} mm, fixings included. Bench plates from {priceOf(plate(150, 50, STAINLESS))}, A5 {priceOf(plate(210, 148, STAINLESS))}, on a wood board {formatGbp(board.price)}, <a href="/tree-memorial-plaques">on a tree stake</a> {formatGbp(onStakePrice(treeFrom))}.</>,
     cards: stainlessCards,
     finishes: STAINLESS,
     chips: [

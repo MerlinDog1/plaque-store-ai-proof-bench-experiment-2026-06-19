@@ -220,6 +220,18 @@ function wallFixingSummary() {
   return `${words[rect[0]]}, one in each corner, on rectangular plaques and ${words[round[0]]}, one at each side, on ovals and circles`;
 }
 
+/** The garden page's fixings, from the catalogue: the wall plaques' screws under decorative caps, and its one bench-size
+ * card, the 150 × 50 mm plate, with two screws at its ends and no caps. The build fails if either changes. */
+function gardenFixingSummary() {
+  const plates = merchantOffers.filter(offer => offer.format === 'Bench' && offer.preset.width === 150 && offer.preset.height === 50);
+  const holes = [...new Set(plates.map(offer => offer.preset.fixingHoleCount))];
+  const capped = merchantOffers.filter(offer => offer.format !== 'Bench').every(offer => offer.preset.fixing === 'caps');
+  if (!capped || !plates.length || holes.length !== 1 || holes[0] !== 2 || plates.some(offer => offer.preset.fixing !== 'screws')) {
+    throw new Error('Garden plaque fixings changed: reword gardenFixingSummary');
+  }
+  return `${wallFixingSummary()}, under decorative caps that hide the screw heads, except the 150 × 50 mm plate, which has two, one at each end, without caps`;
+}
+
 /** The longest production time of plaques in a finish, without wood backing (catalogue days). */
 const productionDaysFor = (material: string) => Math.max(...merchantOffers.filter(offer => offer.preset.material === material && !offer.preset.wood).map(offer => offer.productionDays));
 
@@ -802,7 +814,8 @@ export const seoLandingPages: SeoLandingPage[] = [
       // page's new "made to last outdoors" section now cover. "Fixings", not caps: the 150 × 50 mm plates have screws only.
       { question: 'What are the best memorial plaques for a garden?', answer: 'A solid metal plate without wood backing. Stainless steel stays silver with little care, and brass gives a warmer, traditional look that mellows over time. Both of ours are 1.5 mm solid metal with etched, paint-filled lettering, and come with fixings for a wall, fence, post or stone.' },
       { question: 'What size should a garden plaque be?', answer: 'Measure the flat space first and keep the plaque above the planting. A 200 × 150 mm or A5 plaque suits a name, dates and a short message; choose A4 or 300 × 200 mm for a longer tribute or a shared garden, and 150 × 50 mm for just a name and dates on a post.' },
-      { question: 'How do I fix it to a wall, fence or stone?', answer: `Each plaque comes with its screw holes and screws, under decorative caps that hide the screw heads: ${wallFixingSummary()}. Standard fixings suit timber, brick or stone, and the holes are drawn on your proof so you can check them before you pay. For a tree, use a ground stake or a post rather than the tree itself.` },
+      // Not every plaque here has caps: the 150 × 50 mm plates have screws only (page-1 SEO review, 6 Nov 2026).
+      { question: 'How do I fix it to a wall, fence or stone?', answer: `Each plaque comes with its screw holes and screws: ${gardenFixingSummary()}. Standard fixings suit timber, brick or stone, and the holes are drawn on your proof so you can check them before you pay. For a tree, use a ground stake or a post rather than the tree itself.` },
       { question: 'Can a garden plaque go near the sea?', answer: 'Near the sea or somewhere very exposed, ask us before ordering. Send us a photo of the spot on WhatsApp and we’ll tell you honestly which finish suits it.' },
       { question: 'How do I look after a garden plaque?', answer: 'Care depends on the finish. Polished stainless steel needs only an occasional wipe; brushed and polished brass mellow outside unless they are polished from time to time. On sealed finishes such as orbital and aged brass, check the care instructions before using any polish or abrasive cleaner.' },
     ] : [
