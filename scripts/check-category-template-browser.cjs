@@ -117,7 +117,7 @@ const geometry = page => page.evaluate(() => {
   return { mainTop: Math.round(top), pageHeight: main.scrollHeight, viewport: [innerWidth, innerHeight], screens: main.scrollHeight / (innerHeight - top),
     overflow: Math.max(main.scrollWidth - main.clientWidth, document.documentElement.scrollWidth - innerWidth), card: rect(card), banner: rect(banner),
     h1: rect(document.querySelector('h1')), firstRow: firstRow.map(rect), bar: bar && bar.getBoundingClientRect().height ? rect(bar) : null,
-    buttons: rect(document.querySelector('.cat-tpl-head .shop-hero-choices')), film: rect(figure?.querySelector('.promo-film')), toggle: rect(figure?.querySelector('.promo-film-toggle')) };
+    buttons: rect(document.querySelector('.cat-film-hero .shop-hero-choices')), film: rect(figure?.querySelector('.promo-film')), toggle: rect(figure?.querySelector('.promo-film-toggle')) };
 });
 const overlaps = (a, b) => a && b && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
 
@@ -234,7 +234,7 @@ async function checkFilm(page, films, where) {
     const figure = [...document.querySelectorAll('.cat-film-figure')].find(el => el.getBoundingClientRect().height > 0);
     const video = figure.querySelector('video');
     const box = figure.querySelector('.promo-film').getBoundingClientRect();
-    const glowing = [...document.querySelectorAll('.cat-tpl-head .shop-hero-choices > a')].filter(a => getComputedStyle(a).outlineStyle === 'solid')
+    const glowing = [...document.querySelectorAll('.cat-film-hero .shop-hero-choices > a')].filter(a => getComputedStyle(a).outlineStyle === 'solid')
       .map(a => (a.classList.contains('shop-hero-choice-whatsapp') ? 'whatsapp' : 'design'));
     return { film: [Math.round(box.width), Math.round(box.height)], id: figure.querySelector('[data-film-id]').dataset.filmId, paused: video.paused, time: video.currentTime,
       others: [...document.querySelectorAll('.cat-film-figure video')].filter(el => el !== video).map(el => el.getAttribute('src')),
@@ -243,7 +243,8 @@ async function checkFilm(page, films, where) {
   const first = await state();
   const viewport = page.viewportSize();
   assert(first.film[1] <= viewport.height * 0.75 + 1, `${where}: film within 75% of the screen height (${first.film})`);
-  assert(first.film[0] >= (viewport.width < 721 ? viewport.width - 40 : 380), `${where}: large film (${first.film})`);
+  // As wide as the homepage's: the phone copy fills the hero between its 24 px margins.
+  assert(first.film[0] >= (viewport.width < 721 ? viewport.width - 48 : 380), `${where}: large film (${first.film})`);
   await page.waitForFunction(() => {
     const video = [...document.querySelectorAll('.cat-film-figure')].find(el => el.getBoundingClientRect().height > 0)?.querySelector('video');
     return video && !video.paused && video.currentTime > 0.5;
@@ -304,9 +305,10 @@ async function checkPlanner(page, where) {
         await settle(page);
         const withNotice = await geometry(page);
         assert(withNotice.banner, `${spec.slug}/${mode}: cookie notice showing for a new visitor`);
-        // The film leads, as on the homepage (owner msg 10240): in the top half of the first screen, under the two hero
-        // buttons on phones and beside them on computers, and before the first product card.
-        const leads = state => state.film && state.buttons && state.film.top < state.viewport[1] / 2 && state.film.bottom <= state.card.top
+        // The film leads, as on the homepage (owner msg 10240): under the two hero buttons on phones and beside them on
+        // computers, and before the first product card. In the homepage's own hero (owner msg 10329) it starts where the
+        // homepage's does, below its title, tagline and intro: within the top two-thirds of the first screen.
+        const leads = state => state.film && state.buttons && state.film.top < state.viewport[1] * 2 / 3 && state.film.bottom <= state.card.top
           && (mode === 'phone' ? state.film.top >= state.buttons.bottom : state.film.left >= state.buttons.right);
         assert(leads(withNotice), `${spec.slug}/${mode}: the film leads the page ${JSON.stringify({ film: withNotice.film, buttons: withNotice.buttons, card: withNotice.card })}`);
         // The noticeable neutral notice: 88 px or less on the phone, clear of the H1, the hero buttons and the contact bar,

@@ -9,6 +9,7 @@ import { businessContact, productionTiming } from '../services/shopInformation';
 import { ContactLink, MobileContactBar, WhatsAppIcon, plaqueSubject } from './ContactOptions';
 import { HomeAiSection, HomePortraitSection, HomeQualitySection, ProofPdfShowcase, featureImageVersion } from './FeatureSections';
 import { PromoFilm, PromoFilmFigure } from './PromoVideo';
+import { ShopHero, homeTagline } from './ShopHero';
 import { promoVideo, promoVideoPath } from '../services/promoVideo.mjs';
 import { designHrefFor, hasNewProductLayout } from '../services/productLayout';
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
@@ -622,48 +623,43 @@ export function ShopHome({ onStartDesign, onRequestDesign }: { onStartDesign?: (
   const benchProduct = productFamilies.find(product => product.slug === 'bench-plaques')!;
   return (
     <div className="shopfront" data-prerendered="true">
-      <section className="shop-hero">
-        <div className="shop-hero-copy">
-          {/* Say what we sell first; the slogan becomes the tagline (owner msg 5132). */}
-          {/* A price on a phone's first screen (owner msg 6430: "price is kind of hidden a bit"). */}
-          <p className="shop-kicker">
-            Free proof · UK delivery · <TrackedPrice value={displayedPriceValue(benchProduct.startingFrom)} product={benchProduct.slug}>{benchProduct.startingFrom}</TrackedPrice>
-          </p>
-          <h1 className="shop-hero-title">Personalised brass &amp; stainless steel plaques</h1>
-          <p className="shop-hero-tagline">Some words deserve to <em>stay.</em></p>
-          <p className="shop-intro">
-            Design online instantly, or talk to one of our designers on WhatsApp.
-          </p>
-          {/* Two equal first choices; WhatsApp is pushed as hard as the designer (owner msg 5137). */}
-          <div className="shop-hero-choices">
-            <DesignLink onStart={onStartDesign}>Design online</DesignLink>
-            <ContactLink channel="whatsapp" placement="hero" subject="a plaque" className="shop-button shop-hero-choice-whatsapp">
-              <WhatsAppIcon /> Design on WhatsApp
-            </ContactLink>
-          </div>
-          {/* The promo film at the top (owner msg 6986): on phones straight under the two buttons it lights up. */}
-          <PromoFilmFigure className="shop-hero-film-inline" />
-          {/* Customers increasingly arrive with an AI mock-up (owner msg 5156). */}
-          <p className="shop-hero-ai-note">
-            Made a design in ChatGPT? <ContactLink channel="whatsapp" placement="hero" subject="a plaque">Send us the picture</ContactLink> and we’ll make it real.
-          </p>
-          <HeroRoutes />
-          <div className="shop-hero-price">
-            <span>Bench plaques</span>
-            <strong>
-              <TrackedPrice value={displayedPriceValue(benchProduct.startingFrom)} product={benchProduct.slug}>{benchProduct.startingFrom}</TrackedPrice>
-            </strong>
-            <span>with UK delivery</span>
-          </div>
-          <p className="shop-hero-note">
-            Free online designer & proof · No account needed · Or <ContactLink channel="email" placement="hero">email us</ContactLink>
-          </p>
-          <a className="shop-text-link shop-hero-how" href="#how-it-works">See how the designer works</a>
-          <ProductionNote />
+      {/* The category pages share this hero (components/ShopHero.tsx, owner msg 10329). */}
+      <ShopHero
+        /* Say what we sell first; the slogan becomes the tagline (owner msg 5132). A price on a phone's first screen
+           (owner msg 6430: "price is kind of hidden a bit"). */
+        kicker={<>Free proof · UK delivery · <TrackedPrice value={displayedPriceValue(benchProduct.startingFrom)} product={benchProduct.slug}>{benchProduct.startingFrom}</TrackedPrice></>}
+        title={<>Personalised brass &amp; stainless steel plaques</>}
+        tagline={homeTagline}
+        intro="Design online instantly, or talk to one of our designers on WhatsApp."
+        /* Two equal first choices; WhatsApp is pushed as hard as the designer (owner msg 5137). */
+        choices={<>
+          <DesignLink onStart={onStartDesign}>Design online</DesignLink>
+          <ContactLink channel="whatsapp" placement="hero" subject="a plaque" className="shop-button shop-hero-choice-whatsapp">
+            <WhatsAppIcon /> Design on WhatsApp
+          </ContactLink>
+        </>}
+        /* The promo film at the top (owner msg 6986): on phones straight under the two buttons it lights up; on
+           computers beside the buttons, where the bench photo was. */
+        film={className => <PromoFilmFigure className={className} />}
+      >
+        {/* Customers increasingly arrive with an AI mock-up (owner msg 5156). */}
+        <p className="shop-hero-ai-note">
+          Made a design in ChatGPT? <ContactLink channel="whatsapp" placement="hero" subject="a plaque">Send us the picture</ContactLink> and we’ll make it real.
+        </p>
+        <HeroRoutes />
+        <div className="shop-hero-price">
+          <span>Bench plaques</span>
+          <strong>
+            <TrackedPrice value={displayedPriceValue(benchProduct.startingFrom)} product={benchProduct.slug}>{benchProduct.startingFrom}</TrackedPrice>
+          </strong>
+          <span>with UK delivery</span>
         </div>
-        {/* Computers: the promo film beside the buttons, where the bench photo was (owner msg 6986). */}
-        <PromoFilmFigure className="shop-hero-film-side" />
-      </section>
+        <p className="shop-hero-note">
+          Free online designer & proof · No account needed · Or <ContactLink channel="email" placement="hero">email us</ContactLink>
+        </p>
+        <a className="shop-text-link shop-hero-how" href="#how-it-works">See how the designer works</a>
+        <ProductionNote />
+      </ShopHero>
       {/* Owner msg 5860 ("This like repeats on the homepage"): each thing once. Prices by size and metal (owner msg
           6430), which also does the old "Brass or stainless steel?" section's job; then categories, the two ways to
           order, and quality. */}

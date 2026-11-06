@@ -6,6 +6,7 @@ import { AiConceptPair, HomeQualitySection, ProofPdfShowcase, featureImageVersio
 import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { merchantProducts } from '../services/commerce';
 import { ShopFaq } from './Shopfront';
+import { ShopHero } from './ShopHero';
 import { portraitsInMetalLink } from '../services/shopInformation';
 
 // Portrait plaques and AI-design pages (owner msg 5178).
@@ -136,42 +137,40 @@ const portraitFilm = categoryFilmFor('portrait-plaques');
 export function ShopPortraitPlaques() {
   return (
     <div className="shopfront" data-prerendered="true">
-      <div className="shop-breadcrumb">
-        <a href="/">Home</a>
-        <span>/</span>
-        <span>Portrait plaques</span>
-      </div>
       {/* The portrait film at the top, as on the homepage (owner msg 10240, 6 Nov 2026): under the two buttons on
-          phones, beside the copy on computers, where the Millie close-up was; the close-up follows the hero. */}
-      <section className="shop-feature-hero cat-film-hero">
-        <div className="shop-feature-hero-copy">
-          <p className="shop-kicker">Free portrait sketch · Made in the UK</p>
-          <h1>Personalised portrait plaques</h1>
-          <p className="shop-hero-tagline">A favourite face, <em>engraved in metal.</em></p>
-          <p className="shop-intro">
-            Send us a favourite photo of a person or pet. Using our Portraits in Metal technology, we turn it into
-            fine engraving artwork, arrange your words around it and send you a free sketch and proof before you pay.
-          </p>
-          {/* The price on the first screen, like the other category pages (owner msg 5927). */}
-          <p className="cat-hero-buy">
-            <strong className="shop-product-price">
-              <TrackedPrice value={displayedPriceValue(portraitFrom)} product="portrait-plaques">from {portraitFrom}</TrackedPrice>
-            </strong>
-            <span>A5 portrait plaque, with your free sketch, engraving and UK delivery</span>
-          </p>
-          <div className="shop-hero-choices">
-            <ContactLink channel="whatsapp" placement="hero" className="shop-button shop-hero-choice-whatsapp">
-              <WhatsAppIcon /> WhatsApp your photo
-            </ContactLink>
-            <ContactLink channel="email" placement="hero" className="shop-button">Email your photo</ContactLink>
-          </div>
-          <CategoryFilmFigure className="cat-film-inline" film={portraitFilm} />
-          <p className="shop-hero-note">
-            Brass or stainless steel · A5, A4 and A3 · Prefer to upload it? <a href={pim('/free-proof', 'hero_free_sketch')}>Request a free sketch online</a>
-          </p>
+          phones, beside the copy on computers, where the Millie close-up was; the close-up follows the hero. Since
+          owner msg 10329 in the homepage's own hero, as the category pages are (components/ShopHero.tsx). */}
+      <ShopHero
+        className="cat-film-hero"
+        crumbs={<div className="shop-breadcrumb shop-hero-crumbs"><a href="/">Home</a><span>/</span><span>Portrait plaques</span></div>}
+        /* The price on the first screen, like the other category pages (owner msg 5927), where the homepage has its; one
+           phone line, as the homepage's. */
+        kicker={<>Free sketch · Made in the UK · <TrackedPrice value={displayedPriceValue(portraitFrom)} product="portrait-plaques">from {portraitFrom}</TrackedPrice></>}
+        title="Personalised portrait plaques"
+        tagline={<>A favourite face, <em>engraved in metal.</em></>}
+        intro={<>
+          Send us a favourite photo of a person or pet. Using our Portraits in Metal technology, we turn it into
+          fine engraving artwork, arrange your words around it and send you a free sketch and proof before you pay.
+        </>}
+        choices={<>
+          <ContactLink channel="whatsapp" placement="hero" className="shop-button shop-hero-choice-whatsapp">
+            <WhatsAppIcon /> WhatsApp your photo
+          </ContactLink>
+          <ContactLink channel="email" placement="hero" className="shop-button">Email your photo</ContactLink>
+        </>}
+        film={className => <CategoryFilmFigure className={className} film={portraitFilm} />}
+      >
+        <div className="shop-hero-price">
+          <span>A5 portrait plaque</span>
+          <strong>
+            <TrackedPrice value={displayedPriceValue(portraitFrom)} product="portrait-plaques">from {portraitFrom}</TrackedPrice>
+          </strong>
+          <span>with your free sketch, engraving and UK delivery</span>
         </div>
-        <CategoryFilmFigure className="cat-film-side" film={portraitFilm} />
-      </section>
+        <p className="shop-hero-note">
+          Brass or stainless steel · A5, A4 and A3 · Prefer to upload it? <a href={pim('/free-proof', 'hero_free_sketch')}>Request a free sketch online</a>
+        </p>
+      </ShopHero>
       <figure className="shop-feature-hero-image shop-portrait-closeup">
         <img src="/site-images/portraits/pim-millie-detail-1200.webp" width="1200" height="675" loading="lazy" decoding="async"
           alt="Close-up photograph of Millie the cat’s portrait engraved in brushed metal, showing fine fur lines and whiskers" />

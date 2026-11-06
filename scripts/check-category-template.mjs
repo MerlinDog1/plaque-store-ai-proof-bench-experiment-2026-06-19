@@ -259,12 +259,17 @@ for (const page of pages) {
   // The page's own film leads it, as the homepage's does (owner msg 10240, 6 Nov 2026): two copies in the hero (under
   // the two buttons for phones, beside the copy for computers; CSS shows one). Like the homepage film it plays by itself
   // once the page has loaded, so the HTML has its preloaded poster but no source. Nothing follows the proof any more.
+  // Since owner msg 10329 the hero is the homepage's own (components/ShopHero.tsx): the same classes and order.
   assert.equal(main.querySelectorAll('iframe').length, 0, `${page.slug}: no embedded frames`);
   const film = categoryFilmFor(page.slug);
   const films = [...main.querySelectorAll('video')];
-  const hero = main.querySelector(':scope > .cat-tpl-hero.cat-film-hero');
-  const inline = hero?.querySelector(':scope > .cat-tpl-head > .cat-film-inline');
-  const side = hero?.querySelector(':scope > .cat-film-side');
+  const hero = main.querySelector(':scope > .shop-hero.cat-film-hero');
+  const inline = hero?.querySelector(':scope > .shop-hero-copy > .shop-hero-film-inline');
+  const side = hero?.querySelector(':scope > .shop-hero-film-side');
+  const order = [...(hero?.querySelector(':scope > .shop-hero-copy')?.children || [])].map(el => el.className.split(' ').find(name => name.startsWith('shop-')) || el.tagName.toLowerCase());
+  assert.deepEqual(order, ['shop-breadcrumb', 'shop-kicker', 'shop-hero-title', 'shop-hero-tagline', 'shop-intro', 'shop-hero-choices', 'shop-hero-film-inline', 'shop-hero-ai-note', 'shop-hero-price', 'shop-hero-note'],
+    `${page.slug}: the homepage's hero, in its order`);
+  assert(/£\d/.test(hero.querySelector('.shop-kicker').textContent), `${page.slug}: a from-price in the kicker, as on the homepage`);
   assert.equal(films.length, 2, `${page.slug}: the film twice, for phones and computers`);
   assert(inline && side && films.every(video => [inline, side].includes(video.closest('.cat-film-figure'))), `${page.slug}: both copies of the film in the hero`);
   assert(hero.compareDocumentPosition(main.querySelector('.cat-tpl-grid-section')) & 4, `${page.slug}: the film before the plaques`);
@@ -290,16 +295,16 @@ for (const page of pages) {
     assert(existsSync(path.join(root, src.replace(/[?#].*$/, ''))), `${page.slug}: missing image ${src}`);
   }
 
-  // Facts line, sample proof and contextual links.
-  const facts = compact(main.querySelector('.cat-tpl-head .cat-hero-buy').textContent);
+  // Facts (the hero's price row and the note under it), sample proof and contextual links.
+  const facts = compact(`${hero.querySelector('.shop-hero-price').textContent} · ${hero.querySelector('.shop-hero-note').textContent.replace(/ · Or email us$/, '')}`);
   // One or two phone lines (review fix, 1 Nov 2026): the page's usual days only (5; 10 on the tree page, where every
   // plaque is on a board, as on the practice grid); longer times are on the cards and in the questions.
   for (const words of ['UK delivery included', 'free proof before you pay']) {
-    assert(facts.includes(words), `${page.slug}: facts line says "${words}"`);
+    assert(facts.toLowerCase().includes(words.toLowerCase()), `${page.slug}: facts line says "${words}"`);
   }
   const usual = Math.min(...pageDays);
   assert.equal(usual, page.usual || (page.stake ? 10 : STANDARD_DAYS), `${page.slug}: the page's usual days`);
-  assert(facts.endsWith(` made in ${usual} working days`) && !facts.includes('('), `${page.slug}: facts line ends with the usual ${usual} days, no exceptions: ${facts}`);
+  assert(facts.toLowerCase().endsWith(` made in ${usual} working days`) && !facts.includes('('), `${page.slug}: facts line ends with the usual ${usual} days, no exceptions: ${facts}`);
   if (page.planner) {
     // The date planner states the catalogue days of the page's plaques, as the cards do.
     const intro = compact(main.querySelector('.cat-tpl-planner .cat-tpl-section-intro').textContent);

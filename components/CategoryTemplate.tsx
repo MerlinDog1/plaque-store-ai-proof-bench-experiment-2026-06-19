@@ -14,6 +14,7 @@ import { TrackedPrice, displayedPriceValue } from './TrackedPrice';
 import { ProofPdfStack } from './FeatureSections';
 import { samplePdfFor, sampleProofPageFor } from './CatalogueDetails';
 import { DesignLink } from './Shopfront';
+import { ShopHero, homeTagline } from './ShopHero';
 import { PriceTable, formatGbp, onStakePrice, priceTableIncludes, priceTableIncludesOnStake, type PriceTableSize } from './PriceTable';
 import type { Inscription } from './CategoryLanding';
 
@@ -581,6 +582,8 @@ export type TemplateConfig = {
    * /memorial-plaques#memorial-wording). */
   prefix: string;
   title: string;
+  /** The line under the H1 in the homepage's tagline style; the homepage's own (homeTagline) where a page has none. */
+  tagline?: React.ReactNode;
   /** Two lines under the H1. */
   intro: React.ReactNode;
   cards: TemplateCard[];
@@ -670,32 +673,61 @@ export function CategoryTemplatePage({ config, product, faqs, onLaunch, onReques
   const finishes = <FinishesRow id={id('finishes')} finishes={config.finishes || templateFinishes.map(finish => finish.key)}
     woodTones={stake ? ['light'] : config.cards.some(card => card.board) ? ['light', 'dark'] : []}
     title={config.finishesTitle} intro={config.finishesIntro} outdoors={config.outdoors} />;
+  const crumbs = (
+    <div className={`shop-breadcrumb ${film ? 'shop-hero-crumbs' : 'cat-tpl-crumbs'}`}>
+      <a href="/">Home</a>
+      <span>/</span>
+      {parent && <><a href={`/${parent.slug}`}>{parent.title}</a><span>/</span></>}
+      <span>{product.title}</span>
+    </div>
+  );
+  const included = config.included || 'engraving, fixings & UK delivery included';
+  const price = <TrackedPrice value={fromValue} product={product.slug}>{fromLabel}</TrackedPrice>;
+  // The price row reads like the homepage's ("Bench plaques from £58.50 with UK delivery").
+  const priceInRow = <TrackedPrice value={fromValue} product={product.slug}>{fromLabel.replace(/^From/, 'from')}</TrackedPrice>;
   return (
     <div className="shopfront cat-page cat-tpl" data-prerendered="true">
-      {/* The page's own film at the top, as on the homepage (owner msg 10240, 6 Nov 2026): straight under the two
-          buttons on phones, beside the title, price and buttons on computers. The buttons light up as it plays. */}
-      <div className={`cat-tpl-hero${film ? ' cat-film-hero' : ''}`}>
-        <header className="cat-tpl-head">
-          <div className="shop-breadcrumb cat-tpl-crumbs">
-            <a href="/">Home</a>
-            <span>/</span>
-            {parent && <><a href={`/${parent.slug}`}>{parent.title}</a><span>/</span></>}
-            <span>{product.title}</span>
-          </div>
-          <h1>{config.title}</h1>
-          <p className="cat-tpl-intro">{config.intro}</p>
-          <p className="cat-hero-buy"><strong className="shop-product-price"><TrackedPrice value={fromValue} product={product.slug}>{fromLabel}</TrackedPrice></strong>
-            <span> · {config.included || 'engraving, fixings & UK delivery included'} · free proof before you pay · made in {usualDays(cards)} working days</span></p>
-          {film && <div className="shop-hero-choices">
+      {/* The page's own film at the top, as on the homepage (owner msg 10240, 6 Nov 2026), in the homepage's own hero
+          (owner msg 10329: "we want to be matching the text size and layout of the homepage always"): the same kicker,
+          title, tagline, intro and buttons, the film straight under the buttons on phones and beside the copy on
+          computers, then the AI note, the price and the page's facts. The buttons light up as it plays. */}
+      {film ? (
+        <ShopHero
+          className="cat-film-hero"
+          crumbs={crumbs}
+          kicker={<>Free proof · UK delivery · {price}</>}
+          title={config.title}
+          tagline={config.tagline || homeTagline}
+          intro={config.intro}
+          choices={<>
             <DesignLink onStart={onLaunch} href={config.designHref}>Design online</DesignLink>
             <ContactLink channel="whatsapp" placement="hero" subject={subject} className="shop-button shop-hero-choice-whatsapp">
               <WhatsAppIcon /> Design on WhatsApp
             </ContactLink>
-          </div>}
-          {film && <CategoryFilmFigure className="cat-film-inline" film={film} />}
+          </>}
+          film={className => <CategoryFilmFigure className={className} film={film} />}
+        >
+          <p className="shop-hero-ai-note">
+            Made a design in ChatGPT? <ContactLink channel="whatsapp" placement="hero" subject={subject}>Send us the picture</ContactLink> and we’ll make it real.
+          </p>
+          <div className="shop-hero-price">
+            <span>{product.title}</span>
+            <strong>{priceInRow}</strong>
+            <span>{included}</span>
+          </div>
+          <p className="shop-hero-note">
+            Free proof before you pay · Made in {usualDays(cards)} working days · Or <ContactLink channel="email" placement="hero">email us</ContactLink>
+          </p>
+        </ShopHero>
+      ) : (
+        <header className="cat-tpl-head">
+          {crumbs}
+          <h1>{config.title}</h1>
+          <p className="cat-tpl-intro">{config.intro}</p>
+          <p className="cat-hero-buy"><strong className="shop-product-price">{price}</strong>
+            <span> · {included} · free proof before you pay · made in {usualDays(cards)} working days</span></p>
         </header>
-        {film && <CategoryFilmFigure className="cat-film-side" film={film} />}
-      </div>
+      )}
       <ProductGrid id={id('grid')} cards={cards} chips={config.chips} links={config.links} end={config.gridEnd} wide={config.photos === 'wide'} stake={stake} mounted={mounted} />
       <FaqAccordion id={id('questions')} title={config.faqTitle} faqs={faqs} subject={subject} />
       {config.afterQuestions?.(cards, subject)}

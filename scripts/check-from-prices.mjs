@@ -43,7 +43,9 @@ const amount = value => {
 const gbp = value => (value == null ? 'none' : `£${Number.isInteger(value) ? value : value.toFixed(2)}`);
 
 function heroPrice(html) {
-  const match = /class="cat-hero-buy"><strong class="shop-product-price">([\s\S]*?)<\/strong>/.exec(html);
+  // The homepage's hero on the category and portrait pages (owner msg 10329): its price row; else the earlier facts line.
+  const match = /class="shop-hero-price"><span>[^<]*<\/span><strong>([\s\S]*?)<\/strong>/.exec(html)
+    || /class="cat-hero-buy"><strong class="shop-product-price">([\s\S]*?)<\/strong>/.exec(html);
   return match ? amount(text(match[1])) : null;
 }
 /** The lowest price in the page's price tables for one metal (the cells' labels name the size, the metal and the price). */

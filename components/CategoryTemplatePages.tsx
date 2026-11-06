@@ -58,6 +58,9 @@ function memorialPage(): TemplateConfig {
   return {
     prefix: 'memorial',
     title: 'Personalised memorial plaques',
+    // The homepage's hero has a tagline under the title (owner msg 10329): each page's line from its earlier live hero
+    // (components/CategoryPages.tsx), or the homepage's own where that line would repeat the film's opening words
+    // beside it (memorial: "Remember them in your own words"; opening: "Mark the occasion") or the page had none.
     intro: <>Solid brass or stainless steel, etched and infilled by hand, for a <a href="/bench-plaques">bench</a>, <a href="/garden-plaques">garden</a>, <a href="/tree-memorial-plaques">tree</a>, grave or wall.</>,
     cards: memorialCards,
     chips: [
@@ -109,6 +112,7 @@ function benchPage(): TemplateConfig {
   return {
     prefix: 'bench',
     title: 'Personalised bench plaques',
+    tagline: 'A small place for a lasting memory.',
     intro: <>Solid brass or stainless steel, {first.replace(' mm', '')} to {last}, with screws. For a <a href="/garden-plaques">garden</a> or <a href="/tree-memorial-plaques">tree</a>?</>,
     cards: benchCards,
     photos: 'wide',
@@ -214,6 +218,7 @@ function gardenPage(): TemplateConfig {
   return {
     prefix: 'garden',
     title: 'Garden memorial plaques',
+    tagline: 'A dedication for a favourite place.',
     intro: <>Solid brass or stainless steel for a wall, fence, post or stone in the garden, with screws and caps included.</>,
     cards: gardenCards,
     chips: [...metalChips, boardChip],
@@ -283,6 +288,7 @@ function treePage(): TemplateConfig {
   return {
     prefix: 'tree',
     title: 'Memorial tree plaques',
+    tagline: 'A tree that grows, and their name beside it.',
     intro: <>Brass or stainless steel, on a light solid wood board and ground stake that stands beside the tree, never fixed to it.</>,
     cards: treeCards,
     mount: 'stake',
@@ -337,6 +343,7 @@ function brassPage(): TemplateConfig {
   return {
     prefix: 'brass',
     title: 'Personalised brass plaques',
+    tagline: 'Warm, traditional and made to last.',
     intro: <>Polished, brushed, orbital or aged: 150 × 50 mm from {from(150, 50)}, A5 {from(210, 148)}, A4 {from(297, 210)}, 400 × 300 mm {from(400, 300)}.</>,
     cards: brassCards,
     finishes: BRASS,
@@ -441,6 +448,7 @@ function stainlessPage(): TemplateConfig {
   return {
     prefix: 'stainless',
     title: 'Personalised stainless steel plaques',
+    tagline: 'Clean, modern and made for outdoors.',
     intro: <>Bench plates from {priceOf(plate(150, 50, STAINLESS))}, A5 {priceOf(plate(210, 148, STAINLESS))}, on a wood board {formatGbp(board.price)}, <a href="/tree-memorial-plaques">on a tree stake</a> {formatGbp(onStakePrice(treeFrom))}.</>,
     cards: stainlessCards,
     finishes: STAINLESS,
@@ -601,6 +609,7 @@ function customPage(): TemplateConfig {
   return {
     prefix: 'custom',
     title: 'Custom plaques',
+    tagline: 'Ovals, circles, larger sizes and your own ideas.',
     intro: <>Ovals, circles and larger plates, priced below. Another size up to {MAX_PLAQUE_DIMENSION_MM} mm, or another shape? <a href="#custom-quote">Get a free quote</a>.</>,
     cards: customCards,
     from: { value: oval.price, slug: oval.slug },
