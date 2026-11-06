@@ -1,5 +1,22 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Category films + larger cookie notice — PREVIEW ONLY, 6 November 2026
+
+- Owner msg 10199. Branch `codex/instaplaque-category-films-20261106`; app source **`aec5ab4c8bee7fecd61966f0cf3fceba74a9723a`**, pushed.
+- **Ready preview:** https://instaplaque-9islru9kh-dullaghan31-3959s-projects.vercel.app (`dpl_5Fj5WvK913X5gQm6rMLUfKKvL9fj`, target preview).
+- Thirteen unique audited films and posters; all 175 exact product pages mapped through their breadcrumb category
+  (bench 37, stainless 42, custom 12, brass 84). Portrait is photo/artwork → proof and WhatsApp only.
+- Cookie-bigger branch merged; existing wording/appearance retained. Six desktop category headers tightened only
+  enough to clear the larger notice; phone layouts, words and product photos unchanged.
+- Page-improvements and the four stage-three pages retained. Original homepage film and /video content/VideoObject,
+  both sitemaps, robots and Merchant feed unchanged.
+- Checks: typecheck; full local/cloud build + postbuild; 175 mappings; 43 playback cases; 36 category layout cases;
+  51 paced protected-preview checks, including stylesheet equality and actual HTTP 206 source bytes; visual inspection.
+- Production independently unchanged before/after: `dpl_EN5TJhoAY3gizahUEiQG9hji4mr2`. No promotion/aliases/env/ads changes.
+- Details: [category film integration](docs/category-films-2026-11-06.md). Full receipt/evidence:
+  workspace `output/instaplaque-category-films-20261106/SITE-REPORT.md`. Task-local servers stopped.
+
+
 ## Page-1 improvements + stage 3 pages — PREVIEW ONLY, 5 November 2026
 
 - **Owner:** msg 10173 "go with improvements" (the plan sent 21:26 UTC). Branch `codex/instaplaque-page-improvements-20261105`,
