@@ -3,42 +3,40 @@
 ## Page-1 SEO copy: garden, opening, stainless steel and brass — PREVIEW ONLY, 6 November 2026
 
 - Owner msgs 10401/10402/10408 ("OK set helper on it"): the corrected spec is workspace
-  `output/instaplaque-seo-page1-20261106/BRIEF.md`. Branch `codex/instaplaque-seo-page1-20261106`, from the live source
-  `f33fa04` (live `dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` was built from `e97d856`; `f33fa04` adds only this file).
+  `output/instaplaque-seo-page1-20261106/BRIEF.md`. Round 2 follows Cody's review of the first preview: two shorter hero
+  intros, a corrected garden fixing answer and the browser check's phone length limit. Branch
+  `codex/instaplaque-seo-page1-20261106`, from the live source `f33fa04` (live `dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` was built
+  from `e97d856`; `f33fa04` adds only this file).
 - **Ships:** new titles, meta/og/twitter summaries (still each page's own catalogue from-price), H1s and one swapped
   question per page (still six; the FAQPage is the visible six). One new section each, in the template's guide block below
   the questions: garden above "Memorial gardens and gardens of remembrance.", opening, stainless steel and brass directly
-  above their wording ideas. Garden and stainless steel intros per the spec, saying "fixings" (the 150 × 50 mm plates have
-  screws, no caps). Garden: the hero film's label and the first two cards' alt text. Links: footer "Garden memorial
-  plaques"; in-text links on memorial, tree, bench, custom and house name; church and donor already link "opening
-  plaques"; the practice page doesn't mention them, so no link. Sitemap `<lastmod>` 2026-11-06 on the four pages only.
-  URLs, prices, products, the Merchant feed, schema types, routes and layout are unchanged.
+  above their wording ideas. Garden and stainless steel hero intros short enough for the film to start in the top
+  two-thirds of a phone screen (garden three lines, stainless steel four), saying "fixings": the 150 × 50 mm plates have
+  screws and no caps. The garden question "How do I fix it to a wall, fence or stone?" now says so too. Garden: the hero
+  film's label and the first two cards' alt text. Links: footer "Garden memorial plaques"; in-text links on memorial,
+  tree, bench, custom and house name; church and donor already link "opening plaques"; the practice page doesn't mention
+  them, so no link. Sitemap `<lastmod>` 2026-11-06 on the four pages only. URLs, prices, products, the Merchant feed,
+  schema types, routes and layout are unchanged.
 - **Code:** `TemplateGuide` takes `paragraphs` and `beforeWording` (its items are optional), `TemplateCard.leadAlt`, a
-  `link` on a product's seoSections (the memorial "Garden, grave and cemetery settings" block), and `NAMES` in
-  `scripts/import-category-films.mjs` for the garden film's label. Copy in `services/commerce.ts` (questions, titles,
+  `link` on a product's seoSections (the memorial "Garden, grave and cemetery settings" block), `NAMES` in
+  `scripts/import-category-films.mjs` for the garden film's label, and `gardenFixingSummary()` in `services/commerce.ts`
+  (from the catalogue; the build fails if the plates' fixings change). Copy in `services/commerce.ts` (questions, titles,
   summaries) and `components/CategoryTemplatePages.tsx` (H1s, intros, sections, links).
-- **Checks:** typecheck; full build with every postbuild guard (383 PASS; `check-category-template.mjs` now expects the
-  new titles, summaries, H1s, questions, sections and links); BRIEF section 6, 95/95, against a build of `f33fa04`
-  (Merchant feed 175 items and product sitemap byte-identical, sitemap the same 29 URLs); only the 9 intended pages
-  change beyond bundle names and the footer anchor. Evidence: the workspace output folder above.
-- **Not passing, limits left as they are:** `scripts/check-category-template-browser.cjs` (local; not a build guard). On a
-  390 × 844 phone the garden film now starts at 582 px and stainless steel's at 568 px (limit 562.7, two-thirds of the
-  screen; they were 491 and 466), and garden is 8.98 and brass 8.68 phone screens long (limit 8.4; were 8.24 and 8.30).
-  Opening (531 px, 8.26) is within both. Release needs the owner's decision: raise the limits, or shorten the copy.
-  The other eight template pages pass it unchanged.
-- **Ready preview:** https://instaplaque-reftj875s-dullaghan31-3959s-projects.vercel.app (`dpl_4odaQG9zCd1VrmF3je1eufFjga5d`,
-  target preview) from `a6d4e59`. Hosted, paced: section 6 94/94; the live sitemaps and feed fetched once each (feed
-  175 items and product sitemap byte-identical, sitemap.xml the same 29 URLs with the four newer `<lastmod>`).
-  Phone 390 and desktop 1440 screenshots of each hero and new section: workspace output folder above, `shots/`.
-- **Staged production, NOT promoted:** https://instaplaque-fihwoj39b-dullaghan31-3959s-projects.vercel.app
-  (`dpl_66txzMy7uUFkpaSAfpi2m1cnFbBx`, target production, Ready) from `a6d4e59` (`vercel deploy --prod --skip-domain`
-  under the shared lock; cloud build and every guard passed). `check-staged.sh` (edited copy, paced): 92 PASS, RESULT
-  PASS, including the four new titles, H1s, summaries and questions.
-- **Production unchanged:** `dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` before, after the preview, after staging and at the end.
-  Vercel's checkpoint challenged this server from about 14:39 to 14:53 UTC; staging waited for it.
-- **Release on the owner's go only:** `DPL=dpl_66txzMy7uUFkpaSAfpi2m1cnFbBx bash output/instaplaque-films-hero-release-20261106/promote.sh`;
-  rollback `DPL=dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` with the same script. Then resubmit the sitemap and request indexing
-  for the four pages.
+- **Checks:** typecheck; full build with every postbuild guard (383 PASS; `check-category-template.mjs` expects the new
+  titles, summaries, H1s, questions, sections and links); BRIEF section 6, 97/97, against a build of `f33fa04` (Merchant
+  feed 175 items and product sitemap byte-identical, sitemap the same 29 URLs; every garden card's plaques fixed as its
+  answer says); only the 9 intended pages change beyond bundle names and the footer anchor.
+  `scripts/check-category-template-browser.cjs` RESULT PASS on all 12 pages. Phone 390 × 844 film tops: garden 531,
+  opening 531, stainless steel 517, brass 491 px (the two-thirds rule, under 562.7 px, is unchanged). Its phone length
+  limit is now 9.0 screens for the new sections (garden 8.91, brass 8.68, stainless steel 8.30, opening 8.26), Cody's
+  decision, as for earlier owner-requested additions; nothing else in that check changed. Evidence: the workspace
+  output folder above (NOTES.md).
+- **First round, superseded (do not promote):** preview `dpl_4odaQG9zCd1VrmF3je1eufFjga5d` and staged production
+  `dpl_66txzMy7uUFkpaSAfpi2m1cnFbBx`, both from `a6d4e59`, before the shorter intros and the fixing answer.
+- **Production unchanged:** `dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx`. Release on the owner's go only, from the round-2 staged
+  build: `DPL=<staged id> bash output/instaplaque-films-hero-release-20261106/promote.sh`; rollback
+  `DPL=dpl_4AJhHvPgZ9narWVpU8GztXKGLwyx` with the same script. Then resubmit the sitemap and request indexing for the four
+  pages.
 
 ## Portrait film v3: cache-safe name for the Bramble film — LIVE, 6 November 2026
 
