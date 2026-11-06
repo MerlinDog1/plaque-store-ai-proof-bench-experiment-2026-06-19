@@ -4,6 +4,16 @@ Owner msg 10199: unique homepage-style films for the 13 category pages and mappe
 Based on page-improvements `4f72e04`, preserving the stage-three pages. Cookie branch
 `origin/codex/instaplaque-cookie-bigger-20261106` merged in `b60d791`.
 
+## v2 films (owner msg 10243, 6 Nov 2026)
+
+The 13 films were remade as v2 (`<slug>-20261106-v2`, 26.53 s, 796 frames): the WhatsApp half now shows a different,
+bespoke example design per page (sketch/logo/document/voice note/photo in, illustrative bespoke proof out), and six
+pages have new real designer captures with better wording. The v1 files were never live, so the importer removes them
+from `public/videos`. Cue windows come from each descriptor: design 0–11.07 s (frame 332), WhatsApp 11.07–23.47 s
+(frame 704), both 23.47–26.53 s; portrait WhatsApp only. `check-promo-video.mjs` seeks into the middle of each
+film's own windows. Film source: `projects/instaplaque-category-films-20261106`, branch
+`codex/instaplaque-category-films-v2-20261106`; media and report: `output/instaplaque-category-films-v2-20261106/`.
+
 ## Implementation
 
 - `services/categoryFilms.mjs`: one versioned descriptor per category. Import only the complete, audited media

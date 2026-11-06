@@ -2,7 +2,7 @@
 // Serve correct prerendered clean routes plus HTTP Range support (Chrome/H.264). Never use this unpaced matrix live.
 // Covers independent IDs, category films leading their pages and playing after load (owner msg 10240), single
 // product/homepage copy, 4:5 uncropped phone/desktop layout,
-// frame-332/566 cues (portrait WhatsApp only), pause/play, actual main-container offscreen pause, quiet modes and
+// cue windows from each film's descriptor (portrait WhatsApp only), pause/play, actual main-container offscreen pause, quiet modes and
 // visibility-event pause/resume. External analytics are blocked and consent refused. Screenshots use CSS pixels.
 // Usage: BASE=http://127.0.0.1:4398 SHOTS=/absolute/path/to/shots node scripts/check-promo-video.mjs
 import assert from 'node:assert/strict';
@@ -87,12 +87,17 @@ const seek = async (page, seconds) => {
   return state(page);
 };
 
-async function glowCycle(page) {
-  let s = await seek(page, 5);
+// Seek into the middle of each cue window. The homepage film uses its own 332/566-frame windows (5, 14, 20 s); a
+// category film uses the windows in its own descriptor (v2: design to 11.07 s, chat to 23.47 s, end card to 26.53 s).
+const cueWindows = (film) => film.cues.map((cue, i) => [cue.start, film.cues[i + 1]?.start ?? film.duration]);
+const middle = ([a, b]) => Math.round(((a + b) / 2) * 100) / 100;
+async function glowCycle(page, film) {
+  const [design, chat, end] = film ? cueWindows(film).map(middle) : [5, 14, 20];
+  let s = await seek(page, design);
   assert.ok(!s.paused && s.cue === 'design' && s.designGlow && !s.whatsappGlow && s.designAnimation === 'promo-cue', `designer part: ${JSON.stringify({ cue: s.cue, d: s.designGlow, w: s.whatsappGlow, a: s.designAnimation })}`);
-  s = await seek(page, 14);
+  s = await seek(page, chat);
   assert.ok(s.cue === 'whatsapp' && !s.designGlow && s.whatsappGlow, `chat part: ${JSON.stringify({ cue: s.cue, d: s.designGlow, w: s.whatsappGlow })}`);
-  s = await seek(page, 20);
+  s = await seek(page, end);
   assert.ok(s.cue === 'both' && s.designGlow && s.whatsappGlow, `end card: ${JSON.stringify({ cue: s.cue, d: s.designGlow, w: s.whatsappGlow })}`);
 }
 
@@ -221,11 +226,11 @@ for (const [slug, film] of Object.entries(categoryFilms)) {
         assert.ok(!s.paused && s.time > 0.5 && s.muted, `not playing muted on the first screen: ${JSON.stringify({ paused: s.paused, time: s.time, muted: s.muted })}`);
         assert.ok(s.videoStart !== null && s.loadEvent !== null && s.videoStart >= s.loadEvent, `video requested before the load event (${s.videoStart} < ${s.loadEvent})`);
         if (slug === 'portrait-plaques') {
-          for (const seconds of [5, 14, 20]) {
+          for (const seconds of [5, 17, 25]) {
             s = await seek(page, seconds);
             assert.ok(s.cue === 'whatsapp' && s.whatsappGlow && !s.designGlow, `portrait at ${seconds}s: ${JSON.stringify({ cue: s.cue, d: s.designGlow, w: s.whatsappGlow })}`);
           }
-        } else await glowCycle(page);
+        } else await glowCycle(page, film);
         await page.screenshot({ path: `${shots}/${slug}-${phone ? 'phone' : 'desktop'}-top.jpg`, type: 'jpeg', quality: 75, scale: 'css' });
         await page.locator('.promo-film-toggle:visible').click();
         await page.waitForTimeout(400);
@@ -303,6 +308,7 @@ await check('13 independent film IDs and assets; tree and practice lead-time qua
     }
   }
   for (const slug of ['tree-memorial-plaques','professional-brass-plaques']) assert.ok(categoryFilms[slug].footnote.includes('10–15'));
+  for (const film of Object.values(categoryFilms)) assert.ok(film.id.endsWith('-20261106-v2') && Math.abs(film.duration - 796 / 30) < 0.01, `${film.id}: v2 film expected`);
 });
 
 await browser.close();

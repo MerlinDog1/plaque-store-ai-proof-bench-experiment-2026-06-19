@@ -120,10 +120,10 @@ sandbox.location = new URL('https://instaplaque.co.uk/video');
 f.playTo(11.5);
 assert.equal(f.sent.at(-1).key, `video:/video:${ID}:50`);
 
-const categoryA = film(21.93, 'bench-plaques-20261106-v1');
-const categoryB = film(21.93, 'brass-plaques-20261106-v1');
+const categoryA = film(26.53, 'bench-plaques-20261106-v2');
+const categoryB = film(26.53, 'brass-plaques-20261106-v2');
 categoryA.play(); categoryB.play();
 assert.notEqual(categoryA.sent[0].key, categoryB.sent[0].key, 'Different cuts on the same page must not suppress each other');
-assert.equal(categoryA.sent[0].video, 'bench-plaques-20261106-v1');
+assert.equal(categoryA.sent[0].video, 'bench-plaques-20261106-v2');
 
 console.log('Promo film watch tracking: one start (autoplay or tapped), 25/50/75/100% once each and in order, the loop and ended as the end, nothing while paused/seeking/unmeasured or after unmount, per-page keys: passed.');
