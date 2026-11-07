@@ -69,8 +69,8 @@ reference/digest. Saved-proof email has no comparable short reference and is unc
   Stripe parameters, free-proof reference and mocked-mail retry behavior.
 - `npx vite build --outDir output/attribution-dist`
 - `npm run check:attribution-browser`: local built assets with all browser traffic
-  intercepted/aborted, no server. Phone Google Shopping and desktop Instagram
-  arrivals reject optional cookies, activate contact references, navigate to the
+  intercepted/aborted, no server. Phone Google CPC (including the exact `?utm_source=google&utm_medium=cpc&gclid=TEST` case), Google Shopping and desktop Instagram
+  product-page arrivals reject optional cookies, activate contact references, navigate to the
   real designer, generate a mocked proof, approve it and submit real UI checkout.
   The intercepted checkout payload passes through real pure server canonicalization
   and Stripe parameter builders. Only a fixture checkout page is shown; the admin

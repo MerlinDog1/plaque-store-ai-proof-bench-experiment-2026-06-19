@@ -1,5 +1,19 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Phone first screen + order attribution — PREVIEW ONLY, 7 November 2026
+
+Owner msg 10916. Branch `codex/instaplaque-phone-fold-source-20261107`, based on `a967c63` (live app `51bcb55`). Application commits `fba1648` (layout) and `8c985f09567447c7422f8a796c1d6a1c74960e72` (attribution/tests).
+
+Ready preview **https://instaplaque-k7odun0pe-dullaghan31-3959s-projects.vercel.app**, `dpl_E88Xp4Ym9rXGcF7gCrM9w7KFh9cC`, target preview, **Vercel SSO protected**. Nothing promoted: production independently remains `dpl_DyTwtgWCmASKbePetzNnczHsHsG1`.
+
+- Phone product photo/title/price/CTAs fit the first screen at 360/375/390/412/430px with cookies showing; both online and WhatsApp buttons clear. Cookie wording/size unchanged. Designer reserves the notice's actual height below its footer; 768/1440 product screens pixel-identical.
+- Memory-only first-arrival UTMs/click IDs/referrer host/landing path; sanitized order metadata, Stripe label/campaign, admin detail label. Contact/free-proof reference legend **G Google ads/Shopping; F Facebook/Instagram; O organic; D direct/unknown; R referral; B Bing ads**.
+- Local/hosted 27-screen matrices pass; all 175 SEO fields/raw tags, feed and sitemaps unchanged. Typecheck/full build/postbuild, 27 attribution tests and 3 intercepted product-to-checkout flows pass. 35/44 package commands pass; remaining failures reproduced on baseline (missing generic `check`, old browser selectors/fixtures/assertions), detailed in report.
+- Preview keys are TEST, but no session/order/actual DB write was made. No production, Merchant, Ads, mail or legal-text changes. Privacy disclosure proposed only; source labels are hints, full reloads/new tabs reset attribution.
+
+See [full changes, evidence, caveats and staged-release/rollback instructions](docs/phone-fold-source-2026-11-07.md). Evidence: workspace `output/instaplaque-phone-fold-source-20261107/`. Release needs a fresh live-source check and the owner's go. Rollback after a future release: promote `dpl_DyTwtgWCmASKbePetzNnczHsHsG1`.
+
+
 ## Page-1 SEO copy: garden, opening, stainless steel and brass — LIVE, 6 November 2026
 
 - **LIVE since 15:36:54 UTC** (owner msg 10422 "go live bro"): Cody promoted the round-2 staged build
