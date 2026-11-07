@@ -1,5 +1,19 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Bigger phone product photo — v2 PREVIEW ONLY, 7 November 2026
+
+Follow-up to the phone first-screen/order-source preview below. New branch **`codex/instaplaque-phone-fold-photo-20261107`**, created from v1 docs tip `48e2c5c5ebc7784b9943b9a688695951b0bec544`; v1 branch untouched. App commit **`c0fb82b59dea618ceee277b58a34aa944bf68707`**.
+
+Ready preview **https://instaplaque-al102u7s8-dullaghan31-3959s-projects.vercel.app**, `dpl_C2UB3G3ACxikhbAKp8bqSH5jB3wN`, target preview, **Vercel SSO protected**. Production still `dpl_DyTwtgWCmASKbePetzNnczHsHsG1`. No live/test checkout sessions or DB writes.
+
+- Phones only: thumbnails follow both CTAs and free-proof line; caption directly below main photo. Keep contain/no cropping. Product header/breadcrumb gaps tightened to give the photo 210/237/257/325/333px at the requested five sizes. At 390×664, plaque width is **75.1% of live** and **71.3% larger than v1**.
+- Both full CTAs and price still above the unchanged notice: **875/875** exact-title/viewport cases; worst clearance **10.23px** at 360×640. Gallery controls actually select the main image.
+- Compiled local and hosted matrices **27/27**, zero errors/failures, exact geometry parity. Tablet/desktop pixel-identical. Designer geometry and cookie text/rectangles unchanged. Attribution code untouched.
+- Typecheck, full build/postbuild, 27 attribution tests and three intercepted checkout flows pass. All 175 SEO fields/raw tags, feed and sitemaps identical to live. Broader baseline-only failures remain documented in v1.
+- Report/width table/receipt: workspace `output/instaplaque-phone-fold-source-20261107/REPORT-v2.md`, `PREVIEW2-READY.txt`, `photo-v2/`, `hosted-v2/`. [Committed report and release/rollback instructions](docs/phone-fold-photo-2026-11-07.md). Photo width estimates use hand-checked plaque edges, not the element width; live uses cover whereas v1/v2 use contain. At 360, v2 reaches 67.3% of live to preserve the full title/CTAs/notice.
+
+No production action authorized or performed. Reinspect before any future release; staged `--prod --skip-domain` then checks/promotion only when requested. Rollback remains promotion of `dpl_DyTwtgWCmASKbePetzNnczHsHsG1`.
+
 ## Phone first screen + order attribution — PREVIEW ONLY, 7 November 2026
 
 Owner msg 10916. Branch `codex/instaplaque-phone-fold-source-20261107`, based on `a967c63` (live app `51bcb55`). Application commits `fba1648` (layout) and `8c985f09567447c7422f8a796c1d6a1c74960e72` (attribution/tests).
