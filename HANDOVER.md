@@ -1,5 +1,13 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Phone/source release — STAGING BLOCKED, 7 November 2026
+
+Owner msg 10932 authorized staging and one unpaid checkout, not promotion. Branch `codex/instaplaque-phone-source-release-20261107`, based on final v2 `4094dee17293b8c4eb8934b8179a28e723f4caf5`. Privacy application commit `391a64284adb84cc04f9df6b822a0e09ea75dbb2` adds the approved paragraph verbatim and updates only the privacy date. Pushed safely; no deployment attempted.
+
+Typecheck/full build/postbuild, 27 attribution tests, 875 title-fit cases, 27 phone screens, static/built-browser consent and Accept/Reject dismissal pass. **Consent network suite fails**: current live video absent from its static allowlist; release purchase fixture sees two intercepted signals instead of one. Baseline also fails the same test cases, but the purchase assertion differs (missing client ID). Do not assume a proven single root cause or waive the gate silently.
+
+**No staged URL/dpl, AI calls, checkout session or order.** Live remains `dpl_DyTwtgWCmASKbePetzNnczHsHsG1`. No promotion, payment, email, WhatsApp, env change or DB write. Details and verbatim errors: [blocked-release report](docs/phone-source-release-2026-11-07.md), workspace `output/instaplaque-phone-fold-source-20261107/release/STAGED-BLOCKED.txt`. Review failures before resuming staging; Cody owns promotion.
+
 ## Bigger phone product photo — v2 PREVIEW ONLY, 7 November 2026
 
 Follow-up to the phone first-screen/order-source preview below. New branch **`codex/instaplaque-phone-fold-photo-20261107`**, created from v1 docs tip `48e2c5c5ebc7784b9943b9a688695951b0bec544`; v1 branch untouched. App commit **`c0fb82b59dea618ceee277b58a34aa944bf68707`**.
