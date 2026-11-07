@@ -1,3 +1,4 @@
+import { sanitizeAttribution } from '../services/orderAttribution.mjs';
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { getProductionEstimate } from '../services/productionTime.mjs';
 import { isOnePoundTestOrder, isOnePoundSandboxOrder, isOnePoundLiveOrder, assertOnePoundTestSession } from "./onePoundTest.mjs";
@@ -101,6 +102,11 @@ export const buildStripeCheckoutParams = (order, options = {}) => {
   params.set("metadata[order_id]", orderId);
   params.set("metadata[source]", "instaplaque");
   params.set("metadata[payload_version]", order.metadata.checkoutPolicyVersion);
+  const attribution = sanitizeAttribution(order.metadata?.attribution);
+  if (attribution) {
+    params.set("metadata[attribution_label]", attribution.label);
+    if (attribution.utm_campaign) params.set("metadata[attribution_campaign]", attribution.utm_campaign);
+  }
 
   if (isOnePoundTestOrder(order)) {
     const live = isOnePoundLiveOrder(order);

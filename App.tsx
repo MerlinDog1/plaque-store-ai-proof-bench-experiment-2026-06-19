@@ -1,3 +1,4 @@
+import { getArrivalAttribution } from './services/arrivalAttribution';
 import { ensureInscriptionFonts } from './services/inscriptionFonts';
 import { MetaConsent } from './components/MetaConsent';
 import { trackMetaCheckout } from './services/metaPixel';
@@ -1338,6 +1339,7 @@ const App: React.FC = () => {
           totalPence: Math.round(order.total * 100),
           origin: window.location.origin,
           uiMode: 'hosted',
+          attribution: getArrivalAttribution(),
           deliveryAddress,
           orderSnapshot: {
             ...order,

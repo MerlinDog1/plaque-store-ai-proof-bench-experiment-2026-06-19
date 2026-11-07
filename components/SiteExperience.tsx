@@ -1,3 +1,4 @@
+import { sanitizeAttribution } from '../services/orderAttribution.mjs';
 import React, { lazy, useEffect, useRef, useState } from 'react';
 const PlaquePreview = lazy(() => import('./PlaquePreview'));
 import { MockOrder, ProductFamily, SeoLandingPage, SiteView, getPlaqueSummaryTitle, getPriceBreakdown, materialStories, productFamilies, seoLandingPages, categoryParentFor, landingDesignProduct } from '../services/commerce';
@@ -2429,6 +2430,7 @@ function AdminPage() {
                       <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
                       <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
                       <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
+                      <div><span>Arrival source</span><strong>{sanitizeAttribution(selectedOrder.metadata?.attribution)?.label || 'Not recorded'}</strong></div>
                       <div><span>Order status</span><strong>{statusLabel(selectedOrder.status)}</strong></div>
                       <div><span>Fulfilment</span><strong>{statusLabel(selectedOrder.fulfilmentStatus)}</strong></div>
                       <div><span>Paid</span><strong>{formatAdminDate(selectedOrder.paidAt || selectedOrder.createdAt)}</strong></div>
@@ -2560,6 +2562,7 @@ function AdminPage() {
                 <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
                 <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
                 <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
+                <div><span>Arrival source</span><strong>{sanitizeAttribution(selectedOrder.metadata?.attribution)?.label || 'Not recorded'}</strong></div>
                 <div><span>Order status</span><strong>{statusLabel(selectedOrder.status)}</strong></div>
                 <div><span>Fulfilment</span><strong>{statusLabel(selectedOrder.fulfilmentStatus)}</strong></div>
                 <div><span>Paid</span><strong>{formatAdminDate(selectedOrder.paidAt || selectedOrder.createdAt)}</strong></div>

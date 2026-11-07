@@ -1,3 +1,5 @@
+import { getArrivalAttribution } from '../services/arrivalAttribution';
+import { contactReference } from '../services/orderAttribution.mjs';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { businessContact } from '../services/shopInformation';
@@ -44,7 +46,7 @@ export function ContactLink({ channel, placement, subject = 'a plaque', classNam
     // No cookies, customer wording, private page URLs or advertising IDs.
     const now = Date.now();
     let reference = now - lastActivation.current.at < 1000 ? lastActivation.current.reference : undefined;
-    try { reference ||= `IP-${crypto.randomUUID().replace(/-/g, '').slice(0, 10).toUpperCase()}`; } catch { /* The basic link still works. */ }
+    try { reference ||= contactReference(crypto.randomUUID(), getArrivalAttribution()); } catch { /* The basic link still works. */ }
     lastActivation.current = { at: now, reference };
     event.currentTarget.href = contactHref(channel, subject, reference);
     if (reference) event.currentTarget.dataset.contactReference = reference;

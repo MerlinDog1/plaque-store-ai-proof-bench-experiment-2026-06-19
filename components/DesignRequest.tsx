@@ -1,3 +1,5 @@
+import { getArrivalAttribution } from '../services/arrivalAttribution';
+import { attributionSourceCode } from '../services/orderAttribution.mjs';
 import React, { useEffect, useRef, useState } from 'react';
 import { Fixing, Material, PlaqueState, Shape } from '../types';
 import { trackSiteEvent } from '../services/posthogAnalytics';
@@ -61,7 +63,7 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
       }) : undefined;
       const response = await fetch('/api/design-requests', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({...draft, requestId, website, attachment}), signal:AbortSignal.timeout(22_000),
+        body:JSON.stringify({...draft, requestId, website, attachment, sourceCode: attributionSourceCode(getArrivalAttribution())}), signal:AbortSignal.timeout(22_000),
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || result.ok !== true || typeof result.reference !== 'string') throw new Error(result.error || 'We could not confirm receipt. Please retry without changing the brief, or contact us.');

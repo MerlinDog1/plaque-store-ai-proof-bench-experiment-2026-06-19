@@ -172,6 +172,12 @@ const flush = () => new Promise(resolve => setImmediate(resolve));
     assert.ok(!JSON.stringify([contacts.google, contacts.requests]).includes(secret), `Contact events redact ${secret}`);
   }
   assert.ok(contacts.google.every(event => event[1] === 'contact_clicked'), 'Opening a contact app never implies a lead, enquiry or purchase');
+  for (const suffix of ['G', 'F', 'O', 'D', 'R', 'B']) {
+    clickContact(contacts, contactLink('mailto:hello@instaplaque.co.uk', 'hero', `IP-A1B2C3D4E5-${suffix}`));
+    assert.equal(contacts.google.at(-1)[2].contact_reference, `IP-A1B2C3D4E5-${suffix}`);
+  }
+  clickContact(contacts, contactLink('mailto:hello@instaplaque.co.uk', 'hero', 'IP-A1B2C3D4E5-PRIVATE'));
+  assert.equal(contacts.google.at(-1)[2].contact_reference, undefined);
   const allowedContacts = contacts.google.length;
   for (const url of ['http://localhost:5173/', 'https://preview.vercel.app/', 'https://instaplaque.co.uk/design?proof=PRIVATEPROOF', 'https://instaplaque.co.uk/admin']) {
     contacts.sandbox.location = new URL(url);

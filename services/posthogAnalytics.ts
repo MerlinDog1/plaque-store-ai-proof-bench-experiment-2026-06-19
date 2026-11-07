@@ -141,7 +141,7 @@ function safeProperties(input: Properties): Properties {
     if (typeof input[key] === 'string' && choices.includes(input[key] as string)) result[key] = input[key];
   }
   if (typeof input.product === 'string' && products.has(input.product)) result.product = input.product;
-  if (typeof input.contact_reference === 'string' && /^IP-[A-F0-9]{10}$/.test(input.contact_reference)) result.contact_reference = input.contact_reference;
+  if (typeof input.contact_reference === 'string' && /^IP-[A-F0-9]{10}(?:-[GFODRB])?$/.test(input.contact_reference)) result.contact_reference = input.contact_reference;
   // The promo film's watch events: which film (services/promoVideo.mjs id), how far it played, and whether it started by itself.
   if (typeof input.video === 'string' && /^[a-z0-9-]{1,64}$/.test(input.video)) result.video = input.video;
   if (typeof input.percent === 'number' && [25, 50, 75, 100].includes(input.percent)) result.percent = input.percent;

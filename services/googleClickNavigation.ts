@@ -1,7 +1,8 @@
 // Google decorates normal anchors, but React's pushState routes ignore the
-// decorated href. Keep only its click/linker parameters across public routes.
+// decorated href. Keep click/linker parameters across public routes, including Meta/Bing.
+// First-arrival UTMs are separately held in memory; never copy them onto private routes.
 // No cookie/localStorage is created, and no private references are copied.
-const clickKeys = ['gclid', 'dclid', 'gclsrc', '_gl', 'wbraid', 'gbraid'];
+const clickKeys = ['gclid', 'dclid', 'gclsrc', '_gl', 'wbraid', 'gbraid', 'fbclid', 'msclkid'];
 const privatePath = /^\/(admin|proof|order|order-confirmed|checkout)(\/|$)/;
 function isPublic(url: URL): boolean {
   return !privatePath.test(url.pathname)

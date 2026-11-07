@@ -1,3 +1,4 @@
+import { sanitizeAttribution } from '../services/orderAttribution.mjs';
 import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { getProductionEstimate } from '../services/productionTime.mjs';
 import {
@@ -266,6 +267,7 @@ export const buildServerCheckoutOrder = (
     MAX_NAME_LENGTH,
   );
   plaqueState = stripClientArtworkFromPlaqueState(plaqueState);
+  const attribution = sanitizeAttribution(payload.attribution);
 
   return {
     id: orderId,
@@ -295,6 +297,7 @@ export const buildServerCheckoutOrder = (
     ],
     metadata: {
       source: "instaplaque-checkout",
+      ...(attribution ? { attribution } : {}),
       ...(sandboxTest ? { checkoutTestPolicy: ONE_POUND_TEST_POLICY, noFulfilment: true } : {}),
       ...(liveTest ? { liveVerificationPolicy: ONE_POUND_LIVE_POLICY, noFulfilment: true } : {}),
       pricingAuthority: "server",

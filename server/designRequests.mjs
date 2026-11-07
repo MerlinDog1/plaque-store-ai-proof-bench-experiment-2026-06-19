@@ -7,7 +7,7 @@ const fields = { size: 100, shape: 80, material: 100, wood: 100, fixing: 100, wo
 const required = new Set(['size', 'shape', 'material', 'wood', 'fixing', 'wording', 'name', 'email']);
 export function validateDesignRequest(payload) {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) fail('Invalid design request.');
-  if (Object.keys(payload).some(key => ![...Object.keys(fields), 'requestId', 'website', 'attachment'].includes(key))) fail('Unexpected request field.');
+  if (Object.keys(payload).some(key => ![...Object.keys(fields), 'requestId', 'website', 'attachment', 'sourceCode'].includes(key))) fail('Unexpected request field.');
   if (payload.website) fail('Unable to submit this request.');
   if (typeof payload.requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(payload.requestId)) fail('Invalid request reference. Please refresh and try again.');
   const draft = {};
@@ -31,16 +31,17 @@ export function validateDesignRequest(payload) {
     if (!format || a.type !== mime) fail('Please choose a valid JPG, PNG or WebP reference image.');
     attachment = { filename: `reference.${format}`, content: a.content, content_type: mime };
   }
-  return { requestId: payload.requestId.toLowerCase(), draft, attachment };
+  const sourceCode = typeof payload.sourceCode === 'string' && /^[GFODRB]$/.test(payload.sourceCode) ? payload.sourceCode : '';
+  return { requestId: payload.requestId.toLowerCase(), draft, attachment, sourceCode };
 }
 
 export async function submitDesignRequest(payload, { env = process.env, recipients = [], fetchImpl = fetch } = {}) {
-  const { requestId, draft, attachment } = validateDesignRequest(payload);
+  const { requestId, draft, attachment, sourceCode } = validateDesignRequest(payload);
   if (!env.RESEND_API_KEY || !recipients.length) fail('Request sending is temporarily unavailable. Please contact us or try again later.', 503);
   // Stable payload-derived key: retries of an unchanged brief cannot double-send within Resend's 24h window.
   // Changed briefs get distinct keys, avoiding ambiguous updates to an already accepted request.
-  const digest = createHash('sha256').update(JSON.stringify({ draft, attachment })).digest('hex');
-  const reference = `IP-DESIGN-${requestId}-${digest.slice(0,8)}`;
+  const digest = createHash('sha256').update(JSON.stringify({ draft, attachment, ...(sourceCode ? { sourceCode } : {}) })).digest('hex');
+  const reference = `IP-DESIGN-${requestId}-${digest.slice(0,8)}${sourceCode ? `-${sourceCode}` : ''}`;
   const labels = {name:'Customer',email:'Reply email',size:'Size',shape:'Shape',material:'Material',wood:'Wood backing',fixing:'Fixings',use:'Location / use',wording:'EXACT PLAQUE WORDING',notes:'Design instructions'};
   const text = [`New InstaPlaque human-design request: ${reference}`, 'Please prepare and email the proof within 3 hours. No payment or order has been created.', ...Object.entries(labels).map(([key,label])=>`${label}:\n${draft[key] || 'Not specified'}`)].join('\n\n');
   let response;
