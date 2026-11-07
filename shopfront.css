@@ -3938,11 +3938,13 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
 /* Phone product first screen (7 Nov 2026). Only catalogue products use v3.
    Keep the photo and complete title; put the purchase choices ahead of supporting copy.
    The image uses the available short-screen space without cropping the plaque. */
+.shop-product-phone-thumbs { display: none; }
 @media (max-width: 767px) {
-  .shopfront > .shop-breadcrumb:has(+ .shop-product-hero-v3) { padding-block: 8px; }
+  .commerce-mode:has(.shop-product-hero-v3) .shop-header { padding-block: 10px; row-gap: 8px; }
+  .shopfront > .shop-breadcrumb:has(+ .shop-product-hero-v3) { padding-block: 2px; }
   .shopfront .shop-product-hero-v3 > figure { display: none; }
   .shopfront .shop-product-hero-v3 > div { display: flex; flex-direction: column; }
-  .shopfront .shop-product-hero-v3 > div > * { order: 5; }
+  .shopfront .shop-product-hero-v3 > div > * { order: 6; }
   .shopfront .shop-product-hero-v3 .shop-product-inline-image {
     display: block;
     order: 0;
@@ -3950,20 +3952,28 @@ html body:has(.designer-step-footer) .cookie-banner { top: calc(8px + env(safe-a
   }
   .shopfront .shop-product-hero-v3 .shop-product-inline-image > img {
     width: 100%;
-    height: clamp(120px, calc(100svh - 514px), 220px);
+    height: clamp(195px, calc(100svh - 407px), 380px);
     aspect-ratio: auto;
     object-fit: contain;
     background: #eeeae2;
     border-radius: 3px;
   }
   .shopfront .shop-product-hero-v3 .shop-product-thumbs { margin-top: 4px; gap: 6px; }
+  .shopfront .shop-product-hero-v3 .shop-product-phone-thumbs { display: flex; order: 5; margin: 0 0 12px; }
   .shopfront .shop-product-hero-v3 .shop-product-thumbs button { width: 44px; height: 44px; }
   .shopfront .shop-product-hero-v3 .shop-product-inline-image figcaption { margin-top: 4px; font-size: 10px; }
   .shopfront .shop-product-hero-v3 h1.shop-product-title-long { order: 1; font-size: 22px; line-height: 1.12; }
-  .shopfront .shop-product-hero-v3 .shop-product-price { order: 2; margin: 6px 0; }
+  .shopfront .shop-product-hero-v3 .shop-product-price { order: 2; margin: 4px 0; }
   .shopfront .shop-product-hero-v3 .shop-hero-choices { order: 3; margin: 0 0 14px; }
   .shopfront .shop-product-hero-v3 .shop-hero-choices > a { min-height: 50px; }
   .shopfront .shop-product-hero-v3 .shop-hero-design-request { order: 4; margin: 0 0 12px; }
+}
+
+/* Narrow phones have a longer title and, at 360px, an extra line in the unchanged cookie notice. */
+@media (max-width: 389px) {
+  .shopfront .shop-product-hero-v3 .shop-product-inline-image > img {
+    height: clamp(180px, calc(100svh - 430px), 360px);
+  }
 }
 
 /* Reserve the cookie notice's own measured height in the mobile designer's flex shell.

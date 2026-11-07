@@ -753,21 +753,25 @@ function finishImagesFor(slug: string): GalleryImage[] {
 
 // Catalogue pages show the photo first and the flat design view (the feed image) as a second
 // image, so the Merchant Center image is still on the landing page.
-function ProductGallery({ images, caption, className, sizes }: { images: GalleryImage[]; caption: string; className?: string; sizes?: string }) {
-  const [active, setActive] = React.useState(0);
+function ProductThumbnails({ images, active, onSelect, className = '' }: { images: GalleryImage[]; active: number; onSelect: (index: number) => void; className?: string }) {
+  if (images.length < 2) return null;
+  return <div className={`shop-product-thumbs${className ? ` ${className}` : ''}`} role="group" aria-label="Product images">
+    {images.map((item, index) => (
+      <button type="button" key={item.src} aria-label={item.label} aria-pressed={index === active} onClick={() => onSelect(index)}>
+        <img src={item.thumb || item.src} srcSet={item.thumbSrcSet} sizes={item.thumbSrcSet ? '64px' : undefined} alt="" width="120" height="120" loading="lazy" />
+      </button>
+    ))}
+  </div>;
+}
+
+function ProductGallery({ images, caption, className, sizes, selection, separateThumbnails = false }: { images: GalleryImage[]; caption: string; className?: string; sizes?: string; selection?: { active: number; onSelect: (index: number) => void }; separateThumbnails?: boolean }) {
+  const [ownActive, setOwnActive] = React.useState(0);
+  const active = selection?.active ?? ownActive;
   const image = images[active] || images[0];
   return (
     <figure className={className}>
       <img src={image.src} srcSet={image.srcSet} sizes={image.srcSet ? sizes : undefined} alt={image.alt} width="1200" height="1200" fetchPriority="high" />
-      {images.length > 1 && (
-        <div className="shop-product-thumbs" role="group" aria-label="Product images">
-          {images.map((item, index) => (
-            <button type="button" key={item.src} aria-label={item.label} aria-pressed={index === active} onClick={() => setActive(index)}>
-              <img src={item.thumb || item.src} srcSet={item.thumbSrcSet} sizes={item.thumbSrcSet ? '64px' : undefined} alt="" width="120" height="120" loading="lazy" />
-            </button>
-          ))}
-        </div>
-      )}
+      {!separateThumbnails && <ProductThumbnails images={images} active={active} onSelect={selection?.onSelect || setOwnActive} />}
       <figcaption>{image.caption || caption}</figcaption>
     </figure>
   );
@@ -826,6 +830,7 @@ export function ShopProduct({
   onRequestDesign?: () => void;
   examples?: SeoLandingPage['examples'];
 }) {
+  const [phonePhoto, setPhonePhoto] = React.useState(0);
   const collection = collections.find((item) => item.slug === product.slug);
   // The FAQ schema in scripts/prerender-product-pages.mjs is built from this same list.
   const faqs = [...product.faqs, ...shopFaqs]
@@ -896,7 +901,7 @@ export function ShopProduct({
         <div>
           {/* New layout, phones: the photo first, as in the Shopping ad they tapped (owner msg 8065). Same sizes as the
               desktop figure, so React emits one image preload, not two. */}
-          {newLayout && <ProductGallery className="shop-product-inline-image" images={heroImages} caption={heroCaption} sizes="(max-width: 720px) 92vw, 560px" />}
+          {newLayout && <ProductGallery selection={{ active: phonePhoto, onSelect: setPhonePhoto }} separateThumbnails className="shop-product-inline-image" images={heroImages} caption={heroCaption} sizes="(max-width: 720px) 92vw, 560px" />}
           <p className="shop-kicker">Free proof · UK delivery included</p>
           <h1 className={product.merchantOffer ? 'shop-product-title-long' : undefined}>{heroTitles[product.slug] || product.title}</h1>
           {newLayout ? (
@@ -926,6 +931,7 @@ export function ShopProduct({
           <p className="shop-hero-design-request">
             Prefer us to design it? <a href="/design-request" onClick={onRequestDesign ? event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onRequestDesign(); } } : undefined}>Have us design it – free proof</a>
           </p>
+          {newLayout && <ProductThumbnails className="shop-product-phone-thumbs" images={heroImages} active={phonePhoto} onSelect={setPhonePhoto} />}
           <p className="shop-smallprint">
             Standard engraving, fixings and UK delivery included.
             Extras are shown before checkout.
