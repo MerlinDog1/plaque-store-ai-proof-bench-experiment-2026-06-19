@@ -1,5 +1,11 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Purchase continuity gate CLEARED — staging authorized, 7 November 2026
+
+Cody reviewed three release and three exact-live-baseline traces and cleared the gate. Each has one GA4 `/g/collect` purchase, one `/measurement/conversion` signal, one frame, and no additions on reload. Both requests use `region1.analytics.google.com`; conversion `oid` matches GA4 `ep.transaction_id`, and `gacid` matches `cid`. The original test counted both endpoints / selected the conversion first. No purchase-source regression; exact live baseline is `51bcb55f876bee285ce6821740bbf08d7a31c1aa` confirmed by Vercel metadata and rebuilt separately. Repository test unchanged.
+
+The previous blocked-release entry below is superseded for this gate. Known stale video allowlist and a baseline cookie-readiness timing retry are documented in [the six-run verdict](docs/purchase-continuity-investigation-2026-11-07.md). Staging may proceed under the lock with `--prod --skip-domain`; Cody alone promotes after hosted checks and the authorized single unpaid checkout/readback. Evidence: workspace `output/instaplaque-phone-fold-source-20261107/release/`.
+
 ## Phone/source release — STAGING BLOCKED, 7 November 2026
 
 Owner msg 10932 authorized staging and one unpaid checkout, not promotion. Branch `codex/instaplaque-phone-source-release-20261107`, based on final v2 `4094dee17293b8c4eb8934b8179a28e723f4caf5`. Privacy application commit `391a64284adb84cc04f9df6b822a0e09ea75dbb2` adds the approved paragraph verbatim and updates only the privacy date. Pushed safely; no deployment attempted.
