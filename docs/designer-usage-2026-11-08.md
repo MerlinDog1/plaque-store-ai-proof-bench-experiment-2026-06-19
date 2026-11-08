@@ -2,6 +2,12 @@
 
 Branch: `codex/instaplaque-usage-counter-20261108`, based on verified live source `f27cc5ef7e276636409e271bf3cf6a02afaba9c0`. No production deployment or environment change is authorized here.
 
+## Selected preview
+
+https://instaplaque-3omozigom-dullaghan31-3959s-projects.vercel.app (`dpl_ETPoeW5mhY6ptQwT5vX1dY2m1LoJ`, Ready/preview), source `2d29514738a22583888750cec1722d01f0624335`. The first preview's inherited DB configuration did not persist counts. This selected deployment uses current-project URL/service-key overrides on **this preview deployment only**, obtained using Cody's Management API login; no project or production variables changed. Five hosted test events were read back, all preview/test/internal. A later release must use a fresh production-target build and verify production configuration.
+
+35 package suites pass; eight known 7-Nov baseline failures remain. Two extra initial failures were investigated against an independently installed/built, clean `f27cc5e`: the form test's missing hosted analytics script fails both builds and passes both with the committed harness isolation; the unchanged SEO UI test fails both without a local admin credential and passes both with its expected fixture-only credential. See the output report/comparison logs.
+
 ## Contract
 
 `services/designerUsage.ts` creates a crypto UUID in page memory. Statistics-off sends neither that ID nor usage events. Internal browsers remain visible only in test counts. No new cookie/storage/third-party destination. Existing preferences are read, not repurposed. Browser events are capped at 40 per document, keepalive, without retries or UI awaits.
