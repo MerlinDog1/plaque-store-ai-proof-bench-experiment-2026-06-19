@@ -3,13 +3,13 @@
 
 ## Private admin glow-up — PREVIEW ONLY, 8 November 2026
 
-Branch **`codex/instaplaque-admin-glowup-20261108`**, based on usage-counter tip `be7a5471b064ee601597789c4e8def09c2e5dcac` (includes the not-yet-live cookie-free counter). Application/deployed SHA **`bebd3d320b19c2b0d191085cb7b196c2a6c869f2`**.
+Branch **`codex/instaplaque-admin-glowup-20261108`**, based on usage-counter tip `be7a5471b064ee601597789c4e8def09c2e5dcac` (includes the not-yet-live cookie-free counter). Application/deployed SHA **`d8b42a601f06d058390fb1b310507e7f90b77239`**.
 
-**Ready preview:** https://instaplaque-5tyl6ip0r-dullaghan31-3959s-projects.vercel.app/admin — `dpl_FVkimRS42abG4gaZtKaDTPacAAsN`, Ready/preview, Vercel-protected. **Not live; no promotion, production/project env changes or database writes.** Deployment-only current-shop Supabase URL/key override follows the counter preview procedure. No hosted admin login/actions were performed.
+**Ready preview:** https://instaplaque-m18lc6elc-dullaghan31-3959s-projects.vercel.app/admin — `dpl_Awhqhe6B79dsy7xN4US6d99Ri7W4`, Ready/preview, Vercel-protected. **Not live; no promotion, production/project env changes or database writes.** Deployment-only current-shop Supabase URL/key override follows the counter preview procedure. No hosted admin login/actions were performed.
 
 - Green/white responsive admin shell, login, Orders, shared phone/desktop details, Search position, and Designer use dashboard. Phones gain the existing email/archive actions under collapsed More actions and the timeline. No action/API/auth/export changes; all existing action labels retained. Friendly status labels and Customers / Our tests replace presentation-only labels/checkbox.
 - Typecheck, full build/postbuild and all core admin/usage/security checks pass. **35/43 existing package suites pass; the same eight documented baseline failures, no new failures.** 390/768/1440 mocked layouts have no horizontal overflow; 11 actions reachable, keyboard order/focus checked; 16 key colour pairs AA (including non-text chart contrast). Six public page/viewport PNG comparisons are **pixel-identical** after 3D rendering settles; production PDF raster and hidden export markup/dimensions identical.
-- Evidence: workspace **`output/instaplaque-admin-glowup-20261108/REPORT.md`**, `PREVIEW1-READY.txt`, before/after full-page PNGs, eight bounded `GLOWUP-n.jpg` sheets and review copies. Final harness-only fix expands the nested admin scroller for full-page capture; application preview source is unchanged. [Reproduction guide](docs/admin-glowup-2026-11-08.md).
+- Evidence: workspace **`output/instaplaque-admin-glowup-20261108/REPORT.md`**, `PREVIEW2-READY.txt`, before/after full-page PNGs, eight bounded `GLOWUP-n.jpg` sheets and review copies. Final preview 2 adds 40px phone link targets and chart/today-row contrast polish; the harness expands the nested admin scroller for full-page capture only. [Reproduction guide](docs/admin-glowup-2026-11-08.md).
 
 Release is separate and owner-authorized only. The inherited counter/privacy approval and production-environment checks still apply. Never automate presses in the hosted admin: it is connected to real orders.
 
@@ -228,7 +228,7 @@ See [full changes, evidence, caveats and staged-release/rollback instructions](d
   inspected target **preview**). Hosted checks with the real designer UI and deployed exporter: A5 double 1 / 0.75 mm, rx 0,
   proof lines solid; 120 x 80 mm caps + double scalloped: proof and file **0.375 / 0.3 mm**, solid, no live text, no page errors.
 - **Evidence:** workspace `output/instaplaque-border-parity-20261104/r3/` (square-cornered `border-parity-phone.jpg` + size sheets,
-  sample SVGs, logs, `hosted-check.log`, `hosted-small-check.json`).
+  sample SVGs, logs, `hosted-check2.log`, `hosted-small-check.json`).
 - **Not live.** Production independently remains `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. Release on the owner's go:
   `vercel deploy --prod --skip-domain` under the shared lock, check, then `vercel promote`; rollback = promote
   `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. The 0.25 mm question is resolved; nothing else is open for this release.
@@ -253,7 +253,7 @@ See [full changes, evidence, caveats and staged-release/rollback instructions](d
   inspected target **preview**). Hosted A5 double export (real designer UI, deployed exporter): proof opacities 1/1,
   file 1 / 0.75 mm at 3 / 5 mm, rx 0, solid black, text outlined, 210 x 148 mm, zero page errors.
 - **Evidence:** workspace `output/instaplaque-border-parity-20261104/r2/` (square-cornered `border-parity-phone.jpg` + three
-  size sheets, sample SVGs, logs, `hosted-check.log`).
+  size sheets, sample SVGs, logs, `hosted-check2.log`).
 - **Not live.** Production independently remains `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. Release only on the owner's go:
   `vercel deploy --prod --skip-domain` under the shared lock, check, then `vercel promote`; rollback = promote
   `dpl_6dZgz3ts9pDczDeXGcyQbKpz2GJN`. Still open: whether Trade Etching can etch the 0.25 mm inner line on small

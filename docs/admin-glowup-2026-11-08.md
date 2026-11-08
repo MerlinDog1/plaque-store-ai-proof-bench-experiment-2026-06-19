@@ -2,7 +2,7 @@
 
 Preview-only branch `codex/instaplaque-admin-glowup-20261108`, based on `be7a5471b064ee601597789c4e8def09c2e5dcac` (the cookie-free usage counter branch, not just live source). No production release is included.
 
-Ready preview: https://instaplaque-5tyl6ip0r-dullaghan31-3959s-projects.vercel.app/admin (`dpl_FVkimRS42abG4gaZtKaDTPacAAsN`), application commit `bebd3d320b19c2b0d191085cb7b196c2a6c869f2`. Later changes are harness/documentation only.
+Ready preview: https://instaplaque-m18lc6elc-dullaghan31-3959s-projects.vercel.app/admin (`dpl_Awhqhe6B79dsy7xN4US6d99Ri7W4`), application commit `d8b42a601f06d058390fb1b310507e7f90b77239`. Later changes are harness/documentation only.
 
 ## Implementation boundaries
 
