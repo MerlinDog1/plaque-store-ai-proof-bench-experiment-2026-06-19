@@ -1,5 +1,18 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+
+## Private admin glow-up — PREVIEW ONLY, 8 November 2026
+
+Branch **`codex/instaplaque-admin-glowup-20261108`**, based on usage-counter tip `be7a5471b064ee601597789c4e8def09c2e5dcac` (includes the not-yet-live cookie-free counter). Application/deployed SHA **`bebd3d320b19c2b0d191085cb7b196c2a6c869f2`**.
+
+**Ready preview:** https://instaplaque-5tyl6ip0r-dullaghan31-3959s-projects.vercel.app/admin — `dpl_FVkimRS42abG4gaZtKaDTPacAAsN`, Ready/preview, Vercel-protected. **Not live; no promotion, production/project env changes or database writes.** Deployment-only current-shop Supabase URL/key override follows the counter preview procedure. No hosted admin login/actions were performed.
+
+- Green/white responsive admin shell, login, Orders, shared phone/desktop details, Search position, and Designer use dashboard. Phones gain the existing email/archive actions under collapsed More actions and the timeline. No action/API/auth/export changes; all existing action labels retained. Friendly status labels and Customers / Our tests replace presentation-only labels/checkbox.
+- Typecheck, full build/postbuild and all core admin/usage/security checks pass. **35/43 existing package suites pass; the same eight documented baseline failures, no new failures.** 390/768/1440 mocked layouts have no horizontal overflow; 11 actions reachable, keyboard order/focus checked; 16 key colour pairs AA (including non-text chart contrast). Six public page/viewport PNG comparisons are **pixel-identical** after 3D rendering settles; production PDF raster and hidden export markup/dimensions identical.
+- Evidence: workspace **`output/instaplaque-admin-glowup-20261108/REPORT.md`**, `PREVIEW1-READY.txt`, before/after full-page PNGs, eight bounded `GLOWUP-n.jpg` sheets and review copies. Final harness-only fix expands the nested admin scroller for full-page capture; application preview source is unchanged. [Reproduction guide](docs/admin-glowup-2026-11-08.md).
+
+Release is separate and owner-authorized only. The inherited counter/privacy approval and production-environment checks still apply. Never automate presses in the hosted admin: it is connected to real orders.
+
 ## Cookie-free designer usage — PREVIEW ONLY, 8 November 2026
 
 Branch **`codex/instaplaque-usage-counter-20261108`**, from verified live `f27cc5ef7e276636409e271bf3cf6a02afaba9c0`. Application `e3f6b3a2767e78c2ab8f309f25149c6e09e09d5a`; selected preview source **`2d29514738a22583888750cec1722d01f0624335`** (adds local-test harness isolation only).

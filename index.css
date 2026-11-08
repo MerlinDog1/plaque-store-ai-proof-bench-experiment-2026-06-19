@@ -4914,7 +4914,7 @@
 .usage-chart-dates {display:flex; justify-content:space-between; margin:0 24px; font-size:10px; color:var(--admin-muted);}
 .usage-legend {display:flex; gap:16px; font-size:11px; color:var(--admin-muted);}
 .usage-legend span:before {content:""; display:inline-block; width:8px; height:8px; border-radius:2px; background:#203b32; margin-right:6px;}
-.usage-legend span:last-child:before {background:#89ad9e;}
+.usage-legend span:last-child:before {background:#6b9784;}
 .usage-table-wrap {max-width:100%; overflow-x:auto;}
 .usage-table-wrap table {width:100%; border-collapse:collapse; min-width:900px; font-size:12px;}
 .usage-table-wrap th,.usage-table-wrap td {padding:13px 16px; text-align:right; border-top:1px solid #edf0ec; font-weight:450; white-space:nowrap;}
@@ -4923,11 +4923,11 @@
 .usage-table-wrap small {display:block; font-size:10px; margin-top:3px;}
 .usage-table-wrap .is-today {background:#f0f5ee;}
 .usage-table-wrap .is-today th small {color:#386348; font-weight:500;}
-.usage-table-wrap .is-zero {color:#68766c;}
+.usage-table-wrap .is-zero {color:#647067;}
 .usage-failed {color:#a63a2e;}
 .usage-table-wrap .usage-day-context td {text-align:left; padding:0 16px 8px; border:0;}
 .usage-day-context summary {font-size:10px; color:var(--admin-muted); cursor:pointer; padding:5px 0;}
-.usage-day-context summary span {margin-left:6px; color:#68766c;}
+.usage-day-context summary span {margin-left:6px; color:#647067;}
 .usage-day-context p {display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:8px 0;}
 .usage-day-context p > strong {font-size:11px; min-width:150px; font-weight:550;}
 .usage-chip {display:inline-block; padding:4px 8px; border-radius:5px; background:#f0f3ef; color:#4e6155; font-size:10px; font-weight:500; line-height:1.4;}
@@ -5070,4 +5070,7 @@
  .admin-console__orders-head {display:grid;}
  .admin-console__order-row > span:nth-child(n) {grid-column:auto; grid-row:auto; text-align:left; font-weight:inherit;}
  .admin-console__order-row > span:last-child {text-align:right; font-weight:650;}
+}
+@media (max-width:700px) {
+ .admin-console__link-row a, .admin-console .seo-rank-tracker table td a {display:inline-flex; align-items:center; min-height:40px;}
 }
