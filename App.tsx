@@ -1,3 +1,4 @@
+import { usageHeaders, designerUsage, layoutUsage, beginLayoutUsage } from './services/designerUsage';
 import { getArrivalAttribution } from './services/arrivalAttribution';
 import { ensureInscriptionFonts } from './services/inscriptionFonts';
 import { MetaConsent } from './components/MetaConsent';
@@ -289,6 +290,8 @@ const App: React.FC = () => {
   useEffect(() => {
     const track = () => {
       if (currentView !== 'plaque') return;
+      designerUsage('designer_open', {}, 'open');
+      designerUsage('designer_step', { step: ['size', 'material', 'colour', 'fixings', 'backing', 'wording', 'review'][activeStep] }, `step:${activeStep}`);
       trackSiteEvent('designer_started', {}, 'designer_started');
       trackSiteEvent('designer_step_viewed', { step: ['size', 'material', 'colour', 'fixings', 'backing', 'wording', 'review'][activeStep] }, `step:${activeStep}`);
     };
@@ -768,6 +771,7 @@ const App: React.FC = () => {
   const handleGenerateLayout = async (prompt: string) => {
     if (isGeneratingLayout) return;
     trackSiteEvent('layout_requested', { method: 'ai', shape: state.shape, material: state.material, width_mm: state.width, height_mm: state.height });
+    const usageStarted = beginLayoutUsage();
     const snapshot = currentLayoutRef.current;
     setLayoutMessage('');
     setIsGeneratingLayout(true);
@@ -778,6 +782,7 @@ const App: React.FC = () => {
       const effectivePrompt = await refinePlaqueWording(prompt);
       const afterProofreading = currentLayoutRef.current;
       if (afterProofreading.state !== snapshot.state || afterProofreading.prompt !== snapshot.prompt || afterProofreading.guidance !== snapshot.guidance) {
+        layoutUsage('layout', usageStarted, 'failed', 'cancelled');
         setLayoutMessage('The design changed while AI was working. Nothing was replaced; create your layout again.');
         return;
       }
@@ -799,6 +804,7 @@ const App: React.FC = () => {
       if (result) {
         const latest = currentLayoutRef.current;
         if (latest.state !== snapshot.state || latest.prompt !== snapshot.prompt || latest.guidance !== snapshot.guidance) {
+          layoutUsage('layout', usageStarted, 'failed', 'cancelled');
           setLayoutMessage('The design changed while AI was working. Nothing was replaced; create your layout again.');
           return;
         }
@@ -818,9 +824,11 @@ const App: React.FC = () => {
           aiReasoning: result.reasoning
         }));
         setActiveStep(5);
+        layoutUsage('layout', usageStarted, 'shown');
         trackSiteEvent('layout_generated', { method: 'ai', shape: state.shape, material: state.material });
-      }
+      } else { layoutUsage('layout', usageStarted, 'failed', 'invalid_reply'); }
     } catch (error) {
+      layoutUsage('layout', usageStarted, 'failed', error);
       trackSiteEvent('layout_failed', { method: 'ai' });
       setLayoutMessage(error instanceof Error ? error.message : 'We could not create a readable layout. Try a larger plaque, less wording or contact us for help.');
     } finally {
@@ -898,6 +906,7 @@ const App: React.FC = () => {
       setLayoutMessage('Your wording or plaque options have changed. Create a fresh layout first.');
       return;
     }
+    const usageStarted = beginLayoutUsage();
     const snapshot = currentLayoutRef.current;
     setIsGeneratingLayout(true);
     setGenerationPhase('editing');
@@ -912,12 +921,15 @@ const App: React.FC = () => {
       });
       const latest = currentLayoutRef.current;
       if (latest.state !== snapshot.state || latest.prompt !== snapshot.prompt || latest.guidance !== snapshot.guidance) {
+        layoutUsage('change', usageStarted, 'failed', 'cancelled');
         setLayoutMessage('The proof changed while AI was working. Nothing was replaced; apply your instruction again.');
         return;
       }
       acceptLayout(result.svgContent, inscriptionPrompt, result.reasoning);
+      layoutUsage('change', usageStarted, 'shown');
       setLayoutMessage('Layout updated. Your wording is unchanged. Check the proof or undo this change.');
     } catch (error) {
+      layoutUsage('change', usageStarted, 'failed', error);
       setLayoutMessage(`Your previous proof is unchanged. ${error instanceof Error ? error.message : 'Please try again.'}`);
     } finally { setIsGeneratingLayout(false); setGenerationPhase(null); }
   };
@@ -1076,7 +1088,7 @@ const App: React.FC = () => {
   const handleEmailProof = async (email: string, requestId: string, website: string) => {
     trackSiteEvent('proof_email_requested');
     try {
-      const response = await fetch('/api/proof-sessions/email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const response = await fetch('/api/proof-sessions/email', { method: 'POST', headers: { 'Content-Type': 'application/json', ...usageHeaders() },
         body: JSON.stringify({ ...proofSavePayload(), email, requestId, website }), signal: AbortSignal.timeout(25000) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.ok) throw new Error(result.error || 'Could not email the proof. Please retry without changing your design.');
@@ -1099,7 +1111,7 @@ const App: React.FC = () => {
       try {
         const response = await fetch('/api/proof-sessions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...usageHeaders() },
           body: JSON.stringify(proofSavePayload()),
         });
         if (!response.ok) { failureReason = 'save_http'; throw new Error(`Proof session save failed (${response.status})`); }
@@ -1330,7 +1342,7 @@ const App: React.FC = () => {
       const timeout = window.setTimeout(() => controller.abort(), 12000);
       const response = await fetch('/api/stripe/checkout-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...usageHeaders() },
         signal: controller.signal,
         body: JSON.stringify({
           orderId: order.id,

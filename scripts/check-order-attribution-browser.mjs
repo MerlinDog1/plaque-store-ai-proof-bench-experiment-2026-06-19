@@ -29,6 +29,7 @@ try {
    if(url.origin!==origin) return route.abort();
    if(url.pathname.startsWith('/api/')) {
     apiRequests.push(url.pathname);
+    if(url.pathname==='/api/usage') return json({ok:true},202); // First-party counts are mocked in this offline attribution test.
     if(url.pathname==='/api/gemini/generate-content') {
      const request=req.postDataJSON();
      if(request.config?.responseSchema?.properties?.refinedText) return json({text:JSON.stringify({refinedText:'SYNTHETIC TEST\nOFFLINE ONLY'})});

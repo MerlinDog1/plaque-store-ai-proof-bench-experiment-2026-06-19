@@ -60,7 +60,8 @@
     "check:category-template": "node scripts/check-category-template.mjs",
     "check:statistics": "node scripts/check-site-statistics.cjs",
     "check:attribution": "node --test scripts/check-order-attribution.mjs",
-    "check:attribution-browser": "node scripts/check-order-attribution-browser.mjs"
+    "check:attribution-browser": "node scripts/check-order-attribution-browser.mjs",
+    "check:usage": "node --test scripts/check-designer-usage.mjs && node scripts/check-usage-routes.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1136.0",
@@ -71,6 +72,7 @@
     "@types/d3-geo": "^3.1.0",
     "@types/qrcode": "^1.5.6",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/functions": "^3.11.0",
     "d3-contour": "^4.0.2",
     "d3-geo": "^3.1.1",
     "qrcode": "^1.5.4",

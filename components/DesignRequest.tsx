@@ -1,3 +1,4 @@
+import { usageHeaders } from '../services/designerUsage';
 import { getArrivalAttribution } from '../services/arrivalAttribution';
 import { attributionSourceCode } from '../services/orderAttribution.mjs';
 import React, { useEffect, useRef, useState } from 'react';
@@ -62,7 +63,7 @@ export function DesignRequest({ initialState, initialWording, initialNotes, onBa
         reader.readAsDataURL(file);
       }) : undefined;
       const response = await fetch('/api/design-requests', {
-        method:'POST', headers:{'Content-Type':'application/json'},
+        method:'POST', headers:{'Content-Type':'application/json', ...usageHeaders()},
         body:JSON.stringify({...draft, requestId, website, attachment, sourceCode: attributionSourceCode(getArrivalAttribution())}), signal:AbortSignal.timeout(22_000),
       });
       const result = await response.json().catch(() => ({}));

@@ -1,3 +1,4 @@
+import { observeUsage, parseUsage, browserRow, recordUsage, recordPaid, readUsage } from './server/usage.mjs';
 import { submitDesignRequest, MAX_DESIGN_REQUEST_BYTES } from "./server/designRequests.mjs";
 import fs from "node:fs";
 import http from "node:http";
@@ -349,9 +350,33 @@ const serveStatic = (req, res) => {
   fs.createReadStream(filePath).pipe(res);
 };
 
+const usageLimiter = createGeminiRateLimiter({ limit: 80, windowMs: 60_000 });
 const designRequestLimiter = createGeminiRateLimiter({ limit: 5, windowMs: 15 * 60_000 });
 export const handleRequest = async (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+  observeUsage(req, res, url.pathname);
+  if (url.pathname === '/api/usage') {
+    if (req.method !== 'POST') { sendJson(res,405,{error:'Use POST.'}); return; }
+    if (!hasAllowedGeminiBrowserHeaders(req,{deployed:deployedGeminiEnvironment}) || !/^application\/json(?:;|$)/i.test(String(req.headers['content-type'] || ''))) {
+      sendJson(res,403,{error:'An explicit same-origin JSON request is required.'}); return;
+    }
+    try {
+      const identity = getGeminiClientIdentity(req, {vercel:Boolean(process.env.VERCEL)});
+      if (!identity || !usageLimiter.consume(identity).ok) { sendJson(res,429,{error:'Too many usage events.'}); return; }
+      const payload = parseUsage(await readBody(req,2048));
+      res.once('finish',()=>recordUsage(browserRow(req,payload)));
+      sendJson(res,202,{ok:true});
+    } catch(error) { sendJson(res,error.statusCode || 400,{error:'Invalid usage event.'}); }
+    return;
+  }
+  if (req.method === 'GET' && url.pathname === '/api/admin/usage') {
+    if (!requireAdminRequest(req,res)) return;
+    const days = Math.min(90,Math.max(1,Number(url.searchParams.get('days')) || 14));
+    try { sendJson(res,200,await readUsage(Math.floor(days),url.searchParams.get('tests') === '1')); }
+    catch { sendJson(res,503,{error:'Designer counts are temporarily unavailable.'}); }
+    return;
+  }
+
 
   if (url.pathname === "/api/design-requests") {
     if (req.method !== "POST") { sendJson(res, 405, {error:"Use POST to submit a request."}); return; }
@@ -557,6 +582,7 @@ export const handleRequest = async (req, res) => {
       });
       const order = await attachStripeSessionToOrder(pendingOrder.id, session.raw || session);
       const { raw: _rawStripeSession, ...publicSession } = session;
+      res.usageData = { order, sandboxTest, liveTest };
       sendJson(res, 201, { ok: true, session: publicSession, order: stripHeavyProofPayload(order) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create Stripe checkout session.";
@@ -585,6 +611,7 @@ export const handleRequest = async (req, res) => {
       const rawBody = await readBody(req);
       const event = parseStripeWebhook(rawBody, req.headers["stripe-signature"]);
       await handleStripeEvent(event);
+      res.once('finish', () => recordPaid(event));
       sendJson(res, 200, { ok: true, received: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Stripe webhook failed.";
@@ -598,6 +625,7 @@ export const handleRequest = async (req, res) => {
       const rawBody = await readBody(req);
       const event = parseStripeWebhook(rawBody, req.headers["stripe-signature"]);
       await handleStripeEvent(event);
+      res.once('finish', () => recordPaid(event));
       sendJson(res, 200, { ok: true, received: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Stripe webhook failed.";
@@ -782,6 +810,7 @@ export const handleRequest = async (req, res) => {
     try {
       const payload = JSON.parse(await readBody(req));
       const proofSession = await createProofSession(payload);
+      res.usageData = { source:payload.metadata?.source, kind:payload.metadata?.source === 'pdf-resume-link-trial' ? 'pdf' : 'saved' };
       sendJson(res, 201, { ok: true, proofSession });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not create proof session.";

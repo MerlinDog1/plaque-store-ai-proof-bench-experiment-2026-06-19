@@ -1,10 +1,11 @@
+import { usageHeaders } from './designerUsage';
 import type { GoogleGenAI } from "@google/genai";
 import { PLAQUE_TEXT_MODEL, LEGACY_PLAQUE_TEXT_MODEL } from './aiModels.mjs';
 import { TEXT_PROXY_TIMEOUT_MS, GENERATION_TIMEOUT_MESSAGE } from './geminiTiming.mjs';
 
 type GenerateContentArgs = Parameters<GoogleGenAI["models"]["generateContent"]>[0];
 
-const callGeminiProxy = async <T,>(path: string, payload: unknown): Promise<T> => {
+const callGeminiProxy = async <T,>(path: string, payload: unknown, step: 'proofread' | 'layout' | 'change' | 'other'): Promise<T> => {
   const model = (payload as GenerateContentArgs)?.model;
   const isText = model === PLAQUE_TEXT_MODEL || model === LEGACY_PLAQUE_TEXT_MODEL;
   const controller = new AbortController();
@@ -12,7 +13,7 @@ const callGeminiProxy = async <T,>(path: string, payload: unknown): Promise<T> =
   try {
     const response = await fetch(path, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...usageHeaders(step) },
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
@@ -39,19 +40,19 @@ const callGeminiProxy = async <T,>(path: string, payload: unknown): Promise<T> =
   }
 };
 
-const createBrowserProxyClient = () => ({
+const createBrowserProxyClient = (step: 'proofread' | 'layout' | 'change' | 'other') => ({
   models: {
     generateContent: (args: GenerateContentArgs) =>
       callGeminiProxy<Awaited<ReturnType<GoogleGenAI["models"]["generateContent"]>>>(
         "/api/gemini/generate-content",
-        args,
+        args, step,
       ),
   },
 });
 
-export const getGeminiClient = (): GoogleGenAI => {
+export const getGeminiClient = (step: 'proofread' | 'layout' | 'change' | 'other' = 'other'): GoogleGenAI => {
   if (typeof window !== "undefined") {
-    return createBrowserProxyClient() as unknown as GoogleGenAI;
+    return createBrowserProxyClient(step) as unknown as GoogleGenAI;
   }
   return { models: { generateContent: async (args: GenerateContentArgs) => {
     const { GoogleGenAI: ServerClient } = await import("@google/genai");
