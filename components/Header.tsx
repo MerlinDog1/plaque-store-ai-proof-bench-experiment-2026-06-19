@@ -26,6 +26,8 @@ export const Header: React.FC<Props> = ({
   const showDesignCta = !isDesigner && currentView !== "checkout" && !isAdmin;
   const showCheckoutCta = isDesigner && showPrice;
 
+  if (isAdmin) return <header className="admin-brand-header"><a href="/" aria-label="InstaPlaque shop">Insta<span>Plaque</span></a><span className="admin-brand-tag">Admin</span><a className="admin-shop-link" href="/">Visit shop <span aria-hidden="true">↗</span></a></header>;
+
   if (isDesigner) {
     return (
       <header className="designer-header no-print">

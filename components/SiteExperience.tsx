@@ -1,3 +1,4 @@
+import { AdminIcon } from './AdminIcon';
 import DesignerUse from './DesignerUse';
 import { sanitizeAttribution } from '../services/orderAttribution.mjs';
 import React, { lazy, useEffect, useRef, useState } from 'react';
@@ -2048,6 +2049,161 @@ function OrderConfirmedPage({ onNavigate }: Pick<SiteProps, 'onNavigate'>) {
   );
 }
 
+const adminStatusLabel = (value?: string) => ({ paid: 'Paid / new', proof_check: 'Proof checked', in_production: 'In production', ready_to_dispatch: 'Ready to dispatch', dispatched: 'Dispatched', issue: 'On hold', archived: 'Archived', cancelled: 'Cancelled', refunded: 'Refunded', not_started: 'Not started' }[value || 'not_started'] || statusLabel(value));
+
+function AdminOrderDetail({ selectedOrder, variant, canRenderSelectedProof, canDownloadSelectedProductionArtwork, downloadProductionArtwork, updateOrder, loadOrders }: {
+ selectedOrder: PaidOrder; variant: 'mobile' | 'desktop'; canRenderSelectedProof: boolean; canDownloadSelectedProductionArtwork: boolean;
+ downloadProductionArtwork: (order: PaidOrder) => Promise<void>; updateOrder: (id: string, payload: Record<string, string>) => Promise<void>; loadOrders: () => Promise<void>;
+}) {
+ const productionStep = ['proof_check', 'in_production', 'ready_to_dispatch', 'dispatched'].indexOf(selectedOrder.fulfilmentStatus === 'not_started' ? selectedOrder.status : selectedOrder.fulfilmentStatus);
+ return (            <article className={`admin-console__detail admin-console__detail--${variant}`}>
+              <div className="admin-console__detail-head">
+                <div>
+                  <p>{formatOrderSource(selectedOrder)}</p>
+                  <h2>{selectedOrder.id}</h2><mark className="admin-status" data-status={selectedOrder.fulfilmentStatus === 'not_started' ? selectedOrder.status : selectedOrder.fulfilmentStatus}>{adminStatusLabel(selectedOrder.fulfilmentStatus === 'not_started' ? selectedOrder.status : selectedOrder.fulfilmentStatus)}</mark>
+                </div>
+                <strong>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</strong>
+              </div>
+              <div className="admin-console__proof">
+                {storedProofSvgForOrder(selectedOrder) ? (
+                  <StoredProofSvgPreview order={selectedOrder} />
+                ) : selectedOrder.proofPackage?.visualProofPng ? (
+                  <img
+                    src={versionedOrderProofImageUrl(selectedOrder)}
+                    alt="Approved plaque proof"
+                    className="admin-console__proof-image"
+                  />
+                ) : canRenderSelectedProof ? (
+                  <div className="admin-console__proof-live-preview">
+                    <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
+                  </div>
+                ) : (
+                  <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
+                )}
+              </div>
+              <div className="admin-console__data-grid">
+                <div><span>Product</span><strong>{getPlaqueSummaryTitle(selectedOrder.plaqueState, selectedOrder.productTitle)}</strong></div>
+                <div><span>Backing</span><strong>{backingLabel(selectedOrder.plaqueState)}</strong></div>
+                <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
+                <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
+                <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
+                <div><span>Arrival source</span><strong>{sanitizeAttribution(selectedOrder.metadata?.attribution)?.label || 'Not recorded'}</strong></div>
+                <div><span>Order status</span><strong>{adminStatusLabel(selectedOrder.status)}</strong></div>
+                <div><span>Fulfilment</span><strong>{adminStatusLabel(selectedOrder.fulfilmentStatus)}</strong></div>
+                <div><span>Paid</span><strong>{formatAdminDate(selectedOrder.paidAt || selectedOrder.createdAt)}</strong></div>
+                <div><span>Due</span><strong>{formatShortDate(dueDateForOrder(selectedOrder))}</strong></div>
+              </div>
+              <div className="admin-console__info-panels">
+                <section>
+                  <div className="admin-console__section-head">
+                    <span>Shipping address</span>
+                    <button
+                      type="button"
+                      disabled={!addressLinesForOrder(selectedOrder).length}
+                      onClick={() => navigator.clipboard?.writeText(addressLinesForOrder(selectedOrder).join('\n'))}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  {addressLinesForOrder(selectedOrder).length ? (
+                    <address>
+                      {addressLinesForOrder(selectedOrder).map((line) => <span key={line}>{line}</span>)}
+                    </address>
+                  ) : (
+                    <p>No shipping address stored yet.</p>
+                  )}
+                </section>
+                <section>
+                  <div className="admin-console__section-head">
+                    <span>Stripe</span>
+                  </div>
+                  <p><strong>Session</strong> {selectedOrder.stripeCheckoutSessionId || 'Not linked'}</p>
+                  <p><strong>Payment</strong> {selectedOrder.stripePaymentIntentId || 'Not linked'}</p>
+                  <div className="admin-console__link-row">
+                    {selectedOrder.stripeCheckoutSessionId && (
+                      <a href={stripeDashboardUrl('checkout/sessions', selectedOrder.stripeCheckoutSessionId)} target="_blank" rel="noreferrer">Open session</a>
+                    )}
+                    {selectedOrder.stripePaymentIntentId && (
+                      <a href={stripeDashboardUrl('payments', selectedOrder.stripePaymentIntentId)} target="_blank" rel="noreferrer">Open payment</a>
+                    )}
+                  </div>
+                </section>
+              </div>
+<section className="admin-action-group"><h3>Production <span>{adminStatusLabel(selectedOrder.fulfilmentStatus === 'not_started' ? selectedOrder.status : selectedOrder.fulfilmentStatus)}</span></h3>
+<ol className="admin-production-steps" aria-label="Production progress">{['proof_check', 'in_production', 'ready_to_dispatch', 'dispatched'].map((step, index) => <li key={step} className={productionStep >= index ? 'is-done' : ''}><span>{productionStep >= index ? '✓' : index + 1}</span>{['Proof', 'Making', 'Ready', 'Sent'][index]}</li>)}</ol>
+<div className="admin-console__actions"><button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'proof_check', fulfilmentStatus: 'not_started' })}>
+                  Mark proof checked
+                </button>
+<button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'in_production', fulfilmentStatus: 'in_production', emailTemplate: 'customer-in-production' })}>
+                  Mark in production + email
+                </button>
+<button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'ready_to_dispatch', fulfilmentStatus: 'ready_to_dispatch' })}>
+                  Mark ready to dispatch
+                </button>
+<button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'dispatched', fulfilmentStatus: 'dispatched', emailTemplate: 'customer-dispatched' })}>
+                  Mark dispatched + email
+                </button></div></section>
+<section className="admin-action-group admin-action-group--files"><h3>Files</h3><div className="admin-console__actions"><button
+                  type="button"
+                  disabled={!selectedOrder || !canDownloadSelectedProductionArtwork}
+                  onClick={() => downloadProductionArtwork(selectedOrder)}
+                >
+                  <DownloadIcon />
+                  Download production artwork
+                </button>
+<button
+                  type="button"
+                  disabled={!selectedOrder}
+                  onClick={() => downloadOrderProofPng(selectedOrder).catch((downloadError) => {
+                    console.error('Approved proof PNG download failed.', downloadError);
+                    window.alert('The approved proof image is not available yet. Please try again in a few seconds.');
+                  })}
+                >
+                  <DownloadIcon />
+                  Download approved proof
+                </button></div></section>
+<details className="admin-more-actions" open={variant === 'desktop' ? true : undefined}><summary>More actions</summary>
+<section className="admin-action-group admin-action-group--quiet"><h3>Customer emails</h3><div className="admin-console__actions"><button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
+                  method: 'POST',
+                  credentials: 'same-origin',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ template: 'customer-order-confirmation' }),
+                }).then(loadOrders)}>
+                  <AdminIcon name="mail" /> Resend confirmation
+                </button>
+<button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
+                  method: 'POST',
+                  credentials: 'same-origin',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ template: 'customer-proof-copy' }),
+                }).then(loadOrders)}>
+                  <AdminIcon name="mail" /> Resend proof email
+                </button>
+<button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
+                  method: 'POST',
+                  credentials: 'same-origin',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ template: 'customer-review-request' }),
+                }).then(loadOrders)}>
+                  <AdminIcon name="mail" /> Send review follow-up
+                </button></div></section>
+<section className="admin-action-group admin-action-group--other"><h3>Other</h3><div className="admin-console__actions"><button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'issue', fulfilmentStatus: 'issue' })}>
+                  Put on hold
+                </button>
+<button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'archived', fulfilmentStatus: 'archived' })}>
+                  Archive test/order
+                </button></div></section></details>
+              <div className="admin-console__timeline"><h3>Order timeline</h3>
+                {(selectedOrder.events || []).map((event, index) => (
+                  <div key={`${event.type}-${event.at}-${index}`}>
+                    <strong>{event.label}</strong>
+                    <span>{event.at ? new Date(event.at).toLocaleString('en-GB') : ''}</span>
+                  </div>
+                ))}
+              </div>
+            </article>);
+}
+
 function AdminPage() {
   const [adminSection, setAdminSection] = useState<'orders' | 'search' | 'usage'>('orders');
   const [orders, setOrders] = useState<PaidOrder[]>([]);
@@ -2298,20 +2454,20 @@ function AdminPage() {
       <section className="admin-console__shell">
         <div className="admin-console__head">
           <div>
-            <p>{adminSection === 'orders' ? 'Operations' : 'Organic search'}</p>
-            <h1>{adminSection === 'orders' ? 'Orders' : 'Search position'}</h1>
+            <p>{adminSection === 'orders' ? 'Your workshop, at a glance' : adminSection === 'usage' ? 'From first idea to finished plaque' : 'Organic search'}</p>
+            <h1>{adminSection === 'orders' ? 'Orders' : adminSection === 'usage' ? 'Designer use' : 'Search position'}</h1>
           </div>
           <div className="admin-console__head-actions">
-            <span>{adminSection === 'orders' ? (ordersLoaded ? `${orders.length} orders` : loading ? 'Loading orders…' : 'Orders unavailable') : '25 searches'}</span>
+            <span>{adminSection === 'orders' ? (ordersLoaded ? `${orders.length} orders` : loading ? 'Loading orders…' : 'Orders unavailable') : adminSection === 'usage' ? '14-day overview' : '25 searches'}</span>
             {authConfig?.operational && authConfig.authRequired && adminAuthenticated && (
               <button type="button" className="admin-console__ghost-button" onClick={logoutAdmin}>
-                Lock
+                <AdminIcon name="lock" /> Lock
               </button>
             )}
           </div>
         </div>
         {authConfig?.operational && authConfig.authRequired && !adminAuthenticated && (
-          <form className="admin-console__login" onSubmit={loginAdmin}>
+          <form className="admin-console__login" onSubmit={loginAdmin}><span className="admin-login-icon"><AdminIcon name="lock" /></span><h2>Insta<span>Plaque</span></h2><p>Your workshop, ready when you are.<br />Sign in to manage orders and see how things are going.</p>
             <label htmlFor="admin-passcode">{authConfig.label || 'Admin passcode'}</label>
             <div>
               <input
@@ -2328,36 +2484,37 @@ function AdminPage() {
             </div>
           </form>
         )}
-        {adminError && <div className="commerce-warning">{adminError}</div>}
+        {adminError && <div className="commerce-warning" role="alert"><strong>We couldn’t load this view.</strong><p>{adminError}</p></div>}
         {adminError && adminAuthenticated && !loading && <button type="button" className="admin-console__ghost-button" onClick={loadOrders}>Retry loading orders</button>}
-        {loading && <div className="commerce-success">Loading orders...</div>}
+        {loading && <div className="admin-skeleton" role="status" aria-label="Loading orders"><span className="sr-only">Loading orders...</span>{[0,1,2,3].map(i => <div key={i}><i /><i /><i /></div>)}</div>}
         {authConfig?.operational === false || (authConfig?.authRequired && !adminAuthenticated) ? null : (
           <>
         <nav className="admin-console__section-tabs" aria-label="Admin sections">
-          <button type="button" className={adminSection === 'orders' ? 'is-active' : ''} onClick={() => setAdminSection('orders')}>
+          <button type="button" className={adminSection === 'orders' ? 'is-active' : ''} aria-current={adminSection === 'orders' ? 'page' : undefined} onClick={() => setAdminSection('orders')}><AdminIcon name="orders" />
             Orders
           </button>
-          <button type="button" className={adminSection === 'search' ? 'is-active' : ''} onClick={() => setAdminSection('search')}>
+          <button type="button" className={adminSection === 'search' ? 'is-active' : ''} aria-current={adminSection === 'search' ? 'page' : undefined} onClick={() => setAdminSection('search')}><AdminIcon name="search" />
             Search position
           </button>
-          <button type="button" className={adminSection === 'usage' ? 'is-active' : ''} onClick={() => setAdminSection('usage')}>Designer use</button>
+          <button type="button" className={adminSection === 'usage' ? 'is-active' : ''} aria-current={adminSection === 'usage' ? 'page' : undefined} onClick={() => setAdminSection('usage')}><AdminIcon name="usage" />Designer use</button>
         </nav>
         {adminSection === 'usage' ? <DesignerUse /> : adminSection === 'search' ? <SeoRankTracker /> : (
           <>
         {ordersLoaded && <div className="admin-console__stats">
-          <div><span>Sold today</span><strong>{todayOrders.length}</strong><small>{formatPence(counts.todayRevenue)}</small></div>
-          <div><span>This month</span><strong>{monthOrders.length}</strong><small>{formatPence(counts.monthRevenue)}</small></div>
-          <div><span>In production</span><strong>{counts.production}</strong><small>{counts.dispatched} dispatched</small></div>
-          <div><span>Overdue</span><strong>{counts.overdue}</strong><small>{counts.emails} email events</small></div>
+          <div><span><AdminIcon name="money" />Sold today</span><strong>{todayOrders.length}</strong><small>{formatPence(counts.todayRevenue)}</small></div>
+          <div><span><AdminIcon name="usage" />This month</span><strong>{monthOrders.length}</strong><small>{formatPence(counts.monthRevenue)}</small></div>
+          <div><span><AdminIcon name="orders" />In production</span><strong>{counts.production}</strong><small>{counts.dispatched} dispatched</small></div>
+          <div className={counts.overdue ? 'is-overdue' : ''}><span><AdminIcon name="clock" />Overdue</span><strong>{counts.overdue}</strong><small>{counts.emails} email events</small></div>
         </div>}
         <div className="admin-console__filters">
           <input
             type="search"
+            aria-label="Search orders"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search order, customer, email, postcode or wording"
           />
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as AdminStatusFilter)}>
+          <select aria-label="Filter order status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as AdminStatusFilter)}>
             <option value="active">Active orders</option>
             <option value="all">All orders</option>
             <option value="paid">Paid/new</option>
@@ -2367,7 +2524,7 @@ function AdminPage() {
             <option value="issue">Issue/on hold</option>
             <option value="archived">Archived</option>
           </select>
-          <select value={sortMode} onChange={(event) => setSortMode(event.target.value as AdminSortMode)}>
+          <select aria-label="Sort orders" value={sortMode} onChange={(event) => setSortMode(event.target.value as AdminSortMode)}>
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
             <option value="due">Due date</option>
@@ -2397,123 +2554,14 @@ function AdminPage() {
                     <small>{order.customerEmail || 'Email held by Stripe'}</small>
                   </span>
                   <span>
-                    <mark>{statusLabel(order.fulfilmentStatus || order.status)}</mark>
-                    <small>Due {formatShortDate(dueDateForOrder(order))}</small>
+                    <mark className="admin-status" data-status={order.fulfilmentStatus === 'not_started' ? order.status : order.fulfilmentStatus || order.status}>{adminStatusLabel(order.fulfilmentStatus === 'not_started' ? order.status : order.fulfilmentStatus || order.status)}</mark>
+                    <small className={overdueOrders.includes(order) ? 'admin-due--late' : ''}>Due {formatShortDate(dueDateForOrder(order))}</small>
                   </span>
                   <span>{formatPence(order.totalPence, order.currency)}</span>
                 </button>
                 {selectedOrder?.id === order.id && (
                   <AdminDetailBoundary resetKey={`mobile-${selectedOrder.id}-${selectedOrder.updatedAt || ''}`}>
-                  <article className="admin-console__detail admin-console__detail--mobile">
-                    <div className="admin-console__detail-head">
-                      <div>
-                        <p>{formatOrderSource(selectedOrder)}</p>
-                        <h2>{selectedOrder.id}</h2>
-                      </div>
-                      <strong>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</strong>
-                    </div>
-                    <div className="admin-console__proof">
-                      {storedProofSvgForOrder(selectedOrder) ? (
-                        <StoredProofSvgPreview order={selectedOrder} />
-                      ) : selectedOrder.proofPackage?.visualProofPng ? (
-                        <img
-                          src={versionedOrderProofImageUrl(selectedOrder)}
-                          alt="Approved plaque proof"
-                          className="admin-console__proof-image"
-                        />
-                      ) : canRenderSelectedProof ? (
-                        <div className="admin-console__proof-live-preview">
-                          <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
-                        </div>
-                      ) : (
-                        <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
-                      )}
-                    </div>
-                    <div className="admin-console__data-grid">
-                      <div><span>Product</span><strong>{getPlaqueSummaryTitle(selectedOrder.plaqueState, selectedOrder.productTitle)}</strong></div>
-                      <div><span>Backing</span><strong>{backingLabel(selectedOrder.plaqueState)}</strong></div>
-                      <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
-                      <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
-                      <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
-                      <div><span>Arrival source</span><strong>{sanitizeAttribution(selectedOrder.metadata?.attribution)?.label || 'Not recorded'}</strong></div>
-                      <div><span>Order status</span><strong>{statusLabel(selectedOrder.status)}</strong></div>
-                      <div><span>Fulfilment</span><strong>{statusLabel(selectedOrder.fulfilmentStatus)}</strong></div>
-                      <div><span>Paid</span><strong>{formatAdminDate(selectedOrder.paidAt || selectedOrder.createdAt)}</strong></div>
-                      <div><span>Due</span><strong>{formatShortDate(dueDateForOrder(selectedOrder))}</strong></div>
-                    </div>
-                    <div className="admin-console__info-panels">
-                      <section>
-                        <div className="admin-console__section-head">
-                          <span>Shipping address</span>
-                          <button
-                            type="button"
-                            disabled={!addressLinesForOrder(selectedOrder).length}
-                            onClick={() => navigator.clipboard?.writeText(addressLinesForOrder(selectedOrder).join('\n'))}
-                          >
-                            Copy
-                          </button>
-                        </div>
-                        {addressLinesForOrder(selectedOrder).length ? (
-                          <address>
-                            {addressLinesForOrder(selectedOrder).map((line) => <span key={line}>{line}</span>)}
-                          </address>
-                        ) : (
-                          <p>No shipping address stored yet.</p>
-                        )}
-                      </section>
-                      <section>
-                        <div className="admin-console__section-head">
-                          <span>Stripe</span>
-                        </div>
-                        <p><strong>Session</strong> {selectedOrder.stripeCheckoutSessionId || 'Not linked'}</p>
-                        <p><strong>Payment</strong> {selectedOrder.stripePaymentIntentId || 'Not linked'}</p>
-                        <div className="admin-console__link-row">
-                          {selectedOrder.stripeCheckoutSessionId && (
-                            <a href={stripeDashboardUrl('checkout/sessions', selectedOrder.stripeCheckoutSessionId)} target="_blank" rel="noreferrer">Open session</a>
-                          )}
-                          {selectedOrder.stripePaymentIntentId && (
-                            <a href={stripeDashboardUrl('payments', selectedOrder.stripePaymentIntentId)} target="_blank" rel="noreferrer">Open payment</a>
-                          )}
-                        </div>
-                      </section>
-                    </div>
-                    <div className="admin-console__actions">
-                      <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'proof_check', fulfilmentStatus: 'not_started' })}>
-                        Mark proof checked
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!selectedOrder || !canDownloadSelectedProductionArtwork}
-                        onClick={() => downloadProductionArtwork(selectedOrder)}
-                      >
-                        <DownloadIcon />
-                        Download production artwork
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!selectedOrder}
-                        onClick={() => downloadOrderProofPng(selectedOrder).catch((downloadError) => {
-                          console.error('Approved proof PNG download failed.', downloadError);
-                          window.alert('The approved proof image is not available yet. Please try again in a few seconds.');
-                        })}
-                      >
-                        <DownloadIcon />
-                        Download approved proof
-                      </button>
-                      <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'in_production', fulfilmentStatus: 'in_production', emailTemplate: 'customer-in-production' })}>
-                        Mark in production + email
-                      </button>
-                      <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'ready_to_dispatch', fulfilmentStatus: 'ready_to_dispatch' })}>
-                        Mark ready to dispatch
-                      </button>
-                      <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'dispatched', fulfilmentStatus: 'dispatched', emailTemplate: 'customer-dispatched' })}>
-                        Mark dispatched + email
-                      </button>
-                      <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'issue', fulfilmentStatus: 'issue' })}>
-                        Put on hold
-                      </button>
-                    </div>
-                  </article>
+                  <AdminOrderDetail selectedOrder={selectedOrder} variant="mobile" canRenderSelectedProof={canRenderSelectedProof} canDownloadSelectedProductionArtwork={canDownloadSelectedProductionArtwork} downloadProductionArtwork={downloadProductionArtwork} updateOrder={updateOrder} loadOrders={loadOrders} />
                   </AdminDetailBoundary>
                 )}
               </React.Fragment>
@@ -2536,151 +2584,7 @@ function AdminPage() {
           )}
           {selectedOrder && (
             <AdminDetailBoundary resetKey={`desktop-${selectedOrder.id}-${selectedOrder.updatedAt || ''}`}>
-            <article className="admin-console__detail admin-console__detail--desktop">
-              <div className="admin-console__detail-head">
-                <div>
-                  <p>{formatOrderSource(selectedOrder)}</p>
-                  <h2>{selectedOrder.id}</h2>
-                </div>
-                <strong>{formatPence(selectedOrder.totalPence, selectedOrder.currency)}</strong>
-              </div>
-              <div className="admin-console__proof">
-                {storedProofSvgForOrder(selectedOrder) ? (
-                  <StoredProofSvgPreview order={selectedOrder} />
-                ) : selectedOrder.proofPackage?.visualProofPng ? (
-                  <img
-                    src={versionedOrderProofImageUrl(selectedOrder)}
-                    alt="Approved plaque proof"
-                    className="admin-console__proof-image"
-                  />
-                ) : canRenderSelectedProof ? (
-                  <div className="admin-console__proof-live-preview">
-                    <PlaquePreview state={selectedOrder.plaqueState} activeStep={6} inscription={selectedOrder.inscription} />
-                  </div>
-                ) : (
-                  <div className="commerce-order-proof__pending">Approved proof preview unavailable</div>
-                )}
-              </div>
-              <div className="admin-console__data-grid">
-                <div><span>Product</span><strong>{getPlaqueSummaryTitle(selectedOrder.plaqueState, selectedOrder.productTitle)}</strong></div>
-                <div><span>Backing</span><strong>{backingLabel(selectedOrder.plaqueState)}</strong></div>
-                <div><span>Customer</span><strong>{selectedOrder.customerName || 'Customer'}</strong></div>
-                <div><span>Email</span><strong>{selectedOrder.customerEmail || 'Held by Stripe'}</strong></div>
-                <div><span>Payment</span><strong>{selectedOrder.paymentStatus}</strong></div>
-                <div><span>Arrival source</span><strong>{sanitizeAttribution(selectedOrder.metadata?.attribution)?.label || 'Not recorded'}</strong></div>
-                <div><span>Order status</span><strong>{statusLabel(selectedOrder.status)}</strong></div>
-                <div><span>Fulfilment</span><strong>{statusLabel(selectedOrder.fulfilmentStatus)}</strong></div>
-                <div><span>Paid</span><strong>{formatAdminDate(selectedOrder.paidAt || selectedOrder.createdAt)}</strong></div>
-                <div><span>Due</span><strong>{formatShortDate(dueDateForOrder(selectedOrder))}</strong></div>
-              </div>
-              <div className="admin-console__info-panels">
-                <section>
-                  <div className="admin-console__section-head">
-                    <span>Shipping address</span>
-                    <button
-                      type="button"
-                      disabled={!addressLinesForOrder(selectedOrder).length}
-                      onClick={() => navigator.clipboard?.writeText(addressLinesForOrder(selectedOrder).join('\n'))}
-                    >
-                      Copy
-                    </button>
-                  </div>
-                  {addressLinesForOrder(selectedOrder).length ? (
-                    <address>
-                      {addressLinesForOrder(selectedOrder).map((line) => <span key={line}>{line}</span>)}
-                    </address>
-                  ) : (
-                    <p>No shipping address stored yet.</p>
-                  )}
-                </section>
-                <section>
-                  <div className="admin-console__section-head">
-                    <span>Stripe</span>
-                  </div>
-                  <p><strong>Session</strong> {selectedOrder.stripeCheckoutSessionId || 'Not linked'}</p>
-                  <p><strong>Payment</strong> {selectedOrder.stripePaymentIntentId || 'Not linked'}</p>
-                  <div className="admin-console__link-row">
-                    {selectedOrder.stripeCheckoutSessionId && (
-                      <a href={stripeDashboardUrl('checkout/sessions', selectedOrder.stripeCheckoutSessionId)} target="_blank" rel="noreferrer">Open session</a>
-                    )}
-                    {selectedOrder.stripePaymentIntentId && (
-                      <a href={stripeDashboardUrl('payments', selectedOrder.stripePaymentIntentId)} target="_blank" rel="noreferrer">Open payment</a>
-                    )}
-                  </div>
-                </section>
-              </div>
-              <div className="admin-console__actions">
-                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'proof_check', fulfilmentStatus: 'not_started' })}>
-                  Mark proof checked
-                </button>
-                <button
-                  type="button"
-                  disabled={!selectedOrder || !canDownloadSelectedProductionArtwork}
-                  onClick={() => downloadProductionArtwork(selectedOrder)}
-                >
-                  <DownloadIcon />
-                  Download production artwork
-                </button>
-                <button
-                  type="button"
-                  disabled={!selectedOrder}
-                  onClick={() => downloadOrderProofPng(selectedOrder).catch((downloadError) => {
-                    console.error('Approved proof PNG download failed.', downloadError);
-                    window.alert('The approved proof image is not available yet. Please try again in a few seconds.');
-                  })}
-                >
-                  <DownloadIcon />
-                  Download approved proof
-                </button>
-                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'in_production', fulfilmentStatus: 'in_production', emailTemplate: 'customer-in-production' })}>
-                  Mark in production + email
-                </button>
-                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'ready_to_dispatch', fulfilmentStatus: 'ready_to_dispatch' })}>
-                  Mark ready to dispatch
-                </button>
-                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'dispatched', fulfilmentStatus: 'dispatched', emailTemplate: 'customer-dispatched' })}>
-                  Mark dispatched + email
-                </button>
-                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'issue', fulfilmentStatus: 'issue' })}>
-                  Put on hold
-                </button>
-                <button type="button" onClick={() => updateOrder(selectedOrder.id, { status: 'archived', fulfilmentStatus: 'archived' })}>
-                  Archive test/order
-                </button>
-                <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
-                  method: 'POST',
-                  credentials: 'same-origin',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ template: 'customer-review-request' }),
-                }).then(loadOrders)}>
-                  Send review follow-up
-                </button>
-                <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
-                  method: 'POST',
-                  credentials: 'same-origin',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ template: 'customer-order-confirmation' }),
-                }).then(loadOrders)}>
-                  Resend confirmation
-                </button>
-                <button type="button" onClick={() => fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.id)}/emails`, {
-                  method: 'POST',
-                  credentials: 'same-origin',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ template: 'customer-proof-copy' }),
-                }).then(loadOrders)}>
-                  Resend proof email
-                </button>
-              </div>
-              <div className="admin-console__timeline">
-                {(selectedOrder.events || []).map((event, index) => (
-                  <div key={`${event.type}-${event.at}-${index}`}>
-                    <strong>{event.label}</strong>
-                    <span>{event.at ? new Date(event.at).toLocaleString('en-GB') : ''}</span>
-                  </div>
-                ))}
-              </div>
-            </article>
+            <AdminOrderDetail selectedOrder={selectedOrder} variant="desktop" canRenderSelectedProof={canRenderSelectedProof} canDownloadSelectedProductionArtwork={canDownloadSelectedProductionArtwork} downloadProductionArtwork={downloadProductionArtwork} updateOrder={updateOrder} loadOrders={loadOrders} />
             </AdminDetailBoundary>
           )}
         </div>
