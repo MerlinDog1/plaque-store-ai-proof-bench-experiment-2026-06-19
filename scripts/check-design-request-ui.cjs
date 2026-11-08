@@ -6,6 +6,9 @@ const assert = require('node:assert/strict');
   for(const width of [390,1440]) {
    const page=await browser.newPage({viewport:{width,height:1000}});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+   // Built local servers do not host Vercel's analytics script; it is not part of this form test.
+   await page.route('**/_vercel/**',route=>route.fulfill({contentType:'application/javascript',body:''}));
+   await page.route('**/api/usage',route=>route.fulfill({status:202,json:{ok:true}}));
    let pending;const requests=[];
    await page.route('**/api/design-requests',route=>{requests.push(route.request().postDataJSON());pending=route;});
    await page.goto('http://127.0.0.1:4196/design-request');
