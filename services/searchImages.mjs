@@ -1,3 +1,4 @@
+import { studioPhotos } from './studioPhotos.mjs';
 // Search/share derivatives only. Page photos, Merchant feed and other schemas stay unchanged.
 export const stainlessSearchSlug = 'brushed-stainless-150x65-rect-plaque';
 export const gardenSearchPhoto = 'brushed-brass-210x148-rect-light-wood-plaque';
@@ -12,7 +13,7 @@ export const searchPrimaryImage = (slug, base) => {
   return images ? { '@type': 'ImageObject', url: images[0], width: 1200, height: 1200 } : undefined;
 };
 export const studioShareImageFor = slug => {
-  const photo = searchPhotoFor(slug);
+  const photo = searchPhotoFor(slug) || (studioPhotos.has(slug) ? slug : undefined);
   return photo ? searchImagePath(photo, 'og') : undefined;
 };
 export const studioShareAltFor = slug => slug === stainlessSearchSlug

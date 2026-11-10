@@ -58,6 +58,10 @@ for(const offer of merchantOffers) {
   assert(studioPhotos.has(offer.slug));shares(page(offer.slug),offer.slug);studioProducts++;
   assert.equal(expected,searchImagePath(offer.slug,'og'),'Product uses own photo');
 }
+assert.equal(studioProducts,merchantOffers.filter(o=>studioPhotos.has(o.slug)).length);
+for(const offer of merchantOffers.filter(o=>!studioPhotos.has(o.slug))) {
+  const d=page(offer.slug);assert.equal(d.querySelector('meta[property="og:image"]').content,site+offer.image);assert.equal(d.querySelector('meta[name="twitter:image"]').content,site+offer.image);
+}
 for(const slug of ogImageSlugs) {
   assert.notEqual(slug,'garden-plaques');const d=page(slug);
   assert.equal(d.querySelector('meta[property="og:image"]').content,`${site}/site-images/og/og-${slug}.jpg`);
