@@ -26,6 +26,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 import { merchantOffers } from '../services/merchantCatalogue.mjs';
 import { merchantReturnPolicy } from '../services/merchantPolicies.mjs';
+import { socialProfiles } from '../services/socialProfiles.mjs';
 
 const distDir = path.resolve('dist');
 const site = 'https://instaplaque.co.uk';
@@ -152,6 +153,7 @@ for (const file of pages) {
   html = editJsonLd(html, 'instaplaque-site-schema', schema => {
     const org = schema['@graph'].find(node => node['@type'] === 'Organization');
     if (!org) throw new Error(`${name}: no Organization in site schema`);
+    org.sameAs = Object.values(socialProfiles);
     org.logo = logo;
     org.contactPoint = contactPoint;
     org.hasMerchantReturnPolicy = merchantReturnPolicy;

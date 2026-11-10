@@ -923,6 +923,27 @@
   outline-offset: 4px;
 }
 
+/* Shared site-footer social links: local SVGs, generous touch and focus targets. */
+footer .footer-social-links {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+footer .footer-social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  color: inherit;
+  border-radius: 4px;
+}
+footer .footer-social-links a:hover { background: rgb(32 59 50 / 8%); }
+footer .footer-social-links a:focus-visible { outline: 3px solid currentColor; outline-offset: 2px; }
+footer .footer-social-links svg { display: block; flex: none; }
+
 /* Let customers choose a self-service proof or help from the same first screen. */
 .shop-hero-copy > .shop-hero-price {
   margin: 0 0 24px;

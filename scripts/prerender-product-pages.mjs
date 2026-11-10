@@ -12,9 +12,10 @@ import { createServer } from 'vite';
 // Render the same shop components used in the browser, rather than a second
 // abbreviated version of the catalogue that drifts away from the visible page.
 const renderer = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom' });
-let shop, catalogue, ShopHeader, guides, LegalPlaceholderPage, designer, DesignRequest, initialState, QuotePage, features, promoFilm;
+let FooterSocialLinks, shop, catalogue, ShopHeader, guides, LegalPlaceholderPage, designer, DesignRequest, initialState, QuotePage, features, promoFilm;
 try {
   shop = await renderer.ssrLoadModule('/components/Shopfront.tsx');
+  FooterSocialLinks = (await renderer.ssrLoadModule('/components/FooterSocialLinks.tsx')).FooterSocialLinks;
   features = await renderer.ssrLoadModule('/components/FeaturePages.tsx');
   promoFilm = await renderer.ssrLoadModule('/components/PromoVideo.tsx');
   guides = await renderer.ssrLoadModule('/components/ShopGuides.tsx');
@@ -477,7 +478,7 @@ const staticPageMarkup = ({ title, heading, description, image, faqs = [], price
       ? `<section aria-labelledby="prerender-shop-heading"><h2 id="prerender-shop-heading">Popular custom plaque formats</h2><ul>${indexablePages.map((page) => `<li><a href="/${page.slug}">${escapeHtml(page.productType)}</a> from £${page.price.toFixed(2).replace(/\.00$/, '')}</li>`).join('')}</ul><p>Choose brass or stainless steel, enter the wording and review a free online proof before checkout. Standard plaque prices include engraving, standard fixings and UK delivery.</p><a href="/design">Start a free proof</a></section>`
       : `<section aria-labelledby="prerender-process-heading"><h2 id="prerender-process-heading">Proof your plaque before payment</h2><p>Choose the format, add the wording and review the layout online. Standard prices are shown before checkout, with UK delivery included on eligible standard plaques.</p><a href="/design">Create your free plaque proof</a></section>`;
 
-  return `<div class="seo-prerendered-page" data-prerendered="true"><header>${staticNav()}</header><main><article><h1>${escapeHtml(visibleHeading)}</h1><p>${escapeHtml(description)}</p>${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(visibleHeading)} example" />` : ''}${details}${staticFaqs(faqs)}</article></main><footer><p>Made in the UK</p><nav aria-label="Legal"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/returns-and-cancellations">Returns and cancellations</a></nav></footer></div>`;
+  return `<div class="seo-prerendered-page" data-prerendered="true"><header>${staticNav()}</header><main><article><h1>${escapeHtml(visibleHeading)}</h1><p>${escapeHtml(description)}</p>${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(visibleHeading)} example" />` : ''}${details}${staticFaqs(faqs)}</article></main><footer><p>Made in the UK</p>${renderToStaticMarkup(React.createElement(FooterSocialLinks))}<nav aria-label="Legal"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/returns-and-cancellations">Returns and cancellations</a></nav></footer></div>`;
 };
 
 const replaceTag = (html, pattern, replacement) => html.replace(pattern, replacement);

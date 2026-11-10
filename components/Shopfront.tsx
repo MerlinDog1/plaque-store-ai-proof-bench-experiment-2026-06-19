@@ -1,3 +1,4 @@
+import { FooterSocialLinks } from './FooterSocialLinks';
 import { categoryFilmFor } from '../services/categoryFilms.mjs';
 import React from "react";
 import { CategoryLandingPage } from './CategoryLanding';
@@ -1181,6 +1182,7 @@ export function ShopFooter() {
         <p>Personal words, made lasting.</p>
         <ContactLink channel="email" placement="footer">{businessContact.email}</ContactLink>
         <p><ContactLink channel="whatsapp" placement="footer">WhatsApp: {businessContact.whatsapp}</ContactLink></p>
+        <FooterSocialLinks />
         <p className="shop-footer-address">
           {businessContact.address}
           <br />

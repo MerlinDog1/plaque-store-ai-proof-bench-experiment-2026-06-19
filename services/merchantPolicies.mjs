@@ -1,3 +1,5 @@
+import { socialProfiles } from './socialProfiles.mjs';
+
 // Existing owner-approved policies, read back from Merchant Center on
 // 13 October 2026. This describes them; it does not change fulfilment or refunds.
 const site = 'https://instaplaque.co.uk';
@@ -19,6 +21,7 @@ export const merchantPolicyOrganization = Object.freeze({
   '@type': 'Organization',
   '@id': `${site}/#organization`,
   name: 'InstaPlaque',
+  sameAs: Object.values(socialProfiles),
   url: `${site}/`,
   address: { '@type': 'PostalAddress', streetAddress: 'Dunkirk Avenue', addressLocality: 'Desborough', addressRegion: 'Northamptonshire', postalCode: 'NN14 2PL', addressCountry: 'GB' },
   hasMerchantReturnPolicy: merchantReturnPolicy,
