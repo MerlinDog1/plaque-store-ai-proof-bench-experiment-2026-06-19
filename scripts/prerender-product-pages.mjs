@@ -1,3 +1,4 @@
+import { studioShareImageFor, studioShareAltFor, searchSchemaImages, searchPrimaryImage } from '../services/searchImages.mjs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import React from 'react';
@@ -521,9 +522,17 @@ const writePrerenderedPage = async ({
   html = replaceTag(html, /<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${escapeAttr(title)}" />`);
   html = replaceTag(html, /<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${escapeAttr(description)}" />`);
   html = replaceTag(html, /<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`);
-  // Branded share cards for home and the indexable category pages; the schema keeps the photo.
-  const ogImage = shareImagePathFor(slug) ? `${siteBaseUrl}${shareImagePathFor(slug)}` : image ? `${siteBaseUrl}${image}` : shareImage;
+  // Plain studio derivatives for the selected routes; all other category share cards stay branded.
+  const studioShare = studioShareImageFor(slug);
+  const ogImage = studioShare ? `${siteBaseUrl}${studioShare}` : shareImagePathFor(slug) ? `${siteBaseUrl}${shareImagePathFor(slug)}` : image ? `${siteBaseUrl}${image}` : shareImage;
   html = replaceTag(html, /<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${ogImage}" />`);
+  if (studioShare) {
+    html = html.replace(`<meta property="og:image" content="${ogImage}" />`, `<meta property="og:image" content="${ogImage}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:alt" content="${escapeAttr(studioShareAltFor(slug))}" />`);
+  }
   if (pathPart === promoVideoPath) {
     // Open Graph is one of the video metadata sources Google reads; same file and size as the VideoObject.
     const file = `${siteBaseUrl}${promoVideo.file}`;
@@ -548,6 +557,7 @@ const writePrerenderedPage = async ({
         name: title,
         description,
         isPartOf: { '@id': `${siteBaseUrl}/#website` },
+        ...(searchPrimaryImage(slug, siteBaseUrl) ? { primaryImageOfPage: searchPrimaryImage(slug, siteBaseUrl) } : {}),
       },
       ...(productSchema ? [productSchema] : []),
       ...schema,
@@ -588,7 +598,8 @@ for (const page of routePages) {
 
 // The main Shopping picture (owner msg 8159, 31 Oct): the studio photo where a product has one, otherwise the flat
 // drawing (or the A5 steel and brass bench photos, which are their offer image). The feed's image_link and the page's
-// Product schema use the same picture; behind a studio photo the drawing becomes the first additional image.
+// Product schema normally use the same picture; the selected stainless schema uses search derivatives instead.
+// Behind a studio photo the drawing remains the first additional feed image.
 const drawingUrlFor = page => `${siteBaseUrl}${page.image}${merchantImageQuery}`;
 const mainImageUrlFor = page => (page.studioPhoto ? `${siteBaseUrl}${page.studioPhoto}` : drawingUrlFor(page));
 
@@ -608,7 +619,7 @@ for (const page of indexablePages) {
       '@id': `${url}#product`,
       name: page.productType,
       description: page.description,
-      image: mainImageUrlFor(page),
+      image: searchSchemaImages(page.slug, siteBaseUrl) || mainImageUrlFor(page),
       brand: { '@type': 'Brand', name: 'InstaPlaque' },
       category: 'Custom engraved plaques',
       material: merchantOffers.find(item => item.slug === page.slug)?.label || 'Brass or stainless steel',
@@ -656,7 +667,7 @@ for (const page of [...indexableLandingPages, ...occasionPages]) {
         '@id': `${url}#collection`,
         name: page.pageName,
         description: page.description,
-        image: `${siteBaseUrl}${page.image}`,
+        image: searchSchemaImages(page.slug, siteBaseUrl) || `${siteBaseUrl}${page.image}`,
         about: page.relatedSearches,
       },
       {
@@ -732,8 +743,8 @@ await writeFile(path.join(distDir, 'google-merchant-feed.xml'), feedXml);
 // photo went up later takes that date, services/studioPhotos.mjs).
 const productsLastmod = '2026-10-24';
 const productSitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${merchantPages.map(page => {
-  const lastmod = [productsLastmod, studioPhotos.get(page.slug) || ''].sort().at(-1);
-  const images = [page.studioPhoto, page.photo, page.image && page.image + merchantImageQuery].filter(Boolean).map(src => `<image:image><image:loc>${escapeAttr(siteBaseUrl + src)}</image:loc><image:title>${escapeAttr(page.productType)}</image:title></image:image>`).join('');
+  const lastmod = [productsLastmod, studioPhotos.get(page.slug) || '', searchSchemaImages(page.slug, siteBaseUrl) ? '2026-11-10' : ''].sort().at(-1);
+  const images = [searchSchemaImages(page.slug, siteBaseUrl)?.[0]?.replace(siteBaseUrl, ''), page.studioPhoto, page.photo, page.image && page.image + merchantImageQuery].filter(Boolean).map(src => `<image:image><image:loc>${escapeAttr(siteBaseUrl + src)}</image:loc><image:title>${escapeAttr(page.productType)}</image:title></image:image>`).join('');
   return `  <url><loc>${escapeAttr(`${siteBaseUrl}/${page.slug}`)}</loc><lastmod>${lastmod}</lastmod>${images}</url>`;
 }).join("\n")}\n</urlset>\n`;
 await writeFile(path.join(distDir, "sitemap-products.xml"), productSitemapXml);

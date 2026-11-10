@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {searchSchemaImages} from '../services/searchImages.mjs';
 import fs from 'node:fs';
 import {JSDOM} from 'jsdom';
 import {merchantImageQuery,merchantOffers} from '../services/merchantCatalogue.mjs';
@@ -20,7 +21,7 @@ for(const offer of merchantOffers){
  const html=fs.readFileSync('dist/'+offer.slug+'/index.html','utf8');
  const schemas=[...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map(x=>JSON.parse(x[1]));
  const products=schemas.flatMap(s=>s['@graph']||[s]).filter(s=>s['@type']==='Product');
- assert(products.some(p=>Number(p.offers.price)===offer.price&&p.image===main),'Schema '+offer.slug);
+ assert(products.some(p=>Number(p.offers.price)===offer.price&&JSON.stringify(p.image)===JSON.stringify(searchSchemaImages(offer.slug,'https://instaplaque.co.uk')||main)),'Schema '+offer.slug);
  assert(html.includes(offer.image));assert(html.includes(`${offer.productionDays} working days`));
 }
 console.log('All',items.length,'feed items match built page schema/images/prices/production times;',studioMain,'lead with their studio photo');

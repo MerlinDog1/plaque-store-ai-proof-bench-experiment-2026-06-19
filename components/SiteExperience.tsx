@@ -1,3 +1,4 @@
+import { studioShareImageFor, studioShareAltFor, searchSchemaImages, searchPrimaryImage } from '../services/searchImages.mjs';
 import { AdminIcon } from './AdminIcon';
 import DesignerUse from './DesignerUse';
 import { sanitizeAttribution } from '../services/orderAttribution.mjs';
@@ -743,7 +744,7 @@ const productSchema = (product: ProductFamily) => {
     '@id': `${siteBaseUrl}/${product.slug}#product`,
     name: product.title,
     description: product.seoDescription || product.description,
-    image: product.image ? `${siteBaseUrl}${product.image}` : siteShareImage,
+    image: searchSchemaImages(product.slug, siteBaseUrl) || (product.image ? `${siteBaseUrl}${product.image}` : siteShareImage),
     brand: {
       '@type': 'Brand',
       name: 'InstaPlaque',
@@ -767,7 +768,7 @@ const landingPageSchema = (page: SeoLandingPage) => ({
   '@id': `${siteBaseUrl}/${page.slug}#collection`,
   name: page.title,
   description: page.seoDescription,
-  image: `${siteBaseUrl}${page.image}`,
+  image: searchSchemaImages(page.slug, siteBaseUrl) || `${siteBaseUrl}${page.image}`,
   about: page.relatedSearches,
 });
 
@@ -953,8 +954,14 @@ export const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selec
     setMetaContent('meta[property="og:url"]', url);
     const routeSlug = view === 'product' ? selectedProduct.slug : view === 'landing' ? selectedLanding.slug : undefined;
     const routeImage = view === 'product' ? selectedProduct.image : view === 'landing' ? selectedLanding.image : view === 'video' ? promoVideo.thumbnails.wide : undefined;
-    const shareImage = new URL(shareImagePathFor(routeSlug) || routeImage || defaultShareImagePath, siteBaseUrl).href;
+    const shareImage = new URL(studioShareImageFor(routeSlug) || shareImagePathFor(routeSlug) || routeImage || defaultShareImagePath, siteBaseUrl).href;
     setMetaContent('meta[property="og:image"]', shareImage);
+    const studioShare = studioShareImageFor(routeSlug);
+    for (const [name, value] of Object.entries({ width: '1200', height: '630', type: 'image/jpeg', alt: studioShareAltFor(routeSlug) })) {
+      const selector = `meta[property="og:image:${name}"]`;
+      if (studioShare) setMetaContent(selector, value);
+      else document.head.querySelector(selector)?.remove();
+    }
     setMetaContent('meta[name="twitter:title"]', config.title);
     setMetaContent('meta[name="twitter:description"]', config.description);
     setMetaContent('meta[name="twitter:image"]', shareImage);
@@ -969,6 +976,7 @@ export const useSeoMeta = (view: SiteView, selectedProduct: ProductFamily, selec
           url,
           name: config.title,
           description: config.description,
+          ...(searchPrimaryImage(routeSlug, siteBaseUrl) ? { primaryImageOfPage: searchPrimaryImage(routeSlug, siteBaseUrl) } : {}),
           isPartOf: {
             '@id': `${siteBaseUrl}/#website`,
           },

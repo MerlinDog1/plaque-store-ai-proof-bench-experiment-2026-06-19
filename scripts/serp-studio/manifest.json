@@ -1,0 +1,138 @@
+[
+  {
+    "slug": "brushed-brass-210x148-rect-light-wood-plaque",
+    "version": "1x1",
+    "file": "brushed-brass-210x148-rect-light-wood-plaque-1x1-v1.webp",
+    "width": 1200,
+    "height": 1200,
+    "format": "WEBP",
+    "treatment": "pad",
+    "scale": 0.86,
+    "sourceFrame": [
+      84,
+      84,
+      1032,
+      1032
+    ],
+    "minimumMargin": 0.07
+  },
+  {
+    "slug": "brushed-brass-210x148-rect-light-wood-plaque",
+    "version": "4x3",
+    "file": "brushed-brass-210x148-rect-light-wood-plaque-4x3-v1.webp",
+    "width": 1200,
+    "height": 900,
+    "format": "WEBP",
+    "treatment": "pad",
+    "scale": 0.645,
+    "sourceFrame": [
+      213,
+      63,
+      774,
+      774
+    ],
+    "minimumMargin": 0.07
+  },
+  {
+    "slug": "brushed-brass-210x148-rect-light-wood-plaque",
+    "version": "16x9",
+    "file": "brushed-brass-210x148-rect-light-wood-plaque-16x9-v1.webp",
+    "width": 1200,
+    "height": 675,
+    "format": "WEBP",
+    "treatment": "pad",
+    "scale": 0.48375,
+    "sourceFrame": [
+      310,
+      47,
+      580,
+      580
+    ],
+    "minimumMargin": 0.06962962962962962
+  },
+  {
+    "slug": "brushed-brass-210x148-rect-light-wood-plaque",
+    "version": "og",
+    "file": "brushed-brass-210x148-rect-light-wood-plaque-og-v1.jpg",
+    "width": 1200,
+    "height": 630,
+    "format": "JPEG",
+    "treatment": "pad",
+    "scale": 0.45149999999999996,
+    "sourceFrame": [
+      329,
+      44,
+      542,
+      542
+    ],
+    "minimumMargin": 0.06984126984126984
+  },
+  {
+    "slug": "brushed-stainless-150x65-rect-plaque",
+    "version": "1x1",
+    "file": "brushed-stainless-150x65-rect-plaque-1x1-v1.webp",
+    "width": 1200,
+    "height": 1200,
+    "format": "WEBP",
+    "treatment": "original square",
+    "scale": 1,
+    "plateBounds": [
+      80,
+      385,
+      1120,
+      837
+    ],
+    "minimumMargin": 0.06666666666666667
+  },
+  {
+    "slug": "brushed-stainless-150x65-rect-plaque",
+    "version": "4x3",
+    "file": "brushed-stainless-150x65-rect-plaque-4x3-v1.webp",
+    "width": 1200,
+    "height": 900,
+    "format": "WEBP",
+    "treatment": "centre crop",
+    "scale": 1,
+    "plateBounds": [
+      80,
+      235,
+      1120,
+      687
+    ],
+    "minimumMargin": 0.06666666666666667
+  },
+  {
+    "slug": "brushed-stainless-150x65-rect-plaque",
+    "version": "16x9",
+    "file": "brushed-stainless-150x65-rect-plaque-16x9-v1.webp",
+    "width": 1200,
+    "height": 675,
+    "format": "WEBP",
+    "treatment": "centre crop",
+    "scale": 1,
+    "plateBounds": [
+      80,
+      123,
+      1120,
+      575
+    ],
+    "minimumMargin": 0.06666666666666667
+  },
+  {
+    "slug": "brushed-stainless-150x65-rect-plaque",
+    "version": "og",
+    "file": "brushed-stainless-150x65-rect-plaque-og-v1.jpg",
+    "width": 1200,
+    "height": 630,
+    "format": "JPEG",
+    "treatment": "centre crop",
+    "scale": 1,
+    "plateBounds": [
+      80,
+      100,
+      1120,
+      552
+    ],
+    "minimumMargin": 0.06666666666666667
+  }
+]
