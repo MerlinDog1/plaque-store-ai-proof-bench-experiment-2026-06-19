@@ -1,3 +1,4 @@
+import { WordingHelp, useWordingHelp, useWordingKeyboard } from './components/WordingHelp';
 import { usageHeaders, designerUsage, layoutUsage, beginLayoutUsage } from './services/designerUsage';
 import { getArrivalAttribution } from './services/arrivalAttribution';
 import { ensureInscriptionFonts } from './services/inscriptionFonts';
@@ -1448,6 +1449,8 @@ const App: React.FC = () => {
   const goNext = () => setActiveStep(step => Math.min(steps.length - 1, step + 1));
   // On the wording step the main button makes the layout until there is a current one (owner msg 6884): on a phone
   // it is the only button in view, and "Continue" used to skip the layout altogether.
+  const wordingHelp = useWordingHelp(currentView === 'plaque' && activeStep === 5, inscriptionPrompt, !!state.generatedSvgContent);
+  useWordingKeyboard(currentView === 'plaque' && activeStep === 5);
   const wordingStepAction = activeStep === 5 && !hasCurrentLayout
     ? isGeneratingLayout
       ? { label: `Designing… ${layoutProgress.percent}%`, disabled: true, onClick: () => undefined }
@@ -1645,6 +1648,7 @@ const App: React.FC = () => {
                   onClear={handleClearDesign}
                   prompt={inscriptionPrompt}
                   onPromptChange={handlePromptChange}
+                  onShowWordingHelp={wordingHelp.replay}
                   guidance={inscriptionGuidance}
                   onGuidanceChange={handleInscriptionGuidanceChange}
                   onGeneratedSvgContentChange={handleGeneratedSvgContentChange}
@@ -1701,6 +1705,7 @@ const App: React.FC = () => {
                 <div className="proofbench-svg-preview">
                   <PlaquePreview ref={svgRef} state={state} activeStep={activeStep} inscription={inscriptionPrompt} />
                 </div>
+                {wordingHelp.mode && <WordingHelp key={wordingHelp.playId} mode={wordingHelp.mode} onStop={wordingHelp.stop} />}
                 {isGeneratingLayout && <LayoutProgressOverlay progress={layoutProgress} />}
                 {isProofExpanded && (
                   <Suspense

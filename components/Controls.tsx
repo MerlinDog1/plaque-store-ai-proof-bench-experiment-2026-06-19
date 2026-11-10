@@ -192,6 +192,7 @@ interface Props {
   onClear: () => void;
   prompt: string;
   onPromptChange: (prompt: string) => void;
+  onShowWordingHelp: () => void;
   guidance: string;
   onGuidanceChange: (guidance: string) => void;
   onGeneratedSvgContentChange: (svgContent: string, style?: DesignStyle) => boolean;
@@ -439,6 +440,7 @@ export const Controls: React.FC<Props> = ({
   onClear,
   prompt,
   onPromptChange,
+  onShowWordingHelp,
   guidance,
   onGuidanceChange,
   onGeneratedSvgContentChange,
@@ -1871,7 +1873,8 @@ export const Controls: React.FC<Props> = ({
 
       {activeStep === 5 && (
         <section className="space-y-4">
-          <div className="ai-typesetter-panel rounded-lg border border-[#d7b66a]/35 bg-[#151f1b] p-4">
+          <div className="ai-typesetter-panel wording-help-panel rounded-lg border border-[#d7b66a]/35 bg-[#151f1b] p-4">
+            <button type="button" className="wording-help-replay" onClick={onShowWordingHelp}>How it works</button>
             <div className="flex items-start gap-3">
               <div className={`ai-typesetter-orb ${isGenerating ? 'is-working' : ''}`} aria-hidden="true">
                 <span />

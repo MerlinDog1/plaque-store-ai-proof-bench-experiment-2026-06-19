@@ -61,7 +61,8 @@
     "check:statistics": "node scripts/check-site-statistics.cjs",
     "check:attribution": "node --test scripts/check-order-attribution.mjs",
     "check:attribution-browser": "node scripts/check-order-attribution-browser.mjs",
-    "check:usage": "node --test scripts/check-designer-usage.mjs && node scripts/check-usage-routes.mjs"
+    "check:usage": "node --test scripts/check-designer-usage.mjs && node scripts/check-usage-routes.mjs",
+    "check:wording-help": "node scripts/check-wording-help.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1136.0",
