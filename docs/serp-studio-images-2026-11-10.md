@@ -66,3 +66,19 @@ Part A application commits together (including new guard and assets); the
 separate documentation commit may remain. No database or feed migration exists.
 Google still needs to re-crawl the two URLs; Cody can provide Request indexing
 steps after go-live. Metadata guides, but does not guarantee, Google's thumbnail.
+
+## Circle seam follow-up (Amendment 4)
+
+Only the aged-brass and polished-stainless 200 mm circle OGs were re-exported.
+A source-centred geometric circle with five source pixels of protective bleed
+retains the complete silhouette (including bright silver and both fixings) over
+one continuous corner-sampled backdrop. Scale is unchanged; no enlargement or
+cropping. All other shipped bytes stay unchanged.
+
+Run `python3 -I scripts/serp-studio/check-seams.py OUTPUT_DIRECTORY` locally
+after exporting. It applies Cody's 75th-percentile, 3-pixel-strip seam scan to
+all 166 padded OGs; every L/R/T/B side must be <=2.0 luminance units except
+the three explicitly reviewed circle-bottom plate crossings (brushed brass,
+brushed stainless and polished brass). No left/right exception is allowed.
+The gate needs Pillow and NumPy, like the exporter; it is an artwork-release
+gate rather than a Python dependency in Vercel's Node postbuild environment.

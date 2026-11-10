@@ -45,13 +45,21 @@ def padded(im,size,slug):
   mix=np.where((dy[select]>=dx[select])[:,None],horizontal,vertical)
   blend=np.clip(dist[select]/240,0,1)[:,None];blend=blend*blend*(3-2*blend)
   bg[select]=mix*(1-blend)+bg[select]*blend
- if slug=='brushed-brass-200x200-circle-plaque':
-  # The selected alternative is tangent to its square source at top/bottom.
-  # Preserve its complete brass silhouette, and continue one smooth backdrop behind it.
+ if slug in {'brushed-brass-200x200-circle-plaque','aged-brass-200x200-circle-plaque','polished-stainless-200x200-circle-plaque'}:
+  # These circles are tangent to their square source at top/bottom.
+  # Preserve each complete silhouette over one smooth backdrop.
   from scipy.ndimage import binary_fill_holes,binary_dilation,label
-  foreground=(a[:,:,0]-a[:,:,2]>42)|(a.mean(axis=2)<130)
-  labels,count=label(foreground);sizes=np.bincount(labels.ravel());sizes[0]=0
-  mask=binary_dilation(binary_fill_holes(labels==sizes.argmax()),iterations=5)
+  if slug=='brushed-brass-200x200-circle-plaque':
+   foreground=(a[:,:,0]-a[:,:,2]>42)|(a.mean(axis=2)<130)
+   labels,count=label(foreground);sizes=np.bincount(labels.ravel());sizes[0]=0
+   mask=binary_dilation(binary_fill_holes(labels==sizes.argmax()),iterations=5)
+  else:
+   # These two 1200-square originals have a complete, centred circle tangent
+   # to the frame. A geometric silhouette also retains bright silver, unlike
+   # the warm/dark colour classifier. Five source pixels of protective bleed
+   # preserve the rim, antialiasing and both fixings; never crop or enlarge it.
+   my,mx=np.mgrid[:im.height,:im.width]
+   mask=((mx-im.width/2)/(im.width/2+5))**2+((my-im.height/2)/(im.height/2+5))**2<=1
   alpha=np.asarray(Image.fromarray((mask*255).astype('uint8')).resize((nw,nh),Image.Resampling.LANCZOS)).astype(float)[...,None]/255
   # Bilinear backdrop is continuous across all four source boundaries.
   bg=(corners[0]*(1-tx)+corners[1]*tx)*(1-ty)+(corners[2]*(1-tx)+corners[3]*tx)*ty
