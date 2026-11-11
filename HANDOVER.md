@@ -1,5 +1,41 @@
 # plaque-store-ai-proof-bench-experiment-2026-06-19: source and machine handover
 
+## Organic search fixes — PREVIEW ONLY, 11 November 2026
+
+Owner msg 12218 ("purely focus on organic search fixes, wins and improvements"). Branch
+**`codex/instaplaque-organic-seo-20261111`**, from the live commit `24ea4b3` (production
+`dpl_AzogMXcG2BZM6vzfpUoht5qdveuU`, unchanged). Application commits `db8b1ca`, `ea5d7cd`,
+**`b463c7a`** (the one deployed as preview 3).
+
+**Ready preview:** https://instaplaque-264rrtxh5-dullaghan31-3959s-projects.vercel.app —
+`dpl_8G3iSzSG543qY5QzvywyDRGQQEB5`, target preview, Vercel-protected. **Not live; no promotion, alias, environment or
+outside-service change; nothing submitted to Google or Bing.** Previews 1 and 2 (`dpl_EqGfKtsP68hwKSZY77ufqZ5dL8uQ`,
+`dpl_AtxtdGxyBRBEm5zxKTeakgb8qiaU`) are superseded.
+
+- Titles: all 204 pages now 61 characters or fewer (146 were longer; 139 of them product pages, by a length rule in
+  `services/catalogueContent.ts` that keeps finish, size and backing). Search summaries: 160 or fewer (90 were longer).
+- New titles/summaries for bench, memorial, custom, garden, house name, church, donor, wording, sizes and tree pages;
+  bench and memorial summaries now carry the page's own from-price (`searchSummaries` in `services/commerce.ts`).
+  Bench and custom prerendered metadata now come from the catalogue, like the other category pages.
+- Links: four occasion pages linked from the homepage under "Prices at a glance" (they were two clicks deep with 2–4
+  links each); link titles on the brass, stainless steel, bench, garden and custom pages reworded for searches Google
+  split between two pages. One sentence added on the memorial page and one reworded on the house name page.
+- **The footer is unchanged on purpose.** It is inside each category page's `main`, so it counts towards the phone
+  length limit in `scripts/check-category-template-browser.cjs` (9.0 screens); the live garden page is at 8.99, and
+  four footer links took it to 9.17. Do not add footer links without making room on the garden page first.
+- Checks updated only where they hard-code text changed on purpose: expected titles/summaries in
+  `scripts/check-category-template.mjs`; the sitemap date in `scripts/check-serp-images.mjs` (exactly 2026-11-10 ->
+  2026-11-10 or later). No limit was raised.
+- Typecheck; full build and every postbuild guard (385 PASS lines); `check-category-template-browser.cjs` RESULT PASS
+  36/36 (garden 8.99 screens); Merchant feed byte-identical to the `24ea4b3` build (sha256 `89ff9d36…`), locally and
+  on the hosted preview; sitemap URL and image sets unchanged (`lastmod` dates moved to 2026-11-11 for changed pages).
+- No layout, price, checkout, designer, cookie-banner or analytics change.
+
+Evidence, the Search Console/Bing/Merchant analysis, before/after tables and the go-live steps (sitemap resubmission,
+IndexNow, indexing requests): workspace **`output/instaplaque-organic-seo-20261111/`** (`REPORT.md`, `WINS.csv`,
+`FIX-PLAN.md`, `PREVIEW3-READY.txt`). Release is separate and owner-authorised only; rollback after a future release is
+promotion of `dpl_AzogMXcG2BZM6vzfpUoht5qdveuU`.
+
 
 ## Private admin glow-up — PREVIEW ONLY, 8 November 2026
 
