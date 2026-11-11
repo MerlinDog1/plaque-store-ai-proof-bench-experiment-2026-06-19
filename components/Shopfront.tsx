@@ -224,13 +224,6 @@ export function ShopCollections() {
         <a href="/brass-plaques">Browse brass plaques ↗</a>
         <a href="/stainless-steel-plaques">Browse stainless steel plaques ↗</a>
         <a href="/custom-plaques">Custom sizes & shapes ↗</a>
-        {/* The four occasion pages were two clicks from the homepage with two to four links each (organic search
-            review, owner msg 12218, 11 Nov 2026). They go here, not in the footer: the footer is part of each category
-            page's measured length on phones, and the garden page has no room left under its limit. */}
-        <a href="/house-name-plaques">House name plaques ↗</a>
-        <a href="/church-plaques">Church plaques ↗</a>
-        <a href="/donor-recognition-plaques">Donor plaques ↗</a>
-        <a href="/professional-brass-plaques">Brass practice plaques ↗</a>
       </nav>
     </section>
   );
@@ -623,6 +616,16 @@ function HomePrices() {
         <a className="shop-button" href="/plaque-sizes">See every size and price</a>
         <a className="shop-text-link" href="/materials">Compare materials &amp; finishes ↗</a>
       </div>
+      {/* The four occasion pages were two clicks from the homepage with two to four links each (organic search
+          review, owner msg 12218, 11 Nov 2026). They go here, where phones and computers both show them: the "Find
+          your plaque" grid is hidden on phones, and the footer is part of each category page's measured length on
+          phones, where the garden page has no room left under its limit. */}
+      <nav className="shop-related" aria-label="Plaques for a particular use">
+        <a href="/house-name-plaques">House name plaques ↗</a>
+        <a href="/church-plaques">Church plaques ↗</a>
+        <a href="/donor-recognition-plaques">Donor plaques ↗</a>
+        <a href="/professional-brass-plaques">Brass practice plaques ↗</a>
+      </nav>
     </section>
   );
 }
