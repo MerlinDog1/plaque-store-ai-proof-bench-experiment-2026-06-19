@@ -279,7 +279,7 @@ function gardenPage(): TemplateConfig {
     },
     guides: gardenGuides,
     moreTitle: 'More about garden plaques',
-    related: related(<>Remembering someone? See <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">wording ideas</a>. Planting or dedicating a tree? See <a href="/tree-memorial-plaques">tree dedication plaques</a>. Opening a community garden? See <a href="/opening-plaques">opening plaques</a>.</>),
+    related: related(<>Remembering someone? See <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">wording ideas</a>. For a tree, see <a href="/tree-memorial-plaques">tree dedication plaques</a>. Opening a community garden? See <a href="/opening-plaques">opening plaques</a>.</>),
     closing: {
       title: 'Not sure which size?',
       copy: 'Send a photo of the spot and your words on WhatsApp: we’ll suggest a size and fixings and send a free proof.',
@@ -713,7 +713,7 @@ function customPage(): TemplateConfig {
     },
     moreTitle: 'More about custom plaques',
     // Page-1 SEO internal link (owner msgs 10401-10408, 6 Nov 2026): "custom brass plaques".
-    related: related(<>See <a href="/brass-plaques">custom brass plaques</a>, <a href="/portrait-plaques">portrait plaques</a>, <a href="/ai-plaque-design">AI designs made real</a> and <a href="/plaque-sizes">every standard size and price</a>.</>),
+    related: related(<>See <a href="/brass-plaques">custom brass plaques</a>, <a href="/house-name-plaques">house name plaques</a>, <a href="/portrait-plaques">portrait plaques</a>, <a href="/ai-plaque-design">AI designs made real</a> and <a href="/plaque-sizes">every standard size and price</a>.</>),
     closing: {
       title: 'Have a size in mind?',
       copy: 'Send the measurements, a photo of the spot and your words on WhatsApp: we’ll send a free proof with the price.',

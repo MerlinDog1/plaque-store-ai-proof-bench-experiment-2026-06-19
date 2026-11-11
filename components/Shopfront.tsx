@@ -224,6 +224,13 @@ export function ShopCollections() {
         <a href="/brass-plaques">Browse brass plaques ↗</a>
         <a href="/stainless-steel-plaques">Browse stainless steel plaques ↗</a>
         <a href="/custom-plaques">Custom sizes & shapes ↗</a>
+        {/* The four occasion pages were two clicks from the homepage with two to four links each (organic search
+            review, owner msg 12218, 11 Nov 2026). They go here, not in the footer: the footer is part of each category
+            page's measured length on phones, and the garden page has no room left under its limit. */}
+        <a href="/house-name-plaques">House name plaques ↗</a>
+        <a href="/church-plaques">Church plaques ↗</a>
+        <a href="/donor-recognition-plaques">Donor plaques ↗</a>
+        <a href="/professional-brass-plaques">Brass practice plaques ↗</a>
       </nav>
     </section>
   );
@@ -1198,12 +1205,6 @@ export function ShopFooter() {
         <a href="/tree-memorial-plaques">Tree memorial plaques</a>
         <a href="/opening-plaques">Opening plaques</a>
         <a href="/custom-plaques">Custom plaques</a>
-        {/* The four occasion pages were two clicks from the homepage with two to four links each (organic search
-            review, owner msg 12218, 11 Nov 2026). */}
-        <a href="/house-name-plaques">House name plaques</a>
-        <a href="/church-plaques">Church plaques</a>
-        <a href="/donor-recognition-plaques">Donor plaques</a>
-        <a href="/professional-brass-plaques">Brass practice plaques</a>
         <a href="/plaque-sizes">Every size and price</a>
         <a href="/memorial-plaque-wording">Memorial wording ideas</a>
         <a href="/portrait-plaques">Portrait plaques</a>
