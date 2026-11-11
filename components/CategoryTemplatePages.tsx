@@ -150,7 +150,7 @@ function benchPage(): TemplateConfig {
     moreTitle: 'More about choosing a bench plaque',
     // Page-1 SEO internal links (owner msgs 10401-10408, 6 Nov 2026): "garden memorial plaques" and "engraved stainless
     // steel plaques".
-    related: related(<>Remembering someone? See <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">memorial wording ideas</a>. For a garden or a tree, see <a href="/garden-plaques">garden memorial plaques</a> and <a href="/tree-memorial-plaques">memorial tree plaques</a>. For other sizes in steel, see <a href="/stainless-steel-plaques">engraved stainless steel plaques</a>.</>),
+    related: related(<>Remembering someone? See <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">memorial wording ideas</a>. For a garden or a tree, see <a href="/garden-plaques">garden memorial plaques</a> and <a href="/tree-memorial-plaques">memorial tree plaques</a>. For other sizes in brass or steel, see <a href="/brass-plaques">engraved brass plaques</a> and <a href="/stainless-steel-plaques">engraved stainless steel plaques</a>.</>),
     closing: {
       title: 'Not sure which size fits?',
       copy: 'Send a photo of the bench rail and your words on WhatsApp: we’ll suggest a size and send a free proof. Replacing an old plaque? Send its size and hole positions.',
@@ -279,7 +279,7 @@ function gardenPage(): TemplateConfig {
     },
     guides: gardenGuides,
     moreTitle: 'More about garden plaques',
-    related: related(<>Remembering someone? See <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">wording ideas</a>. Planting a tree? See <a href="/tree-memorial-plaques">memorial tree plaques</a>. Opening a community garden? See <a href="/opening-plaques">opening plaques</a>.</>),
+    related: related(<>Remembering someone? See <a href="/memorial-plaques">memorial plaques</a> and <a href="/memorial-plaque-wording">wording ideas</a>. Planting or dedicating a tree? See <a href="/tree-memorial-plaques">tree dedication plaques</a>. Opening a community garden? See <a href="/opening-plaques">opening plaques</a>.</>),
     closing: {
       title: 'Not sure which size?',
       copy: 'Send a photo of the spot and your words on WhatsApp: we’ll suggest a size and fixings and send a free proof.',
@@ -430,13 +430,13 @@ function brassPage(): TemplateConfig {
         title: 'What brass plaques are used for.',
         intro: 'The traditional choice, warm against timber, brick and stone.',
         items: [
-          { title: 'Memorial plaques', href: '/memorial-plaques', copy: 'A name, dates and a tribute for a wall, a grave or a garden.' },
-          { title: 'Bench plaques', href: '/bench-plaques', copy: `Name and dates for the top rail, from ${from(150, 50)} for 150 × 50 mm.` },
+          { title: 'Brass memorial plaques', href: '/memorial-plaques', copy: 'A name, dates and a tribute for a wall, a grave or a garden.' },
+          { title: 'Brass bench plaques', href: '/bench-plaques', copy: `Name and dates for the top rail, from ${from(150, 50)} for 150 × 50 mm.` },
           { title: 'House name plaques', href: '/house-name-plaques', copy: 'A house name, or a name and number, by the door or gate.' },
           { title: 'Practice plaques', href: '/professional-brass-plaques', copy: 'A traditional name plate for a solicitor, dentist, vet, architect or accountant.' },
           { title: 'Opening plaques', href: '/opening-plaques', copy: 'Who opened the building and when, usually on A4.' },
-          { title: 'Church plaques', href: '/church-plaques', copy: 'Pew plates, memorials and dedications, in the wording your church has agreed.' },
-          { title: 'Donor and recognition plaques', href: '/donor-recognition-plaques', copy: 'Thank a donor, a sponsor or everyone who helped.' },
+          { title: 'Brass plaques for churches', href: '/church-plaques', copy: 'Pew plates, memorials and dedications, in the wording your church has agreed.' },
+          { title: 'Brass donor plaques', href: '/donor-recognition-plaques', copy: 'Thank a donor, a sponsor or everyone who helped.' },
         ],
       },
       {
@@ -543,6 +543,7 @@ function stainlessPage(): TemplateConfig {
       title: 'What stainless steel plaques are used for.',
       intro: 'It keeps its silver colour outdoors, so it suits plaques that face the weather.',
       items: [
+        { title: 'Metal memorial plaques', href: '/memorial-plaques', copy: 'A name, dates and a tribute for a wall, a grave or a garden, in stainless steel or brass.' },
         { title: 'Bench plaques', href: '/bench-plaques', copy: `A name, dates and a line on the top rail, from ${priceOf(plate(150, 50, STAINLESS))} for 150 × 50 mm.` },
         { title: 'Garden memorial plaques', href: '/garden-plaques', copy: 'A memorial or a dedication on a wall, fence, post or stone.' },
         { title: 'Memorial tree plaques', href: '/tree-memorial-plaques', copy: 'On a light solid wood board and ground stake beside the tree, never fixed to it.' },

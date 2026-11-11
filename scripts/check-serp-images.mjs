@@ -49,7 +49,8 @@ for(const slug of [stainlessSearchSlug,'garden-plaques']) {
   assert.deepEqual(graph.find(n=>n['@type']==='WebPage').primaryImageOfPage,searchPrimaryImage(slug,site));
   const xml=fs.readFileSync('dist/'+(slug===stainlessSearchSlug?'sitemap-products.xml':'sitemap.xml'),'utf8');
   const entry=[...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].find(m=>m[1].includes(`<loc>${site}/${slug}</loc>`))?.[1];
-  assert(entry?.includes(`<image:loc>${images[0]}</image:loc>`));assert(entry.includes('<lastmod>2026-11-10</lastmod>'));
+  assert(entry?.includes(`<image:loc>${images[0]}</image:loc>`));// On or after the studio search images' release date; later page changes move it forward (11 Nov 2026).
+  assert((entry.match(/<lastmod>(\d{4}-\d\d-\d\d)<\/lastmod>/)?.[1]||'')>='2026-11-10');
   if(slug===stainlessSearchSlug)assert(entry.includes(`/site-images/studio-photo/${slug}.webp`),'Existing stainless sitemap image retained');
 }
 let studioProducts=0;

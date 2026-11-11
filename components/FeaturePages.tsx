@@ -13,7 +13,7 @@ import { portraitsInMetalLink } from '../services/shopInformation';
 
 export const portraitPage = {
   title: 'Portrait Plaques UK | Engraved From Your Photo | InstaPlaque',
-  description: 'Turn a favourite photo of a person or pet into an engraved brass or stainless steel portrait plaque. Free portrait sketch and proof before you pay. Made in the UK.',
+  description: 'Turn a favourite photo of a person or pet into an engraved brass or stainless steel portrait plaque. Free sketch and proof before you pay. Made in the UK.',
 };
 
 export const aiDesignPage = {

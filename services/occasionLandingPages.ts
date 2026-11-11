@@ -12,13 +12,13 @@ export const occasionLandingPages: SeoLandingPage[] = [
   {
     slug: 'house-name-plaques', title: 'House name plaques', shortTitle: 'House name plaques', eyebrow: 'Engraved house names',
     description: 'Engraved brass and stainless steel name plates for a door, porch or gate.',
-    seoTitle: 'House Name Plaques | Engraved Brass & Steel | InstaPlaque',
-    seoDescription: 'Create a simple engraved house name plaque in brass or stainless steel. Compare sizes, finishes and prices, with a free proof and UK delivery included.',
+    seoTitle: 'House Name Plaques & House Signs | Engraved Brass & Steel',
+    seoDescription: 'Create an engraved house name plaque or house sign in brass or stainless steel. Compare sizes, finishes and prices, with a free proof and UK delivery included.',
     heroCopy: 'A house name, a number or a short second line, engraved in solid brass or stainless steel. Measure the flat fixing area and check the layout in your free proof.',
     image: '/site-images/studio-photo/polished-brass-200x150-rect-plaque.webp',
     relatedProductSlug: 'brushed-stainless-150x50-rect-plaque', from: steelFrom, proofCta: 'Design a house name plaque',
     sections: [
-      { title: 'Keep the name easy to read', copy: 'These are engraved inscription plates for a door, porch, gate or wall. Check a paper outline in position before choosing a size. Leave more space for a long name, a house number or a second line.' },
+      { title: 'Keep the name easy to read', copy: 'These are engraved house signs and name plates for a door, porch, gate or wall. Check a paper outline in position before choosing a size. Leave more space for a long name, a house number or a second line.' },
       { title: 'Choose for the position', copy: 'Use metal without wood backing in an exposed spot. Brushed and polished brass mellow outdoors unless polished from time to time; stainless steel keeps its silver colour. Light solid wood or dark solid wood backing suits indoors or a sheltered porch. Near the sea, ask us about the finish first.' },
     ],
     faqs: [
@@ -34,7 +34,7 @@ export const occasionLandingPages: SeoLandingPage[] = [
   {
     slug: 'donor-recognition-plaques', title: 'Donor and recognition plaques', shortTitle: 'Donor plaques', eyebrow: 'Donors and sponsors',
     description: 'Individual engraved plaques for donors, sponsors and community dedications.',
-    seoTitle: 'Donor & Recognition Plaques | Brass Sponsor Plaques | InstaPlaque',
+    seoTitle: 'Donor Plaques UK | Brass Donor & Recognition Plaques',
     seoDescription: 'Thank donors and sponsors with an engraved brass or stainless steel plaque. Sizes for individual donor wall plates and dedications, with a free proof first.',
     heroCopy: 'An individual name plate for a donor wall, or a larger dedication for the project your supporters helped make possible. Agree the names and acknowledgement before approving your proof.',
     image: '/site-images/studio-photo/brushed-brass-300x200-rect-light-wood-plaque.webp',
@@ -56,7 +56,7 @@ export const occasionLandingPages: SeoLandingPage[] = [
   {
     slug: 'church-plaques', title: 'Church plaques', shortTitle: 'Church plaques', eyebrow: 'Pew plates and dedications',
     description: 'Engraved pew plates and dedication plaques, made to the wording and details agreed with your church.',
-    seoTitle: 'Church Pew & Dedication Plaques | Engraved Metal | InstaPlaque',
+    seoTitle: 'Church Plaques | Brass Pew, Memorial & Dedication Plaques',
     seoDescription: 'Plan a church pew, memorial or dedication plaque in brass or steel. Compare sizes and wording ideas, check church permission, then approve your free proof.',
     heroCopy: 'Small plates for a pew and larger plaques for an agreed church dedication. Settle the location, wording, material and fixings with the church before ordering.',
     image: '/site-images/studio-photo/polished-brass-200x150-rect-light-wood-plaque.webp',
@@ -79,7 +79,7 @@ export const occasionLandingPages: SeoLandingPage[] = [
     slug: 'professional-brass-plaques', title: 'Brass practice plaques', shortTitle: 'Practice plaques', eyebrow: 'Professional practice name plates',
     description: 'Brass name plates for solicitors, dentists, vets, architects, accountants and other practices.',
     seoTitle: 'Brass Plaques for Professional Practices | InstaPlaque',
-    seoDescription: 'Brass name plates for solicitors, dentists, vets, architects and accountants. Compare sizes and finishes, add your wording and approve a free proof before paying.',
+    seoDescription: 'Brass name plates for solicitors, dentists, vets, architects and accountants. Compare sizes and finishes, add your wording and approve a free proof first.',
     heroCopy: 'An engraved brass name plate for a practice entrance, reception or office door. Use your approved business name and check the titles, qualifications and contact details before approving your proof.',
     image: '/site-images/studio-photo/orbital-brass-matt-lacquer-200x150-rect-dark-wood-plaque.webp',
     relatedProductSlug: 'brushed-brass-150x50-rect-plaque', from: brassFrom, proofCta: 'Design a practice name plate',

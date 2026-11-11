@@ -149,15 +149,34 @@ export function heroNote(slug: string) {
 
 const title = (text: string) => text.replace(/(^|\s)([a-z])/g, (_, space, letter) => space + letter.toUpperCase()).replace(/ On /g, ' on ');
 
-/** Page <title>: finish, format and size first, as people search for them. */
+/** Longest title Google shows whole; longer ones are cut off mid-word in the results (owner msg 12218, 11 Nov 2026). */
+export const SEO_TITLE_MAX = 61;
+/** Longest search summary Google shows whole. */
+export const SEO_DESCRIPTION_MAX = 160;
+/** The first candidate that fits; they are listed fullest first, and the last one must always fit. */
+function firstThatFits(candidates: string[], max: number, what: string) {
+  const fit = candidates.find(text => text.length <= max);
+  if (!fit) throw new Error(`${what}: no version of "${candidates[0]}" fits ${max} characters`);
+  return fit;
+}
+
+/** Page <title>: finish, format and size first, as people search for them. A title that would be cut off in the
+ *  results drops "Engraved", then the shop name, rather than the finish, size or backing. */
 export function seoTitleFor(slug: string) {
   const offer = offerFor(slug);
   if (!offer) return '';
   const name = title(finish(offer));
-  if (isBench(offer)) return `${name} Memorial Bench Plaque ${offer.size} | InstaPlaque`;
-  if (offer.preset.shape !== 'rect') return `${name} ${offer.preset.shape === 'oval' ? 'Oval' : 'Round'} Plaque ${offer.size} | Engraved | InstaPlaque`;
-  const fmt = offer.format.startsWith('A') ? `${offer.format.split(' ')[0]} Plaque (${offer.size})` : `Plaque ${offer.size}`;
-  return `${name} ${fmt}${offer.preset.wood ? title(backing(offer)) : ''} | Engraved | InstaPlaque`;
+  if (isBench(offer)) {
+    const bench = `${name} Memorial Bench Plaque ${offer.size}`;
+    return firstThatFits([`${bench} | InstaPlaque`, bench], SEO_TITLE_MAX, slug);
+  }
+  const wood = offer.preset.wood ? title(backing(offer)) : '';
+  const names = offer.preset.shape !== 'rect'
+    ? [`${name} ${offer.preset.shape === 'oval' ? 'Oval' : 'Round'} Plaque ${offer.size}`]
+    : offer.format.startsWith('A')
+      ? [`${name} ${offer.format.split(' ')[0]} Plaque (${offer.size})${wood}`, `${name} ${offer.format.split(' ')[0]} Plaque ${offer.size}${wood}`]
+      : [`${name} Plaque ${offer.size}${wood}`];
+  return firstThatFits(names.flatMap(text => [`${text} | Engraved | InstaPlaque`, `${text} | InstaPlaque`, `${text} | Engraved`, text]), SEO_TITLE_MAX, slug);
 }
 
 // Short uses for the meta description, so it fits in Google's snippet (about 155 characters).
@@ -179,7 +198,10 @@ function shortUse(offer: Offer) {
 export function seoDescriptionFor(slug: string) {
   const offer = offerFor(slug);
   if (!offer) return '';
-  return `${offer.size} ${finish(offer)} plaque${backing(offer, true)} for ${shortUse(offer)}. Free proof, or we design it for you on WhatsApp. UK delivery included.`;
+  const lead = `${offer.size} ${finish(offer)} plaque${backing(offer, true)} for ${shortUse(offer)}.`;
+  // Wood-backed plaques have the longest lead; they keep the free proof and delivery and drop the WhatsApp offer.
+  return firstThatFits([`${lead} Free proof, or we design it for you on WhatsApp. UK delivery included.`,
+    `${lead} Free proof, or we design it on WhatsApp. UK delivery included.`, `${lead} Free proof first. UK delivery included.`], SEO_DESCRIPTION_MAX, slug);
 }
 
 /** Google Shopping title: what people search for first, then the exact size. */

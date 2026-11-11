@@ -277,7 +277,7 @@ export const productFamilies: ProductFamily[] = [
       },
       {
         title: 'Stainless steel memorial plaques',
-        copy: 'Stainless steel gives a silver finish, with brushed and polished options. It suits both contemporary wall memorials and outdoor remembrance plaques. Choose the finish for the setting and keep the inscription readable at the distance people will view it. Ask us about particularly exposed or coastal locations before ordering.',
+        copy: 'Stainless steel gives a silver finish, with brushed and polished options. It suits both contemporary wall memorials and outdoor remembrance plaques. Choose the finish for the setting and keep the inscription readable at the distance people will view it. Ask us about particularly exposed or coastal locations before ordering. Brass and stainless steel are both solid metal, so either makes a lasting metal memorial plaque for an “In memory of” inscription.',
       },
       {
         title: 'Memorial wall plaques and fitting',
@@ -349,7 +349,9 @@ export const productFamilies: ProductFamily[] = [
     materialCue: 'stainless',
     image: '/site-images/home-carousel-bench-steel.webp',
     description: 'Compact plaques for benches, seats and short outdoor dedications where the wording needs to stay crisp.',
-    seoTitle: 'Bench Plaques UK | Custom Brass & Stainless Steel Bench Plaques',
+    // Organic search review (owner msg 12218, 11 Nov 2026): 61 characters or fewer so Google shows the whole title, and it
+    // names memorial bench plaques, the page's main search.
+    seoTitle: 'Bench Plaques UK | Memorial Bench Plaques in Brass & Steel',
     seoDescription: 'Order custom bench plaques in brass or stainless steel. Build a proof online, check the inscription and see live pricing before payment.',
     seoIntro: 'Design a brass or stainless steel plaque for a bench or seat, starting at 150 × 50 mm. Measure the available space, add your dedication and check the layout and price online before you pay.',
     seoSections: [
@@ -704,8 +706,9 @@ export const productFamilies: ProductFamily[] = [
     materialCue: 'stainless',
     image: '/site-images/home-custom-oval-steel.webp',
     description: 'For non-standard sizes, oval plaques, circular plaques and made-to-measure metal plaques.',
-    seoTitle: 'Custom Plaques UK | Bespoke Oval, Circular & Made-to-Measure Plaques',
-    seoDescription: 'Start a custom plaque proof for bespoke sizes, oval plaques, circular plaques and made-to-measure brass or stainless steel plaques.',
+    // Organic search review (owner msg 12218): shortened to fit Google's title line.
+    seoTitle: 'Custom Plaques UK | Bespoke & Made-to-Measure Metal Plaques',
+    seoDescription: `Custom plaques in brass or stainless steel: bespoke sizes up to ${MAX_PLAQUE_DIMENSION_MM} mm, ovals and circles, made to measure with your wording. See a free proof before you pay.`,
     seoIntro: 'Use the custom plaque route when a standard size is not quite right. Build the wording and layout first, then anything unusual can be checked before production.',
     seoSections: [
       {
@@ -831,8 +834,8 @@ export const seoLandingPages: SeoLandingPage[] = [
     shortTitle: 'Wording',
     eyebrow: 'Ideas and examples',
     description: 'Memorial plaque wording ideas: over 40 examples for a mum or dad, grandparents, partners, children, friends, benches, trees and pets.',
-    seoTitle: 'Memorial Plaque Wording Ideas & Examples | What to Write | InstaPlaque',
-    seoDescription: 'What to write on a memorial plaque: over 40 wording examples for mums, dads, grandparents, benches, trees and pets, plus short phrases. We can design it for you.',
+    seoTitle: 'Memorial Plaque Wording: 40+ Ideas & Examples | InstaPlaque',
+    seoDescription: 'What to write on a memorial plaque: over 40 wording examples for mums, dads, grandparents, benches, trees and pets, plus short phrases. Or we design it for you.',
     heroCopy: 'Finding the right words is often the hardest part. Here is a simple way to structure the wording, over 40 examples for different people and places, and short phrases to finish with. When you have a few words, design it online or send them to us on WhatsApp and we’ll lay it out for you.',
     image: '/site-images/catalogue-photo/aged-brass-210x148-rect-plaque.webp',
     relatedProductSlug: 'memorial-plaques',
@@ -853,7 +856,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     shortTitle: 'Sizes',
     eyebrow: 'Every size and finish',
     description: 'Every standard InstaPlaque size and finish, each shown with its own example wording and price, from bench plaques to 400 × 300 mm.',
-    seoTitle: 'Plaque Sizes & Prices UK | Brass & Stainless Steel Plaques | InstaPlaque',
+    seoTitle: 'Plaque Sizes & Prices UK | Brass & Stainless Steel Plaques',
     seoDescription: 'Compare every plaque size and finish with photos and prices: bench plaques, A5, A4, 300 × 200 mm, 400 × 300 mm, ovals and circles. UK delivery included.',
     heroCopy: 'Every standard plaque we make, in one place: bench plaques from 150 × 50 mm up to 400 × 300 mm wall plaques, ovals and circles, in six brass and stainless steel finishes, with or without wood backing. Each is shown with its own example wording. Need a size that isn’t here? Message us on WhatsApp and we’ll make it.',
     image: '/site-images/catalogue-photo/polished-brass-297x210-rect-plaque.webp',
@@ -877,7 +880,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     shortTitle: 'Tree',
     eyebrow: 'Memorial tree dedications',
     description: 'Engraved brass and stainless steel plaques for a memorial tree in a garden, churchyard, school or park.',
-    seoTitle: 'Memorial Tree Plaques UK | Engraved Tree Dedication Plaques | InstaPlaque',
+    seoTitle: 'Memorial Tree Plaques UK | Engraved Tree Dedication Plaques',
     seoDescription: 'Personalised memorial tree plaques in brass or stainless steel, on a light solid wood board and black steel ground stake beside the tree. Free proof, or we design it on WhatsApp.',
     heroCopy: 'Planting a tree is a living way to remember someone. Mark it with a plaque in their name, in brass or stainless steel on a light solid wood board with a black steel ground stake that stands beside the tree, never fixed to it. See a free online proof, or send us your words on WhatsApp and we’ll design it for you.',
     image: '/site-images/tree-plaque-photos/memorial-tree-plaque-cherry-v2-sq.webp',
@@ -1408,7 +1411,9 @@ export const merchantProducts: ProductFamily[] = merchantOffers.map(item => cata
   // Studio photos (owner msg 7966) lead the product page, ahead of any in-place photo and the flat design view.
   studioPhoto: studioPhotos.has(item.slug) ? studioPhotoPath(item.slug) : undefined,
   merchantMaterial: item.label, productionDays: item.productionDays,
-  description: item.description, seoIntro: item.description, seoTitle: `${item.title} UK | InstaPlaque`,
+  // The two older offers: the Merchant feed keeps their original title; the page title drops the shop name so Google
+  // shows it whole (61 characters; owner msg 12218, 11 Nov 2026).
+  description: item.description, seoIntro: item.description, seoTitle: `${item.title} UK`, feedTitle: `${item.title} UK | InstaPlaque`,
   seoDescription: `${item.size} ${item.label.toLowerCase()} plaque${item.preset.wood ? ` with ${item.preset.woodTone} wood backing` : ''}. Add your wording, check a free proof and order with UK delivery included.`,
   startingFrom: formatRetailPrice(item.price), schemaStartingPrice: item.price,
   bestFor: ['Your own wording', 'Proof approval before payment', 'UK delivery included'],
@@ -1546,10 +1551,16 @@ export function makeMockOrder(
 // shows it), filled in here so a summary can never quote a different price from the page it describes.
 // Page-1 SEO (owner msgs 10401-10408, 6 Nov 2026): new summaries for brass, stainless steel, garden and opening, still
 // with the page's own from-price. The garden one says "fixings": its 150 × 50 mm plates have screws but no caps.
+// Organic search review (owner msg 12218, 11 Nov 2026): memorial and bench plaques join them, so the search result shows
+// the price; "metal memorial plaques" is a search the memorial page is shown for.
 const searchSummaries: Record<string, (from: string) => string> = {
+  'memorial-plaques': from => `Personalised metal memorial plaques ${from} in brass or stainless steel, for walls, gardens and graves. Free proof of your wording. UK delivery included.`,
+  'bench-plaques': from => `Memorial bench plaques ${from} in engraved brass or stainless steel. Check the size and inscription on a free proof before you pay. UK delivery included.`,
   'brass-plaques': from => `Custom engraved brass plaques ${from} in polished, brushed, orbital or aged brass. Your wording, size and shape, with a free proof first and UK delivery.`,
   'stainless-steel-plaques': from => `Engraved stainless steel plaques ${from}, brushed or polished, for benches, gardens, house names and businesses. Made for outdoors. Free proof, UK delivery.`,
-  'garden-plaques': from => `Memorial plaques for the garden in solid brass or stainless steel, ${from}. Made to stay outdoors, fixings included. Free proof first, UK delivery.`,
+  // 11 Nov 2026: names dedication signs; "garden dedication signs" was shown 80 times on page one in three months with
+  // no clicks (owner msg 12218).
+  'garden-plaques': from => `Memorial plaques and dedication signs for the garden in solid brass or stainless steel, ${from}. Made for outdoors, with fixings. Free proof, UK delivery.`,
   'tree-memorial-plaques': from => `Memorial tree plaques ${from} on a light solid wood board and black steel ground stake beside the tree. Brass or stainless steel, free proof first.`,
   'opening-plaques': from => `Engraved opening plaques ${from} for buildings, rooms, clubs and anniversaries, in brass or stainless steel. Free proof to share first, UK delivery.`,
 };

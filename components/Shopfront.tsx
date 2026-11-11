@@ -1198,6 +1198,12 @@ export function ShopFooter() {
         <a href="/tree-memorial-plaques">Tree memorial plaques</a>
         <a href="/opening-plaques">Opening plaques</a>
         <a href="/custom-plaques">Custom plaques</a>
+        {/* The four occasion pages were two clicks from the homepage with two to four links each (organic search
+            review, owner msg 12218, 11 Nov 2026). */}
+        <a href="/house-name-plaques">House name plaques</a>
+        <a href="/church-plaques">Church plaques</a>
+        <a href="/donor-recognition-plaques">Donor plaques</a>
+        <a href="/professional-brass-plaques">Brass practice plaques</a>
         <a href="/plaque-sizes">Every size and price</a>
         <a href="/memorial-plaque-wording">Memorial wording ideas</a>
         <a href="/portrait-plaques">Portrait plaques</a>

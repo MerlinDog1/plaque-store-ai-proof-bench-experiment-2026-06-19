@@ -297,8 +297,9 @@ const indexablePages = [...pages.filter((page) => indexableProductSlugs.has(page
   // Keep the revised memorial search metadata and illustration identical to
   // the hydrated page; the catalogue is the source for both representations.
   // Brass and stainless steel take the catalogue's title and summary too (its from-price, owner msg 10173), keeping
-  // their own image.
-  if (!['memorial-plaques', 'brass-plaques', 'stainless-steel-plaques'].includes(page.slug)) return page;
+  // their own image. Bench and custom plaques as well since the organic search review (owner msg 12218, 11 Nov 2026),
+  // so every category page's search title and summary come from the catalogue.
+  if (!['memorial-plaques', 'brass-plaques', 'stainless-steel-plaques', 'bench-plaques', 'custom-plaques'].includes(page.slug)) return page;
   const product = catalogue.productFamilies.find(item => item.slug === page.slug);
   if (page.slug !== 'memorial-plaques') return { ...page, title: product.seoTitle, description: product.seoDescription };
   return { ...page, title: product.seoTitle, description: product.seoDescription, image: product.image };
@@ -741,7 +742,8 @@ await writeFile(path.join(distDir, 'google-merchant-feed.xml'), feedXml);
 // Exact catalogue variants get their own sitemap for Search Console reporting.
 // Each product URL lists its photos and flat design image, with the date its content last changed (a page whose studio
 // photo went up later takes that date, services/studioPhotos.mjs).
-const productsLastmod = '2026-10-24';
+// 11 Nov 2026: product titles and summaries shortened to fit the search results (owner msg 12218).
+const productsLastmod = '2026-11-11';
 const productSitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${merchantPages.map(page => {
   const lastmod = [productsLastmod, studioPhotos.get(page.slug) || '', searchSchemaImages(page.slug, siteBaseUrl) ? '2026-11-10' : ''].sort().at(-1);
   const images = [searchSchemaImages(page.slug, siteBaseUrl)?.[0]?.replace(siteBaseUrl, ''), page.studioPhoto, page.photo, page.image && page.image + merchantImageQuery].filter(Boolean).map(src => `<image:image><image:loc>${escapeAttr(siteBaseUrl + src)}</image:loc><image:title>${escapeAttr(page.productType)}</image:title></image:image>`).join('');
